@@ -1,0 +1,60 @@
+name: Build & Publish Search Index
+
+# Runs automatically whenever a new protocol JSON is pushed to protocols/
+# Also triggerable manually from the Actions tab.
+on:
+  push:
+    paths:
+      - 'protocols/**.json'
+  workflow_dispatch:
+
+jobs:
+  build-index:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pipeline dependencies
+        run: pip install -r requirements.txt
+
+      # Layer 4 only — rebuilds the index from the protocols/ folder.
+      # Layers 1–3 are run manually by the data team with API credentials.
+      - name: Compile search index
+        run: |
+          python - <<'EOF'
+          import json, pathlib
+
+          INDEX_KEYS = {
+              "protocol_id", "parent_protocol_id", "title",
+              "author", "verification_status", "category"
+          }
+
+          index = {}
+          for p in sorted(pathlib.Path("protocols").glob("*.json")):
+              try:
+                  proto = json.loads(p.read_text())
+              except Exception as e:
+                  print(f"Skipping {p.name}: {e}")
+                  continue
+              pid = proto.get("protocol_id")
+              if not pid:
+                  continue
+              index[pid] = {k: proto.get(k) for k in INDEX_KEYS if k in proto}
+
+          out = pathlib.Path("search_index.json")
+          out.write_text(json.dumps(index, separators=(",", ":"), ensure_ascii=False))
+          print(f"Index compiled: {len(index)} entries, {out.stat().st_size / 1024:.1f} KB")
+          EOF
+
+      - name: Commit updated search_index.json
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "ci: rebuild search_index.json [skip ci]"
+          file_pattern: search_index.json
