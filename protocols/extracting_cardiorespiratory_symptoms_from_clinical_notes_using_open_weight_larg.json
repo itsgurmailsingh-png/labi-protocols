@@ -1,0 +1,268 @@
+{
+  "protocol_id": "extracting_cardiorespiratory_symptoms_from_clinical_notes_using_open_weight_larg",
+  "parent_protocol_id": null,
+  "title": "Extracting Cardiorespiratory Symptoms From Clinical Notes Using Open-Weight Large Language Models: Method Development and Validation Study",
+  "author": "Bai, Yunbing",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed from PMC XML: https://creativecommons.org/licenses/by/4.0/",
+  "source_name": "pubmed_central",
+  "source_id": "PMC13216758",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13216758/",
+  "doi": "10.2196/89480",
+  "citation": "10.2196/89480",
+  "category": "Other",
+  "estimated_time_mins": null,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "A total of 593 clinical notes from the MTSamples database were manually reviewed, with 93 notes used for prompt development and comparison using Llama 3.3-70B, and 500 notes used as testing data for the final best prompt setting using both Llama 3.3-70B and gpt-oss-120B. Four prompting conditions were evaluated: (1) instruction-only, (2) ICD-10-CM definition–based prompts, (3) assumption-free prompts, and (4) a multimodule LLM framework with postprocessing. Performance was measured using precision, recall, and F1-score for both S&S extraction and ICD-10-CM code generation.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "This study conducted a comprehensive analysis of clinical notes sourced from the MTSamples database [16], with a specific focus on records related to medical conditions. The initial phase involved identifying notes that contained keywords associated with cardiorespiratory disorders. These notes underwent manual review, during which any entries that did not explicitly describe clinical S&S were excluded. After this process, a final dataset comprising 93 notes was selected. These notes were retained in their original form, without any textual modifications. For evaluation purposes, annotations provided by clinical experts served as the gold standard. We only extracted and annotated S&S with ICD-10-CM codes related to the cardiorespiratory system that were able to map to ICD-10-CM codes: R00 to R09 [17]. These 93 cardiorespiratory clinical notes served as the training data for prompt development.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "An additional 500 expert-labeled clinical notes from the MTSamples database were used as the test dataset. Unlike the training data, the test notes were not limited to the cardiorespiratory domain; instead, they included S&S spanning multiple clinical systems. This design more closely reflects real-world clinical documentation and enables a more realistic evaluation of model performance.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Each clinical note was annotated by 2 individuals including a nurse and a clinical informatician with experience in medical coding. Cohen κ coefficient was used to evaluate the agreement between 2 annotators as previously described. The interrater reliability based on the Cohen κ coefficient was 0.75 (SD 0.06) in this study.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "In this study, we selected 2 open-weight LLMs for evaluation: Llama 3.3-70B and gpt-oss-120B. Prompt development was conducted using Llama 3.3-70B for iterative prompt engineering and method design [18]. We chose Llama 3.3-70B based on our previous studies, in which it demonstrated strong performance in extracting clinical S&S from medical notes [1415].",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "After the final prompt framework was established, we evaluated the proposed approach using both Llama 3.3-70B and gpt-oss-120B to assess whether the workflow generalized across different open-weight models [19]. For both models, the temperature was set to 0, and all other hyperparameters were kept at their default settings during evaluation.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "We conducted all experiments on a local workstation equipped with a 32-core 2.50 GHz Intel Xeon W7-3565X processor, 256 GB of RAM, and 2 NVIDIA RTX PRO 6000 Blackwell Max-Q graphics cards with a total of 192 GB of graphics processing unit memory. Both models were deployed locally using Ollama, a lightweight and extensible framework for local LLM deployment. Llama 3.3-70B was run using Q4_K_M quantization, whereas gpt-oss-120B was run using MXFP4 quantization [1819]. No central processing unit offloading was used during inference. The approximate inference speed was 27.88 tokens/s for Llama 3.3-70B and 152.73 tokens/s for gpt-oss-120B. Although gpt-oss-120B has a larger total parameter count than Llama 3.3-70B, its faster throughput on the same hardware is not necessarily unexpected because gpt-oss-120B is a sparse mixture-of-experts model, meaning that only a subset of parameters is active for each token during inference. By contrast, Llama 3.3-70B is a dense model. The difference may also reflect the deployment formats used in this study, as gpt-oss-120B was run in MXFP4 and Llama 3.3-70B in Q4_K_M.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "The prompt was designed to accomplish 2 primary tasks: extracting the exact S&S from clinical notes and accurately mapping the extracted S&S to the correct ICD-10-CM code groups (R00-R09). To achieve these objectives, multiple prompt structures were tested before selecting an instruction-based prompting approach. The prompt template we applied organized the prompt into 3 distinct sections: “TASK,” “REQUIREMENT,” and “CLINICAL NOTE.” The TASK section clearly defined the objective, instructing the model to extract S&S explicitly mentioned in the clinical notes and associate them with the correct ICD-10-CM codes. The REQUIREMENT section provided specific constraints to guide the extraction process. The CLINICAL NOTE section contained the original medical transcription text, from which the model was expected to extract relevant information.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "We iterated through 4 generations of prompts, aiming to improve the model’s extraction of clinical S&S, as shown in Figure 1. In our initial approach, we provided the task background and goals within the prompt to evaluate the feasibility and general performance of the model without further instructions on extracting S&S or converting them to ICD-10-CM codes.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "Then, in the second generation, we provided the model with a list of ICD-10-CM codes and their definitions within the prompt. To balance the need for completeness while controlling the input length, we limited the ICD-10-CM codes to those within the range R00 to R09, specifically including 3-character and 4-character codes (R00-R09 and R00.0-R09.9). These codes corresponded to “symptoms and signs involving the circulatory and respiratory systems” (Table 1). In addition, clinical notes often contained negative S&S, such as “No cough, shortness of breath, fever, or chills.” To ensure that only positively reported S&S were extracted, we explicitly instructed the model to exclude any negative S&S from its output. In the third iteration, we aimed to reduce hallucinations by explicitly instructing the model to extract only S&S explicitly mentioned in the clinical notes and to avoid making assumptions about content not explicitly stated.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "ICD-10-CM: International Classification of Diseases, Tenth Revision, Clinical Modification.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "These codes represent standardized clinical symptom categories used for mapping extracted symptoms and signs in a retrospective analysis of deidentified clinical notes from the MTSamples database. Only 3-character and 4-character ICD-10-CM codes within the R00 to R09 range were included to limit the input length of models.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "In the fourth iteration, we aimed to prompt the model to produce structured responses that would enable automated evaluation. However, to avoid increasing task complexity and causing unstable outputs, we adopted a multimodule LLM approach in which specialized modules (eg, extraction and refinement) collaborate through role-based interactions to decompose the task and generate standardized outputs—an approach that has been shown to improve reliability and orchestration in complex workflows [20-23].",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "Specifically, we used 2 modules: an extraction module (EM) and a refinement module (RM). The EM was responsible for identifying all valid S&S explicitly mentioned in the clinical notes. This task consisted of two subtasks: (1) extracting candidate S&S and (2) filtering out false positives. The definitions of S&S from the National Cancer Institute were provided in the prompt, and the model was instructed to include only explicitly stated S&S and to exclude negated or denied findings. During preliminary testing, the model occasionally interpreted examination results—such as blood pressure values—as clinical signs. To mitigate this issue, we further instructed the model to exclude examination findings that contained numerical values.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "The RM was responsible for mapping the extracted S&S to ICD-10-CM codes in the range R00 to R09. For this module, we provided a predefined list of ICD-10-CM codes within this range, along with the required output format. The RM ingested the unstructured plain text output generated by the EM, selected S&S that matched the provided code list, and returned the results in the specified format.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "Following model inference, we performed postprocessing and data cleaning on the RM’s structured outputs to eliminate assumption-based results. Based on a review of outputs from earlier iterations, we developed a red-flag keyword list (Textbox 1). Any output entries containing terms from this list were flagged as high risk for false positives due to assumptions, inclusion of negated S&S, or hallucinations. All such entries were subsequently removed from the final results.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "",
+      "instruction": "Red-flag words",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "",
+      "instruction": "Possible",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "",
+      "instruction": "No",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "",
+      "instruction": "Related",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "",
+      "instruction": "Mentioned",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "",
+      "instruction": "Not present",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "",
+      "instruction": "Appears",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "",
+      "instruction": "Implied",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "",
+      "instruction": "Normal",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "",
+      "instruction": "Considered",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "",
+      "instruction": "Involving",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "",
+      "instruction": "Explicitly",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "",
+      "instruction": "The model’s performance was assessed through a 2-part evaluation for each clinical note. First, the accuracy of extracted S&S was measured to determine how well the model identified only the explicitly stated S&S from the text. Second, the accuracy of generated ICD-10-CM codes was evaluated to assess the model’s ability to correctly map extracted S&S to the appropriate ICD-10-CM categories.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 29,
+      "title": "",
+      "instruction": "To quantify performance, precision, recall, and F1-score were used, with human expert annotations serving as the gold standard for comparison. Precision calculated how many predicted S&S were correct, and recall calculated how many ground-truth S&S were recognized. Model outputs were evaluated at the individual clinical note level, and average performance metrics were then calculated across all notes. For ICD-10-CM code evaluation, only the first 3 digits of the code were considered to account for variations in granularity. For example, R01, R01.1, and R01.21 were all treated as R01, ensuring consistency in assessment.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 30,
+      "title": "",
+      "instruction": "Prompt development was conducted using Llama 3.3-70B. Accordingly, performance on the prompt development dataset was compared across prompt iterations to assess how changes in prompt design influenced model outputs. To reduce the risk of overfitting the final framework to either the development data or the model used for prompt engineering, both Llama 3.3-70B and gpt-oss-120B were evaluated on the independent test dataset.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 31,
+      "title": "",
+      "instruction": "Because the test dataset included notes from multiple clinical systems rather than only cardiorespiratory conditions, many notes contained no annotated cardiorespiratory S&S. In an initial note-level evaluation, notes with both empty ground-truth labels and empty model outputs were treated as correct matches. However, because this macro-averaging approach may inflate overall performance in a sparse dataset, we additionally calculated precision, recall, and F1-score using standard entity-level microaveraging across the corpus.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 32,
+      "title": "",
+      "instruction": "For microaveraged evaluation, predicted and reference labels were first reduced to unique sets within each clinical note. True positives were defined as labels present in both the model output and expert annotation for the same note, false positives as labels predicted by the model but absent from the reference set, and false negatives as reference labels missed by the model. These counts were then summed across all notes, and precision, recall, and F1-score were calculated from the aggregated totals. For ICD-10-CM code evaluation, only the first 3 characters of each code were used in this corpus-level analysis. Notes with no gold labels and no predicted labels did not contribute to true-positive counts and were not assigned perfect scores.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 33,
+      "title": "",
+      "instruction": "In addition to reporting overall performance, we evaluated the model separately for each primary ICD-10-CM category within the R00 to R09 range. For this subgroup analysis, both predicted and reference codes were grouped at the 3-character category level (eg, R00, R01, R03, R04, R05, R06, R07, and R09), and precision, recall, and F1-score were calculated independently for each category. Within each category, true positives represented correctly predicted codes that matched the expert annotation for the same clinical note, false positives represented incorrectly predicted codes assigned to that category, and false negatives represented annotated codes in that category that were not identified by the model. This analysis was included to characterize variation in performance across individual cardiorespiratory ICD-10-CM subcategories.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 34,
+      "title": "",
+      "instruction": "This study did not involve human participants or the collection of identifiable private information. All analyses were conducted using secondary data from the publicly available MTSamples database, which consists of deidentified clinical transcription samples created for educational and research purposes [16]. No patient identifiers were accessed, recorded, or analyzed, and no attempt was made to reidentify individuals. In accordance with journal guidelines, this research does not meet the definition of human subjects research and was therefore exempt from institutional review board review and informed consent requirements. The study was conducted in compliance with applicable ethical standards for research using deidentified secondary data.",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-16T16:02:52.136722Z",
+  "llm_normalised": false,
+  "dedup_note": "merged by merge_and_dedup.py on 2026-06-16"
+}

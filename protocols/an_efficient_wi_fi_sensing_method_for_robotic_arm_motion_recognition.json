@@ -1,0 +1,317 @@
+{
+  "protocol_id": "an_efficient_wi_fi_sensing_method_for_robotic_arm_motion_recognition",
+  "parent_protocol_id": null,
+  "title": "An Efficient Wi-Fi Sensing Method for Robotic Arm Motion Recognition",
+  "author": "Zhuo, Junyan",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed from PMC XML: https://creativecommons.org/licenses/by/4.0/",
+  "source_name": "pubmed_central",
+  "source_id": "PMC13211166",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13211166/",
+  "doi": "10.3390/s26103210",
+  "citation": "10.3390/s26103210",
+  "category": "Other",
+  "estimated_time_mins": null,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "In the robotic arm Wi-Fi sensing scenario considered in this study, a wireless transmitter and multiple passive receivers are deployed around the robotic workspace to capture channel variations induced by arm motion, without requiring attached sensors or vision equipment. As the robotic arm performs different motion patterns, the transmitted Wi-Fi signals undergo multipath propagation, and the resulting channel state information is recorded by the receivers over successive packets and subcarriers. These CSI measurements provide a non-intrusive representation of robotic motion and serve as the sensing basis for subsequent recognition.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "In an OFDM-based Wi-Fi system, the received signal can be written as(1)y=Hx+η,\nwhere x, y, and η denote the transmitted signal, received signal, and additive noise, respectively [21,22]. The CSI matrix H∈CT×S characterizes the channel response over T packets and S subcarriers, and each element is defined as(2)hs[t]=as[t]ejϕs[t],\nwhere as[t] and ϕs[t] denote the amplitude and phase of subcarrier s at time index t. This study uses CSI amplitude as the input feature. This choice follows the common setting adopted in many CSI-based recognition studies, where amplitude provides a comparatively stable and reproducible representation. In contrast, the raw CSI phase is highly sensitive to hardware-induced offsets and usually requires additional calibration procedures, such as phase unwrapping, sanitization, and offset removal. These procedures introduce extra preprocessing complexity and computational cost, which is less consistent with the lightweight design goal of MSPoolNet. Therefore, this work focuses on amplitude-based robotic arm motion recognition, while phase-amplitude fusion is left for future investigation.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Given a CSI amplitude matrix A, the objective of the classification task is to infer the activity label y∈{1,2,…,C} corresponding to the observed channel variations. Formally, let {(Ai,yi)}i=1N denote the labeled training set, where Ai∈RT×S represents the CSI amplitude matrix and yi denotes the corresponding class label. The goal of this study is to learn a parametric mapping fθ:RT×S→{1,…,C} by minimizing the cross-entropy loss over the training set.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "MSPoolNet is developed as a multi-stage framework for robotic arm motion recognition from Wi-Fi CSI. Given a raw CSI amplitude matrix A∈R1×T×S, the framework consists of six sequential stages: signal preprocessing, an adaptive temporal downsampling module, a temporal gating module, a patch embedding module, a Transformer-based feature encoding module, and a classification head. Through this hierarchical design, the input is progressively transformed from normalized CSI representations into compact and discriminative features for final motion recognition.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "In robotic arm CSI sensing, discriminative information is often subtle and tends to appear as localized variations in time–frequency responses. Moreover, useful cues are unevenly distributed along the temporal dimension, since a fixed-length acquisition window usually contains a considerable proportion of stable background segments and weakly correlated disturbances. Practical deployment also requires an effective balance between parameter efficiency and inference performance. To accommodate these characteristics, MSPoolNet first performs signal preprocessing to obtain a normalized CSI representation. It then employs an adaptive temporal downsampling module to enhance local time–frequency patterns while reducing frequency-domain redundancy, uses a temporal gating module to emphasize informative CSI responses, and adopts a Transformer-based feature encoding module to model compact token representations efficiently.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Accordingly, MSPoolNet is organized as a progressive pipeline comprising input preprocessing, local pattern extraction, key temporal interval selection, and high-level representation integration. This design is specifically tailored to robotic arm CSI signals, including subtle local disturbances, sparsely distributed informative temporal cues, and the practical need for efficient back-end modeling. The overall architecture is shown in Figure 1, and the key components are described in the following subsections.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "The raw CSI data is stored in the form of a complex matrix H∈CT×S. The amplitude matrix M∈RT×S is extracted from H as(3)Mt,s=|hs[t]|.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Log compression is applied to reduce the dynamic range:(4)A˜t,s=log(Mt,s+ϵ),ϵ=10−6.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "The compressed amplitude is further normalized along each subcarrier:(5)A^t,s=A˜t,s−μsσs+ϵ.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "Here, μs and σs denote the mean and standard deviation of subcarrier s over the temporal dimension within the same CSI sample, respectively.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "To better preserve weak and locally distributed motion-related perturbations in robotic arm CSI, MSPoolNet employs an adaptive temporal downsampling module as the front-end representation stage. By enhancing local time–frequency responses and reducing redundant subcarrier information before tokenization, this module produces a compact feature representation for subsequent temporal gating and encoding. This design is supported by recent findings showing that early convolutional layers can improve both the optimization process and the feature quality of Transformer architectures [27]. The module corresponds to the overall mapping process defined in Equation (6), and its primary roles are to extract local time–frequency patterns and perform early-stage resolution reduction.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "The adaptive temporal downsampling module is composed of two convolutional layers, each followed by batch normalization and a nonlinear activation function [28]. Considering that the discriminative information of robotic arm motions in CSI is primarily distributed along the temporal dimension, while adjacent subcarriers in the frequency dimension often exhibit strong correlation and redundancy, an asymmetric downsampling strategy is adopted, with relatively moderate compression in the temporal dimension and more aggressive compression in the frequency dimension. Specifically, the first layer performs joint downsampling in both time and frequency, whereas the second layer further reduces the frequency resolution. This design aims to preserve the dynamic boundaries and temporal evolution of the motion as much as possible, thereby avoiding excessive loss of temporal detail at an early stage, while simultaneously exploiting the redundancy among adjacent subcarriers to reduce the input scale for subsequent encoding.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "For robotic arm motion recognition, inter-class differences are usually not reflected in large-scale global shape variations but rather in subtle local response differences across neighboring time steps and adjacent subcarriers, such as short-term energy fluctuations, local amplitude perturbations, and variations in inter-subcarrier correlation patterns. Therefore, the adaptive temporal downsampling module in the proposed model is not merely used for general feature extraction but is designed to enhance local spatiotemporal responses in raw CSI at an early stage so that discriminative cues related to fine-grained motion differences can be more effectively preserved.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "Let the preprocessed CSI tensor be A^∈R1×Tin×Fin. To align the feature size for subsequent patch embedding, zero-padding is applied along the frequency dimension to obtain A^pad∈R1×Tin×Fpad. The stem output is defined as(6)Fstem=Stem(A^pad)∈RCstem×Tstem×Fstem.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "Here, Cstem denotes the number of output channels, while Tstem and Fstem represent the downsampled temporal and frequency resolutions, respectively. The adaptive temporal downsampling module maps the original CSI input into a more compact, multi-channel feature representation, thereby establishing the feature basis for subsequent temporal gating and token-based modeling. The two-layer Conv-BN-GELU cascaded structure of the adaptive temporal downsampling module and its asymmetric time–frequency downsampling scheme are illustrated in Figure 1.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "The CSI features produced by the adaptive temporal downsampling module remain continuous along the temporal dimension, whereas the truly informative discriminative cues associated with robotic arm motions are typically concentrated within only a few key temporal intervals. Within a fixed-length CSI acquisition window, stable background segments before and after motion onset, transition periods, and weak disturbance regions often occupy a substantial portion of the sequence. In contrast, the channel variations that genuinely reflect motion differences are usually short-lived and appear at uncertain temporal locations. If these informative intervals are not explicitly highlighted, the subsequent encoder must process a large amount of weakly correlated or irrelevant CSI responses, thereby increasing the difficulty of accurately identifying critical motion-related segments. To better focus the representation on motion-relevant temporal cues, the proposed framework employs a temporal gating module to perform sample-dependent feature reweighting along the temporal dimension.",
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "",
+      "instruction": "The temporal gating module compresses the convolutional features along the channel and frequency dimensions into a one-dimensional temporal descriptor, which characterizes the overall response intensity of the CSI sequence at different time positions. Based on this descriptor, a multi-layer perceptron (MLP) predicts time-step-wise gating weights in the range of 0 to 1, and these weights are then applied to reweight the convolutional features. In this way, the module emphasizes informative channel responses associated with robotic arm motions while preserving the original temporal order, thereby suppressing the influence of stable background segments and weakly correlated disturbances during subsequent tokenization and encoding.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "",
+      "instruction": "This module consists of three steps. First, the output F from the adaptive temporal downsampling module is averaged across the channel and frequency dimensions, compressing each time step into a scalar to obtain a temporal vector that reflects the overall activity intensity at each time step:(7)e(t)=1Cs·S′∑c=1Cs∑f=1S′Fc,t,f,t=1,…,T′.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "",
+      "instruction": "Next, the time vector e∈RT′ is fed into a two-layer MLP. After dimensionality reduction via a bottleneck layer, it is mapped back to the original time dimension to obtain the time-step-wise gating weights:(8)g=σW2·GELU(W1e+b1)+b2∈(0,1)T′,",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "",
+      "instruction": "Here, σ(·) denotes the sigmoid function, which is used to constrain the weights to the interval (0,1). The GELU activation function is used to maintain the smoothness of the nonlinear transformation [29]. Finally, the gated weights are applied element-wise to the feature map via broadcast:(9)F^c,t,f=g(t)·Fc,t,f.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "",
+      "instruction": "The proposed temporal gating module does not modify the original temporal order of the sequence but instead redistributes the importance of different temporal positions through continuous weighting. Compared with methods based on predefined fixed windows or manually selected segments, this module does not impose prior assumptions on the location or duration of informative temporal intervals. Instead, it adaptively generates temporal weights according to the CSI response of each input sample. As a result, it is more suitable for handling temporal variations caused by different robotic arm motion speeds and motion patterns.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "",
+      "instruction": "To avoid excessive disturbance to CSI features that are still unstable during the early stage of training, the parameters of the final layer in the gating predictor are initialized to zero. Under this setting, the weights assigned to different time steps remain approximately uniform at the beginning of training, allowing the model to first learn basic CSI representations before gradually establishing the emphasis and suppression mechanism for key temporal segments. This design helps improve training stability.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "",
+      "instruction": "Figure 2a illustrates the overall workflow of the temporal gating module. The features are first compressed along the spatial and frequency dimensions, after which time-step-wise gating weights are predicted and multiplied back into the feature map, thereby explicitly performing temporal reweighting before tokenization.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "",
+      "instruction": "The gated feature map F^∈RCs×T′×S′ is projected onto a sequence of tokens via a convolutional layer with a stride equal to the kernel size. This convolution divides the feature map into several non-overlapping patches and maps each patch to a D-dimensional embedding vector, yielding N tokens. To preserve the positional information of the patches within the two-dimensional feature map, this paper introduces a learnable positional encoding for each token:(10)Z(0)=PatchProj(F^)+Epos∈RN×D.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "",
+      "instruction": "The features refined by the adaptive temporal downsampling module and temporal gating module are converted into compact token representations through patch embedding and then used as the input to the subsequent Transformer-based feature encoding module.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "",
+      "instruction": "Patch embedding reorganizes the token sequence into a two-dimensional feature map and subsequently feeds it into multiple layers of lightweight encoding modules. The adaptive temporal downsampling module primarily serves to extract local time–frequency responses and reduce redundancy in the frequency dimension, while the temporal gating module further highlights informative temporal intervals. Through these two stages, category-relevant local CSI cues are retained in the form of compact token representations. However, the relationships among these local cues still need to be further integrated so as to form stable, high-level discriminative features.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "",
+      "instruction": "For robotic arm CSI sensing, inter-class differences are usually not determined by the response of a single local block alone but rather by the joint variation patterns of multiple local subcarrier responses along the temporal dimension. Therefore, the role of the back-end encoder is not to rediscover local perturbations from the raw CSI input but to further integrate the filtered and informative CSI cues within a compact representation space. To meet this requirement, PoolFormer [30] is adopted as the back-end encoding module to perform token interaction and representation refinement with relatively low computational complexity.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "",
+      "instruction": "First, the compact tokens obtained after patch embedding are reorganized as the input to the back-end encoding stage. Then, contextual information is progressively aggregated among neighboring CSI tokens through pooling operations, rather than through explicit global pairwise interactions. In this way, the remaining informative responses can be further integrated after local enhancement and temporal filtering. Finally, PoolFormer enables efficient high-level aggregation of local CSI cues while maintaining a more favorable balance between recognition performance and computational complexity.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "",
+      "instruction": "During the spatial mixing phase, this paper employs a neighborhood aggregation method based on local pooling, rather than explicitly computing the pairwise similarities between all tokens. For the input feature map Z, the pooling operations process is represented as(11)Z′=Z+DropPathAvgPool(Z)−Z.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 29,
+      "title": "",
+      "instruction": "Here, DropPath denotes stochastic depth regularization [31]. This step facilitates information exchange between adjacent tokens through pooling interactions within local neighborhoods, without the need to explicitly compute global attention. For CSI inputs that have undergone local pattern enhancement and temporal filtering in the earlier stages, this lightweight spatial mixing is sufficient to meet the requirements for subsequent discriminative representation updates.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 30,
+      "title": "",
+      "instruction": "The model further updates the feature representations through a convolutional channel transformation module:(12)Z(l+1)=Z′+DropPathMLP(LN(Z′)),\nwhere LN denotes layer normalization [32]. Specifically, the MLP consists of three components: point-wise convolution for dimensionality increase, depthwise separable convolution, and point-wise convolution for dimensionality reduction, with the Hardswish activation function used in the middle layer [33]. This architecture preserves a certain degree of local spatial modeling capability while performing channel transformations, thereby helping to further refine the CSI token representations. The detailed structure of a single lightweight Transformer encoding block is illustrated in Figure 2b.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 31,
+      "title": "",
+      "instruction": "The feature maps produced by the L lightweight Transformer encoding blocks are further normalized and aggregated by global average pooling along the spatial dimension, yielding a global feature vector z∈RD. Finally, a single layer of normalization and a linear mapping are applied to generate the classification prediction:(13)y^=LinearLNGAPLN2d(Z(L)).",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 32,
+      "title": "",
+      "instruction": "Here, LN denotes the standard layer normalization applied to vector representations, while LN2d is used for two-dimensional feature maps X∈RB×C×H×W. Specifically, LN2d first permutes the feature map to B×H×W×C, applies layer normalization along the channel dimension C at each spatial location, and then permutes the result back to B×C×H×W.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 33,
+      "title": "",
+      "instruction": "To evaluate the overall recognition performance of MSPoolNet, we compare it with several representative baseline models covering convolutional, recurrent, hybrid spatiotemporal, Transformer-based, and recent task-related architectures.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 34,
+      "title": "",
+      "instruction": "CNN is adopted as a representative convolutional baseline for modeling local patterns in CSI representations. It mainly reflects the capability of convolutional architectures for extracting local time–frequency features.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 35,
+      "title": "",
+      "instruction": "LSTM is adopted as a recurrent baseline that treats the CSI amplitude matrix as a temporal sequence, where the subcarrier vector at each time step is regarded as the input vector and the final hidden state is used for classification.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 36,
+      "title": "",
+      "instruction": "BiLSTM extends the above recurrent formulation by modeling temporal dependencies in both forward and backward directions. The hidden states from the two directions are concatenated before classification.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 37,
+      "title": "",
+      "instruction": "ConvLSTM [37] is adopted as a hybrid spatiotemporal baseline. By replacing the standard matrix multiplications in the gating operations with convolutions, it preserves the two-dimensional CSI structure during temporal modeling.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 38,
+      "title": "",
+      "instruction": "Transformer is adopted as a standard Transformer encoder baseline. The CSI matrix is partitioned into fixed-length temporal chunks as input tokens and mean pooling over the output sequence is used for classification.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 39,
+      "title": "",
+      "instruction": "ViT is adopted as a standard Vision Transformer baseline. The two-dimensional CSI amplitude map is divided into non-overlapping patch tokens and encoded by stacked Transformer blocks, and the final aggregated representation is used for classification.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 40,
+      "title": "",
+      "instruction": "BiVTC is included as a task-related Transformer baseline for robotic arm WiFi sensing. It adopts a dual-branch ViT architecture to process two independent sniffer inputs in parallel and concatenates the corresponding token representations before classification.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 41,
+      "title": "",
+      "instruction": "RoboDSTAN is included as a recent task-related baseline for robotic arm motion recognition from WiFi sensing. It adopts a dual-stream temporal convolutional architecture with self-attention, fuses the two sniffer streams through concatenation, and performs final prediction with an MLP classifier.",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-16T16:02:52.118492Z",
+  "llm_normalised": false,
+  "dedup_note": "merged by merge_and_dedup.py on 2026-06-16"
+}
