@@ -1,0 +1,156 @@
+{
+  "protocol_id": "protocol_for_a_reproducible_circrna_analysis_using_docker4circ",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Protocol for a Reproducible circRNA Analysis Using Docker4Circ",
+  "author": "Giulio Ferrero",
+  "doi": "dx.doi.org/10.17504/protocols.io.9vmh646",
+  "source_name": "protocols_io",
+  "source_url": "https://www.protocols.io/view/protocol-for-a-reproducible-circrna-analysis-using-9vmh646",
+  "citation": "dx.doi.org/10.17504/protocols.io.9vmh646",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.9vmh646",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 9.0,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 108,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Installation of the docker4seq R package. In the R environment digit the following command to install and run the docker4seq pipeline # Installationinstall.packages(\"devtools\")library(\"devtools\")install_github(\"kendomaniac/docker4seq\", ref=\"master\")# Program executionlibrary(\"docker4seq\") docker4seq R package installation install.packages(&#34;devtools&#34;) library(devtools) install_github(&#34;kendomaniac/docker4seq&#34;, ref=&#34;master&#34;)",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Creation of the analysis folders. Before running the analyses, create the following directories in the working folder &#34; data &#34; &#34; reference &#34; &#34; scratch &#34;. The &#34;data&#34; folder will be used to store all the input and output data, the &#34;scratch&#34; folder will be used to store the temporary data, and the &#34;reference&#34; folder will be used to store the reference genome and annotation data. The folders can be created in your working directory using the command &#34; mkdir &#34;. # Creation of the directories for the analysissystem(\"mkdir data reference scratch\") Creation of working folders Based on the path of your working directory, the path to these folder will be different. In our example the working directory is &#34; /home&#34; . Then, the path to these three folders will be &#34; /home/data &#34; &#34; /home/scratch &#34; &#34; /home/reference &#34; You can obtain the path to your working directory using the R getwd() command.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Download of the input RNA-Seq data The RNA-Seq raw reads for the circRNA prediction can be downloaded from PRJNA393626 . This dataset includes a triplicate paired-end total and RNAse-R treated RNA-Seq performed on NCM460 (normal colon cells), SW480 (primary colorectal cancer cells), and SW620 cell lines (metastatic colorectal cancer cells). PRJNA411984 The detailed list of datasets needed for the analysis is the following: SRA ID ID SRR5889371 NCM460_rep1 SRR5889366 NCM460_rep2 SRR5889367 NCM460_rep3 SRR5889368 SW480_rep1 SRR5889369 SW480_rep2 SRR5889362 SW480_rep3 SRR5889363 SW620_rep1 SRR5889364 SW620_rep2 SRR5889365 SW620_rep3 The the .fastq files can be downloaded from the ENA page of the experiment (linked below). The links to these files are reported under the column &#34; FASTQ files (FTP) &#34;. Each dataset should be located in a specific directory, for example the experiment SRR5889371 should be put in the folder /data/SRR5889371. Use the following code to automatically create these folders: # Define a list containing the dataset idsids = c(\"SRR5889362\", \"SRR5889363\", \"SRR5889364\", \"SRR5889365\", \"SRR5889366\", \"SRR5889367\", \"SRR5889368\", \"SRR5889369\", \"SRR5889371\")# Define a variable storing the path to data folderdata = paste0(getwd(), \"/data\")# Create each dataset folderfor(i in 1:length(ids)){dir.create(paste0(data, \"/\", ids[i]))} Creation of the dataset folders To download the files you can use the following R code. # Define a variable storing the fastq urlurl1 Dataset download",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Indexing of the reference genome The first module of Docker4Circ was designed for the prediction of circRNAs from raw RNA-Seq reads. In this part of the protocol, the prediction performed using the CIRI2 algorithm is described. The first step of the pipeline is the BWA indexing of a reference genome using the bwaIndex function. # Define a variable storing the path to the reference folderref Human genome BWA indexing All the index files of the reference genome will be stored in the reference folder.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Read alignment with BWA The second step of the pipeline will be the RNA-Seq read quality control using the fastqc function, the read aligment using the bwa function, and the circRNAs prediction using ciri2 function. The sequential call of these three functions is implemented in the wrapperCiri function that can be used as follow: # Define a variable storing the path to the scratch folderscratch = paste0(getwd(), \"/scratch\")# Define a variable storing the path to the reference genome sequencegs BWA RNA-Seq read alignment and circRNAs prediction with CIRI2 The read alignment quality control files, the BWA read alignment files and the set of predicted circRNAs (.ciri files) will be stored in the folder in which the input fastq files are located.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Merge of multiple CIRI2 predictions To merge multiple CIRI2 circRNAs predictions into a common list of circRNAs, the function ciri2MergePredictions was implemented. Each .ciri files located in a specific dataset folder will be merged into a single file. Each sample name should be reported ad element of the samples.list vector with correponding sample type specified as element of the covariate.list vector. # Copy each CIRI2 prediction in the data foldersystem(paste0(\"cp \", data, \"/*/*.ciri \", data))# Define a list of sample groupscov Merge of different CIRI2 predictions This function generates two files named merged_circRNA.ciri2.count_table and merged_circRNA.ciri2.txt . The first file reports the ids and coordinates of each circRNA while the second file is a matrix reporting the number of backsplicing reads supporting each circRNA in each dataset.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Indexing of the reference genome In this part of the protocol, the prediction performed using the STARChip algorithm is described. The first step of the pipeline is the STAR indexing of a reference genome using the rsemstarIndex function. # Call the function to index the reference genomersemstarIndex(group=\"docker\", genome.folder=ref, ensembl.urlgenome=genome, ensembl.urlgtf=url_gene, threads=40) Reference genome indexing with STAR The STAR index files of the reference genome will be stored in the reference folder.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Create the reference file for STARChip The STARChip algorithm required an additional .bed file defined starting from the STAR-indexed reference genome. To generate this file, the function starChipIndex should be applied as follow: # Creation of the STARChip reference filestarChipIndex(group=\"docker\", genome.folder=ref) Reference creation for STARChip Two files called genome.gtf.bed and genome.gtf.exon.bed will be generated in the reference folder.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "Running of STAR chimeric analysis The STARChip circRNAs prediction require a run of STAR chimeric algorithm on the RNA-Seq reads. The STAR chimeric analysis is implemented in the starChimeric function that shoul be applied as follow: # Run of the STAR chimeric analysis on each RNA-Seq datasetfor(i in 1:length(ids)){fqfolder = paste(data, ids[i] , sep=\"/\")starChimeric(group=\"docker\", fastq.folder=fqfolder, scratch.folder=scratch, genome.folder=ref, threads=40, chimSegmentMin=20, chimJunctionOverhangMin=15)} STAR chimeric analysis This function will generate each STAR chimeric output in each sample directory.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "STARChip circRNAs prediction The circRNA prediction will be performed using the starchipCircle function applied on the data folder containing each sample-specific folder # Prediction of circRNAs using STARChipstarchipCircle_temp(group=\"docker\", genome.folder=ref, scratch.folder=scratch, samples.folder=data, reads.cutoff=1, min.subject.limit=2, threads=40, do.splice=TRUE, cpm.cutoff=0, subjectCPM.cutoff=0, annotation=TRUE) STARChip circRNAs prediction",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "Preparation of the reference files for the classification To classify the circRNAs a reference of Ensembl exon and transcript annotations is required. To provide these data in the correct format, the circrnaPrepareFiles function should be applied as follow. # Create the reference exon and gene isoforms files required for the circRNA classification analysiscircrnaPrepareFiles(group=\"docker\", scratch.folder=scratch, data.folder=data, assembly=\"hg19\") Preparation of the reference files for the classification Two files called exons_reference and isoforms_reference reporting the exons and the gene isoform annotations respectively, will be generated in the data folder.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "Classification of circRNAs based on their mapping location To classify the circRNAs into distinct classes the function circrnaClassification should be applied as follow. # Classification of a circRNA setcircrnaClassification(group=\"docker\", scratch.folder=scratch, circrna.data=paste0(data,\"/merged_circRNA.ciri2.txt\"), exon.data=paste0(data,\"/exons_reference\", isoform.data=paste0(data,\"/isoforms_reference\"), assembly=\"hg19\") circRNAs classification Two files called circRNA_classification and circRNA_univocal_classification reporting the transcript- and the gene-level classification respectively, will be generated in the data folder.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "Annotation of the circRNA based on databases information To annotate the circRNAs based on the information stored in the circBase, TSCD, CSCD v2, Circ2Disease, ExoRBase, and CircFunBase databases, the function circAnnotation should be applied as follow. # Annotation of a circRNA set based on information from public databasescircrnaAnnotations(group=\"docker\", scratch.folder=scratch, ciri.file=paste0(data,\"/merged_circRNA.ciri2.txt\"), genome.version=\"hg19\") circRNAs annotation Different files with suffix .anno will be will be generated in the data folder. Each of these files will report the information about the circRNAs found in a specific database (es. circbase.anno will report the circBase information)",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "Reconstruction of the circRNAs backsplicing junction sequences To reconstruct the sequence of the backsplicing junction of each circRNA the function circrnaBSJunctions should be applied as follow # Reconstruction of circRNA backsplicing junction sequencecircrnaBSJunctions(group=\"docker\", scratch.folder=scratch, circrna.data=paste0(data,\"/merged_circRNA.ciri2.txt\"), exon.data=paste0(data,\"/exons_reference\"), assembly=\"hg19\") Backsplicing sequence reconstruction This function will generate a files called circRNA_backsplicing_sequences.fasta reporting the reconstructed sequence.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "Prediction of alternative splicing events involving the circRNAs To predict the set of alternative splicing events involving the circRNA, the ciriAS function can be applied as follow using each BWA read alignment file and CIRI2 output. # Application of CIRI AS algorithm on each datasetfor(i in 1:length(ids)){fqfolder = paste(path, ids[i] , sep=\"\")ciriAS(group=\"docker\", scratch.folder=scratch, sam.file=paste0(fqfolder,\"/aligned_reads.sam\"), ciri.file=paste0(fqfolder, \"/\", ids[i], \".ciri2\"), genome.file=gs, annotation.file=gtf)} Detection of alternative splicing events involving the circRNAs The output of the function will be a two different files called structure.list and structure_AS.list .",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "Download of the RNA-Seq data in which quantify the expression of a circRNA set The RNA-Seq raw reads for the circRNAs quantification can be downloaded from PRJNA-411984 . This dataset includes RNA-Seq data of three CRC samples with matched data from normal mucosa samples. PRJNA411984 The detailed list of datasets needed for the analysis is the following: SRA ID ID SRR6067723 CRC_1 SRR6067725 CRC_2 SRR6067727 CRC_3 SRR6067729 Normal mucosa 1 SRR6067731 Normal mucosa 2 SRR6067733 Normal mucosa 3 For each dataset a specific folder in the data folder The datasets can be downloaded using the following code applied using the url of the different datasets. # Define a variable storing the fastq urlurl1 Download dataset",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "",
+      "instruction": "Quantification of circRNAs expression in RNA-Seq datasets The quantification of each circRNA in a specific RNA-Seq dataset is computed using the circrnaQuantification function # Define a list containing the dataset idsids2 \", ids2[i], \".fastq\"))circrnaQuantification(group=\"docker\", scratch.folder=scratch, rnaseq.data=paste0(fqfolder, \"/\", ids2[i], \".fastq\"), backsplicing_junctions.data=paste0(data, \"/circRNA_backsplicing_sequences.fasta\"), hc.params=c(21, 40, 1000000, 1000000, 17, 30))} CircRNAs expression analysis This function will generate a file with extension .hashcirc reporting for each dataset the number of reads supporting each circRNA.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "",
+      "instruction": "CircRNAs differential expression analysis Before the differential expression analysis of the circRNAs level detected by the circrnaQuantification function, the function mergeData should be applied in order to merge the result obtained for each dataset. # Define a variable storing the list of sample classescov Merge different data The output of this function called MergedData.tsv is a table reporting the counts of each annotation for each dataset. Furthermore, the sample identifiers reported in the header will be report the sample id followed by the corresponding sample class. On this table the differential expression analysis can be perfomed using DESeq2 algorithm implemented in the wrapperDeseq2 function. # Differential expression analysis with DESeq2wrapperDeseq2(group=\"docker\", output.folder=data,experiment.table=paste0(data, \"/MergedData.tsv\"), log2fc=0, fdr=0.05, ref.covar=\"N\", type=\"gene\", batch=FALSE) Differential expression analysis",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}

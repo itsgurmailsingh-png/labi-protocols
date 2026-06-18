@@ -1,0 +1,93 @@
+{
+  "protocol_id": "single_cell_gex_and_vdj_tcr_sequencing_protocol",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Single-Cell GEX and VDJ (TCR) Sequencing Protocol",
+  "author": "Hyojin Song",
+  "doi": "dx.doi.org/10.17504/protocols.io.yxmvmdoebv3p/v1",
+  "source_name": "protocols_io",
+  "source_url": "https://www.protocols.io/view/single-cell-gex-and-vdj-tcr-sequencing-protocol-li-j2wycqffx",
+  "citation": "dx.doi.org/10.17504/protocols.io.yxmvmdoebv3p/v1",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.yxmvmdoebv3p/v1",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 4.5,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 54,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Library Preparation. Thaw PBMC samples and wash with warm DMEM + 10% FBS. Perform automated cell counting. Resuspend cells in 1× PBS + 1% BSA to a final concentration of 100–2,000 cells/µL. Prepare Gene Expression (GEX) and T-cell receptor (TCR) libraries according to the manufacturer’s protocols for the 10x Genomics Chromium GEM-X Single Cell V(D)J + 5’ Gene Expression (v3) kit.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Single-Cell TCR (scTCR) Sequencing Analysis. Analyze VDJ data using scRepertoire (v2.0.7). 1 Assign each cell a TCR clonotype based on paired TRA and TRB chains. Uniquely identify each TCR clonotype using a combination of V, D, J, C gene segments and CDR nucleotide sequences. Retain only cells with a single productive TRB chain for downstream analysis.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Single-Cell RNA (scRNA) Sequencing and Analysis",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Pre-processing and Quality Control (QC). Generate a customized reference genome using cellranger mkref (v7.0.1) by aggregating the human reference (GRCh38/hg38) with GCAR1 construct sequences. 2 Align sequencing data to the customized reference using cellranger multi (v7.0.1). 2 Identify VDJ+ cells from the GEX dataset and subset them for downstream analyses. Perform all subsequent processing and QC in Seurat (v5). 3 Identify GCAR1-expressing cells using subset (SeuratObject, subset = GCAR &gt; 0). Apply the following QC filters: - Raw nCount_RNA &gt; 5,000 - Mitochondrial RNA percentage (percent.mt) &lt; 10% (except for the GCAR1 Product sample, wherepercent.mt &gt; 20% is allowed) Normalize data using SCTransform, regressing out mitochondrial content. Integrate all samples across timepoints: select integration features with SelectIntegrationFeatures(), identify anchors using FindIntegrationAnchors(reduction = &#34;rpca&#34;), and generate integrated expression values with IntegrateData(). Perform cell clustering at resolution 0.8 (resulting in 30 clusters).",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Cluster-Level Cell Type Predictions. Perform unsupervised cell-type labelling using SCimilarity (v0.2.0; “unconstrained” model). 4 Re-run the model in “constrained” mode to obtain a min_dist value for each cell’s label prediction (0 indicates an identical match to the reference). Calculate a cluster label score that incorporates the min_dist value per label (x),and the number of cells with each label (xc), per cluster, as: cluster label score_x = (threshold(min_dist) – median(min_dist))_k × proportion(x_c)",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Validate annotations. Perform pathway enrichment analysis to extract cluster-specific marker genes with FindAllMarkers() (using performNormalization()), filter for markers with avg_log2FC &gt; 1.0, and query with the g:Profiler2 R package focusing on GO:BP terms. 5,6",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Cluster-Level GCAR1 Status. Annotate clusters as GCAR1+ if they contain &gt;250 cells or &gt;15% GCAR1+ cells. Calculate p-values for the proportion of GCAR1-positive cells in each cluster using a two-proportion z-test.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Cell-Level Cell Type Classification. Refine SCimilarity cell-level labels into broad cell types using semi-manual curation and tumour marker gene expression levels. Retain cells only if cell-level and cluster-level annotations agree on T-cell status (to eliminate ambiguous assignments).",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "Marker Gene Expression Profiling. Profile CAR T-cell immunophenotyping genes using established published marker lists. 7",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}

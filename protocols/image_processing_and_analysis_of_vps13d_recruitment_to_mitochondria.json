@@ -1,0 +1,79 @@
+{
+  "protocol_id": "image_processing_and_analysis_of_vps13d_recruitment_to_mitochondria",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Image Processing and Analysis of VPS13D Recruitment to Mitochondria",
+  "author": "Marianna Leonzino",
+  "doi": "dx.doi.org/10.17504/protocols.io.bvgnn3ve",
+  "source_name": "protocols_io",
+  "source_url": "https://www.protocols.io/view/protocol-for-image-processing-and-analysis-of-vps1-bvgnn3ve",
+  "citation": "dx.doi.org/10.17504/protocols.io.bvgnn3ve",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.bvgnn3ve",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 3.5,
+  "category": "Imaging & Microscopy",
+  "estimated_time_mins": 42,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Build kymographs tracing a line ROI across the mitochondria that was illuminated with Blue Light.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Measure an intensity profile by tracing a line ROI across the center of the mitochondrial signal on the kymograph. Take a background profile using the same line ROI outside the illumination area.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Normalize the fluorescence intensities to the min and max values using the following formula: Normalized f[t] = f[t]-f min [t] ———————— f max [t]−f min [t] where f[t] = F mito [t] − F bkgd [t].",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Analyze the cells coexpressing VPS13D^EGFP and mitoBFP individually. Store the each cell outline as an ROI in the ROI Manger of Fiji.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Apply the “Gaussian Blur” tool and “Enhance Local Contrast” tool to the MitoBFP channel to average the brightness of the whole image and to clarify the shape and margin of mitochondria.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Use an automated macro designed in Fiji to measure VPS13D^EGFP signal overlapping with mitochondria and that localized in the cytosol surrounding them.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Calculate the ratio between the intensity of VPS13D^EGFP on mitochondria and the intensity of VPS13D^EGFP in the cytosol surrounding mitochondria for each cell and plot a graph indicating the enrichment of VPS13D^EGFP on mitochondria. The macro (which can be adapted to analyse recruitment of any given protein to mitochondria) is included below: macro &#34;ROI in batches auto measure VPS13 binding with mitochondrial &#34; { Dialog.create(&#34;reminder&#34;);//create an interface Dialog.addMessage(&#34;choose saving path&#34;);//an interactive interface for user to set the saving directory Dialog.show();//an interactive interface for user to set the saving directory dir_saving = getDirectory(&#34;Choose a Directory to save&#34;);//an interactive interface for user to set the saving directory count = roiManager(&#34;Count&#34;);//save the information from ROI manager into the term &#34;count&#34; for (i = 0; i &lt; count; i ++){ name = getTitle; selectWindow(name); roiManager(&#34;Select&#34;, i);//save the selected ROIs in the ROI manager in batch Stack.getPosition(channel, slice, frame);//save the selected ROIs in the ROI manager in batch run(&#34;Duplicate...&#34;, &#34;duplicate slices=&#34; + slice);//save the selected ROIs in the ROI manager in batch saveAs(&#34;Tiff&#34;, dir_saving + &#34;ROIslice&#34;+i+name); //save the selected ROIs in the ROI manager in batch name = replace(name, &#34;.tif&#34;, &#34;&#34;);//motify the name of images C1 = &#34;C1-ROIslice&#34;+i+name+&#34;.tif&#34;;//motify the name of images C2 = &#34;C2-ROIslice&#34;+i+name+&#34;.tif&#34;;//motify the name of images run(&#34;Split Channels&#34;);//split the integrated image into single channel Dialog.create(&#34;Content of the channel&#34;);//create an interface Dialog.addMessage(&#34;Make sure the content of the channels. If same as described, click OK. If different, click Cancel and make changes.\\n&#34;); Dialog.addMessage(&#34;Channel 1 is VPS13D channel. Channel 2 is Mitochondrial channel.&#34;); Dialog.show();//make sure the content of each channels selectWindow(C1);//choose the cytosol slice run(&#34;Duplicate...&#34;, &#34; &#34;);//duplicate a seperate image to process run(&#34;Brightness/Contrast...&#34;);//preprocess the VPS13D signal in the cytosol area //measure the intensity of VPS13D signal in mitochondria area selectWindow(C2);//choose the mitochondria slice run(&#34;Duplicate...&#34;, &#34; &#34;);//duplicate a seperate image to process run(&#34;Gaussian Blur...&#34;, &#34;sigma=2 slice&#34;);//balance the brightness of image run(&#34;Enhance Local Contrast (CLAHE)&#34;, &#34;blocksize=127 histogram=256 maximum=3 mask=*None* fast_(less_accurate)&#34;);//clearify the outline of mitochondria run(&#34;Enhance Local Contrast (CLAHE)&#34;, &#34;blocksize=127 histogram=256 maximum=3 mask=*None* fast_(less_accurate)&#34;);//clearify the outline of mitochondria run(&#34;Enhance Local Contrast (CLAHE)&#34;, &#34;blocksize=127 histogram=256 maximum=3 mask=*None* fast_(less_accurate)&#34;);//clearify the outline of mitochondria run(&#34;Threshold...&#34;);//choose the mitochondria area run(&#34;Convert to Mask&#34;);//generate an accurate mitomask saveAs(&#34;Tiff&#34;, dir_saving + &#34;ROI&#34;+i+&#34; mitomask &#34;+name);//generate an accurate mitomask imageCalculator(&#34;AND create&#34;, mitomask, C1);//map C1 onto the mitomask setThreshold(1, 255);//choose the calculated area saveAs(&#34;Tiff&#34;, dir_saving + &#34;ROI&#34;+i+&#34; result of mitochondria intensity &#34;+name); mitointensity=getTitle; run(&#34;Measure&#34;);//measure the intensity of VPS13D signal in mitochondria area //measure the VPS13D intensity in the cytosol area run(&#34;Dilate&#34;); run(&#34;Dilate&#34;); run(&#34;Dilate&#34;);//duplicate three times to eliminate the interference from mitochondria signal run(&#34;Convert to Mask&#34;); run(&#34;Invert&#34;);//invert the enlarged mitomask saveAs(&#34;Tiff&#34;, dir_saving + &#34;ROI&#34;+i+&#34; mitomask x3 &#34;+name);//generate the enlarged inverted mitomask mitomask3 = getTitle; imageCalculator(&#34;AND create&#34;, mitomask, mitomask);//map the enlarged inverted mitomask onto the original mitomask to get the enlarged outline of mitochondria in the cytosol area saveAs(&#34;Tiff&#34;, dir_saving + &#34;ROI&#34;+i+&#34; cytomask &#34;+name);//generate outline profile of mitomask, which refers to mask of cytosol area cytomask = getTitle; imageCalculator(&#34;AND create&#34;, cytomask, C1);//map the cytomask onto cytosol setThreshold(1,255); saveAs(&#34;Tiff&#34;, dir_saving + &#34;ROI&#34;+i+&#34; result of cytosolic intensity &#34;+name); cytointensity=getTitle; run(&#34;Measure&#34;);//measure the VPS13D intensity in the cytosol area saveAs(&#34;Results&#34;, dir_saving + &#34;ROI&#34;+i+&#34; measurement results of VPS13 binding to mitochondrial.csv&#34;); close() } Dialog.create(&#34;reminder&#34;); Dialog.addMessage(&#34;Mission accomplished.Congratulations!&#34;); Dialog.show(); }",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}

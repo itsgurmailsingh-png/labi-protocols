@@ -1,0 +1,58 @@
+{
+  "protocol_id": "survival_analysis_for_student_dropout_prediction",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Survival Analysis for Student Dropout Prediction",
+  "author": "Feng Pan",
+  "doi": "dx.doi.org/10.17504/protocols.io.b4duqs6w",
+  "source_name": "protocols_io",
+  "source_url": "https://www.protocols.io/view/a-survival-analysis-based-volatility-and-sparsity-b4duqs6w",
+  "citation": "dx.doi.org/10.17504/protocols.io.b4duqs6w",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.b4duqs6w",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 2.0,
+  "category": "Other",
+  "estimated_time_mins": 24,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Prepare the dataset: We conduct experiments on two benchmark datasets to evaluate our proposed model. Both of them are drawn from the largest MOOC platform in China, XuetangX (see https://www.xuetangx.com/). The first dataset KDDCup 2015 is available at https://www.biendata.xyz/competition/kddcup2015/data/, which have been widely used for various MOOC dropout prediction studies. The dataset contains information about 39 courses and 72,395 enrolled students. Each course takes 30 days as the history time window and the prediction period is set to 10 days. 7 different event types of student learning activity (i.e., features) are provided in KDDCup 2015. We use KDDCup 2015 to compare our proposed method with existing methods. The second dataset XuetangX is available at http://moocdata.cn/data/user-activity, which is much larger than KDDCup 2015. The original XuetangX dataset contains 246 courses, 202,000 students and 22 event types. But to facilitate model training, we adopt the data processing method used in &#34;Prenkaj B, Velardi P, Distante D, et al. A reproducibility study of deep and surface machine learning methods for human-related trajectory prediction[C]//Proceedings of the 29th ACM International Conference on Information &amp; Knowledge Management. 2020: 2169-2172.&#34;, i.e., pruning all e-courses with less than 350 student trajectories, which leaves us with 19 courses and 23839 students. For the XuetangX dataset, the history period is 35 days and the prediction period is still 10 days. We use XuetangX to test the robustness and generalization of the proposed method.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Data processing: For each dataset, we perform a daily grouping of events concerning each student to help in deriving the temporal sequences. Therefore, we represent each student’s trajectory with a time-matrix T_u∈ R^(l,n) , where l is the length of the adopted time-window in days and n is the number of different events types available in the dataset. Moreover, we add the elapsed time ∆t and the missing indicator u_t to each time step. Therefore, the final input matrix is a tensor of shape (N,l,n+2).",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Build model: Our proposed model, SAVSNet, is designed as three stages deep learning networks: a volatility modeling network, a sparsity modeling network and a survival analysis network. (1) In the volatility modeling network, we leverage a dual-branch structure, which is consisted of an 1D convolutaional network to capture the spatial dependencies of multivariate time series and an LSTM network to learn the temporal dependency, respectively. Then we ultilize an update gate to adaptively fuse the two hidden representations. (2) In the sparsity modeling network, we use a customized Time-Missing-Aware LSTM (TM-LSTM) unit to take the elapsed time and missing indicator between the consecutive timestamps of a sequence into consideration to adjust the long-term and short-term memory content of the LSTM unit. (3) In the survival analysis network, we apply a softplus function to transform the output of TM-LSTM into hazard rate that represents the instantaneous hazard of the student given no dropout event occurred before. Then we employ a survival analysis loss function to estimate the hazard rates. Accordingly, the survival probability at each time step is obtained by the formula ${S_t} = {e^{ - \\sum\\nolimits_{k = 1}^t {{\\lambda _k}} }}$. By comparing the survival probability at the last timestamp with a threshold $\\tau$, we can predict whether a user would dropout of the course.We use the Tensorflow1.x platform to build this model and the source code will be published at: https://github.com/leondepf/SAVSNet .",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Model training and testing: The data is trained in the built model, and this process is carried out on the GPU. At the end of this process, we get some metrics that evaluate our model&#39;s perfromance.",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}

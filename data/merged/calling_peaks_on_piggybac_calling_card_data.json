@@ -1,0 +1,212 @@
+{
+  "protocol_id": "calling_peaks_on_piggybac_calling_card_data",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Calling Peaks on piggyBac Calling Card Data",
+  "author": "Arnav Moudgil",
+  "doi": "dx.doi.org/10.17504/protocols.io.bb9xir7n",
+  "source_name": "protocols_io",
+  "source_url": "https://www.protocols.io/view/calling-peaks-on-piggybac-calling-card-data-bb9xir7n",
+  "citation": "dx.doi.org/10.17504/protocols.io.bb9xir7n",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.bb9xir7n",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 13.0,
+  "category": "Bioinformatics",
+  "estimated_time_mins": 156,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Before calling peaks on calling card data, it is useful to create a file listing the location of every TTAA tetramer in the genome. The piggyBac transposase inserts almost exclusively into this motif. Morever, we use the presence of a TTAA adjacent to a mapped read as an internal quality check when creating CCF files. This section will walk you through how to quickly find all TTAA&#39;s in a genome.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Compile the kmer.cc program as follows: g++ kmer.cc -o kmer The result should be a C++ executable in your directory called kmer .",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "This program takes as input a FASTA file and k-mer and outputs a BED file of all exact matches to that k-mer. Here we use it to find all exact matches to the 4-mer TTAA. Download or copy to your working directory a FASTA file of your genome of interest. Using the latest human genome build as an example: ./kmer hg38.fa TTAA &gt; hg38_TTAA.bed The file hg38_TTAA.bed now lists all TTAA&#39;s in hg38.fa. It is important that the FASTA file that you use in this step is the same FASTA sequence used for aligning calling card reads. For example, if you mapped to a repeat-masked genome earlier, you should supply a repeat-masked FASTA file here.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "(Optional) More recent builds of the human and mouse genomes contain unplaced contigs and alternate haplotypes. You maybe interested in restricting your analysis to the &#34;canonical&#34; chromosomes (e.g. 1-22, X &amp; Y for humans). Here is a simple way to filter only &#34;canonical&#34; TTAAs: grep -v &#39;_&#39; hg38_TTAA.bed &gt; hg38_TTAA_canon.bed (If you are being nitpicky, this file will include TTAAs on the mitochondrial chromosome, but we have not found this to be a problem for peak calling). If you filter only &#34;canonical&#34; TTAAs, it is important that you also filter your CCF file so it contains only insertions mapping to &#34;canonical&#34; chromosomes. The above command can be used to do so. If you do not do this, you may get &#34;divide by zero&#34; errors in subsequent steps.",
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "The core of calling peaks in calling card data is Bayesian blocks. This algorithm, originally developed in astrophysics, segments one-dimensional datasets into regions of piecewise-constant density. We use it to initially partition the genome into intervals, where each interval contains a constant rate of piggyBac insertions. These intervals are referred to as blocks ; two adjacent blocks are characterized by different insertion rates and, accordingly, different insertion densities. One attractive reason for using Bayesian blocks is that it can find a mathematically optimal partition of the data into blocks. Peak calling then proceeds by testing each block to see if it contains more insertions than expected by some background model. This much overview of Bayesian blocks is sufficient to understand peak calling. For more details, we recommend reading the original paper ( Scargle et al. 2013 ) or this blog post by Jake VanderPlas .",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "We generate a list of blocks from CCF files, but these files must first be sorted. Here are three ways to sort CCF files, in order of preference: Using bedops: sort-bed sample.ccf &gt; sample_sorted.ccf Using bedtools: bedtools sort -i sample.ccf &gt; sample_sorted.ccf Using the standard shell sort command: sort -k1V -k2n -k3n sample.ccf &gt; sample_sorted.ccf For the remainder of this protocol, we assume your CCF files are already sorted.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Here we will describe how to call BRD4 peaks from undirected piggyBac insertions. Our sample file is HCT-116_PBase.ccf, which contains insertions from 10 replicates of bulk RNA calling cards in the HCT-116 cell line. This file contains 1.5 million insertions: ❯ wc -l HCT-116_PBase.ccf 1521048 HCT-116_PBase.ccf",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "We start by creating creating blocks from the CCF file. To do this, we use the SegmentCCF.py script: python SegmentCCF.py HCT-116_PBase.ccf | sed -e &#39;/^\\s*$/d&#39; &gt; HCT-116_PBase.blocks The output file is a BED-formatted list of blocks inferred by Bayesian blocks. The piped sed command simply removes blank lines. You may see a warning about false positive rates for event data, as well as possibly a dividing by zero warning. These are automatically generated by astropy, the library which contains the Bayesian blocks algorithm and can be safely ignored. We have successfully called peaks with the blocks generated despite these warnings. Segmenting the CCF file is often the most time-consuming step. The Bayesian blocks algorithm has quadratic runtime complexity. If one CCF file has twice as many insertions as another, the former is expected to take roughly four times longer to segment as the latter.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "We then provide the CCF and blocks files, as well as the TTAA file, to BBPeakCaller_BRD4.py, which tests each block for statistical significance. This script performs the following steps: Divide the number of insertions by the number of TTAAs in the TTAA file. This defines a global rate parameter ( r ) under a null model assuming a uniform distribution of insertions. For each block b , count the number of TTAAs in b and multiply it by r . This value specifies the expected number of insertions in b if insertions were uniformly distribution (denoted λ b ). For each block b , let x b be the number of observed insertions in the block. The script then performs a one-tailed Poisson significance test on the block. This is calculated as the probability of observing x b insertions or more in the block parametrized by a Poisson distribution with expected value λ b . Multiple hypothesis correction is performed (based on user preferences). Finally, blocks that pass multiple hypothesis correction are polished and written to file. The output file is in BED format.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "The TTAA file only needs to be generated once per genome. Afterwards, all experiments using the same reference genome can use the same TTAA file.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "BBPeakCaller_BRD4.py takes four required positional arguments: CCF file, blocks file, TTAA file, and output filename. An example command would look like this: python BBPeakCaller_BRD4.py HCT-116_PBase.ccf HCT-116_PBase.blocks hg38_TTAA_canon.bed HCT-116_PBase_peaks.bed This command WILL NOT RUN as written because it does not specify how peaks should be thresholded. See Step 12 for details.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "Required flag: BBPeakCaller_BRD4.py has one required flag which specifies the statistical threshold for filtering blocks. There are two options for this: a straight p-value cutoff or with a multiple hypothesis correction method. The former is specified by the –p flag; the value supplied to it must be the –log10 transformation of the desired p-value. Example: select only those blocks with p &lt; 10 -9 -p 9 Alternatively, you can control for multiple hypotheses at a desired alpha level. This is specified by the –a flag and the value supplied is not transformed. If this option is used, you must supply a method (–m) of multiple hypothesis correction. Valid methods are listed here . Example: Bonferroni correction at an alpha of 0.05 -a 0.05 -m bonferroni Example: Benjamini-Hochberg correction at false discovery rate of 10% -a 0.1 -m fdr_bh Remember: You must use EITHER –p OR –a –m for the program to run. BRD4 peaks may require choosing a p-value cutoff that is more stringent than, for example, Bonferroni correction. This appears to scale with size of the dataset: with more insertions, a more stringent cutoff is needed. To guide settling on an optimal p-value, we recommend calling peaks at a variety of cutoffs, visualizing CCF data and peak files (eg. on the WashU Epigenome Browser), and choosing a value whose peak boundaries reasonably accord with insertion densities. Optional flags: Mutliple significant blocks may occur in close proximity to one another. If you want to merge these into larger peaks, you can specify a distance (–d) . Significant blocks within this distance will be merged together. Example: merge blocks within 12.5 kb -d 12500 Finally, while the primary output of BBPeakCaller_BRD4.py is a list of peaks in BED format, an intermediate filename (-i) can be supplied to write information about each block and it&#39;s p-value. This file will be written in CSV format. Example: write an intermediate file for the HCT-116 PBase dataset -i HCT-116_PBase_intermediate.csv",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "Let&#39;s put this all together. Here is the command to recreate our analysis from our recent preprint: python BBPeakCaller_BRD4.py -p 30 -d 12500 HCT-116_PBase.ccf HCT-116_PBase.blocks hg38_TTAA_canon.bed HCT-116_PBase_peaks.bed This generates a BED file containing nearly 2000 peaks. ❯ wc -l HCT-116_PBase_peaks.bed 1939 HCT-116_PBase_peaks.bed",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "Peak calling on TF-directed piggyBac insertions is similar to calling BRD4 peaks. The major distinction is in the choice of background model. With undirected piggyBac , the background is modeled as a uniform distribution of the observed number of insertions. For TF-directed piggyBac , however, the background is the undirected piggyBac dataset from the same cell line or system. For this example, we will use HCT-116_SP1-PBase.ccf. This file was generated from 10 replicates of bulk RNA calling cards with SP1- piggyBac in HCT-116 cells. The control file is the undirected piggyBac data from the same system, i.e. HCT-116_PBase.ccf. ❯ wc -l HCT-116_SP1-PBase.ccf 410588 HCT-116_SP1-PBase.ccf",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "As before, we start by creating creating blocks from the CCF file: python SegmentCCF.py HCT-116_SP1-PBase.ccf | sed -e &#39;/^\\s*$/d&#39; &gt; HCT-116_SP1-PBase.blocks The same notes from Step 9 apply here as well.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "The blocks file, in addition to being used to call peaks, can also be used to calculate normalized insertion densities across the genome. This is done using the CCFIdeogram.py script, which takes as input a CCF file and a blocks file and outputs a bedgraph file. Each entry in the bedgraph file is a block and the numerical value for each block is the number of insertions in that block per million mapped insertions per kilobase (IPKM). python CCFIdeogram.py HCT-116_PBase.ccf HCT-116_PBase.blocks HCT-116_PBase.bedgraph This script is named after ideograms because the resulting bedgraph files, when visualized as densities, create banding patterns that resemble karyotyped chromosomes.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "",
+      "instruction": "Here is the output of our sample analysis as visualized on the WashU Epigenome Browser. The top track is the raw CCF data. The next track is the per-block insertion densities as calculated by CCFIdeogram.py. The third track is the same as the second but with in-browser smoothing (15 px). We then show peak boundaries at a variety of p-value thresholds, in order of increasing stringency. Notice how peaks grow, merge, shrink, and vanish at different cutoffs. The dark blue peaks track corresponds to the threshold used in the previous step. BRD4 and H3K27ac data, marks of enhancers and super-enhancers, are shown for reference.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "",
+      "instruction": "We then provide the CCF and blocks files, as well as the background CCF file, to BBPeakCaller_TF.py, which tests each block for statistical significance. This script performs the following steps: Divide the number of insertions in the TF CCF file by the number of insertions in the background CCF file. This defines a global scaling parameter ( s ). This enables us to account for library size differences between the TF-directed and undirected control libraries. For each block b , count the number of insertions from the background CCF file in b and multiply it by s, then add a pseudocount c . This value specifies the normalized expected number of insertions in b from the undirected control experiment (denoted λ b ). For each block b , let x b be the number of insertions from the TF-directed CCF file. The script then performs a one-tailed Poisson significance test on the block. This is calculated as the probability of observing x b insertions or more in the block parametrized by a Poisson distribution with expected value λ b . Multiple hypothesis correction is performed (based on user preferences). Finally, blocks that pass multiple hypothesis correction are polished and written to file. The output file is in BED format.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "",
+      "instruction": "BBPeakCaller_TF.py takes four required positional arguments: TF-directed CCF file, TF-directed blocks file, undirected CCF file, and output filename. An example command would look like this: python BBPeakCaller_TF.py HCT-116_SP1-PBase.ccf HCT-116_SP1-PBase.blocks HCT-116_PBase.ccf HCT-116_SP1-PBase_peaks.bed This command WILL NOT RUN as written because it does not specify how peaks should be thresholded. See Step 20 for details.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "",
+      "instruction": "Required flag: BBPeakCaller_TF.py has one required flag which specifies the statistical threshold for filtering blocks. There are two options for this: a straight p-value cutoff or with a multiple hypothesis correction method. The former is specified by the –p flag; the value supplied to it must be the –log10 transformation of the desired p-value. Example: select only those blocks with p &lt; 10 -9 -p 9 Alternatively, you can control for multiple hypotheses at a desired alpha level. This is specified by the –a flag and the value supplied is not transformed. If this option is used, you must supply a method (–m) of multiple hypothesis correction. Valid methods are listed here . Example: Bonferroni correction at an alpha of 0.05 -a 0.05 -m bonferroni Example: Benjamini-Hochberg correction at false discovery rate of 10% -a 0.1 -m fdr_bh Remember: You must use EITHER –p OR –a –m for the program to run. Optional flags: Mutliple significant blocks may occur in close proximity to one another. If you want to merge these into larger peaks, you can specify a distance (–d) . Significant blocks within this distance will be merged together. Example: merge blocks within 250 bp -d 250 Peaks are composed of one or more blocks. Bayesian blocks draws block boundaries halfway between adjacent insertions. This can, in some cases, lead to unnecessarily wide peaks. The refine (–r) flag constrains the block edges so that they start and end at insertions. This, in turn, helps increase the resolution of peak calls. Peaks can be further filtered based on a size threshold. You can specify a minimum (–n) and maximum (–x) size bound on reported peaks. Example: report all peaks less than 5 kb in length -x 5000 Example: report only peaks between 100 and 500 bp in length -n 100 -x 500 TF- piggyBac fusions redirect, but do not abolish, piggyBac &#39;s natural affinity for BRD4. This is why TF-directed experiments must use an undirected calling card experiment as a control. This can also pose a challenge for peak calling: whereas most TF&#39;s have narrow, sharp peaks, BRD4 can bind much broader stretches of the genome. Peak calling may not completely eliminate this signal, which is typically reflected in large, but statisically significant, peaks. Broad peaks can also occur in the shoulder regions flanking a TF binding site, likely from &#34;spillover&#34; of insertions by the increased local concentration of transposase. A simple way to increase peak specificity is to threshold on peak size. In our experience, in a number of cell lines with a variety of TFs, 5 kb is a reasonable upper bound for filtering peaks. This threshold is greater than the median peak sizes we have observed, which lets us preserve the majority of called peaks. By default, the pseudocount added to all peaks is 1. This value (–c) can be changed if desired. Example: use a pseudocount of 0.1 -c 0.1 Finally, while the primary output of BBPeakCaller_TF.py is a list of peaks in BED format, an intermediate filename (-i) can be supplied to write information about each block and it&#39;s p-value. This file will be written in CSV format. Example: write an intermediate file for the HCT-116 SP1-PBase dataset -i HCT-116_SP1-PBase_intermediate.csv",
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "",
+      "instruction": "As before, TF-directed CCF files can also be used to create insertion density tracks, following the instructions in Step 13.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "",
+      "instruction": "Let&#39;s put this all together. This command calls peaks from SP1-PBase at a false discovery rate of 5%, merging significant blocks within 250 bp, refining block edges, and outputing all peaks less than 5 kb in length: python BBPeakCaller_TF.py -a 0.05 -m fdr_bh -d 250 -r -x 5000 HCT-116_SP1-PBase.ccf HCT-116_SP1-PBase.blocks HCT-116_PBase.ccf HCT-116_SP1-PBase_peaks.bed This generates a BED file containing around 5600 peaks. ❯ wc -l HCT-116_SP1-PBase_peaks.bed 5615 HCT-116_SP1-PBase_peaks.bed",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "",
+      "instruction": "Here is the output of our sample analysis as visualized on the WashU Epigenome Browser. The top track are the undirected insertions, followed by the SP1-directed insertions. The next track is the per-block insertion densities for the SP1-PBase data with in-browser smoothing (3 px). Finally, we plot peak boundaries at a variety of p-value thresholds, in order of decreasing stringency. Notice how peaks grow, merge, shrink, and vanish at different cutoffs. The dark blue peaks track corresponds to the threshold used in the previous step. The dark blue track shows all significant peaks at 5% FDR less then 5 kb in length. The light blue track shows all peaks without size restriction. Notice how imposing a maximum peak size filters out potentially artifactual peaks.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "",
+      "instruction": "The output of these peak calling scripts are BED files listing peak coordinates only. They do not annotate the peaks themselves. There are a number of programs for secondary analyses: Peaks can be annotated with overlapping and nearest genes using HOMER . Peaks can be connected to putative genetic targets using GREAT . De novo motif analysis on peaks can be done with either HOMER or MEME .",
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "",
+      "instruction": "BBPeakCaller_TF.py can also be used to call differential peaks between two different undirected or TF-directed calling card datasets, such as between cell types or treatments. In this use case, one sample serves as the &#34;background&#34; for the other. For example, let&#39;s imagine that we have done one undirected (a.k.a. BRD4) calling cards experiment on cells treated with DMSO and another treated with dexamethasone. To identify peaks that are enriched in the dexamethasone condition, we could call: python BBPeakCaller_TF.py -p 9 -d 12500 DEX.ccf DEX.blocks DMSO.ccf DEX_peaks.bed Since these tests are one-tailed, to find peaks that are enriched in the other direction, i.e. in the DMSO condition, we simply swap the datasets: python BBPeakCaller_TF.py -p 9 -d 12500 DMSO.ccf DMSO.blocks DEX.ccf DMSO_peaks.bed",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "",
+      "instruction": "For guidance on how to visualize calling card data, see our companion protocol . Documentation is also available from the WashU Epigenome Browser .",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}

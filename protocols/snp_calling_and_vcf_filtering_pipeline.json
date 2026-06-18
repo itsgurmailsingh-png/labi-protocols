@@ -1,0 +1,142 @@
+{
+  "protocol_id": "snp_calling_and_vcf_filtering_pipeline",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "SNP Calling and VCF Filtering Pipeline",
+  "author": "M Renee Bellinger",
+  "doi": "dx.doi.org/10.17504/protocols.io.84fhytn",
+  "source_name": "protocols_io",
+  "source_url": "https://www.protocols.io/view/snp-calling-and-vcf-filtering-pipeline-84fhytn",
+  "citation": "dx.doi.org/10.17504/protocols.io.84fhytn",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.84fhytn",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 8.0,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 96,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "# copy the genome to a working folder and unzip it to be a &#34;working copy&#34; cp /your/path/to/genome/genome.gz genome.fasta.gz gunzip genome.fasta.gz",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "# index genome samtools faidx genome.fasta bowtie2-build genome.fasta genome",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "# Map demultiplexed GBS reads with bowtie2 or a program of your choice. Repeat this step for all demultiplexed samples # settings are -q for fastq format, -p for 20 threads, --very-sensitive-local for alignment algorithm, -x for reference, -U name of demultiplexed read file (e.g., P230.R1.fastq). -S is output file &#34;P230.sam&#34; bowtie2 -q -p 20 --very-sensitive-local -x genome -U P230.R1.fastq -S P230.sam",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "# Use samtools to convert *sam to *bam format, sort the reads, filter out unmapped reads (-F 4) to save space, and then check mapping stats # this loop will process all *sam files in your working directory # note some samtools programs use -o while others use &gt; to collect program output for i in *sam; do samtools view -bS -o $i.bam $i --threads 20 samtools sort $i.bam -o $i.sort.bam --threads 20 samtools view -h -F 4 $i.sort.bam &gt; $i.mapped.bam samtools flagstat $i.mapped.bam &gt; $i.mapped.sort.stats done;",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "#calculate genotype likelihoods and call variants samtools mpileup -gu -f genome.fasta -q 20 -Q 20 --output-tags DP,AD,ADF,ADR,SP,INFO/AD *mapped.bam | bcftools call -m --output-type v -o draft_Taro.merged_q20Q20.vcf",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "# compress the *vcf to save space gzip draft_Taro.merged_q20Q20.vcf",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "## I use variables for this script. Would be easier to run the file 1_SNP_calling.txt provided on page with Abstract ## This step remove samples that are not part of the mapping population A=draft_Taro.merged_q20Q20.vcf.gz vcftools --gzvcf $A --keep keep_1025_230_255.txt --recode --recode-INFO-all --out 1025_230_255",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "## Remove SNPs within 5 bases of an INDEL B=1025_230_255.recode.vcf bcftools filter -g 5 $B &gt;filter.1.vcf",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "## Remove indels C=filter.1.vcf vcftools --vcf $C --keep keep_1025_230_255 --remove-indels --recode --recode-INFO-all --out 1025_230_255.noindel",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "## light filter for max missing 50%, minimum depth of 5 (per genotype), bi-allelic calls, minimum quality phred 20 ## remove samples that are not the 1025 taro leaf blight mapping population D=1025_230_255.noindel.recode.vcf vcftools --vcf $D --max-missing 0.5 --minDP 5 --min-alleles 2 --max-alleles 2 --minQ 20 --recode --recode-INFO-all --out 1025_230_255.noindel.maxmiss.5.minDP5.2alleles.minQ20",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "## Measure missingness across individuals and create a file listing individuals missing &gt;30% of data E=1025_230_255.noindel.maxmiss.5.minDP5.2alleles.minQ20.recode.vcf vcftools --vcf $E --missing-indv --out 30percent cat 30percent.imiss | awk &#39;{if($5&gt;0.3)print $1}&#39;|grep -v INDV&gt; remove-indv_30perc",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "## Remove individuals missing 30% data in conjunction with the light filter D=1025_230_255.noindel.recode.vcf vcftools --vcf $D --remove remove-indv_30perc --max-missing 0.5 --minDP 5 --min-alleles 2 --max-alleles 2 --minQ 20 --recode --recode-INFO-all --out 1025_230_255.noindel.maxmiss.5.minDP5.2alleles.minQ20.n86ind",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "## Measure missingness across loci and create a file &#34;exclude_miss20p&#34;. Apply this file in step 15. F=1025_230_255.noindel.maxmiss.5.minDP5.2alleles.minQ20.n86ind.recode.vcf vcftools --vcf $F --keep keep_1025_230_255 --missing-site --out 1025_230_255.noindel.maxmiss.5.minDP5.2alleles.minQ20 cat 1025_230_255.noindel.maxmiss.5.minDP5.2alleles.minQ20.lmiss|awk &#39;{if($6&gt;=0.20)print $1, $2}&#39;&gt;exclude_miss20p",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "## Apply stringent filter: ## Exclude individuals missing 30% of data and loci that are missing 20% of data ## some filters are redundant in case steps are run out of order ## apply minimum genotypic depth of 8 G=1025_230_255.noindel.recode.vcf vcftools --vcf $G --remove remove-indv_30perc --exclude-positions exclude_miss20p --max-missing 0.8 --minDP 8 --min-alleles 2 --max-alleles 2 --minQ 20 --recode --recode-INFO-all --out 1025_230_255.noindel.maxmiss.8.minDP8.2alleles.minQ20.n86",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "## Apply minor allele frequency filter vcftools --vcf 1025_230_255.noindel.maxmiss.8.minDP8.2alleles.minQ20.n86_variable_parental.recode.vcf.recode.vcf --maf 0.012 --recode --recode-INFO-all --out 1025_230_255.noindel.maxmiss.8.minDP8.2alleles.minQ20.n86_variable_parents_maf_0.012 # filtered file is: 1025_230_255.noindel.maxmiss.8.minDP8.2alleles.minQ20.n86_variable_parents_maf_0.012.recode.vcf",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "############### # SNP calling # ############### # To set up your working environment you will need to download GBS and genome data from NCBI # Set paths to each program if they are not in your bash environment. #----------------------------------# # Programs and versions used for SNP calling #----------------------------------# # bowtie2v2.2.4 # samtools1.4.1 # bcftools-1.2 #----------------------------------# # DATA FILES #----------------------------------# # Short-read files that have been demultiplexed (see Guidelines) # SRX2754311 --&gt; GBS data for Taro from Hawaii, South Pacific, Palau, and mainland Asia # SRX2754311 --&gt; GBS data for the &#39;1025&#39; Taro mapping population resistant to Taro Leaf Blight # GENOME FILE # NCBI Bioproject PRJNA567267",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}

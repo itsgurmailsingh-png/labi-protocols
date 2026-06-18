@@ -1,0 +1,86 @@
+{
+  "protocol_id": "stranded_transcript_count_table_generation_from_long_reads",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Stranded Transcript Count Table Generation from Long Reads",
+  "author": "David A Eccles",
+  "doi": "dx.doi.org/10.17504/protocols.io.5qpvonn2bl4o/v17",
+  "source_name": "protocols_io",
+  "source_url": "https://www.protocols.io/view/stranded-transcript-count-table-generation-from-lo-cgx4txqw",
+  "citation": "dx.doi.org/10.17504/protocols.io.5qpvonn2bl4o/v17",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.5qpvonn2bl4o/v17",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 4.0,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 48,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Demultiplex and orient reads as per the protocol Preparing Reads for Stranded Mapping . It is expected that these demultiplexed reads will be split up in the current directory, and coupled with a &#39; barcode_counts.txt &#39; file. If that&#39;s the case, the following should work: for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do ls oriented/${bc}_reads_dirAdjusted.fq.gz; done Example expected output: oriented/BC03_reads_dirAdjusted.fastq.gz oriented/BC04_reads_dirAdjusted.fastq.gz oriented/BC05_reads_dirAdjusted.fastq.gz oriented/BC06_reads_dirAdjusted.fastq.gz oriented/BC07_reads_dirAdjusted.fastq.gz oriented/BC08_reads_dirAdjusted.fastq.gz If the &#39; barcode_counts.txt &#39; file is not present, this error will appear: awk: fatal: cannot open file `barcode_counts.txt&#39; for reading (No such file or directory) If one or more of the oriented read files is missing, it will look something like this: oriented/BC03_reads_dirAdjusted.fastq.gz oriented/BC04_reads_dirAdjusted.fastq.gz ls: cannot access &#39;oriented/BC05_reads_dirAdjusted.fastq.gz&#39;: No such file or directory ls: cannot access &#39;oriented/BC06_reads_dirAdjusted.fastq.gz&#39;: No such file or directory oriented/BC07_reads_dirAdjusted.fastq.gz oriented/BC08_reads_dirAdjusted.fastq.gz",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Prepare transcript index (see Guidelines for data sources). The GENCODE transcript file is first modified so that the mapped reference sequence name is the first value (i.e. the Transcript id): perl -pe &#39;s/&gt;(.*?)\\|/&gt;$1 /&#39; gencode.vM28.transcripts.fa &gt; trName_gencode.vM28.transcripts.fa In order to reduce the risk of polyA and polyT sequences matching to the polyA tail of reads (e.g. as found in Comt-204 / ENSMUST00000165430.8), any A or T homopolymers are masked out with Ns: fasta_formatter -i trName_gencode.vM28.transcripts.fa | perl -pe &#39;s/(A{9}A+|T{9}T+)/&#34;N&#34; x length($1)/eg&#39; &gt; ATmasked_trName_gencode.vM28.transcripts.fa A temporary shell variable is created to reference the transcript file location: indexLoc=$(readlink -e ATmasked_trName_gencode.vM28.transcripts.fa)",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Newer versions of LAST (v1409+) include a new seeding scheme , &#39;-uRY4&#39; [and other related RYX schemes], which improves mapping accuracy and reduces polyA matches; low-complexity regions are also converted to lower case. This will generate seven additional files of the form &lt;index name&gt;.XXX: lastdb -uRY4 -R01 ${indexLoc} ${indexLoc} Prepare a substitution matrix for transcript mapping. The default substitution matrix is swayed too much by INDELs in the barcode sequences, so here&#39;s one that I&#39;ve developed using last-train with a recent nanopore cDNA sequencing run: #last -Q 1 #last -t4.27969 #last -a 15 #last -A 17 #last -b 3 #last -B 4 #last -S 1 # score matrix (query letters = columns, reference letters = rows): A C G T A 5 -37 -14 -33 C -34 6 -36 -19 G -15 -37 6 -35 T -35 -19 -36 6 cDNA.mat The variant matrix here was generated using last-train on one of the read files from a recent cDNA run, called using super-accuracy basecalling with guppy v5.1.15: last-train -Q 1 ${indexLoc} &lt;(zcat oriented/BCXX_reads_dirAdjusted.fq.gz | head -n 100000) [note: this is a different matrix from that used for demultiplexing and read orientation]",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Reads are mapped to the transcriptome to create an output associating each read to one or more transcripts. The outcome of this process is a tab-separated file containing barcode/transcript/read/direction quads (in that order). Reads may be mapped to multiple gene transcripts in this process (e.g. for polycistronic transcripts), which is fine as long as the total sum of mapped transcript/read pairs doesn&#39;t play a role in subsequent downstream normalisation.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Reads are mapped to the transcriptome using LAST, splitting reads into pieces where appropriate for polycistronic transcripts. The results of that mapping are piped through last-postmask to exclude unlikely hits. Following this, one of my scripts, maf2csv.pl , is used to convert to a one-line-per-mapping CSV format. Based on an eyeballing of mapped results (see here ), hits are additionally filtered to exclude 100% matches (these tend to be short, low-complexity subsequences), as well as any mappings shorter than 50% of the read where the proportion of the query that is mapped is less than the proportion of the target. LAST reports multiple hits per read (including multiple hits for each read/transcript/direction triplet), so this is further ordered by the gap-compressed identity column of the CSV output and unique triplets preserved using sort for easier downstream processing. This intermediate CSV file is preserved for additional read-level mapping and accuracy QC, if desired. The CSV file is finally converted by awk to a space-separated format to retain only the transcript, read, and direction. mkdir -p mapped for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do echo &#34;** ${bc} **&#34;; lastal -P 10 -p cDNA.mat --split-m=0.99 ${indexLoc} &lt;(pv oriented/${bc}_reads_dirAdjusted.fq.gz | zcat) | \\ last-postmask | maf2csv.pl | sort -t &#39;,&#39; -k 1r,1 -k 14rn,14 | \\ sort -t &#39;,&#39; -k 1r,1 -k 2,2 -k 3,3 -u | \\ gzip &gt; mapped/trnMapping_LAST_${bc}_vs_Mmus_transcriptome.csv.gz; zcat mapped/trnMapping_LAST_${bc}_vs_Mmus_transcriptome.csv.gz | \\ awk -F &#39;,&#39; -v &#39;OFS=\\t&#39; &#39;{print $2, $1, $3}&#39; | sort -r | uniq | gzip &gt; mapped/trnMapping_LAST_${bc}_vs_Mmus_transcriptome.txt.gz done",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "The result is then aggregated to sum up counts per transcript/direction pair: mapper=&#34;LAST&#34; for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do echo &#34;** ${bc} **&#34;; zcat mapped/trnMapping_${mapper}_${bc}_vs_Mmus_transcriptome.txt.gz | \\ awk -F&#39;\\t&#39; -v &#34;bc=${bc}&#34; &#39;{print bc,$1,$3}&#39; | sort | uniq -c | \\ gzip &gt; mapped/trnCounts_${mapper}_${bc}_vs_Mmus_transcriptome.txt.gz; done Note: I&#39;ve split this up into two steps so that an intermediate count of the total number of mapped transcripts per barcode can be done: for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do echo -n &#34;${bc} &#34;; zcat mapped/trnMapping_${mapper}_${bc}_vs_Mmus_transcriptome.txt.gz | \\ awk &#39;{print $2}&#39; | sort | uniq | wc -l; done",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "count_analysis.r Transcript counts are merged with ensembl gene annotation, then converted into wide format (one line per transcript) using an R script. The transcript annotation in this case is from ensembl BioMart (see Guidelines for more details). #!/usr/bin/env Rscript library(tidyverse); ## load used barcode identifiers bcNames &lt;- read.table(&#34;barcode_counts.txt&#34;, stringsAsFactors=FALSE)[,2]; ## set gene annotation file location annotationFile &lt;- &#34;ensembl_GRCm39_geneFeatureLocations.txt.gz&#34;; ## load ensemble transcript metadata (including gene name) ensembl.df &lt;- read_delim(annotationFile, delim=&#34;\\t&#34;); colnames(ensembl.df) &lt;- c(&#34;Transcript stable ID&#34; = &#34;transcript&#34;, &#34;Gene description&#34; = &#34;Description&#34;, &#34;Gene name&#34; = &#34;Gene&#34;, &#34;Gene start (bp)&#34; = &#34;Start&#34;, &#34;Gene end (bp)&#34; = &#34;End&#34;, &#34;Strand&#34; = &#34;Strand&#34;, &#34;Chromosome/scaffold name&#34; = &#34;Chr&#34;)[colnames(ensembl.df)]; ensembl.df$Description &lt;- sub(&#34; \\\\[.*$&#34;,&#34;&#34;,ensembl.df$Description); ensembl.df$Description &lt;- sub(&#34;^(.{50}).+$&#34;,&#34;\\\\1...&#34;,ensembl.df$Description); options(scipen=15); ## don&#39;t show scientific notation for large positions for(mapper in c(&#34;LAST&#34;)){ checkName &lt;- sprintf(&#34;mapped/trnCounts_%s_%s_vs_Mmus_transcriptome.txt.gz&#34;, mapper, bcNames[1]); if(!file.exists(checkName)){ cat(sprintf(&#34;Warning: %s does not exist. If you are using mapper &#39;%s&#39;, consider this an error\\n&#34;, checkName, mapper)); next; } ## load count data into &#34;narrow&#34; array (one line per count) trn.counts &lt;- tibble(); for(bc in bcNames){ trn.counts &lt;- bind_rows(trn.counts, sprintf(&#34;mapped/trnCounts_%s_%s_vs_Mmus_transcriptome.txt.gz&#34;, mapper, bc) %&gt;% read_table2(col_names=c(&#34;count&#34;,&#34;barcode&#34;, &#34;transcript&#34;,&#34;dir&#34;))); } ## remove revision number from transcript names (if present) trn.counts$transcript &lt;- sub(&#34;\\\\.[0-9]+$&#34;,&#34;&#34;,trn.counts$transcript); ## convert to wide format (one line per transcript) trn.counts.wide &lt;- spread(trn.counts, barcode, count) %&gt;% mutate(dir = c(&#34;+&#34;=&#34;fwd&#34;, &#34;-&#34;=&#34;rev&#34;)[dir]); for(bd in colnames(trn.counts.wide[,-1])){ trn.counts.wide[[bd]] &lt;- replace_na(trn.counts.wide[[bd]],0); } ## merge ensembl metadata with transcript counts gene.counts.wide &lt;- inner_join(ensembl.df, trn.counts.wide, by=&#34;transcript&#34;); gene.counts.wide &lt;- gene.counts.wide[order(-rowSums(gene.counts.wide[,-(1:8)])),]; ## write result out to a file write.csv(gene.counts.wide, file=sprintf(&#34;wide_transcript_counts_%s_%s.csv&#34;, mapper, Sys.Date()), row.names=FALSE); } #!/usr/bin/Rscript library(dplyr); library(tidyr); ## load ensemble transcript metadata (including gene name) ensembl.df &lt;- as.tbl(read.delim(&#39;ensembl_mm10_geneFeatureLocations.txt.gz&#39;, col.names=c(&#39;transcript&#39;,&#39;Description&#39;,&#39;Start&#39;,&#39;End&#39;, &#39;Strand&#39;,&#39;Gene&#39;,&#39;Chr&#39;), stringsAsFactors=FALSE)); ensembl.df$Description &lt;- sub(&#39; \\\\[.*$&#39;,&#39;&#39;,ensembl.df$Description); ensembl.df$Description &lt;- sub(&#39;^(.{50}).+$&#39;,&#39;\\\\1...&#39;,ensembl.df$Description); ensembl.df[,1:7] &lt;- ensembl.df[,c(1,7,5,3,4,2,6)]; colnames(ensembl.df)[1:7] &lt;- colnames(ensembl.df)[c(1,7,5,3,4,2,6)]; options(scipen=15); ## don&#39;t show scientific notation for large positions ## load used barcode identifiers bcNames &lt;- readLines(&#39;used_barcodes.txt&#39;); ## load count data into &#39;narrow&#39; array (one line per count) trn.counts &lt;- tibble(); for(bc in bcNames){ trn.counts &lt;- bind_rows(trn.counts, as.tbl(read.table( sprintf(&#39;mapped/trnCounts_LAST_%s_vs_Mmus_transcriptome.txt.gz&#39;, bc), col.names=c(&#39;count&#39;,&#39;barcode&#39;,&#39;transcript&#39;,&#39;dir&#39;), stringsAsFactors=FALSE))); } ## remove revision number from transcript names (if present) trn.counts$transcript &lt;- sub(&#39;\\\\.[0-9]+$&#39;,&#39;&#39;,trn.counts$transcript); ## convert to wide format (one line per transcript) trn.counts.wide &lt;- spread(trn.counts, barcode, count) %&gt;% mutate(dir = c(&#39;+&#39;=&#39;fwd&#39;, &#39;-&#39;=&#39;rev&#39;)[dir]); for(bd in colnames(trn.counts.wide[,-1])){ trn.counts.wide[[bd]] &lt;- replace_na(trn.counts.wide[[bd]],0); } ## merge ensembl metadata with transcript counts gene.counts.wide &lt;- inner_join(ensembl.df, trn.counts.wide, by=&#39;transcript&#39;); gene.counts.wide &lt;- gene.counts.wide[order(-rowSums(gene.counts.wide[,-(1:8)])),]; ## write result out to a file write.csv(gene.counts.wide, file=&#39;wide_transcript_counts_LAST.csv&#39;, row.names=FALSE);",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Here is a downstream workflow that carries out transcript-level differential expression analysis using DESeq2 : Creating Differential Transcript Expression Results with DESeq2 I would like to emphasise that batch effects should be considered for nanopore sequencing, given how frequently the technology changes. Make sure that at least the sequencing library (i.e. samples prepared in tandem on the same day from the same kit) is added into the statistical model, and try to make sure that sequencing libraries are fairly heterogeneous - replicates from a sample with skewed transcript distributions could influence the outcome of statistical tests.",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}

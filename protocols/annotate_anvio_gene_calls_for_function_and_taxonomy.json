@@ -1,0 +1,170 @@
+{
+  "protocol_id": "annotate_anvio_gene_calls_for_function_and_taxonomy",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Annotate Anvio Gene Calls for Function and Taxonomy",
+  "author": "Unknown",
+  "doi": "dx.doi.org/10.17504/protocols.io.gczbsx6",
+  "source_name": "protocols_io",
+  "source_url": "https://www.protocols.io/view/mg-hw10-annotate-anvio-gene-calls-for-function-and-gczbsx6",
+  "citation": "dx.doi.org/10.17504/protocols.io.gczbsx6",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.gczbsx6",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 10.0,
+  "category": "Bioinformatics",
+  "estimated_time_mins": 120,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Login to the HPC ssh hpcice ssh hpc ice",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Move into your user directory in bh_class cd /rsgrps/bh_class/user_id",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "We are going to run analyses on the anvio gene calls to get function and taxonomy. Create these directories to store the analyses. mkdir taxonomy-genesmkdir taxonomy-genes/std-errmkdir taxonomy-genes/std-outmkdir anvio-genesmkdir function-genesmkdir function-genes/std-errmkdir function-genes/std-out mkdir taxonomy-genes mkdir taxonomy-genes/std-err mkdir taxonomy-genes/std-out mkdir anvio-genes mkdir function-genes mkdir function-genes/std-err mkdir function-genes/std-out",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "First we will need to download the anvio gene calls. Open Anvio on your computer. And type the following commands in the anvio terminal window. anvi-get-dna-sequences-for-gene-calls -c contigs.db -o nucleotides.faa",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "How many genes did Anvi&#39;o find on your contigs? Check by entering the following command in the Anvi&#39;o terminal. egrep",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "From your anvio terminal, you need to secure copy the anvio-genes.faa file back to the HPC. scp nucleotides.faa sftp.hpc.arizona.edu:/rsgrps/bh_class/username/anvio-genes",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Go to the HPC and make sure your anvio-genes.faa file is there. cd /rsgrps/bh_class/username/anvio-genesls -l nucleotides.faa cd /rsgrps/bh_class/username/anvio-genes ls -l nucleotides.faa",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Go to the taxonomy-genes directory to perform the taxonomic analysis on the genes using centrifuge. cd /rsgrps/bh_class/bhurwitz/taxonomy-genes",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "Create the following script to run taxonomic analysis on the gene calls from Anvi&#39;o. #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=12:mem=23gb#PBS -l pvmem=22gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m bea#--------------EDIT THESE---------------FASTA= #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=12:mem=23gb #PBS -l pvmem=22gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea #--------------EDIT THESE--------------- FASTA=&#34;/rsgrps/bh_class/username/anvio-genes/nucleotides.faa&#34; OUT_DIR=&#34;/rsgrps/bh_class/username/taxonomy-genes&#34; #--------------------------------------- CENT_DB=&#34;/rsgrps/bh_class/b_compressed+h+v/b_compressed+h+v&#34; centrifuge -x $CENT_DB -U $FASTA -S $OUT_DIR/centrifuge_hits.tsv --report-file $OUT_DIR/centrifuge_report.tsv -f",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "Run the centrifuge_tax.sh script to get the taxonomic information for genes. chmod 755 centrifuge_tax.shqsub -o std-out/ -e std-err/ centrifuge_tax.sh chmod 755 centrifuge_tax.sh qsub -o std-out/ -e std-err/ centrifuge_tax.sh",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "Go to the function-genes directory. We are going to get the top pfam and kegg ids for each contig using the program uproc. cd /rsgrps/bh_class/username/function-genes",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "Create uproc_function.sh to run the functional analysis. #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=12:mem=23gb#PBS -l pvmem=22gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m bea#--------------EDIT THESE---------------FASTA= #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=12:mem=23gb #PBS -l pvmem=22gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea #--------------EDIT THESE--------------- FASTA=&#34;/rsgrps/bh_class/username/anvio-genes/nucleotides.faa&#34; OUT_DIR=&#34;/rsgrps/bh_class/username/function-genes&#34; OUTPUT=&#34;$OUT_DIR/uproc-out&#34; #--------------------------------------- export UPROC=&#34;/rsgrps/bh_class/bin/uproc-dna&#34; export DATA=&#34;/rsgrps/bh_class/data/uproc&#34; export UPROC_MODEL=&#34;$DATA/model&#34; export UPROC_OUT_DIR=&#34;$OUT_DIR/uproc-out&#34; export PFAM=&#34;$DATA/pfam27ready&#34; export KEGG=&#34;$DATA/keggready&#34; $UPROC --preds --short --threads 12 --output $OUTPUT.pfam $PFAM $UPROC_MODEL $FASTA $UPROC --preds --short --threads 12 --output $OUTPUT.kegg $KEGG $UPROC_MODEL $FASTA",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "Run the uproc_function.sh script chmod 755 uproc_function.shqsub -o std-out/ -e std-err/ uproc_function.sh chmod 755 uproc_function.sh qsub -o std-out/ -e std-err/ uproc_function.sh",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "Create a perl script called format-anvio.pl to convert the functional data into anvio format. #! /uaopt/perl/5.14.2/bin/perluse strict;if (@ARGV != 4) { die $out&#34;) || die &#34;Cannot open out\\n&#34;; my %id_to_desc; while () { chomp $_; my ($id, $desc) = split (/\\t/, $_); $id_to_desc{$id} = $desc; } print OUT &#34;gene_callers_id\\tsource\\taccession\\tfunction\\te_value\\n&#34;; while () { chomp $_; my @fields = split (/,/, $_); my $gene = $fields[1]; $gene =~ s/\\|.*//; my $id = $fields[6]; my $score = $fields[7]; my $desc = &#34;NONE&#34;; if (exists $id_to_desc{$id}) { $desc = $id_to_desc{$id}; } print OUT &#34;$gene\\t$source\\t$id\\t$desc\\t$score\\n&#34;; }&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;CF20F5C29762404A91449958868D3740&#34; &gt; #! /uaopt/perl/5.14.2/bin/perl use strict; if (@ARGV != 4) { die &#34;Usage: format-anvio.pl uproc-file function-to-desc out source\\n&#34;; } my $uproc = shift @ARGV; my $function = shift @ARGV; my $out = shift @ARGV; my $source = shift @ARGV; open (F, $function) || die &#34;I need a kegg or pfam desc file\\n&#34;; open (U, $uproc) || die &#34;I need the uproc file\\n&#34;; open (OUT, &#34;&gt;$out&#34;) || die &#34;Cannot open out\\n&#34;; my %id_to_desc; while () { chomp $_; my ($id, $desc) = split (/\\t/, $_); $id_to_desc{$id} = $desc; } print OUT &#34;gene_callers_id\\tsource\\taccession\\tfunction\\te_value\\n&#34;; while () { chomp $_; my @fields = split (/,/, $_); my $gene = $fields[1]; $gene =~ s/\\|.*//; my $id = $fields[6]; my $score = $fields[7]; my $desc = &#34;NONE&#34;; if (exists $id_to_desc{$id}) { $desc = $id_to_desc{$id}; } print OUT &#34;$gene\\t$source\\t$id\\t$desc\\t$score\\n&#34;; }",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "Run format-anvio.pl to convert the functional data into anvio format. chmod 755 format-anvio.pl./format-anvio.pl uproc-out.kegg /rsgrps/bh_class/kegg_to_desc uproc-kegg-anvio kegg./format-anvio.pl uproc-out.pfam /rsgrps/bh_class/pfam_to_domain uproc-pfam-anvio pfamcat uproc-kegg-anvio > input_matrix.txtegrep -v &gt; input_matrix.txt&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;DBF8B67E1C4643659C0793F8C0F511C2&#34; &gt; chmod 755 format-anvio.pl ./format-anvio.pl uproc-out.kegg /rsgrps/bh_class/kegg_to_desc uproc-kegg-anvio kegg ./format-anvio.pl uproc-out.pfam /rsgrps/bh_class/pfam_to_domain uproc-pfam-anvio pfam cat uproc-kegg-anvio &gt; input_matrix.txt egrep -v &#34;gene_callers_id&#34; uproc-pfam-anvio &gt;&gt; input_matrix.txt",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "Download the functional data to your computer. Go to the directory where Anvi&#39;o is running (on your computer) and type the following commands to download the files. scp netid@sftp.hpc.arizona.edu:/rsgrps/bh_class/username/function-genes/input_matrix.txt . Note the I use a",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "",
+      "instruction": "Download the taxonomic data to your computer. Go to the directory where Anvi&#39;o is running (on your computer) and type the following commands to download the files. scp netid@sftp.hpc.arizona.edu:/rsgrps/bh_class/username/taxonomy-genes/centrifuge_report.tsv .scp netid@sftp.hpc.arizona.edu:/rsgrps/bh_class/username/taxonomy-genes/centrifuge_hits.tsv . Note the I use a scp netid@sftp.hpc.arizona.edu:/rsgrps/bh_class/username/taxonomy-genes/centrifuge_report.tsv . scp netid@sftp.hpc.arizona.edu:/rsgrps/bh_class/username/taxonomy-genes/centrifuge_hits.tsv . Note the I use a &#34;.&#34; here to mean the current directory in Anvi&#39;o, on my computer this is: /Users/bhurwitz/skinmicrobiome",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "",
+      "instruction": "From the Anvi&#39;o terminal, type the following command to upload the taxonomic data for the gene calls. anvi-import-taxonomy -c contigs.db -i centrifuge_report.tsv centrifuge_hits.tsv -p centrifuge",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "",
+      "instruction": "From the Anvi&#39;o terminal, type the following command to upload the functional data for the gene calls. anvi-import-functions -c contigs.db -i input_matrix.txt",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "",
+      "instruction": "Please document these steps in the methods section of your report. Note what programs you used for each step and what the parameters were. How many genes did Anvi&#39;o find? Is this different from your analyses? Why? Anvi&#39;o uses the &#34;-p meta&#34; parameter for metagenomics datasets, which is stricter than what you first ran. How many of your genes from Anvio had a match to a known bacteria? How many matched known proteins for kegg or pfam?",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}
