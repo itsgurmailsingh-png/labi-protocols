@@ -1,0 +1,102 @@
+{
+  "protocol_id": "bcrseq_analysis_using_dandelion",
+  "parent_protocol_id": null,
+  "title": "BCRseq Analysis using Dandelion",
+  "author": "Oliver Skinner",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.eq2lyorwwgx9/v1",
+  "source_name": "protocols_io",
+  "source_id": "315247",
+  "source_url": "https://www.protocols.io/view/bcrseq-analysis-using-dandelion-jx4pcpqvp",
+  "doi": "dx.doi.org/10.17504/protocols.io.eq2lyorwwgx9/v1",
+  "citation": "dx.doi.org/10.17504/protocols.io.eq2lyorwwgx9/v1",
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 60,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Adjust cell and contig barcodes by adding user-supplied suffixes and/or prefixes to ensure that there are no overlapping barcodes between samples.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Re-annotation of contigs with igblastn (v1.19.0) against IMGT (international ImMunoGeneTics) reference sequences.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Re-annotation of D and J genes separately using blastn with similar parameters as per igblastn (dust = ‘no’, word size ( J = 7; D = 9)) but with an additional e-value cutoff ( J = 10^^−4 in contrast to igblastn’s default cutoff of 10; D = 10^^−3^^). This is to enable the annotation of contigs without the V gene present.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Identification and recovery of nonoverlapping individual J gene segments (under associated ‘j_chain_multimapper’ columns). In the list of all mapped J genes (all_contig_j_blast.tsv) from blastn, the J gene with the highest score (j_support) was chosen. Dandelion then looks for the next J gene with the highest ‘j_support’ value, and with start (j_sequence_start) and end (j_sequence_end) positions not overlapping with the selected J gene, and does so iteratively until the list of all mapped J genes are exhausted. In contigs without V gene annotations, it then selects the 5’ end leftmost J gene and update the ‘j_call’ column in the final AIRR table. For contigs with V gene annotations, but with multiple J gene calls, it uses the annotations provided by igblastn.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Additional re-annotation of heavy-chain constant (C) region calls using blastn (v2.13.0) against curated sequences from CH1 regions of respective isotype class.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Heavy chain V gene allele correction using TIgGER (v1.0.0). The final outputs are then parsed into AIRR format with change-o scripts.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "The rearrangement sequences that pass standard quality control checks are saved in file ending with the suffix ‘_contig_dandelion.tsv’.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Perform cell-level quality control using Dandelion’s ‘check_contig’ function to ensure consistent V, D, J, and C gene calls. Sort contigs by UMI count and prioritize productive contigs. Flag cells with orphan, extra pair(s), or ambiguous status, allowing IgM and IgD to coexist if no other isotypes are detected. Apply library type restriction to filter out contigs annotated to unexpected loci. Use ‘filter_contigs’ to ensure a single cell has only one VDJ and one VJ pair, or only an orphan VDJ chain, removing contigs that fail these checks.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "Group BCRs into clones/clonotypes using a rule-based procedure applied to productive rearrangements. After cell-level QC, each cell contributes at most one dominant productive VDJ and one productive VJ contig, selected by UMI count. Chain-aware grouping: Clonotype heavy- and light-chain repertoires separately, defining paired clonotypes using combined heavy+light signature. Shared V/J gene usage: Require identical V-gene and J-gene calls for the relevant chain. Matched junction length: Require identical CDR3 amino-acid length within each V/J bin. CDR3 similarity threshold: Cluster sequences by CDR3 amino-acid sequence similarity using a Hamming-distance criterion, requiring ≥85% amino-acid identity. Handling incomplete receptors: Clonotype cells lacking an unambiguous productive chain using the available productive chain only, excluding them from analyses requiring paired heavy+light definition. Diversity was quantified from the resulting clonotype frequency tables (counts of cells per clonotype within each sample/timepoint/condition). Clonal expansion was summarised by the distribution of clone sizes (e.g., unexpanded singletons versus expanded clones), and repertoire diversity was computed using standard clonotype-based diversity metrics (e.g., Shannon entropy and/or Simpson diversity) on depth-normalised clonotype tables to enable fair comparisons across samples.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "The basic mutation load is quantified by using the ‘pp.quantify_mutations’ in Dandelion which is a wrapper of SHaZam’s basic mutational analysis. It sums all mutation scores (heavy and light chains, silent and replacement mutations) for the same cell.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-17T13:46:17.597328Z",
+  "llm_normalised": true
+}

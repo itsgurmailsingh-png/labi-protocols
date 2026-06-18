@@ -1,0 +1,110 @@
+{
+  "protocol_id": "introduction_to_analyzing_fasta_files",
+  "parent_protocol_id": null,
+  "title": "Introduction to Analyzing FASTA Files",
+  "author": "Frank O Aylward",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.qg6dtze",
+  "source_name": "protocols_io",
+  "source_id": "12542",
+  "source_url": "https://www.protocols.io/view/introduction-to-analyzing-fasta-files-qg6dtze",
+  "doi": "dx.doi.org/10.17504/protocols.io.qg6dtze",
+  "citation": "dx.doi.org/10.17504/protocols.io.qg6dtze",
+  "category": "Bioinformatics",
+  "estimated_time_mins": 66,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "The first thing we need to do is get some data. For purposes here we&#39;ll work with some FASTA files from the genome sequencing project of Yersinia pestis, the causative agent of the plague. A good place to go for genome data is the National Center for Biotechnology Information, or NCBI. Among other things, they post FTP sites with genomic data for many different organisms. Here is the FTP site for the Yersinia pestis straing CO92: ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/009/065/GCF_000009065.1_ASM906v1 You can also see some more general information at this URL: https://www.ncbi.nlm.nih.gov/genome/?term=yersinia+pestis If you copy and paste the first URL into your browser you should see various files with different extensions like .faa.gz or .fna.gz. The .gz here is the gzip extension, which indicates that these files have been compressed using gzip. The other extensions generally give some information about the kind of sequences that are inside. For example, FNA generally stands for &#39;FASTA nucleic acid&#39; while FAA generally stands for &#39;FASTA amino acid&#39;.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Now before the download anything I usually like to set up a new folder that I can work in. This is because I want to be able to easily see what new files have been created or downloaded through this process, and if I&#39;m working on my Desktop or Downloads folder it is easy to get confused with all of the other files that are there. So let&#39;s create a simple directory first and then navigate into it. The commands for this are: mkdir fasta_parsing cd fasta_parsing The first command &#34;mkdir&#34; will make the directory, and the second command &#34;cd&#34; will allow us to navigate into that directory. If you ever want to see what files are present in the directory, you can use the &#34;ls&#34; command. There shouldn&#39;t be anything in the directory now, so your commands should lead to something like this: a Not particularly exciting, but at least there are no error messages :)",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Now we can get started with some data that we saw from in first step. For starters let&#39;s download the raw nucleic acid genome sequence, which is in the GCF_000009065.1_ASM906v1_genomic.fna.gz file. To download this directly from the command line we can use the &#39;wget&#39; command, which is part of the basic Ubuntu command line and should already be installed. The command below should download the file: wget -O y_pestis_genome.fna.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/009/065/GCF_000009065.1_ASM906v1/GCF_000009065.1_ASM906v1_genomic.fna.gz In the command above, the -O flag lets us specify what name we want the downloaded file the have. After that we just have to provide the full URL for the file (this can usually be achieved by right-clicking on the file in the FTP site and then clicking &#39;copy link address&#39;). The wget command will give us a progress report and log while the download is happening. Since this file is compressed, we will want to uncompress it with the &#39;gunzip&#39; command: gunzip y_pestis_genome.fna.gz And then we can check what we have in the directory with the &#39;ls&#39; command. You should see something like this: a If you see something like this, then success! We have our very own FASTA file that we can now begin to analyze.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Typically whenever you have a new file that you want to look at, the first few command you want to use are &#39;head&#39;, and &#39;tail&#39; commands to look at the format of the beginning and end of the file. &#39;head&#39; and &#39;tail&#39; return the first and last 10 lines of a file, though we can specify the number of lines we want to see with the &#39;-n&#39; flag. Try something like this: head -n 20 y_pestis_genome.fna and tail -n 20 y_pestis_genome.fna and you should see something like this: a So you essentially see that the file is full of ATGC letters, and that the very beginning has a header line with some descrptive information that starts wtih a &#39;&gt;&#39;. This is the basic format of FASTA files. Generally what comes right after the &#39;&gt;&#39; in the header line should be a non-redundant identifier for the sequence that follows it. Also, there can be multiple sequences in a single file, all of which have a header line that precedes the sequence. Now, you may ask, why bother looking at a file in the command line if we can just open it up in our favorite text edtior, like gedit or notepad++? Well, opening up the file in a text editor is perfectly fine, and if your just starting you may wish to do this just to browse, but using the command line has two main advantages: 1) You can quickly check the format and contents of a file, so you don&#39;t have to toggle between different programs, which is especially handy if you&#39;re working with many different files, and 2) FASTA files can get huge (giga- or terabyte size), and tring to open those files in your text editor will either take a very long time or crash your system. If you want to have more open-ended browsing capabilities of a file, you can also try the &#34;less&#34; command, which allows you to browse through a file.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Now that we have a general idea of what the FASTA file looks like, we can get some basic statistics about how many distinct sequences are inside. Remember that above I indicated that a single FASTA file can have multiple distinct sequences inside (i.e., multiple chromosomes, plasmids, or whole genomes could be present in a single file, with each unique nucleic acid sequence preceded by its own &#39;&gt;&#39; header line). So how many distinct sequences are in our Y. pestis genome? We can use the &#39;grep&#39; command for this: grep &#39;^&gt;&#39; y_pestis_genome.fna and grep -c &#39;^&gt;&#39; y_pestis_genome.fna Grep searches through a file and returns all of the lines that have a particular character or pattern. Here we searched for &#39;^&gt;&#39;, which tells grep that we want every line that starts with a &#39;&gt;&#39; character (the &#39;^&#39; is code for &#39;begins with&#39;). Since each FASTA header starts with a &#39;&gt;&#39; character, this should return all of the headers for each unique sequence in the file. In the second command we did the same thing, but with the &#39;-c&#39; flag, which tells grep we don&#39;t actually want to see each line that has the query character in it, we just want to know how many total lines that fit our search. The results should look like this: a The descriptions in the headers tell us quite a bit about the sequences that are in our file. Each header starts with a unique identifier (NC_#######), followed by description. The first sequence therefore encodes the Yersinia pestis chromosome, and the next three sequences encode for plasmids. Using the &#39;-c&#39; command, we can quickly see that there are 4 total sequences present.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "This is all good and well for looking at a raw genome file, but what about the other files we saw in step? Let&#39;s continue with analyzing the genes encoced in the Y. pestis genome. These will be found in the &#39;GCF_000009065.1_ASM906v1_cds_from_genomic.fna.gz&#39; file. Note that the file name includes the abbreviation &#34;CDS&#34;, which means &#34;coding sequence&#34; and implies that these are protein-coding genes. So other genes, such as rRNAs or tRNAs, are not going to be found here. Let&#39;s download and uncompress the data the same as with the genome. wget -O y_pestis_genes.fna.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/009/065/GCF_000009065.1_ASM906v1/GCF_000009065.1_ASM906v1_cds_from_genomic.fna.gz gunzip y_pestis_genes.fna ls And you should see both the genome and gene files: a",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Now we can use the same grep commands with the &#39;genes&#39; file as we used with the &#39;genome&#39; file, to get an idea of the format and the number of genes encoded in the genome. head y_pestis_genes.fna a Note that in the first 10 lines we can already see multiple header lines, since of course genes are much shorter than whole genomes. Also note that the headers for genes have a lot more information. In addition to unique identifiers, they also have information about the function of the gene, the coordinates of the gene in the chromosome/plasmid, a unique identifier for the protein that is encoded, and other information that NCBI keeps in its databases. We can continue to take a look at the file with grep: grep &#39;^&gt;&#39; y_pestis_genes.fna | head grep -c &#39;^&gt;&#39; y_pestis_genes.fna a Note that above I used a &#39;pipe&#39; with the first grep command. A pipe takes the output of the first command and feeds it into the command that comes after the &#39;|&#39;. This is handy here since there are many genes in the Y. pestis genome, and all of the text in the command line can be overwhelming. This way we can see the first 10 to get a general idea of the format (still a bit difficult to browse, since the headers are so long, but they give us a general idea). Lastly, with the &#34;-c&#34; flag with grep we can see that there are a total of 3,979 protein-coding genes in this genome, including those encoded in the chromosome and plasmids.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Sometimes we want a bit more information than just the format of a FASTA file and the total number of sequences that are inside. For more information we can use the &#34;seqtk&#34; tool. To install, type: sudo apt install seqtk You should be prompted to enter in your password, and then you will see some information about how the installation proceeds. For more information about this tool you can look at the github page: https://github.com/lh3/seqtk To see what utilities are availalble in the seqtk tool, just type: seqtk a You can see that there are many things we can use seqtk for. Here we will only be using the &#34;comp&#34; utility, which gives us some general statistics of sequences in a FASTA file. To see what this does, try the following command: seqtk comp y_pestis_genome.fna a Each row here is a unique sequence in the FASTA file, which for the Y. pestis genome would correspond to the chromosome and three plasmids. The columns provide the name , length, #A, #C, #G, #T, #2, #3, #4, #CpG, #tv, #ts, #CpG-ts. , length, #A, #C, #G, #T, #2, #3, #4, #CpG, #tv, #ts, #CpG-ts. a There is a lot of information here about the composition of the sequences, but I&#39;m usually only interested in the sequence length, ACGT composition, and possibly the #4 column, which specifies how many N characters were present in the sequence (if a nucleotide is ambiguous, meaning it could not be determined for some reason, it will sometimes be given a letter other than ATGC: see the one-letter codes here: https://www.bioinformatics.org/sms/iupac.html). There is a lot of information here about the composition of the sequences, but I&#39;m usually only interested in the sequence length, ACGT composition, and possibly the #4 column, which specifies how many N characters were present in the sequence (if a nucleotide is ambiguous, meaning it could not be determined for some reason, it will sometimes be given a letter other than ATGC: see the one-letter codes here: https://www.bioinformatics.org/sms/iupac.html). a So from the above we can see the that the first sequence, which is the chromosome, is much longer than the following three sequences, which are all plasmids (&gt;4 million base-pairs compared to ~70K, ~96K, and 10K). Plasmids are typically much shorter than chromosomes, so this is not surprising. So from the above we can see the that the first sequence, which is the chromosome, is much longer than the following three sequences, which are all plasmids (&gt;4 million base-pairs compared to ~70K, ~96K, and 10K). Plasmids are typically much shorter than chromosomes, so this is not surprising.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "Now let&#39;s use &#39;seqtk comp&#39; on the genes file, once again using a pipe so we don&#39;t flood our command line with text: seqtk comp y_pestis_genes.fna | head a Now let&#39;s say we don&#39;t want to know what the longest gene in the genome is. For this we can pipe the output of &#39;seqtk comp&#39; into the &#39;sort&#39; command: seqtk comp y_pestis_genes.fna | sort -k 2,2 -rn | head a Just to unpack the syntax of &#39;sort&#39; a bit, the &#39;-r&#39; flag indicates we wish to perform a reverse sort (descending order), th e &#39;-n&#39; flag indicates we wish to perform a numeric sort (as opposed to alphabetical, which wouldn&#39;t make sense here), and the &#39;-k&#39; flag indicates the columns to use for sorting, which in this case is only the 2nd column. The default column delimiter for &#39;sort&#39; is a tab, which is already the column delimiter used by &#39;seqtk comp&#39; in its output, so we don&#39;t need to change anything there. If columns were separated with something else, we would want to use the &#39;-d&#39; flag (as with all Unix commands, check all of the features of sort by typing &#39;man sort&#39;). So in the output above we have found that lcl|NC_003143.1_cds_YP_002346049.1_921 is the longest gene, with a length of 11,118, or a little more than 11 kilobases. A good rule-of-thumb for bacteria is that the average gene length of a genome is ~ 1 kilobase, so this one is pretty large! Now what if we want to find what this gene encodes for? Since we know that the FASTA header in the genes file has this information, we can use grep to retrieve this information: grep &#39;lcl|NC_003143.1_cds_YP_002346049.1_921&#39; y_pestis_genes.fna a So it appears this very long gene is yapH , which encodes for an autotransporter protein. Not super descriptive, but sometimes the functions of genes and their encoded proteins is unclear. Now try doing the same, but with the shortest gene in the Y. pestis genome. What is that gene, and what is its predicted function?",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "We can use pipes and combine Unix commands to get more specific information. Let&#39;s say we want to know how many genes are on the main chromosome only. Well we know from above that the main chromosome has the unique identifier NC_003143.1, so we can combine grep commands to count how many headers have only that grep &#34;^&gt;&#34; y_pestis_genes.fna | grep -c &#34;NC_003143.1&#34; The first grep command give us all of the header lines, and the second grep command parses through these are returns only the header lines with the chromosome ID in them. Here I got 3798. In the last step we found that there are 3979 genes total, so &gt;95% of all of the genes are encoded on the main chromosome. This is pretty typical, since plasmids are usually pretty small compared to chromosomes. Note that we probably could have arrived at this answer using only one grep command, since we know each gene name has the chromosome ID in the beginning. grep -c &#34;&gt;lcl|NC_003143.1&#34; y_pestis_genes.fna But with the first command we have a bit more versatility. For example, we can also ask how many genes have the term &#34;DNA polymerase&#34; in the description: grep &#34;^&gt;&#34; y_pestis_genes.fna | grep -c &#34;DNA polymerase&#34; (I got 12). Or may be we want an idea of genes involved in virulence: grep &#34;^&gt;&#34; y_pestis_genes.fna | grep -c &#34;virulence&#34; (I got 7). For in depth annotations we will want to do more than simple keyword searches, but these are still easy ways to begin exploring the data and looking at what kinds of genes are present. These examples also give you an idea of how powerful simple Unix commands can be. Since several commands can be easily combined with pipes, many different questions can be answered with a little creativity.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "For simple math in the command line I like to use a tool called &#34;datamash&#34;. If this tool is not installed you can install it with: sudo apt install datamash This tool is nice because it will let use do simple calculations like sums and means. For example, let&#39;s say we want to know the mean gene length of all genes in the Y. pestis genome. We can do this with the following command: seqtk comp y_pestis_genes.fna | datamash mean 2 The syntax for datamash is &#34;datamash &lt;operation to perform&gt; &lt;column to use&gt;&#34; So here we want to calculate the mean of all values in the second column, which we know from our work above are the gene lengths. Or if we only want to look at genes on the main chromosome: seqtk comp y_pestis_genes.fna | grep &#34;NC_003143.1&#34; | datamash mean 2 a Rather interesting. The average gene length is around 1 kilobase in both cases, and genes on the main chromosome are slightly longer on average than all genes combined. Now what is the total length of all protein coding genes on the main chromsome? We can answer this question with the following command: seqtk comp y_pestis_genes.fna | grep &#34;NC_003143.1&#34; | datamash sum 2 I got a value of 3718659 for this. From using seqtk in step 9 above we know that the main chrosome has a length of 4653728, so if we calculate the ratio of base-pairs in all protein-coding sequences divided by the total number of base-pairs we arrive at 79.9%. This could be called the &#34;coding density&#34; of protein-coding genes. Note that we are not considering rRNA, tRNA, or other genes here, so the total coding density will be higher than this. Still, ~80% is pretty high, indicating that the main chromosome is densely packed with genes.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-17T15:35:55.097238Z",
+  "llm_normalised": true
+}

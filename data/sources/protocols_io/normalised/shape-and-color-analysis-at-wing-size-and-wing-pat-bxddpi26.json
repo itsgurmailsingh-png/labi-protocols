@@ -1,0 +1,327 @@
+{
+  "protocol_id": "shape_and_color_analysis_at_wing_size_and_wing_pattern_levels",
+  "parent_protocol_id": null,
+  "title": "Shape and Color Analysis at Wing-Size and Wing-Pattern Levels",
+  "author": "Wei-Ping Chan",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.81wgb783qvpk/v1",
+  "source_name": "protocols_io",
+  "source_id": "52357",
+  "source_url": "https://www.protocols.io/view/shape-and-color-analysis-at-wing-size-and-wing-pat-bxddpi26",
+  "doi": "dx.doi.org/10.17504/protocols.io.81wgb783qvpk/v1",
+  "citation": "dx.doi.org/10.17504/protocols.io.81wgb783qvpk/v1",
+  "category": "Imaging & Microscopy",
+  "estimated_time_mins": 216,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Inspect all specimens before running the dorsal-ventral analysis",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Download group summary materials to local machine",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Multispectral reflectance at the wing-pattern level &amp; Visualization according to summarized groups.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Download all images in Shape_analysis/wing_segmentation to your local disk. Make sure all segmented images are in a local folder. The images should all contain the suffix: &#39;wing_segmentation.jpg&#39;",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Upload the empty preference table to Google Drive and color each column as in the example below for your convenience. The colors below correspond to the colors of each segmented body-part in specimen images. The default preference table has all cells filled with 1.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Run a script like the example Mathematica script provided below to generate a list of all specimens for inspection. If the user decides to generate the table manually or by other methods, please do include the following column names to prevent potential problems in the future processing steps: &#34;barcode&#34;, &#34;side&#34;, &#34;template&#34;, &#34;LF_wing_d&#34;, &#34;RF_wing_d&#34;, &#34;LH_wing_d&#34;, &#34;RH_wing_d&#34;, &#34;Body&#34;, &#34;L_antennae_d&#34;, &#34;R_antennae_d&#34;. Concatenating &#34;barcode&#34; and &#34;side&#34; with &#39;_&#39; can form &#34;template&#34;. For example &#39;MCZ-ENT000000001&#39; (barcode) and &#39;dorsal&#39; (side) can be joined to form &#39;MCZ-ENT000000001_dorsal&#39; (template). refdir = &#34;Path\\\\to\\\\wing_segmentation\\\\directory&#34;; outDir = &#34;Path\\\\to\\\\output\\\\directory&#34;; (*Generate a list for wing part checking*) label = {&#34;LF_wing_d&#34;, &#34;RF_wing_d&#34;, &#34;LH_wing_d&#34;, &#34;RH_wing_d&#34;, &#34;Body&#34;, &#34;L_antennae_d&#34;, &#34;R_antennae_d&#34;};(*_d: the L/R parts are defined by looking from the \\ dorsal side, it&#39;s definite*) imglist = FileNames[&#34;*.jpg&#34;, refdir]; imgnamelist = Table[StringSplit[FileNameTake[imglist[[k]]], &#34;_wing_segmentation.jpg&#34;][[-1]], {k, 1, Length[imglist]}]; barcodelist = Table[StringSplit[imgnamelist[[k]], &#34;_&#34;][[1]], {k, 1, Length[imgnamelist]}]; sidelist = Table[StringSplit[imgnamelist[[k]], &#34;_&#34;][[2]], {k, 1, Length[imgnamelist]}]; emptyList = Table[Join[{barcodelist[[k]], sidelist[[k]], imgnamelist[[k]]}, ConstantArray[1, Length[label]]], {k, 1, Length[imgnamelist]}]; outEmptyList = Join[{Flatten[{&#34;barcode&#34;, &#34;side&#34;, &#34;template&#34;, label}]}, emptyList]; outname = FileNameTake[outDir] &lt;&gt; &#34;_spp_preference_table.csv&#34;; out = outDir &lt;&gt; &#34;\\\\&#34; &lt;&gt; outname; Export[out, outEmptyList];",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Sometimes a specimen may have an incomplete set of images (i.e. is missing the dorsal or ventral side result). We can use the following script to detect those incomplete specimens, and further operations (e.g. manual redo or checking the source) can be launched to regenerate missing files. Here, we provide an example script written in Mathematica. refdir = &#34;Path\\\\to\\\\wing_segmentation\\\\directory&#34;; (*Check the inspection images*) imglist = FileNames[&#34;*.jpg&#34;, refdir]; imgnamelist = Table[StringSplit[FileNameTake[imglist[[k]]], &#34;_wing_segmentation.jpg&#34;][[-1]], {k, 1, Length[imglist]}]; barcodelist = Table[StringSplit[imgnamelist[[k]], &#34;_&#34;][[1]], {k, 1, Length[imgnamelist]}]; singleSideMat = Select[Tally[barcodelist], #[[2]] != 2 &amp;]; singleSideList = Table[imgnamelist[[ Position[barcodelist, singleSideMat[[k, 1]]][[1, 1]]]], {k, 1, Length[singleSideMat]}]; MatrixForm[Transpose[{singleSideMat[[All, 1]], singleSideList}]] matdir = &#34;Path\\\\to\\\\wing_shape_matrices-seg\\\\directory&#34;; (*Check the morph-seg matrices*) imglist2 = FileNames[&#34;*.mat&#34;, matdir]; imgnamelist2 = Table[StringSplit[FileNameTake[imglist2[[k]]], &#34;_morph-seg.mat&#34;][[-1]], {k, 1, Length[imglist2]}]; barcodelist2 = Table[StringSplit[imgnamelist2[[k]], &#34;_&#34;][[1]], {k, 1, Length[imgnamelist2]}]; singleSideMat2 = Select[Tally[barcodelist2], #[[2]] != 2 &amp;]; singleSideList2 = Table[imgnamelist2[[ Position[barcodelist2, singleSideMat2[[k, 1]]][[1, 1]]]], {k, 1, Length[singleSideMat2]}]; MatrixForm[Transpose[{singleSideMat2[[All, 1]], singleSideList2}]]",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Open the folder of segmented images and the Google Drive preference table side by side for inspection. Change the value in a cell to 0 if the corresponding body part is not ideal (biased) for further analysis, e.g., a wing is significantly damaged, an antenna is broken, etc. The terms &#34;left&#34; and &#34;right&#34; (i.e. left fore/hindwing, right fore/hindwing) as used in the table are all with respect to the dorsal image; &#39;right&#39; wing pieces will appear on the left side of ventral segmentation images and &#39;left&#39; wing pieces on the ventral right side. Thus, it may be easier to rely on the color codes in spreadsheet&#39;s columns to remind yourself which wing piece is &#39;left&#39; or &#39;right.&#39; Screenshot showing a divided desktop workspace with two side-by-side windows: one with segmented images in Adobe bridge (left) and another with the corresponding preference table in Google spreadsheet format (right).",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "Body part quality inspection (This can be done parallel with Step 2 ). This allows one to tailor the dataset to exclude unwanted segments of specimens in downstream analyses (i.e., broken wings, missing antennae, segmentation anomalies)",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "Wing grid inspection",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "General color pattern and shape analysis based on universal wing grid after dorsal-ventral mapping",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "Identify a folder of morph-seg files on the cluster. Usually, these will reside in a folder */Shape_analysis/wing_shape_matrices-seg and the files within will end with the suffix: &#39;morph-seg.mat&#39;",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "Download MatLab scripts from the GitHub repository to a MATLAB_CODE_LIBRARY . Run the following command on the cluster to generate wing grids batch_dorsal_ventral_mapping sbatch batch_dorsal_ventral_mapping.sh MORPH-SEG_DIR SPP_MATRICES_DIR/ MANUAL_GRID_DIR MATLAB_CODE_LIBRARY RESULT_DIR GRID_RESOLUTION MORPH-SEG_DIR: Directory described above, containing morph-seg.mat files for all specimens in the dataset SPP_MATRICES_DIR : Directory containing MatLab specimen boundary parameters for every specimen imaged. Located and created in the RESULT_DIRECTORY during all_in_one_image_analysis (see 3.5 ) [note: the directory name must be followed by a &#39;/&#39; in order for the files to be correctly sourced from the folder MANUAL_GRID_DIR : A folder contains manually defined grid files. It can be set to a random directory during the first run (i.e. no manually-defined grids) MATLAB_CODE_LIBRARY RESULT_DIR GRID_RESOLUTION : default value is 5, specifying that 2^5 * 2^5 grids be mapped onto each piece of wing. All scripts were developed under this resolution with the flexibility of using higher or lower values.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "Use Adobe Bridge to do the inspection. If there are obviously incorrect wing segmentations (see the image attached), they should be mainly due to flawed data in .json files. Thus, rerun every step from Step 6.2 in the Primary Processing Protocol for those images as needed. Example 1: incorrect wing segmentation. Notice how the left-side forewing is artificially drawn too large, overlapping the left forewing and the joint where they intersect, and thus results in grid-drawing issues in that region. Example 2: incorrect right hindwing. This is induced by the incorrect fore-hindwing segmenting line at the ventral side of the specimen, so a new segmented line in .json format is needed to make it correct. If there are some images showing correct segmentation but unideal wing grids (see the images attached), put those problematic ones into a subfolder named &#34;manual&#34;. This folder will be referred as manual_grid_redo_directory i n the following steps. Example 3: incorrect wing grid for the right hindwing Example 4: incorrect wing grids on forewings. This is due to the curved forewing in jumbo specimens, and it can be fixed in the manual correction part. Example 5: incorrect overlapping area reconstruction. Generally, this is caused by incorrect specimen placement during imaging (i.e. the ventral side faced up in the dorsal image; dorsal side faced up in the ventral image). Though it could be solved by systematically changing the file names (switch &#34;dorsal&#34; and &#34;ventral&#34;) from the upstream to downstream, this approach is not recommended since human interaction easily messes up the systematic file names and causes even bigger problems.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "Download the required script here (&#39; manual_wing_grid_correction &#39;), and check if all necessary MatLab toolboxes are installed properly according to the list below: required_toolboxes.txt",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "Inspect and upload the manually defined grids to the cluster. These will have been output to the folder spp_manual_grid_parameters generated within the manual_wing_grid_correction code directory",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 16,
+      "title": "",
+      "instruction": "Relaunch the dorsal-ventral mapping script (as in 2.2 ), this time making sure to specificy the MANUAL_GRID_DIR variable with the directory containing manually defined grids ( spp_manual_grid_parameters ). batch_dorsal_ventral_mapping sbatch batch_dorsal_ventral_mapping.sh MORPH-SEG_DIR SPP_MATRICES_DIR/ MANUAL_GRID_DIR MATLAB_CODE_LIBRARY RESULT_DIR GRID_RESOLUTION MORPH-SEG_DIR: Directory containing morph-seg.mat files for all specimens in the dataset SPP_MATRICES_DIR : Directory containing MATLAB specimen boundary parameters for every specimen imaged. Located and created in the RESULT_DIRECTORY during all_in_one_image_analysis (see 3.5 ) [note: the directory name must be followed by a &#39;/&#39; in order for the files to be correctly sourced from the folder MANUAL_GRID_DIR : A folder that contains manually defined grid files, in the automatically generated folder spp_manual_grid_parameters generated as a result of the manual_grid_correction process. It was set to a random directory during the first run (i.e. no manually-defined grids) MATLAB_CODE_LIBRARY RESULT_DIR (same result directory as in step 2.2 - previously problematic grid files will be overwritten) GRID_RESOLUTION : default value is 5, turning into 2^5 * 2^5 grids on each piece of wing. All scripts were developed under this resolution with the flexibility of using higher or lower values.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": [
+        {
+          "instruction": "Relaunch the dorsal-ventral mapping script (as in",
+          "title": ""
+        },
+        {
+          "instruction": "), this time making sure to specificy the MANUAL_GRID_DIR variable with the directory containing manually defined grids ( spp_manual_grid_parameters ). batch_dorsal_ventral_mapping sbatch batch_dorsal_ventral_mapping.sh MORPH-SEG_DIR SPP_MATRICES_DIR/ MANUAL_GRID_DIR MATLAB_CODE_LIBRARY RESULT_DIR GRID_RESOLUTION MORPH-SEG_DIR: Directory containing morph-seg.mat files for all specimens in the dataset SPP_MATRICES_DIR : Directory containing MATLAB specimen boundary parameters for every specimen imaged. Located and created in the RESULT_DIRECTORY during all_in_one_image_analysis (see",
+          "title": ""
+        },
+        {
+          "instruction": ") [note: the directory name must be followed by a &#39;/&#39; in order for the files to be correctly sourced from the folder MANUAL_GRID_DIR : A folder that contains manually defined grid files, in the automatically generated folder spp_manual_grid_parameters generated as a result of the manual_grid_correction process. It was set to a random directory during the first run (i.e. no manually-defined grids) MATLAB_CODE_LIBRARY RESULT_DIR (same result directory as in step",
+          "title": ""
+        },
+        {
+          "instruction": "- previously problematic grid files will be overwritten) GRID_RESOLUTION : default value is 5, turning into 2^5 * 2^5 grids on each piece of wing. All scripts were developed under this resolution with the flexibility of using higher or lower values.",
+          "title": ""
+        }
+      ]
+    },
+    {
+      "step_id": 17,
+      "title": "",
+      "instruction": "Download the final results in spp_wing_parameter to the local disk.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 18,
+      "title": "",
+      "instruction": "Download the required dorsal-ventral_summary script , and check if all necessary MatLab toolboxes are installed properly according to the following list: required_toolboxes.txt",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 19,
+      "title": "",
+      "instruction": "Make sure all morph-seg files are in a folder on your local disk. This folder will be referred to as morph_mat_directory in the following steps. Check, also, that all .json files are also stored in a folder on your local disk. If segmentation corrections were necessary in the previous step, please replace/overwrite the original erroneous segmentation files with the corrected ones.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 20,
+      "title": "",
+      "instruction": "Tutorial for manual wing grid correction Using the cursor, click and drag misidentified landmarks (red/green points) to the desired location. Plot order moves in a clockwise manner around the specimen image, identifying morphometric landmarks in the following order: Left corner dividing Fore &amp; Hing Wings Left corner dividing Forewing &amp; Body Right corner dividing Forewing &amp; Body Right corner dividing Fore &amp; Hing Wings Right corner dividing Hindwing &amp; Body Left corner dividing Hindwing &amp; Body Left forewing tip Right forewing tip Order in which landmarks appear for correction: begins in forewings and moves to hindwings; cycles through 4 joint landmarks between the wing and the body (red dots) as well as 4 wing &#34;corner&#34; landmarks (green dots). Press ENTER to confirm using the point shown on the screen. This will also move the correction process forward to the next landmark. Press &#39;r&#39; to redo the manual process Press &#39;f&#39; to force-exit the entire manual process Note: once ENTER is pressed, the point will move to the nearest detected white/black edge boundary; for precise and rapid point placement, merely re-position landmark points just close enough to the desired location to enable the program to automatically detect the correct and nearest edge at which to place the landmark.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 21,
+      "title": "",
+      "instruction": "After Step 2 is done, download the images from inspect_imgs to the local disk for inspection.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 22,
+      "title": "",
+      "instruction": "Replot the visualization with customized settings",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 23,
+      "title": "",
+      "instruction": "Knowing the locations of (1) the preference table that was generated in step 3 and (2) the group_list.json generated in step 6.2 , specify all required information (i.e. paths, parameters) in the header of the script &#34;specimen_group_summary.m&#34; in MatLab.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 24,
+      "title": "",
+      "instruction": "Download scripts for replotting customized visualizations to local machine from the linked GitHub repository. Check that the required toolboxes listed in &#39;required_toolboxes.txt&#39; are installed.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 25,
+      "title": "",
+      "instruction": "Knowing the folder that has the summary matrices for replotting, run &#34;replot_group_mean_shapes&#34; with specified parameters.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 26,
+      "title": "",
+      "instruction": "Try different parameters to find the most suitable one for the group of interest.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 27,
+      "title": "",
+      "instruction": "Run the MatLab script &#39;manually_define_grid.m&#39;, specify paths and parameters in the heading, and follow the tutorial in the following step to manually correct problematic grids in manual_grid_redo_directory.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 28,
+      "title": "",
+      "instruction": "Convert the .csv file to .json format An exemplar script written in Mathematica is provided. Users can also manually prepare the .json format document without relying on the script. indir = &#34;...&#34;; infinallist = &#34;specimen_groups.csv&#34;; (*Identify the import file*) (*-------------------------------------------------------------------------------------------------------------------------------------\\ *) raw = Drop[Import[FileNameJoin[{indir, infinallist}]], 1]; nGroup = Length[raw[[1]]] - 1; (*create a sublist based on Group*) groupBarcodes = ConstantArray[0, nGroup]; For[groupID = 1, groupID &lt;= nGroup, groupID++, { groupName = Select[raw[[All, groupID + 1]], StringLength[#] &gt; 0 &amp;][[1]]; groupBarcodes0 = Join[{groupName}, Select[raw, #[[groupID + 1]] == groupName &amp;][[All, 1]]]; groupBarcodes = ReplacePart[groupBarcodes, groupID -&gt; groupBarcodes0]; }]; groupBarcodeList = Select[groupBarcodes, Length[#] &gt; 1 &amp;]; (*Convert the data into json format*) allGroupBarcodesJson = Table[groupBarcodeList[[k, 1]] -&gt; groupBarcodeList[[k, 2 ;; -1]], {k, 1, Length[groupBarcodeList]}]; outGroupListName = FileBaseName[infinallist] &lt;&gt; &#34;_group_barcode_list.json&#34;; Export[FileNameJoin[{indir, outGroupListName}], allGroupBarcodesJson]; The .json format should be as follows: { &#34;Lycaenidae&#34;:[ &#34;MCZ-ENT00068296&#34;, &#34;MCZ-ENT00069063&#34;, &#34;MCZ-ENT00086787&#34;, &#34;MCZ-ENT00086886&#34;, &#34;MCZ-ENT00185721&#34;, &#34;MCZ-ENT00185723&#34;, &#34;MCZ-ENT00193718&#34; ], &#34;NymPap&#34;:[ &#34;MCZ-ENT00103895&#34;, &#34;MCZ-ENT00134839&#34;, &#34;MCZ-ENT00173775&#34;, &#34;MCZ-ENT00183049&#34;, &#34;MCZ-ENT00212762&#34; ], &#34;Heliconius&#34;:[ &#34;MCZ-ENT00113098&#34;, &#34;MCZ-ENT00116621&#34; ], &#34;All&#34;:[ &#34;MCZ-ENT00068296&#34;, &#34;MCZ-ENT00069063&#34;, &#34;MCZ-ENT00086787&#34;, &#34;MCZ-ENT00086886&#34;, &#34;MCZ-ENT00103895&#34;, &#34;MCZ-ENT00113098&#34;, &#34;MCZ-ENT00116621&#34;, &#34;MCZ-ENT00134839&#34;, &#34;MCZ-ENT00173775&#34;, &#34;MCZ-ENT00183049&#34;, &#34;MCZ-ENT00185721&#34;, &#34;MCZ-ENT00185723&#34;, &#34;MCZ-ENT00193718&#34;, &#34;MCZ-ENT00212762&#34;, &#34;MCZ-ENT00733306&#34;, &#34;MCZ-ENT00753857&#34;, &#34;MGCL-295034&#34; ] }",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 29,
+      "title": "",
+      "instruction": "Create a dataset indicates different groups and members. The format should read as follows, with specimen IDs in the first &#39;barcode&#39; column. Specimens may belong to multiple groups, but individual columns may not specify more than one group at a time. A B C D E 1 barcode Group_1 Group_2 Group_3 Group_4 2 MCZ-ENT00113098 Heliconius All 3 MCZ-ENT00116621 Heliconius All 4 MCZ-ENT00068296 Lycaenidae All 5 MCZ-ENT00069063 Lycaenidae All 6 MCZ-ENT00086787 Lycaenidae All 7 MCZ-ENT00086886 Lycaenidae All 8 MCZ-ENT00103895 NymPap All 9 MCZ-ENT00134839 NymPap All 10 MCZ-ENT00173775 NymPap All 11 MCZ-ENT00183049 NymPap All 12 MCZ-ENT00185721 Lycaenidae All 13 MCZ-ENT00185723 Lycaenidae All 14 MCZ-ENT00193718 Lycaenidae All 15 MCZ-ENT00212762 NymPap All 16 MCZ-ENT00733306 All 17 MCZ-ENT00753857 All 18 MGCL-295034 All Each column indicates a group, and the cells of those group members are filled with the same group name.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 30,
+      "title": "",
+      "instruction": "Prepare the list of groups by which to summarize the data.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 31,
+      "title": "",
+      "instruction": "Run the script &#34; specimen_group_summary.m&#34;. It is possible to generate statistical summaries for all groups listed in the &#39;group_list.json&#39; or to target groups one-by-one for summarization based either on group number (e.g. &#34;group_4&#34;) or group name (e.g. &#34;Lycaenidae&#34;).",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 32,
+      "title": "",
+      "instruction": "Multispectral reflectance at the wing-size level",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 33,
+      "title": "",
+      "instruction": "Make sure all specimen matrices (*AllBandsMask.mat) are complete and error-free in their own directory. Make sure all corresponding segmentation matrices (*morph-seg.mat) are complete and error-free in their own directory.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 34,
+      "title": "",
+      "instruction": "Download MatLab scripts from the GitHub repository to a MATLAB_CODE_LIBRARY . Calculate multispectral reflectance at the wing-size level. multispectral_wavelength_band_summary sbatch batch_BW_bands_analysis.sh SPP_MATRICES_DIR MORPH-SEG_DIR MATLAB_CODE_LIBRARY RESULT_DIR REF_THRESHOLD Summarize the reflectance of multispectral wavelength bands SPP_MATRICES_DIR: Directory containing all finalized/manually checked and corrected specimen image matrices MORPH-SEG_DIR: Directory containing all morph-seg.mat matrices, which describe detailed segmentation information MATLAB_CODE_LIBRARY: Directory containing MatLab program files RESULT_DIR: Directory in which the output tables (*.csv) should be placed REF_THRESHOLD : The threshold used to identify signaling features. Default value is 0.1, which means a feature having reflectance over 0.1 will be measured, and statistical summaries such as the mean reflectance and the size of the reflective area will be provided. N,B.: it is highly recommended that the user run this script/analysis multiple times, each time specifying a different reflectance threshold. The reason for this is that different wavelength bands, by default, tend to have very low or very high signal. (UV reflectance, for instance, is usually very low. Setting a reflectance threshold that is too high will wipe all apparent UV signal from the data. On the other hand, 940nm band reflectance is normally very high. A higher reflectance threshold will be ideal to capture the variability in this data which would otherwise be &#39;oversaturated&#39; at a lower value of ref_threshold) Running multispectral analysis with multiple thresholds will allow the user to pinpoint which sets of data/threshold parameters to use for each wavelength band (i.e., the ones that yield the highest signal-to-noise ratio).Sets of thresholds customarily run are {0.01, 0.02, 0.05, 0.1, 0.2, 0.5).",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 35,
+      "title": "",
+      "instruction": "Result tables will contain the name of a wavelength band and the reflectance threshold specified. For example, &#39;done_31-10-21_15-49-28_UV_refThreshold-_0.1_summary.csv&#39; indicates the date, UV band, and the threshold at 0.1. The schema of table is provided as follows. Specimen_Barcode: The barcode of specimens Side: Dorsal or ventral side body_part: all, lf_wing (left forewing), rf_wing (right forewing), lh_wing (left hindwing), rh_wing (right hindwing), body, antennae Area_Mask_cm2: The size of each body part according to the background removed mask Area_F_cm2: The size of the reflective region (where reflectance is higher than the threshold) in cm2 b_F_reflectance_perCm2_mean: The mean reflectance in the reflective region b_F_reflectance_perCm2_cv: The coefficient of variation in the reflective region Area_F_pct: The size of the reflective region as a percentage of the area_mask Note that the name of the wavelength band has been included in the variable names. For example, &#39;Area_F_cm2&#39; represents the reflective area of fluorescence. In many cases, results will be further divided by RGB channel. For example, the following columns represent reflectance data in the white-light band and are segregated by RGB channel: A B C D E F G H I J K L M 1 Area_Mask_cm2 Area_white_R_cm2 b_white_R_reflectance_per_Cm2_mean b_white_R_reflectance_perCm2_cv Area_white_R_pct Area_white_G_cm2 b_white_G_reflectance_perCm2_mean b_white_G_reflectance_perCm2_cv Area_white_G_pct Area_white_B_cm2 b_white_B_reflectance_perCm2_mean b_white_B_reflectance_perCm2_cv Area_white_B_pct Example column names for the complement of data generated for the white-light spectral band A cell with no data is flagged by -9999",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-18T11:01:23.063806Z",
+  "llm_normalised": true
+}

@@ -1,0 +1,187 @@
+{
+  "protocol_id": "methodology_for_gathering_and_annotating_citing_documents_of_a_retraction",
+  "parent_protocol_id": null,
+  "title": "Methodology for Gathering and Annotating Citing Documents of a Retraction",
+  "author": "Ivan Heibi",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.bqqumvww",
+  "source_name": "protocols_io",
+  "source_id": "45556",
+  "source_url": "https://www.protocols.io/view/a-methodology-for-gathering-and-annotating-the-raw-bqqumvww",
+  "doi": "dx.doi.org/10.17504/protocols.io.bqqumvww",
+  "citation": "dx.doi.org/10.17504/protocols.io.bqqumvww",
+  "category": "Bioinformatics",
+  "estimated_time_mins": 108,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Starting from one retracted article identified with a DOI this step gets the metadata of all the citing entities included in the COCI dataset (the OpenCitations Index of Crossref open DOI-to-DOI references). We are only interested in a subset of attributes for the citing entities gathered. More specifically, for each citing entity we want to annotate: The DOI value The year of publication The title of the article The ID of the venue (ISSN/ISBN) The title of the venue In practical terms, this step will initialize our main dataset and include the above attributes in it. The next steps of this methodology will further enrich the same dataset with new variables that characterize each citing entity of the dataset. Input: DOI of the retracted article Output: creates the dataset Cits\\_Dataset with the initial variables/columns: doi_{var} , title_{var} , year_{var} , source\\_id_{var} , and source\\_title_{var} .",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "First, we need to set the retracted article we want to examine. We consider articles that have officially received one or more retraction notice and had been eventually fully retracted. The Retraction Watch service reports and collects information about the retractions of scientific papers which they make available in an open queryable database at http://retractiondatabase.org/ . We use the Retraction Watch database to get the article we are interested in. Each record of the Retraction Watch database contains the following attributes (columns): Title, Subject(s), Journal, Publisher, Affiliation(s), Retraction Watch Post URL(s) Retraction reasons Authors The Original Paper date/PubMedID/DOI The retraction notice date/PubMedID/DOI Article type(s) and the nature of the notice Countries, If it is Paywalled? and Other notes For the proceeding of this methodology, we consider the following attributes from the above list: The original DOI of the paper The year of publication (although Retraction Watch reports the complete publication date we will only consider the year value) The year of the retraction notice/s (some articles might have more than one retraction notice, we will consider all these notices). Another aspect we need to take into consideration at this stage is the in-text citation style. We need to take note and keep in mind this information, which will become very important in the next steps. The DOI of the retracted article The year of publication The year of the retraction notice/s Example: 10.1016/S0140-6736(97)11096-0 1998 2004, 2010",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Now we need to get the list of the entities which have cited the retracted article. We will query the COCI dataset ( https://opencitations.net/index/coci ). This dataset contains details of all the citations that are specified by the open references to DOI-identified works present in Crossref ( https://www.crossref.org/ ). OpenCitations provides a free APIs service to query and retrieve the COCI data at http://opencitations.net/index/coci/api/v1 . First, we get all the entities citing our retracted article using the “citations” operation: http://opencitations.net/index/coci/api/v1#/citations/ . Once we have the list of all the citing entities, we outline each citing entity with the following attributes: (a) the DOI value, (b) the year of publication, (c) the title of the article: (d) the ID of the venue (ISSN/ISBN), and (e) the title of the venue. These attributes are available in the COCI datasets. We use the COCI APIs and apply the “metadata” operation: http://opencitations.net/index/coci/api/v1#/metadata/ , which requests the DOI/s value of the entity we are looking for and returns the metadata of such entity (if any). The COCI API does not necessarily have the metadata of all our DOI values (citing entities), in this case, such citing entities are excluded from our analysis. In this step, we initialize our main dataset and populate it with the citing entities and first metadata. For the rest of this document, we will refer to our dataset as Cits\\_Dataset . This step&#39;s operations are done automatically by calling the following script. Script to execute: python3 method.py -s 1.2 -in &lt;DOI&gt; You can also specify a different output directory for the dataset: python3 method.py -s 1.2 -in &lt;DOI&gt; -out &lt;DIR-PATH&gt; Example: python3 method.py -s 1.2 -in &#34;10.1186/1756-8722-5-31&#34; python3 method.py -s 1.2 -in &#34;10.1186/1756-8722-5-31&#34; -out path/to/dir A dataset containing all the entities citing the retracted article Example: step_1_2.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": [
+        {
+          "instruction": "Now we need to get the list of the entities which have cited the retracted article. We will query the COCI dataset ( https://opencitations.net/index/coci ). This dataset contains details of all the citations that are specified by the open references to DOI-identified works present in Crossref ( https://www.crossref.org/ ). OpenCitations provides a free APIs service to query and retrieve the COCI data at http://opencitations.net/index/coci/api/v1 . First, we get all the entities citing our retracted article using the “citations” operation: http://opencitations.net/index/coci/api/v1#/citations/ . Once we have the list of all the citing entities, we outline each citing entity with the following attributes: (a) the DOI value, (b) the year of publication, (c) the title of the article: (d) the ID of the venue (ISSN/ISBN), and (e) the title of the venue. These attributes are available in the COCI datasets. We use the COCI APIs and apply the “metadata” operation: http://opencitations.net/index/coci/api/v1#/metadata/ , which requests the DOI/s value of the entity we are looking for and returns the metadata of such entity (if any). The COCI API does not necessarily have the metadata of all our DOI values (citing entities), in this case, such citing entities are excluded from our analysis. In this step, we initialize our main dataset and populate it with the citing entities and first metadata. For the rest of this document, we will refer to our dataset as Cits\\_Dataset . This step&#39;s operations are done automatically by calling the following script. Script to execute: python3 method.py -s",
+          "title": ""
+        },
+        {
+          "instruction": "-in &lt;DOI&gt; You can also specify a different output directory for the dataset: python3 method.py -s",
+          "title": ""
+        },
+        {
+          "instruction": "-in &lt;DOI&gt; -out &lt;DIR-PATH&gt; Example: python3 method.py -s",
+          "title": ""
+        },
+        {
+          "instruction": "-in &#34;10.1186/1756-8722-5-31&#34; python3 method.py -s",
+          "title": ""
+        },
+        {
+          "instruction": "-in &#34;10.1186/1756-8722-5-31&#34; -out path/to/dir A dataset containing all the entities citing the retracted article Example: step_1_2.csv",
+          "title": ""
+        }
+      ]
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "To give the citing entities other attributes that aren’t part of the COCI metadata we need to use other services. The only thing we would like to check is whether any of the citing entities we are considering had been retracted as well. This value will be assigned to each citing entity of the Cits\\_Dataset . At the end of this step, we will have an extended version of the Cits\\_Dataset which embeds the additional is\\_retracted_{var} . The first substep prepares the Cits\\_Dataset , while the second substep shows how to annotate the new variable. Input: Cits\\_Dataset[*,doi_{var}] Output: extends the Cits\\_Dataset with the new variable is\\_retracted_{var}",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "First, we need to prepare the Cits\\_Dataset for the upcoming annotation (done on the next substep). The dataset will be extended with the new variable, and its value set to &#34; todo &#34;: Cits\\_Dataset[*,is\\_retracted_{var}] = &#34; todo &#34;. This operation is done automatically by calling the following script. Script to execute: python3 method.py -s 2.1 -in &#34;&lt;Cits_Dataset-Path&gt;&#34; Example: python3 method.py -s 2.1 -in &#34;output/cits_dataset.csv&#34; An extended version of the Cits\\_Dataset Example: step_2_1.png",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "To fill the new is\\_retracted_{var} we need to iterate over all the citing entities and manually verify whether any of the citing entities has been retracted as well. Again we use the RetractionWatch database ( http://retractiondatabase.org/ ) and check all the citing entities using their DOI values. The &#34; todo &#34; values under is\\_retracted_{var} are substituted with a &#34; yes &#34;/&#34; no &#34; value depending on whether the examined DOI has/hasn&#39;t been fully retracted. The CitsDataset with the annotated is\\_retracted_{var} step_2-2.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "The aim of this step is to annotate the subject area/s and subject category/s of each citing entity in Cits\\_Dataset . To do this we consider the venue identifiers (ISSN/ISBN) and classify them into specific subject area/s and a subject category/s using the SCImago Journal Classification ( https://www.scimagojr.com/). This classification groups the journals into a subject area (27 major thematics), and subject category (313 specific subject categories). These values define two different levels: (1) a macro layer for the subject area, and (2) a lower layer for a specific subject category. In this step, we first focus on the citing entities having ISSN IDs, and then we move to analyze those having ISBN IDs. At the end of this step, the Cits\\_Dataset will be further extended with two additional variables: area_{var} and category_{var} . The first substep is a preparation phase. On substep 2 we handle the ISSN venues and on substep 3 and 4 we handle the ISBN venues. The final substep (i.e. 5) merges the results and populates the Cits\\_Dataset . Input: Cits\\_Dataset[*,source\\_id_{var}] Output: extends the CitsDataset with the new variables: area_{var} and category_{var}",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "We first separate the ISSN and ISBN values into two datasets: ISSN\\_Dataset and ISBN\\_Dataset . These datasets represent two indexes that include all the unique ISSN and ISBN values in the Cits\\_Dataset . Both the datasets will have the area_{var} and category_{var} variables. The ISBN\\_Dataset contains the additional lcc_{var} variable (the reason will become clear on substep 3.3). The two indexes/datasets are generated automatically using the script below. Script to execute: python3 method.py -s 3.1 -in &#34;&lt;Cits_Dataset-Path&gt;&#34; Example: python3 method.py -s 3.1 -in &#34;example_data/cits_dataset.csv&#34; ISSN\\_Dataset : a dataset containing the unique ISSN IDs in the Cits\\_Dataset step_3_1_1.csv ISBN\\_Dataset : a dataset containing the unique ISBN IDs in the Cits\\_Dataset step_3_1_2.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "We map each unique ISSN value of our index ISSN\\_Dataset into its corresponding area and category following the SCImago journal classification. This process is done manually by checking each ISSN value using the SCImago Journal Rank service at https://www.scimagojr.com/ . Among the returned information and metadata, we have the subject area and subject category. Journals might have more than one subject area or subject category, we will take into consideration and write down all these values. The following figure shows a result example from the Scimago Journal Rank service when searching for the ISSN value &#34; 0273-9615 &#34;. The subject area ( area_{var} ) and subject category ( category_{var} ) must be annotated inside the ISSN\\_Dataset following these rules: The &#34; ;; &#34; segment (with white space at the end) is used as a separator between two different subject areas, and between two subject categories that belong to different areas. The &#34; ; &#34; segment (with white space at the end) is used as a separator between two different subject categories that belong to the same area. Consediring the above rules and the previous example (ISSN=&#34; 0273-9615 &#34;), the correct form to annotate the ISSN\\_Dataset is: area_{var} : &#34; Medicine;; Psychology &#34; category_{var} : &#34; Pediatrics, Perinatology and Child Health;; Clinical Psychology; Developmental and Educational Psychology;; &#34; An annotated ISSN\\_Dataset (the area_{var} and category_{var} are defined) step_3_2.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "We need to classify also the ISBN venues into their corresponding subject areas and subject categories. Again we use the Scimago Journal classification. This choice is based on the fact that our aim is to have a standard for all the venues regardless of their type (ISBN or ISSN). The Scimago classification previously used for the ISSN sources belongs to the journal sources, therefore we can&#39;t apply a direct association of these values to the ISBN sources. We need a pre-elaboration which maps an ISBN classification model into the Scimago classification model (subject area and subject category). The ISBN classification model we used is the Library of Congress Classification (LCC, h ttps://www.loc.gov/catdir/cpso/lcco/ ). First, we need to assign for each ISBN source in the ISBN\\_Dataset its corresponding LCC code. This operation is done manually using two main services: (a) the ISBNDB service ( https://isbndb.com/) , and (b) Classify ( http://classify.oclc.org/classify2/ ), an experimental classification web service. The LCC code values are written under lcc_{var} in the ISBN\\_Dataset . An updated version of the ISBN\\_Dataset having lcc_{var} annotated step_3_3.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "To compile the area and category of each ISBN source we call a function that maps the LCC codes to an area and category of the Scimago Journal classification. More precisely, this function will do the following operations for each member m of the ISBN\\_Dataset : Considers only the starting alphabetic segment of ISBN\\_Dataset[m,lcc_{var}] and find the corresponding LCC discipline using a pre-built lookup index. (e.g. “ RC360 ” -&gt; “ RC ” -&gt; “ Medicine &#34;) Checks whether the value of the LCC subject is also a Scimago subject area using a pre-built Scimago index. If this is the case, the algorithm will automatically annotate the ISBN\\_Dataset[m,area_{var}] with such value, and the ISBN\\_Dataset[m,category_{var}] will have the same value with the addition of “ (miscellaneous) ” at the end of it, as it is done on the Scimago classification when denoting a Journal that treats general categories of a specific area. In case no corresponding Scimago area has been found the function moves to point 3. Checks whether the value of the LCC subject is a Scimago subject category using the same pre-built Scimago index. If the corresponding value is present, the program will automatically annotate the ISBN\\_Dataset[m,category_{var}] with such value, and the ISBN\\_Dataset[m,area_{var}] will have the same value used on the Scimago classification to denote the macro area of such category. In case no corresponding Scimago category has been found the function moves to point 4. The program will annotate both ISBN\\_Dataset[m,area_{var}] and ISBN\\_Dataset[m,category_{var}] with the “ todo_manual ” value. Once the above function completes its elaboration, we need to find the corresponding area and category for the records marked with the &#34; todo_manual &#34; value and annotate such values manually using the LCC index ( http://www.loc.gov/catdir/cpso/lcco/). The above algorithm is executed by running the following script: Script to execute: python3 method.py -s 3.4 -in &#34;&lt;CitsDataset-Path&gt;&#34; Example: python3 method.py -s 3.4 -in &#34;example_data/cits_dataset.csv&#34; An annotated ISBN\\_Dataset (the area_{var} and category_{var} are defined) step_3_4.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "Finally, we merge the ISSN\\_Dataset and the ISBN\\_Dataset into our main Cits\\_Dataset . The Cits\\_Dataset will be extended with the two variables area_{var} and category_{var} . Script to execute: python3 method.py -s 3.5 -in &#34;&lt;CitsDataset-Path&gt;&#34; Example: python3 method.py -s 3.5 -in &#34;example_data/cits_dataset.csv&#34; The Cits\\_Dataset with the annotated area_{var} and category_{var} step_3_5.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "In this step, we enrich the Cits\\_Dataset with new variables that denote some textual values contained in the citing entities&#39; full-text. The values we are interested in are: The abstract ( abstract_{var} ,): the abstract of the citing entity (in case there is any). The in-text citation context/s ( intext\\_citation.context_{var} ): the textual context/s which contains a reference pointer of the retracted article The in-text citation section/s ( intext\\_citation.section_{var} ): the section/s which contains the reference pointer of the retracted article The in-text citation pointer/s ( intext\\_citation.pointer_{var} ): the in-text reference pointer (e.g. Heibi (2019)) The first substep prepares the Cits\\_Dataset to be filled later with the above values. Substep 4.2 discusses each one of the above values and indicates how to correctly annotate them. Input: Cits\\_Dataset[*,doi_{var}] Output: extends the Cits\\_Dataset with the new variables: abstract_{var} ,, intext\\_citation.section_{var} , intext\\_citation.context_{var} and intext\\_citation.pointer_{var} .",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "We extend the Cits\\_Dataset with the new new variables: abstract_{var} ,, intext\\_citation.section_{var} , intext\\_citation.context_{var} and intext\\_citation.pointer_{var} . The default value assigned to these fields is “ todo ”. This process is made automatically by calling the following script: Script to execute: python3 method.py -s 4.1 -in &#34;&lt;Cits_Dataset-Path&gt;&#34; Example: python3 method.py -s 4.1 -in &#34;example_data/cits_dataset.csv&#34; step_4_1.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "To annotate the new variables we need to examine the citing entities&#39; full-text. Some full-texts are open and freely accessible, others are closed by paywalls. We consider only the entities that we can successfully access their full-text, all the others should be removed from the Cits\\_Dataset and not considered. Finding the full-texts and removing the citing entities (which lack a full-text) are operations to manually do (for each citing entity in the Cits\\_Dataset ). Once we have collected all the full-texts, we need to replace the “ todo ” values with the true corresponding values following the rules below: The abstract ( abstract_{var} ) ): Copy the entire abstract from each citing entity&#39;s full-text. In case no abstract has been found, we write an empty string. Possible examples of documents lacking abstracts are book chapters or editorials. The in-text citations pointer ( intext\\_citation.pointer_{var} ) ): To correctly annotate this variable we need to have a little background on the citing formats and how the reference pointers in the text are written. Look at the following guidelines: https://tinyurl.com/vtdd6x2 for a brief background on this topic. We search inside the citing entities&#39; full-text for all the in-text citation pointers of our retracted article, and we write down the value used to point to the retracted article reference entry. For instance, this means that for a member m in Cits\\_Dataset , the value of Cits\\_Dataset[m,intext\\_citation.pointer_{var}] might be: &#34;Heibi(2019)&#34;. Note that this value is the same one adopted for each in-text citation inside the document, so Cits\\_Dataset[m,intext\\_citation.pointer_{var}] will have only one value. The in-text citations context ( intext\\_citation.context_{var} ) ): We want to write down the context of each detected in-text citation. We define our in-text citation context as the sentence that includes the in-text citation pointer (anchor sentence), plus the prior and the following sentence. There are some special cases we need to handle. If the in-text citation pointer: Appears in a title: the context equals the entire title. Appears in a table cell: the context equals the entire table cell. Appears in the first sentence of a section/sub-section: the context equals the anchor sentence plus the sentence after. Appears in the last sentence of a section/sub-section: the context equals the anchor sentence plus the prior sentence. We might have more than one in-text citation in one citing entity, in this case, we must include the “; ; ” segment as a separator between every two different contexts. For instance, for a record m in Cits\\_Dataset , the value of Cits\\_Dataset[m,intext\\_citation.context_{var}] might be: &#34; We will talk about this aspect later. As it was also observed in Heibi(2019). Now we move to the second point of our analysis. ;; This work takes into consideration new features. We are working on extending the previous work of Heibi(2019) &#34; The in-text citations section ( intext\\_citation.section_{var} ) ): The section where the in-text citation appears. If the related citing entity&#39;s full-text does not include any section/paragraph (e.g. an editorial), then the value of Cits\\_Dataset[m,intext\\_citation.context_{var}] equals &#34; none &#34; . Otherwise, the in-text citation section is annotated using one/both these values: Type: could be equal to one of the following values: (a) &#34; abstract &#34;, (b) &#34; introduction &#34;, (c) &#34; background &#34;, (d) &#34; results &#34;, (e) &#34; method &#34;, (f) &#34; conclusion &#34;, and (g) &#34; discussion &#34;. We chose one of these values only if it is clearly inferred from the section title (e.g. the title contains the typology name). In case we can’t link the section to any of these types we will take note of its position in the document: (a) &#34; first section &#34;: appears in the first section of the article, (b) &#34; final section &#34;: appears in the last section of the article, and (c) &#34; middle section &#34;: it appears neither in the first section nor the final section. Title: in case we have assigned to section one of the previous 5 typologies, we will omit this value. Otherwise, we will annotate the exact title surrounded by brackets ( &#34; ...&#34; ). So the value of Cits\\_Dataset[m,intext\\_citation.context_{var}] will contain the title alongside the section position annotated on point(1). We consider only the sections on the first level, therefore the section of an examined in-text citation should always refer to the higher one and not the inner subsections. For instance, if a citation occurs inside subsection 2.1 then the section to consider is 2. We might have more than only one in-text section in each examined citing entity, in this case, we must include the &#34; ;; &#34; segment as a separator between two different sections, and we use the &#34; ; &#34; as a separator between the type and title of the section. For instance, this means that for a record m in Cits\\_Dataset , the value of Cits\\_Dataset[m,intext\\_citation.section_{var}] in case it contains two in-text citations is: &#34; introduction ;; final section ; “Discussion” &#34; step_4_2.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "In this step, we add to the Cits\\_Dataset three variables that characterise the annotated in-text citation/s: intext\\_citation.intent_{var} : the citation intent/reason/function: the author’s reason for citing a specific paper (e.g. because the citing document want to use the method defined in the cited paper), intext\\_citation.sentiment_{var} : the author&#39;s sentiment regarding the cited entity. We check whether the author&#39;s sentiment toward the cited entity is positive/negative/neutral. intext\\_citation.ret\\_mention_{var} : check whether at least one of the in-text citations (of the examined citing entity) does explicitly mention the fact that the cited entity is retracted. In the first substep, we will prepare the Cits\\_Dataset , while the next substeps discuss how to correctly annotate it. Input: Cits\\_Dataset[*,intext\\_citation.context_{var}] Output: extends the Cits\\_Dataset with the new variables: intext\\_citation.intent_{var} , intext\\_citation.sentiment_{var} , and intext\\_citation.ret\\_mention_{var} .",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 16,
+      "title": "",
+      "instruction": "This substep extends the Cits\\_Dataset with the new variables: intext\\_citation.intent_{var} , intext\\_citation.sentiment_{var} , and intext\\_citation.ret\\_mention_{var} . The default value assigned is &#34; todo &#34;. This process is made automatically by calling the following script: Script to execute: python3 method.py -s 5.1 -in &#34;&lt;Cits_Dataset-Path&gt;&#34; Example: python3 method.py -s 5.1 -in &#34;example_data/cits_dataset.csv&#34; step_5_1.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 17,
+      "title": "",
+      "instruction": "All the variables of this step are manually inferred from the intent citation context. To correctly replace the default initial “ todo ” values we should follow the rules below. The in-text citation intent ( intext\\_citation.intent_{var} ): This variable answers the question “Why the citing entity is citing the retracted article?”, so we want to examine the intent/reason of the citation. The CiTO ontology, the Citation Typing Ontology ( https://sparontologies.github.io/cito ), is an ontology for the characterization of factual and rhetorical bibliographic citations. Although the CiTO ontology characterizes also the in-text citations lacking an explicit in-text citation pointer, we will not consider these variants. Instead, we perform the analysis on the in-text citations previously annotated (on Step-4) which appear in the full-text with an in-text citation pointer. On CiTO the citation intents are the object properties ( CiTO^{op} ), the intext\\_citation.intent_{var} is compiled using one of CiTO^{op} values. Despite the fact that an in-text citation might refer to more than only one CiTO^{op} , our work restricts the decision to only one value. This decision should simplify the future elaborations on the annotated dataset and limit the possible ambiguities. We have designed a CiTO decision-model, to help us decide which CiTO^{op} value assign for an examined in-text citation in case we have more than one suitable CiTo^{op} value. This model is based on a priority ranked strategy. The following figure shows a graphical representation of the model. Considering a member m of Cits\\_Dataset , our decision-model works as follow: We read the Cits\\_Dataset[m,intext\\_citation.context_{var}] , and find the most suitable citation intent for it. The above model presents 3 macroblocks, we outline the suitable one/s considering the analyzed in-text citation context. We can take a cue from the description, the usage, and the example of each block. Notice that the analyzed in-text citation context might be suitable for more than only one block. Once we have chosen a suitable macroblock/s, we move toward a deepen selection of the suitable citation intent/s (CiTO object property). At the end of this phase, we will have a set of citation intents (based on CiTO): Intent\\_set= \\{x:x \\in CiTo^{op}\\} . In case we have chosen only one value: &#34; x &#34;, then the value of Cits\\_Dataset[m,intext\\_citation.intent_{var}] is &#34; x &#34;. Otherwise (the Intent\\_set contains more than one CiTO^{op} ) we take a decision based on a priority approach as described in the next point. To calculate the priority of a CiTO^{op} value: &#34; x &#34;, we sum the corresponding y-axis and x-axis values, along with its cell inner value. The smaller a value, the more priority it has. For instance, priority(“confirms”)=11.2 is higher than priority(“describes”)=43.2 . We will calculate the priority of each value &#34; x &#34; in the Intent\\_set , and select the one with the higher priority value. Since a record m in Cits\\_Dataset might have N in-text citations, we must include the &#34; ;; &#34; segment as a separator between two different intext\\_citation.intent_{var} values. The in-text citation sentiment ( intext\\_citation.sentiment_{var} ): After reading each intext\\_citation.context_{var} we will annotate the intext\\_citation.sentiment_{var} with one of the following values: &#34; positive &#34;: the retracted article was cited as a valid prior work, and its findings/conclusions could have been also used in the citing study. &#34; negative &#34;: the citing study cites the retracted article but addresses its findings as inappropriate/valid. &#34; neutral &#34;: the author cites the retracted article without including any judgment or personal opinion regarding its validity. We must include the &#34; ;; &#34; segment as a separator between two different intext\\_citation.sentiment_{var} values. The in-text citation mentions the retraction ( intext\\_citation.ret\\_mention_{var} ): We look at the value of intext\\_citation.context_{var} and check whether at least one of the in-text citation contexts explicitly mentions the fact that the cited entity is retracted. Notice that here we are not interested in characterizing the in-text citation. We rather want to annotate intext\\_citation.ret\\_mention_{var} with a singular value: &#34; yes &#34;/&#34; no &#34; . To make this annotation as much as possible coherent and less subject to language ambiguities, we decided to annotate with a &#34; yes &#34; value, only in case the word “retract” and its derivatives are explicitly used when addressing the cited entity in at least one of the in-text citations contexts in intext\\_citation.context_{var} . step_5_2.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-17T13:31:20.972403Z",
+  "llm_normalised": true
+}

@@ -1,0 +1,118 @@
+{
+  "protocol_id": "ecogeo_omics_training_32_amplicon_analysis_qiime",
+  "parent_protocol_id": null,
+  "title": "ECOGEO 'Omics Training: 3.2 Amplicon Analysis - QIIME",
+  "author": "Melissa Dsouza",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.fjbbkin",
+  "source_name": "protocols_io",
+  "source_id": "3395",
+  "source_url": "https://www.protocols.io/view/ECOGEO-Omics-Training-3-2-Amplicon-Analysis-QIIME-fjbbkin",
+  "doi": "dx.doi.org/10.17504/protocols.io.fjbbkin",
+  "citation": "dx.doi.org/10.17504/protocols.io.fjbbkin",
+  "category": "Bioinformatics",
+  "estimated_time_mins": 72,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Validate Mapping File Format",
+      "instruction": "Checking mapping file format $ validate_mapping_file.py -m map_file.txt -o mapping_file_output",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "Join Paired-End Reads",
+      "instruction": "Join paired end reads $ join_paired_ends.py -f Undetermined_S0_L001_R1_001.fastq -r Undetermined_S0_L001_R2_001.fastq -b Undetermined_S0_L001_I1_001.fastq -o reads",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "Demultiplex and Quality Filter",
+      "instruction": "Depmultiplex & quality filter $ split_libraries_fastq.py -i fastqjoin.join.fastq -b fastqjoin.join_barcodes.fastq -o split -m map_file.txt -q 29 --barcode_type 12 --store_demultiplexed_fastq",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "De Novo OTU Picking",
+      "instruction": "De novo OTU picking $ pick_de_novo_otus.py -i subs_seqs_q.fasta -o uclust_otus/",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "Closed-Reference OTU Picking",
+      "instruction": "Closed-reference OTU picking $ pick_closed_reference_otus.py -i subs_seqs_q.fasta -r $PWD/gg_13_8_otus/rep_set/97_otus.fasta -t $PWD/gg_13_8_otus/taxonomy/97_otu_taxonomy.txt -o_ref_otus",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "Open-Reference OTU Picking",
+      "instruction": "Open-reference OTU picking $ pick_open_reference_otus.py -i subs_seqs_q.fasta -r $PWD/gg_13_8_otus/rep_set/97_otus.fasta -o uclust_open_otu",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "Summarize BIOM Table",
+      "instruction": "$ biom summarize-table -i uclust_otus/otu_table_even10.biom",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "Qualitative BIOM Table Summarization",
+      "instruction": "$ biom summarize-table -i uclust_otus/otu_table_even10.biom --qualitative",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "Add Metadata to BIOM Table",
+      "instruction": "$ biom add-metadata -i $PWD/otu_table_even10.biom -o denovo_otu.biom --sample-metadata-fp map_file.txt --observation-metadata-fp $PWD/uclust_assigned_taxonomy/subs_seqs_q_rep_set_tax_assignments.txt --observation-header OTUID,taxonomy --sc-separated taxonomy",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "Convert BIOM Table to Text",
+      "instruction": "$ biom convert -i otu_table.biom -o otu_table.txt --table-type 'otutable' --header-key taxonomy -b",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 10,
+      "title": "Identify Chimeric Sequences",
+      "instruction": "$ identify_chimeric_seqs.py -m ChimeraSlayer -i rep_set_aligned.fasta -a gold.fa -o chimeric_seqs.txt",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 11,
+      "title": "Perform Core Diversity Analysis",
+      "instruction": "$ core_diversity_analyses.py -i denovo_otu.biom -o core_diversity -e 10 -m map_file.txt -t ref_set.tre",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-17T10:11:51.350840Z",
+  "llm_normalised": true
+}

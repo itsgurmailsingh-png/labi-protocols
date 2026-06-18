@@ -1,0 +1,179 @@
+{
+  "protocol_id": "optimized_assembly_and_gene_finding_protocol",
+  "parent_protocol_id": null,
+  "title": "Optimized Assembly and Gene Finding Protocol",
+  "author": "Bonnie Hurwitz",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.gbhbsj6",
+  "source_name": "protocols_io",
+  "source_id": "4169",
+  "source_url": "https://www.protocols.io/view/mg-hw8-optimized-assembly-read-recruitment-and-gen-gbhbsj6",
+  "doi": "dx.doi.org/10.17504/protocols.io.gbhbsj6",
+  "citation": "dx.doi.org/10.17504/protocols.io.gbhbsj6",
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 102,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Login to the HPC and move over to the ICE cluster. If you have meno enabled, select option 3. ssh hpcice ssh hpc ice",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Move into the class directory change &#34;username&#34; to YOUR user name. cd /rsgrps/bh_class/username",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Create directories for each of the new analyses we will run. Note these steps will be similar to what you originally ran, but with optimized steps. mkdir assembly read_recruit gene_finding",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "We are ready to run the assembly. Create all of the necessary directories for storing the results. cd /rsgrps/bh_class/username/assemblymkdir std-err std-out cd /rsgrps/bh_class/username/assembly mkdir std-err std-out",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Create a script to run the assembly called run-assembly.sh. don&#39;t forget to update with your netid and username. #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l select=1:ncpus=12:mem=23gb#PBS -l pvmem=22gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m beaFASTQ_DIR='/rsgrps/bh_class/username/unmapped'ASSEM_DIR='/rsgrps/bh_class/username/assembly'MIN_CONTIG_LEN=500OUT_DIR='/rsgrps/bh_class/username/assembly/megahit-out'cd $ASSEM_DIRR1s=`ls $FASTQ_DIR/*.paired.1.fastq | python -c 'import sys; print #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l select=1:ncpus=12:mem=23gb #PBS -l pvmem=22gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea FASTQ_DIR=&#39;/rsgrps/bh_class/username/unmapped&#39; ASSEM_DIR=&#39;/rsgrps/bh_class/username/assembly&#39; MIN_CONTIG_LEN=500 OUT_DIR=&#39;/rsgrps/bh_class/username/assembly/megahit-out&#39; cd $ASSEM_DIR R1s=`ls $FASTQ_DIR/*.paired.1.fastq | python -c &#39;import sys; print &#34;,&#34;.join([x.strip() for x in sys.stdin.re adlines()])&#39;` R2s=`ls $FASTQ_DIR/*.paired.2.fastq | python -c &#39;import sys; print &#34;,&#34;.join([x.strip() for x in sys.stdin.re adlines()])&#39;` SINGLEs=`ls $FASTQ_DIR/*.singletons.fastq | python -c &#39;import sys; print &#34;,&#34;.join([x.strip() for x in sys.st din.readlines()])&#39;` megahit -1 $R1s -2 $R2s -r $SINGLEs --preset meta-sensitive --min-contig-len $MIN_CONTIG_LEN -o $OUT_DIR -t 12",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Run the assembly on the cluster. chmod 755 run-assembly.shqsub -e std-err/ -o std-out/ run-assembly.sh chmod 755 run-assembly.sh qsub -e std-err/ -o std-out/ run-assembly.sh",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Look at the quality of the assembly. How many contigs did you get? What is the average contig length, and N50? Is this an improvement over the first assembly you ran?",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Now we will re-run the read recruitment back to the assembly as we did before. This time we will account for the read pairing in the read files. cd ../read_recruitmkdir bammkdir bt2_index cd ../read_recruit mkdir bam mkdir bt2_index",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "Move into your assembly directory containing your contigs. We will need to simplify the fasta headers in the contig file cd ../assembly/megahit-outmodule load fastx/0.0.14fastx_renamer -n COUNT -i final.contigs.fa -o fixed-contigs.fa cd ../assembly/megahit-out module load fastx/0.0.14 fastx_renamer -n COUNT -i final.contigs.fa -o fixed-contigs.fa",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "Move into the contig indexing directory. And create the contig index. cd /rsgrps/bh_class/username/read_recruit/bt2_indexmodule load bowtie2/2.2.5bowtie2-build -f /rsgrps/bh_class/username/assembly/megahit-out/fixed-contigs.fa contig_index cd /rsgrps/bh_class/username/read_recruit/bt2_index module load bowtie2/2.2.5 bowtie2-build -f /rsgrps/bh_class/username/assembly/megahit-out/fixed-contigs.fa contig_index",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "Now move into the bam directory you created earlier and create std-err and std-out directories for running bowtie on the cluster. cd /rsgrps/bh_class/username/read_recruit/bammkdir std-errmkdir std-out cd /rsgrps/bh_class/username/read_recruit/bam mkdir std-err mkdir std-out",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "Copy the following into a new script called bt2_align.sh: Should this script be saved in the bam directory or the bt2_index directory? #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=4:mem=15gb#PBS -l pvmem=14gb#PBS -l place=pack:shared#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m beaecho “my job_id is: ${PBS_JOBID}”#####change here #######FASTQ_DIR= $FASTQ_LIST echo &#34;Samples to be processed:&#34; $(cat $FASTQ_LIST) module load bowtie2/2.2.5 module load samtools/1.3.1 while read FASTQ; do R1=$FASTQ&#34;.paired.1.fastq&#34; R2=$FASTQ&#34;.paired.2.fastq&#34; S=$FASTQ&#34;.singletons.fastq&#34; OUT=$file bowtie2 -x $BT2_INDEX -1 $R1 -2 $R2 -U $S -q --maxins 800 --fr --very-sensitive-local -p 4 -S $OUT_DIR/$FASTQ.sam cd $OUT_DIR echo &#34;Converting $FASTQ.sam using reference $CONTIGS&#34; samtools view -@ 16 -bT $CONTIGS $FASTQ.sam &gt; $FASTQ.temp echo &#34;Sorting $FASTQ&#34; samtools sort -@ 16 $FASTQ.temp &gt; $FASTQ.bam echo &#34;Removing $FASTQ.temp&#34; rm $FASTQ.temp cd $FASTQ_DIR done &lt; $FASTQ_LIST&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;4765A081CB3D493CA4DA431BC710906F&#34; &gt; #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=4:mem=15gb #PBS -l pvmem=14gb #PBS -l place=pack:shared #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea echo “my job_id is: ${PBS_JOBID}” #####change here ####### FASTQ_DIR=&#34;/rsgrps/bh_class/username/unmapped&#34; BT2_INDEX=&#34;/rsgrps/bh_class/username/read_recruit/bt2_index/contig_index&#34; OUT_DIR=&#34;/rsgrps/bh_class/username/read_recruit/bam&#34; CONTIGS=&#34;/rsgrps/bh_class/username/assembly/megahit-out/fixed-contigs.fa&#34; ####################### cd $FASTQ_DIR export FASTQ_LIST=&#34;$FASTQ_DIR/fastq-list&#34; ls *fastq | cut -d &#39;.&#39; -f 1 | sort | uniq &gt; $FASTQ_LIST echo &#34;Samples to be processed:&#34; $(cat $FASTQ_LIST) module load bowtie2/2.2.5 module load samtools/1.3.1 while read FASTQ; do R1=$FASTQ&#34;.paired.1.fastq&#34; R2=$FASTQ&#34;.paired.2.fastq&#34; S=$FASTQ&#34;.singletons.fastq&#34; OUT=$file bowtie2 -x $BT2_INDEX -1 $R1 -2 $R2 -U $S -q --maxins 800 --fr --very-sensitive-local -p 4 -S $OUT_DIR/$FASTQ.sam cd $OUT_DIR echo &#34;Converting $FASTQ.sam using reference $CONTIGS&#34; samtools view -@ 16 -bT $CONTIGS $FASTQ.sam &gt; $FASTQ.temp echo &#34;Sorting $FASTQ&#34; samtools sort -@ 16 $FASTQ.temp &gt; $FASTQ.bam echo &#34;Removing $FASTQ.temp&#34; rm $FASTQ.temp cd $FASTQ_DIR done &lt; $FASTQ_LIST",
+      "is_critical": false,
+      "timers": [],
+      "substeps": [
+        {
+          "instruction": "Copy the following into a new script called bt2_align.sh: Should this script be saved in the bam directory or the bt2_index directory? #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=4:mem=15gb#PBS -l pvmem=14gb#PBS -l place=pack:shared#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m beaecho “my job_id is: ${PBS_JOBID}”#####change here #######FASTQ_DIR= $FASTQ_LIST echo &#34;Samples to be processed:&#34; $(cat $FASTQ_LIST) module load bowtie2/2.",
+          "title": ""
+        },
+        {
+          "instruction": "module load samtools/1.",
+          "title": ""
+        },
+        {
+          "instruction": "while read FASTQ; do R1=$FASTQ&#34;.paired.1.fastq&#34; R2=$FASTQ&#34;.paired.2.fastq&#34; S=$FASTQ&#34;.singletons.fastq&#34; OUT=$file bowtie2 -x $BT2_INDEX -1 $R1 -2 $R2 -U $S -q --maxins 800 --fr --very-sensitive-local -p 4 -S $OUT_DIR/$FASTQ.sam cd $OUT_DIR echo &#34;Converting $FASTQ.sam using reference $CONTIGS&#34; samtools view -@ 16 -bT $CONTIGS $FASTQ.sam &gt; $FASTQ.temp echo &#34;Sorting $FASTQ&#34; samtools sort -@ 16 $FASTQ.temp &gt; $FASTQ.bam echo &#34;Removing $FASTQ.temp&#34; rm $FASTQ.temp cd $FASTQ_DIR done &lt; $FASTQ_LIST&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;4765A081CB3D493CA4DA431BC710906F&#34; &gt; #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=4:mem=15gb #PBS -l pvmem=14gb #PBS -l place=pack:shared #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea echo “my job_id is: ${PBS_JOBID}” #####change here ####### FASTQ_DIR=&#34;/rsgrps/bh_class/username/unmapped&#34; BT2_INDEX=&#34;/rsgrps/bh_class/username/read_recruit/bt2_index/contig_index&#34; OUT_DIR=&#34;/rsgrps/bh_class/username/read_recruit/bam&#34; CONTIGS=&#34;/rsgrps/bh_class/username/assembly/megahit-out/fixed-contigs.fa&#34; ####################### cd $FASTQ_DIR export FASTQ_LIST=&#34;$FASTQ_DIR/fastq-list&#34; ls *fastq | cut -d &#39;.&#39; -f 1 | sort | uniq &gt; $FASTQ_LIST echo &#34;Samples to be processed:&#34; $(cat $FASTQ_LIST) module load bowtie2/2.",
+          "title": ""
+        },
+        {
+          "instruction": "module load samtools/1.",
+          "title": ""
+        },
+        {
+          "instruction": "while read FASTQ; do R1=$FASTQ&#34;.paired.1.fastq&#34; R2=$FASTQ&#34;.paired.2.fastq&#34; S=$FASTQ&#34;.singletons.fastq&#34; OUT=$file bowtie2 -x $BT2_INDEX -1 $R1 -2 $R2 -U $S -q --maxins 800 --fr --very-sensitive-local -p 4 -S $OUT_DIR/$FASTQ.sam cd $OUT_DIR echo &#34;Converting $FASTQ.sam using reference $CONTIGS&#34; samtools view -@ 16 -bT $CONTIGS $FASTQ.sam &gt; $FASTQ.temp echo &#34;Sorting $FASTQ&#34; samtools sort -@ 16 $FASTQ.temp &gt; $FASTQ.bam echo &#34;Removing $FASTQ.temp&#34; rm $FASTQ.temp cd $FASTQ_DIR done &lt; $FASTQ_LIST",
+          "title": ""
+        }
+      ]
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "Submit the job on the cluster to align reads via bowtie Are the std-err and std-out directories in read_recruit/bt2_index directory or just read_recruit? (I also have a std-err and std-out in the read_recruit/bam diectory as per step 11. Should I keep that?). I think I need a little more clarification as to which directories should have std-err and std-out directories and which shouldn&#39;t? chmod 755 bt2_align.shqsub -e std-err/ -o std-out/ bt2_align.sh chmod 755 bt2_align.sh qsub -e std-err/ -o std-out/ bt2_align.sh",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "While the read recruitment is running, we are going to run the gene finding on the new assembly. cd ../gene_findingmkdir std-err std-out cd ../gene_finding mkdir std-err std-out",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "Create a script called run-prodigal.sh to get the gene calls. #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=4:mem=15gb#PBS -l pvmem=14gb#PBS -l place=pack:shared#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m beaecho “my job_id is: ${PBS_JOBID}”#####change here #######CONTIG_DIR= #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=4:mem=15gb #PBS -l pvmem=14gb #PBS -l place=pack:shared #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea echo “my job_id is: ${PBS_JOBID}” #####change here ####### CONTIG_DIR=&#34;/rsgrps/bh_class/username/assembly/megahit-out&#34; OUT_DIR=&#34;/rsgrps/bh_class/username/gene_finding&#34; ####################### GENE_CALLS=&#34;$OUT_DIR/gene_calls&#34; PROTEINS=&#34;$OUT_DIR/proteins.faa&#34; NUCLEO=&#34;$OUT_DIR/nucleotides.faa&#34; CONTIGS=&#34;$CONTIG_DIR/fixed-contigs.fa&#34; cd $CONTIG_DIR module load prodigal/2.6.2 prodigal -i $CONTIGS -o $GENE_CALLS -a $PROTEINS -d $NUCLEO",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "Run the gene finding script on the cluster. chmod 755 run-prodigal.shqsub -e std-err/ -o std-out/ run-prodigal.sh chmod 755 run-prodigal.sh qsub -e std-err/ -o std-out/ run-prodigal.sh",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 16,
+      "title": "",
+      "instruction": "In the next protocol (MG_HW9), we will be converting these output files into files we can load into Anvio for data visualization. We will also be reporting on our findings in the google report.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-18T09:43:07.517279Z",
+  "llm_normalised": true
+}

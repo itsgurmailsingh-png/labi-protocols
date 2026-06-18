@@ -1,0 +1,148 @@
+{
+  "protocol_id": "phylogenetic_classification_of_bacterial_populations_using_core_snps_and_accesso",
+  "parent_protocol_id": null,
+  "title": "Phylogenetic Classification of Bacterial Populations Using Core SNPs and Accessory Genes",
+  "author": "Jared Johnson",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.x54v9y13mg3e/v1",
+  "source_name": "protocols_io",
+  "source_id": "61322",
+  "source_url": "https://www.protocols.io/view/phylogenetic-classification-of-bacterial-populatio-b75irq4e",
+  "doi": "dx.doi.org/10.17504/protocols.io.x54v9y13mg3e/v1",
+  "citation": "dx.doi.org/10.17504/protocols.io.x54v9y13mg3e/v1",
+  "category": "Microbiology",
+  "estimated_time_mins": 90,
+  "materials": [
+    "Unicycler",
+    "Panaroo",
+    "raxml",
+    "pair_diff.py",
+    "accessory_binary_genes.py"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Download scripts from https://github.com/johnjare/panaroo_scripts . git clone https://github.com/johnjare/panaroo_scripts",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Assemble bacterial genomes using Unicycler ( https://github.com/rrwick/Unicycler ). The standard input for Illumina-only assemblies is shown. unicycler -1 short_reads_1.fastq.gz -2 short_reads_2.fastq.gz -o output_dir",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Check the quality of the assembled genomes and any reference genomes included in the analysis using BUSCO (https://busco.ezlab.org) and Quast ( http://quast.sourceforge.net ). Standard inputs are shown. This step is optional. busco -i assembly.fasta -o output_dir -m genome -l reference_id quast.py -i assembly_directory/*.fasta -o output_directory -r reference.fasta",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Reject assemblies with large numbers of missing, fragmented, or duplicated (MFD) BUSCOs (e.g., assemblies with &gt;1% MFD BUSCOs) and/or those with estimated genome sizes three standard deviations from the mean of high-quality reference genomes for that species.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Annotate all genome assemblies, including reference genomes if included in your analysis, using Prokka ( https://github.com/tseemann/prokka ). The standard input is shown below. prokka --kingdom Bacteria --outdir output_directory --genus bacterial_genus --locustag isolate_id assembly.fasta",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Move the resulting .gff annotation files to a single directory.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Assemble the pangenome using Panaroo ( https://github.com/gtonkinhill/panaroo ). The standard input with core gene alignment using MAFFT is shown. panaroo -i gff_directory/*.gff -o output_directory -a core --aligner mafft",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Check for any problematic genome assemblies in the pangenome using pan_check.R (https://github.com/johnjare/panaroo_scripts/tree/main/pan_check). This script will output a heatmap like shown in Figure 1. Notice that isolate_10 in Figure 1 is missing several genes shared by all other isolates, probably indicating poor assembly quality. Rscript pan_check.R gene_presence_absence.Rtab Figure 1. Example output from the ‘pan_check.R’ script.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "If necessary, re-assemble the pangenome after removing any problematic genome assemblies identified in the previous step.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "Extract single nucleotide polymorphisms (SNPs) from the core gene alignment using SNP-sites (https://github.com/sanger-pathogens/snp-sites). The standard inputs for the creation of an alignment (.aln) file and variant call format (.vcf) file are shown. The “-c” flag excludes gaps. snp-sites -c core_gene_alignment.aln &gt; core_snps.aln snp-sites -c -v core_gene_alignment.aln &gt; core_snps.vcf",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "Extract accessory genes using the accessory_binary_genes.py (https://github.com/johnjare/panaroo_scripts/tree/main/accessory_binary_genes). This script requires that Pandas is installed (https://pandas.pydata.org). The standard input for this command is shown. The output has a similar structure to a FASTA file but contains 1’s and 0’s in places of ACGT’s. python3 accessory_binary_genes.py -i gene_presence_absence.Rtab -o accessory_genes.binary",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "Create phylogenetic trees from the “accessory_genes.binary&#34; and &#34;core_snps.aln&#34; files generated in the previous step using RAXML. The standard input using the BINCAT and GTRCAT models are shown. Adjust as necessary based on your available resources, preferred seed numbers, and number of bootstraps. The command for rooting the tree is also shown, though this step is optional.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "Accessory genome: raxml -s accessory_genes.bin -n output_file_name -m BINCAT -f a -T 2 -x 11 -N 100 -p 11 raxml -T 3 -f I -m GTRCAT -t input_file -n output_file_name",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "SNPs: raxml -s core_snps.aln -n output_file_name -m GTRCAT -f a -T 2 -x 11 -N 100 -p 11 raxml -T 3 -f I -m GTRCAT -t input_file -n output_file_name",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "Calculate pairwise gene and SNP differences using the pair_diff.py (https://github.com/johnjare/panaroo_scripts/tree/main/pair_diff). The standard input is shown. python3 pair_diff.py -g gene_presence_absence.Rtab -s core_snps.vcf -o gene_snp_differences.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-18T10:08:11.460927Z",
+  "llm_normalised": true
+}

@@ -1,0 +1,135 @@
+{
+  "protocol_id": "detecting_16s_rrna_gene_fragments_from_a_metagenome_to_assemble_full_length_16s_",
+  "parent_protocol_id": null,
+  "title": "Detecting 16S rRNA Gene Fragments from a Metagenome to Assemble Full-Length 16S Sequences",
+  "author": "Benjamin Tully",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.d7u9nv",
+  "source_name": "protocols_io",
+  "source_id": "2004",
+  "source_url": "https://www.protocols.io/view/Detecting-16S-rRNA-Gene-Fragments-from-a-Metagenom-d7u9nv",
+  "doi": "dx.doi.org/10.17504/protocols.io.d7u9nv",
+  "citation": "dx.doi.org/10.17504/protocols.io.d7u9nv",
+  "category": "Bioinformatics",
+  "estimated_time_mins": 72,
+  "materials": [
+    "IDBA-UD",
+    "fq2fa",
+    "Meta-RNA",
+    "HMMER3.0b3",
+    "Biopython",
+    "MetaRNA_to_FastQ.py",
+    "EMIRGE",
+    "Cython",
+    "pysam",
+    "scipy",
+    "numpy",
+    "usearch",
+    "samtools",
+    "bowtie",
+    "SILVA database",
+    "mothur"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Convert FASTQ to FASTA",
+      "instruction": "Convert quality trimmed FASTQ metagenomic sequences to a FASTA format. Assumes that sequences are paired-end. fq2fa is available as part of IDBA-UD. Example command: fq2fa --merge --filter INFILE_NAME.R1.001_paired.fastq INFILE_NAME.R2.001_paired.fastq INFILE_NAME.001.merged.fasta. Parameters: --merge = interweave paired-end sequences in two separate FASTQ files; --filter = remove sequences containing Ns.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "Detect SSU rRNA Gene Fragments",
+      "instruction": "Detect small subunit (SSU) rRNA gene fragments using command-line based Meta-RNA. This example utilizes a specific version (accessible via http://weizhong-lab.ucsd.edu/meta_rna/rRNA_hmm3.tar.gz). Example command: rna_hmm3.py -i INFILE_NAME.001.merged.fasta -L /directory/location/of/HMM/files/rna_hmm3/HMM3/ -o OUTFILE_NAME.001_predictedRNAs -m ssu -e .0000000001 -p 36. Parameters: -L = provide the directory address of the downloaded, pre-computed HMM alignment models for both SSU and large subunit rRNA genes; -o = set name of output file; -m = sets target as SSU fragments only; -e = E-value cutoff used by HMMER (1 x 10^-10); -p = number of available CPUs.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "Trim Original FASTQ Files",
+      "instruction": "Use the script MetaRNA_to_FastQ.py to trim the original quality trimmed FASTQ files based on the output table created by Meta-RNA. MetaRNA_to_FastQ.py is only confirmed to work with the version of Meta-RNA described above and requires Biopython. Example command: MetaRNA_to_FastQ.py -r OUTFILE_NAME.001_predictedRNAs -q INFILE_NAME.R1.001_paired.fastq -o OUTFILE_PREFIX1.001. Parameters: -r = Meta-RNA table output; -q = original FASTQ file searched by Meta-RNA; -o = a prefix for the outfile, the final file will have '.metagenome16S.fastq' as the suffix.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "Trim R2 Reads",
+      "instruction": "Repeat Step 2 (trimming original quality trimmed FASTQ files) for R2 reads (and any other sets of reads from the same sample) using MetaRNA_to_FastQ.py. Example command: MetaRNA_to_FastQ.py -r OUTFILE_NAME.001_predictedRNAs -q INFILE_NAME.R2.001_paired.fastq -o OUTFILE_PREFIX2.001.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "Combine Output FASTQ Files",
+      "instruction": "Combine output 'metagenome16S.fastq' files as desired. Options: (1) Pairs of 16S rRNA fragments, or (2) All 16S rRNA fragments from a single sample.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "Set up EMIRGE Dependencies",
+      "instruction": "If using EMIRGE for the first time, set up its dependencies: Cython, pysam, scipy/numpy, usearch, samtools, bowtie.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "Download EMIRGE Reference Database",
+      "instruction": "If using EMIRGE for the first time, a reference database is required. SILVA (Ref111) can be downloaded using the script provided with EMIRGE: emirge_download_candidate_db.py.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "Correct EMIRGE Reference Database",
+      "instruction": "If using EMIRGE for the first time, the reference database must be 'corrected' using the script provided with EMIRGE: fix_nonstandard_chars.py.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "Index Reference Database with Bowtie",
+      "instruction": "If using EMIRGE for the first time, the reference database must be indexed using bowtie. Example command: bowtie-build SSU_candidate_db.fasta SSU_candidate_db_btindex.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "Assemble Full-Length 16S rRNA Sequences with EMIRGE",
+      "instruction": "Assemble full-length 16S rRNA sequences using EMIRGE via emirge_amplicon.py, as the input file contains exclusively 16S rRNA fragments. Example command: emirge_amplicon.py ./emirgeWorkingDir -1 OUTFILE_NAME_all.metagenome16S.fastq -f /directory/location/of/EMIRGE/SSURef_111_candidate_db.fasta -b /directoy/location/of/EMIRGE/SSURef_111_candidate_db_btindex -l 260 -i 246 -s 88 -a 32 --phred33. Parameters: ./emirgeWorkingDir = creates a working directory for EMIRGE command (delete or rename if re-running); -1 = input FASTQ file containing all metagenome16S.fastq sequences; -f = location of reference FASTA file; -b = location of reference FASTA bowtie index file; -l = max length of sequences; -i = insert size between sequences; -s = standard deviation of insert sequence sizes; -a = number of available CPUs; --phred33 = utilizes 33 based Phred quality.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 10,
+      "title": "Create Final FASTA File",
+      "instruction": "Move to the 'emirgeWorkingDir' and create the final FASTA file using the script provided with EMIRGE: emirge_rename_fasta.py.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 11,
+      "title": "Optional: Assign Taxonomy with mothur",
+      "instruction": "This is an optional step to assign taxonomy using mothur (version 1.36.1). It requires a reference alignment for align.seqs and reference FASTA + taxonomy files for classify.seqs. Run as three separate commands: 1. align.seqs(fasta=INPUT.16S.fasta, reference=reference.alignment.fasta, flip=T, processors=64); 2. remove.seqs(accnos=INPUT.16S.flip.accnos, fasta=INPUT.16S.align); 3. classify.seqs(fasta=INPUT.16S.pick.align, template=reference.database.fasta, taxonomy=reference.database.tax, cutoff=80, iters=1000, processors=64). Parameters: flip = T - looks for matches in both forward and reverse directions; processors = available number of CPUs; cutoff = level cutoff for a taxonomic assignment; iters = number of comparisons performed to ensure correct assignment.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-17T10:10:58.007046Z",
+  "llm_normalised": true
+}

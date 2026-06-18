@@ -1,0 +1,149 @@
+{
+  "protocol_id": "mapping_community_meta_transcriptomics_to_gapseq_annotated_metabolic_reactions_a",
+  "parent_protocol_id": null,
+  "title": "Mapping Community Meta-transcriptomics to gapseq-Annotated Metabolic Reactions and Transporters",
+  "author": "Zhelun Zhang",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.8epv5yoynl1b/v1",
+  "source_name": "protocols_io",
+  "source_id": "313305",
+  "source_url": "https://www.protocols.io/view/mapping-community-meta-transcriptomics-to-gapseq-a-jv7zcn9p7",
+  "doi": "dx.doi.org/10.17504/protocols.io.8epv5yoynl1b/v1",
+  "citation": "dx.doi.org/10.17504/protocols.io.8epv5yoynl1b/v1",
+  "category": "Bioinformatics",
+  "estimated_time_mins": 90,
+  "materials": [
+    "Trimmomatic",
+    "SortMeRNA",
+    "Bowtie2",
+    "SAMtools",
+    "HTSeq",
+    "Python"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "trimmomatic PE -threads 12 -phred33 ${reads}.fastq HEADCROP:33 SLIDINGWINDOW:4:20 MINLEN:50",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "## remove rRNA export PATH=sortmerna-4.3.6-Linux/bin:$PATH sortmerna --workdir ${sample_name}/P1_sortmerna --ref rRNA_DB/CC_5_16_23s_rna_db.fa --reads ${sample_name}_paired_R1.fastq -other ${sample_name}_paired_R1 -fastx fastq",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "# Build Bowtie2 index from the reference genome FASTA file # This step prepares the genome for efficient read alignment bowtie2-build ${genome}.fa ${genome} bowtie2 -x ${genome} -1 ${reads}_paired_R1.fq -2 ${reads}_paired_R2.fq -S ${genome}.sam -p 12",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "# Convert SAM (text format) to BAM (binary format) to reduce file size and enable downstream processing samtools view -bS ${genome}.sam -o ${genome}.bam",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "# Sort BAM file by genomic coordinates # Required for indexing and most downstream analyses samtools sort ${genome}.bam -o ${genome}_sorted.bam",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "# Create index file (.bai) for the sorted BAM # Enables rapid random access to alignment data samtools index ${genome}_sorted.bam",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "rm ${genome}.sam rm ${genome}.bam",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "###################################################################### ################## for transporter transcripts ################################ # Convert the gapseq annotation to GTF python GTF_generate_20230815.py -T ${genome}-Transporter.tbl -o ${genome}_transporters_raw.gtf",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "htseq-count -r pos -t CDS -m intersection-nonempty --nonunique all -f bam ${genome}_sorted.bam ${genome}_transporters.gtf -c transporters_readscount_HTSeq.csv --nonunique all: Reads (or read pairs) assigned to multiple features are counted as ambiguous and are also included in the counts for each assigned feature. Additionally, reads that align to more than one location are labeled as alignment_not_unique and are also counted separately for each alignment location. -m intersection-nonempty This option counts reads that are ambiguously assigned to multiple features. check the figure in the site:https://htseq.readthedocs.io/en/release_0.11.1/count.html?highlight=ambiguous#counting-reads-in-features-with-htseq-count. ## allocate HTSeq-count at least 60 gb memory ## 3 hours might be required for each sample",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "###################################################################### ################## for reaction transcripts ################################ # Convert the gapseq annotation to GTF python GTF_generate_20230815.py -G ${genome}-all-Reactions.tbl -o ${genome}_reactions_raw.gtf",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "htseq-count -r pos -t CDS -m intersection-nonempty --nonunique all -f bam ${genome}_sorted.bam ${genome}_reactions.gtf -c reactions_readscount_HTSeq.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "sed -i &#39;s/\\t/,/g&#39; transporters_readscount_${transreads_version}_HTSeq.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "### sort according to number of mapped reads sort -n -k2 -r -t, transporters_readscount__HTSeq.csv &gt; transporters_readscount__HTSeq_sorted.csv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "######### Normalize and summarize the metatranscriptomic reads mapped to each bacterial genome and produce a summary file ######## #### Parameters a, b and c represent three replicates ########## # Rscript summary_transporter_reaction_0911.R -a transporters_readscount_${transreads_version_1}_HTSeq_sorted.csv -b transporters_readscount_${transreads_version_2}_HTSeq_sorted.csv -c transporters_readscount_${transreads_version_3}_HTSeq_sorted.csv -n ${genome} -g ${genome}-Transporter.tbl -o ${genome}_${reads_date}_transporter_reads_count.tsv",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "module load python/3.10.8 module load samtools module load bowtie2 module load bedtools2/2.30.0 # Please run this pipeline on the university supercomputer",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-18T09:36:20.789747Z",
+  "llm_normalised": true
+}

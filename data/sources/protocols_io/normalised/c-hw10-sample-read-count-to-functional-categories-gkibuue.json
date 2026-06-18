@@ -1,0 +1,91 @@
+{
+  "protocol_id": "sample_read_count_to_functional_categories_for_anvio_bar_chart",
+  "parent_protocol_id": null,
+  "title": "Sample Read Count to Functional Categories for Anvi'o Bar Chart",
+  "author": "Bonnie Hurwitz",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.gkibuue",
+  "source_name": "protocols_io",
+  "source_id": "4458",
+  "source_url": "https://www.protocols.io/view/c-hw10-sample-read-count-to-functional-categories-gkibuue",
+  "doi": "dx.doi.org/10.17504/protocols.io.gkibuue",
+  "citation": "dx.doi.org/10.17504/protocols.io.gkibuue",
+  "category": "Bioinformatics",
+  "estimated_time_mins": 48,
+  "materials": [
+    "HPC",
+    "Anvi'o",
+    "uproc",
+    "samples.db"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "login to the HPC ssh hpcice ssh hpc ice",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "To get an idea of the broad functional categories in the samples we are going to use the reads to quantify hits to Kegg ids. Then we will group the hits by broad categories to include in a bar chart in Anvi&#39;o for each sample. We are going to use a similar approach as we did before for annotating the function to genes (see previus protocol), except this time we will map the reads to kegg ids by using uproc. First we need to create a diretory to run the analysis in: mkdir /rsgrps/bh_class/username/function-readscd /rsgrps/bh_class/username/function-readsmkdir std-errmkdir std-out mkdir /rsgrps/bh_class/username/function-reads cd /rsgrps/bh_class/username/function-reads mkdir std-err mkdir std-out",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Now we need to create a script to run uproc on the reads for each of the samples. We will do this by running uproc on the reads that did not map to human (or the unmapped reads). Create a script called: uproc_function.sh #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=12:mem=23gb#PBS -l pvmem=22gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m bea#--------------EDIT THESE---------------FASTQ_DIR= Make sure your script is executable, and that no lines were split (the uproc command should be a single line). #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=12:mem=23gb #PBS -l pvmem=22gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea #--------------EDIT THESE--------------- FASTQ_DIR=&#34;/rsgrps/bh_class/username/unmapped&#34; OUT_DIR=&#34;/rsgrps/bh_class/username/function-reads&#34; OUTPUT=&#34;$OUT_DIR/uproc-out&#34; #--------------------------------------- export UPROC=&#34;/rsgrps/bh_class/bin/uproc-dna&#34; export DATA=&#34;/rsgrps/bh_class/data/uproc&#34; export UPROC_MODEL=&#34;$DATA/model&#34; export UPROC_OUT_DIR=&#34;$OUT_DIR/uproc-out&#34; export KEGG=&#34;$DATA/keggready&#34; cd $FASTQ_DIR for file in `cat fastq-list`; do # filtered no human R1=$FASTQ_DIR/$file&#34;.paired.1.fastq&#34; R2=$FASTQ_DIR/$file&#34;.paired.2.fastq&#34; S=$FASTQ_DIR/$file&#34;.singletons.fastq&#34; $UPROC --preds --short --threads 12 --output $OUTPUT.$file.kegg $KEGG $UPROC_MODEL $R1 $R2 $S done Make sure your script is executable, and that no lines were split (the uproc command should be a single line).",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "The output files will be called &#39;uproc-out.$file.kegg&#39;, where $file is one of your SRR file names. You will need to write a script that loops through each of these file names, converts the SRR file name into the body site &#39;short name&#39; (e.g. Um for belly button), and then creates a read count for each of the broad kegg categories for each sample (use the file /rsgrps/bh_class/kegg_to_broadcat to convert the kegg ids in the uproc file to the broad categories). Also note that there are 31 categories, but this is way too many to display on our anvi&#39;o graph. So the results should only display %reads that hit to the top five categories for all samples and group the rest into &#39;Other&#39; (where Func1 is replaced by the &#39;broad category desc&#39; in the output below). Also remember that you will need to have a mapping file for converting the sample SRR id to the sample name, and linking to the categories for the output. e.g. %s %s SRR Sample Occlusion MicroEnv SRR1647143 Ra Occluded Sebaceous SRR1647048 Sc Exposed Sebaceous SRR1647047 Ax Occluded Moist SRR1647142 Um Occluded Moist SRR1647049 Fh Exposed Sebaceous SRR1647046 Ac IntOcculded IntMoist SRR1647045 Pa Exposed IntMoist SRR1647141 Tw Occluded Moist Note that this script should be similar to the script that Ken wrote in class to convert uproc output into input for Anvio. The main difference is that you need to create a summary table for the output. %s %s Sample Occlusion MicroEnv Func1 Func2 Func3 Func4 Func5 FuncOther Ra Occluded Sebaceous 33 21 16 3 2 25 Sc Exposed Sebaceous 40 21 16 10 2 11 Ax Occluded Moist 30 18 5 10 1 36 Um Occluded Moist 28 13 6 10 25 18 Fh Exposed Sebaceous 27 21 12 10 2 28 Ac IntOcculded IntMoist 5 14 16 6 4 55 Pa Exposed IntMoist 6 21 16 10 2 45 Tw Occluded Moist 33 21 16 10 2 18",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Run the script above on the HPC to get read matches to kegg ids. qsub -e std-err -o std-out uproc_function.sh",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Start Anvi&#39;o as you have done in past protocols. Go into the directory with the anvi&#39;o databases. Download the output (on the HPC) from the script above to your computer. scp sftp.hpc.arizona.edu:/rsgrps/bh_class/username/function-reads/samples-table . where samples-table is the output of the script you wrote in the step above.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Use the command below to create an anvi&#39;o samples database. anvi-gen-samples-info-database --samples-information samples-table -o samples.db",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Start Anvi&#39;o with the samples.db to visualize the results for the samples. anvi-interactive -p SAMPLES-MERGED/PROFILE.db -c contigs.db -s samples.db",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-17T13:51:45.684561Z",
+  "llm_normalised": true
+}

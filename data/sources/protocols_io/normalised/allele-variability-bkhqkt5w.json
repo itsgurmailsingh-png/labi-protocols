@@ -1,0 +1,122 @@
+{
+  "protocol_id": "allele_variability_analysis_protocol",
+  "parent_protocol_id": null,
+  "title": "Allele Variability Analysis Protocol",
+  "author": "Sara Beier",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.bkhqkt5w",
+  "source_name": "protocols_io",
+  "source_id": "41232",
+  "source_url": "https://www.protocols.io/view/allele-variability-bkhqkt5w",
+  "doi": "dx.doi.org/10.17504/protocols.io.bkhqkt5w",
+  "citation": "dx.doi.org/10.17504/protocols.io.bkhqkt5w",
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 66,
+  "materials": [
+    "Cutadapt",
+    "Sickle",
+    "SortMeRNA",
+    "IDBA-UD",
+    "Prodigal",
+    "NCBI-BLAST",
+    "DIAMOND",
+    "Bowtie2",
+    "Subread",
+    "PSORTb",
+    "Cd-hit"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "removal of nextera adaptors (cutadapt v1.8.3) Removal of nextera adaptors (Cutadapt v1.8.3) cutadapt -a CTGTCTCTTATA -o ca.file.forward.fastq.gz file.forward.fastq.gzcutadapt -a CTGTCTCTTATA -o ca.file.reverse.fastq.gz file.reverse.fastq.gz Run for all raw data sequence revers and forward read-files from BATS and HOT",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Quality trimming (Sickle v1.33) sickle pe \\-f /data/sara/LTG/pacific/BAT1/cutadapt/ca.file.forward.fastq.gz \\-r /data/sara/LTG/pacific/BAT1/cutadapt/ca.file.reverse.fastq.gz \\-t sanger \\-o /data/sara/LTG/pacific/BAT1/sickle/qtrim.file.forward.fastq \\-p /data/sara/LTG/pacific/BAT1/sickle/qtrim.file.reverse.fastq \\-s /data/sara/gesifus.strains/sickle/qtrim.file.unpaired.fastq \\-q 20 -l 50 Run on BATS and HOT output files from step 1 and on LMO rawdata sequence files",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "rRNA removal (SortMeRna v1.9) #interleave readsmerge-paired-reads.sh qtrim.file.forward.fastq qtrim.file.reverse.fastq file.inter.fastq#sortmernasortmerna --I file.inter.fastq --paired-in -n 2 --db personal_default_rRNA_DBs.fna --other file.inter.protein -a 20#unmerge protein dataunmerge-paired-reads.sh file.inter.protein.fastq file.forward.protein.fastq file.reverse.protein.fastq Run for SOLA (output files step 2). The presonal referenece database (personal_default_rRNA_DBs.fna) contains the silve rRNA sequences (downloaded 2013)",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Assembly (IDBA-UD v1.1.3) fq2fa --merge --filter qtrim.file.1.fastq qtrim.file.2.fastq file.merged.fa #interleave paired readscat file*.merged.fa > all.merged.fa #concatenate all individual merged read files of a time series into one fileidba_ud --mink=25 --maxk=99 --step=4 -l all.merged.fa -o IDBAoutput #run assembly Run for BATS, HOT (using output from step 2, only data from 10 sample days considered in this study) and SOLA (using output from step 3, data fro all available sample days)",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Gene calling (Prodigal v2.6.1) prodigal -i IDBA.contig.fa -a prod.pep -d prod.fas -o prod.gff -f gff Run for BATS, HOT and SOLA using the outpute file from step 4",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "Blast annotation (NCBI-BLAST v2.2.31+) makeblastdb -in KEGG.faa -parse_seqids -dbtype prot #create database for blastpblastp -db KEGG.faa -query prod.pep -outfmt 6 -num_alignments 1 -num_threads 16 -out blastout.tab #run blastp run for SOLA (predicted genes from step 5) and LMO (predicted genes from BARM assembly that were different from the public available data translated with table 11). The reference KEGG database (KEGG.faa) was downloaded on 15.05.2016.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Diamond-Blast annotation (DIAMOND v0.8.22.84) diamond makedb --in KEGG.faa -d KEGG #create diamond databasediamond blastp -d KEGG -q prod.pep --more-sensitive -k 1 -o diamond.tab -p 26 #run diamond blast",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Mapping (Bowtie2 v2.2.9) bowtie2-build contig.fa contigs #build indexed reference filebowtie2 --very-sensitive-local --no-unal -x contigs -1 qtrim.file.forrward.fastq -2 qtrim.file.reverse.fastq -S file.sam #for LMO, SOLA, BATS, HOT with paired-end readsbowtie2 --very-sensitive-local --no-unal -x contigs -U qtrim.file.fastq -S file.sam #for MENDOTA with single-end reads run for BATS, HOT, LMO (quality trimmed reads, step 3), SOLA (protein-coding reads, step 4) and MENDOTA (quality trimmed reads provided by collaborators). Assembled contigs were used as reference (BATS, HOT, SOLA: output from step 4; LMO: BARM assembly, MENDOTA: assembly provided by collaborators)",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "summarize mapped reads (Subread v1.4.6) convert_prodigal_GFF_to_subread_featureCount_SAF.pl -g prod.gff -s prod.saf #converts prodigal output into prod.saffeatureCounts -p -a prod.saf -T 30 -F SAF -o feature.tab *sam #for LMO, SOLA, BATS, HOT with paired-end readsfeatureCounts -a prod.saf -T 12 -F SAF -o feature.tab *sam #for MENDOTA with single-end reads the prod.gff outputfile from step 5 was reformatted using a personal script (convert_prodigal_GFF_to_subread_featureCount_SAF.pl) to prod.saf concerning the requirements of the featureCounts software. For BATS, HOT, LMO, SOLA and MENDOTS sam-files produced during step 7 were used.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "Subcellular location (PSORTb v.3.0) psort -n/p/a K*.prokaryotes.faa -o terse |awk -F'\\t' '{$1=\"XXX\" FS $1;}1' OFS='\\t'|sed 1d > psort.K*.prok.tab #create psortoutput for each KEGG orthologcat psort.K* >psort.all.prok.tab #concatenate results Run for prokaryotic amino acid sequences from the KEGG database (downloaded Nov 2015) representing each KEGG ortrholog (K*.prokaryotes.faa) with the alternative settings -n, -p or -a for sequences affiliating with gram negatives, gram positives or archaea, respectively",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "cluster CDS by 100% amino acid similarity (Cd-hit v4.6) cd-hit -i prod.pep -o out.clust -c 1.00 -n 5 -M 16000 -T 22 run for BATS, HOT, LMO, MENDOTA, SOLA: input files amino acid sequence files obtained after gene calling (prod.pep)",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-17T13:36:40.358167Z",
+  "llm_normalised": true
+}

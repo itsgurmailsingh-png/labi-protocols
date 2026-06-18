@@ -1,0 +1,105 @@
+{
+  "protocol_id": "single_cell_analysis_of_ipsc_derived_midbrain_organoids",
+  "parent_protocol_id": null,
+  "title": "Single cell analysis of iPSC-derived midbrain organoids",
+  "author": "Maria Jose Perez J.",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.q26g74xjkgwz/v1",
+  "source_name": "protocols_io",
+  "source_id": "61507",
+  "source_url": "https://www.protocols.io/view/single-cell-analysis-of-ipsc-derived-midbrain-orga-b8bbrsin",
+  "doi": "dx.doi.org/10.17504/protocols.io.q26g74xjkgwz/v1",
+  "citation": "dx.doi.org/10.17504/protocols.io.q26g74xjkgwz/v1",
+  "category": "Cell Biology",
+  "tags": [
+    "single cell analysis",
+    "ipsc",
+    "midbrain organoids",
+    "neuroscience",
+    "seurat"
+  ],
+  "estimated_time_mins": 54,
+  "materials": [
+    "Seurat",
+    "patchwork",
+    "ggplot2"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "# Install and load the libraries library(Seurat) library(patchwork) library(ggplot2) library(cowplot) library(magrittr) library(tidyverse) # Load and combine 10x Runs setwd(\"D:.../analysis_results\") GC1.data <-Read10X_h5(\"1GC_filtered_feature_bc_matrix.h5\") GC1 <-CreateSeuratObject(counts = GC1.data) GC1 MUT1.data <-Read10X_h5(\"1MUT_filtered_feature_bc_matrix.h5\") MUT1 <-CreateSeuratObject(counts = MUT1.data) MUT1 GC2.data <-Read10X_h5(\"2GC_filtered_feature_bc_matrix.h5\") GC2 <-CreateSeuratObject(counts = GC2.data) GC2 MUT2.data <-Read10X_h5(\"2MUT_filtered_feature_bc_matrix.h5\") MUT2 <-CreateSeuratObject(counts = MUT2.data) MUT2 GC3.data <-Read10X_h5(\"3GC_filtered_feature_bc_matrix.h5\") GC3 <-CreateSeuratObject(counts = GC3.data) GC3 MUT3.data <-Read10X_h5(\"3MUT_filtered_feature_bc_matrix.h5\") MUT3 <-CreateSeuratObject(counts = MUT3.data) MUT3 # Merge more than two objectsMUT.combined <-Reduce(function(x,y) merge (x,y, all=T), list (GC1, MUT1, GC2, MUT2, GC3, MUT3))",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "# Add number of genes per UMI for each cell to metadataMUT.combined$log10GenesPerUMI =500) &(nFeature_RNA >=250) &(log10GenesPerUMI >0.80) & (mitoRatio 0# Sums all TRUE values and returns TRUE if more than 10 TRUE values per genekeep_genes =10# Only keeping those genes expressed in more than 10 cellsfiltered_counts <-counts[keep_genes, ]# Reassign to filtered Seurat objectfiltered_seurat <-CreateSeuratObject(filtered_counts, meta.data =filtered_seurat@meta.data)# Save.RData objectsave(filtered_seurat, file=\"seurat_filtered.RData\")",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "#Cell cycle scoring. Normalize the counts seurat_phase <-NormalizeData(filtered_seurat) # Load cell cycle markers load(\"cycle.rda\") # Score cells for cell cycle seurat_phase <-CellCycleScoring(seurat_phase,g2m.features = g2m_genes,s.features =s_genes)# View cell cycle scores and phases assigned to cellsView(seurat_phase@meta.data)# Identify the most variable genesseurat_phase <-FindVariableFeatures(seurat_phase,selection.method =\"vst\",nfeatures =2000, verbose =FALSE)# Scale the countsseurat_phase <-ScaleData(seurat_phase)# Perform PCAseurat_phase <-RunPCA(seurat_phase)# Plot the PCA colored by cell cycle phaseDimPlot(seurat_phase,reduction =\"pca\", group.by=\"Phase\", split.by =\"Phase\")# Split seurat object by condition to perform cell cycle scoring and SCT on all samplessplit_seurat <-SplitObject(filtered_seurat, split.by =\"orig.ident\")for (i in1:length(split_seurat)) { split_seurat[[i]] <-NormalizeData(split_seurat[[i]], verbose =TRUE)split_seurat[[i]] <-CellCycleScoring(split_seurat[[i]], g2m.features=g2m_genes, s.features=s_genes)split_seurat[[i]] <-SCTransform(split_seurat[[i]], vars.to.regress =c(\"mitoRatio\", \"S.Score\", \"G2M.Score\")) }",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "# Select the most variable features to use for integration integ_features <-SelectIntegrationFeatures(object.list =split_seurat,nfeatures =3000) # Prepare the SCT list object for integration split_seurat <-PrepSCTIntegration(object.list =split_seurat,anchor.features =integ_features) # Find anchors integ_anchors <-FindIntegrationAnchors(object.list =split_seurat,normalization.method =\"SCT\", anchor.features =integ_features) # Integrate across conditions organoids.combined.sct <-IntegrateData(anchorset =integ_anchors,normalization.method =\"SCT\") # Save integrated seurat object saveRDS(organoids.combined.sct, \"integrated_seurat.rds\") ## Run the standard workflow for visualization and clustering DefaultAssay(organoids.combined.sct) <-\"integrated\" organoids.combined.sct <-RunPCA(organoids.combined.sct, verbose =FALSE) PCAPlot(organoids.combined.sct,split.by =\"orig.ident\") organoids.combined.sct <-RunUMAP(organoids.combined.sct, reduction =\"pca\", dims =1:40)# Plot UMAPDimPlot(organoids.combined.sct, split.by =\"orig.ident\")DimPlot(organoids.combined.sct, group.by =\"orig.ident\")# Elbow plotElbowPlot(object =organoids.combined.sct,ndims =40)#Find neighbors for cluster analysisorganoids.combined.sct <-FindNeighbors(organoids.combined.sct, reduction =\"pca\", dims =1:40)organoids.combined.sct <-FindClusters(organoids.combined.sct, resolution =c(0.6))# Assign identity of clustersIdents(object =organoids.combined.sct) <-\"integrated_snn_res.0.6\"# Visualizationall.genes <-rownames(organoids.combined.sct)organoids.combined.sct <-ScaleData(organoids.combined.sct, features =all.genes)DimPlot(organoids.combined.sct, reduction =\"umap\", group.by =\"seurat_clusters\", label =TRUE,repel =TRUE)DimPlot(organoids.combined.sct, reduction =\"umap\", split.by =\"orig.ident\")",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "#Extract identity and sample information from seurat object to determine the number of cells per cluster per sample n_cells % dplyr::count(ident, orig.ident) %>% tidyr::spread(ident, n) write.csv(n_cells, \"n_cells.csv\") ## Identify conserved cell type markers # Switch back to the original data DefaultAssay(organoids.combined.sct) %rownames_to_column(var =\"gene\") %>%left_join(y =unique(annotations[, c(\"gene_name\", \"description\")]),by =c(\"gene\"=\"gene_name\")) %>%cbind(cluster_id =cluster, .)} # Iterate function across desired clusters. conserved_markers %mutate(avg_fc =(GC1_avg_log2FC +GC2_avg_log2FC +GC3_avg_log2FC + MUT1_avg_log2FC +MUT2_avg_log2FC +MUT3_avg_log2FC) /6) %>%group_by(cluster_id) %>%top_n(n =100,wt = avg_fc)write.csv(top100, \"Clusters_top100.csv\")## Identifying gene markers for each clusterGenes <-c (\"SOX2\", \"DCX\", \"TH\", \"NEUROD4\") # Change target genes depending on the cell type# UMAP plotFeaturePlot(organoids.combined.sct,reduction =\"umap\",features = Genes, sort.cell =TRUE, min.cutoff ='q10', max.cutoff =5,label = T, pt.size =0.5)# Violin plotplots <-VlnPlot(organoids.combined.sct, features =Genes, split.by =\"orig.ident\", pt.size =0, combine =FALSE)wrap_plots(plots = plots, ncol =1)# Dot plotDotPlot(organoids.combined.sct, features =Genes) +RotatedAxis()",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "## Combine the clusters according to the identity new.cluster.ids %rownames_to_column(var =\"gene\") %>%left_join(y =unique(annotations[, c(\"gene_name\", \"description\")]),by =c(\"gene\"=\"gene_name\")) #Savewrite.csv(Markers, \"DEgenes_cRadial Glia_1couple.csv\")",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Neurons_subset %rownames_to_column(var =\"gene\") %>%left_join(y =unique(annotations[, c(\"gene_name\", \"description\")]), by =c(\"gene\"=\"gene_name\")) %>%cbind(cluster_id = cluster, .)}# Iterate function across desired clusters. conserved_markers %mutate(avg_fc =(GC1_avg_log2FC +GC2_avg_log2FC +GC3_avg_log2FC + MUT1_avg_log2FC +MUT2_avg_log2FC +MUT3_avg_log2FC) /6) %>%group_by(cluster_id) %>%top_n(n =100, wt = avg_fc)#OR savewrite.csv(top100, \"Clusters_top100_Neuronsubset.csv\")",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "annotations %rownames_to_column(var =\"gene\") %>%left_join(y =unique(annotations[, c(\"gene_name\", \"description\")]), by =c(\"gene\"=\"gene_name\")) write.csv(Markers, \"DEgenes_C11Neuron_1couple.csv\")# couple 2Markers %rownames_to_column(var =\"gene\") %>%left_join(y =unique(annotations[, c(\"gene_name\", \"description\")]),by =c(\"gene\"=\"gene_name\")) write.csv(Markers, \"DEgenes_C11Neuron_2couple.csv\")# couple 3Markers %rownames_to_column(var =\"gene\") %>%left_join(y =unique(annotations[, c(\"gene_name\", \"description\")]), by =c(\"gene\"=\"gene_name\")) write.csv(Markers, \"DEgenes_C11Neuron_3couple.csv\")",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "# Merge datasets, example analysis for couple 1organoids.combined.sct %rownames_to_column(var =\"gene\") %>%left_join(y =unique(annotations[, c(\"gene_name\", \"description\")]), by =c(\"gene\"=\"gene_name\")) #savewrite.csv(Markers, \"DEgenes_Cluster20_couple1.csv\")",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-18T21:55:18.940179Z",
+  "llm_normalised": true
+}

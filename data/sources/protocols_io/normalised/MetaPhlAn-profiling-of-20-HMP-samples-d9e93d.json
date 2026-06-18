@@ -1,0 +1,130 @@
+{
+  "protocol_id": "metaphlan_profiling_of_20_hmp_samples",
+  "parent_protocol_id": null,
+  "title": "MetaPhlAn profiling of 20 HMP samples",
+  "author": "Curtis Huttenhower",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.d9e93d",
+  "source_name": "protocols_io",
+  "source_id": "2054",
+  "source_url": "https://www.protocols.io/view/MetaPhlAn-profiling-of-20-HMP-samples-d9e93d",
+  "doi": "dx.doi.org/10.17504/protocols.io.d9e93d",
+  "citation": "dx.doi.org/10.17504/protocols.io.d9e93d",
+  "category": "Bioinformatics",
+  "estimated_time_mins": 180,
+  "materials": [
+    "MetaPhlAn software",
+    "BowTie2 software",
+    "Mercurial (optional)",
+    "Unix environment",
+    "Internet connection",
+    "Human Microbiome Project (HMP) metagenome samples"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Download and Uncompress MetaPhlAn",
+      "instruction": "The first operation consists in obtaining the latest version of MetaPhlAn downloadable as zip, gz, or bz2 compressed archives. In a Unix environment, you can obtain and uncompress it from the command line: $ wget https://bitbucket.org/nsegata/metaphlan/get/default.tar.bz2 $ tar xjvf default.tar.bz2 $ mv *-metaphlan-* metaphlan",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 1,
+      "title": "Alternative: Obtain MetaPhlAn with Mercurial",
+      "instruction": "Alternatively, you can use Mercurial to obtain the package from the Bitbucket repository and keep it updated in the future: $ hg clone ssh://hg@bitbucket.org/nsegata/metaphlan",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "Create Input Directory",
+      "instruction": "Navigate to the MetaPhlAn folder and create a subfolder for storing the 20 metagenomes: $ cd metaphlan $ mkdir input",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "Download HMP Metagenome Samples",
+      "instruction": "Now, we can download the 20 samples to profile (additional information about the samples is available at the HMP DACC): This operation will likely require several hours. $ buccal_mucosa_samples=\"SRS013506 SRS015374 SRS015646 SRS017687 SRS019221 SRS019329 SRS020336 SRS022145 SRS022532 SRS045049\" $ for s in ${buccal_mucosa_samples} $ do $ wget http://downloads.hmpdacc.org/data/Illumina/buccal_mucosa/${s}.tar.bz2 -O input/${s}.tar.bz2 $ done $ tongue_dorsum_samples=\"SRS011243 SRS013234 SRS014888 SRS015941 SRS016086 SRS016342 SRS017713 SRS019219 SRS019327 SRS043663\" $ for s in ${tongue_dorsum_samples} $ do $ wget http://downloads.hmpdacc.org/data/Illumina/tongue_dorsum/${s}.tar.bz2 -O input/${s}.tar.bz2 $ done",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "Create Output Directory",
+      "instruction": "Create a folder for storing the MetaPhlAn output. $ mkdir profiled_samples",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "Profile Buccal Mucosa Samples",
+      "instruction": "Profile the 10 buccal mucosa samples using MetaPhlAn. We are running MetaPhlAn using the BowTie2 engine (this step requires BowTie2 to be installed and in the system path). Note that piping the fastq reads directly from the compressed archive to MetaPhlAn means MetaPhlAn's internal parallelization option (--nproc option) cannot be used. This is available when the input is an uncompressed file. If your machine has multiple CPUs, you can run multiple MetaPhlAn profiling operations in parallel. $ BM_samples=\"SRS013506 SRS015374 SRS015646 SRS017687 SRS019221 SRS019329 SRS020336 SRS022145 SRS022532 SRS045049\" $ for s in ${BM_samples} $ do $ tar xjf input/${s}.tar.bz2 --to-stdout | ./metaphlan.py --bowtie2db bowtie2db/mpa --bt2_ps very-sensitive --input_type multifastq --bowtie2out BM_${s}.bt2out > profiled_samples/BM_${s}.txt $ done",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 6,
+      "title": "Access MetaPhlAn Help",
+      "instruction": "Refer to the MetaPhlAn help (see command below) or to the MetaPhlAn wiki for specific information about other strategies and additional MetaPhlAn options. $ ./metaphlan.py -h Accessing MetaPhlAn help page",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 7,
+      "title": "Profile Tongue Dorsum Samples",
+      "instruction": "Apply MetaPhlAn to the 10 tongue dorsum samples. $ TD_samples=\"SRS011243 SRS013234 SRS014888 SRS015941 SRS016086 SRS016342 SRS017713 SRS019219 SRS019327 SRS043663\" $ for s in ${TD_samples} $ do $ tar xjf input/${s}.tar.bz2 --to-stdout | ./metaphlan.py --bowtie2db bowtie2db/mpa --bt2_ps very-sensitive --input_type multifastq --bowtie2out TD_${s}.bt2out > profiled_samples/TD_${s}.txt $ done",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 8,
+      "title": "Examine Profiled Metagenomes",
+      "instruction": "The \"profiled_samples\" folder now contains 20 profiled metagenomes. Here is an example of first few lines of the BM_SRS013506 sample output. $ cat profiled_samples/BM_SRS013506.txt $ k__Bacteria 100.0 $ k__Bacteria|p__Firmicutes 80.97874 $ k__Bacteria|p__Proteobacteria 17.17081 $ k__Bacteria|p__Fusobacteria 0.34233 $ k__Bacteria|p__Bacteroidetes 0.17203 $ k__Bacteria|p__Firmicutes|c__Bacilli 80.62406 [truncated output]",
+      "is_critical": false,
+      "timers": [],
+      "substeps": [
+        {
+          "instruction": "The \"profiled_samples\" folder now contains 20 profiled metagenomes. Here is an example of first few lines of the BM_SRS013506 sample output. $ cat profiled_samples/BM_SRS013506.txt $ k__Bacteria",
+          "title": ""
+        },
+        {
+          "instruction": "$ k__Bacteria|p__Firmicutes",
+          "title": ""
+        },
+        {
+          "instruction": "$ k__Bacteria|p__Proteobacteria",
+          "title": ""
+        },
+        {
+          "instruction": "$ k__Bacteria|p__Fusobacteria",
+          "title": ""
+        },
+        {
+          "instruction": "$ k__Bacteria|p__Bacteroidetes",
+          "title": ""
+        },
+        {
+          "instruction": "$ k__Bacteria|p__Firmicutes|c__Bacilli",
+          "title": ""
+        },
+        {
+          "instruction": "[truncated output]",
+          "title": ""
+        }
+      ]
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-17T10:16:20.590401Z",
+  "llm_normalised": true
+}
