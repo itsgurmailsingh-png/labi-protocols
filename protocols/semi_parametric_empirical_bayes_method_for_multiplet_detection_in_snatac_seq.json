@@ -1,0 +1,268 @@
+{
+  "protocol_id": "semi_parametric_empirical_bayes_method_for_multiplet_detection_in_snatac_seq",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Semi-parametric Empirical Bayes Method for Multiplet Detection in snATAC-seq",
+  "author": "Wu, Yuntian",
+  "doi": "10.1371/journal.pcbi.1013653",
+  "source_name": "pubmed_central",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13148828/",
+  "citation": "10.1371/journal.pcbi.1013653",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed from PMC XML: https://creativecommons.org/licenses/by/4.0/",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 17.0,
+  "category": "Bioinformatics",
+  "estimated_time_mins": 204,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "To generate the high-coverage locus count (HCLC) statistics required for SEBULA, we largely follow the preprocessing procedures established in AMULET, which consist of two main stages.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "In the first stage, we process fragment files containing all read alignments along with a set of confidently called cell barcodes. For each autosomal chromosome in each cell, we retain fragments with insert sizes less than 900 base pairs. We then identify and record high-coverage loci (defined as genomic intervals overlapped by more than two fragments within a single cell) using a sweep-line algorithm.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "In the second stage, we aggregate the high-coverage loci identified across all cells to create a non-redundant set of genomic intervals for each chromosome. This is achieved using a greedy interval-merging algorithm. Based on these merged loci, we construct a binary matrix in which each row corresponds to a high-coverage locus and each column corresponds to a cell. An entry in the matrix is set to 1 if the cell contains a fragment overlapping the corresponding locus, and 0 otherwise. The HCLC for each cell is then computed as the sum of entries in the corresponding column.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Let X=x1,…,xN denote the HCLC values for N cell barcodes in an experiment. We first exclude cells with HCLC strictly below a predefined threshold xmin, assuming that such cells are predominantly singlets. In the Method part, we provide a computational procedure for selecting an optimal value of xmin based on the overall goodness-of-fit of the SEBULA model. However, we find that SEBULA’s results are generally robust when xmin∈[0,Q1], where Q1 denotes the 25th percentile. We denote the set of filtered HCLC values by XT and the number of retained cells by NT. For each xj∈XT, we apply a variance-stabilizing and Box-Cox transformation [28],",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "where the parameter λ is determined by maximizing the Box-Cox log-likelihood. SEBULA models the Box-Cox transformed HCLC data, ZT, using a two-component mixture distribution:",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "where f0 is assumed to be a normal density with (unknown) mean, δ0, and variance, σ02.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "We estimate the mixture density f(z) using a smoothed histogram of the truncated variable ZT, partitioned into K equally spaced bins (default K = 120). For i=1,…,K, let yi denote the observed count in the ith bin and ci the center of the bin.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "Following Efron [23,29,30], we treat yi as independent Poisson observations and fit a generalized linear model (GLM) with natural spline basis of degree 7. Specifically, we assume",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "where nsk(z) denotes the kth basis function of the natural spline. This yields a smooth estimate f^(z) of the mixture density. The fitted values at bin centers, f^i=f^(ci), are normalized to produce a discrete approximation of the density:",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "A smooth estimate of the cumulative distribution function (CDF), F^(z), is subsequently obtained by linearly interpolating the bin centers ci against the cumulative sums of ρ^i.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "We apply Efron’s central matching method [23] to estimate the singlet density f0(z) and the singlet proportion π0 in the transformed HCLC data. The key assumption here is that the vast majority of the transformed HCLC values within a predefined central window correspond to singlet cells. (By default, we specify the central window spanning the 20th to 60th percentiles of the empirical distribution of ZT.) By isolating data within this range, we fit a quadratic model to the log of the sub-density f0+(z):=π0f0(z) as follows:",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "where cmax is the center of the histogram bin where the estimated mixture density f^(z) attains its maximum.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "Assuming f0(z)~𝒩(δ0,σ02), the log sub-density expands as",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "",
+      "instruction": "The least squares estimates, β^0,β^1,β^2, from the fit of (4) induce the estimates of δ^0 and σ^0 for the normal density of the singlet distribution:",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "",
+      "instruction": "An unnormalized estimate of the singlet count in each histogram bin i is then computed by",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "",
+      "instruction": "where f^i denotes the fitted count from the Poisson spline model at the ith bin center, ci.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "",
+      "instruction": "Finally, the singlet proportion π0 is estimated by normalizing the total fitted singlet density:",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "",
+      "instruction": "Note that π^0 represents the proportion of singlets among the cells after initial filtering. To report the estimate of the singlet proportion in the entire original library, we use",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "",
+      "instruction": "In practice, we find that filtering out zero and low HCLC values can substantially improve the efficiency of mixture distribution estimation. Although the final results for multiplet classification are generally robust to the specific choice of the threshold xmin, provided that xmin≥0, we propose a simple computational procedure to aid in selecting an xmin value to optimize the performance of SEBULA.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "",
+      "instruction": "The proposed procedure evaluates the goodness-of-fit between the transformed HCLC values within a specific range and the estimated normal distribution using cross-entropy loss. Specifically, after filtering the data and fitting the mixture model, we define",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "",
+      "instruction": "and compute the cross-entropy for the corresponding xmin as",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "",
+      "instruction": "The cross-entropy measures the discrepancy between the fitted normal distribution and the empirical distribution of the data; lower values indicate a better fit. Therefore, selecting an xmin that minimizes the cross-entropy supports the validity of the central matching assumption.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "",
+      "instruction": "Because the mixture fitting procedure is computationally efficient, SEBULA can quickly evaluate cross-entropy values over a range of xmin settings. To balance improved goodness-of-fit with retaining sufficient data for stable estimation of the mixture model, SEBULA constructs a trace plot of CE(xmin) and selects the elbow point as the optimal threshold (S4 Fig).",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "",
+      "instruction": "To further assess SEBULA’s robustness to the choice of truncation threshold, we conducted a sensitivity analysis by varying xmin over a broad range. Classification performance metrics, including F1 score, AUROC, and AUPRC, as well as the called multiplet rate, remained stable over practical threshold choices (S5 Fig). These results indicate that SEBULA is not highly sensitive to moderate variations in xmin and that the proposed cross-entropy-based selection procedure provides a reasonable and stable operating point.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "",
+      "instruction": "Based on the overall procedure, we compute the posterior probability that cell j is a multiplet as",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "",
+      "instruction": "Thresholding the pj values is a standard classification approach in machine learning practice. By default, we classify cells with pj > 0.8 as multiplets, corresponding to a local false discovery rate threshold of 20%.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "",
+      "instruction": "Alternatively, we also implement a classification procedure that controls the overall false discovery rate (FDR), primarily for comparison with AMULET. Note that the estimated densities f^0 and f^ induce corresponding cumulative distribution functions F^0 and F^. For a decision rule that classifies all cells with Box-Cox transformed values z ≥ t as multiplets, the estimated FDR at threshold t is given by",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "",
+      "instruction": "This approach allows users to pre-specify a target FDR level (e.g., 20%) and then identify the corresponding z cutoff directly from the data.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "",
+      "instruction": "To integrate probabilistic evidence from HCLC with evidence derived from other data features and/or modalities, we adopt a general Bayesian framework for sequentially updating posterior multiplet probabilities.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 29,
+      "title": "",
+      "instruction": "We regard the existing posterior probability for a target cell, P(multiplet∣y), as the new prior for re-analyzing the HCLC data. We then recover the HCLC likelihood for each cell from the earlier HCLC-only analysis. Specifically, we compute the marginal likelihood of the HCLC data, i.e., the Bayes factor, for cell j as",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 30,
+      "title": "",
+      "instruction": "where pj is the posterior multiplet probability based on HCLC alone, and π~0 is the estimated proportion of singlets in the original library.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 31,
+      "title": "",
+      "instruction": "Assuming conditional independence between x and y, i.e.,",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 32,
+      "title": "",
+      "instruction": "The updated posterior probability incorporating HCLC evidence is given by the Bayes rule:",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 33,
+      "title": "",
+      "instruction": "Note that the conditional independence assumption in (6) is the naïve independence assumption used in the naïve Bayes classifier. While this assumption may not hold exactly in practice, empirical evidence suggests that it is approximately valid (Section 5 of S1 Text), particularly when integrating data across distinct modalities. Additionally, the same naïve Bayes procedure can be applied to integrate evidence in the form of p-values or z-scores (see Section 3 of S1 Text).",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}

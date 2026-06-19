@@ -1,0 +1,96 @@
+{
+  "protocol_id": "processing_multivariate_time_series_electronic_health_records_of_covid_19_patien",
+  "parent_protocol_id": null,
+  "title": "Processing Multivariate Time-Series Electronic Health Records of COVID-19 Patients",
+  "author": "Wang, Zhu, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC11928838",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11928838/",
+  "doi": "10.1016/j.xpro.2025.103669",
+  "citation": "10.1016/j.xpro.2025.103669",
+  "category": "Epidemiology & Public Health",
+  "tags": [
+    "covid-19",
+    "data analysis",
+    "python",
+    "pytorch",
+    "anaconda"
+  ],
+  "estimated_time_mins": 42,
+  "materials": [
+    "COVID-19 patient data",
+    "Anaconda",
+    "Python",
+    "PyTorch",
+    "Pandas",
+    "NumPy",
+    "Scikit-learn",
+    "Ubuntu",
+    "Intel CPU",
+    "NVIDIA GPU"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Before you begin",
+      "instruction": "The global healthcare landscape continues to face significant challenges from COVID-19, despite the emergence of less virulent variants. The virus’s enhanced transmissibility drives periodic case surges that disproportionately impact intensive care units (ICUs), highlighting a critical gap in our capacity to manage healthcare resources effectively.2 This ongoing pressure underscores the urgent need for accurate prognostic tools to improve patient outcomes and optimize resource allocation in the evolving post-pandemic era.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Before you begin",
+      "instruction": "Artificial intelligence (AI) models have demonstrated remarkable potential in predicting patient outcomes, enabling clinical interventions and contributing to adequate treatment.1,3 However, the development and application of these AI models are dependent upon high-quality, large-scale data.4 A major obstacle is the lack of standard techniques for processing raw patient data from ICUs. This multivariate time-series electronic health record (EHR) data is complex, consisting of multiple clinical indicators (such as laboratory tests, vital signs, medications, and procedures) recorded across multiple patient visits over time. The absence of standardized methodologies for processing this raw clinical data presents a significant barrier to the widespread adoption of AI-driven solutions in clinical practice. To bridge this critical gap, we introduce a streamlined data processing protocol specifically designed for EHR data from COVID-19 ICU patients. This protocol aims to create a systematic approach to data harmonization and model development, thereby providing a standardized pipeline for enhancing patient outcomes and improving ICU efficiency both for the current pandemic and potential future public emergencies.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Data preparation and formatting",
+      "instruction": "Timing: 30 min",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Data preparation and formatting",
+      "instruction": "Here, we standardize the original data of COVID-19 patients obtained from medical institutions into a multivariate time-series EHR data table, and then format the table.5.Download the raw data file “time_series_375_prerpocess_en.xlsx” from https://github.com/HAIRLAB/Pre_Surv_COVID_19/tree/master/data or from Yan et al.3’s paper’s Supplementary Information section.Note: One can directly download the raw data file by running the following command.>wget -Lhttps://raw.github.com/HAIRLAB/Pre_Surv_COVID_19/master/data/time_series_375_prerpocess_en.xlsxNote: The raw data format is shown in Table 1. Each row in the EHR data table represents the observed clinical measurements for each patient at each ICU record. Please ensure compliance with its associated license terms and conditions when utilizing this dataset.CRITICAL: The Python code for steps 6 and 7 is provided in the “standardize_preprocess.py”, and one can run the following command in the directory “Fieldry-DataProcessCovid19-078cef8” to achieve the processing steps. Before using the code script, please put the raw data file in the directory “datasets/tjh/raw”.6.Standardize EHR data for each patient at each ICU record in the raw data table into a multivariate time-series EHR data table, as shown in Table 2.Note: In the multivariate time-series EHR data table, the first column represents a unique identifier for COVID-19 patients, labeled as “PatientID”. The second column represents the time point of the record. The third and fourth columns represent the time points of admission and discharge for patients in intensive care, respectively. The fifth column represents the clinical outcome, 0 and 1 indicating survival and death at the end of the ICU period respectively. The columns from the sixth to the last represent demographic information and laboratory test results at the nth time point.7.Format the multivariate time-series EHR data table to obtain a formatted multivariate time-series EHR data table, as shown in Table 3.a.Format data values.i.Convert Gender values to binary: Assign a value of 1 for male patients and a value of 0 for female patients.ii.Keep the year/month/day (Y/M/D) format for RecordTime, AdmissionTime, and DischargeTime.b.Clean missing data.i.Ensure that all records are complete for PatientID, RecordTime, AdmissionTime and DischargeTime. Remove any records with missing data in these columns to ensure consistency.ii.Drop columns whose values are all missing or all the same.c.Merge records by date.i.Group the data by PatientID and RecordTime to combine entries for the same patient on the same day.ii.Calculate the mean of numeric values within the grouped data to generate a single record per patient per day.Note: In actual clinical practice, not all laboratory tests are conducted at every ICU time-point. We merge records on a daily basis to reduce the overall rate of missing data within the dataset. In cases where other datasets exhibit more frequent recording of laboratory features, it’s feasible to merge records at finer temporal resolutions, such as by the hour, minute, or even second, etc.d.Calculate Length of Stay (LOS).i.Compute LOS in days by subtracting RecordTime from DischargeTime.ii.Set any negative LOS values to 0 to correct potential errors.CRITICAL: The steps required to standardize and format the multivariate time-series EHR data table may vary depending on the dataset (troubleshooting 2).Table 1Raw EHR data tablePatient_IDRe_DATEageGenderAdmission timeDischarge timeOutcomeFeature 1…––––––––…––––––––…––––––––…Table 2Multivariate time-series EHR data tablePatientIDRecord timeAdmission timeDischarge timeOutcomeFeature 1…Feature m11990/01/0201:09:001990/01/0122:12:001990/01/1112:40:0001.0…91.111990/01/0202:19:001990/01/0122:12:001990/01/1112:40:000NaN…NaN……………………Table 3Formatted multivariate time-series EHR data tablePatientIDRecord timeAdmission timeDischarge timeOutcomeLOSFeature 1…11990/01/021990/01/011990/01/110101.0…21990/02/011990/02/011990/02/131122.1………………………",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Quantification and statistical analysis",
+      "instruction": "The details of the formatting steps for the multivariate time-series EHR data and the criteria for data inclusion and exclusion are demonstrated in Figure 3.Figure 3Inclusion and exclusion criteria for multivariate time-series EHR dataFigures reprinted with permission from Gao et al., 2024.2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Quantification and statistical analysis",
+      "instruction": "The evaluation metrics used are listed as follows:1.For the binary outcome classification task: AUPRC, AUROC, Accuracy, F1, and EScore.2.For the LOS regression task: MAE, MSE, and R2.3.For multitask: OSMAE, and all metrics above.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Quantification and statistical analysis",
+      "instruction": "For the complete information about metrics, please refer to Gao et al.1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T00:37:13.598245Z",
+  "llm_normalised": true
+}

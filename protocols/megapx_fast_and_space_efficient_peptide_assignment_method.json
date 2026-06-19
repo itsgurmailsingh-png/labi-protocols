@@ -1,0 +1,121 @@
+{
+  "protocol_id": "megapx_fast_and_space_efficient_peptide_assignment_method",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "MegaPX: Fast and Space-Efficient Peptide Assignment Method",
+  "author": "Lutfi, Ahmad",
+  "doi": "10.1093/bioinformatics/btag134",
+  "source_name": "pubmed_central",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13148961/",
+  "citation": "10.1093/bioinformatics/btag134",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed from PMC XML: https://creativecommons.org/licenses/by/4.0/",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 6.5,
+  "category": "Bioinformatics",
+  "estimated_time_mins": 78,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "In general, de novo peptide sequencing algorithms are designed to directly determine the amino acid sequence of peptides from MS data without referring to a protein sequence database. Many methods are based on machine or deep learning algorithms and attempt to make predictions in real-time with specific parametric configurations. We combined the sequencing results from two different deep learning models: Casanovo (Yilmaz et al. 2024) and SMSNet (Karunratanakul et al. 2019). Both were executed on a Linux machine (Ubuntu 20.04.6 LTS 64-bit) with standard GPU configurations. SMSNet was executed using a previously published de novo sequencing pipeline (Beslic et al. 2023). Both deep learning models have been trained on high-resolution MS/MS data from the human proteome using the HCD library from MassIVE Wang et al. (2018), which consists of 1 114 503 annotated peptides. The models were trained with a precursor tolerance of 10 ppm and a fragment mass tolerance of 0.02 Da. Carbamidomethylation of cysteine was set as a fixed modification, whereas oxidation of methionine and deamidation of asparagine and glutamine were set as variable modifications. For the analysis, we opted to use the pre-trained Casanovo weights from the original publication and the SMSNet model from Beslic et al. (2023). This decision was based on their distinct training procedures, ensuring broader coverage of different sequencing scenarios in our combined approach.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "To ensure data quality, we filtered de novo peptides based on the peptide-level confidence score reported by each model, defined as the average of the amino acid–level confidence scores across the predicted sequence. For all global analyses, we used a default threshold of 70%, which in our datasets corresponds to the high-confidence regime of the score distribution and effectively removes the long tail of low-scoring predictions. This is consistent with typical settings in de novo sequencing workflows, where comparable peptide- or amino acid–level confidence cutoffs are used to retain sequences with high expected correctness while controlling the error rate (Tran et al. 2019). At the same time, recent work has shown that de novo confidence scores are not perfectly calibrated across spectra and sequence contexts, and that varying the score threshold mainly trades recall for precision rather than defining a hard boundary between correct and incorrect sequences (Mabona et al. 2025, van Puyenbroeck et al. 2025) in regions where we expect a higher rate of genuine sequence variability (e.g. mutated peptides), we therefore relaxed the cutoff to 50%. This more permissive threshold is motivated by the empirical behaviour of the models on our data and by the observations above: lowering the cutoff substantially increases sensitivity to variant peptides while still filtering out most low-confidence predictions. Thus, the 70% threshold is used as a conservative setting for most analyses, whereas the 50% threshold is applied only in mutation-rich contexts where higher recall of true variants is prioritized over maximal specificity.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "To enable efficient simultaneous querying of multiple Bloom filters, Hailemariam Dadi et al. (2018) introduced the Interleaved Bloom Filter (IBF). Unlike conventional approaches that query each filter individually, the IBF combines multiple Bloom filters of equal size n into a single interleaved structure using a shared set of hash functions H. Each bit in the IBF is replaced by a sub-bit vector of size b, where the i-th bit corresponds to bin Bi, resulting in a total size of b×n. This structure allows all bins to be queried simultaneously, improving efficiency. The false positive rate depends on the size n, the number of inserted elements m, and the number of hash functions H, and can be calculated as described by Hailemariam Dadi et al. (2018):",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "In our application, the IBF is used to index k-mers derived from peptide sequences across many species-level bins. Because each bin contains a finite set of peptide-derived k-mers, the sizing of the underlying Bloom filters must account for the maximum possible number of k-mers that any input bin may contribute. This quantity is referred to as maxKmers and directly determines the Bloom filter size required to maintain the desired false positive rate.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "The optimal size of each Bloom filter (bin) for a given error rate can be calculated using the equation (Ulrich et al. 2022):",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "where r=1−p1/H and maxKmers is the maximum number of k-mers in the input user bins (input references). This value is computed by estimating the maximum size of k-mers sets in the input user bins. Our tool calculates the size of the IBF based on the vectorized representation of the user bins using a default false positive rate of 0.01. Figure S2 in the Supplementary Material shows an example of an IBF structure derived from three different input sequences. In the beginning, each reference sequence is k-merized to a length k. Subsequently, the generated k-mers are encoded, and these encoded k-mers are either inserted directly into the filter or mutated versions are generated (processed k-mers). The resulting k-mers are then hashed using three different hash functions, and the resulting hashes of each reference sequence are inserted into the corresponding Bloom filter. These different BFs are then interleaved into a single IBF. However, it should be noted that memory consumption can increase significantly if the reference sequences are of very different sizes, as all BFs are interleaved. Consequently, the size corresponds to the largest BF, meaning other filters also reserve a lot of memory for empty blocks.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "",
+      "instruction": "Following the query membership of peptide sequences from each sample against a pre-built index, we constructed a count matrix C. Each row in this matrix represents a peptide, while each column corresponds to the user bin. The entries of the matrix are the k-mers’ hits per bin for every query peptide:",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "",
+      "instruction": "The count matrix is further processed according to the user-defined assignment threshold D, representing the percentage of the peptide P (number of k-mers) that matches the user bin B to assign the peptide to that user bin. Let x=y×D100, where y is the total number of k-mers in peptide P.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "",
+      "instruction": "The lookup matrix is built with bits (1 and 0) and defined as:",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "",
+      "instruction": "Using the lookup table 50, the assignment score S of the set of peptides in a sample to the corresponding user bin B can be computed as:",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "",
+      "instruction": "where z is the total number of peptides in the input sample. MegaPX supports querying large databases with errors, enabling an error-tolerant detection of amino acid sequences. Substitution matrices characterize all possible modifications of each amino acid by another and provide essential information for predicting potential changes based on a specific score. The BLOSUM (BLOcks SUbstitution Matrix) series is one of the most widely used substitution matrices. BLOSUM matrices are constructed by clustering aligned sequence segments within conserved blocks based on a specified percentage identity threshold. This process involves analyzing large protein data sets to identify amino acid substitution patterns, which are then used to derive scoring matrices that reflect the likelihood such substitutions occurring in related proteins (Henikoff and Henikoff 1992). BLOSUM62 is derived from sequence blocks with at least 62% identity (Henikoff and Henikoff 1992). In a BLOSUM matrix, higher scores indicate a greater probability that the corresponding amino acid substitution occurs during sequence alignment. We generated all possible mutational variants of each k-mer by simulating potential amino acid substitutions, guided by sequence similarity, to identify target proteins even in the presence of mutations. The process begins by dividing the target protein sequence into overlapping k-mers. For each k-mer, we consider all possible amino acid substitutions based on the BLOSUM62 substitution matrix and a user-defined similarity score threshold. Without optimization, generating mutational variants requires evaluating up to 20k combinations, making it computationally expensive. To reduce runtime, we pre-sort the substitution matrix so that, for each amino acid, candidates are ordered by descending similarity score. This prioritizes high-scoring substitutions during variant generation. An early stopping mechanism further improves efficiency: if a substitution score falls below a user-defined threshold, the process terminates early, skipping remaining lower-scoring candidates. This reduces computations when aligning mutated k-mers to the reference, enhancing runtime performance. The generated database includes both original and mutated k-mers, ensuring that the original protein sequences are also represented in the IBF.",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "",
+      "instruction": "MegaPX uses a multiple indexing strategy based on a divide-and-conquer algorithm to efficiently handle large databases. It partitions n user-defined references into batches, generating separate IBFs with equal numbers of user bins (based on the split size). Each IBF is sized according to its content to minimize filter size and false positives. By breaking the problem into smaller sub-tasks and combining the results, this approach reduces both time and memory consumption. While this approach optimizes indexing efficiency, it may lead to slower query times, particularly when the target database contains a high proportion of over-represented sequences. To address this, MegaPX allows the inclusion of an external blacklist file, enabling users to exclude specific references from the indexing process. These references, often considered outliers, are omitted from subsequent searches to improve query performance. This method eliminates the need to load, write, and repeatedly query very large IBFs. Instead, it enables querying smaller IBFs, which can be efficiently managed within standard RAM configurations. The workflow of this approach is illustrated in Fig. 1 (pseudo-code in Supplementary Material Algorithm S1). Additionally, our workflow supports minimizer computation. Minimizers are typically calculated in both the forward and reverse directions of a given sequence, as DNA sequences have palindromic features where the sequence on one strand is the reverse complement of the sequence on the other strand (Miklenic and Svetec 2021). Taking both the forward and reverse strands into account is crucial for applications such as sequence alignment, where similarities can occur on either strand [https://www.cureffi.org/2012/12/19/forward-and-reverse-reads-in-paired-end-sequencing/]. Unlike DNA, protein sequences consist of amino acids and lack a reverse complement, so minimizers are calculated only on the forward strand. As protein sequences are typically shorter, minimizer calculation is included as an optional step. The workflow begins with preparing input datasets, including the reference database and MS/MS spectra (in MGF or converted from RAW). Input protein sequences are k-merized to a specified length k and inserted into the IBF index. De novo peptides are sequenced from spectra, k-merized at the same k, and searched against the index (Supplementary Material Fig. S3). Finally, taxonomy is assigned based on peptide-to-protein matches, with scoring based on Equation (6).",
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "",
+      "instruction": "Multi-indexing approach workflow. The user bins are loaded in memory in batches according to the user-defined M split size; (1) Removing outliers according to the user-defined black list. (2) K-mer computation of each reference sequence in the loaded split. (3) Generating mutation according to user-defined score, if needed (Boolean value 0 or 1). (4) Encoding the k-mers to the 64-bit integer representation. (5) Compute minimizers of each k-mers set. (6) Hash the encoded values using set of hash functions H. (7) Insert the k-mers into the target IBF; each IBF has the same size as the split size (the last IBF contains the rest of the sequences). (8) Query assignment of input peptides against the built index. The query and assignment step is repeated until all IBFs are queried without outliers. The different colors represent the different splits/IBFs.",
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "merged_at": "2026-06-18"
+}

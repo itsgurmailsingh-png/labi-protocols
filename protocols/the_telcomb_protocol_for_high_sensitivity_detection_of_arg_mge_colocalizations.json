@@ -1,0 +1,232 @@
+{
+  "protocol_id": "the_telcomb_protocol_for_high_sensitivity_detection_of_arg_mge_colocalizations",
+  "parent_protocol_id": null,
+  "title": "The TELCoMB Protocol for High-Sensitivity Detection of ARG-MGE Colocalizations",
+  "author": "Bravo, Slizovskiy, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "current_protocols",
+  "source_id": "PMC11620000",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11620000/",
+  "doi": "10.1002/cpz1.70031",
+  "citation": "10.1002/cpz1.70031",
+  "category": "Microbiology",
+  "tags": [
+    "antimicrobial resistance",
+    "microbial communities",
+    "sequencing",
+    "database",
+    "bioinformatics"
+  ],
+  "estimated_time_mins": 138,
+  "materials": [
+    "Sequence reads in FASTQ format",
+    "MEGARes database FASTA and CSV files",
+    "ICEberg database FASTA file",
+    "ACLAME database FASTA file",
+    "PlasmidFinder database FASTA file"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "BASIC PROTOCOL 1",
+      "instruction": "Install Conda if it is not already available. Conda can be installed using the installer from the website here https://www.anaconda.com/download/ or by using wget as follows: wget -O conda.pkg \\\nhttps://repo.anaconda.com/archive/Anaconda3-2023.07-2-MacOSX-arm64.pkg\ninstaller -pkg conda.pkg This example illustrates how to download and install the Anaconda package on an M-series MacBook; be sure to use the correct link for your device’s operating system.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "BASIC PROTOCOL 1",
+      "instruction": "Create the TELCoMB Conda environment using the following commands: conda create -c conda-forge -c bioconda -n telcomb snakemake git\nconda activate telcomb\ngit clone https://github.com/jonathan-bravo/TELCoMB.git",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "BASIC PROTOCOL 1",
+      "instruction": "Set up a directory structure within the cloned GitHub repository. mkdir -p telcomb/samples_dir/samples # for fasta files",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "BASIC PROTOCOL 1",
+      "instruction": "The TELCoMB workflow assumes that all FASTQ files are stored in a target directory that contains a sample directory. Therefore, once all directories are created, link, copy or move the FASTQ files to this directory.\nReplace placeholder with the correct path. # linking files to sample directory\nfor fq in /*.fastq; do\nln -s ${fq} telcomb/samples_dir/samples; # create symlink\ndone",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "BASIC PROTOCOL 1",
+      "instruction": "Modify the following options in telcomb/config/config.json, depending on input/user preference. The default values are: “WORKFLOW” :\n{\n“SAMPLEDIR” : “test_samples”,\n“WORKDIR” : “test_dir”,\n“DATABASES_DIR” : “databases”,\n“LONG_READS” : “true”,\n“DEDUPLICATE” : “true”\n}, The SAMPLEDIR value references the sample directory. The WORKDIR value references the directory where all output is placed. The initial value for SAMPLEDIR is set to test samples because of the included test input. DATABASE_DIR is the directory where the database files are downloaded. LONG_READS can be changed to false if the input data are short reads; otherwise, it should remain true. And finally, DEDUPLICATE can be set to false if the deduplication is causing the workflow to run beyond the desired time frame. It is highly recommended that this remains at the default value to improve quality of the results.\nLastly, when running TELCoMB for the first time all databases and third-party software will be downloaded as part of the initial run of TELCoMB. For any subsequent run, data will only be generated for new samples that have been added or old samples that have been modified.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "ALTERNATE PROTOCOL",
+      "instruction": "On a Slurm cluster, Conda can be loaded by running this command, if the Conda module is present on your cluster: module load conda",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "ALTERNATE PROTOCOL",
+      "instruction": "Create the TELCoMB Conda environment using the following commands: conda create -c conda-forge -c bioconda -n telcomb snakemake git\nconda activate telcomb\ngit clone https://github.com/jonathan-bravo/TELCoMB.git",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "ALTERNATE PROTOCOL",
+      "instruction": "Set up a directory structure within the cloned GitHub repository, and we need to create an additional directory if the workflow is being run on a cluster. mkdir -p telcomb/samples_dir/samples # for fasta files\nmkdir -p telcomb/logs # for cluster log output",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "ALTERNATE PROTOCOL",
+      "instruction": "The TELCoMB workflow assumes that all FASTQ files are stored a target directory that contains a sample directory. Therefore, once all directories are created, we link, copy or move the FASTQ files to this directory. Note: replace placeholder with the correct path. # linking files to sample directory\nfor fa in /*.fastq;\ndo\nln -s ${fa} telcomb/samples_dir/samples; # create symlink\ndone",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "ALTERNATE PROTOCOL",
+      "instruction": "Modify the run script and Slurm profile configuration file. First modify the telcomb/run.sh script to include the email and account information in the header. This informs the cluster manager which account to use to launch the initial snakemake command. #SBATCH --job-name=TLS-disp\n#SBATCH --account ≤account>\n#SBATCH --qos ≤account qos>\n#SBATCH --mail-type=FAIL\n#SBATCH --mail-users≤email>\n#SBATCH --ntasks=1\n#SBATCH --cpus-per-task=1\n#SBATCH --mem=1gb\n#SBATCH --time=96:00:00\n#SBATCH --output=logs/%j_disp.log\n#SBATCH --error=logs/%j_disp.log Next, modify the telcomb/profiles/slurm/config.yaml file with the same account and email information. Additionally, provide or remove queue priority, or qos, information, which is typically provided by your account manager. This configuration JSON file is used by Snakemake to launch each individual rule with the specified settings, allowing Snakemake to work harmoniously with Slurm. cluster:\nmkdir -p logs/ &&\nsbatch\n--account={resources.account}\n--qos={resources.qos}\n--cpus-per-task=“1”\n--nodes=l\n--mem={resources.mem_mb}\n--time=“72:00:00”\n--job-name=“TLS-job”\n--mail-user=“ “\n--mail-type=“NONE”\n--output=“logs/log_%j.log”\n--error=“logs/err_%j.log”\ndefault-resources:\n- mem_mb=32000\n- account≤account>\n- qos≤qos> Also modify the following options in telcomb/config/config.json, depending on input/user preference. The default values are: “WORKFLOW” :\n{\n“SAMPLEDIR” : “test_samples”,\n“WORKDIR” : “test_dir”,\n“DATABASES_DIR” : “databases”,\n“LONG_READS” : “true”,\n“DEDUPLICATE” : “true”\n}, The workflow value definitions can be found in Basic Protocol 1. Again, we highly recommend leaving the DEDUPLICATE default setting for higher quality results.\nWhen running TELCoMB for the first time, all databases and third-party software will be downloaded as part of the initial run. As in Basic Protocol 1, any subsequent run will only generate data for new samples that have been added or old samples that have been modified.",
+      "substeps": [
+        {
+          "instruction": "mem_mb=32000",
+          "title": ""
+        },
+        {
+          "instruction": "account≤account>",
+          "title": ""
+        },
+        {
+          "instruction": "qos≤qos> Also modify the following options in telcomb/config/config.json, depending on input/user preference. The default values are: “WORKFLOW” :",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "BASIC PROTOCOL 2",
+      "instruction": "If the data from the sequencer include multiple FASTQ files per sample, combine them using the cat command. This step assumes the files for each sample are in their own directory, i.e., all the files for sample 1 are in a directory named sample1 and all the files for sample 2 are in a directory named sample2. cd / cat *.fastq> . . .fastq",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "BASIC PROTOCOL 2",
+      "instruction": "After concatenation, there should be a single FASTQ file for each of the input samples. Create symbolic links in the sample directory to these files from the source directory. for fq in /*.fastq; do\nln -s ${fq} telcomb/sample_dir/samples; # create symlink\ndone FASTQ files can be copied to the sample directory, but linking the files reduces unnecessary use of hard drive space. The files can also be moved directly, but it is best not to operate directly on source files.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "BASIC PROTOCOL 2",
+      "instruction": "Review the settings in telcomb/config/config.json (Table 1), which can be adjusted to change input and output locations, how data is processed, and the threshold used for detecting duplicates.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "BASIC PROTOCOL 2",
+      "instruction": "Launch the workflow from the telcomb directory by either submitting the telcomb/run.sh script to the Slurm batch manager or by running the workflow locally. Using screen when connected to a server allows one to detach from the screen and allow the workflow to continue running if the remote session is interrupted.\nIf running the workflow locally, i.e., without a remote connection to a server/cluster, then the screen commands become completely optional.\nTo run locally, use the following command. screen -S telcomb; #starting a screen with the name: telcomb\nconda actiavte telcomb; #activating the conda environment\ncd telcomb; #changing directories into telcomb\nsnakemake --cores --use-conda --latency-wait 20 \\\n--rerun-incomplete --conda-frontend conda #launching the workflow To run in a Slurm environment, submit the job using the sbatch. cd telcomb\nsbatch run.sh",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "BASIC PROTOCOL 2",
+      "instruction": "Review the output files and figures, which are produced by this step in the workflow.\nSN is the sample name and DS is the deduplicate string (i.e., deduplicated, not deduplicated, or assembled).\nDeduplicated, Assembled, or Non-Deduplicated Reads (SN_DS): These are the reads or contigs that are produced from the selected deduplication method in telcomb/config/config.json, either produced by deduplicate, not_deduplicated_reads, or meta_spades_assembly; these reads or contigs are used as input for the alignments to the MGE and MEGARes databases.Read Lengths (SN_read_lengths.json): A JSON formatted file produced by the read_lengths workflow rule that contains an entry for every input read identifier and the length value for that read. Length is determined by the number of base pairs in the read.Duplicate Reads (SN.dup.reads.fastq): if the DEDUPLICATE setting in telcomb/config/config.json is set to true and the input data contain long reads, this FASTQ file is produced by the deduplicate workflow rule and contains all read entries from the input FASTQ file that were flagged as duplicates and removed.Read Length Plots (SN_DS_read_lengths_hist.svg): This figure is produced by the read_length_plots workflow rule and showcases a bar chart displaying read lengths on the x-axis and their counts on the y-axis.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "BASIC PROTOCOL 3",
+      "instruction": "Review the parameter settings in the telcomb/config/config.json file found in Table 2. To reduce false-positive detection of ARG and MGE accessions, we used a gene fraction cutoff, defined as the proportion of nucleotides within a given reference accession that are aligned by at least one sequenced read of 80% and 50% for resistome and mobilome accessions, respectively, based on cut-offs established in a prior resistome-mobilome colocalization analysis of metagenomic data (Slizovskiy et al., 2022). These cut-offs are illustrated in Figure 2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "BASIC PROTOCOL 3",
+      "instruction": "Launch the workflow, if not previously run or if configuration settings were changed since the last run, by navigating to the telcomb directory and either submitting the telcomb/run.sh script to the Slurm batch manager or running the workflow locally. Here is an example of running the workflow locally: conda actiavte telcomb; #activating the conda environment\ncd telcomb; #changing directories into telcomb\nsnakemake --cores --use-conda --latency-wait 20 \\\n--rerun-incomplete --conda-frontend conda #launching the workflow Here is an example of submitting the telcomb/run. sh script to the Slurm batch manager: cd telcomb\nsbatch run.sh",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "BASIC PROTOCOL 3",
+      "instruction": "Review the output files. The following alignment files are produced:\nMEGARes Alignment (SN_DS_ato_megares.sam): This SAM is obtained after aligning the deduplicated reads or assembled contigs to the MEGARes database. This SAM file contributed to generating the colocalization, resistome, and mobilome results.MGEs Alignment (SN_DS_ato_MGES.sam): This is a SAM of the processed input data, either deduplication, assembly, or no deduplication, that is aligned to the MGEs database FASTA file produced by the align_to_mges workflow rule. Data from this alignment is used to generate colocalization, resistome, and mobilome results.\nNext, alignment files are used by the resistome and mobilome workflow rule to produce the Resistome Features, Resistome Richness, and Mobilome files:Resistome Features (SN_DS.fastq_amr_features.csv): This is a CSV file that contains statistics on the number and lengths of reads or contigs. It provides detailed information for each MEGARes match, including MEGARes header, group, mechanism, and class, along with the number of supporting reads or contigs for each. The following statistics are given:\nARG_NUM_OF_READS: the number of reads or contigs that aligned to the MEGARes databaseARG_READ_LENGTH_MEAN: mean length of the reads or contigs aligned to the MEGARes databaseARG_READ_LENGTH_MEDIAN: median length of the reads or contigs aligned to the MEGARes databaseARG_READ_LENGTH_RANGE: a tuple with the shortest read length that aligned to the MEGARes database as the first value and the longest read length as the second valueARG_READ_LENGTH_STD_DEV: standard deviation of the read lengths, closely related to the variance; a higher value means the read lengths are more spread out and a lower standard deviation means the read lengths are closer togetherARG_READ_LENGTH_VARIANCE: variance of the read length; a high value indicates that the read lengths are spread far from the mean and a low value indicates that the read lengths are closer togetherARG_READ_LENGTH_SKEW: the measure of asymmetry of the read length distribution, a positive value indicating a right skew, and a negative value indicating a left skewARG_READ_LENGTH_KURTOSIS: kurtosis is a measure of the shape of the distribution of the length of reads or contigs; a positive number indicates that the distribution has fatter tails and a sharper peak at the mean or a higher likelihood of extreme values; a negative number indicates thinner tails and a flatter peak or fewer extreme values, and a value of zero indicates that the distribution is similar to normal.ARG descriptors. The following descriptors are given for each ARG alignment.\nMEGARes identifier: the MEGARes identifier for the ARG. A detailed description of the MEGARes identifiers can be found on the MEGARes website. https://www.meglab.org/.Num Reads: the number of reads or contigs that aligned to the ARGGroup: the MEGARes group of the ARGNum Reads: the number of reads or contigs that aligned to ARGs classified within each groupMechanism: the MEGARes mechanism of the ARGNum Reads: the number of reads or contigs that aligned to ARGs classified within each mechanismClass: the MEGARes class of the ARGNum Reads: the number of reads or contigs that aligned to ARGs within each class.Resistome Richness (SN_DS.fastq_amr_richness.csv): This CSV file reveals the diversity within the resistome by showing counts of different genes, gene classes, mechanisms, and groups. The column headers are:\nGene Richness: the count of unique ARGs for each sample;Class Richness: the count of unique ARG classes for each sample;Mechanism Richness: the count of unique ARG mechanisms for each sample;Group Richness: the count of unique ARG groups for each sample.Mobilome (SN_DS.fastq_mobilome.csv): This CSV file offers statistics about the number and length of reads or contigs that aligned to accessions within any of the reference MGE databases. The following statistics are given:\nMGES_NUM_OF_READS: number of reads or contigs that aligned to the MGE databasesMGES_READ_LENGTH_MEAN: mean length of the reads or contigs aligned to the MGE databasesMGES_READ_LENGTH_MEDIAN: median length of the reads or contigs aligned to the MGE databasesMGES_READ_LENGTH_RANGE: a tuple with the shortest read length that aligned to the MGE databases as the first value and the longest read length as the second valueMGES_READ_LENGTH_STD_DEV: standard deviation of the read lengths, closely related to the variance, a higher value means the read lengths are more spread out and a lower standard deviation means the read lengths are closer togetherMGES_READ_LENGTH_VARIANCE: variance of the read length, a high value indicates that the read lengths are spread far from the mean and a low value indicates that the read lengths are closer togetherMGES_READ_LENGTH_SKEW: the measure of asymmetry of the read length distribution, a positive value indicating a right skew, and a negative value indicating a left skewMGES_READ_LENGTH_KURTOSIS: kurtosis is a measure of the shape of the distribution of the length of reads or contigs, a positive number indicates that the distribution has fatter tails and a sharper peak at the mean or a higher likelihood of extreme values, while a negative number indicates thinner tails and a flatter peak or fewer extreme values, and a value of zero indicates that the distribution is similar to normalMGE Richness: number of unique MGE alignments (diversity)MGE descriptors. The following descriptors are given for each MGE accession: MGE accession header (obtained from the FASTA file), and the number of reads or contigs that aligned to the relevant MGE.In addition to these statistics, TELCoMB gives the same statistics when reads or contigs with whose length is four standard deviations or move from the mean are removed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "BASIC PROTOCOL 3",
+      "instruction": "Review the output figures. Each figure uses data from Slizovskiy et al. (2020) and is an example of the output that can be expected from TELCoMB. A heatmap (heatmap_all_samples.svg) is produced by the heatmap workflow rule. It illustrates the resistome composition at the ARG mechanism level for all samples (one sample per column), with one panel for metal and biocide ARGs and a separate panel for antibiotic drug ARGs (Fig. 3). A violin plot (violing_plot_all_samples.svg) is produced by the violin_plots workflow rule and represents the resistome distribution of all samples as the log 10 relative abundance of ARG groups on the y-axis (Fig. 4). Note that the relative abundance is normalized by the length of the ARG, and the total length of all the reads in the sample.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "BASIC PROTOCOL 4",
+      "instruction": "Review the parameter settings in the telcomb/config/config.json file (Table 3). Two parameters affect the colocalizations. Figure 5 illustrates the difference between colocalization strategies.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "BASIC PROTOCOL 4",
+      "instruction": "Launch the workflow, if not previously run or if configuration settings were changed since the last run, by navigating to the telcomb directory and either submitting the telcomb/run.sh script to the Slurm batch manager or running the workflow locally. Here is an example of running the workflow locally: conda actiavte telcomb; #activating the conda environment\ncd telcomb; #changing directories into telcomb\nsnakemake --cores --use-conda --latency-wait 20 \\\n--rerun-incomplete --conda-frontend conda #launching the workflow Here is an example of submitting the telcomb/run.sh script to the Slurm batch manager: cd telcomb\nsbatch run.sh",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "BASIC PROTOCOL 4",
+      "instruction": "Review the output files. The first file is the Overlapping MGEs file produced by the overlap workflow rule:\nOverlapping MGEs (SN_DS_overlapped_mges.csv): This CSV file contains the MGE headers of MGEs that overlap with ARGs beyond the specified threshold. Offending MGEs are then listed in this file and not used when generating colocalization or mobilome results.\nThis file affects the mobilome results from\nBasic Protocol 3\nThe next two files are the Colocalizations and Genes List files, which are produced by the find_colocalizations workflow rule:Colocalizations (SN_DS.fastq_colocalizations.csv): This CSV file presents a row for each ARG-MGE colocalization. The default configuration settings specify that an ARG has 80% genome fraction, a MGE that has at least 50% genome fraction, these occur together on a single read (or contig), and any gene overlaps that occur are evaluated and offending MGEs are removed if they cross the default threshold of 50%. This file gives the read or contig name, gene names, and gene positions on the read or contig. The column headers are:\nread: the header value for the read from the deduplicated FASTQ file or contig id from the assembly FASTQ fileARG: the header from MEGARes indicating the accession to which the read alignedARG positions: the start:stop positions of the ARG on the readMGE (s): the header from the MGE databases indicating the accession to which the read alignedMGE (s) positions: the start:stop positions of the MGE on the readGenes List (SN_DS_genes_list.xlsx): This Excel file contains a row for every read containing an ARG. This is an intermediate file generated while looking for candidate colocalizations. The column headers are:\nRead Name: The read id from the input SAM fileAMR Genes: A semicolon-separated list of ARG headers obtained from the alignment to the MEGARes databaseAMR Gene Pos: A semicolon-separated list of ARG start:stop positions from the alignment to the MEGARes databaseMGE Genes: A semicolon-separated list of MGE gene headers from the alignment to the MGEs databaseMGE Genes Pos: A semicolon-separated list of MGE gene start:stop positions from the alignment to the MGEs database.The Colocalization Richness file is produced from the Colocalizations file by the colocalization richness workflow rule:Colocalization Richness (SN_DS.fastq_colocalization_richness.csv): This CSV file includes a row for each unique colocalization that contains both gene names, the distance between them, and the number of times this colocalization occurs in the data. There is also a count value for the number of unique colocalizations (i.e., colocalization richness) at the top of the file. The column headers are:\nMEGARes group: the gene group name(s)MGE gene: the MGEs database header for the MGE accession(s)Distance: the distance between the end of the ARG or MGE and the start of the other gene within the colocalizationOccurrences: the number of occurrences the colocalizations appear based on the ARG and MGE alignments",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "BASIC PROTOCOL 4",
+      "instruction": "Review the output figures. The workflow produces an illustration of the colocalizations (SN_colocalizations_plot.svg) via the colocalization_visualization workflow rule. It illustrates each read containing an ARG-MGE colocalization for each sample, with reads or contigs depicted as black lines and genes as colored rectangles (Fig. 6).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T01:22:12.873770Z",
+  "llm_normalised": true
+}

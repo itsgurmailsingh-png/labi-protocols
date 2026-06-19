@@ -1,0 +1,100 @@
+{
+  "protocol_id": "non_invasive_tumor_monitoring_and_diagnosis_using_deep_learning",
+  "parent_protocol_id": null,
+  "title": "Non-invasive tumor monitoring and diagnosis using deep learning",
+  "author": "Yuan, Yan, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC12907704",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12907704/",
+  "doi": "10.1016/j.xpro.2026.104358",
+  "citation": "10.1016/j.xpro.2026.104358",
+  "category": "Clinical & Translational",
+  "tags": [
+    "deep learning",
+    "prostate cancer",
+    "methylation analysis",
+    "bioinformatics",
+    "cfdna"
+  ],
+  "estimated_time_mins": 42,
+  "materials": [
+    "Python 3",
+    "Matplotlib",
+    "NumPy",
+    "PyTorch",
+    "Pandas",
+    "SciPy",
+    "R",
+    "BiocManager",
+    "GEOquery",
+    "Limma",
+    "ggplot2",
+    "Intel Core i9-10980XE CPU",
+    "NVIDIA GeForce RTX 3090",
+    "GNU/Linux Ubuntu 22.04.5 LTS"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Before you begin",
+      "instruction": "The detection of circulating tumor DNA (ctDNA) within cell-free DNA (cfDNA) has shown great potential for cancer diagnosis.2,3 However, a major hurdle in using ctDNA as a tumor biomarker is accurately distinguishing the minute fraction of ctDNA from vast background of cfDNA. DNA methylation profiling represents a promising strategy, as tumor-derived ctDNA typically exhibits methylation patterns distinct from those of background cfDNA.4 Moreover, DNA methylation profiling is characterized by high stability and broad genomic coverage, offering clear-cut advantages over other biomarkers, such as tumor-specific mutations and chromosomal aberrations.5,6,7,8,9",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Before you begin",
+      "instruction": "Here, we describe a protocol that uses Oncoder, an autoencoder-based framework, designed to automatically learn methylation patterns from a reference methylation atlas for predicting tumor fractions in plasma cfDNA. To demonstrate its utility, we leverage Oncoder to monitor the dynamics of tumor fraction in plasma cfDNA across 33 prostate cancer patients during abiraterone acetate (AA) therapy. As treatment with AA is known to largely eliminate non-resistant prostate cancer cells,10 this case study presents an illustrative biological scenario.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Step-by-step method details",
+      "instruction": "The workflow schematic of this protocol is illustrated in Figure 1.Figure 1The workflow schematic of this protocol",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Differential methylation analysis",
+      "instruction": "Timing: 2–3 h",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Differential methylation analysis",
+      "instruction": "This section includes the details on identifying tumor-specific differentially methylated positions (DMPs). We perform differential analysis using M-values to contrast prostate tumor tissues against adjacent normal tissues and healthy plasma samples. M-values are derived from beta-values via logit transformation and offer better statistical properties. These identified sites are then used as input features for training the model.3.Activate conda environment and load the required packages.>conda activate >R>library(knitr)>library(limma)>library(stringr)>library(ggplot2)>library(tidyr)>library(dplyr)>library(tibble)>library(pheatmap)>library(RColorBrewer)4.Load all DNA methylation matrices preprocessed in the first two steps into the R session.>rm(list=ls())>matrix_names matrix_list names(matrix_list) probs_to_keep matrix_list beta_matrix colnames(beta_matrix) group_sizes group_names groups group_mapping M_matrix % qlogis() / log(2)b.Plot the distribution density of beta-values and M-values for the first 2,000 CpG sites(Figures 2A and 2B),>plot_methylation_density % rownames_to_column(\"cpg_id\") %>% pivot_longer(-cpg_id, names_to = \"sample_id\", values_to = \"value\") %>% merge(group_mapping, by = \"sample_id\") %>%ggplot(aes(value, color = group)) + geom_density() + theme_bw() + theme(legend.position = \"bottom\", plot.title = element_text(hjust = 0.65, size = 20, face = \"bold\"), axis.title = element_text(size = 16), axis.text = element_text(size = 14), legend.text = element_text(size = 13), legend.title = element_blank(), panel.border = element_rect(color = \"black\", fill = NA, linewidth = 1))ggsave(filename, p, width = 8, height = 6, dpi = 300) }>plot_methylation_density(beta_matrix[1:2000,],\"Methylation_beta_value.jpg\")>plot_methylation_density(M_matrix[1:2000,],\"Methylation_M_value.jpg\")Figure 2Comparison between beta-values and M-values(A and B) Density plots of (A) beta-values and (B) M-values for the first 2,000 methylation probes across different sample groups. The beta-value ranges from 0 to 1, while the M-value ranges from negative infinity to positive infinity.(C and D) Dot plots of the mean and variance of (C) beta-values and (D) M-values for all probes across different sample groups. The beta-value exhibits low variance near 0 and 1, but high variance near 0.5. In contrast, M-value demonstrates homoscedasticity. Its variance is approximately constant along the X-axis.c.Plot the mean-variance relationship of beta-values and M-values (Figures 2C and 2D).>mean_beta var_beta mean_M var_M jpeg(\"variance.beta_vs_M.jpg\", width = 8, height = 6, res = 300 , units = 'in')>par(mfrow = c(1, 2), mar = c(5, 5, 4, 2))>plot(mean_beta,var_beta,main = \"\",xlab = \"Mean Beta-value\",ylab = \"Variance\", pch = 16,cex = 0.8, col = \"#8B000033\")>grid()>plot(mean_M, var_M,main = \"\",xlab = \"Mean M-value\",ylab = \"Variance\", pch = 16,cex = 0.8,col = \"#8B000033\")>grid()>dev.off()9.Identify tumor-specific DMPs using limma package.a.Create a design matrix incorporating group information and fit linear models to M-value matrix.>design colnames(design) fit contMatrix fit2 fit2 tumor_results tissue_results tissue_not_sig_probes % filter(adj.P.Val >= 0.05 | abs(logFC) % rownames()>tumor_sig % rownames_to_column(\"probe_id\") %>% filter( adj.P.Val 0.2, probe_id %in% tissue_not_sig_probes ) %>% arrange(desc(abs(logFC))) %>% slice_head(n = 500) %>% pull(probe_id)Note: Since plasma cfDNA originates from various tissues throughout the body, we retain only tumor-specific methylation sites by excluding tissue-specific sites that show differences between adjacent normal tissue and normal plasma samples.10.Generate a heatmap to illustrate the methylation patterns of the top 500 tumor-specific sites across different sample groups (Figure 3).Figure 3Heatmap of beta values for the top 500 differentially methylated CpG sites>annotation_col pheatmap( as.matrix(beta_matrix[tumor_sig,]), annotation_col = annotation_col, scale = \"row\", cluster_rows = TRUE, cluster_cols = FALSE, treeheight_row = 0,color = colorRampPalette(rev(brewer.pal(7, \"RdYlBu\")))(100), show_rownames = FALSE, show_colnames = FALSE,filename = \"PRAD_top500.jpg\")11.Save the reference and test sets for Oncoder.>ref_matrix ctProstate_Resistant ctProstate_Sensitive write.table(ctProstate_Sensitive, file = \"test_ctPRAD_Sensitive.tsv\", sep = \"\\t\", quote = FALSE)>write.table(ctProstate_Resistant, file = \"test_ctPRAD_Resistant.tsv\", sep = \"\\t\",quote = FALSE)>write.table(ref_matrix, file = \"ref_matrix_PRAD.tsv\",sep = \"\\t\",quote = FALSE)>quit()CRITICAL: The reference set comprises 1,140 samples, including 484 prostate tumor samples and 656 plasma samples from healthy donors. The two independent test sets consist of cfDNA methylation matrices derived from 74 AA-sensitive and 107 AA-resistant samples. Ensure that all matrices are saved in the working directory for downstream analysis.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Quantification and statistical analysis",
+      "instruction": "The methylation beta value represents the percentage of methylation at a CpG site, and is calculated as follows:Betavalue=MM+U+offsetWhere M and U represent the methylated and unmethylated intensities at a specific probe, and an offset (typically 100) is added to the denominator to regularize the beta value when both methylated and unmethylated probe intensities are low.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Quantification and statistical analysis",
+      "instruction": "The M value does not have a direct biological interpretation. It can be derived from the Beta value using a logit transformation:Mvalue=log2(Beta1−Beta)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T01:05:44.459516Z",
+  "llm_normalised": true
+}

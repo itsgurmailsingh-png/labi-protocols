@@ -1,0 +1,142 @@
+{
+  "protocol_id": "detecting_genome_wide_introgressed_genes_and_evaluating_their_functional_legacy",
+  "parent_protocol_id": null,
+  "title": "Detecting Genome-Wide Introgressed Genes and Evaluating Their Functional Legacy",
+  "author": "Jiao, Ren, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC13213801",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+  "doi": "10.1016/j.xpro.2026.104553",
+  "citation": "10.1016/j.xpro.2026.104553",
+  "category": "Genomics & Sequencing",
+  "tags": [
+    "genome-wide",
+    "introgression",
+    "d. huoshanense",
+    "differential expression",
+    "bioinformatics"
+  ],
+  "estimated_time_mins": 72,
+  "materials": [
+    "RAD-seq data",
+    "D. huoshanense genome",
+    "Transcriptomic data of D. catenatum",
+    "GATK4 v4.6.2.0",
+    "parseVCF.py",
+    "windows.py",
+    "ncbi-blast-2.14.0",
+    "KofamKOALA",
+    "MEGA v5.2",
+    "FastQC v0.12.1",
+    "Agat v0.8.1",
+    "Trim_galore v0.6.10",
+    "Hisat2 v2.2.1",
+    "Samtools v1.20",
+    "HTSeq v0.11.3",
+    "DESeq2"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Before you begin",
+      "instruction": "Introgressed segments derived from exogenous species often encompass gene clusters that play a significant role in shaping the evolutionary trajectories of recipient species as they adapt to new habitats.2 However, the rapid degradation of archaic DNA and RNA in nature,3 along with the fact that many introgressed genes may be selected against and gradually lost over time,4 limits functional genomic insights into recipient species. Nevertheless, the ancient introgressed genomic segments retained in contemporary species provide a valuable opportunity to investigate the functional implications of introgression, particularly in perennial herbaceous plants.1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Before you begin",
+      "instruction": "Apart from introgression, most eukaryotic genomes contain a substantial fraction of duplicated genes.5,6 According to previous studies, the mechanisms driving the retention of duplicated genes or paralogs may be influenced by gene dosage effects or by functional divergence through asymmetric evolution.7 Retention of duplicates may result from subfunctionalization, leading to a pair of genes that together perform the full range of functions of the single ancestral gene.8,9 Evidence of functional partitioning of ancestral functions includes, but is not limited to, biochemical functions10 and gene expression regulatory elements.11 Considering the potential functional similarity among introgressed genes, their paralogs, and alleles in recipient species, it is necessary to identify their paralogs and alleles and compare their relative expression under abiotic stress conditions. The protocol outlines the steps for detecting ancient introgressed genes between distantly related species and introduces a flexible method for identifying paralogs and alleles of these introgressed genes.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Preparation 1: Hardware",
+      "instruction": "1.All tests are conducted on a system running the CentOS Linux 7 (Core) operating system with Intel® Xeon® Gold 6348H CPUs operating at 2.30 GHz and supported by 1 TB of RAM.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Preparation 2: Setting up the software",
+      "instruction": "Timing: 1–2 h",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Preparation 2: Setting up the software",
+      "instruction": "In this protocol, all tests are conducted utilizing software, as detailed in the key resources table, with download links provided for access. It is recommended to store all software files in a designated folder. Additionally, software can be downloaded and installed either manually or through Conda using the default settings (Figure 1).2.Prior to the bioinformatics analysis, install all software specified in the key resources table.Note: Installation instructions for each program are available on their official websites.Figure 1Screenshot displaying the help message of GenomeAnalysisTKThe figure displays the help information for GATK4, including the version, background details, and usage instructions for the package.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Preparation 3: Dataset",
+      "instruction": "Timing: Variable (affected by dataset size and computational resources)\n3.Obtain raw resequencing data.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Preparation 3: Dataset",
+      "instruction": "To facilitate more efficient downloading and management of raw resequencing data, install the SRA Toolkit and organize the raw data files within a designated directory. This protocol utilizes Restriction Site-Associated DNA sequencing (RAD-seq) datasets from populations of Dendrobium catenatum and D. huoshanense, as well as transcriptomic data of D. catenatum subjected to various cadmium stress conditions, all obtained from publicly available sources. Details regarding the download of these data can be found in the key resources table.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Prepare input genotype data for analysis",
+      "instruction": "Timing: 6 days",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Prepare input genotype data for analysis",
+      "instruction": "This step involves SNP calling for all individuals studied and prepares a VCF file for downstream analysis.1.Variant calling with GATK HaplotypeCaller.Figure 2Screenshot displaying information about the SNP calling processThe figure displays the process and summary information of SNP calling for all twenty tested individuals using GATK4.>gatk4 HaplotypeCaller -R /home/[user name]/Workfiles/SNP_Calling/reference.fasta -O /home/[user name]/Workfiles/SNP_Calling/example.raw.vcf -I /home/[user name]/Workfiles/Raw_data/Sample01.realign.bam -I /home/[user name]/Workfiles/Raw_data/Sample02.realign.bam -I /home/[user name]/Workfiles/Raw_data/Sample03.realign.bam … -I /home/[user name]/Workfiles/Raw_data/SampleXX.realign.bamNote: This section identifies variants for each individual using the HaplotypeCaller module in GATK4 v4.6.2.0-114 (Figure 2). To conduct a preliminary evaluation of this protocol, we obtained and analyzed genotype data files from twenty samples across three species: D. catenatum (ten individuals), D. huoshanense (five individuals), and Flickingeria albopurpurea (five individuals). We selected the D. catenatum genome as the reference genome. Troubleshooting 1.2.Selecting SNP variations using GATK.>gatk4 SelectVariants -select-type SNP -V /home/[user name]/Workfiles/SNP_Calling/example.raw.vcf -O /home/[user name]/Workfiles/SNP_Calling/example.raw.SNP.vcf3.Variant filtering with GATK.Figure 3Screenshot displaying information about the SNP filtering processThe figure displays the process and summary information of SNP filtering for all twenty tested individuals using GATK4.>gatk4 VariantFiltration -R /home/[user name]/Workfiles/SNP_Calling/reference.fasta -V /home/[user name]/Workfiles/SNP_Calling/example.raw.SNP.vcf --filter-expression \"QD 60.0 || SOR > 3.0 || MQRankSum python parseVCF.py -i /home/[user name]/Workfiles/SNP_Calling/example.filtered.vcf.gz --minQual 30 --skipIndels --gtf flag=DP min=3 | gzip > /home/[user name]/Workfiles/SNP_Calling/output.example.filtered.vcf.geno.gz",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Geno-format file preparation",
+      "instruction": "The script’s output file contains 22 columns, including the chromosome (CHROM), SNP position (POS), and unphased genotypes for each individual (Figure 10).15 Missing data are represented by ‘N’, while unphased genotypes are indicated by ‘/’.15Figure 10The formation and composition of the geno fileThe figure displays the loci information from the.geno file for all tested individuals, generated by parseVCF.py. The script’s output file contains 22 columns, including chromosome (CHROM), SNP position (POS), and unphased genotypes for each individual. Missing data are represented by ‘N’, while unphased genotypes are indicated by ‘/’.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Differential expression analysis",
+      "instruction": "The DESeq2 output file comprises eight columns, which include the mean of normalized counts across all samples (baseMean), the log2 fold change (log2FoldChange) representing the comparison groups under treated and untreated conditions, the standard error associated with the log2 fold change (lfcSE), the Wald test statistic (stat), the p-value derived from the Wald test (p-value), the Benjamini-Hochberg adjusted p-value for controlling the false discovery rate (padj), and an indicator denoting statistical significance (sig).25",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "The limited application of D-statistic analysis",
+      "instruction": "The D statistic is derived from a model comprising four species or populations, which incorporates an outgroup species.15 This method requires four species or populations: P1, P2, P3 and O. Importantly, it assumes that individuals sampled from the outgroup population have experienced negligible admixture from the archaic source.15 Moreover, the model designs limitations—typically confined to four taxa—make it unsuitable for identifying introgression across broader evolutionary scales, especially in large, complex phylogenies.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T01:14:17.133148Z",
+  "llm_normalised": true
+}

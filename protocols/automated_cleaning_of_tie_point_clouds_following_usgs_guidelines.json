@@ -1,0 +1,55 @@
+{
+  "protocol_id": "automated_cleaning_of_tie_point_clouds_following_usgs_guidelines",
+  "parent_protocol_id": null,
+  "title": "Automated Cleaning of Tie Point Clouds Following USGS Guidelines",
+  "author": "Mohren, Schulze",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC10992719",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10992719/",
+  "doi": "10.1016/j.mex.2024.102679",
+  "citation": "10.1016/j.mex.2024.102679",
+  "category": "Other",
+  "tags": [
+    "automated cleaning",
+    "tie point clouds",
+    "usgs",
+    "agisoft metashape"
+  ],
+  "estimated_time_mins": 18,
+  "materials": [
+    "Agisoft Metashape",
+    "image processing software"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Tie point cloud cleaning procedures as suggested by the USGS",
+      "instruction": "The sparse cloud cleaning workflow suggested by Over et al. [20] includes four tie point filtering steps (for an overview, see their Figs. 1 and S1) with the overall aim to filter out low-quality tie points and to optimize the camera model. These error reduction steps generally include the iterative selection and removal of tie points by (1) reconstruction uncertainty, (2) projection accuracy, and (3) reprojection error attached to the individual points in the sparse cloud. All of these filtering criteria are unitless. In short (see [20], for a detailed description), the cleaning steps are implemented in order (1) to clean the sparse cloud from tie points that were created from images with adverse geometric relationships to each other (e.g., spatially very close camera positions), (2) to remove tie points whose corresponding key points have a low precision in their spatial location (i.e., a large key point size), and (3) to remove tie points with a large spatial offset between their original location in 3D space on an image and their position on the image as estimated by reprojection (cf. [24]). Besides their workflow suggestions, Over et al. [20] provide concrete recommendations for target values and value ranges to be achieved by removing a certain fraction of points per iteration as summarized in Table 1.Fig. 1Script graphical user interface. The interface consists of three main sections allowing the processor to select the chunk, to choose which error minimization steps should be included into the cleaning procedure and whether an automatic run should be executed (A), to adjust filter and camera alignment optimizations settings of each individual filtering step (B), and to monitor quality measures (C; see also Fig. 2).Fig 1Table 1Details on error reduction steps as proposed by Over, et al. [20].Table 1Error reduction stepPoint filter criterionMaximum fraction of points to be removed per iteration (%)Maximum threshold valueTarget tie points1Reconstruction uncertainty<5010–15Points resulting from poor camera geometry2Projection accuracy<502–5Points with large key point size3Reprojection error100.3Points with poor spatial matching of original and reprojected location in 3D space4Reprojection error10<0.3**RMSE 0.13–0.18 pxPoints with insufficient spatial matching of original and reprojected location as captured by the unweighted RMS reprojection error of the point cloud",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Tie point cloud cleaning procedures as suggested by the USGS",
+      "instruction": "For example, it is suggested that a maximum of 10% of points should be removed per iteration in cleaning step 3 until a maximum tie point reprojection error within the sparse cloud of 0.3 is reached (reprojection error values are normalized by the sizes of corresponding key points). As noted by Over et al. [20], a manual iteration process by repeated filtering of 10% of the tie points remains highly time consuming. Furthermore, to achieve a timely completion of a full cleaning circle, permanent attention of the processor is required. The python script we present here aims at alleviating this iterative cleaning by automating the processing steps. Over et al. [20] also provide a detailed description of the most important quality measures for the error reconstruction procedure as provided by the software (Table 2). The list of variables (see Sect. 3.2 for more details) includes simple measures such as the unweighted root mean reprojection error of the tie points and root mean square control and check point errors, but also the number of images with less than 100 projections. The latter is important as images with less than 100 valid tie points will not be used for depth maps generation in subsequent steps [24].Table 2Details on error reduction variables as implemented in the script.Table 2Error reduction variableGUI abbreviationUnitDescriptionNumber of iterations(nI)Num. iterations–Count of iterations performedNumber of tie points(nP)Num. points–Count of tie pointsUnweighted RMS reprojection error(RMSE)RMSEpxUnweighted root mean square reprojection error of the point cloudStandard error per unit weight(SEUW)SEUW–SEUW (optimum: 1) estimates the tie point accuracyCamera error(ecam)Camera errormRoot mean square error for all cameras in 3D spaceControl scale error(es,co)Control scale errormRoot mean square error of all control scale bars (individual scale bar errors calculated as difference between input and estimated scale bar length)Check scale error(es,ch)Check scale errormRoot mean square error of all check scale bars (individual scale bar errors calculated as difference between input and estimated scale bar length)Control point error(ep,co)Control point errormRoot mean square error for all control points in 3D spaceCheck point error(ep,ch)Check point errormRoot mean square error for all check points in 3D spaceError reduction level(L)Level–Error reduction level approached after an error reduction step has been performed (<10 points above a pre-set threshold allowed)Number of images with less than 100 projections(ni<100)Num. proj. < 100–Count of images that have too few valid tie points (i.e. less than 100) to be included into the generation of camera model derivationsNumber of reversals(nR)Rev. it.–The number of iterations after which the number of points above the error reduction level increased (≥ 0 reversal points)Number of reversal points(nP,R)Rev. pts.–The cumulative number of points of all reversals",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method validation",
+      "instruction": "To assess the performance of the SCC script, we used real-world data obtained from three different projects, as detailed in the following section. For the initial camera models of all projects, we used camera alignment preferences as suggested by Over et al. [20], i.e. a maximum of 60,000 key points and no tie point limit assigned per image. The alignment was performed at a high accuracy with stationary tie points being excluded. The camera models relied on camera self-calibration adjusting the standard parameters (focal length, principal point position, three radial and two tangential distortion coefficients). All computations were conducted using a Dell Precision Tower 3620 (3.60 GHz processor, 64GB RAM, Intel HD Graphics 630 on board and NVIDIA Quadro M4000). We tested the script using Microsoft's Windows 10 Pro 64-bit operating system (ver. 22H2), keeping as few background programs as possible and Microsoft's Office running during the processing. Testing our script involved “Default” cleaning defined based on the recommendations Over et al. [20] and subsequent supposedly “Optimized” runs where we changed the number of iterations allowed in Step 1 and/or Step 2 (Table 3). Finally, we executed runs to minimize RMSE (“RMSEm”). To assess the reproducibility of our automated camera model optimization efforts, we repeated each automated run five times and calculated the arithmetic means and standard deviations for each step. One run per project was manually repeated serving as benchmark for quality measures and processing duration. We here do not report measures for ecam since the images were either not geotagged (BA18–008 and Lucia projects) or not used for camera model building due to large vertical offsets (Urft project; cf. [26]). Furthermore, we did not adjust the tie point accuracy in Step 4 as recommended by Over et al. [20] to more conveniently track the change of SEUW during the cleaning process (changing the point accuracy will affect SEUW).Table 3Overview on runs executed on the three projects.Table 3Project (type)RunnTarget values Step 1Target values Step 2Target values Step 3Target values Step 4nPnPnPnPRMSE(%)LnI(%)LnI(%)LnI(%)(pix)nIBA18–008 (close range, lightbox)SCC-Default550.0010.00150.003.00110.000.3020010.00––SCC—Optimized522.002––SCC-RMSEm523.0010.18200Manual-Default113.001––Lucia (drone; [13])SCC-Default513.001––SCC—Optimized522.001––SCC-RMSEm522.0010.18200Manual-Default113.001––Urft (drone; [26])SCC-Default513.001––SCC—Optimized512.001––SCC-RMSEm512.0010.18200Manual-RMSEm113.0010.18200",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T01:59:05.268404Z",
+  "llm_normalised": true
+}

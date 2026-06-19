@@ -1,0 +1,103 @@
+{
+  "protocol_id": "protocol_for_using_treelfa_to_infer_multimorbidity_patterns_in_the_form_of_disea",
+  "parent_protocol_id": null,
+  "title": "Protocol for using treeLFA to infer multimorbidity patterns in the form of disease topics from diagnosis data in biobanks",
+  "author": "Zhang, Jiang, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC12447997",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12447997/",
+  "doi": "10.1016/j.xpro.2025.104033",
+  "citation": "10.1016/j.xpro.2025.104033",
+  "category": "Bioinformatics",
+  "tags": [
+    "treelfa",
+    "multimorbidity",
+    "biobanks",
+    "disease topics",
+    "diagnosis data"
+  ],
+  "estimated_time_mins": 54,
+  "materials": [
+    "Deposited dataUK BiobankBycroft et al.2https://biobank.ctsu.ox.ac.ukData field: 41202, 41204, 22418ICD-10 coding systemWorld Health Organizationhttps://icd.who.int/browse10/2016/enExample input dataThis paperhttps://github.com/zhangyd10/treeLFA-demo-CG/tree/main/docs/simu.train.data.txtExample tree structureThis paperhttps://github.com/zhangyd10/treeLFA-demo-CG/tree/main/docs/tree.str.simu.txtSoftware and algorithmstreeLFA scriptsThis paperhttps://github.com/zhangyd10/treeLFA-demo-CGhttps://doi.org/10.5281/zenodo.8077452"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Before you begin",
+      "instruction": "Multimorbidity refers to diseases that tend to co-occur within the same individuals. With the increasing incidence of multimorbidity and their negative impacts on patients’ health, it is imperative to study them and their etiology to guide the development of new prevention and treatment strategy.2 In recent years the establishment of biobanks worldwide has enabled systematic study of multimorbidity patterns.3 “treeLFA” (latent factor allocation with a tree-structured prior) models the diagnosis data of patients by viewing individuals as “documents” and diseases as “words” in the topic modeling setting, and “topics” of diseases are probability vectors of diseases, where diseases that are likely to co-occur will have large probabilities in the same topic, while other diseases in the topic have negligible probabilities. For details of the structure and generative process of the model, refer to Figure 1 and the “treeLFA” subsection in the “Method Details” section in the primary publication. Compared to other topic models like LDA (Latent Dirichlet Allocation),4 treeLFA can more accurately infer disease topics. In addition, it brings additional power for the downstream GWAS using peoples’ inferred topic weights as traits, to find genomic loci that are associated with a group of diseases inclined to co-occur.Figure 1The computational time of Gibbs-EM training with different values set for three variables of the model (number of individuals, number of disease codes, and number of topics inferred)The slope of the fitted line was calculated by scaling the largest value of runtime to be the same as the largest value of the independent variables (x-axis). The full result is in Table 1.(A) The relationship between the computational time and the number of individuals in the training dataset.(B) The relationship between the computational time and the total number of diseases to be analysed.(C) The relationship between the computational time and the number of topics to be inferred.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Before you begin",
+      "instruction": "This protocol details the steps to infer multimorbidity clusters in the form of disease topics as well as individuals’ corresponding topic weights, stating from a diagnosis input data and a two columns table encoding a hierarchical structure of disease codes describing the relationship of all diseases in general (such as the ICD-10 disease coding system). The algorithm can also work without a specific tree structure of diseases, in which case no prior similarity structure are assumed among diseases.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Before you begin",
+      "instruction": "To apply treeLFA, the only prerequisite is to install the R software and download a few R packages and scripts from the Github repository for treeLFA. It is recommended to train treeLFA model on a high-performance computing (HPC) facility if a biobank-scale dataset (for example, hundreds of diseases, hundreds of thousands of individuals) is used.Table 1Relationship between the training time and parameters of the treeLFA model/the computing equipment on simulated and UK biobank datasetsPeopleDiseaseTopicCycle1aCycle2aopt_N_1aopt_N_2aComputing nodesEquipmentDatasetParallel tasksMemoryRuntime (s)10001545051101laptopsimulation116G1.6550001545051101laptopsimulation116G4.69100001545051101laptopsimulation116G7.92200001545051101laptopsimulation116G16.35500001545051101laptopsimulation116G37.661000001545051101laptopsimulation116G81.8650001585051101laptopsimulation116G5.57500015125051101laptopsimulation116G6.45500015165051101laptopsimulation116G7.03500015205051101laptopsimulation116G8.1450003045051101laptopsimulation116G8.2950004545051101laptopsimulation116G11.3350006045051101laptopsimulation116G13.9650007545051101laptopsimulation116G18.110000010010100101101HPCUKB8200G1556.610000010010100101101HPCUKB1200G410110000010010100101101HPCUKB82G167110000010010100101101HPCUKB12G3922aCycle1, Cycle2, opt_N_1, opt_N_2 are the parameters of the Gibbs-EM training function (see step 3).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Preparation 1: Find the appropriate computing facility",
+      "instruction": "Timing: Variable\nNote: The computer memory requirement of training the treeLFA model is not high. The largest matrices stored during the inference are the input data matrix and the topic assignment matrix (both are “number of people” by “number of diseases” matrices). The size of a dataset containing hundreds of disease codes and half a million people is less than 1 GB (biobank scale data). Although the storage of a large number of posterior samples of hidden variables requires relatively large memory space (see step 5), the overall computer memory size requirement should be easily met if a HPC facility is available.\nNote: The training of treeLFA on biobank-scale data can take a long time (up to around two weeks). Figure 1 shows the increase of computational time as the number of people, diseases and inferred topics increases (each time one variable is varied with the other two fixed) on simulated data. The computational time scales linearly with the number of people and number of disease codes in the input dataset (scaling factor near 1, calculated by scaling the maximum of the dependent/independent variables to the same value) and the number of topics inferred (scaling factor near 0.5) (Figure 1). We also use the Gibbs-EM algorithm to infer 10 topics on a real UKB dataset containing 100 disease codes for 100,000 people on a HPC facility (use 48 cores on one computing node; CPU clock frequency: 2.4 GHz). On a single computing node, training with Gibbs-EM for 200 EM cycles took 4101 s, while parallel training (8 parallel tasks) on one node took 1556.6 s (Table 1). The size of computer memory didn’t significantly influence the computational time (Table 1). On the full UK biobank data (assume there are 500,000 people and 400 diseases, and 50 topics are inferred), a typical parallel training (8 parallel tasks, 2,000 EM cycles) with the Gibbs-EM algorithm is estimated to take around 9 days. The Gibbs sampling step usually take much less time than the Gibbs-EM training, as less total Gibbs sampling iterations are needed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Preparation 2: Install required software and source scripts of the algorithm",
+      "instruction": "Timing: 30 min\n1.Install R (version 4.2.2 or higher) and RStudio.\nNote: It is recommended to run the code in RStudio for the convenience of debugging, but the code can also be run in a console R session.\nNote: The scripts of treeLFA have been tested with the latest released R software (R 4.4.3).\n2.Download R scripts for treeLFA from the Github repository:a.Navigate to the Github webpage for treeLFA: https://github.com/zhangyd10/treeLFA-demo-CG, click the green button “Code”, and then in the drop-down list click “Download ZIP”. The downloaded directory has the name “treeLFA-demo-CG-master.zip”.b.Extract all files from the downloaded zip file. The scripts for running treeLFA are in the “docs” folder in the directory.3.Install and load R libraries: troubleshooting 1. install.packages(\"data.table\") install.packages(\"Rcpp\") install.packages(\"RcppParallel\") install.packages(\"dqrng\") install.packages(\"pheatmap\") install.packages(\"RColorBrewer\") install.packages(\"coda\") install.packages(\"lsa\") install.packages(\"ggplot2\") install.packages(\"BiocManager\") library(BiocManager) BiocManager::install(\"scran\") library(data.table) library(Rcpp) library(RcppParallel) library(dqrng) library(pheatmap) library(RColorBrewer) library(coda) library(lsa) library(scran) library(ggplot2) Note: The “scran” package needs to be installed with the “BiocManager” package, and the installation can take a few minutes, as the package has many dependencies. When asked by the R software, users can choose not to update the relevant packages to save time.\nNote: The list of all the R packages attached/loaded after loading the required packages for treeLFA is shown below (output by the “sessionInfo” function):",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Preparation 2: Install required software and source scripts of the algorithm",
+      "instruction": "Base packages attached: stats4,stats,graphics_,grDevices_,utils_,datasets_,methods;",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Preparation 2: Install required software and source scripts of the algorithm",
+      "instruction": "Other attached packages: ggplot2_3.5.1,scran_1.34.0,ggplot2_3.5.1,scran_1.34.0,scuttle_1.16.0,SingleCellExperiment_1.28.1,SummarizedExperiment_1.36.0,Biobase_2.66.0,GenomicRanges_1.58.0,GenomeInfoDb_1.42.3,IRanges_2.40.1,S4Vectors_0.44.0,BiocGenerics_0.52.0,MatrixGenerics_1.18.1,matrixStats_1.5.0,coda_0.19–4.1,RColorBrewer_1.13,pheatmap_1.0.12,dqrng_0.4.1,RcppParallel_5.1.10,Rcpp_1.0.14,data.table_1.16.4;",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Preparation 2: Install required software and source scripts of the algorithm",
+      "instruction": "Packages loaded via a namespace:",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Preparation 2: Install required software and source scripts of the algorithm",
+      "instruction": "gtable_0.3.6,xfun_0.5,lattice_0.226,generics_0.1.3,vctrs_0.6.5,tools_4.4.3,parallel_4.4.3,tibble_3.2.1,cluster_2.1.8,pkgconfig_2.0.3,BiocNeighbors_2.0.1,Matrix_1.72,lifecycle_1.0.4,GenomeInfoDbData_1.2.13,compiler_4.4.3,statmod_1.5.0,munsell_0.5.1,bluster_1.16.0,codetools_0.220,htmltools_0.5.8.1,yaml_2.3.10,pillar_1.10.1,crayon_1.5.3,BiocParallel_1.40.0,DelayedArray_0.32.0,limma_3.62.2,abind_1.48,tidyselect_1.2.1,metapod_1.14.0,locfit_1.59.12,rsvd_1.0.5,digest_0.6.37,dplyr_1.1.4,BiocSingular_1.22.0,fastmap_1.2.0,grid_4.4.3,colorspace_2.11,cli_3.6.3,SparseArray_1.6.2,magrittr_2.0.3,S4Arrays_1.6.0,withr_3.0.2,edgeR_4.4.2,scales_1.3.0,UCSC.utils_1.2.0,rmarkdown_2.29,XVector_0.46.0,httr_1.4.7,igraph_2.1.4,ScaledMatrix_1.14.0,beachmat_2.22.0,evaluate_1.0.3,knitr_1.49,irlba_2.3.5.1,rlang_1.1.5,glue_1.8.0,rstudioapi_0.17.1,jsonlite_1.8.9,R6_2.5.1,zlibbioc_1.52.0.4.Source R scripts for treeLFA: troubleshooting 1.setwd(\"/<full path to/treeLFA-demo-CG-master/docs/\")Rcpp::sourceCpp(\"treeLFA.ge.new.cpp\")Rcpp::sourceCpp(\"treeLFA.g.new.cpp\")Rcpp::sourceCpp(\"pl_mc.cpp\")source(file=\"treeLFA.functions.R\")Note: Warning messages (not error messages) that appear while sourcing the scripts can be ignored.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T00:56:07.258975Z",
+  "llm_normalised": true
+}

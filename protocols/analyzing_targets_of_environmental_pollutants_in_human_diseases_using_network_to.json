@@ -1,0 +1,77 @@
+{
+  "protocol_id": "analyzing_targets_of_environmental_pollutants_in_human_diseases_using_network_to",
+  "parent_protocol_id": null,
+  "title": "Analyzing Targets of Environmental Pollutants in Human Diseases Using Network Toxicology",
+  "author": "Hong, Li, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC13194618",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13194618/",
+  "doi": "10.1016/j.xpro.2026.104555",
+  "citation": "10.1016/j.xpro.2026.104555",
+  "category": "Environmental Science",
+  "tags": [
+    "network toxicology",
+    "molecular docking",
+    "human diseases",
+    "cytoscape",
+    "functional enrichment"
+  ],
+  "estimated_time_mins": 24,
+  "materials": [
+    "Cytoscape v.3.10.4",
+    "MCODE",
+    "CytoHubba",
+    "R software v.4.3.2",
+    "clusterProfiler v.4.14.6",
+    "PyMOL v.3.1",
+    "ChemOffice (v20.0)",
+    "MOE (2019)",
+    "Discovery Studio Visualizer",
+    "PubChem",
+    "ChEMBL",
+    "STITCH",
+    "SwissTargetPrediction",
+    "GeneCards",
+    "UniProt"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Database and software preparation",
+      "instruction": "Before initiating the network toxicology and molecular docking workflow, ensure that all required databases and software tools are accessible and properly prepared. Stable internet access is required for querying public databases, and all computational tools should be installed and tested in advance to guarantee reproducibility and analytical stability.1.Public databases, including PubChem, ChEMBL, STITCH, SwissTargetPrediction, GeneCards, OMIM, UniProt, STRING, and the RCSB Protein Data Bank, should be accessible, and the database access date and version should be recorded.2.Cytoscape (v3.10.4) should be installed with the MCODE and CytoHubba plugins enabled for network construction and topological analysis.3.R software (v4.3.2) should be installed with the clusterProfiler package and appropriate annotation libraries for functional enrichment analysis.4.Molecular docking and structural visualization require PyMOL (v3.1), Molecular Operating Environment (MOE, 2019), ChemOffice (v20.0), and Discovery Studio Visualizer, all of which should be verified for proper operation prior to analysis.5.A workstation with sufficient computational resources (recommended ≥16 GB RAM) is advised to ensure smooth execution of network analyses and docking simulations.Note: Equivalent databases or software tools may be used as alternatives, provided that software versions, parameters, and database access dates are clearly documented.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Step-by-step method details",
+      "instruction": "This section describes the complete computational workflow for identifying and validating the potential molecular targets of environmental pollutants in human diseases. The process integrates multi-database target collection, network construction, enrichment analysis, and molecular docking validation. Each step is modular and can be adapted for different compounds or disease models. In the present protocol, bisphenol A (BPA) and osteosarcoma are used as a representative worked example to illustrate the implementation of the workflow.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Construction and analysis of the PPI network",
+      "instruction": "Timing: 2–4 h\n11.Import the overlapping targets into the STRING database to construct a protein–protein interaction (PPI) network.20a.Prepare the input file 02_Intersection/overlap_genes.txt containing one official HGNC gene symbol per line (no commas/semicolons).b.Open STRING database, and choose “Multiple proteins”.c.Paste the overlap gene symbols into the input box (or upload the .txt file).d.Select Organism = Homo sapiens before submitting the query.e.After STRING maps identifiers, download/save the mapping report to 03_PPI_STRING/string_mapping_report.tsv.f.Confirm that the number of mapped proteins is close to the number of input genes.12.Set the species to Homo sapiens and define the STRING confidence score threshold.a.On the STRING network page, set:i.Set the meaning of network edges to “evidence” with default active interaction sources used.ii.Minimum required interaction score: set to 0.700 (high confidence).b.Specify whether disconnected nodes are shown/hidden (recommended: hide disconnected nodes for clarity, but keep them recorded).c.Specify which active interaction sources are included (e.g., experiments, databases, co-expression, textmining). If keeping defaults, write “default interaction sources in STRING were used.”d.Record these settings in 03_PPI_STRING/string_settings.txt (including query date).e.Export an image of the STRING network for documentation: 03_PPI_STRING/Figure 3_STRING_network.svg (Figure 3).Figure 3PPI network generated using the STRING database of common targetsThe common targets were imported into the STRING database to construct a PPI network. Nodes represent common targets, and edges represent known or predicted functional associations between proteins. The network shows extensive interconnectivity among the common targets, suggesting that these proteins may participate in coordinated biological processes relevant to the potential effects of BPA on osteosarcoma.f.Export the interaction table as 03_PPI_STRING/string_interactions.tsv.g.Visually confirm the network is not excessively sparse (too few edges) or overly dense (hairball).\nNote: A minimum required interaction score of 0.700 is recommended to balance network reliability and interpretability. Alternative thresholds may be used depending on the study purpose and desired network stringency, but the selected criterion should be explicitly stated and justified.\n13.Export the interaction data and import it into Cytoscape for visualization and further analysis.9a.In STRING, export network data as tabular files:i.Edges/links table: save as 03_PPI_STRING/string_edges.tsvii.Nodes table: save as 03_PPI_STRING/string_nodes.tsvb.Open Cytoscape (v3.10.4) > File > Import > Network from File > select string_interactions.tsv.c.If needed, import node attributes: File > Import > Table from File > select string_nodes.tsv and map by protein/gene identifier column.d.Save Cytoscape session immediately: 04_Cytoscape/PPI_overlap_STRING.cys.e.Export an image of the Cytoscape network for documentation: 03_PPI_STRING/Figure 4_Cytoscape_network.svg (Figure 4).Figure 4Network visualization of common targets ranked by degree centrality in CytoscapeThe common targets were ranked according to their degree values in the PPI network to identify highly connected genes. In this network, each node represents a common target and each edge represents a PPI. Node size and color intensity both reflect the degree value, with larger and darker blue nodes indicating higher connectivity within the network. Genes such as ESR1, SRC, EP300, and CTNNB1 showed the highest degree values and occupied central positions, suggesting that they may function as key regulatory targets linking BPA to osteosarcoma.f.Confirm the node count and edge count in Cytoscape match the STRING export (± minor differences due to filtering).14.Apply the Molecular Complex Detection (MCODE) plugin to identify network clusters.10a.In Cytoscape, open Apps (MCODE), and start MCODE.b.Use and report the exact parameters:i.Degree cutoff = __ (commonly 2)ii.Node score cutoff = __ (commonly 0.2).iii.K-core = __ (commonly 2).iv.Max depth = __ (commonly 100).c.Click “Analyze” to detect clusters/modules.d.Export results:i.Cluster summary table: 04_Cytoscape/MCODE_cluster_summary.csv.ii.For each top cluster, export member genes: 04_Cytoscape/MCODE_cluster1_genes.txt, cluster2_genes.txt, etc.e.Generate and export the module visualization as: 04_Cytoscape/Figure 5_MCODE_modules.svg (Figure 5).Figure 5Modules of functionally related proteins identified using MCODE in CytoscapeSubnetwork analysis of the common target interaction network revealed two relatively distinct but internally connected modules. The left module shows a densely interconnected cluster centered around genes such as ESR1, EP300, CTNNB1, BCL2, SRC, and KRAS, whereas the right module contains another connected group including EGFR, HRAS, ERBB2, IGF1R, MAPK1, MAPK3, NR3C1, NCOR1, NCOA1, and NCOA2. These modules suggest that the common targets are organized into functionally related subnetworks rather than forming a completely uniform interaction structure. This step helps refine the overall PPI network into interpretable clusters and supports the identification of biologically meaningful target groups for downstream functional analysis and molecular docking.f.Record the number of clusters and the size of the top cluster (e.g., “Top cluster contained __ nodes”).15.Use the CytoHubba plugin to analyze network topology and identify hub proteins based on metrics like maximal clique centrality (MCC), edge percolated component (EPC), closeness, and betweenness.11a.In Cytoscape, open Apps > cytoHubba.b.Define a hub selection rule before running (must be explicit for reproducibility):i.Primary metric: MCC (recommended).ii.Top N hubs: Top 10 (or Top 20).c.Run cytoHubba with MCC, set Top N = __, and export ranking: 04_Cytoscape/cytoHubba_MCC_TopN.csvd.Repeat for EPC, Closeness, and Betweenness with the same Top N, export each:i.cytoHubba_EPC_TopN.csv.ii.cytoHubba_Closeness_TopN.csv.iii.cytoHubba_Betweenness_TopN.csv.e.Create a consensus hub list: Intersection of the four Top N lists and save as 04_Cytoscape/hubs_consensus_intersection.txt.f.Export Figure 6 panels (A–D) as high-resolution images:i.04_Cytoscape/Figure 6A_EPC.svg (Figure 6A).ii.Figure 6B_Closeness.svg (Figure 6B).iii.Figure 6C_MCC.svg (Figure 6C).iv.Figure 6D_Betweenness.svg (Figure 6D).Figure 6Identification of hub targets based on different topological parametersHub genes within the common BPA–osteosarcoma target network were ranked using four topological methods in cytoHubba: (A) EPC, (B) Closeness, (C) MCC, and (D) Betweenness. Each panel shows the top-ranked genes identified by the corresponding algorithm, with warmer node colors indicating higher topological importance within that ranking method. Several genes, including BCL2, CTNNB1, EGFR, ESR1, and HSP90AA1, were repeatedly identified across multiple algorithms, suggesting that they may represent robust hub genes in the common target network. This multi-algorithm comparison was used to improve confidence in hub gene prioritization and to guide subsequent functional analysis and molecular docking.g.Save the final hub list that will be used for molecular docking as: 04_Cytoscape/hub_targets_final.txt (one gene per line).h.Report the Top hubs identified.\nNote: When relevant datasets are available, this workflow can be further strengthened by integrating tissue- or cell-type-relevant expression data, such as differentially expressed genes, tissue-enriched genes, or single-cell markers, to refine hub gene prioritization and improve the biological specificity of downstream functional analyses.6\nCRITICAL: Avoid including isolated nodes or low-confidence edges, as they may introduce noise in downstream analyses.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Functional enrichment analysis",
+      "instruction": "Timing: 1–2 h\n16.Perform GO and KEGG enrichment analyses for the common targets.a.Prepare the overlap gene list as the enrichment input (choose ONE and state it clearly): 02_Intersection/overlap_genes.txt.b.Save the final input list used for enrichment as: 05_Enrichment/enrichment_input_genes.txt (one official HGNC symbol per line).c.Create an output folder: 05_Enrichment/, and keep all intermediate files.d.Decide the universe/background gene set (must be consistent across GO/KEGG):i.Default option: all Entrez genes in org.Hs.e.g.db (state “default background in clusterProfiler”).ii.Save as 05_Enrichment/background_genes.txt.e.Record input gene count (N) and background gene count (M) in 05_Enrichment/enrichment_metadata.txt.\nNote: These analyses are used to identify enriched biological processes, cellular components, molecular functions, and pathways associated with the common targets.\n17.Use the clusterProfiler package in R for the analysis, applying the Benjamini–Hochberg (BH) adjusted p-value cutoff of % left_join(map, by = \"SYMBOL\") write.csv(map_all, \"05_Enrichment/gene_symbol_to_entrez.csv\", row.names = FALSE) entrez <- unique(na.omit(map$ENTREZID)) # Save enrichment metadata writeLines(c( paste0(\"Input gene count (N): \", length(genes)), paste0(\"Background gene count (M): \", length(bg)) ), \"05_Enrichment/enrichment_metadata.txt\") # Run GO enrichment for BP ego_bp <- enrichGO(gene = entrez, OrgDb = org.Hs.eg.db, keyType = \"ENTREZID\", ont = \"BP\", universe = bg, pAdjustMethod = \"BH\", pvalueCutoff = 0.05, qvalueCutoff = 0.05, minGSSize = 10, maxGSSize = 500, readable = TRUE) # Run GO enrichment for CC ego_cc <- enrichGO(gene = entrez, OrgDb = org.Hs.eg.db, keyType = \"ENTREZID\", ont = \"CC\", universe = bg, pAdjustMethod = \"BH\", pvalueCutoff = 0.05, qvalueCutoff = 0.05, minGSSize = 10, maxGSSize = 500, readable = TRUE) # Run GO enrichment for M\nF ego_mf <- enrichGO(gene = entrez, OrgDb = org.Hs.eg.db, keyType = \"ENTREZID\", ont = \"MF\", universe = bg, pAdjustMethod = \"BH\", pvalueCutoff = 0.05, qvalueCutoff = 0.05, minGSSize = 10, maxGSSize = 500, readable = TRUE) # Run KEGG enrichment ekegg <- enrichKEGG(gene = entrez, organism = \"hsa\", universe = bg, pAdjustMethod = \"BH\", pvalueCutoff = 0.05, qvalueCutoff = 0.05, minGSSize = 10, maxGSSize = 500) # Export enrichment results write.csv(as.data.frame(ego_bp), \"05_Enrichment/GO_BP_results.csv\", row.names = FALSE) write.csv(as.data.frame(ego_cc), \"05_Enrichment/GO_CC_results.csv\", row.names = FALSE) write.csv(as.data.frame(ego_mf), \"05_Enrichment/GO_MF_results.csv\", row.names = FALSE) write.csv(as.data.frame(ekegg), \"05_Enrichment/KEGG_results.csv\", row.names = FALSE) # Generate GO dot plot (BP shown as example) pdf(\"05_Enrichment/\nFigure7A\n_GO_dotplot.pdf\", width = 8, height = 6) print(dotplot(ego_bp, showCategory = 10)) dev.off() # Generate KEGG dot plot pdf(\"05_Enrichment/\nFigure7B\n_KEGG_dotplot.pdf\", width = 8, height = 12) print(dotplot(ekegg, showCategory = 20)) dev.off() # Save session information writeLines(capture.output(sessionInfo()), \"05_Enrichment/sessionInfo.txt\") Note: Use consistent background gene sets to ensure comparability between analyses.\nCRITICAL: Double-check gene identifiers (ENTREZ ID or gene symbol) before analysis to avoid annotation errors.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T01:13:15.020807Z",
+  "llm_normalised": true
+}

@@ -1,0 +1,140 @@
+{
+  "protocol_id": "lff_pos_a_linguistic_fusion_method_to_handle_out_of_vocabulary_words_in_low_reso",
+  "parent_protocol_id": null,
+  "title": "LFF-POS: A linguistic fusion method to handle out-of-vocabulary words in low-resource part-of-speech tagging",
+  "author": "Alfian, Yuhana, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC12466239",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12466239/",
+  "doi": "10.1016/j.mex.2025.103615",
+  "citation": "10.1016/j.mex.2025.103615",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 78,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "This study proposes a linguistic feature fusion that combines orthographic, morphological, and character features to improve the performance of the POS tagging model as shown in Fig 1. We adopt the architecture from Kurniawan and Aji's research [17] which uses morphological and character features to represent words. We modify the morphological features and add orthographic features that can improve the representation of OOV words. We extracted orthographic features such as capital letters, symbols, and numbers, by using modified technique proposed by Manning [19]. The objective is to recognize the characteristics of name entities which usually consist of special forms such as capital letters, numbers, or symbols. Morphological features were extracted using two different methods and were tested to determine which method produced higher POS tagging performance. The first method extracts affixes (prefix and suffix) in each word. The second method extracts affixes using formal morphological analyzer tools, Aksara. Formal morphological feature extraction is expected to improve word representation. Character features were extracted from character-level embedding by using convolutional layers following the work of Kurniawan and Aji [17]. Several studies in other languages have demonstrated that character features can improve POS tagging performance [20]. All these linguistic features were combined using the concat method so that the total dimension of one word is 380 as highlighted in Fig 1. We also modified the model by adding a self-attention layer before the BiLSTM layer. The Self-Attention layer helps the model recognizing global context information in a sentence and enriches word information before being processed by BiLSTM. The BiLSTM model has been proven optimal for various cases of sequential labeling, including POS tagging [2]. We also compared two types of classification layers: softmax and conditional random fields (CRF). This study used a larger corpus than in previous similar studies, with a total of 355,021 words and a vocabulary of 29,031 words [21].Fig. 1Architecture of the proposed model using the linguistic feature fusion and BiLSTM for enhanced OOV handling in Low-Resource POS tagging.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method details",
+      "instruction": "In the following, we detail our proposed method to improve Indonesian POS tagging performance. Fig. 1 presents the overall study stages. The stages are as follows: 1) breaking the input sentence (Si) into a list of words (W) (tokenization), 2) extracting features based on orthography, morphology, and characters, 3) and combining the features using concatenation, 4) recognizing global context with self-attention, 5) recognizing local context and word order patterns with BiLSTM, 6) obtaining word classes with classifier, 7) evaluating the POS tagging model and assessing its ability in OOV handling. These stages are explained in greater detail in the following subsections.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Feature extraction",
+      "instruction": "Given an input sentence Si=wj…wn, where wj is the j-th word, we extract the orthographic (Owj), morphological (Mwj), and character (Cwj) features.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Feature extraction",
+      "instruction": "Our proposed orthographic features adopt the features used by Manning [19] to build English POS Tagging. We adopt the features of word shape, capital letters, symbols, and numbers which are respectively symbolized as aj=encode(wj), bj=isupper(wj), cj=isnumber(wj), and dj=issymbol(wj). The wordshape feature is obtained from the coding process illustrated in Algorithm 1. Finally, the orthographic feature of each word is derived as shown in Eq. (1):(1)Owj={aj,bj,cj,dj}Algorithm 1Word shape Encoding (a).Algorithm 1:1Input: the j-th word in sentences (wj)2Output: the j-th word shape in sentences (aj)3Initialization: array of word shape in j-th word (ajk)4fork=1tolength(wj)do {iterations}5 ifwjkisnumericthenajk=“d”6 else ifwjkis not alphanumericsthenajk=wjk7 else ifwjkis uppercasethenajk=“X”8 else ifwjkis lowercasethenajk=“x”9 end if12end for",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Feature extraction",
+      "instruction": "Morphological features were extracted using two approaches. The first approach intuitively extracts prefixes (pn) dan suffixes (sn) with an n-gram approach. We use two variations of subwords with n=2 dan n=3. This technique assumes that every word has an affix. The morphological features extracted using this approach are derived as shown in Eq. (2):(2)Mwj={p2,p3,s2,s3}",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Feature extraction",
+      "instruction": "The second method extracts morphological features using the Aksara tool, which is based on linguistic theory and conforms to standard Indonesian grammar [22]. This approach converts the results of the tool [23] in CoNLL-U format, denoted by ej=Aksara(wj), into vector/embedding form. Not all the script results were used in this study. The only variables related to morphosyntax used in this study are prefixes (ejp), lemmas (ejl), suffixes (ejs), and clitics (ejc). Occasionally, words with more than one prefix are found, thereby extending the vector. The resulting vector is derived as shown in Eq. (3):(3)M′wj={ejp,ejl,ejs,ejc}",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Feature extraction",
+      "instruction": "Orthographic and morphological features are represented using embedding layers provided by the Pytorch library. Embedding layers automatically convert index values into vectors with dense layers. We also configure a dropout of 0.5 to avoid overfitting. The values of each vector are generated randomly with low dimensions (dim=20).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Feature extraction",
+      "instruction": "The character features were extracted from a word (wj), consists of M characters {c1,c2,…,cM}. Similar to orthographic and morphological features, each character is represented using an embedding layer with dim=30. As shown in Fig. 2, each character (cm) is represented by character embedding (rcm). The character embedding is a vector of size nc with a value of 1 for index cm and 0 for other indices. Then, we added convolutional layers which the input is a sequence of character embeddings {rc1,rc2,…,rcM}. We also added two padding characters (rpad) to anticipate the border effect. These two paddings are added at the beginning and end of each word (wj).Fig. 2Architecture of CNN Encoder.Fig 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Feature extraction",
+      "instruction": "A convolutional filter (Wconv) applied over the sliding window (rcm−dc+1:…:rcm) produces a local feature (za) that is derived as shown in Eq. (4):(4)za=Wconv(rcm−dc+1:…:rcm)T+bconv",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Feature extraction",
+      "instruction": "The length of the sliding window is determined by the dc parameter, which represents the number of characters. The local feature (za) is a vector of length nf, which is obtained from each character (cm) in each word (wj). Local features (za) within a word (wj) are combined using the max function as shown in Eq. (5):(5)[f]i=tanh(max1<a<A[za]i)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Feature extraction",
+      "instruction": "Calculating the maximum function on each element (i) of the local feature (xm) produces the character feature of the word C={f1,f2,…,fnf}. The matrix Wconv and vector bconv are the learned parameters. The character embedding length (nc), feature length (nf), and sliding window length (dc) are the hyperparameters.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Method validation",
+      "instruction": "In this section, we present and discuss in detail the experimental setup and results of the ablation study. The study examined the influence of the extracted features on the performance of the POS tagging model, specifically, how each feature contributed to handle OOV words.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Previous method comparison",
+      "instruction": "We compared the performance of the proposed method with several commonly used methods in POS Tagging, such as HMM, MEMM, CRF, and BiLSTM (baseline). We evaluated the performance of POS Tagging models in general and specifically in handling OOV words as shown in Table 5. The best POS Tagging model performance was achieved using the proposed method. The aF1 and wF1 values were superior to those of the previous methods. This proves the superiority of the proposed method in handling OOV words in Indonesian POS Tagging.Table 5Previous Model Evaluation.Table 5MethodOOVOverallwF1aF1wF1aF1HMM33.09 %7.23 %90.81 %70.67 %MEMM75.36 %21.63 %89.30 %63.60 %CRF66.93 %30.69 %90.42 %75.90 %BiLSTM (baseline)69.70 %37.65 %92.97 %81.08 %BiLSTM (proposed)84.06 %46.44 %94.93 %85.79 %",
+      "substeps": [
+        {
+          "instruction": "We compared the performance of the proposed method with several commonly used methods in POS Tagging, such as HMM, MEMM, CRF, and BiLSTM (baseline). We evaluated the performance of POS Tagging models in general and specifically in handling OOV words as shown in Table 5. The best POS Tagging model performance was achieved using the proposed method. The aF1 and wF1 values were superior to those of the previous methods. This proves the superiority of the proposed method in handling OOV words in Indonesian POS Tagging.Table 5Previous Model Evaluation.Table 5MethodOOVOverallwF1aF1wF1aF1HMM",
+          "title": ""
+        },
+        {
+          "instruction": "%BiLSTM (baseline)",
+          "title": ""
+        },
+        {
+          "instruction": "%BiLSTM (proposed)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T04:19:54.994669Z",
+  "llm_normalised": false
+}

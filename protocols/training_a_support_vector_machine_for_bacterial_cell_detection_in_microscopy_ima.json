@@ -1,0 +1,230 @@
+{
+  "protocol_id": "training_a_support_vector_machine_for_bacterial_cell_detection_in_microscopy_ima",
+  "parent_protocol_id": null,
+  "title": "Training a Support Vector Machine for Bacterial Cell Detection in Microscopy Images",
+  "author": "Steemans, Govers",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC10850855",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10850855/",
+  "doi": "10.1016/j.xpro.2024.102868",
+  "citation": "10.1016/j.xpro.2024.102868",
+  "category": "Bioinformatics",
+  "tags": [
+    "support vector machine",
+    "microscopy",
+    "bacteria",
+    "image analysis",
+    "python"
+  ],
+  "estimated_time_mins": 138,
+  "materials": [
+    "E. coli MG1655",
+    "Yeast extract",
+    "Tryptone",
+    "NaCl",
+    "Agar",
+    "Agarose",
+    "Na2HPO4",
+    "KH2PO4",
+    "NH4Cl",
+    "MgSO4",
+    "CaCl2",
+    "L(+)-arabinose",
+    "Glucose",
+    "Glycerol",
+    "Casamino acids",
+    "Python programming language"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Before you begin",
+      "instruction": "The protocol below details the generation of training data and the training of a support vector machine (SVM) model for the curation of Escherichia coli cell detections in phase contrast, snapshot microscopy images. However, the protocol can be readily used to train SVM models for cell detections of other bacterial species or even mixtures of species. In principle, this approach can even be extended beyond bacterial cells to yeast, plant or human cells. This will likely require customization of the feature extraction to accommodate different cell types, data structures and imaging approaches, but training of the SVM model would occur in the exact same way.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Setting up the python environment",
+      "instruction": "Timing: 30 min",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Setting up the python environment",
+      "instruction": "Before any training can be performed using the provided Jupyter notebooks, it is important to install and set up the required Python environment.1.Install Anaconda:a.Download the appropriate version of Anaconda for your operating system from the official website (https://www.anaconda.com/products/individual).b.Follow the installation instructions specific to your operating system.CRITICAL: This protocol is tailored for Windows operating systems.2.Create a Virtual Environment (troubleshooting 1):a.Open an Anaconda Prompt/Terminal.b.Create a new virtual environment by running the following code:> conda create --name svm_env python=3.10.8",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Setting up the python environment",
+      "instruction": "When asked ‘Proceed ([y]/n)?’, answer y.Note: Python version 3.10.8 is used in all our analyses.3.Activate the Virtual Environment and install the required libraries:Note: Run all code in the Anaconda Prompt unless specified otherwise.a.Activate the environment by running this line of code:> conda activate svm_envb.Run the following lines of code separately to install the required libraries:>pip install numpy==1.23.4>pip install pandas==2.0.1>pip install tifffile==2022.10.10>pip install tqdm==4.64.1>pip install opencv-python-headless==4.6.0.66>pip install scikit-image==0.19.3>pip install scipy==1.9.3>pip install shapely==2.0.1>pip install scikit-learn==1.1.3>pip install matplotlib==3.6.2Note: We used these library versions for writing the notebooks. Newer versions might no longer be compatible with each other and prevent the notebooks from working correctly.4.Set up Jupyter Notebook:a.In the Python environment, install Jupyter Notebook by running the following code:> conda install jupyterWhen asked ‘Proceed ([y]/n)?’, answer y.b.Launch Jupyter Notebook by running the following code:> jupyter notebookc.Jupyter Notebook should open in your default web browser, displaying the file browser interface.5.Clone our GitHub repository using Git:a.Download Git from the official website: https://git-scm.com/downloads.b.Open a Command Prompt (not the Anaconda Prompt).c.Run the following code to clone our GitHub Repository:> git clonehttps://github.com/Govers-Lab/Steemans_and_Govers_2023.git.d.The Steemans_and_Govers_2023 repository that contains folders with the notebooks, feature data and labeled feature data is now downloaded on your local computer and located in your current working directory.e.For immediate testing of the notebooks, readers are referred to the ‘feature extraction’ section.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Feature extraction",
+      "instruction": "Timing: 15 min",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Feature extraction",
+      "instruction": "In this step, cellular features are extracted from the cell meshes and phase contrast images, using the ‘feature_extraction.ipynb’ notebook. This will result in a DataFrame with 26 features that, together with the frame number, cell ID and cell contour, are exported in a pickle file. The feature extraction script can deal with segmentation results obtained from various sources and/or algorithms, as long as these results come in the form of cell meshes (described above). To test the notebook, you can use the cell meshes and images provided in our Mendeley data repository (key resources table).6.Activate the virtual environment (svm_env) and open Jupyter Notebook.7.Open the feature_extraction.ipynb file inside the ‘Notebooks’ folder of the Steemans_and_Govers_2023 repository.8.Run every code cell of the notebook in the correct order:a.Import necessary libraries: run this code cell to import the required Python libraries (troubleshooting 1).b.Load image and mesh data: to load raw images, provide the path to the folder where the images are located. Images should be stored as separate TIF files in this folder. To load the cell mesh data, specify both the path and the file name where the mesh data is stored.c.Load functions: instead of adding a separate helper function file, we opted to include the functions that calculate the features in the notebook itself. Running this code cell will load in the functions that are used in the subsequent code cell of the notebook.d.Extract features: running this code cell will extract the features from the cell meshes.Note: After feature extraction, the first five rows are displayed underneath the code cell. This serves as an initial validation step that allows a quick assessment of the calculated feature values, and whether or not these were calculated successfully.e.Save DataFrame: save the DataFrame to a specific folder by changing the file_path. Preferably, the name of the pickle file should end with ‘svm_features.pkl’.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Overview of the cellular features that are extracted from cell meshes and phase contrast images, along with an explanation of how they are calculated.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell length (μm): individual step lengths (between each segment of the cell mesh) are determined by computing the distance between the midpoints of the lines formed by the coordinates (x1, y1) and (x2, y2). The calculated step lengths are subsequently summed to obtain the total cell length.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell width (μm): the cell width is computed as the mean of the top one-third of the segment widths (i.e., are the distances between coordinates (x1, y1) and (x2, y2)).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell area (μm2): the pixel area is computed based on the contour that outlines the cell using shapely.Polygon().",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell volume (μm³): each cell segment is assumed to be a cylinder, and the volume of each cell segment is computed using the trapezoidal rule and summed up to obtain the total volume of the cell.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell surface area (μm2): each cell segment is assumed to be a cylinder, and the surface area is calculated as 2π∗(width2)∗step_length. Individual surface areas of each cell segment are summed to obtain the total surface area.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max, min and mean contour curvature: the curvature characteristics are computed using the gradient and the second derivative of the contour coordinates.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell perimeter (μm): the perimeter is calculated by summing up the distances between two consecutive points of the (subpixel) cell contour. From the cell perimeter, other features such as circularity, compactness, and sphericity are calculated. Cell circularity:4π∗areaperimeter2Cell compactness:perimeter2areaCell sphericity:1.5πperimeter2π1.5area",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Total phaco intensity (A.U.): the sum of all phase contrast pixel intensity values inside the cell contour.Note: the phase contrast image is inverted, and a background subtraction is performed by deducting the mean intensity value outside all cell segmentation masks from the image.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max and mean phaco intensity (A.U.): Maximum and mean of the phase contrast pixel intensity values inside the cell contour.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Phaco contour intensity peaks (A.U.): The number of peaks in the phase contrast intensity along the cell contour, determined using the find_peaks() method from the SciPy library.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max, min and mean contour intensity (A.U.): The maximum, minimum and mean values of the phase contrast intensity along the cell contour.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max and mean contour intensity variability: The rolling window standard deviation is computed for the contour intensity values using a window size of 10. This captures fluctuations in contour intensity along the contour, and calculates both the maximum and mean values.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Midline intensity skewness: The skewness of the distribution of phase contrast intensity values along the cell midline.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Midline intensity kurtosis: The kurtosis of the distribution of phase contrast intensity values along the cell midline.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max and mean expanded contour intensity (A.U.): The contour is expanded by 2 pixels and the maximum and mean phase contrast values along the expanded contour are then calculated.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Quantification and statistical analysis",
+      "instruction": "Mean cell edge gradient (A.U.): This feature uses both an expanded and an eroded cell contour. The intensity values along these contours are subtracted from each other and averaged to calculate the mean gradient over the cell contour.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T00:21:51.351048Z",
+  "llm_normalised": true
+}
