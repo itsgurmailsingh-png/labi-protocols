@@ -1,0 +1,167 @@
+{
+  "protocol_id": "two_phase_drift_monitoring_and_automatic_retraining_tpdm_ar_for_electric_load_fo",
+  "parent_protocol_id": null,
+  "title": "Two-phase drift monitoring and automatic retraining (TPDM-AR) for electric load forecasting",
+  "author": "Oliveira, Silva",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC13226265",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13226265/",
+  "doi": "10.1016/j.mex.2026.103966",
+  "citation": "10.1016/j.mex.2026.103966",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 60,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "This study proposes TPDM-AR (Two-Phase Drift Monitoring and Automatic Retraining), an experimental approach based on the generation of synthetic power-demand signals inspired by the typical air-conditioning usage profile at the Smart Campus of Mackenzie Presbyterian University. The objective is to evaluate, in a controlled manner, the ability to detect concept drift and data drift using multiple drift detectors coupled to a machine-learning forecasting model, and to trigger retraining according to the proposed two-phase decision rule.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 1. Define the monitoring setup (streams and constants): hourly load series y(t); forecasting design (48-h input → 24-h horizon); detectors {ADWIN, KSWIN, PH}; Phase 2 smoothing window wMA=24; and consensus horizon S=8 days.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 2. Prepare the load data y(t) as an hourly series.•Synthetic validation: generate Jan–Mar 2024 and keep Jan for training, Feb as drift-free reference, and Mar for drift-injected evaluation.•Real-data validation: build the hourly series y(t) from the UCI Global_active_power (kW) by parsing Date and Time into timestamps, handling missing values via time interpolation, and resampling to hourly mean active power. Define the initial reference window ref as 7 consecutive days (Aug 1–7), used later to calibrate the reference threshold in Step 10.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 3. (Synthetic only) Inject controlled incremental drift in March using linear and logarithmic distortion profiles with final intensity p∈{10,20,30,40,50} % by day 31.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 4. Build supervised learning samples with sliding windows: inputs xi=(yi,…,yi+47) and targets zi=(yi+48,…,yi+71).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 5. Fit the scaler on the training baseline month only (synthetic: January 2024; real-world: July 2007) and normalize both inputs and outputs using MinMaxScaler [0,1] to avoid leakage.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 6. Train the forecasting model (MLPRegressor) on the baseline month only (synthetic: January 2024; real-world: July 2007), freeze the model, and keep the detector hyperparameters fixed (Table-based configuration).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 7. Run multi-step forecasting during monitoring: at each forecast origin t, issue a 24-step ahead forecast y^t+h|t, h=1,…,24, and create a consistent error stream for monitoring.•Synthetic regime (to form a single-valued hourly forecast stream y^(t)): issue one 24-step forecast per daily anchor (e.g., 00:00). This avoids overlapping horizons across multiple forecast origins and yields exactly one forecast per hour for ε(t). Then unfold the horizon to assign y^t+h←y^t+h|t for h={1,…,24}. Concatenate daily horizons to obtain the hourly y^(t) stream used to compute ε(t).•Real-data regime: keep the per-origin multi-step forecasts y^t+h|t​ (one vector per forecast origin t; in this study, forecast origins are hourly (∆t = 1 h), i.e., one forecast per hour) to build the horizon-aggregated error MAE24(t).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 8. Compute the Phase 2 “raw” error stream (regime-specific):•Synthetic regime: compute the hourly pointwise absolute error on denormalized values (after inverse-transform) as ε(t)=|y(t)−y^(t)|.•Real-data regime: compute AEt+h|t=|yt+h−y^t+h|t| and aggregate it into MAE24(t)=124∑h=124AEt+h|t​ (one scalar per forecast origin).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 9. Build the Phase 2 monitoring signal by smoothing the regime-specific raw error stream (synthetic: ε(t); real-data: MAE24(t)) with a moving average wMA=24, yielding MA24(t). Apply detectors in Phase 2 on the smoothed signal to emphasize sustained deviations.•Synthetic regime: smooth ε(t) using wMA=24 to obtain MA24(t) as in Eq. (12).•Real-data regime: smooth MAE24(t) using the same definition to obtain MA24(t).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 10. Calibrate the Phase 2 reference threshold Tref​ on an initial reference interval, using the regime-appropriate monitoring scalar.•Synthetic regime: Since February is drift-free by construction, compute Tref​ over the full month as Tref=maxt∈FebMA24(t).•Real-data regime: Calibrate on a short initial reference week ref (7 consecutive days from the start of monitoring), using the horizon-aggregated error indexed at the forecast origin, as Tref=maxt∈refMAE24(t). Use either a fixed-global Tref​ or per-cycle updating (this study uses fixed-global). For conservatism, Tref​ is computed on non-smoothed MAE24(t) although detectors operate on smoothed MA24(t).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Note: The subscript “24″ appears in both MAE24(t) (24-step horizon aggregation) and MA24(t) (24-sample moving average), but they refer to different operations: horizon aggregation versus temporal smoothing.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 11. Phase 1 monitoring (raw stream): run ADWIN/KSWIN/PH on the raw y(t) stream and log Phase 1 alerts (reporting may include a Daily-MAE curve as context).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 12. Phase 2 monitoring (impact stream): run the same detectors on MA24(t), log alert timestamps, and form the candidate consensus interval [ti*,tl*] from the first Phase 2 alert to the alert that completes three-detector consensus.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 13. Apply the Phase 2 confirmation rule: confirm degradation only if (i) three-detector consensus occurs within horizon S, and (ii) the persistence condition holds, i.e., MA24(t)>Tref for all t∈[ti*,tl*]. Here, the consensus completion time tl*​ is defined as the timestamp of the third detector’s first alert (within the window S).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 14. If confirmed, schedule retraining using the fixed-length window anchored at the consensus completion time [tl*−22 days, tl*+7 days]; execute retraining after the +7-day post-consensus buffer becomes available. After retraining and deployment, start a new monitoring cycle by reinitializing ADWIN, KSWIN, and PH for Phase 1 and Phase 2. The new cycle uses a 7-day reference week to define the Phase-2 baseline, and monitoring resumes at the subsequent stream start; if configured, Tref is recalibrated for the new cycle (or retained under a fixed-global policy).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Step-by-step procedure (TPDM-AR replication guide)",
+      "instruction": "Step 15. Save reproducibility artifacts: configuration (all hyperparameters), timestamps of Phase 1/Phase 2 alerts, error streams (MAE24(t), MA24(t)), and validation metrics (MAE/MSE/RMSE), plus figures and logs required to reproduce the exact runs.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Declaration of generative AI and AI-assisted technologies in the manuscript preparation process",
+      "instruction": "During the preparation of this work, the authors used ChatGPT (OpenAI) for translation from Portuguese to English, language polishing, and review of analysis scripts. No AI tools were used to generate the scientific results, data analyses, figures, tables, or conclusions. All technical content was verified by the authors, who take full responsibility for the manuscript.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T05:53:36.694427Z",
+  "llm_normalised": false
+}

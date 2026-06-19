@@ -1,0 +1,92 @@
+{
+  "protocol_id": "scpasu_a_computational_protocol_for_quantifying_polyadenylation_site_usage_from_",
+  "parent_protocol_id": null,
+  "title": "scPASU: A computational protocol for quantifying polyadenylation site usage from scRNA-seq data",
+  "author": "Krylova, Le, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC13157062",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13157062/",
+  "doi": "10.1016/j.xpro.2026.104544",
+  "citation": "10.1016/j.xpro.2026.104544",
+  "category": "Genomics & Sequencing",
+  "tags": [
+    "scrna-seq",
+    "polyadenylation",
+    "bioinformatics",
+    "python"
+  ],
+  "estimated_time_mins": 36,
+  "materials": [
+    "R version 4.3.3",
+    "Python version 3.10",
+    "apeglm version 1.24.0",
+    "argparser version 0.7.2",
+    "Bioperl version 1.7.8",
+    "DESeq2 version 1.42.0",
+    "edgeR version 4.0.16",
+    "ggplot2 version 3.5.1",
+    "Seurat version 5.1.0",
+    "bowtie2 version 2.5.4",
+    "cellranger version 7.1.0",
+    "Snakemake version 7.32.4",
+    "UMI-tools version 1.1.6",
+    "matrixStats version 1.3.0",
+    "data.table version 1.15.2"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Before you begin",
+      "instruction": "Alternative polyadenylation (APA) is a pervasive yet underexplored mechanism that expands transcriptome diversity in a cell- and tissue-specific manner. By generating mRNAs with distinct 3′ untranslated regions, APA fine-tunes expression through effects on stability, localization, and translation efficiency,2,3,4,5,6,7,8,9 and, in some cases, alters coding potential, as in the immunoglobulin switch from membrane-bound to secreted forms in B cells.10 Despite its broad impact, APA remains incompletely characterized in complex tissues because conventional bulk 3′-end sequencing averages signals across cells and obscures cell type-specific APA dynamics.11 Resolving APA isoforms at single-cell resolution is therefore needed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Before you begin",
+      "instruction": "scPASU (single-cell Poly(A) Site Usage) is a Snakemake-based workflow that extracts APA information from standard 3′ scRNA-seq data. Conceptually, scPASU builds a dataset-specific polyadenylation (poly(A)) site reference from junction evidence, generates per-sample site-by-cell count matrices using that reference, and tests multi-site genes for differences in site usage between specified cell groups. The protocol below describes the steps for using scPASU to analyze APA in human urothelial cell differentiation in the ureter.1 The urothelium spans from basal progenitors to terminally differentiated umbrella cells. Using scPASU, we mapped poly(A) isoforms and identified hundreds of differentiation-associated APA events among basal, intermediate, and umbrella cells. Most APA genes were not differentially expressed by total mRNA abundance, revealing regulatory dynamics that conventional analyses miss.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Setting up the configuration file",
+      "instruction": "Timing: 10–20 min\n7.Navigate to the “scPASU_snakemake_version/config” directory.8.Open the “config.yaml” file in a text editor and update the following variables to match your dataset and analysis:a.compartment: Prefix used for intermediate and output file names. Set this to the cell group being analyzed (e.g., “fibroblasts”).b.genomename: Genome reference to use. The pipeline currently supports GRCh38 for human (set parameter to “hg38”) and GRCm38 for mouse (set parameter to “mm10”).c.chrs: For human: “chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX, chrY” and for mouse: “chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chrX,chrY”d.samples: List of sample names to analyze, exactly matching the sample names in the Cell Ranger alignment output. Format as [“Sample_1”, “Sample_2”, “Sample_3”, …]e.subset: Set to “true” if analyzing a specific list of cell barcodes (rather than all barcodes in the Cell Ranger BAM files). If “true”, provide the barcode file paths in the barcodepath parameter below. Otherwise, set to “false” to analyze all barcodes.f.PAS_filtering: Set to “true” to perform PAS filtering or “false” to skip this step. See the Module 3 section for an explanation of this filtering step.g.group_one and group_two: Names of the two cell groups to compare during APA and DEG testing, matching the group labels in your metadata (e.g., group_one: “Umbrella”, group_two: “Basal”).h.meta_testing_column: Name of the metadata column that contains the cell group labels specified above (e.g., “cell_type”).9.Continue in the same “config.yaml” file and update the following path variables to match the locations of files, tools, and directories on your system:a.work_dir: Absolute path to the scPASU workflow directory. Format: “/path/to/scPASU/workflow/”.b.cellrangeroutputpath: Absolute path to the directory containing all Cell Ranger alignment outputs. Format: “/path/to/cellranger/alignments”.c.cellrangerrefpath: Absolute path to the genome reference used for Cell Ranger alignment. Format: “/path/to/cellranger/reference/”.d.barcodepath: Relative path from the workflow directory to the folder containing per-sample tsv files listing barcodes of interest. If subset is “false”, leave this parameter as empty string: “”. Otherwise, set to directory such as “data/subset_bams”.e.seurat_obj_file: Relative path from the workflow directory to a Seurat object containing the cells of interest. This object is optional and only used during peak matrix merging in module 5 to ensure barcode formatting matches the object. Leave as “” if not used; otherwise, format as “data/seurat_object_name.rds”.f.metadata_file: Relative path from the workflow directory to a CSV file containing metadata for the cells of interest. Format: “data/metadata_file_name.csv”.g.polyAfilterpath: Absolute path to the polyAfilter package directory cloned from GitHub as described in the Package installation and pipeline set up section. Format: “/path/to/package/polyAfilter/”.h.cellrangerpath: Absolute path to the installed Cell Ranger software. Format: “/path/to/package/cellranger/version_number/”.i.goldminepath: Absolute path to the directory containing the goldmine R as described in the Package installation and pipeline set up section. Format: “/path/to/R/package/library”. Note that here, the “library” directory should contain the R package directory named “goldmine”.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Step-by-step method details",
+      "instruction": "For the following sections, timing estimates are provided for the ureter dataset analyzed in Le et al.,1 with jobs running in parallel wherever possible. The Cell Ranger bam files for this dataset are approximately 384 GB; the pipeline timing will vary according to the initial dataset size and allocated HPC resources.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Module 5: Alternative poly(A) site usage testing and DEG analysis",
+      "instruction": "Timing: 30–60 min, variable depending on dataset size and computational resources",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Module 5: Alternative poly(A) site usage testing and DEG analysis",
+      "instruction": "This module provides optional R scripts designed to streamline common downstream analyses using the peak-by-cell count matrices generated in Module 4. It offers convenient workflows for merging count matrices, performing APA and differential gene expression testing, and generating browser-ready visualization tracks, but all steps are fully optional. Users may instead use the matrices directly for their own custom analyses.5.Submit Snakemake command to run module 5:>snakemake run_module_5 --jobs [job_num] --cluster 'HPC_submit_parameters' --use-condaNote: This module contains six rules. merge_per_sample_peakcounts and merge_per_sample_genecounts merge per-sample peak and gene count matrices and optionally edit cell barcodes to match with a user-provided Seurat object, outputting to folders 5a. APA_testing performs APA significance testing between two user-defined groups of cells to identify differentially expressed poly(A) sites, outputting to folder 5b. DEG_testing conducts pseudo-bulk differential gene expression (DEG) testing to generate a list of differentially expressed genes for comparison with APA peaks, outputting to folder 5b. make_fractional_tracks converts the APA bedGraph files generated by APA_testing to fractional usage track files for visualization in the UCSC Genome Browser. make_track_annotations generates a reference bigBed file annotating peaks for visualization in the UCSC Genome Browser.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T01:12:27.599628Z",
+  "llm_normalised": true
+}

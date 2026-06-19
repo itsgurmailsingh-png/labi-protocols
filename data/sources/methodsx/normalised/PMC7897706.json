@@ -1,0 +1,71 @@
+{
+  "protocol_id": "high_performance_method_for_identification_of_super_enhancers_from_chip_seq_data",
+  "parent_protocol_id": null,
+  "title": "High-performance method for identification of super enhancers from ChIP-Seq data with configurable cloud virtual machines",
+  "author": "Orlova, Bogatova, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC7897706",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7897706/",
+  "doi": "10.1016/j.mex.2020.101165",
+  "citation": "10.1016/j.mex.2020.101165",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 68,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method validation",
+      "instruction": "To demonstrate the capabilities of the method, we performed a search for super-enhancers in three different sample types – a cell line (human MCF-7), a mouse tissue (heart), and a human tissue (adrenal gland). The acetylation at the 27th lysine residue of the histone H3 protein (H3K27Ac) was used as an enhancer mark. Table 1 provides information on the ChIP-seq data from the ENCODE Project that we used.Table 1Information about ChIP-seq data used.Table 1Dataset IDSample TypeChIP-seq MarkPlatformReference GenomeENCFF000VHDCell line (human MCF-7)H3K27AcIllumina Genome AnalyzerGRCh38ENCFF000VHLCell line (human MCF-7)Control(input library)Illumina Genome AnalyzerGRCh38ENCFF483VRPMouse tissue (heart)H3K27AcIllumina HiSeq 4000Mm10ENCFF183PVAMouse tissue (heart)Control(input library)Illumina HiSeq 4000Mm10ENCFF697BQRHuman tissue (adrenal gland)H3K27AcIllumina HiSeq 2500GRCh38ENCFF225QVLHuman tissue (adrenal gland)Control(input library)Illumina HiSeq 2500GRCh38",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method validation",
+      "instruction": "Table 2 shows the cVM configurations at each step of data processing using the developed method. cVM configuration was chosen in order to optimize the processing time, taking into account the possibility of multi-threading at a particular stage. We increased the number of CPUs and the amount of RAM as long as it still resulted in shorter processing times.Table 2Cloud VM configurations at each step of data processing using the developed method.Table 2Alignment(bowtie2)Conversion (samtools)Sorting (samtools)Peak Calling(MACS2)Identified Super-Enhancers (ROSE)CPU648884RAM2561616168",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method validation",
+      "instruction": "Table 3 shows method operating time at each of the processing steps and the number of potential super enhancer. Fig. 1 shows the results of ROSE for each of three sample types – cell line (human MCF-7), mouse tissue (heart), and human tissue (adrenal gland). The full processing time of raw ChIP-seq raw data ranged from 14 min 37 s to 48 min 03 s for a test/control pair of sample datasets depending on the number of the initial short reads. As one can see from the table, the processing time at each step was almost linear to the number of the short reads in the ChIP-seq raw data.Table 3The processing time of the method at each data processing step and the number of identified super-enhancers.Table 3Sample TypeTest/ControlNumber of ReadsProcessing timePotential super-enhancersAlignment(bowtie2)Conversion (samtools)Sorting(samtools)Peak calling (MACS2)Identification of super-enhancers (ROSE)TotalCell line (human MCF-7)Test31,418,57202 m 42s00 m 43s00 m 37s03 m 42s05 m 30s14 m 37s72Control18,714,96400 m 44s00 m 23s00 m 16sMouse tissue (heart)Test36,752,87303 m 48s00 m 57s00 m 50s11 m 09s20 m 32s48 m 03s338Control85,608,71706 m 53s02 m 17s01 m 37sHuman tissue (adrenal gland)Test33,443,28904 m 12s01 m 06s00 m 56s06 m 43s10 m 27s30 m 23s123Control41,510,86804 m 45s01 m 20s00 m 54sFig. 1Dependence of normalized signal on the peak rank: the ChIP-Seq data ROSE processing results using the H3K27Ac enhancer mark in (a) MCF-7 human cell line; (b) mouse heart; and (c) human adrenal gland.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method validation",
+      "instruction": "It should be noted that the stage of alignment reads is traditionally one of the most time-consuming steps in many genomics pipelines. With the developed method, it took a relatively short period of time – from 44 s for the sample dataset of 18.7 million reads to 6 min 53 s for the sample dataset of 85.6 million reads. This is primarily due to the efficient multi-threading algorithms underlying the bowtie2 tools which were implemented on a cVM with 64 CPUs.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Method validation",
+      "instruction": "At the same time, as can be seen from Table 3, the ROSE algorithm turned out to be the slowest, most likely due to the fact that it is least efficient with multi-threading. Growing each cVM performance by increasing the number of CPUs or RAM amount did not significantly accelerate the ROSE. Nevertheless, the proposed method allows for simultaneous and independent processing of different sample datasets on different cVMs. To achieve this, the configured cVM is cloned in the required number of instances, and an individual cVM clone processes one dataset of test/control pair.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Method validation",
+      "instruction": "In our case, we ran ROSE algorithm simultaneously for all sample datasets on several low-performance cVMs instances. Here, the total processing time of all samples was actually equal to the processing time of one (the slowest) sample dataset. Parallel and independent processing of individual sample datasets on their own cVMs is one of the significant advantages of the proposed method that can be used for rapid high-throughput processing. Besides, due to the universal concept of a cloud virtual machine, the proposed method can be scaled up to address other resource-intensive biocomputing applications for analysis of genome-wide sequencing data. The method can be also used for the optimization of the ChIP-seq assay and for developing multiplex biosensing systems that provide highly sensitive detection of the agents essential in medical diagnostics [[26], [27]], veterinary medicine, food quality control [[28], [29]], environmental monitoring [30] and other applications.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T10:41:48.360429Z",
+  "llm_normalised": false
+}

@@ -1,0 +1,111 @@
+{
+  "protocol_id": "analysis_ready_satellite_data_mosaics_from_landsat_and_sentinel_2_imagery",
+  "parent_protocol_id": null,
+  "title": "Analysis-ready satellite data mosaics from Landsat and Sentinel-2 imagery",
+  "author": "Ørka, Gailis, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC9860476",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9860476/",
+  "doi": "10.1016/j.mex.2022.101995",
+  "citation": "10.1016/j.mex.2022.101995",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 66,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "Methods for combining multiple single scene satellite imagery have been used for many decades [1]. The, early methods consist of merging a few selected scenes [1]. However, multiple scenes are used as more high-resolution satellite imagery has become freely available, e.g., from the Landsat archive [2] and as imagery from the Copernicus Sentinel-2 satellites [3]. As a result, many mosaics e.g., [4,5] and tools to create such exists e.g. [6], [7], [8], [9], [10]. Mosaicking refers to combining two or more spatially independent images into one continuous image, while compositing refers to combining multiple overlapping images into one using an aggregation function [11]. The current method focuses on combining several independent images without any aggregation function; thus, we refer to the method as mosaicking. Some of the existing mosaics are only static and application-specific tuning is impossible [4,5]. Other methods may not provide pixel-level metadata that can be used in modeling, classification or stratification [8,10]. For example, when creating data mosaics based on aggregating pixel values from the same locations e.g., averaging methods such metadata are not available [8]. However, such mosaics may be appropriate for certain applications, but in other applications metadata may be desired. Furthermore, many of the mentioned mosaicking tools only work on a specific type of satellite data as Landsat 8 or Sentinel-2 data [6]. At last, mosaicking tools could be proprietary or connected to a specific software or cloud platform [9]. Based on these issues, we established a generic mosaicking method working on both Sentinel-2 and Landsat 4-8. Thus, we developed the Geomosaic method that implements a configurable smart pixel selection method that lets the user adjust the pixel selection criteria to fit the particular use case. The Geomosaic method is implemented in a software tool developed in Python and is available at Gitlab under a MIT license.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method details",
+      "instruction": "The Geomosaic tool has specific implementations for: (1) Sentinel-2 surface reflectance data (L2A), (2) Landsat 8 Collection 1 Surface Reflectance data (LaSRC - OLI/TIRS) and (3) Landsat 4-7 Collection 1 Surface Reflectance data (LEDAPS - TM/ETM+). Spatiotemporal data aggregation is performed by (1) sorting the input scenes by date, (2) reprojecting the scene to the desired target projection if needed, (3) calculating the spatial extents of potential contribution from the scene, and (4) generating a pixel selection mask at each step. The pixel selection mask is established using the Geomosaic method described below.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method details",
+      "instruction": "The Geomosaic method uses a two-step pixel selection procedure based on a class score and a desirability score. Thus, for each pixel in the mosaic pixels are updated based on the pixel selection mask created from these two score values. If the new scenes’ pixel has a larger class score or the same class score, but a larger desirability score the pixel values for all bands in the mosaic are updated (Fig. 1).Fig. 1Schematic overview of the Geomosaic method.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method details",
+      "instruction": "In the first step in the Geomosaic method, the class score is established by selecting pixels according to a class categorization, where pixels from ‘worse’ classes are progressively exchanged for ‘better’ classes, according to a class hierarchy (Table 1). The classes used in the hierarchy for Sentinel-2 was adapted from the Sentinel 2 MSI Technical Guide [12]. For Landsat 4-8 the classes described in the Land Surface Reflectance Code Product Guide V3.0 [13] was used. The class hierarchy and respective class scores used was fixed in the Geomosaic tool (Table 1). Nevertheless, other classes and another hierarchy of the classes can be used with the Geomosaic method.Table 1Class hierarchy adopted to compute class score and pixel quality. A larger class score means a better pixel quality, i.e., a score of 1 is the worse pixels while a score of six or seven is the best quality for Sentinel-2 or Landsat, respectively.Table 1Class scoreSentinel –2Landsat1no_data, saturated, defectiveno_data, saturated2cloud_medium_probability, cloud_high_probabilityterrain_occlusion3thin cirruscloud_medium_probability, cloud_high_probability4snow/icecirrus_medium_probability, cirrus_high_probability5Dark, shadow, unclassifiedsnow/ice6vegetation, soil, waterdark, shadow7clear_terrain, water",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Method details",
+      "instruction": "In the second step, a weighted pixel desirability score is calculated for each scene:Sdes=wdateSdate+wgpixSgpix+waotSaot,where, Sdate describes the relative distance from the desired mosaic target date, Sgpix is a ratio of good pixels in the scene against all pixels and Saotdescribes the mean aerosol optical thickness of the scene, and wdate,wgpix,waot are relative weights that are summarized to one:wdate∈[0,1],wgpix∈[0,1],waot∈[0,1],wdate+wgpix+waot=1,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Method details",
+      "instruction": "These weights can be changed in order to adapt the mosaic to a specific problem or application, e.g., by increasing the value of wdate to have input images closer to the target date or increase the value of wgpix to have a higher spatial homogeneity of the mosaic or alternatively increase the atmospheric clarity of the mosaic by increasing waot.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Method details",
+      "instruction": "The variable Sdate is a value between 0 and 1 in a quasi-Gaussian distribution:Sdate=exp(−(Dtarget−Dσ2)2),where, Dtarget describes the target date for the mosaic, D describes the date of the current scene and σ2 is the standard deviation in days. The value used for σ2 in the Geomosaic tool was 30 days. The value of Sdate is one if the image is from the desired date and will decrease as the difference between the target date and the scene date increases. Images from +/- 30 days are strongly preferred over other dates due to the selected standard deviation (Fig. 2).Fig. 2The value of Sdate based on the difference between the target date and the date of the input scene (σ2 = 30).Fig 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Method details",
+      "instruction": "The ratio of good pixels in the scene against all pixels Sgpixis computed as:Sgpix=∑i=1ngpixin,where, n is the total number of pixels in the scene and gpixitakes the value 1 if the pixel i is classified as good and 0 if not classified as good. The pixel is classified as good if the pixel has the highest class score possible for the given satellite data type and typically denoting a cloud, snow, and artefact free pixel (i.e., class score 6 for Sentinel-2 and class score 7 for Landsat, see Table 1).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Method details",
+      "instruction": "The mean aerosol optical thickness of the scene is described with Saot and calculated as follows:Saot=1−∑i=1naotin,where, aoti is the “aerosol optical thickness” of pixel i, and n is the number of pixels.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Method details",
+      "instruction": "When performing the spatiotemporal data aggregation of the sorted input scenes, all pixels in the mosaic with a smaller class score than the potential new scene are replaced. Furthermore, for pixels who have the highest possible class score in both the input scene and the mosaic, the pixel is exchanged only if the desirability score for the input scene Sdes is higher than the Sdes of the pixel currently in the mosaic. In addition to the mosaic, the algorithms create a tilemap that contains a metadata identifier to the original scene. In the Geomosaic tool provided, this value is stored as an unsigned integer, and the metadata is stored in an output GeoTiff file. Thus, each pixel in the mosaic is easily traceable back to the original input scene from which it was selected.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Method details",
+      "instruction": "The Geomosaic method is applicable to several use cases and types of satellites data and provides a mosaicking method that enables user-specific inputs and provides analysis-ready satellite data mosaics. See examples of tile maps and mosaics in Fig. 3.Fig. 3Example of tile maps (top) and mosaics (bottom) from different types of satellites (from left Sentinel-2 from year 2020, Landsat from year 1986, and Sentinel-2 from 2018).Fig 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T12:18:36.142214Z",
+  "llm_normalised": false
+}

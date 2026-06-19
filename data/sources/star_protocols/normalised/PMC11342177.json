@@ -1,0 +1,94 @@
+{
+  "protocol_id": "genetic_factors_related_to_severe_covid_19_analysis_of_gwas_data",
+  "parent_protocol_id": null,
+  "title": "Genetic Factors Related to Severe COVID-19: Analysis of GWAS Data",
+  "author": "Zhang, Lin, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC11342177",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11342177/",
+  "doi": "10.1016/j.xpro.2024.103028",
+  "citation": "10.1016/j.xpro.2024.103028",
+  "category": "Genomics & Sequencing",
+  "tags": [
+    "genetic factors",
+    "covid-19",
+    "gwas",
+    "single-cell rna-seq",
+    "sas"
+  ],
+  "estimated_time_mins": 42,
+  "materials": [
+    "COVID-19 Host Genetics Initiative GWAS B1",
+    "COVID-19 Host Genetics Initiative GWAS B2",
+    "Processed differential GWAS summary statistics",
+    "COVID-19 nasopharyngeal single-cell RNA-seq",
+    "SAS OnDemand for Academics",
+    "UCSC Cell Browser",
+    "GTEx Portal",
+    "COVID19_GWAS_Analyzer"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Before you begin",
+      "instruction": "The protocol below describes the specific steps for using COVID19_GWAS_Analyzer to conduct integrative analyses of COVID-19 hospitalization GWASs from the Host Genetics Initiative (HGI).2 However, we have also used this protocol for analyzing GWASs from COVID-19 GRASP database,3 UK Biobank (UKB),4 and even users’ supplied GWAS data, such as long COVID GWAS data.5,6",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Before you begin",
+      "instruction": "To access the necessary tools, register for a free SAS OnDemand for Academics account by visiting this link (https://www.sas.com/en_us/software/on-demand-for-academics.html). SAS OnDemand for Academics provides cloud-based access to SAS Studio free of charge. The current protocol is tailored for execution in the SAS studio.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Before you begin",
+      "instruction": "Once you have obtained a SAS OnDemand for Academics account, download the COVID19_GWAS_Analyzer package in compressed zip format from its corresponding GitHub repository (https://github.com/chengzhongshan/COVID19_GWAS_Analyzer). In SAS Studio, create a directory called ‘Macros’ under the home directory ‘Files (HOME)’. Extract the downloaded file ‘COVID19_GWAS_Analyzer.zip’ on your local computer and upload all SAS macro files within the ‘Macros’ directory to the corresponding online SAS studio directory ‘Macros’.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Load SAS macros for preparation of analyses",
+      "instruction": "Timing: ∼2 mins\n1.Log in to SAS studio using SAS OnDemand for Academics.a.Press the F4 on your keyboard to create a new SAS file in SAS Studio.b.Type or copy the following codes into the SAS file for importing the provided SAS macros in the' Macros' directory located under the SAS Studio home directory. %let macrodir=%sysfunc(pathname(HOME))/Macros; %include “¯odir/importallmacros_ue.sas”; %importallmacros_ue; Note: These commands are necessary at the beginning of any new SAS file that utilizes SAS macros from COVID19_GWAS_Analyzer.\n2.Execute the above codes by selecting them with your mouse and pressing F3 on the keyboard to submit them to SAS Studio.\nCRITICAL: Loading SAS macros is a crucial step to enable comprehensive analysis of GWAS data in SAS studio. Even loading > 400 specifically written SAS macros from COVID19_GWAS_Analyzer can be done quickly. To further assist users to know the functions of these SAS macros, we have provided a macro called “get_anno4macro” to print functional annotations of all these macros, and users can read the contents of each macro by providing the macro name to another macro “macroparas”. The full annotation of these SAS macros are deposited into a csv file here: https://github.com/chengzhongshan/COVID19_GWAS_Analyzer/blob/main/Macros/Available_SAS_Macros_and_its_annotations4STAR_PROTOCOL.csv.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Single-cell gene expression analysis",
+      "instruction": "Timing: ∼30 mins",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Single-cell gene expression analysis",
+      "instruction": "Once the top GWAS SNPs can be associated with specific genes through the eQTL analysis, it would be worthwhile to investigate further the expression of these genes in biologically related single-cell datasets available from the UCSC Cell Browser.8 After locating the desired single-cell dataset and obtaining its corresponding download links, the COVID19_GWAS_Analyzer can be utilized to generate customized Uniform Manifold Approximation and Projection (UMAP) and gene expression figures stratified by sample groups, such as distinct phenotypes of these samples.8.For demonstration purposes, please download the COVID-19 single-cell dataset published by Trump et al.7 by executing the following SAS codes:∗Download the following single-cell data from UCSC Cell Browser into a local computer and then upload them into the HOME directory of SAS OnDemand for Academics;∗https://cells.ucsc.edu/covid-hypertension/Seurat_umap.coords.tsv.gz;∗https://cells.ucsc.edu/covid-hypertension/meta.tsv;∗https://cells.ucsc.edu/covid-hypertension/exprMatrix.tsv.gz;%import_sc_mtex_meta_umap_data(umap_file=%sysfunc(pathname(HOME))/Seurat_umap.coords.tsv.gz,meta_file=%sysfunc(pathname(HOME))/meta.tsv,cell_id_in_meta=cell,exp_matrix_file=%sysfunc(pathname(HOME))/exprMatrix.tsv.gz,outdir=%sysfunc(pathname(HOME)),/∗Three sas datasets will be created and put into the dir:exp (read matrix with column headers, and the last column is for genesymbol),umap (umap coordinates with sample meta data merged),headers (cell barcodes corresponding to column headers for the exp matrix)∗/target_genes=,/∗Provide genesymbols separated by | for parsing lines match with these genes;when the single cell dataset is too large, this will save disk space in SAS OnDemand for Academics∗/mean_exp_cutoff=0.01, /∗Only keep row records with mean read of gene expression > mean_exp_cutoff∗/max_cells2import=1000000 /∗Maximum number of cells to be imported;if there are more than 1 million cells in the input cell matrix, only 1 million cellswill be randomly selected.∗/);Note: if the total number of cells in the single-cell matrix is more than 1 million, the macro will randomly select 1 million cells automatically, which will avoid using up the limited disk space (∼5 GB) in SAS OnDemand for Academics.9.Create a single-cell UMAP by entering the following codes into SAS studio.libname sc \"%sysfunc(pathname(HOME))\";%sc_umap(umap_ds=sc.umap,xvar=x,yvar=y,cluster_var=cluster);10.Create a single-cell UMAP visualization for the target gene MAP3K19, emphasizing only the major cell types that express MAP3K19, specifically ciliated cell types, using the parameter 'where_cnd4sgplot′ for the macro ‘sc_scatter4gene’.libname sc \"%sysfunc(pathname(HOME))\";∗Modify phenotype categories;data sc.umap;set sc.umap;if severity=”healthy_control” then severity=”Healthy”;if severity=”severe” then severity=”Severe”;if severity=”critical” then severity=”Critical”;run;%sc_scatter4gene(dsd=sc.exp,dsd_headers=sc.headers,dsd_umap=sc.umap,gene=MAP3K19,pheno_var=severity,pheno_categories=Healthy Severe Critical,boxplot_width=800,boxplot_height=300,umap_width=400,umap_height=800,umap_lattice_nrows=3,boxplot_nrows=1,where_cnd4sgplot=%quote(cluster contains %'Ciliated%'));∗Further zoom into specific UMAP area defined by the X- and Y-axis regions for single cells mainly express MAP3K19.;∗Note: the input SAS dataset ‘new__tgt_dsd_’ is internally generated by the above SAS macro sc_scatter4gene;%umap_with_axes_restriction(dsdin=new__tgt_dsd_,umap_width=1000,umap_height=300,lattice_or_not=0,raxis_max=20000,raxis_min=0,caxis_max=,caxis_min=45000,panel_row_num=1,noheader=0);11.Analyze the percentage distribution of different cell types in the single-cell dataset.12.Calculate the proportion of cells expressing MAP3K19 in each individual cell type.13.Perform differential gene expression analysis for MAP3K19 using the SAS procedure proc GLM.libname sc \"%sysfunc(pathname(HOME))\";∗Use the dataset ‘new__tgt_dsd_’ internally generated by running;∗the SAS macro sc_scatter4gene;∗The following steps combine non-ciliated cells as ‘Other’ and;∗treat samples with age>60 as ‘Yes’ and others as ‘No’;data tgt;length cell_type $50.;set new__tgt_dsd_;cell_type=\"Other\";if prxmatch('/Ciliated/i',Cluster) then cell_type=Cluster;if age>60 then Old='Yes';else Old='No';run;∗Get percentages of different cells in the single cell dataset;∗Note: we use the exp_cutoff=-1; ∗This will calculate the percentages of different cells within each pheno group; ∗percent=cells/total_cells_in_a_pheno_grp; ∗The macro also perform differential gene expression analysis based on log10(reads+1); %sc_freq_boxplot(longformdsd=tgt,cell_type_var=cell_type, sample_grp_var=sample, pheno_var=severity, cust_pheno_order=Healthy Severe Critical, exp_var=exp, exp_cutoff=-1, boxplot_height=800, boxplot_width=300, boxplot_nrows=5, where_cnd_for_sgplot=%quote( cell_type contains 'Ciliated' or cell_type='Other'), frqout=cellfrqout, other_glm_classes=sex medication Old CAD CVD hypertension,/∗covariant for the linear model∗/aggre_sc_glm_pdiff_dsd=all_sc ); ∗Note: the differential expression analysis results can be further viewed by running the following code;proc print data=all_sc_celltype_pdiff;run;Note: After initiating the library 'sc', the previously imported single-cell SAS datasets will be accessible to the SAS macros. The final differential gene expression results will be saved into a SAS table named as 'all_sc_celltype_pdiff'.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Quantification and statistical analysis",
+      "instruction": "1.To calculate differential effect sizes between two GWASs, the differential Z-test11,12 is employed to compare the effect sizes of each common SNP (MAF > 0.01, imputation score > 0.6) between the two GWASs. The test considers the possibility of normalizing the effect of overlapped samples between HGI-B1 and HGI-B2 on the estimated variance, i.e., gwas1.se2 + gwas2.se2.2.To calculate the differential effect size of each SNP from HGI-B1 and HGI-B2 without normalization, users can follow the procedure as outlined in Sentence 1 using the following formulas:\nΔZ−score=gwas1.β−gwas2.β(gwas1.se2+gwas2.se2)\ndiff.zscore=ΔZ−score\nP=pnorm(−|diff.zscore|)∗2\n3.To calculate the differential effect size of each SNP from HGI-B1 and HGI-B2 with normalization, COVID19_GWAS_Analyzer will first normalize the raw differential Z-score using SAS procedure proc stdize with the method ‘std’, and then proceed with the differential p value calculation using normalized data.\nΔZ−score=gwas1.β−gwas2.β(gwas1.se2+gwas2.se2)\ndiff.zscore=Normalization(ΔZ−score)\nP=pnorm(−|diff.zscore|)∗2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T00:25:59.804515Z",
+  "llm_normalised": true
+}

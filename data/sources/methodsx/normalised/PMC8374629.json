@@ -1,0 +1,255 @@
+{
+  "protocol_id": "general_resource_for_ionospheric_transient_investigations_griti_an_open_source_c",
+  "parent_protocol_id": null,
+  "title": "General resource for ionospheric transient investigations (GRITI): An open-source code developed in support of the Dinsmore et al. (2021) results",
+  "author": "Dinsmore, Mathews, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC8374629",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374629/",
+  "doi": "10.1016/j.mex.2021.101456",
+  "citation": "10.1016/j.mex.2021.101456",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 1805,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "GRITI supports the Madrigal-format GPS TEC database which supplies absolute GPS vTEC data (plus universal time (UT) time, pierce-point location, and many other parameters) for each satellite pass over each contributing receiver over the whole Earth for a UT day. A single data day may include 80-100M data points. These data may be accessed from cedar.openmadrigal.org using GRITI. For Madrigal's logging and security purposes, the user needs to provide a name, email, and affiliation. Alternatively, the Madrigal website allows click-through to download data as well as various code packages to build your own process. GRITI, without any user intervention, processes the absolute GPS vTEC along each pass at each receiver into the delta-vTEC product which is stored in an HDF5 (Hierarchical Data Format version 5) container with other necessary parameters.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "As pass-level absolute TEC data is downloaded from Madrigal on a UT whole-day basis, those passes that extend before or beyond the current UT day(s) boundary are incomplete. GRITI automatically completes these passes by also downloading the data from the edge days before and after the date(s) of immediate interest to complete the data for otherwise incomplete passes. Use of complete passes helps to prevent edge filtering issues when processing absolute vTEC to delta-vTEC. A permissive flag allows for incomplete pass data to be processed, even if it is missing one or both of its edge days.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "The Madrigal data comes in an HDF5 format file that, due to its data structure, suffers from very slow read performance when using the Python implementation of HDF5, h5py. To sidestep this performance issue, a one-time conversion to a more efficient HDF5 structure is performed. This sidestep may not be needed when using Python with future h5py updates or for other code languages with different HDF5 implementations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "Important timekeeping stewarding/repairs also occur during the HDF5 reformatting. The need for this arises due to different timekeeping formats in different datasets and to extending GPS passes across day boundaries. For example, timestamps on day 128, h 24, min 60, and s 0 are actually (by our timekeeping standard) day 129, h 0, min 0, s 0 and should not be included in the day 128 dataset. The best approach to consistent timekeeping is to enforce the removal of all h 24, min 60, and s 60 values. Due to the cyclical nature of timekeeping, a sorting process that steps through the seconds, then the minutes, then the hours, and then the days is sufficient to move all of the timestamps onto a consistent system that never has two values representing the same time (like min 1, s 0 and min 0, s 60). The resultant unified timestamps that fall outside the analysis day are then easily identified and attached (or removed) to the correct day.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "The data for the day(s) being processed as well as data from the previous and following day need to be loaded into memory. The entirety of the edge day data is not needed, though. A cutoff of six hours for the edge days will include any possible satellite observations that continue across the day boundary while reducing the memory usage.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "The data is farther pruned by removing any data below a user-specified minimum elevation angle value. GNSS signals pass through more of the ionosphere at lower elevation angles due to the curvature of the Earth, which leads to larger errors in the vTEC value [8]. The ionosphere effect in the slant TEC (sTEC), which is seen in Fig. 1, is already removed to produce vTEC through a process called “mapping,” which is described in Rideout and Coster [10]. The sTEC, vTEC, and delta-vTEC values are all assumed to originate at the effective ionosphere altitude (often called the pierce point altitude) used in the mapping process, which is 350 km for the Madrigal TEC database. The geographic point where the GNSS satellite to receiver path is at 350 km in altitude is used as the geographic point for each TEC measurement. The code defaults to a strict 30° minimum elevation angle, though lower elevation angles can be specified by the user.Fig. 1The delta-vTEC product is based on the difference between the vTEC and Savitzky-Golay fit. The TEC data products sTEC, vTEC, and Savitzky-Golay Fit use the left axis while the delta-vTEC product uses the right axis. The sTEC product is not directly used by the algorithm as the Madrigal database provides the elevation-normalized (mapped) vTEC product; it is provided for a more complete picture of the data processing path. The vTEC product is based on the sTEC product but has the bias from elevation angle removed through a process called mapping. The mapping process used by the Madrigal database is based on the method described in Rideout and Coster [10]. The vTEC data is smoothed, as described in the text, by applying a Savitzky-Golay filter [11] to the vTEC data product. The appropriately smoothed vTEC result is subtracted from the original, producing the delta-vTEC product that is then further employed in GRITI. Note that each delta-vTEC data point is identified with its latitude, longitude, and time parameters. The example data results shown here are for satellite G16 over receiver 0mly for the time range 2013, May 5th from 11:38:00 to 15:32:00 at approximately 58 arcdegrees latitude and 12 arcdegrees longitude near Göteborg, Sweden.Fig. 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "With the desired day and edge-day data in place and the timestamps of all data aligned, sorting and filtering of the geographically appropriate GPS vTEC data along individual passes at each receiver can begin. Filtering proceeds on a receiver-by-receiver basis for a given day. For each receiver, all satellite passes are examined to verify if the pass is long enough for the selected filtering time. If so, the detrending filter is applied to that single satellite pass with typical results given in Fig. 1. The detrending method used in this code is an application of a Savitzky–Golay filter [11]. This is a low-pass FIR (finite impulse response) filter that effectively smooths the data, allowing for the difference to be taken between the original data and the smoothed (filtered) data yielding the delta-vTEC product. The Savitzky-Golay filter has been used previously in other works for TEC detrending [1,16].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "The key user-controlled parameters of the Savitzky-Golay filter are the polynomial order employed and the window length. The polynomial order used here and in other works [1,16] is 1, which is a form of a running linear fit. The window length is based on the chosen filter cutoff period divided by the TEC data rate, as shown in Eq. (1):(1)SGwindowlength=[round(cutoffperiodTECdatarate)]",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "As the integer SGwindowlength must be odd, the Eq. (1) result must be incremented by 1 if it is even. The cutoffperiod and TECdatarate must be the same time units. The Madrigal GNSS data interval is typically 30 s but some passes are given on 15 s or 60 s intervals in which case those passes are interpolated to (our) standard 30 s intervals. We typically employ a 121-point window corresponding to 1 h of 30 s sampled vTEC data.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "As shown graphically in Fig. 2, in order to process the data from individual satellite passes across individual receivers to delta-vTEC, the bulk 24 h UT data is sorted by receiver and further sorted by satellite. For a specific receiver and satellite combination a time-stamp vector is formed and the individual passes are identified by a user-defined time gap limit. Finally, individual passes are appropriately cataloged for further analysis. In particular, each individual satellite pass needs to be examined for completeness—if not complete it is repaired or discarded. Finally, the filtering and delta-vTEC generation process is applied to each acceptable individual satellite pass. As noted, satellite passes will sometimes have one, or a few, missing data points in a row—as recognized by a relatively small time gap—which are filled by interpolation. The maximum gap to interpolate between is a user-defined variable, and 10 points (5 min) was used in this analysis.Fig. 2A visual representation of the steps implemented in GRITI to select a single satellite pass over a single receiver. Out of the large pool of many receivers (solid white, left bar), one receiver is selected (green checkered squares, left middle bar). From there, a single satellite is selected out of the pool of around 30 GPS satellites (blue slashes, right middle bar). Then a maximum time gap is used to identify the individual satellite passes over the receiver, and one of those individual passes is selected for the delta-vTEC processing algorithm to operate on (yellow checkered diamonds, right bar).Fig. 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "Each individual satellite pass is gauged to determine if it is acceptable for filtering to the desired delta-vTEC product with the Savitzky-Golay filter. In addition to limiting gaps as mentioned above, each individual satellite pass is only processed if the total satellite pass duration is greater than twice the filter cutoff period.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Data preparation: Delta-vTEC processing",
+      "instruction": "To be fully acceptable for processing, individual satellite passes need to be screened for several additional validity issues:",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "The per-day, HDF5-formatted, delta-vTEC product can be flexibly shuffled into several analysis algorithms available in GRITI. These algorithms include keogram generation with very flexible parameters, a circle-pixel (radius-around-a-point) averaging algorithm for local time-series generation, a cross-spectral analysis algorithm, an FFT algorithm, and a movie making algorithm with snapshot generation. While the other algorithms are relatively simple or rely on packages for plotting or spectral analysis, the keogram averaging algorithm is more involved. The algorithm is described in detail below.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "Importantly, a keogram is canonically defined as a plot with latitude on the ordinate, time on the abscissa, and a color scale to represent auroral emission intensity, per Eather et al. [5]. A few decades later the term ewogram was introduced to represent longitude on the ordinate [4]. Herein and in the related works we follow contemporary literature (e.g. Coster et al. [1]) which generalize the term keogram to more broadly represent either latitude or longitude on the ordinate while also presenting any appropriate geophysical parameter via the color scale. The essential features of a (generalized) keogram herein are latitude or longitude on the ordinate, time on the abscissa, and any activity type for the color scale.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "Keogram analysis of delta-vTEC involves several steps. First, a user-defined keogram averaging-framework is set up as seen in Fig. 3. This establishes the set of parallel rectangular boxes into which the entire full-day delta-vTEC dataset is then sorted. The sorting algorithm used is a ray tracing algorithm that is greatly accelerated via pre-calculation and pre-compilation to reduce the computational time needed as a single day of TEC data can have ~80 to ~100 million delta-vTEC points distributed around the globe. As noted in the code comments, the ray tracing algorithm is used instead of a simpler sorting algorithm for orthogonal angles (0°, 90°) because it is three times faster than the current simpler sorting algorithm implementation. In those orthogonal angle instances, the ray tracing algorithm creates an averaging area that is not based on the exact orthogonal angle, but rather an angle that is slightly perturbed from the exact angle due to the slope method used to lay out the averaging zones. A flag can be used to force the exact orthogonal angles and the slower sorting algorithm, but the differences between the two sorting methods are negligible for orthogonal angles.Fig. 3Visualization of the keogram averaging-framework. The thick magenta outer line with the round dots at the corners represents the overall keogram averaging area. For 10 or less cells, each averaging box is represented as the space between the thin magenta lines with their corresponding X points. For more than 10 averaging cells, every nth line is drawn to keep the visualization from becoming too crowded. The boxes between the lines are the areas averaged for each vertical “pixel” of the keogram. The normal keogram averaging-framework visualization in GRITI does not include the black round dots or X's. The keogram area here is set to a 45° angle with a plot area from 30 to 46 arcdegrees latitude and 130 to 146 arcdegrees longitude around Japan. The keogram also has an averaging width of 4 arcdegrees and 10 averaging cells. The purple star represents location of the Shigaraki MU Observatory.Fig. 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "A particular user-defined keogram averaging-framework is constructed based on the specified “propagation angle” (e.g., north-south, east-west, or angles in between), the total plot area (the map area to calculate the keogram within), the desired keogram averaging width, and the number of averaging cells. An example of that keogram averaging area is shown in Fig. 3 with the keogram set to a 45° angle, a plot area ranging over 30 to 46 arcdegrees latitude and 130 to 146 arcdegrees longitude (encompassing Japan), a keogram averaging width of 4 arcdegrees, and a total of 10 averaging cells. The purple star represents the location of the Shigaraki MU Observatory. The 45° keogram angle will more effectively image phenomena propagating at a 45°/255° angle than orthogonal keogram angles; see Dinsmore et al. [2]\nFigs. 5 and 6b. for simulated medium-scale traveling ionospheric disturbances (MSTIDs) propagating at a 135° angle and the imaging results from a keogram angled to 135°.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "The keogram averaging zone is made up of two outer parallel lines that are offset by ± half of the keogram width from a center line that goes through the center of the plot area. These two outer parallel lines define the boundary of the keogram averaging-framework. Being parallel lines, they share a slope but have different intercept values. The lines then need to be projected and then clipped to fit within the plot area. That process yields the four points that define the boundary lines, which are represented in Fig. 3 by the four black round dot corner points connected by the thicker magenta line.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "With those defining four points computed, then two linearly spaced sets of points along the two outer boundary lines can be made based on the number of averaging cells chosen by the user. The two sets of points represent all of the averaging zones that the ray tracing algorithm will use to compute the individual pixels as a function of time. The keogram averaging boxes are constructed from two sets of adjacent points from each line. In Fig. 3, black X's represent the points used to define the averaging box edge corners and the thin magenta lines represent the edges. For more than 10 averaging cells, the keogram framework visualization code will start to plot every nth line to keep the visualization from becoming too crowded with thin magenta lines.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "With the keogram averaging-framework set up, the ray tracing algorithm is applied. Ray tracing can take many forms, but since the keogram averaging boxes are rectangles, a simple five-step method is employed. This simple method assumes points 1 and 3 are opposite each other. The method employed in GRITI revolves around calculating the angles that make up the square and then comparing those angles to the angles that arbitrary data points have with reference to the sides of the square. Fig. 4 shows a zoomed-in view of one of the averaging boxes in Fig. 3 with the constant points, angles, and vectors noted.Fig. 4A zoomed in view of the averaging box around Shigaraki MU Observatory (represented by the purple star). Additionally, points, vectors, and angles used in the ray tracing equations are annotated. Note that the angles listed in this case are always 90° due to how the keogram averaging-framework is constructed, but the ray tracing algorithm supports parallelograms as well. The points within the box for each time interval will be identified with the ray tracing algorithm and then averaged into a single number to represent the keogram “pixel” for this box. Note the subscripting of the vectors and angles.Fig. 4",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "Per Fig. 4:",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "Step 1, calculate reference vectors:(2a)V12⇀=[P2X−P1X,P2Y−P1Y],M12=∥V12⇀∥(2b)V14⇀=[P4X−P1X,P4Y−P1Y],M14=∥V14⇀∥(2c)V32⇀=[P2X−P3X,P2Y−P3Y],M32=∥V32⇀∥(2d)V34⇀=[P4X−P3X,P4Y−P3Y],M34=∥V34⇀∥",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "Step 2, calculate reference angles using the dot product:(3a)cos(θ12,14)=V12⇀·V14⇀M12M14(3b)θ12,14=cos−1(V12⇀·V14⇀M12M14)(3c)cos(θ32,34)=V32⇀·V34⇀M32M34(3d)θ32,34=cos−1(V32⇀·V34⇀M32M34)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "These two reference angles will be used to compare to the angles calculated for each potentially enclosed data point. Steps 3, 4, and 5 are repeated for all potential data points to determine if each is inside of the keogram averaging rectangle for the time interval in question.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "Step 3, calculate arbitrary point vectors where the lowercase p subscript refers to the relevant data coordinate:(4a)V1p⇀=[PpX−P1X,PpY−P1Y],M1p=∥V1p⇀∥(4b)V3p⇀=[PpX−P3X,PpY−P3Y],M3p=∥V3p⇀∥",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "Step 4, calculate arbitrary point angles using the dot product:(5a)cos(θ12,1p)=V12⇀·V1p⇀M12M1p(5b)θ12,1p=cos−1(V12⇀·V1p⇀M12M1p)(5c)cos(θ14,1p)=V14⇀·V1p⇀M14M1p(5d)θ14,1p=cos−1(V14⇀·V1p⇀M14M1p)(5e)cos(θ32,3p)=V32⇀·V3p⇀M32M3p(5f)θ32,3p=cos−1(V32⇀·V3p⇀M32M3p)(5g)cos(θ34,3p)=V34⇀·V3p⇀M34M3p(5h)θ34,3p=cos−1(V34⇀·V3p⇀M34M3p)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "Step 5, check if the arbitrary point is inside of the rectangle:(6)IsIn?=(θ12,1p≤θ12,14)&(θ14,1p≤θ12,14)&(θ32,3p≤θ32,34)&(θ34,3p≤θ32,34)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "This binary check results in true if the point is within the rectangle and false if it is not. Some easy accelerations can be made based on not calculating the angle directly and just using the cosine of the angle. This requires the less-than-or-equal signs be flipped to greater-than-or-equals:(7)IsIn?=(cos(θ12,1p)≥cos(θ12,14))&(cos(θ14,1p)≥cos(θ12,14))&(cos(θ32,3p)≥cos(θ32,34))&(cos(θ34,3p)≥cos(θ32,34))",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "Another easy acceleration is to apply the steps 1-5 to the outer keogram averaging rectangle that holds all of the sub-rectangles. This will allow for points that are not inside of the keogram averaging area at all to be rejected avoiding unnecessary in-the-box checks, saving computational time. Mathematical approximation can also yield some acceleration at a minor cost of location accuracy, such as using the “alpha max plus beta min” algorithm [6] to approximate the magnitude calculations by removing the computationally costly square root. These accelerations are incorporated into the algorithm, while the square root approximation is optional based on a permissive flag with the default option being non-approximated square roots.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "Analysis: Keogram algorithm",
+      "instruction": "The resulting array from running the ray tracing sorting algorithm with the keogram averaging-framework on all of the delta-vTEC data within the specified time range is the keogram that can then be plotted or analyzed as needed per the results in Dinsmore et al. [2]. Fig. 5 shows the resulting array from the specifications visualized in Fig. 3, plotted as a keogram with a reference black line showing the latitude of Shigaraki MU Observatory and with an additional local time overlay localized to the Shigaraki MU Observatory's time zone. Note that for a 45° (and 135°, 225°, 315°) keogram angle GRITI has a user-defined flag that plots either latitude or longitude on the keogram's vertical axis, since for either case the plotted keogram looks the same. Additionally, there is no functional difference between either 45° or 225° and 135° or 315°, since the keogram averaging-framework is identical.Fig. 5(a.) shows a keogram that is the result of the keogram averaging-framework visualized in Fig. 3. The night-to-day transitions are immediately identifiable as near-vertical blue lines, as well as increased nighttime activity. (b.) shows the local day and night periods for the Shigaraki MU Observatory at local time.Fig. 5",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T11:04:58.653399Z",
+  "llm_normalised": false
+}

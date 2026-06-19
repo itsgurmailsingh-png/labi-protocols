@@ -1,0 +1,63 @@
+{
+  "protocol_id": "automating_content_analysis_of_scientific_abstracts_using_chatgpt_a_methodologic",
+  "parent_protocol_id": null,
+  "title": "Automating content analysis of scientific abstracts using ChatGPT: A methodological protocol and use case",
+  "author": "Domínguez-Diaz, Goyanes, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC12221365",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12221365/",
+  "doi": "10.1016/j.mex.2025.103431",
+  "citation": "10.1016/j.mex.2025.103431",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 30,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Protocol",
+      "instruction": "The protocol defines how to convert a codebook that specifies the variables to be analyzed and coded into a prompt that instructs the language model to perform content analysis. The codebook includes a list of variables to be analyzed, and each variable may have a description, a list of possible coding values, and coding rules. This protocol generates a prompt for ChatGPT to analyze and interpret text, assigning values to each variable and, optionally, indicating the parts of the text used to infer its decisions. For this protocol, we use computing terminology—such as variables, values, and rules—instead of content analysis terminology, which can be inconsistent. Variables are sometimes referred to as categories, themes, or codes, while values may also be called codes or labels. Since categorical variables are commonly coded within a set of categories, their coding values represent a coding category. In this paper we use category to refer to coding categories of categorical variables. Table 1 presents the coding book used to extract the research method and research approach from the abstracts of scientific papers, defining two variables.Table 1Codebook for classification of research approach and research method.Table 1#ItemContent1Variable nameresearch_approachDescriptionindicates whether the research is Quantitative, Qualitative or MixedRulesIf the study has just one research method, it should be classified as Quantitative or Qualitative. If the study has more than one research method, it should be classified as MixedExplanationNo2Variable nameresearch_methodDescriptionindicates the type of the main research method used to collect dataValuesMethodological advances, Systematic literature review, Meta-analysis, Big data, Experimental, Ethnography, Observational analysis, Case study, Discourse and textual analysis, Focus group, Interview, Survey, Content analysis, Network analysisRulesThe values have to be ordered by descending priority, in case more than one research method is detectedExplanationYesNote: Each item represents a variable with its name (Variable), description, values, and rules. Values and rules are optional. This research uses computing terminology. In content analysis terminology a Variable can also be called Theme, Code or Category. Values can also be called labels.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Protocol",
+      "instruction": "The protocol (Table 2) begins by instructing ChatGPT on its role and the task to be performed. Under ‘{document_description}’, the type of document is identified. For this research, we used ‘abstract’. Then, for each variable defined in the codebook, the protocol directs the LLM to code it using the description, values, and rules, if provided. If the description specifies the possible values, it is not necessary to present them again. Rules can further clarify coding instructions, as illustrated in the example provided in Table 1. When the codebook requires an explanation for a given variable, the protocol instructs ChatGPT to create a new variable named ‘{variable_name_description}’ and return the fragments of the original text used to make the coding decision. The protocol concludes by indicating that all variables are defined and providing the text to be analyzed.Table 2Protocol for content analysis using ChatGPT.Table 2#DescriptionInstruction1RoleYou will have the role of a researcher that performs content analysis tasks.2TaskI need you to code a series of variables based on {document_description}. Next, I will describe you the variables.3For each variableVariable “{variable_name}” which {variable_description}.If valuesAnswer with one of the following values: {values}If rules{rules}If explanationVariable \"{variable_name}_explanation” where you return an array with the text fragments used to determine the value of \"{variable_name}\". Include up to 10 words per text fragment.4EndingAll the variables are defined. This is the content to analyze (between triple quotes):\"\"\"{text_content}\"\"\"Return the response in JSON format. Do not include the content itself in the response.Note: This protocol translates a codebook described in the form presented in Table 1 to instructions for ChatGPT LLM. Values and rules for each variable are optional.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Protocol",
+      "instruction": "This protocol can be applied through both ChatGPT's chat mode and the OpenAI API. In chat mode, ChatGPT responds to each message step-by-step, confirming the process as defined in the protocol. The process is entirely guided, ensuring that ChatGPT receives all necessary information and knows what to return at each stage. To apply the protocol programmatically, the client.chat.completions.create function is used with the ChatGPT 3.5-turbo model. In the initial message to the LLM, the role is defined under system, while subsequent messages are separated by line breaks under user. Additionally, the model’s temperature is set to 0, as creativity is not required for this task. To facilitate further programmatic processing of the output, we suggest requesting the response in JSON format. Annex 1 presents the Python source code implementing the protocol using the ChatGPT API.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Error analysis",
+      "instruction": "Table 6 presents common false-positive errors, categorized by the primary data collection method. Big data is often misclassified as Content analysis (28.6% of errors). ‘Content analysis’ itself suffers from misclassification with ‘Survey’ (9.5%) and ‘Discourse/Textual Analysis’ (8.4%) as frequent sources of confusion. Other notable errors include ‘Discourse/Textual Analysis’ being misclassified as ‘Interview’ (13%) and ‘Ethnography’ being confused with ‘Interview’ (20%). These patterns reveal areas where the model struggles with overlapping methodological features.Table 6Most frequent errors. False positives (>1%) for data collection methods.Table 6CategoryError#1Error#2Error#3Big dataContent analysis (28.6%)--Content analysisSurvey 9.5%)Discourse / textual analysis (8.4%)Big data (5.3%)Discourse / textual analysisInterview (13%)Survey (3.7%)Ethnography (1.9%)EthnographyInterview (20.0%)Discourse / textual analysis (10.0%)-ExperimentalSurvey (4.8%)Big data (1.3%)-Focus group---InterviewExperimental (3.8%)Survey (2.5%)Focus group (1.3%)Meta-analysisSurvey (5.6%)--SurveyExperimental (8.8%)Interview (1.8%)-Systematic literature review---Note: Columns Error#1, Error#2 and Error#3 represent the most common errors between categories measured as the percentage of false positives when it is larger than 1%. Empty cells mean no errors between the category and others.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Error analysis",
+      "instruction": "Table 7 highlights the most common false negatives, where specific methods were not identified correctly. For instance, ‘Big data’ is frequently missed, being instead classified as ‘Network Analysis’ (29.2%) or ‘Content Analysis’ (20.8%). ‘Content analysis’ is sometimes incorrectly excluded, with ‘Observational Analysis’ and ‘Survey’ as alternative categorizations (2.6% each). Misclassification trends suggest difficulty distinguishing between methodologies that share thematic or procedural similarities, such as ‘Discourse/Textual Analysis’ being confused with ‘Content Analysis’ (14.3%) and ‘Ethnography’ with ‘Discourse/Textual Analysis’ (12.5%). Errors documented in Table 6, Table 7 reflect challenges in differentiating nuanced methodologies, particularly between conceptually adjacent categories like qualitative approaches and certain data collection techniques.Table 7Most frequent errors. False negatives (>1%) for data collection methods.Table 7CategoryError#1Error#2Error#3Big dataNetwork analysis (29.2%)Content analysis (20.8%)Observational analysis (16.7%)Content analysisObservational analysis (2.6%)Survey (2.6%)Big data (2.6%)Discourse and textual analysisContent analysis (14.3%)Observational analysis (3.6%)Narrative thematic analysis (1,8%)EthnographyDiscourse / textual analysis (12.5%)--ExperimentalSurvey (9.9%)Observational analysis (2.8%)Interview (1.2%)Focus groupDiscourse / textual analysis (5.9%)Interview (5.9%)-InterviewDiscourse / textual analysis (7.6%)Survey (5.4%)Ethnography (2.2%)Meta-analysis---SurveyObservational analysis (5.2%)Experimental (3.6%)Content analysis (2.9%)Systematic literature reviewContent analysis (21.4%)--Note: Columns Error#1, Error#2 and Error#3 represent the most common errors between categories measured as the percentage of false negatives when it is larger than 1%. Empty cells mean no errors between the category and others.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T03:34:59.361662Z",
+  "llm_normalised": false
+}

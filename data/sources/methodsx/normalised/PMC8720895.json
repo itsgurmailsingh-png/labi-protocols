@@ -1,0 +1,79 @@
+{
+  "protocol_id": "a_divided_and_prioritized_experience_replay_approach_for_streaming_regression",
+  "parent_protocol_id": null,
+  "title": "A divided and prioritized experience replay approach for streaming regression☆☆☆",
+  "author": "Leite Arnø, Godhavn, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC8720895",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8720895/",
+  "doi": "10.1016/j.mex.2021.101571",
+  "citation": "10.1016/j.mex.2021.101571",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 42,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method",
+      "instruction": "The selected model architecture for this work was a DNN. DNNs consist of multiple layers of interconnected neurons with nonlinear activation functions. This allows extraction of latent, possibly nonlinear features within the data. First, we provide notation for the DNN:L:numberoflayersintheDNNm:numberofobservationsf:numberoffeaturesx:featuresy:targetvariablesl:numberofneuronsinlayerl∈1,…,L(xi,yi):ithobservation,i∈1,…,mw[l]:trainableweightmatrixforlayerlb[l]:trainablebiasvectorforlayerland(1)x=[⋮⋮⋮x1x2…xm⋮⋮⋮]∈Rfxm,(2)y=[y1y2…ym]∈R1xm,(3)w[l]=[…w1[l]⊤……w2[l]⊤…⋮…wsl−1[l]⊤…]∈Rsl−1xsl,(4)b[l]=[b1[l]b2[l]⋮bsl[l]]∈Rslx1.To make a prediction on a single observation of inputs xi, the input is mapped to y^i by forward propagation through the DNN:(5)zi[l]=w[l]⊤ai[l−1]+b[l]l=1,…,L,(6)ai[l]=g[l](zi[l])l=1,…,L−1,(7)ai[l]=max{γzi[l],zi[l]}l=1,…,L−1,(8)y^i=ai[L]=zi[L].Eq. (5) describes the linear part of the forward propagation, mapping from one layer to the next throughout the DNN. This starts at ai[0]=xi. At each hidden layer, these linear combinations are passed through nonlinear activation functions g[l], as described in Eq. (6). In this work, the leaky ReLU activation functions given in Eq. (7) are used, where γ is the slope in the left half plane. Lastly, the output layer outputs the prediction, which for this work is a real number, resulting in a regression layer. This is described in Eq. (8).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method",
+      "instruction": "For learning on a mini-batch of size mb, inputs xb and outputs yb are used. The forward propagation for the mini-batch is given by:(9)z[l]=w[l]⊤a[l−1]+b[l]1l=1,…,L,(10)a[l]=g[l](z[l])l=1,…,L−1,(11)a[l]=max{γz[l],z[l]}l=1,…,L−1.(12)y^b=a[L]=z[L],where 1∈R1xmb is a row vector of ones broadcasting the bias term to each observation of the mini-batch.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method",
+      "instruction": "The weight initialization is He normal [19], which pulls the weights in each layer from a truncated normal distribution with mean μ=0 and standard deviation σ=1s[l−1]. The weight initialization for layer l is then given by:(13)w[l]∈Rsl−1xsl∼N([0,(s[l−1])−1]).The biases, b[l], are initialized as zeros. The optimizer used was Adam optimization [20], which adaptively estimates appropriate momentum for the gradient updates.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method",
+      "instruction": "The parameters w[l] and b[l] are iteratively updated by means of a gradient-based optimizer to minimize some cost function describing a distance between true labels and predictions. This is done by finding the gradients of the cost function J, w.r.t the trainable parameters, ∂J∂w and ∂J∂b. For this work the cost is the mean squared error between the true labels and the predictions, defined by:(14)J=12mb|y^−y|2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Method",
+      "instruction": "For supervised learning, the procedure of iteratively updating the trainable parameters, along with other hyperparameters such as model architecture, is typically done repeatedly in a validation process to assess the model’s ability to generalize to unseen observations. However, the ability to generalize relies on the assumption that the unseen observations come from the same distribution as the training data, which for many real-world datasets is an invalid assumption. The target variable may depend on features not included in the model, shifts may occur in the independent or dependent variables, or the underlying process may evolve. These can all be contributors to poor generalization, and are called nonstationarity. In streaming learning, the goal is to bridge the gap between data distributions by adapting to new available observations. For this to work, labels must be available so that supervision of the updates can be achieved. In addition to adaption to changing distributions, it is of interest to ”remember” older, relevant observations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Method",
+      "instruction": "To stay stable to older observations while being plastic to new ones, the prioritized n−bin experience replay was developed. This experience replay configuration allows retention of observations spanning the prediction space y∈[ymin,ymax] by splitting it into bins. We denote the buffer as D∈RnxN, where n is the number of bins, and N is the capacity of each bin. When observation (xi, yi) becomes available from the data stream, it will be placed in a bin after assessment of which bin in the prediction space yi belongs to. Subsequently, the oldest observation in the same bin is discarded. Using this configuration, observations spanning the prediction space are retained, eliminating bias towards the distribution of the latest available observations, which occurs in the standard sliding window. Additionally, the mini-batch sampled from the experience replay for further learning is sampled by prioritization using the softmax function, so that each observation is assigned a probability of being sampled for training by:(15)pj=e(yj−y^j)2∑c=1Ce(yc−y^c)2,j=1,…,C,where C=nN is the total number of observations in the replay. Assigning the probabilities based on the softmax of the model’s mean squared error on the observations results in added focus on observations for which the model performs poorly, as they are more likely to be sampled. By combining the prioritized n-bin with the DNN using the Adam optimizer, we obtain our streaming learning algorithm, given in Algorithm 1.Algorithm 1Streaming Learning Using Prioritized n−bin Experience Replay & Adam OptimizationAlgorithm 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Method",
+      "instruction": "β1, β2 and ε are tunable hyperparameters for Adam optimization, Vdw and Vdb are biased first moment estimates, and Sdw and Sdb are biased second raw moment estimates. Superscript c denotes their bias-corrected counterparts. α is the learning rate.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T11:23:01.657728Z",
+  "llm_normalised": false
+}

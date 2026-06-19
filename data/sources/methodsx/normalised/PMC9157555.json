@@ -1,0 +1,104 @@
+{
+  "protocol_id": "application_of_unmanned_aerial_system_structure_from_motion_point_cloud_detected",
+  "parent_protocol_id": null,
+  "title": "Application of unmanned aerial system structure from motion point cloud detected tree heights and stem diameters to model missing stem diameters",
+  "author": "Swayze, Tinkham",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC9157555",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9157555/",
+  "doi": "10.1016/j.mex.2022.101729",
+  "citation": "10.1016/j.mex.2022.101729",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 24,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Tree height and DBH extraction",
+      "instruction": "Following the generation of 10 cm CHMs, extraction of individual tree locations and heights was completed using a local maximum variable window function from the R ForestTools package [26]. The function was parameterized based on research conducted in similar forest systems [16], [17], and only detected trees greater than 1.37 m tall. The function utilized a moving window search algorithm with a variable radius (Equation 1) to analyze CHMs identify local maximum pixels as single tree locations (Fig. 2B). Based on the height of each pixel, the variable window radius (meters) is adjusted based on the local maximum pixel height (meters) by a factor of 0.1. The outputs from this function return a list of single tree locations (x and y) and heights estimated in meters.(1)variablewindowradius=localmaximumpixelx0.1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Tree height and DBH extraction",
+      "instruction": "After individual tree height extraction, the point cloud is processed to extract DBH measurements using the R TreeLS package [27]. DBH extraction happens through five interconnected steps: (1) point cloud filtering, (2) tree mapping, (3) tree ID attribution, (4) stem point classification, and (5) DBH detection (Fig. 3). First, points below 0.1 m and above 4.0 m were removed from the normalized point cloud to focus on points representing the stem segment for DBH characterization (Fig. 3B) and substantially reducing processing time. Second, the treeMap function identifies candidate tree stem locations using a hough transform circle search algorithm (Fig. 3C). The algorithm detected the radius and circle center coordinates of potential tree locations by analyzing a two-dimensional slice of the point cloud between 1.32 and 1.42 m above ground. The tree mapping algorithm was parameterized to analyze points with a minimum point density of 0.001 points per square meter and a maximum potential stem diameter of 1 m. Third, the treePoints function crops points within a 0.5 m radius of each tree map coordinates and assigns a unique tree ID (Fig. 3D). Fourth, points with tree ID features are filtered for outliers and classified as stem points using the stemPoints function (Fig. 3E). The outliers are identified by applying a hough transform circle search noise filtering algorithm with a maximum stem diameter of 1.5 m and a minimum point density of 0.1 points per square meter. Points belonging to each tree ID are iteratively fit by the hough transform circle algorithm in 0.5 m vertical segments; points falling too far outside of the circle fit to each stem segment are removed from the resulting point cloud. Finally, each assigned tree ID iteratively feeds into the tlsInventory function to estimate the tree's DBH. The function operates by extracting a slice of the classified stem points that is 0.1 m thick and centered at 1.37 m, setting the height of all extracted points to 1.37 m, rasterizing the points, and fitting a circle to the raster through least-squares estimation using a random sample consensus approach. The resulting output of these steps is a file with stem locations (x and y) and stem radius estimated in centimeters (Fig. 3F). All point cloud processing and tree metric extraction steps are demonstrated in Supplemental Script Part 1 for use in the R environment.",
+      "substeps": [
+        {
+          "instruction": "After individual tree height extraction, the point cloud is processed to extract DBH measurements using the R TreeLS package [27]. DBH extraction happens through five interconnected steps: (1) point cloud filtering, (2) tree mapping, (3) tree ID attribution, (4) stem point classification, and (5) DBH detection (Fig. 3). First, points below",
+          "title": ""
+        },
+        {
+          "instruction": "m and above",
+          "title": ""
+        },
+        {
+          "instruction": "m were removed from the normalized point cloud to focus on points representing the stem segment for DBH characterization (Fig. 3B) and substantially reducing processing time. Second, the treeMap function identifies candidate tree stem locations using a hough transform circle search algorithm (Fig. 3C). The algorithm detected the radius and circle center coordinates of potential tree locations by analyzing a two-dimensional slice of the point cloud between",
+          "title": ""
+        },
+        {
+          "instruction": "m above ground. The tree mapping algorithm was parameterized to analyze points with a minimum point density of",
+          "title": ""
+        },
+        {
+          "instruction": "points per square meter and a maximum potential stem diameter of 1 m. Third, the treePoints function crops points within a",
+          "title": ""
+        },
+        {
+          "instruction": "m radius of each tree map coordinates and assigns a unique tree ID (Fig. 3D). Fourth, points with tree ID features are filtered for outliers and classified as stem points using the stemPoints function (Fig. 3E). The outliers are identified by applying a hough transform circle search noise filtering algorithm with a maximum stem diameter of",
+          "title": ""
+        },
+        {
+          "instruction": "m and a minimum point density of",
+          "title": ""
+        },
+        {
+          "instruction": "points per square meter. Points belonging to each tree ID are iteratively fit by the hough transform circle algorithm in",
+          "title": ""
+        },
+        {
+          "instruction": "m vertical segments; points falling too far outside of the circle fit to each stem segment are removed from the resulting point cloud. Finally, each assigned tree ID iteratively feeds into the tlsInventory function to estimate the tree's DBH. The function operates by extracting a slice of the classified stem points that is",
+          "title": ""
+        },
+        {
+          "instruction": "m thick and centered at",
+          "title": ""
+        },
+        {
+          "instruction": "m, setting the height of all extracted points to",
+          "title": ""
+        },
+        {
+          "instruction": "m, rasterizing the points, and fitting a circle to the raster through least-squares estimation using a random sample consensus approach. The resulting output of these steps is a file with stem locations (x and y) and stem radius estimated in centimeters (Fig. 3F). All point cloud processing and tree metric extraction steps are demonstrated in Supplemental Script Part 1 for use in the R environment.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method validation",
+      "instruction": "This method was initially presented and validated by Swayze et al. [18] using an intensively stem mapped site of nearly 900 trees. The validation augments what is presented here by spatially matching the UAS extracted and matched trees with field stem mapped trees characterized for height and DBH using traditional field methods. In total, validation used 30 UAS datasets collected at a range of altitudes, camera angles, and flight patterns. This analysis revealed that tree extraction accuracy was maximized at over 90% of trees for nadir camera angles using a crosshatch flight design. The extracted tree heights had errors smaller than traditional field inventory techniques. While off-nadir camera angles and crosshatch flight patterns increased the rate of DBH extraction to >40%, filtering with regional inventory data during the matching process removed an average of 60% of the extracted DBH values as they created a height to DBH relationship that did not conform to the regional height to DBH model. However, the filtering process caused the R2 values between UAS and stem mapped DBH values to exceed 0.75, significantly improving previous methods [19,29].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method validation",
+      "instruction": "Within Swayze et al. [18], prediction of DBH from the UAS extracted and matched height and DBH values provided a strong approximation of the stem mapped distribution of DBH values. The greatest DBH errors were noted for the smallest diameter trees, which were generally underrepresented in the UAS extracted DBH data, leading to overestimation of these DBHs. The study also points out how other UAS extracted tree metrics like crown area or local stem density might improve the representation of the smallest diameter trees when modeling DBH. Following the modeling of missing DBH values, Swayze et al. [18] summarized plot-level estimates of trees per hectare and basal area per hectare with correlations typically exceeding 0.8 for most of the 30 tested UAS acquisitions. The best performing acquisitions characterized the study site's basal area within 5% of the stem mapped value, with off-nadir or crosshatch flight patterns maximizing precision.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T11:53:17.121240Z",
+  "llm_normalised": false
+}

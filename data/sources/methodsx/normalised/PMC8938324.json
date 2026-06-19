@@ -1,0 +1,195 @@
+{
+  "protocol_id": "faster_and_more_precise_isotopic_water_analysis_of_discrete_samples",
+  "parent_protocol_id": null,
+  "title": "Faster and more precise isotopic water analysis of discrete samples",
+  "author": "Hachgenei, Vaury, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC8938324",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8938324/",
+  "doi": "10.1016/j.mex.2022.101656",
+  "citation": "10.1016/j.mex.2022.101656",
+  "category": "Environmental Science",
+  "tags": [
+    "isotopic analysis",
+    "water samples",
+    "predictive modeling"
+  ],
+  "estimated_time_mins": 114,
+  "materials": [
+    "Image",
+    "application 1"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "In this section, the principle of the proposed memory correction method is introduced, including a step-by-step description. Thereafter, the whole workflow of the provided calibration program is presented briefly including the calibration and drift correction. This workflow was applied to three Picarro standards and a few natural stream water samples. The stream water samples will not be further presented in this article. In the following validation section, different tests were performed to compare the proposed method to the use of the classical aol method as well as an exponential approximation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method details",
+      "instruction": "Assuming the asymptote of the measured value per injection to be the ‘ideal’ measured value (i.e. unaffected by the memory effect), an average over the last measured values is biased toward the precedent sample as long as the data present a trend. Therefore, we aimed to directly estimate the asymptote from the trend in the repeated injections. This method uses the information from all injections in order to predict the asymptote instead of eliminating this valuable information and only using the last measured values. It does not have particular requirements on the order of analysis and can deal with variable number of injections (e.g. if more injections are used for the standards than for the samples). Different asymptotic functions may be used to try and reproduce this trend. We found y=ax+b (called inv hereafter) to give good results. y is the measured isotope ratio, x is the number of injection, a and b are parameters that are optimized to fit the data points, where a is a scale factor and b is the asymptote. Fitting an exponential function y=a·e−b·x+c (called exp hereafter) did not significantly improve the calibration compared to the aol method (see method validation section for details).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method details",
+      "instruction": "The procedure of the inv method is to optimize a and b to obtain a good fit for measured value vs. injection number for each of the analyzed samples. We use Python's scipy module and its optimize.curve_fit function [7]. The program is provided in the supplementary material.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method details",
+      "instruction": "This method is applied to any analyzed sample (i.e. standards and unknown samples). The memory correction can be combined with any calibration workflow. See the end of this section for details on the full workflow of the provided Python program.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Method details",
+      "instruction": "No matter which programming language is used, we strongly recommend either fitting a linear function to 1/x-transformed data or using increasing weight/decreasing uncertainty with number of injection when fitting directly on the data-scale. If all points are equally weighted, the first injections have a stronger influence on the fit as they are further away from the mean and thus weigh stronger in the fitting algorithms cost function. We obtain this weighting in scipy.optimize.curve_fit through the sigma argument, which describes the uncertainty of each data point and corresponds to the inverse of each point's weight. The cost function is chisq=∑(y−f(x)sigma)2. Sigma should thus decrease with number of injection in order to increase the weight. We used sigma(x)=11+0.5·x in order to have a weight of 1+0.5·x for the xth injection. Varying this parameter slightly (e.g. using sigma(x)=1x or sigma(x)=exp(−0.2x)) did not significantly impact the results presented in the method validation section.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Method details",
+      "instruction": "We also recommend to verify the existence of a trend in the measured values vs. injection number (and thus presence of a memory effect) before fitting the inv function. If the data does not present a trend (too little difference between first and last value) which happens, if the sample is very close to the previous sample and the memory effect does not affect the measured value, we use the classic method of averaging over the last injections. A minimum difference between first and last value of 0.15 for δ18O and 0.4 for δ2H worked well in our case. If no satisfying fit can be found (e.g. there is a difference between start and end, but due to noise with no clear trend), again, the aol method should be used. In our program, the curve_fit function produces a runtime error if no fit can be found and the aol method is used. It is recommended to plot each series of injections with the fit in order to visually verify the fit by scrolling through the figures.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Method details",
+      "instruction": "The procedure of memory correction can be summarized with the following steps to be applied to each analyzed sample, one by one.1.Verify if the difference between first and last value is larger than a threshold, if so continue to step 2, else do aol.2.Try to fit a y=ax+b function to measured value vs. injection number by optimizing a and b to minimize the cost function chisq=∑(y−f(x)sigma)2, where sigma prevents overfitting to the first injections. If this fails use aol, else continue to step 3.3.Retain b as the measured value of the sample.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Method details",
+      "instruction": "Given that each injection in high precision mode takes about 8 min and that inv seems to yield a higher precision after only six injections compared to aol after 12 injections (see method validation section), analysis could be sped up a factor two using this method while gaining in precision. Taking into account the necessity of regularly reanalyzing the standards due to possible drift of the device, the time gain is increased as more samples may be analyzed in between two repetitions of the standards.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Method details",
+      "instruction": "The step-by-step calibration workflow of the provided Python program is as follows:1.For each set of standards (in our example data there is one in the beginning and one in the end).a. Inv method is applied to estimate each standard's measured value.b. A calibration is performed by fitting a linear relation to real vs. measured values of the standards.c. The two fitted parameters (intersection and slope) are saved together with the central time of analysis of this set of standards (i.e. the middle time between first injection of the first standard and last injection of the last standard).2.The calibration parameters (interception and slope) are interpolated to each sample's central measurement time (i.e. the middle time between first and last injection), using the two neighboring sets of standards in order to obtain one individual set of calibration parameters for each sample that is corrected for the instrument's drift. The parameters are interpolated along the time-axis, assuming that instrument drift is linear with time for the duration between each two sets of standards.3.The measured value of each sample is calculated by applying the inv method to its repeated injections.4.The predicted isotopic ratio of each sample is calculated by applying its individual calibration parameters to the measured value.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Method details",
+      "instruction": "This workflow is applied to δ18O and δ2H in parallel independently. The program is written in Python 3 and tested on version 3.8, but should be compatible with near future versions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Method validation",
+      "instruction": "For validation, we compare the method of fitting an asymptotic function to the method officially recommended by Picarro (aol). We used 3 different standards: PICARRO ZERO, MID and DEPL. They were stored in sealed glass ampoules, opened on the day of analysis and directly transferred into analysis vials. Their concentrations and uncertainties are given in Table 1. We also analyzed IAEA VSMOW2 (Vienna Standard Mean Ocean Water) and SLAP2 (Standard Light Antarctic Precipitation) (see supplementary material), however they were not used for calibration or verification as they had been opened beforehand and stored in a recipient containing air. We did 12 injections of each standard in high precision mode (8 min per injection). The order of analysis was as follows.1.Tap water2.PICARRO DEPL3.PICARRO MID4.Tap water5.PICARRO ZEROTable 1Values and uncertainties of the standards used. (Picarro Lot #0517–12–06.x, Certificate C0350).Table 1Nameδ18O [‰]Uncertaintyδ2H [‰]UncertaintyPICARRO ZERO0.3±0.21.8±0.9PICARRO MID−20.6±0.2−159.0±1.3PICARRO DEPL−29.6±0.2−235.0±1.8",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Method validation",
+      "instruction": "In order to estimate the number of injections necessary to obtain acceptable precision, we dropped the results from the last injections and repeated the calibration on this reduced data in order to simulate an analysis using less injections. This way we could compare the results of doing 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 and 12 injections. For the aol we chose to average over the last 5, 4, 3, 2, 1 injections when there were at least 9, 7, 5, 3, 2 injections respectively in total.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Method validation",
+      "instruction": "Fig. 1 illustrates the application of aol and inv for different numbers of injections (uncalibrated raw measurement). The result of inv does not vary much (between 2.58 and 2.81 for this standard), while aol varies much more (from −0.64 to +1.93). We also note that even after 12 injections, the ranges of values obtained by the two methods do not overlap. This can be explained by the trend that still persists after 12 injections, indicating that the measurements have not yet reached their asymptote. The average remains thus biased towards the previously measured sample. The exp method generally results in values close to aol. It either fits the first couple of injections or the last ones but it fails to reproduce the overall shape. This is in accordance with Guidotti et al. [2] who state that there are multiple residual water pools with different exponentially evolving signatures. The combined effect of these pools can therefore not be covered by one single exponential function. The inv function however seems to be able to match the combined effect of these different pools.Fig. 1Application of aol, inv and exp to δ2H of Picarro ZERO standard after 12, 9, 6 and 3 injections respectively. Red dots are measurements, the blue curves are inv function fits and the purple curves are exp function fits. Dashed lines are corresponding asymptotes.Fig 1",
+      "substeps": [
+        {
+          "instruction": "Fig. 1 illustrates the application of aol and inv for different numbers of injections (uncalibrated raw measurement). The result of inv does not vary much (between",
+          "title": ""
+        },
+        {
+          "instruction": "for this standard), while aol varies much more (from −",
+          "title": ""
+        },
+        {
+          "instruction": "to +1.93). We also note that even after 12 injections, the ranges of values obtained by the two methods do not overlap. This can be explained by the trend that still persists after 12 injections, indicating that the measurements have not yet reached their asymptote. The average remains thus biased towards the previously measured sample. The exp method generally results in values close to aol. It either fits the first couple of injections or the last ones but it fails to reproduce the overall shape. This is in accordance with Guidotti et al. [2] who state that there are multiple residual water pools with different exponentially evolving signatures. The combined effect of these pools can therefore not be covered by one single exponential function. The inv function however seems to be able to match the combined effect of these different pools.Fig. 1Application of aol, inv and exp to δ2H of Picarro ZERO standard after 12, 9, 6 and 3 injections respectively. Red dots are measurements, the blue curves are inv function fits and the purple curves are exp function fits. Dashed lines are corresponding asymptotes.Fig 1",
+          "title": ""
+        }
+      ],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Method validation",
+      "instruction": "After extracting each standard's measured value with the different methods, a calibration is performed over the three standards by fitting a linear relation between measured and real values. In order to estimate the improvement from using an asymptotic estimation instead of averaging over the last couple of values, we calculated the coefficient of determination R² of this calibration function. According to the manual of the Picarro L2130-i\n[3], the relationship between the machines signal and the real isotopic ratio of the sample is perfectly linear. Therefore, a higher R² of the calibration indicates a more precise estimation of each standard's measured value on the scale of the instruments raw estimation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Method validation",
+      "instruction": "A calibration was performed for each method and each number of injections Fig. 2. shows the R² for δ18O and δ2H as a function of the total number of injections for the three tested methods (aol, inv, exp). It can be seen that R² improves with the number of injections for all of the methods. R² was higher when applying inv method to estimate the measured value from repeated injections, indicating a more linear relation between measured and real values with less noise and thus a better calibration. The lower R² of the calibration based on the aol method can be explained by the memory effect causing an overestimation of PICARRO DEPL and underestimation of PICARRO MID & ZERO leading to a less linear relation between measured and real values. Exp produces very similar results as aol, while inv produces a good fit even with very few injections. As little as four injections seem to produce acceptable results, however we strongly recommend to do at least six injections. With only six injections, the calibration fit using inv method is better than that using aol method with twelve injections. This indicates, that the approximation method removes a significant part of the bias in measurement caused by the previous sample through memory effect.Fig. 2Goodness of fit (R²) of the calibration curve obtained from the three standards for the three presented methods as a function of the number of injections.Fig 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Method validation",
+      "instruction": "Fig. 3 shows the two parameters (slope and intercept) of the retained calibration (real standard value = f (measured value)). For aol, the effect of using too few injections is a higher slope and a higher intercept (for both isotopes). This translates to a lower maximum and higher minimum measured value, indicating that the ‘extreme’ standards are ‘pulled’ toward the middle (or toward the previously measured value). This trend continues all the way to our maximum of 12 injections, indicating a potential of improvement even beyond 12 injections.Fig. 3Effect of the number of injections on the two parameters of the calibration function (slope and intercept) for the three methods.Fig 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Method validation",
+      "instruction": "The exp method remains close to the aol method. This is because an exponential function that well represents the strong difference between the first injections too rapidly approaches zero thereafter. Thus, the exponential function tends to have its asymptote somewhere between the last couple of injections without extrapolating their trend into the future. The calibration results of the inv method are much less sensitive to the number of injections. The inv method produces relatively constant intersection and slope after four (δ18O) to six (δ2H) injections.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Method validation",
+      "instruction": "Fitting an exponential function would correspond to the hypothesis of one residual water pool with a first order mixing with water from the new sample, diluting it by the same factor with each new injection. This hypothesis can be rejected, as the exponential function underestimates the projected memory effect. In reality, the memory effect has a longer ‘tail’ (i.e. seems to be more time-persistent) than a first order dilution. As mentioned above, this may be explained by the existence of multiple exponential pools, the combined effect of which cannot be reproduced by one single exponential relation [2]. This longer ‘tail’ can be reproduced by the inv method.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Method validation",
+      "instruction": "As an additional validation of the method we performed a calibration on the two extreme standards only (PICARRO DEPL and ZERO) and predicted the concentration of the intermediate standard (PICARRO MID) using this calibration. We did this for 2 to 12 injections again to verify the potential of the method to reduce the number of injections necessary in order to obtain acceptable results Fig. 4. shows the predicted value of PICARRO MID as a function of the number of injections for the three methods. The aol and exp methods do not reach within one standard deviation of the real value even after 12 injections for both isotopes. The inv method gets within uncertainty bounds with 3 injections (δ18O) or 7 injections (δ2H).Fig. 4Prediction of the intermediate standard, that for this example has not been used for calibration. Measured using the three methods calibrated on the two remaining standards (DEPL and ZERO). The black line represents the actual value of the standard. The shaded area corresponds to the uncertainty of the standard as given by Picarro. The points are prediction from the three different methods calibrated on x injections and measuring the sample with the same number of injections.Fig 4",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T11:30:15.041168Z",
+  "llm_normalised": true
+}

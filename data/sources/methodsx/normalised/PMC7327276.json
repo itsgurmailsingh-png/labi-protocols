@@ -1,0 +1,248 @@
+{
+  "protocol_id": "laser_induced_diffuse_reflectance_imaging_monte_carlo_simulation_of_backscatteri",
+  "parent_protocol_id": null,
+  "title": "Laser induced diffuse reflectance imaging – Monte Carlo simulation of backscattering measured on the surface",
+  "author": "Baranyai",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC7327276",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7327276/",
+  "doi": "10.1016/j.mex.2020.100958",
+  "citation": "10.1016/j.mex.2020.100958",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 120,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "The name Monte Carlo (MC) indicates stochastic behavior of computation. The simulation of diffuse reflectance, also known as backscattering, follows photon pathways inside medium and summarizes photon flux leaving the surface. The simulation assumes semi-infinite homogeneous media and an imaging device above the surface to collect photons and measure spatial intensity distribution. Detailed description of the photon trajectory computation algorithm and software libraries are available in Fortran language (with the name of PENELOPE) [1,2] and ANSI C language (with the name of MCML and CONV) [3,4]. This implementation uses variable names similar to the ANSI C code.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method details",
+      "instruction": "Computer vision systems measure spatial intensity distribution relative to the incident point of the light beam [5,6]. The light beam injects photons into the media and surrounding area got illuminated by diffuse reflectance. Intensity is typically measured in concentric rings of 1 pixel width (Fig. 1). The captured intensity profile is very similar to the result of Monte Carlo simulation. Monte Carlo simulation can be used in inverse modeling. Estimation functions, established based on the observed results of simulation, can make predictions in vision systems [7,8].Fig. 1Radial averaging pattern of concentric rings (left) and typical shape of acquired intensity profile (right).R is the radius measured from incident point.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method details",
+      "instruction": "The measured photon flux and the shape of the intensity profile (Fig. 1) depends on the optical properties of the media. These parameters are μa absorption coefficient (cm−1), μs scattering coefficient (cm−1), g anisotropy factor and n refractive index of media. The reduced scattering coefficient (Eq. (1)) is reported in many publications as simplified parameter of the theoretical model [9].(1)μs’=(1−g)μs",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method details",
+      "instruction": "This simplification makes validation more difficult, since many different combinations of g and μs can result the same μs’ reduced scattering coefficient. Media could be assumed isotropic (g = 0) but biological materials are reported to scatter forward g > 0.6 [10]. Additionally, absorption and scattering coefficients may differ by wavelength. The effect of wavelength on optical measurement is demonstrated in Fig. 2, where the same object can be observed with diffuse reflectance induced at multiple wavelengths.Fig. 2Laser induced diffuse reflectance of the same object at different wavelengths. Reference material of μa = 0.1056 cm−1 and μs‘ = 2.529 cm−1 at 680 nm.Fig 2",
+      "substeps": [
+        {
+          "instruction": "This simplification makes validation more difficult, since many different combinations of g and μs can result the same μs’ reduced scattering coefficient. Media could be assumed isotropic (g = 0) but biological materials are reported to scatter forward g >",
+          "title": ""
+        },
+        {
+          "instruction": "[10]. Additionally, absorption and scattering coefficients may differ by wavelength. The effect of wavelength on optical measurement is demonstrated in Fig. 2, where the same object can be observed with diffuse reflectance induced at multiple wavelengths.Fig. 2Laser induced diffuse reflectance of the same object at different wavelengths. Reference material of μa =",
+          "title": ""
+        },
+        {
+          "instruction": "cm−1 and μs‘ =",
+          "title": ""
+        },
+        {
+          "instruction": "cm−1 at 680 nm.Fig 2",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Method details",
+      "instruction": "The computational parameters of the simulation include number of photons, radius of circular light beam, limiting energy level of photons, radius of observed area, spatial resolution of the vision system. The number of photons significantly affects computation time, therefore the minimum sufficient number shall be adjusted. The noise of the calculated intensity profile decreases with increasing number of photons. Based on the power of the light source and wavelength of emitted light, required number of photons can be calculated using Planck's law (Eq. (2)):(2)E=hν=hC0nλwhere E is the photon energy, h is the Planck's constant, v is the frequency, C0 is the velocity of light in vacuum, λ is the wavelength of light and n is the refractive index of media. For example, 1 s light pulse of 670 nm wavelength of 3 mW power in media of n = 1.4 result in 1.42 × 1016 photons. This number can decrease if integration time of the imaging device of computer vision system was considered. Based on time resolved calculations, the 1 ns pulse length was found to be sufficient for simulation of light penetration into apple [5].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Method details",
+      "instruction": "The hardware parameters of the computer vision system are constant for the same setup, such as image resolution, beam radius. The parameter limiting energy shall be low enough to allow drop low energy photons without significant computation error. The simulation can be initialized with optical parameters of media and parameters of the computer vision system. The R code to load package and initialize simulation object is presented in Table 1. Absorption and scattering coefficients are expected in cm−1 unit.Table 1Loading library and configuration of simulation object MCBS in R language.Table 1## Load librarylibrary(\"MCBackscattering\")## Apple tissue properties according to## Qin and Lu (2006) DOI: 10.13031/2013.20862cfgMedia <- c(0.63, # absorption 1/cm, 670 nm30, # scattering 1/cm, 670 nm0, # isotropic tissue assumed1.4) # refractive index## Computer vision system and simulation parameterscfgSimulation <- c(1e7, # 10 million photons0.05, # 1 mm diameter (0.05 cm radius) laser light beam1e-9, # limiting energy level3, # 3 cm radius is computed0.01) # 0.01 cm/pixel resolutionapple <- MCBS(cfgMedia,cfgSimulation)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Method details",
+      "instruction": "Running simulation with this implementation does not require additional preparation. One function is made to perform all computations (Table 2) and result can be presented on chart or extracted as table.Table 2Usage of simulation function in R language. Code also shows profile on chart and saves data into file.Table 2## Run simulation with default incident angleapple <- Simulation(apple)## Show intensity profileChart(apple)## Save results into file with data tablewrite.table(Export(apple),\"apple.dat\")",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Method details",
+      "instruction": "Low number of photons in simulation obtain significant noise on the intensity profile. Low intensity values far from incident point may have higher noise due to the lower number of photons in that area. According to our experiences, the minimum recommended number of photons is 106. The effect of the number of photons is presented on Fig. 3. Simulation of absorbed energy inside media can require less photons compared to diffuse reflection on surface, because the number of trajectories leaving the media on observed area is lower.Fig. 3Effect of the number of photons (NP) on simulation result (μa = 0.1056 cm−1, μs = 2.529 cm−1, g = 0, n = 1.35).Fig 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Method details",
+      "instruction": "The simulation function (Table 2) has an optional second parameter, the incident angle of light beam. This value is used when photon is launched into media. If parameter is missing, default value of 0° is assumed. The normal position, above incident point, is occupied by the camera or other imaging device. Therefore, light source cannot be placed in the same direction. Measurement geometry of low incident angle is recommended to utilize large amount of photons. On the other hand, incident angle should be large enough to avoid direct reflection into the camera. The incident angle of 10–20° is recommended. The incident angle can be used with simulation function (Table 3).Table 3Usage of simulation function in R language with 15° incident angle. Code also saves data into table.Table 3## Run simulation with 15 deg incident angleapple <- Simulation(apple,15)# Save results into file with data tablewrite.table(Export(apple),\"apple.dat\")",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Method details",
+      "instruction": "Computational methods presented in literature use normal direction, perpendicular to surface[1], [2], [3], [4],9]. Due to the limitations of hardware setup, this should be reconsidered.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Method details",
+      "instruction": "Setup function (Table 4) was made to initialize computation at the beginning of the simulation. Container is created for results and derived parameters, such as albedo and critical angle, are calculated. The computation of simulation function may take long since it follows all photon trajectories. In order to accelerate procedure, maximum trajectory length and random launch position of all photons are adjusted, as well.Table 4Setup function implementation in R language to prepare containers, calculate parameters.Table 4## Initialize computationSetup <- function(myObject) {UseMethod(\"Setup\",myObject)}Setup.MCBS <- function(myObject){ # container for intesity profile myObject$heat <- rep(0,1 + round(myObject$radius / myObject$rpx)) # transport albedo = intensity decrease after interaction event myObject$albedo <- myObject$mu_s / (myObject$mu_s+ myObject$mu_a) # specular reflection myObject$rs <- ((myObject$n - 1) / (myObject$n + 1))^2 # critical angle myObject$cangle <- sqrt(1.0 - 1.0/(myObject$n^2)) # maximum trajectory length in events myObject$MAXLEN <- round(log(myObject$limit)/log(myObject$albedo))+1 # beam start position, radius and angle myObject$rbr <- myObject$beamr*sqrt(runif(myObject$photons)) myObject$rba <- runif(myObject$photons,min=0,max=2*pi) # reset summary values myObject$rd <- 0 myObject$bit <- 0 return(myObject)}",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Method details",
+      "instruction": "A randomize function (Table 5) was made with the purpose to accelerate computation and generate random numbers in advance for each photon. Computation later can refer to the prepared vectors of random numbers instead of calling the random number generation function each time.Table 5Randomize function implementation in R language to generate random numbers for single photon.Table 5## Fill random data for single photon trajectoryRandomize <- function(myObject) {UseMethod(\"Randomize\",myObject)}Randomize.MCBS <- function(myObject){ # maximum trajectory length is computed to MAXLEN # random numbers are selected from uniform distribution # move length, 0–1 myObject$rmv <- runif(myObject$MAXLEN) # absorption roulette, 0–1 myObject$rabs <- runif(myObject$MAXLEN) # new direction after scattering, from −1 to +1 myObject$rx1 <- runif(myObject$MAXLEN,min=−1,max=1) myObject$rx2 <- runif(myObject$MAXLEN,min=−1,max=1) # Heyney-Greenstein phase function random variable, 0–1 myObject$rmu <- runif(myObject$MAXLEN) return(myObject)}",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Method details",
+      "instruction": "Photon trajectory computation has five steps:•launch photon•move in media•bounce if photon leaves media through surface•absorb energy•scatter in media",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Method details",
+      "instruction": "Common computational method is modified in launch and bounce. Launch is considering incident angle and its effects, bounce collects photon weights on surface. All steps are available as separate functions to allow users build customized procedure.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Method details",
+      "instruction": "The launch function has an optional second parameter, the incident angle. Initial direction inside media is calculated on the basis of the incident angle and refractive index (Eq. (3)).(3)ϕ2=sin−1(sinϕ1n2)where ϕ1 is the incident angle in air, ϕ2 is the refracted angle in media and n2 is the refractive index of the media. When photon is emitted from light source, its weight is 1. The photon weight decreases first time during interaction with surface. Photons entering media are usually considered to have normal start direction (u,v,w) = (0,0,1). This direction is changed according to the incident angle. In media of n = 1.4, start angle is in the range of 7.12° – 14.14° for recommended incident angle range of 10° – 20° Additionally, due to the rotation of the incident light beam, its circular cross section is elliptic on the surface. This elliptical distortion is calculated on the launch position. The start position of the photon on the surface (x,y,z = 0) is calculated randomly within the area of the circular light beam, using uniform distribution [11]. Elliptic distortion affects this position with the y coordinate. The R language implementation of launch function is presented in Table 6.Table 6Launch function implementation in R language to start photon trajectory from boundary.Table 6## Launch single photon within beam# Parameter:# iAngle = incident angle, default = 0 deg (relative to normal)Launch <- function(myObject,iAngle=0) {UseMethod(\"Launch\",myObject)}Launch.MCBS <- function(myObject,iAngle=0){ # initial photon weight myObject$weight <- 1.0 - myObject$rs # internal angle after refraction myAngle <- asin(sin(iAngle*pi/180)/myObject$n) # incident direction myObject$u <- 0 myObject$v <- sin(myAngle) myObject$w <- cos(myAngle) # start position myObject$x <- myObject$rbr[myObject$idx] * cos(myObject$rba[myObject$idx]) myObject$y <- myObject$rbr[myObject$idx] * sin(myObject$rba[myObject$idx]) / cos(myAngle) myObject$z<- 0 return(myObject)}",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Method details",
+      "instruction": "During simulation, photons are identified with index number idx and trajectory moves for each photon are identified with index number midx. These indices are used to access containers of random numbers, such as launch position polar coordinates rbr for radius and rba for angle (Table 4,6). Bulk generation of random numbers is done for optimization of computation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Method details",
+      "instruction": "The second modified function compared to common algorithm is the bounce method. Photons leaving the surface are collected in this step. Photon position (x,y,z) is out of media if z myObject$cangle) { t 1) { # failsafe check lcc <- 0 } else {lcc <- sqrt(1.0 - lcc^2)}# compute radiusr <- sqrt(myObject$x^2 + myObject$y^2)r <- round(r / myObject$rpx) + 1if (r <= length(myObject$heat)) {myObject$heat[r] <- myObject$heat[r] + lcc * (1.0-rf) * myObject$weight}# continue travel insidemyObject$weight <- myObject$weight - (1.0-rf) * myObject$weight;}return(myObject)}",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Method details",
+      "instruction": "In order to receive the normalized photon flux in cm−2 unit, vector elements are divided by the corresponding surface area during post processing. The area of the concentric rings can be calculated using two equivalent equations (Eq. (4),(5).(4)A=π((r+dr)2−r2)=π(2rdr+dr2)(5)A=2π(r+dr2)dr",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Method details",
+      "instruction": "Where A is the area of the ring of dr width and r is the inner radius of the ring. The form of Eq. (5) is commonly used, but equations are equivalent and also calculated with similar speed. The R implementation is using formula Eq. (4).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Method details",
+      "instruction": "Computations are accelerated to decrease simulation runtime. Trigonometric functions are substituted where it is possible using the following equation (Eq. (6)).(6)cos2ϕ+sin2ϕ=1andsinϕ=1−cos2ϕ;cosϕ=1−sin2ϕ",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Method details",
+      "instruction": "The simulation uses a lot of random numbers to launch photons and calculate their trajectory. Random numbers are generated in bulk for optimization. Start polar coordinates are generated in a vector with the length of the number of photons (Table 4). Trajectory random variables are generated in vectors with the length calculated from limiting energy and transport albedo (Table 5). Table 8 presents the random vectors used int the R implementation.Table 8Random vectors of R implementation of Monte Carlo simulation.Table 8Vector nameValue rangeCreated by functionUsed by functionCommentrbr0 – rb *SetupLaunchLaunch position polar coordinate, radius in light beamrba0 – 2πSetupLaunchLaunch position polar coordinate, anglermv0 – 1RandomizeMoveLength of straight segment of trajectoryrabs0 – 1RandomizeAbsorbPhoton survival decision is made after interactionrx1, rx2−1 – +1RandomizeScatterNew direction coordinates after scatteringrmu0 – 1RandomizeScatterAnisotropic scattering by Henyey-Greenstein function* rb is the radius of light beam.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Method details",
+      "instruction": "The implemented code can be used according to presented sample (Table 2). Only two functions are required to perform simulation, the MCBS object constructor and Simulation to perform computation. Photon flux can be retrieved as intensity profile by Export function (Table 3). If one would like to make customized procedure, functions are available and Simulation function can be used as template.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Method details",
+      "instruction": "Due to the interpreted R codes, computation consumes more time than compiled C software. Parallel processing may utilize multiple cores of processors on POSIX computer systems. Single core process simulation of 106 photons took approximately 2 h on Intel i3 processor (3.83 GFLOPS/core).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "Method validation",
+      "instruction": "Reference material of known optical properties was produced by PDW Analytics GmbH (Potsdam, Germany). The absorption coefficient and reduced scattering coefficient of solid phantom are known as μa = 0.1056 cm−1 and μs‘ = 2.529 cm−1 at 680 nm. The Monte Carlo simulation was repeated twice and used different combinations of anisotropy factor and scattering coefficient (resulting the same reduced scattering coefficient). Simulation parameters are listed in Table 9. The diffusion theory model [9] was also computed as reference. As a result of changing optical properties, rotation of simulated profiles can be observed [5,6]. Comparing the two simulations, results of isotropic media (g = 0) fit better to diffusion theory model in terms of correlation and RMSE (root mean squared error).Table 9Monte Carlo simulation parameters and results of validation.Table 9ParameterIsotropic media (g = 0)Anisotropic media (g = 0.9)Absorption coefficient (μa, cm−1)0.10560.1056Scattering coefficient (μs, cm−1)2.52925.29Anisotropy factor (g)00.9Refractive index1.351.35Number of photons106106Beam radius, cm0.050.05Limiting energy level for photons10−910−9Observed radius, cm33Spatial resolution, cm/pixel0.050.05Correlation with diffusion model0.99030.9529RMSE with diffusion model, cm−20.05340.1744",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Method validation",
+      "instruction": "Backscattering images were recorded for the reference material at 660 nm wavelength (Fig. 2), using a laser module of 3 mW and a CCD camera (CV-A50IR, JAI Ltd., Japan) with zoom lens of 18–108 mm and f/2.5 (12VG1040 ASIR-SQ, Tamron Co. Ltd, Japan). The resolution of the images were 0.01205 cm/pixel. Images were recorded with 8 bit/pixel color depth, therefore pixel intensities ranged 0–255. All intensity profiles, measured and computed, were normalized to the range of 0–1 for comparison. The over saturated part near the incident point of the intensity profile was omitted from analysis. Comparison result of diffusion theory model as well as Monte Carlo simulation with measured signal is presented in Table 10.Table 10Comparison of computer vision system measurement with simulation results.Table 10ParameterDiffusion theory modelMonte Carlo simulationIsotropic media (g = 0)Anisotropic media (g = 0.9)Correlation0.99370.95320.9867RMSE, cm−20.09470.14210.0942",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Method validation",
+      "instruction": "According to the correlation and RMSE values, diffusion theory model showed the closest relationship followed by anisotropic Monte Carlo simulation. Diffusion theory model obtained slightly better correlation, while Monte Carlo simulation reached slightly lower RMSE value.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T10:06:33.343343Z",
+  "llm_normalised": false
+}

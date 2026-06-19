@@ -1,0 +1,55 @@
+{
+  "protocol_id": "bsf_skeleton_a_template_for_parallelization_of_iterative_numerical_algorithms_on",
+  "parent_protocol_id": null,
+  "title": "BSF-skeleton: A template for parallelization of iterative numerical algorithms on cluster computing systems",
+  "author": "Sokolinsky",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC8374653",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374653/",
+  "doi": "10.1016/j.mex.2021.101437",
+  "citation": "10.1016/j.mex.2021.101437",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 24,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "A parallel skeleton is a programming construct, which abstracts a pattern of parallel computation and interaction [1]. The BSF-skeleton extends farm skeleton based on the master/slave paradigm. The farm skeleton and the master/slave paradigm are discussed in a large number of papers (see, for example, [2], [3], [4], [5]). A distinctive feature of the BSF-skeleton is that it combines farm, map, and reduce algorithmic skeletons. The theoretical basis of the BSF-skeleton is the BSF (Bulk Synchronous Farm) model of parallel computations [6]. The BSF-skeleton uses the master/worker (master/slave) paradigm to organize interaction between MPI processes (see Fig. 1). This means that worker processes can only exchange messages with the master process. To use the BSF-skeleton, you must represent your algorithm in the form of operations on lists using the higher-order functions Map and Reduce\n[7]. The higher-order function Map(f,A) applies the function f to each element of list A=[a1,…,an] converting it to the list B=[f(a1),…,f(an)]. The higher-order function Reduce(⊕,B) taking an associative binary operation ⊕ and a list B=[b1,…,bn] as parameters calculates the element b=b1⊕…⊕bn. One should use Algorithm 1 as a template. Let us comment on Algorithm 1. The variable i denotes the iteration number; x(0) is an initial approximation; x(i) is the i-th approximation (the approximation can be a number, a vector, or any other data structure); A is the list of elements of a certain set A, which represents the source data of the problem; Fx:A→B is a parameterized user function (the parameter x is the current approximation) that maps the set A to a set B; B is a list of elements of the set B calculated by applying the function Fx to each element of the list A; ⊕ is an binary associative operation on the set B.Fig. 1Interaction of K+1 MPI processes in the BSF-skeleton.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method details",
+      "instruction": "Step 1 reads input data of the problem and an initial approximation. Step 2 assigns the zero value to the iteration counter i. Step 3 calculates the list B by applying the higher-order function Map(Fx(i),A). Step 4 assigns the result of the higher-order function Redice(⊕,B) to the intermediate variable s∈B. Step 5 invocates the user function Compute that calculates the next approximation x(i+1) taking two parameters: the current approximation x(i) and the result s of the higher-order function Reduce. Step 6 increases the iteration counter i by one. Step 7 checks a termination criteria by invocating the Boolean user function StopCond, which takes two parameters: the new approximation x(i) and the previous approximation x(i+1). If StopCond returns true, the algorithm outputs x(i) as an approximate problem solution and stops working. Otherwise, the control is passed to Step 3 starting the next iteration.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method details",
+      "instruction": "The BSF-skeleton automatically parallelizes Algorithm 1 by splitting the list A into K sublists of equal length (±1):where K is the number of worker processes and denotes the operation of list concatenation. This uses the parallelization scheme shown in Fig. 2.Fig. 2BSF-skeleton parallelization schema.Fig 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method details",
+      "instruction": "The result is the parallel Algorithm 2. It includes K+1 parallel processes: one master process and K worker processes. In Step 2, the master process sends the current approximation x(i) to all worker processes. After that, every j-th worker process independently applies higher-order function Map and Reduce to its sublist (the steps 3 and 4). In the steps 3 and 4, the master process is idle. In Step 5, all worker processes send the partial foldings s0,…,sK−1 to the master process. In the steps 6-9, the master process performs the following actions: executes the higher-order function Reduce over the list of partial foldings [s0,…,sK−1]; invocates the user function Compute that calculates the next approximation; checks the termination criteria by using the Boolean user function StopCond and assigns its result to the Boolean variable exit. In the steps 6-9, the worker processes are idle. In Step 10, the master process sends the exit value to all worker processes. If the exit value is false, the master process and worker processes go to the next iteration, otherwise the master processes outputs the result and the computation stops. Note that, in the Steps 2 and 10, all processes perform the implicit global synchronization.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T11:09:28.250776Z",
+  "llm_normalised": false
+}

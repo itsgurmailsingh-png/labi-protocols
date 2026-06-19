@@ -1,0 +1,80 @@
+{
+  "protocol_id": "ngs_based_deep_bisulfite_sequencing",
+  "parent_protocol_id": null,
+  "title": "NGS-based deep bisulfite sequencing",
+  "author": "Lee, Kim",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC4924566",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4924566/",
+  "doi": "10.1016/j.mex.2015.11.008",
+  "citation": "10.1016/j.mex.2015.11.008",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 145,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Library preparation procedure",
+      "instruction": "1.Combine all the PCR products that have been amplified from bisulfite-converted DNA. It is important to normalize the DNA amount of individual PCR products.2.Prepare the end repair reaction as described below.ComponentVolumePCR productX μlEnd repair enzyme mix5 μlEnd repair reaction buffer (10×)10 μlH2OY μl Total100 μl3.Incubate at 20 °C for 30 min in thermocycler.4.Prepare a 2% agarose gel for size selection.5.Load the entire DNA sample into one or two wells along with a 100-bp size marker in a separate well, and run the gel at 100 V for 40 min.6.Excise a section of the agarose gel containing the PCR products with the desired size range, and extract the DNA from the gel using Zymoclean Gel DNA Recovery Kit. Finally, elute the DNA in 20 μl of TE.7.Prepare the adapter ligation reaction as described below.ComponentVolumeSize selection sample17 μlBst2.0 warm polymerase (8000 U/ml)1 μlBst2.0 polymerase buffer (10×)4 μlT4 DNA ligase (400,000 U/ml)4 μlT4 DNA ligase buffer (10x)4 μlP1 + A Barcode Adapter (10 pmol/μl)10 μl Total40 μl8.Incubate at 25 °C for 25 min, 65 °C for 30 min, and finally 80 °C for 20 min to stop the reaction.9.Repeat the size selection step as described above (5–6). Elute the DNA sample in 10 μl of D.W.10.Perform PCR to amplify the eluted DNA with a set of the two primers corresponding to P and A1 adapter: P1 adapter primer, 5′-CCACTACGCCTCCGCTTTCCTCT-3′; A adapter primer, 5′-CCATCTCATCCCTGCGTGTCTCC-3′.11.The detailed program for PCR is shown below. The typical number of PCR cycles ranges from 10 to 14.Cycle numberDenatureAnnealExtension195 °C, 5 min10–1495 °C, 30 s68 °C, 30 s72 °C, 45 s172 °C, 10 min12.Clean up the final PCR product using DNA Clean & Concentrator Kit.13.Size select using E-Gel Precast Agarose Electrophoresis system.14.Clean up the selected DNA library fragment using DNA Clean & Concentrator Kit.15.Perform NGS-based sequencing with the prepared library.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Bioinformatics analysis",
+      "instruction": "We used the following bioinformatics pipeline to process the raw sequence reads derived from a NGS platform. This pipeline includes several custom-made Perl scripts along with Unix-based command lines. This pipeline require two files in the text format: the first file containing a list of names for individual PCR products and the second file containing the sequences of all the primers used for the amplification of PCR products. This pipeline also requires a directory of the individual sequence files in the fasta format, which correspond to the unconverted original sequences of the PCR products. This directory is used later for calculating DNA methylation with BiQ Analayzer HT. The detailed steps are as follows:(1)Remove raw sequence reads smaller than 100 bp in length and sort raw sequence reads into each file based on their origin of PCR products with a custom Perl script (test_sam_3.pl). The execution of this step generates a directory with a number of files containing the sorted sequence reads. Two files are usually generated for a given PCR product since this sorting process uses the sequences of the two primers that have been used to amplify the PCR product.(2)Combine the two files that belong to a same PCR product with a custom Perl script (test_merge.pl).(3)Execute BiQ Analyzer HT with a custom Perl script (test_biq.pl). This execution requires a tsv file containing two sets of absolute directory paths. The first set is for all of the original unconverted sequence files for PCR products, whereas the second set is for all of the sorted bisulfite sequence files. The tsv file can be prepared with a custom Perl script (test_tsv.pl).(4)Extract the necessary information (the number of reads used, % methylation, standard deviation) from the output of BiQ Analyzer HT with a custom Perl script (test_extract.pl).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Bioinformatics analysis",
+      "instruction": "The execution of these steps will finally derive one text file containing the DNA methylation level for the entire set of PCR products, which can be imported into an excel file for further calculation and inspection. The custom Perl scripts used for this process are presented in Supplemental material 2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method validation",
+      "instruction": "So far, we have performed three independent trials of DNA methylation analyses using this protocol [6]. These test trials have successfully derived the DNA methylation levels of on average 80% of individual PCR products. While performing these trials, however, we have come across a couple of technical issues, which may be responsible for the observed failure, the remaining 20% of the PCR products. First, the initial DNA amounts of some of these PCR products were lower than those of the other PCR products. As a consequence, the sequence reads from these products were not as well represented as the other products in the final sequencing output. It is, therefore, very important to normalize the initial DNA amounts of individual PCR products at the early stage of library construction (Step 1 in Fig. 1A). Also, it is advisable to perform an independent protocol, such as COBRA (Combined Bisulfite Restriction Analysis) [7], before the actual bisulfite sequencing given the possibility that PCR could enrich one type of DNA sequences, such as unmethylated DNA compared to methylated DNA. Second, the size of some of sequence reads turned out to be much smaller than their predicted sizes based on the initial sizes of PCR products. According to detailed inspection, the sequences of these products were truncated at homopolymeric regions, such as poly A or T. These are typical sequences for bisulfite-converted DNA since many Cs are converted to Ts during the bisulfite conversion reaction. According to our recent study [6], similar polymeric repeats are often detected in mammalian genomes, 2 out of 12 amplified PCR products with the average length being around 300 bp in length. Although the exact cause for this truncation is currently unknown, one culprit might be the potential stalling and subsequent falloff of DNA polymerase from template DNA during the sequencing reaction of NGS. One remedy to this problem may be avoiding homopolymeric regions while selecting target regions. Also, different NGS platforms tend to have different success rates in coping with this problem, thus one should consider this aspect more carefully for future projects.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Method validation",
+      "instruction": "Despite these technical shortfalls, the results from the successful runs with the remaining 80% of the PCR products were very informative and insightful due to their overall deep sequencing coverage. In a particular trial measuring the DNA methylation levels of 250 PCR products, we have obtained on average 1000 sequence reads per each PCR product, which were subsequently used for measuring DNA methylation levels with BiQ Analyzer HT. We performed two independent runs of NGS sequencing to test the overall reproducibility of this protocol. One representative locus is presented in Fig. 2. Human USP29 (Ubiquitin-specific protease 29) is an imprinted gene, yet frequently associated with several human cancers as a potential tumor suppressor [8], [9]. Thus, a set of PCR products targeting the promoter of USP29 were amplified from a cancer DNA panel, which is made of two normal and six cancer samples. As expected, the DNA methylation levels of the two normal samples (61.8 and 63.7% for brain and 54.7 and 54.5% for liver) were lower than those from six cancer samples, which range from 67.2% to 89.8%. The higher levels of DNA methylation levels observed in the cancer samples further support the proposed tumor suppressor role for USP29. We observed less than 2% level difference between two independent runs (normal brain, 61.8 vs 63.7%), confirming the reproducibility of the protocol. This type of measurements can be also obtained through the other existing methods, such as Human450K array and pyrosequencing. However, the DNA methylation patterns obtained through the current protocol cannot be obtained through the other methods, although the other method, such as pyrosequencing, may provide more consistent methylation levels in a given position. As seen in Fig. 2, the two normal samples display a somewhat allele-specific DNA methylation pattern as an imprinted gene although the pattern from normal brain is mosaic. In contrast, the results from the cancer samples display unexpected DNA methylation patterns. Several patches of blue lines (representing unmethylated CpG sites) run through from bottom to top on the background of a large number of small red boxes (representing methylated CpG sites). This is particularly obvious in the two samples, liver and breast cancer samples. This indicates that several CpG sites within the promoter region of USP29 are more resistant to DNA methylation in cancer samples. Similar patterns have also been observed in the other PCR products targeting different genomic loci (data not shown). Thus, the observed pattern appears to be an outcome of a previously unnoticed general phenomenon in mammalian epigenomes, certain CpG sites being resistant to DNA methylation. In conclusion, the current study demonstrated that the deep bisulfite sequencing by the new protocol is a very useful approach that can provide many information for mammalian epigenomes, including DNA methylation levels as well as patterns for a given locus.",
+      "substeps": [
+        {
+          "instruction": "Despite these technical shortfalls, the results from the successful runs with the remaining 80% of the PCR products were very informative and insightful due to their overall deep sequencing coverage. In a particular trial measuring the DNA methylation levels of 250 PCR products, we have obtained on average 1000 sequence reads per each PCR product, which were subsequently used for measuring DNA methylation levels with BiQ Analyzer HT. We performed two independent runs of NGS sequencing to test the overall reproducibility of this protocol. One representative locus is presented in Fig. 2. Human USP29 (Ubiquitin-specific protease 29) is an imprinted gene, yet frequently associated with several human cancers as a potential tumor suppressor [8], [9]. Thus, a set of PCR products targeting the promoter of USP29 were amplified from a cancer DNA panel, which is made of two normal and six cancer samples. As expected, the DNA methylation levels of the two normal samples (",
+          "title": ""
+        },
+        {
+          "instruction": "and 63.7% for brain and",
+          "title": ""
+        },
+        {
+          "instruction": "and 54.5% for liver) were lower than those from six cancer samples, which range from 67.2% to 89.8%. The higher levels of DNA methylation levels observed in the cancer samples further support the proposed tumor suppressor role for USP29. We observed less than 2% level difference between two independent runs (normal brain,",
+          "title": ""
+        },
+        {
+          "instruction": "vs 63.7%), confirming the reproducibility of the protocol. This type of measurements can be also obtained through the other existing methods, such as Human450K array and pyrosequencing. However, the DNA methylation patterns obtained through the current protocol cannot be obtained through the other methods, although the other method, such as pyrosequencing, may provide more consistent methylation levels in a given position. As seen in Fig. 2, the two normal samples display a somewhat allele-specific DNA methylation pattern as an imprinted gene although the pattern from normal brain is mosaic. In contrast, the results from the cancer samples display unexpected DNA methylation patterns. Several patches of blue lines (representing unmethylated CpG sites) run through from bottom to top on the background of a large number of small red boxes (representing methylated CpG sites). This is particularly obvious in the two samples, liver and breast cancer samples. This indicates that several CpG sites within the promoter region of USP29 are more resistant to DNA methylation in cancer samples. Similar patterns have also been observed in the other PCR products targeting different genomic loci (data not shown). Thus, the observed pattern appears to be an outcome of a previously unnoticed general phenomenon in mammalian epigenomes, certain CpG sites being resistant to DNA methylation. In conclusion, the current study demonstrated that the deep bisulfite sequencing by the new protocol is a very useful approach that can provide many information for mammalian epigenomes, including DNA methylation levels as well as patterns for a given locus.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T06:58:27.008081Z",
+  "llm_normalised": false
+}

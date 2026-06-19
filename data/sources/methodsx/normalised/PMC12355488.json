@@ -1,0 +1,357 @@
+{
+  "protocol_id": "reinforcement_learning_based_topology_optimization_for_generative_designed_light",
+  "parent_protocol_id": null,
+  "title": "Reinforcement learning-based topology optimization for generative designed lightweight structures",
+  "author": "Kumar N, C M, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC12355488",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+  "doi": "10.1016/j.mex.2025.103539",
+  "citation": "10.1016/j.mex.2025.103539",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 222,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "The proposed research framework that integrates reinforcement learning with topology optimization for the generative design of lightweight structures is illustrated in Fig. 1. The workflow begins with problem formulation, including the definition of material properties, design constraints (e.g., stress, displacement limits), and boundary conditions. The next stage involves discretizing the design domain into a grid-based representation suitable for both the neural policy model and finite element solver. A Proximal Policy Optimization (PPO) agent is then deployed to learn optimal material distribution strategies by interacting with the environment through trial-and-error. Feedback is provided in the form of compliance, stress, and displacement data obtained via Finite Element Analysis (FEA). Based on this feedback, the agent adjusts its policy iteratively to improve structural performance and minimize material usage. Once an optimized topology is achieved, post-processing with Signed Distance Field (SDF) smoothing is applied to ensure surface continuity and manufacturability. The final geometry is then converted into an STL file for additive manufacturing readiness. This framework supports the generation of constraint-compliant, structurally efficient, and 3D-printable designs, offering a scalable solution for intelligent design automation.Fig. 1Research framework for generative design of lightweight structures using reinforcement learning topology optimization.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method details",
+      "instruction": "Dataset: We use the open-source dataset commonly referenced in AI-based topology optimization studies. One of the most widely used datasets is the \"Topology Optimization Dataset (ToD)\" by Stanford University and ETH Zurich (https://topopt.mech.ethz.ch) The Topology Optimization Dataset (ToD) provides a benchmark for evaluating AI-driven topology optimization models. The goal is to minimize material usage while maintaining structural integrity under given boundary conditions and loads.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method details",
+      "instruction": "The key objective function is given as:(1)Minwswhere W = Total weight of the optimized structure, and S = Structural stiffness (compliance measure).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method details",
+      "instruction": "The AI-based topology optimization models learn optimal material distribution patterns for various load cases and boundary constraints. This dataset is chosen as firstly it is a standardized benchmark, used in multiple topology optimization AI research studies. Second it allows diverse load cases & constraints along with comparison of AI-generated designs vs. classical methods. And thirdly, it is supports realistic structural models with FEA validation support.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Method details",
+      "instruction": "The complete process workflow is illustrated in Fig. 2. The workflow consists of five key stages, ensuring a seamless transition from problem definition to AI-based optimization, FEA validation, and final prototyping which is explained in subsequent sections.Fig. 2Process flow in the proposed methodology.Fig 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Step 1: Problem definition and input constraints",
+      "instruction": "Initially, we formulate the structural design challenge in a way that both the AI model and traditional solvers (like FEA) can understand. To define a problem statement, we first generate a mechanically optimal structure that minimizes material usage (lightweighting), withstands structural loading without failure, and respects strict constraints on displacement and stress. The two input constraints chosen are, maximum displacement ≤ 0.5 mm and Von Mises Stress ≤ 300 MPa. The design domain space is a 60 × 40 grid (2400 elements) representing a 2D cantilever beam with left edge fixed (boundary condition). A point load is applied on the right edge (typically downward), and material can either be retained (solid) or removed (void) per grid cell. This binary domain is critical for topology optimization. Regarding material properties, we assume the structure is made of aluminum, with Young’s Modulus (E) = 70 GPa (stiffness), Poisson’s Ratio (ν) = 0.33, and Density (ρ) = 2700 kg/m³. These properties are fed into the FEA solver to simulate stress and displacement under loading. Table 1 shows all the load and boundary conditions considered.Table 1Load and boundary conditions considered.Table 1TypeValueDesign domain60×40 grid 2D cantilever beamMaterialAluminium (E = 70 GPa, ν = 0.33, ρ = 2700 kg/m³)Load typePoint load (downward)Load magnitude1000 NBoundaryLeft edge fixed (clamped)ObjectiveMinimize weight (material usage)",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Step 1: Problem definition and input constraints",
+      "instruction": "This setup simulates a typical mechanical design scenario, such as a cantilever bracket or a machine component. To feed this setup into an AI model the domain is converted to a binary matrix (0 = void, 1 = solid) and the FEA solvers compute displacement and stress fields. These fields are used to compute reward signals for the reinforcement learning agent. The dataset includes many such scenarios with different loadings and geometries, which is essential for generalization. To train the neural network, stress and displacement values are normalized, inputs are encoded as image-like tensors (common in CNN-based models), and the output is a probability distribution over which elements need to be retained/removed. The problem is now fully defined and digitally structured so that a deep RL agent can explore design configurations, FEA can evaluate the performance of each configuration, and the system can iterate toward an optimal, constraint-compliant topology.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Step 2: AI-based generative design using deep learning and RL-based optimization",
+      "instruction": "Reinforcement Learning (RL) is a trial-and-error-based learning paradigm where an agent learns to take actions in an environment to maximize cumulative rewards. As shown in Fig. 3 In topology optimization, the agent learns to modify material distribution within a design domain while ensuring mechanical constraints are satisfied. RL is modeled as a Markov Decision Process (MDP), defined as a tuple:(2)M= where: S are a set of states (e.g., material layout + FEA feedback), A are a set of actions (add/remove material), P(s′|s,a) is the Transition probability to next state, R(s,a) is the Reward function (compliance, weight, constraint satisfaction) and γ=[0,1] is the Discount factor for future rewards.Fig. 3An RL agent interacts with the environment.Fig 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Step 2: AI-based generative design using deep learning and RL-based optimization",
+      "instruction": "The objective function or goal is to find an optimal policy πθ(a|s) parameterized by neural network weights θ, that maximizes:(3)J(θ)=Eπθ[Σt=0TγtR(st,at)]",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Step 2: AI-based generative design using deep learning and RL-based optimization",
+      "instruction": "Using PPO, the surrogate loss is:(4)LCLIP(θ)=Et[min(rt(θ)A^t,clip(rt(θ),1−ε,1+ε)A^t)]where: rt(θ)=πθ(at|st)/πθold(at|st) and A^t is the Advantage estimate (how much better the action was).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Step 2: AI-based generative design using deep learning and RL-based optimization",
+      "instruction": "The PPO algorithm is used with a Deep Neural Network as the policy function to iteratively remove or retain elements. PPO is a state-of-the-art reinforcement learning algorithm that balances stability and efficiency in training policy networks. It belongs to the policy gradient family and improves upon earlier methods by preventing overly large updates to the policy. PPO optimizes a clipped surrogate objective, which restricts the change in policy probability between successive iterations. This helps ensure stable and reliable learning without requiring second-order optimization or complex trust region constraints. The PPO framework parameters are shared in Table 2.Table 2PPO framework parameters.Table 2FeatureDescriptionPolicy FunctionConvolutional Neural Network (CNN)Value FunctionSeparate CNN or shared backboneAction SpaceBinary actions → {0: remove material, 1: retain material} for each element (can be sequential or global)ObservationState representation of current design + structural response",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Step 2: AI-based generative design using deep learning and RL-based optimization",
+      "instruction": "In each iteration, PPO collects trajectories by interacting with the environment using the current policy. Then, it calculates the advantage estimates (how much better an action is compared to average) and updates both the actor (policy) and critic (value function) networks using gradient ascent. By clipping the probability ratio, PPO avoids large deviations that could degrade performance. Table 3 shows a pseudo-code for a Deep RL model with PPO-based Generative design agent. PPO is widely used due to its simplicity, ease of implementation, and robust performance in both discrete and continuous action spaces.Table 3Pseudo-code for deep learning model with PPO-based generative design agent.Table 3Algorithm 1Initialize design domain grid and FEA solverInitialize PPO policy and value networksFor each episode: Reset environment with full material domainFor each step in episode: Observe current state (grid) Select action (element retain/remove) using PPO policy Update grid Run FEA simulation Calculate compliance, displacement, and stress Compute reward based on constraints and compliance Update policy using PPO Return optimal material distribution",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Step 3: Toplogy optimization using AI",
+      "instruction": "In DRL, Actor-Critic is a framework that uses two networks:–Actor: Learns the policy - decides which action to take given a state.–Critic: Learns the value function - estimates how good a state (or state-action pair) is.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Step 3: Toplogy optimization using AI",
+      "instruction": "Both share some common CNN layers to extract visual features from the design state as shown in Fig. 4. The hyperparameter setting of the CNN are shared in Table 4. The input or state fed into the neural network is a 3-channel image tensor that encodes the current state:–Channel 1: Design grid (binary material distribution) X={0,1}HXW–Channel 2: Displacement field (from FEA)–Channel 3: Stress field (e.g., von Mises)Fig. 4Neural network architecture (CNN-based actor-critic).Fig 4Table 4CNN hyperparameter settings.Table 4ComponentHyperparameterValue/SettingInput ShapeChannels × Height × Width3 × 40 × 60 (Design Grid, Displacement, Stress)Conv Layer 1Filters, Kernel Size, Activation32 filters, 3 × 3, ReLUPadding'same'Stride1Conv Layer 2Filters, Kernel Size, Activation64 filters, 3 × 3, ReLUPadding'same'Max PoolingPool Size2 × 2Stride2Conv Layer 3Filters, Kernel Size, Activation128 filters, 3 × 3, ReLUPadding'same'Flatten Layer–Converts 2D feature maps to 1D vectorActor HeadOutput Size, Activation2400 (60×40), Sigmoid for per-pixel action probCritic HeadOutput Size, Activation1 (scalar), LinearOptimizerType, Learning RateAdam, learning rate = 3e-4Policy UpdatePPO Clipping Range (ε)0.2. Limits the policy update step size in PPO’s surrogate loss.Epochs per Update4–10Batch Size64 or domain-size batchEntropy Coefficient–0.01 (to encourage exploration)Value Loss Coefficient–0.5Discount Factor (γ)–0.99. Determines the importance of future rewards.GAE Lambda (λ)–0.95. Controls bias-variance trade-off in GAE; helps smooth advantage estimation.Training StepsPer Epoch1000–2000 timestepsTotal Episodes–100+ depending on convergence",
+      "substeps": [
+        {
+          "instruction": "Both share some common CNN layers to extract visual features from the design state as shown in Fig. 4. The hyperparameter setting of the CNN are shared in Table 4. The input or state fed into the neural network is a 3-channel image tensor that encodes the current state:–Channel 1: Design grid (binary material distribution) X={0,1}HXW–Channel 2: Displacement field (from FEA)–Channel 3: Stress field (e.g., von Mises)Fig. 4Neural network architecture (CNN-based actor-critic).Fig 4Table 4CNN hyperparameter settings.Table 4ComponentHyperparameterValue/SettingInput ShapeChannels × Height × Width3 × 40 × 60 (Design Grid, Displacement, Stress)Conv Layer 1Filters, Kernel Size, Activation32 filters, 3 × 3, ReLUPadding'same'Stride1Conv Layer 2Filters, Kernel Size, Activation64 filters, 3 × 3, ReLUPadding'same'Max PoolingPool Size2 × 2Stride2Conv Layer 3Filters, Kernel Size, Activation128 filters, 3 × 3, ReLUPadding'same'Flatten Layer–Converts 2D feature maps to 1D vectorActor HeadOutput Size, Activation2400 (60×40), Sigmoid for per-pixel action probCritic HeadOutput Size, Activation1 (scalar), LinearOptimizerType, Learning RateAdam, learning rate = 3e-4Policy UpdatePPO Clipping Range (ε)",
+          "title": ""
+        },
+        {
+          "instruction": "Limits the policy update step size in PPO’s surrogate loss.Epochs per Update4–10Batch Size64 or domain-size batchEntropy Coefficient–",
+          "title": ""
+        },
+        {
+          "instruction": "(to encourage exploration)Value Loss Coefficient–0.5Discount Factor (γ)–",
+          "title": ""
+        },
+        {
+          "instruction": "Determines the importance of future rewards.GAE Lambda (λ)–",
+          "title": ""
+        },
+        {
+          "instruction": "Controls bias-variance trade-off in GAE; helps smooth advantage estimation.Training StepsPer Epoch1000–2000 timestepsTotal Episodes–100+ depending on convergence",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Step 3: Toplogy optimization using AI",
+      "instruction": "Input Shape: (C, H, W), where C = 3 channels → [Design Grid, Displacement, Stress]",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Step 3: Toplogy optimization using AI",
+      "instruction": "The shared Convolutional Layers (Feature Extractor) are shared between Actor and Critic to learn useful spatial features. These layers extract structural patterns (e.g., stress concentrations, load paths). The Actor Head (Policy Network) is a fully connected layer outputs a probability score per element for keeping or removing it. The output shape (H × W) corresponds to each element’s action. The Activation function is Sigmoid (for binary classification) or Softmax (for discrete action selection). The Critic Head (Value Function Network) is a fully connected layer that outputs a single scalar value. It represents the expected return from the current state. It is used to compute the advantage function during PPO updates.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Step 3: Toplogy optimization using AI",
+      "instruction": "The reward function is designed as:(5)r(st,at)={−α.Vf+β.(1C);ifconstraintssatisfied−100;ifconstraintsviolatedwhere, Vf is the volume fraction (material usage), C is compliance (inverse of stiffness) and α, β are tunable weights.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Step 3: Toplogy optimization using AI",
+      "instruction": "CNNs are used as they preserve spatial locality and pattern recognition across the design domain, they are ideal for visual reasoning over mechanical fields (stress/displacement) and are lightweight, fast, and trainable with GPU acceleration.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Step 4: FEA validation",
+      "instruction": "After the AI model proposes an optimized topology, the next critical step is to validate its structural feasibility using FEA. This ensures that the design is not only lightweight but also capable of withstanding applied loads under real-world conditions. In this step, we use FEniCS (Python-based) to simulate the mechanical behavior of the structure under specified boundary conditions and loading scenarios. The AI-generated design is converted into a mesh grid, and FEA is performed to evaluate two essential performance metrics: maximum displacement and Von Mises stress.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Step 4: FEA validation",
+      "instruction": "For the design to be considered valid, the maximum displacement must not exceed 0.5 mm, and the Von Mises stress must remain below 300 MPa, ensuring structural integrity and safety. The design moves on to the following phase (prototyping or manufacturing feasibility analysis) if it satisfies these requirements. To help the AI agent learn from its mistakes and get better in subsequent iterations, the reinforcement learning reward function penalizes the design if it breaks any constraints. The AI-generated designs are guaranteed to be both mechanically sound and practically feasible thanks to this physics-informed feedback loop.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Step 5: Manufacturability & prototyping readiness",
+      "instruction": "The following stage is to make sure the design is appropriate for physical manufacture, especially using additive manufacturing (AM) techniques, after the optimized topology has successfully completed structural validation using FEA. Topologies produced by AI frequently have jagged edges or voxel-level aberrations that, although physically sound in simulation, could be quite problematic in 3D printing. A Signed Distance Field (SDF) filtering approach is used in the design to overcome this. SDF improves surface quality and successfully removes aliasing issues by transforming the binary voxel representation of the structure into a continuous surface.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Step 5: Manufacturability & prototyping readiness",
+      "instruction": "After the design has been smoothed, it is transformed into an STL (Stereolithography) file, which is a commonly used format for 3D printing. Limitations on additive manufacturing, such as minimum wall thickness, overhang angles, and support structure needs, are simulated and assessed using the MeshMixer tool. Additionally, the tool enables support generation and orientation adjustment, both of which are essential for guaranteeing printability without failure or distortion. In order to facilitate a seamless transfer from virtual design to actual component, designs that pass these manufacturability criteria are deemed appropriate for prototype. This stage is essential to guaranteeing that the generatively optimized structure is physically achievable with contemporary manufacturing technology in addition to being lightweight and high-performing.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Method validation",
+      "instruction": "To validate the model, output on ToD dataset after 100 RL episodes is shared in Table 5. From visualization, the convergence of reward during Deep RL training is shown in Fig. 5. From the trend, it is observed that the reward improves and converges after ∼70 episodes. Thus, the PPO agent successfully learns to generate structurally efficient, constraint-satisfying designs. Graph to validate the Ablation study is shown in Fig. 6. It compares the performance of the proposed full model vs. reduced versions. It is observed that removing GAE, clipping, or constraint penalties negatively impacts reward. Hence, it justifies the architectural design decisions of the proposed model.Table 5Model output after 100RL episodes.Table 5MetricValueVolume Fraction0.32Max Displacement0.49 mmMax Von Mises Stress298 MPaCompliance2.4e-5 N/mmPrint CompatibilityHigh (No unsupported overhangs)Topology ComplexityModerate (lattice-like design)Fig. 5Convergence of reward during training.Fig 5Fig. 6Ablation study: effect on mean reward.Fig 6",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "Method validation",
+      "instruction": "The final Optimized Topology Design is shown in Fig. 7. From the Grid, black is the material and while is void. The design exhibits truss-like sparse architecture concentrated along stress paths, indicative of intelligent material use. Initial stress distribution from FEA (Von Mises Stress Distribution) is illustrated in Fig. 8 and optimized stress map after AI-driven topology refinement in Fig. 9.Fig. 7Final optimized design grid.Fig 7Fig. 8Initial stress field.Fig 8Fig. 9Optimized stress field.Fig 9",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Method validation",
+      "instruction": "The material discontinuities observed in Fig. 7 are a result of the binary voxel-based representation during the optimization phase, where each element is independently classified as either solid or void by the PPO policy. While this allows fine-grained control of material distribution, it may introduce disconnected or \"floating\" elements during early or intermediate episodes of learning. However, these discontinuities are post-processed using Signed Distance Field (SDF) smoothing, which reconstructs the surface into a manufacturable, continuous geometry. As verified through FEA validation post-smoothing (see Fig. 9, Fig. 11), these refinements preserve all load-bearing paths and eliminate isolated or structurally irrelevant fragments. Moreover, manufacturability analysis confirmed that the final STL-exported design contains no unsupported overhangs or unprintable voids, ensuring that the optimized topology is both structurally sound and ready for 3D printing. Therefore, the usability of the configuration remains high despite the appearance of early-stage discontinuities in the visualized grid. From Constraint Compliance perspective, no regions exceed the 300 MPa limit. The high-stress concentrations are located near load application and fixed supports, while other areas are efficiently voided. It shows lower stress concentrations and better distribution post-optimization.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Method validation",
+      "instruction": "Displacement Field Comparison, with initial (higher values) and optimized values are shown in Fig. 10, Fig. 11 respectively. Final design shows significantly reduced displacement, satisfying mechanical constraints.Fig. 10Initial displacement field.Fig 10Fig. 11Optimized displacement field.Fig 11",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "Method validation",
+      "instruction": "Based on the latest research that uses the Topology Optimization Dataset (ToD), Table 6 captures a comparative analysis of the proposed model with other recent AI-driven topology optimization methods. The comparison highlights model structure, dataset usage, optimization goals, and performance outcomes.Table 6Comparison of proposed model with existing research.Table 6Image, table 6",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "Method validation",
+      "instruction": "From comparison, the advantages of the proposed model are that there is no need for pre-generated training labels or supervision, it learns to balance material efficiency and mechanical safety dynamically, is compatible with STL export and additive manufacturing workflows and demonstrated superior generalization and constraint handling.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "Method validation",
+      "instruction": "Inference Time comparison across models is carried out next. The bar chart in Fig. 12 highlights the computational efficiency of the proposed PPO-based reinforcement learning model in comparison with other widely used approaches. It is observed that:–PPO-RL (Proposed Work): Efficient (∼2.1 s) despite using iterative physics-in-the-loop learning.–SIMP (Traditional) [36]: Slowest (∼18.4 s), despite accuracy, due to intensive FEA loops.–Graph ANN [37]: Moderate time (∼6.3 s) with higher 3D capability.–U-Net [38]: Fastest (∼0.8 s) due to direct supervised prediction but lacks constraint enforcement.Fig. 12Stress distribution from FEA.12",
+      "substeps": [
+        {
+          "instruction": "Inference Time comparison across models is carried out next. The bar chart in Fig. 12 highlights the computational efficiency of the proposed PPO-based reinforcement learning model in comparison with other widely used approaches. It is observed that:–PPO-RL (Proposed Work): Efficient (∼2.1",
+          "title": ""
+        },
+        {
+          "instruction": "despite using iterative physics-in-the-loop learning.–SIMP (Traditional) [36]: Slowest (∼18.4 s), despite accuracy, due to intensive FEA loops.–Graph ANN [37]: Moderate time (∼6.3",
+          "title": ""
+        },
+        {
+          "instruction": "with higher 3D capability.–U-Net [38]: Fastest (∼0.8",
+          "title": ""
+        },
+        {
+          "instruction": "due to direct supervised prediction but lacks constraint enforcement.Fig. 12Stress distribution from FEA.12",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 29,
+      "title": "Method validation",
+      "instruction": "From the application case study proposed, it is observed that the AI-driven generative design framework successfully generated a lightweight wheel hub design that meets the specified performance requirements and manufacturability constraints. Fig. 13 depicts figures to validate results of the case study.Fig. 13Results of the generative design of a lightweight wheel hub using proposed model.Fig 13",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 30,
+      "title": "Method validation",
+      "instruction": "Initial Design Domain: A cylindrical design space is illustrated in Fig. 13, showing fixed bolt hole positions. This represents the traditional wheel hub geometry constrained by standard bolt patterns.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 31,
+      "title": "Method validation",
+      "instruction": "Optimized Topology: The result of the generative design algorithm—an organic structure that efficiently distributes material along high-stress paths. Material is intelligently removed from regions with low stress to minimize weight.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 32,
+      "title": "Method validation",
+      "instruction": "Stress Distribution (FEA): A simulated FEA plot shows stress concentrations primarily around bolt holes and loading points. Maximum stress values remain below the threshold of 300 MPa, validating the design's structural integrity.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 33,
+      "title": "Method validation",
+      "instruction": "Displacement under load: Structural performance under radial and torque loading conditions is ensured by another FEA visualization, which verifies that the maximum displacement is under 0.5 mm.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 34,
+      "title": "Method validation",
+      "instruction": "Capability of Manufacturing (Sliced Layers): The part's suitability for 3D printing is demonstrated through simulated layer-by-layer slicing. Manufacturability was supported by the absence of excessive overhangs or thin features. Comparison of Weight Loss: The improved design achieves a large mass savings over the conventional design, which is crucial for fuel efficiency and emission reduction, as shown by the 40 % weight reduction in the bar chart.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 35,
+      "title": "Method validation",
+      "instruction": "While prior works have employed reinforcement learning (e.g., PPO) for structural optimization tasks [6,11,19], our contribution lies in the comprehensive integration of mechanical realism, manufacturability readiness, and generalizability. Specifically:•We enforce dual physical constraints (stress and displacement) within the PPO reward function, unlike earlier works that often neglect stress limits.•The agent uses a 3-channel CNN-based actor-critic network that jointly learns from material layout, stress, and displacement maps, providing richer contextual feedback during training.•Signed Distance Field (SDF) filtering and STL export are incorporated as part of the optimization pipeline to ensure the design is ready for additive manufacturing.•A detailed ablation study isolates the impact of PPO components like clipping and GAE on convergence and constraint satisfaction, often omitted in similar PPO implementations.•Inference time (2.1 s) is benchmarked and shown to outperform traditional FEA-driven SIMP methods, with validated results on ToD and real-world wheel hub geometry.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 36,
+      "title": "Method validation",
+      "instruction": "Thus, the study presented an AI-powered generative design framework that combines deep reinforcement learning (PPO) with topology optimization to generate lightweight, manufacturable mechanical structures. The proposed method introduces a physics-informed reward function that incorporates stress and displacement constraints, enabling the model to learn feasible and efficient material distributions. Structural validation through Finite Element Analysis (FEA) ensures compliance with mechanical performance criteria, while Signed Distance Field (SDF) filtering and STL export bridge the gap to additive manufacturing. The approach was validated using the Topology Optimization Dataset (ToD) and a real-world wheel hub case study, achieving up to 40 % weight reduction without violating engineering constraints. Comparative analysis shows that the proposed framework outperforms classical and contemporary methods in adaptability, inference time, and manufacturability readiness. The research lays a foundation for future advancements in intelligent structural design. Future work will focus on extending the method to 3D domains, incorporating multi-material and sustainability metrics, and enabling real-time adaptive optimization under dynamic loading conditions. This framework represents a step toward autonomous, scalable, and industry-ready generative design solutions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T04:02:38.135838Z",
+  "llm_normalised": false
+}

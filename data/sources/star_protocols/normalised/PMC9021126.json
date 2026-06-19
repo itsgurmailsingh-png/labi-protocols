@@ -1,0 +1,133 @@
+{
+  "protocol_id": "analyzing_single_cell_transcriptome_data_from_severe_covid_19_patients",
+  "parent_protocol_id": null,
+  "title": "Analyzing single cell transcriptome data from severe COVID-19 patients",
+  "author": "Nassir, Tambi, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC9021126",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9021126/",
+  "doi": "10.1016/j.xpro.2022.101379",
+  "citation": "10.1016/j.xpro.2022.101379",
+  "category": "Genomics & Sequencing",
+  "tags": [
+    "single cell transcriptomics",
+    "covid-19",
+    "rna-seq",
+    "bioinformatics",
+    "human"
+  ],
+  "estimated_time_mins": 66,
+  "materials": [
+    "SARS-CoV-2 spike protein (S1+S2)",
+    "RiboZol RNA extraction reagent",
+    "QIAamp Viral RNA Mini Kit",
+    "RNeasy 96 QIAcube HT Kit",
+    "High-Capacity cDNA Kit",
+    "Taqman Fast advanced master mix",
+    "AccuRT Genomic DNA Removal Kit",
+    "All-In-One Reverse Transcriptase Mastermix",
+    "EvaGreen qPCR Mastermix",
+    "FCGR3B qPCR probe",
+    "FFAR2 qPCR probe",
+    "glyceraldehyde-3-phosphate dehydrogenase qPCR probe",
+    "NanoDrop™ 8000 Spectrophotometer",
+    "QuantStudio5™ Real-Time PCR System",
+    "Thermal cycler"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Bioinformatics analysis",
+      "instruction": "All the bioinformatics analyses were carried out either on the institute (MBRU) server (Linux OS, AMD EPYC 7402 24-Core Processor, 132 GB RAM) or PC (iMac, 4.3 GHz Intel Core i7 processor, 16 GB RAM). The minimum configuration needed for carrying out this analysis is Linux OS, 16 GB RAM and around 30 GB of available storage space.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Step-by-step method details",
+      "instruction": "Timing: ∼2–4 h(Processing the single-cell RNA-seq data)\nTiming: ∼1 week (data collection), 10 min (script execution)(Prepare signature gene marker dataset and ascertain cell type identity of clusters)\nTiming: ∼1 week (compiling the comorbid gene list), 15–20 min (executing the script)(Prepare comorbid gene list and identify subtype with upregulated comorbid gene expression)\nTiming: ∼ 2–4 h(Downstream analysis)\nTiming: ∼ 1–2 h(Pathway enrichment)\nTiming: ∼ 1–2 h(In silico validation)\nTiming: ∼ 1–2 weeks(Gene expression in severe COVID-19 clinical samples)\nTiming: ∼ 1 week (Lung epithelial cell culture: ∼7 days, Monocyte isolationandculture: 24 h, qPCR: 4 h)(Gene expression in spike protein stimulated obese subjects)\n1.Processing the single-cell RNA-seq data.This section describes processing of single cell RNA-seq data including the installation of required packages and codes required to execute each step.a.Control dataset processing using Single Cell Experiment and Scanpy: Most of the R packages are available from CRAN and can be installed and accessed as mentioned below:install.packages('Seurat')library(Seurat)This will install the updated version of the softwares.Once you download the expression matrix and metadata from HCA (Human Cell Atlas), process the data to obtain the h5ad file format (a gene expression matrix file format) as stated below in R version 4.0.2.library(SingleCellExperiment)library(scran)library(sceasy)library(reticulate)#SET working directory pointing to the folder where all yourfiles are to be saved and the outputs will be saved at thatlocationsetwd(/PATH/TO/YOUR/DIRECTORY)# Read matrixairway.data read.csv(\"meta_cell_types_merged.tsv\",sep=\"\\t\")#generate SCE objectsce =0.5)pdb1 0)&(e>0)){ x 0){ ip 0){ ip setwd(\"∼/PATH_TO_WORKING_DIRECTORY_WHERE_db.R_IS_SAVED\")>db.R>q()CRITICAL: After collecting data from each source, it is critical to carefully check the cell type names. Even minor difference in names (cell vs Cell vs CELLS) might lead to creation of redundant cell types (ex. Brush cell vs Brush cells - both are the same and should be combined into one).CRITICAL: It is critical to exhaustively search the publications for marker database creation as the quality of this database will be reflected directly on cell type assignment. Only going through the databases will hardly take few minutes to hours. It is the literature search which is time consuming, due to the exponential rate at which single cell analysis is being performed on different human tissues.b.Cell type assignmentSubsequently, use the marker dataset to find the cluster identity (Figure 2) employing these steps:i.Extract and plot (boxplot) the normalized expression for all the genes belonging to a specific cell type across all the clusters for the given dataset. Alternatively, you can also calculate the median expression for all the clusters per cell type in the database. The following code can be used for calculating the median.library(readxl)library(Seurat)library(SeuratData)library(SeuratDisk)library(ggplot2)library(glue)my_data <- read_excel(\"cell_type_db1.xls\")severe<-readRDS(\"/Volumes/TR/8thDec2021/Download/severe.rds\")len<-length(my_data)nl<-c()feat_new<-c() for(i in 1:len){ nl<-c() k=1 feat<-my_data[[i]] u<-length(feat) for(j in 1:length(feat)){ if(is.na(feat[j])){ k=0 j=(length(feat))+1 } else{ nl[[k]]<-feat[[j]] k=k+1 } }g<-glue_collapse(nl,sep=\" \") feat_new[i]<-g io<-unlist(strsplit(feat_new[i], \" \")) print(io) print(length(io))}length(feat_new)t<-c()for(q in 1:38){io<-unlist(strsplit(feat_new[q], \" \"))print(io)#change cluster number and calculate for each clustersev <- as.matrix(FetchData(object=severe, vars = io,cells=c(names(severe$seurat_clusters[severe$seurat_clusters==10]))))values<-as.list(sev)h<-dim(sev)[1]∗dim(sev)[2]length(values)val75<-round((0.90∗length(values)),digits=0)sev1<-sev[order(sev)]sev11<-sev1[val75:length(sev1)]df<-data.frame(expr=sev11)t[q]<-median(df$expr)}#ranking the median valueshig_od<-order(t,decreasing=T)median_desc<-t[order(t,decreasing=T)]top<-hig_od[1]paste(\"The max median value is for \", colnames(my_data)[top], \"of\",median_desc[1], \"for cluster 1\" )#If u need box plotwrite.csv(df,\"sev.csv\", row.names = FALSE)#Add column headin as 'Sam' for sample and 'Exp' for expression valuesand mention cluster number for the 1st row#Sam Exp#Cluster1 0#Cluster1 7.092988176#Cluster1 6.943530007expr <- read.csv(\"sev.csv\")g <- ggplot(expr, aes(x=Sam, y=Exp, fill=Sam))g + geom_boxplot()+geom_point()+ggtitle(\"Cell_type_under_investigation\")ii.Compare the median expression across the cell types per cluster and to the 99th percentile expression value from the datasets.library(Seurat)severe<-readRDS(\"/PATH/TO/SEURAT_R_DATA_FILE/ severe.rds\")all.genes <- rownames(Your_seurat_object)rt<-FetchData(Your_seurat_object, vars<-all.genes)q99<-quantile(rt,0.99)iii.Assign the cell type identity based on the highest normalized median expression value for each cluster.\n3.Prepare comorbid gene list and identify subtype with upregulated comorbid gene expression.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Step-by-step method details",
+      "instruction": "This section describes steps in compiling the list of COVID-19 comorbid gene lists and identifying the cluster with maximum number of enriched comorbid gene set.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Step-by-step method details",
+      "instruction": "We collated a list of COVID-19 associated genes to analyze and compare their expression among control, moderate and severe COVID-19 clusters. Since COVID-19 disease pathology is associated with enormous release of pro-inflammatory cytokines, we included the list of cytokines and cytokine receptor genes, in addition to the rare infection and syndromic genes accounting for the genetic predisposition, lung channelopathy genes, differentially expressed genes from COVID-19’s BALF transcriptome (Zhou et al., 2020) and genes associated with key comorbid conditions such as chronic obstructive pulmonary disorder, cardiovascular disease, hypertension and diabetes. The list of cytokine and cytokine-receptor genes was retrieved from the Immunology Database and Analysis Portal (Bhattacharya et al., 2018). The monogenic infection gene list was collected from (Casanova, 2015). Syndromic genes (category S) were collected from the Simons Foundation Autism Research Initiative (https://gene.sfari.org/). Primary comorbid disease genes associated with COVID-19 were extracted from GWAS catalog (https://www.ebi.ac.uk/gwas/), where the selected genes had a probability < 10-7. The normalized expression of these gene sets was plotted for all the clusters of control, moderate and severe datasets. Refer the script at Github data: https://github.com/MBRULab/2021_Nassir-etal/blob/main/comorbidexpression.R. If using R-studio, copy and paste the code from GitHub in new R-Script. Select the whole script and press the ‘RUN’ icon and observe your outputs in the console window. Else, you can save this code as ‘comorbidexpression.R’, open R console on terminal by writing R, change and set directory and execute comorbidexpression.R as shown below. Quit the screen after running the code successfully.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Step-by-step method details",
+      "instruction": "The script below will yield cluster specific boxplots for comorbid gene expression.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Step-by-step method details",
+      "instruction": "Mark clusters for which the normalized median expression of the comorbid condition associated gene sets was higher than 99th percentile expression value from the dataset. Compare the boxplots and choose the cluster in which most of the comorbid conditions is upregulated as your subtype of interest, as demonstrated in Figure 2 and Figure S5 of (Nassir et al., 2021b).%R#R version will be printed on your screen>setwd(\"∼/PATH_TO_WORKING_DIRECTORY_WHERE_db.R_IS_SAVED\")> comorbidexpression.R>q()4.Downstream analysis.This section describes identifying genes restricted to cell type of interest.Using step 3, we identified a severe cluster which has maximum enrichment of the comorbid genes, severe cluster 11, which was assigned the identity as monocyte-derived alveolar macrophages (MoAM), indicated by the presence of CCL3L1 - MoAM_CCL3L1. One of the most important steps next is to identify the marker genes that are restrictively expressed in this cluster. Please follow the steps below.a.Use FindAllMarkers to compute the DEGs for each cluster using different tests - Wilcoxon-ranked sum test, t-test.>FindAllMarkers(seu_object, test.use= “wilkox”)b.Select the genes which are differentially expressed (highest probability, combining all the three tests).c.Rank the genes using their Log of fold change in descending order.d.Use top 20 genes and map them using feature plot and dot plot. Analyze the expression pattern and select the genes which are upregulated in severe cluster and have negligible expression in all other clusters in the dataset.Using this approach, we identified the most differentially regulated gene that demarcated cluster 11 in samples from severe COVID-19 patients, FCGR3B (Figure 3).5.Pathway enrichment.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Step-by-step method details",
+      "instruction": "This section describes pathway enrichment of differentially expressed genes and visualization of pathways using Cytoscape tool.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Step-by-step method details",
+      "instruction": "We used the DEGs from severe cluster 11 for enrichment analysis and mapping. For enrichment analysis, please follow the script at Github data: https://github.com/MBRULab/2021_Nassir-etal/blob/main/geneoverlap.R. This script takes the list of genes from severe cluster 11 as input and scans the KEGG (Kyoto Encyclopedia of Genes and Genomes) and GO (Gene Ontology) databases to identify the overlapping pathways. The input file required (KEGG and GO file and gene list file) are deposited in Zenodo. Here, the intersection of your set of genes over KEGG and GO pathway genes is computed. This script generates a csv file with the following information: pathway id, pathway name, pvalue and Odds ratio. This file is used as the input to Cytoscape where two main plugins are used: ‘Enrichment map’ and ‘Autoannotate’. Cytoscape is an open-source network visualization software which can be downloaded from https://cytoscape.org/download.html. Further, ‘App Manager’ present in the ‘APPS’ tab within the Cytoscape can be used to add these plugins (Figure 4). Then, use the Enrichment map and input the above-mentioned files using ‘Generic/gprofiler’ type of analysis. Set the FDR cut off ( 5 as positive match. It means that pathway will be considered only if more than 5 genes are included in it. This can be relaxed (by reducing the number) on line 26 of the script.6.In silico validation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Step-by-step method details",
+      "instruction": "This section describes validation of findings using other single cell and bulk RNA-seq datasets.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Step-by-step method details",
+      "instruction": "Once the cell type and specific marker gene has been identified, you will need to validate your findings, for which you need to decide and download required validation data sets. We used single cell BALF, bulk PBMC and bulk nasopharyngeal datasets for validation. This step involved comparing the expression pattern of FCGR3B in control and patient data and then calculating the significance using t-test p-values. The validation script deposited at Github data: https://github.com/MBRULab/2021_Nassir-etal (validation_BALF_SC.R, validation_nasph.R, validation_pbmc.R) can be directly used for this purpose. . If using R-studio, copy and paste the code from GitHub in new R-Script. Select the whole script and press the ‘RUN’ icon and observe your outputs in the console window. Else, you can save this code as ‘validation.R’, open R console on terminal by writing R, change and set directory and execute validation.R as shown below. Quit the screen after running the code successfully.%R#R version will be printed on your screen>setwd(\"∼/PATH_TO_WORKING_DIRECTORY_WHERE_db.R_IS_SAVED\")> validation.R>q()7.Gene expression in severe COVID-19 clinical samples.This section describes processing of nasopharyngeal swabs for RNA isolation followed by real time PCR analysis.a.Transfer nasopharyngeal swabs into viral transport media utilizing BD Universal Transport Media (UTM) 3-mL collection kit with flexible minitip flocked swab (BD, Cat. No. 220531).b.Perform RT-qPCR for SARS-CoV-2 using the QIAamp Viral RNA Mini or the EZ1 DSP Virus Kits (QIAGEN, Hilden, Germany) following the manufacturer’s recommended protocol.c.Extract human RNA from nasopharyngeal swabs of control (SARS-CoV-2 negative) and severe/critical cases (pneumonia requiring admission to intensive care units and specialized life-support treatment (e.g., mechanical ventilation)) using RNeasy 96 QIAcube HT Kit (QIAGEN USA) as per the manufacturer’s instructions.CRITICAL: Pay attention to avoid RNase contamination.d.Transfer 2 mL of Universal Transfer Medium (UTM) to a clean, sterile tube and centrifuge at 1,800 g for 3 min. Carefully remove 1,650 μL of supernatant without disturbing the pelleted squamous and respiratory epithelial cells.e.Resuspend the pellet with remaining 350 μL of Universal Transfer Medium (UTM) and transfer to S Block (RNeasy 96 QIAcube HT Kit, QIAGEN USA).f.Determine quality and quantity of the extracted RNA using NanoDrop™ 8000 Spectrophotometer (Thermo Fisher Scientific, USA).g.Reverse transcribe RNA to cDNA using a High-Capacity cDNA Kit (Applied Biosystems, Foster City, CA) according to the manufacturer’s protocol. Prepare master mix for reverse transcriptase reaction in a microcentrifuge tube.RT Master Mix for cDNA GenerationReagentVolume per reaction (μL)Multiscribe reverse transcriptase125× dNTP Mix0.810× RT Random Primers2RNase inhibitor110× RT Buffer2Nuclease free water3.2Total Volume10h.Mix the reagents by briefly pipetting or gently vortexing. Label tubes and pipette 10 μL of master mix into PCR strip tubes. Add 10 μL RNA to respective PCR strip tube and gently mix by pipetting 5–10 times.i.Flash spin PCR strip tubes in a mini centrifuge at 2,000 g for approximately 10 s. Place tubes into thermocycler and run the following program:cDNA generation PCR stepsStepsTemperatureTime125°C10 min237°C120 min385°C5 min44°CInfinityj.Thaw TaqMan Fast Advanced Master Mix on ice. Thaw primer/probe set on ice, protected from light. Label one microcentrifuge tube for each primer/probe set and mix the master mix and primer/probes.Two-Step Multiplex qPCR Master Mix RecipeReagentVolume per reaction (μL)2× TaqMan Fast Advanced Master Mix520× TaqMan probe10.520× TaqMan probe20.5Nuclease-free H2O3Final total volume9Note: Use technical duplicates for each sample and primer/probe set.k.Prepare the above mixture and mix by pipetting slowly up and down. Dispense 9 μL of master mix reaction into a 96-well plate. Add 1 μL cDNA to the 96-well plate containing the reaction mixture. Cover the loaded 96-well plate with an adhesive cover and centrifuge the 96-well plate in a mini plate spinner at 500 g for approximately 20 s. Select the reagent type as TaqMan reagents. Choose the ramp speed and plate setup. Define the specific probe and samples, fluorescence reporter and the quencher for the experiment. Assign the probes and samples to selected wells.CRITICAL: Include a no-template control. Prior to initializing the run, assign target genes with the appropriate fluorophore (GAPDH-VIC, FFAR2-FAM).l.Set up the following program:PCR cycling conditionStepsTemperatureTimeCyclesInitial incubation50°C2 min1Polymerase activation95°C5 min1Denaturation95°C1 s40 cyclesAnnealing60°C20 s40 cyclesHold4°CForeverPlace the 96-well plate in the machine and start the Run method. Edit the default run method with appropriate Tm. Include Pre-PCR read to collect the background fluorescence.m.Data Analysis - Review the QC summary (select amplification plot to show amplification curves in all wells. Specific PCR products should display a single sharp peak in the melting curve rather than multiple peaks or single broader peaks (non-specific PCR product)).n.Calculate relative levels of mRNA gene expression using the 2−ΔΔCT method and plot fold change.Relative gene expression = 2−ΔΔCT, where ΔCT is the difference in CT value of target gene with respect to housekeeping gene, ΔΔCT is the difference in CT value of target gene of patients with respect to control.8.Gene expression in spike protein stimulated obese subjects.This section describes culturing lung epithelial cells, monocyte isolation and culturing followed by real time PCR analysis.a.Lung epithelial cell culture.i.Purchase Normal human primary bronchial epithelial (NHBE) cells from non-obese and obese subjects from a commercial source (key resources table).ii.Culture NHBE cells in BEGM media (Lonza, MD, USA) supplemented with 1% antibiotic antimycotic solution (Wisent, QC, CA) in 12 well tissue culture plates coated with Type 1 Rat tail collagen (Sigma-Aldrich, Ontario, Canada).iii.Grow cells to 90% confluency and starve using BEBM Basal Medium (Lonza, MD, USA) supplemented with 1% antibiotic antimycotic solution (Wisent, QC, CA) over night.iv.The next day, stimulate cells with 1 μg/mL of SARS-CoV-2 spike protein (S1+S2) for 3 h.v.Collect the culture media in microtubes, centrifuge at 5,000 g for 5 min. Aliquot supernatants into fresh microtubes and freeze at −80°C.b.Monocyte isolation and culture.i.Isolate PBMCs of a healthy donor from 40 mL of blood using SepMate-50 tubes (StemCell, BC, CA), following manufacture’s protocol.ii.Resuspend PBMCs in RPMI 1640 supplemented with 1% Penicillin/Streptomycin, Glutamax and 10% FBS (Wisent, QC, CA) (Gibco, MD, USA) (Wisent, QC, CA).iii.Perform differential cell count on the PBMC cell suspension using the Beckman Coulter AC-T DIFF cell counter and obtain concentration of monocytes.iv.Add calculated volume of PBMC cell suspension to a 48 well plate to obtain 1 × 10ˆ5 monocytes per well.v.Incubate cell suspension at 37°C, 5% CO2 for 3 h. Remove media from wells and wash twice with PBS.vi.Add fresh complete RPMI media with 0.5% FBS to each well and incubate attached monocytes (16 h). The following day, thaw an aliquot of conditioned media from stimulated NHBE cells on ice and vortex.vii.Remove 100 μL of media from wells and add 100 μL of NHBE conditioned media to attached monocytes and incubate for 24 h. Remove media from cells and use cell pellets for RNA extraction.viii.Perform total RNA extraction from monocytes using phenol-chloroform extraction (RiboZol RNA extraction reagent, VWR, Leicestershire, UK), as directed in the manufacturer’s instructions.ix.Remove contaminated DNA from 500 ng of total RNA using the AccuRT Genomic DNA Removal Kit (Applied Biological Materials, Richmond, BC, Canada), following the manufacturer’s protocol.DNA Removal for cDNA GenerationReagentVolume per reaction (μL)RNA (500 ng)up to 6AccuRT Reaction mix2Nuclease free waterup to 6Incubate 5 minReaction Stopper2Total Volume10x.Perform reverse transcription using the 5× All-In-One Reverse Transcriptase Mastermix (ABM).RT Master Mix for cDNA GenerationReagentVolume per reaction (μL)5× All-in-One RT master mix4Nuclease free water6Total Volume20cDNA generation PCR stepsStepsTemperatureTime125°C10 min242°C15 min385°C5 min44°CInfinityxi.Measure mRNA expression of FCGR3B and GAPDH (housekeeping gene) using EvaGreen qPCR Mastermix (ABM).xii.Test each sample in duplicates and perform qPCR amplification using CFX96 thermal cycler (Bio-Rad, Hercules, 130 CA, USA).qPCR Master Mix RecipeReagentVolume per Reaction (μL)2× EvaGreen Mastermix510 μM Forward & Reverse primers0.6Nuclease free water2.4Total Volume10xiii.Set the cycler program:PCR cycling conditionStepsTemperatureTimeCyclesPolymerase activation95°C20 s1Denaturation95°C3 s40 cyclesAnnealing60°C30 s40 cyclesHold4°CForeverxiv.Use the ΔCT method to measure gene expression: amount of target = CT ref /ΔCT.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Step-by-step method details",
+      "instruction": "Figure 1Steps involved in the compilation of unique marker gene database using various sourcesMarker gene information is present in literature in the form of heat map (Gene expression plotted against cell types using color gradients for expression levels), dot plot (circles denoting the gene expression across various cell types), tables or databases. In case of dot plot, the size and color intensity are proportional to the level of expression in the percent of cells and degree of expression, respectively (in ascending order). In order to constitute the final marker database, the cell types and gene list were combined from all the sources retaining only unique genes into the list for each cell type (Removing any duplicate genes within inter and intra cell types).Figure 2Assigning cell type identity for severe COVID-19 cluster 11(A) Mean expression of CCL3L1 across all clusters in severe COVID-19 dataset. The highest expression was observed for cluster 11, which was annotated as monocyte derived alveolar macrophages (MoAM), marked by CCL3L1. Red dotted line indicates the global median expression. A cluster was assigned a particular cell type if it had the highest median expression (across the clusters and expression value was more than 99th percentile overall expression.(B) Dot plot showing expression of macrophage and its subtype (TRAM and MoAM) marker genes for the severe COVID-19 dataset. The y-axis represents the cell types based on the marker database and x-axis represents the marker genes. Cluster 11 is marked by MoAM_CCL3L1.Figure 3Steps in identifying cluster associated with comorbid disease gene expression and finding gene restricted to that cell typeEnrichment analysis of severe COVID-19 clusters with comorbid gene set. Higher expression (above global median) is indicated by a star. The cluster having maximum number of upregulated gene set is selected for further downstream analysis and identifying candidate genes with restrictive expression in severe COVID-19 cluster. The representative feature plots are reused from Figure 3 of (Nassir et al., 2021b).Figure 4Steps to perform Cytoscape analysisFlowchart representing pathway network creation using Enrichment Map and Autoannotate tool. The tab selections are highlighted in red.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T01:29:18.421309Z",
+  "llm_normalised": true
+}

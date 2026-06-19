@@ -1,0 +1,111 @@
+{
+  "protocol_id": "repd3d_a_tool_for_representative_period_identification_and_associated_boundary_c",
+  "parent_protocol_id": null,
+  "title": "RepD3D: A tool for representative period identification and associated boundary condition extraction",
+  "author": "Soares, Knies, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC12255363",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12255363/",
+  "doi": "10.1016/j.mex.2024.103109",
+  "citation": "10.1016/j.mex.2024.103109",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 360,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "RepD3D is available as source code and pre-compiled as a Windows 64 bit executable. The RepD3D executable file is a GUI application (Fig. 1), of approximately 430 MB in size developed using the Tkinter module, and packaged with PyInstaller for Windows. The open-source code (under the MIT license), which is included in the appendix and hosted on the GitHub repository (https://github.com/capt-clay10/RepD3D.git), is written entirely in Python. For users on UNIX systems, or those with an existing Python environment, a main.py file is available, enabling access to RepD3D's functionality via the command line. These users must install the following libraries and packages in their Python environment: ast, cfgrib, csv, dask, datetime, ecCodes, h5netcdf, h5py, math, netcdf4, numpy, os, pandas, pyproj, re, requests, seaborn, scikit-learn, scipy, statistics, sys, time, tqdm, utm, windrose and xarray.Fig. 1RepD3D main menu showing all the sub-modules.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method details",
+      "instruction": "The functionality of RepD3D can be conceptually split into two main types of modules, the representative period identification (RPI) module and extraction modules (EM). The RPI module is based on the unfiltered-reduction technique introduced by Soares et al. [18], which uses long-term wind datasets as a reference period to identify a shorter representative period that best mimics the properties of the total reference period. In the pre-compiled version, the extraction modules rely on the EasyGSH [10,11] and COSMO-REA6 [1] dataset to extract and write Delft3D-4-compatible space- and time-varying (ST) input condition files (see Fig. 5 for coverage). Together these modules help plan and prepare representative boundary conditions for a Delft3D-4 model.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Extraction modules",
+      "instruction": "The EM within RepD3D offer support to extract water level and wave data from the EasyGSH datasets and convert it to Delft3D-4 compatible input files as .bct (water level time series) and .bcw (wave data time series) respectively, as well as wind velocity and pressure files from COSMO-REA6 to .amu, .amv, .amp and x- and y-wind METEOFILES. All extracted files are currently in UTC. Implementation of these files into a model should be done following the Delft3D-4 manual [5].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Extraction modules",
+      "instruction": "As an overview, the EM consists of 7 sub-modules (Table 1). Currently the modules read COSMO-REA6 for wind field data and EasyGSH for water level and wave data. This exclusivity restricts the use of the module to water level and wave conditions from the German North Sea (see EasyGSH coverage in Fig. 5A) and wind data to the European continent and the connected marginal seas (see Fig. 5B). Further enhancements are possible within the source code to adapt the algorithm to other similar datasets.Table 1Sub-modules within the extraction module and the associated generated output files.Table 1:Sub-moduleInputOutputExtract all files.mdf, .grd (flow and wave), .bnd (flow and wave), .mdw and .nc (EasyGSH water level and wave).bct, .bcw, .mdw, boundary locations.csvBct file overlapping over years.mdf, .grd (flow), .bnd (flow), .nc files (EasyGSH water level).bct, boundary locations.csvBcw file overlapping over years.mdw, .grd (wave), .bnd (wave), .nc files (EasyGSH wave).bcw, .mdw, boundary locations utm.csvBoundary location CSV file.grd and .bndboundary locations.csvBoundary location and mdw file.grd (wave), .bnd (wave) and .mdw.mdw, boundary locations.csvAdd sea level change to .bct files.bct.bctGenerate ST-varying wind field files - COSMO.grb (PS, U and V) and .mat (DelftD3D-4 grid, exported as .mat).amu, .amv, .amp, xwind.wnd, ywind.wndFig. 5A: Overview of EasyGSH coverage and model domains / validation points of example case. B: Overview of COSMO-REA6 and EasyGSH coverage.Fig 5",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Extraction modules",
+      "instruction": "In the EM, the algorithm extracts the A and B endpoints of each open boundary provided in the user-specified open boundary file (.bnd) (Table 2). It converts them into real-world coordinates from m and n indices (Cartesian to Spherical if needed) using information from the provided grid file (.grd). This initial step can also be performed independently using the sub-module Boundary location CSV file. The A and B coordinates are then used as indices to extract data from the EasyGSH variables. The algorithm implements a bilinear interpolation technique (Eq. (2)) to extract information for each boundary endpoint, this offers more precision if the user-provided boundaries lie in an area with high variability, however, it increases the run time of the algorithm. Four bounding points, nearest to the target coordinates are identified and data (Pi) is extracted at each of these locations.(2)Bli=∑i=14Pi·wi∑i=14wiwhere Pi…4 represents the extracted data points nearest to the target coordinates and wi..4 the associated weights based on their relative distances from the target coordinates.Table 2Important warnings and recommendations related to the usage of RepD3D.Table 2:Input fileWhere to prepareWarnings and recommendations.grd (flow and wave)Delft3D-4 - Flow module or outsidePlease make your flow and wave grids as desired using the RGFGRID, Cartesian space or Spherical..bnd (flow)Delft3D-4 - Flow module or outsideSelect the type of open boundary as Water level and forcing type as Time-seriesName the boundaries with an underscore and follow that with a number, eg North_1, do not use North_01.bnd (wave)Delft3D-4 - Flow module or outsideUse the Delft3D-4 flow module to make boundaries on your wave grid, to achieve a space-varying effect make several boundariesName the boundaries without an underscore, eg North1, do not use North01It is recommended to use a larger rectangular outer wave grid to which you prescribe the boundaries and then nest (at least) a higher resolution wave grid (rectilinear or curvilinear) within it that eventually communicates with your flow grid. *Note all wave grids should be bigger than flow grids for best results..mdf (flow)Delft3D-4 - Flow module or outsideThe reference date and simulation start and stop time should be inserted carefully..mdw (wave)Delft3D-4 - Wave module or outsideMake sure at least one interim boundary is set up for the algorithm to find the Boundaries block in the .mdw file. This will be overwritten by your created boundaries from the .bnd (wave) file..nc waterlevel file (EasyGSH)EasyGSHDownload the .nc file to the main path from https://mdi-de.baw.de/easygsh/Easy_Viewer_syn.html#homeFile is found under synoptische Simulation, UnTRIM2, 1000m Raster as Wasserstand 2DDo not change the name of the .nc files.nc wave file (EasyGSH)EasyGSHDownload the .nc file to the main path from https://mdi-de.baw.de/easygsh/Easy_Viewer_syn.html#homeFile is found under synoptische Simulation, UnTRIM2, 1000m Raster as Seegang 2DDo not change the name of the .nc filesWIND fileDWD or outsideThe file should be cleaned of nan valuesThe file should only have 3 columns in the following order: date, speed and direction.COSMO wind fileshttps://opendata.dwd.de/climate_environment/REA/COSMO_REA6/hourly/2D/In the main path make two folders called PS and UV.In the folder PS place, all the pressure files (PS) for the months you're interestedIn the UV folder place, all the U_10 M and V_10 M files for the months you're interested in.Unzip the files such that the final format is now .grib. and delete the zip files.It is important to note that the reference time for the COSMO files should be the reference date of the model simulation, however make sure there is a time gap between the start of the COSMO data and the reference time. So, if your reference time is 01.01.2024 then download COSMO files starting from 01.02.2024.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Extraction modules",
+      "instruction": "The following variables are extracted from the EasyGSH data set (all times in UTC), for water level data, it extracts Mesh2_face_Wasserstand_2d which represents sea surface height or water level. For wave data, it extracts Mesh2_face_signifikante_Wellenhoehe_2d which represents significant wave height, Mesh2_face_Peak_Wellenperiode_2d which represents peak wave period, Mesh2_face_Richtungsaufweitung_der_Wellen_2d which represents directional spreading and Mesh2_face_Wellenrichtungsvektor_x_2d and Mesh2_face_Wellenrichtungsvektor_y_2d which represent the two components of wave direction. These components are then processed for each quadrant to accurately calculate the directional angle (Nautical convention). Finally, the calculated angle is adjusted to convert the wave orientation from the 'waves towards' direction to the 'waves from' direction.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Extraction modules",
+      "instruction": "Sub-modules Bct file overlapping over years and Bcw file overlapping over years allow the user to extract data for model simulations spanning more than one year. A supplementary sub-module called Add sea level change to .bct files provides the opportunity to induce gradual or constant sea level rise to the extracted .bct files. For inducing gradual SLR it requires a maximum SLR height in meters then it extrapolates an array from zero to the provided max in the same resolution as the time step in the .bct file and simply adds it over the water levels in the .bct file.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Extraction modules",
+      "instruction": "The COSMO-REA6 wind fields are extracted and interpolated onto an equidistant grid with a resolution of 6 × 6 km, the time is in UTC. The grid has to be provided by the user in .mat (v7) format, this can be generated easily using the Quick plot function in Delft3D-4. COSMO-REA6 data is provided on a rotated pole, which is corrected within the EM before extraction. The user only needs to follow the folder structure specification (Table 2). The output files generated include wind components (U and V) and stored in files .amu and .amv, air pressure component stored in the file .amp, formatted for use in Delft3D-4 Flow module and METEO files for the wave module stored in the files .wnd.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Method validation",
+      "instruction": "Soares et al. [18] employed the RPI module to identify a representative period using the all-class correlation method and extraction modules to obtain relevant input conditions for their North Frisian Wadden Sea model. Validation in their study demonstrated that the generated input conditions performed effectively. This section presents a simplified use case scenario illustrating how RepD3D can be applied in modeling efforts, with example files provided as tutorial resources on the GitHub repository.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Method validation",
+      "instruction": "For this exemplary case study, we focus on the back-barrier basin Hörnumbecken (situated between the Island of Sylt and Amrum, model domain as depicted in Fig. 5A), where the objective is to analyze the impact of strong winds from the southwest quadrant on the regional hydrodynamics. The goal is to conduct a non-synthetic, unfiltered-reduced but representative simulation using the RPI module. Wind data for the identification of the (selective-class) representative period was sourced from the List weather station on Sylt, provided by DWD. While it is generally advised to use data from an offshore wind station, the data from this station was deemed sufficient for the current scenario. Using the selective-class correlation method, we chose wind directions from the S, SSW, SW, and WSW quadrants, along with wind speeds in classes 8, 9, 10, and 11. To minimize the influence of less relevant classes, the lowest moving-window duration of two months was selected, with the scanning window limited to overlap with EasyGSH and COSMO datasets. Fig. 6H illustrates the representative period identified based on the reference period (1975-01-01 to 2020-01-01), spanning from October 26, 2013, to December 24, 2013, aligning with the modeling objective.Fig. 6Application of the EM and RPI modules for an example scenario. Left panels A-E compare observed (blue) and simulated (red) water level, wave and wind parameters. Right panels show wind roses for the reference period (F), representative period for all direction and speed classes (G) and for the user-specified classes (H) used in the example.Fig 6",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Method validation",
+      "instruction": "A Delft3D-4 based simplified low resolution curvilinear structured grid was generated for the Hörnumbecken basin, with the highest resolution in the channel and back-barrier areas, and reduced resolution toward the open sea. Two wave grids were developed: a low-resolution outer rectilinear wave grid and an inner wave grid matching the resolution of the flow grid. Space- and time-varying meteorological files from the COSMO model were used for the wave (SWAN) module, while the flow module incorporated the .bct file from EasyGSH for water levels. The results, presented in Fig. 6 (A-E), demonstrate the application's effectiveness. The figure Fig. 6 (F-H) shows the wind rose comparison between the reference period, representative period identified under all-class correlation and the selective-class correlation method used for this scenario. It also qualitatively shows the water level, wave and wind data comparison between measured and modeled (extracted using EM and run with Delft3D-4), the locations of the measured stations can be seen in Fig. 5A.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T03:42:19.704489Z",
+  "llm_normalised": false
+}

@@ -1,0 +1,136 @@
+{
+  "protocol_id": "field_boundary_delineation_with_seasonal_sentinel_2_imagery_using_segment_anythi",
+  "parent_protocol_id": null,
+  "title": "Field boundary delineation with seasonal sentinel 2 imagery using Segment Anything Model (SAM)",
+  "author": "Ha, Nketia, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC12857264",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12857264/",
+  "doi": "10.1016/j.mex.2026.103794",
+  "citation": "10.1016/j.mex.2026.103794",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 72,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "The field boundary detection workflow consisted of five key steps (Figure 1): (1) creating the Python working environments, (2) acquiring RGB Sentinel-2 imagery, (3) segmenting field boundaries, (4) post-processing the segmented features, and (5) performing accuracy assessment. The workflow was executed across two main working environments: Google Earth Engine (GEE) for image retrieval and preprocessing, and ArcGIS Pro for segmentation and analysis. RGB imagery covering the Region of Interest (ROI) was downloaded via the GEE Python API. SAM was then employed in ArcGIS Pro to delineate field boundaries. Post-processing steps included cleaning and refining the segmented features, which were subsequently evaluated for accuracy. The entire process was implemented using Python-based tools within the configured GEE and ArcGIS Pro environments.Fig. 1Field boundary detection workflow using segment anything model (SAM).Fig. 1:",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Step 1: Setting the working environment",
+      "instruction": "To prevent software conflicts, two separate Anaconda Python environments were created: one for downloading Sentinel-2 imagery and another for segmenting field borders. Users must first install the free Anaconda distribution by following the instructions at https://www.anaconda.com. A GEE account is also required and can be created at https://code.earthengine.google.com. All software implementations in this study were carried out on a Windows operating system. A dedicated Anaconda environment was configured using Python 3.10.18 via Anaconda version 4.14.0. Key libraries installed in the environment included: geemap (v0.20.6), GDAL (v3.4.3), GEE API (v0.1.355). The full installation procedure is detailed in the supplementary materials (github link).•Create the working environment for downloading Sentinel-2 imagery: For example, to create the environment used for downloading Sentinel-2 imagery, the following commands were run in the Anaconda prompt (see Code Block 1).(block 1)≫condaenvcreate−fenvironment.yml≫condaactivatergb−environment•Create the working environment for image segmentation: For the field-boundary segmentation workflow, we used a cloned version of the ArcGIS Pro (v3.3) deep-learning environment. The clone was configured with the Esri Deep Learning Frameworks (per https://github.com/Esri/deep-learning-frameworks). To reproduce this setup, open the ArcGIS Pro Python Command Prompt (Start → ArcGIS → Python Command Prompt) and clone the default arcgispro-py3 environment; the resulting environment includes arcpy and can be customized with the frameworks required for SAM model execution (see Code Block 2).(block 2)≫condacreate−−field−boundary−seg−−clonearcgispro−py3≫activatefield−boundary−seg",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Step 2: Seasonal image acquisition",
+      "instruction": "To capture seasonal variability in field boundaries, multi-year RGB composites were created using Sentinel-2 imagery from 2021 to 2024. A tiling system based on census subdivision polygons for croplands in the Canadian prairies [15] was applied to parallelize image downloads and structure processing units. Sentinel-2 time-series imagery (May–September) was retrieved using GEE and Python APIs within an Anaconda environment. Preprocessing steps included cloud filtering (retaining scenes with <50% cloud cover), tile-based clipping, temporal aggregation, and masking. RGB bands were generated through median compositing with seasonally adjusted date windows: Red (May–July), Green (July–August), and Blue (August–September), producing annual composites for each tile (Figure 1; Code Block 3). To exclude non-cropland areas, the ESA WorldCover 10 m dataset, AAFC crop inventory map, and road map (Road Network File) from Statistics Canada were incorporated [[16], [17], [18]].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Step 2: Seasonal image acquisition",
+      "instruction": "Download process was executed in JupyterLab by navigating to the folder 2_RGB_download and opening the notebook 1a_rgb_download.ipynb. Before running the script, users specified the region of interest (province), the target years, and the output folder path for storing the downloaded imagery. Once configured, the notebook was executed to initiate image downloads. Following download, the images were mosaicked on an annual basis and subsequently masked to remove any remaining non-cropland areas using Otsu thresholding. Additionally, this process produced a shapefile delineating the boundaries of cropland areas. The final mosaics served as input layers for the subsequent image segmentation stage.(code block 3)≫s2jun=s2collection.filter(ee.Filter.calendarRange(5,7,month′)).median().select([′B4′])≫s2jul=s2collection.filter(ee.Filter.calendarRange(7,8,month′)).median().select([′B3′])≫s2aug=s2collection.filter(ee.Filter.calendarRange(8,9,month′)).median().select([′B2′])≫s2img=ee.Image(s2jun.addBands(s2jul).addBands(s2aug)).clip(tilesub.geometry()).3toUint8()",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Step 2: Seasonal image acquisition",
+      "instruction": "Where: tilesub is the sub-tile of each major tiling system, s2_collection is the Sentinel-2 image collection for a respective year under segmentation. B4, B3 and B2 are Red, Green and Blue bands of Sentinel-2 imagery respectively.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Step 3: Field boundary segmentation using SAM",
+      "instruction": "The SAM is designed to segment clusters of related pixel values within an image. In its baseline design, SAM can segment individual pixels, pixel groups, or bounding boxes. In our study, field boundaries were extracted from Sentinel-2 RGB composites using the Segment Anything Model (SAM) as an automatic proposal generator. Sentinel-2 RGB is free and globally available, and its 10 m resolution supports rapid, large-area processing while preserving sufficient boundary detail. Leveraging SAM’s zero-shot generalization, we avoid task-specific training and labels. For each image tile, SAM generates multiple candidate masks; we retain only stable, high-confidence outputs. The surviving masks are slightly cleaned to yield field polygons. These polygons enable field-scale zonal statistics across the Canadian Prairies. Our use of SAM provides scalable boundary delineation that replaces manual digitization and supports downstream applications—such as zonal statistics—without additional manual digitization.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Step 3: Field boundary segmentation using SAM",
+      "instruction": "Image segmentation was conducted within an Anaconda Python environment using the pre-trained SAM model (SAM, 2023). The segmentation workflow was implemented through the 3a_arcpy_rgb_segmentation.ipynb notebook located in the 3_Segmentation directory. Prior to execution, file paths were updated to reference the pre-trained model file (SAM.dlpk) and to define the output directory for storing the resulting shapefiles. The segmentation procedure can be applied either to individual yearly composites or to a multi-year aggregated composite, depending on user-defined settings.(code block 4)≫arcpy.ia.DetectObjectsUsingDeepLearning(inRaster,outFeature,sam,parameters)where: 'inRaster' is the RGB 8-bit image in GeoTIFF format (*.tif), 'outFeature' is the output feature class in shape format (*.shp), 'sam' is the pre-trained model in *.dlpk format, and 'parameters' contains a list of user specified parameters.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Step 3: Field boundary segmentation using SAM",
+      "instruction": "Imagery from the four-year period was averaged into a single RGB composite before segmentation. Following code block 4, the object detection function was applied to the input image and the parameter’s name and value were set as in Table 1.Table 1Parameters used in SAM for field boundary detection.Table 1:NameValueExplanationPadding256Pixel number added to the image edgesBatch-size4Sample numberBox_nms_thresh,0.7Threshold for keeping overlapping featuresPoints_per_batch64Sample number per batchStability_score_thres0.95The level of anomaliesMin_mask_region_area0The minimum area of the output featuresRun_nms“NMS”Keep all output featuresConfidence_score_field“Confidence”Name of the field in the feature classClass_value_field“Class”Name of the field in the feature class",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Step 4: Post-processing and feature cleaning",
+      "instruction": "Feature cleaning consisted of two sequential steps: (1) filtering features based on area, overlap count, and shape compactness, and (2) refining feature boundaries to better align with cropland extents. In the first stage, multiple-year inputs were intersected to align coincident edges and resolve topology; multipart features were exploded; geodesic area computed; and polygons < 2 ha removed. Overlaps were counted to flag ambiguous/shared boundaries, an inward (-20m) buffer trimmed spikes and narrow artifacts, the polygon area was recomputed, and a second ≥ 2 ha filter retained stable footprints. Finally, scale was restored with an outward (+20m) buffer and the cleaned shapefile saved—yielding topologically consistent, size-screened field polygons for downstream analysis. All these task was compiled in 4a_arcpy_clean_shp.ipynb. In the second stage, field-boundary polygons were cross-referenced with the AAFC crop mask, and a zonal mean of the mask values was computed for each polygon. This mean (interpreted as the proportion of cropland within the polygon) was written to the polygon attributes, and polygons with a mean crop-mask value below 0.4 were removed, retaining only fields with a majority cropland signal (4b_cropmask.ipynb) Figure 2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Step 4: Post-processing and feature cleaning",
+      "instruction": "Fig. 2Example of the field boundary output layer (yellow lines) overlaid on a seasonal Sentinel-2 RGB composite.Fig. 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Method validation",
+      "instruction": "To evaluate the performance of the field boundary segmentation, we employed the Intersection over Union (IoU) metric, which quantifies the degree of spatial overlap between predicted and reference field boundaries. IoU provides a standardized and interpretable measure of segmentation accuracy, where higher values indicate better alignment between segmented features and ground truth delineated manually from GEE satellite-based map [13]. Accuracy assessments were conducted at 15 randomly selected locations across the Canadian Prairies, encompassing a total area of approximately 260,57 hectares (643,84 acres). The overall mean IoU was 0.86, indicating strong agreement between the segmented and reference boundaries. Province-level evaluations further revealed consistent performance across diverse agricultural landscapes, with mean IoU scores of 0.85 for Saskatchewan (107,95 ha), 0.89 for Alberta (60,43 ha), and 0.86 for Manitoba (92,19 ha). These results confirm the robustness and generalizability of the boundary extraction approach, with slightly higher segmentation accuracy observed in Alberta.",
+      "substeps": [
+        {
+          "instruction": "To evaluate the performance of the field boundary segmentation, we employed the Intersection over Union (IoU) metric, which quantifies the degree of spatial overlap between predicted and reference field boundaries. IoU provides a standardized and interpretable measure of segmentation accuracy, where higher values indicate better alignment between segmented features and ground truth delineated manually from GEE satellite-based map [13]. Accuracy assessments were conducted at 15 randomly selected locations across the Canadian Prairies, encompassing a total area of approximately 260,57 hectares (643,84 acres). The overall mean IoU was 0.86, indicating strong agreement between the segmented and reference boundaries. Province-level evaluations further revealed consistent performance across diverse agricultural landscapes, with mean IoU scores of",
+          "title": ""
+        },
+        {
+          "instruction": "for Saskatchewan (107,95 ha),",
+          "title": ""
+        },
+        {
+          "instruction": "for Alberta (60,43 ha), and",
+          "title": ""
+        },
+        {
+          "instruction": "for Manitoba (92,19 ha). These results confirm the robustness and generalizability of the boundary extraction approach, with slightly higher segmentation accuracy observed in Alberta.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Method validation",
+      "instruction": "This study presents a semi-automated workflow for large-scale field boundary segmentation across the Canadian prairies, using multi-year Sentinel-2 imagery and the pre-trained SAM. The methodology consisted of environment setup, multi-year image pre-processing and download, RGB composite generation, segmentation, feature cleaning, and boundary refinement. The workflow successfully produced field boundary maps covering the full cropland area of the Canadian prairies, leveraging open-source data and Python-based processing pipelines. The final output consisted of refined field boundary shapefiles generated from the aggregation of three years (2021–2024) of Sentinel-2 RGB imagery. These boundaries captured over 32 million hectares (79 million acres) of cropland. These results indicate high segmentation performance across diverse agricultural landscapes. The workflow demonstrates that field boundary extraction is achievable using pre-trained foundation models combined with open-access satellite imagery and cloud-based geospatial tools. This approach offers strong potential for global application, enabling continuous monitoring of cropland structure and supporting precision agriculture, land use monitoring, and policy assessment. Future work will focus on building labeled training datasets to fine-tune the segmentation model for single-year or intra-seasonal field boundary mapping, further improving accuracy in complex cropping systems.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T05:06:46.667100Z",
+  "llm_normalised": false
+}

@@ -1,0 +1,95 @@
+{
+  "protocol_id": "festival_a_versatile_framework_for_conducting_experimental_evaluations_of_spatia",
+  "parent_protocol_id": null,
+  "title": "FESTIval: A versatile framework for conducting experimental evaluations of spatial indices",
+  "author": "Carniel, Ciferri, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "methodsx",
+  "source_id": "PMC6994642",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6994642/",
+  "doi": "10.1016/j.mex.2019.10.006",
+  "citation": "10.1016/j.mex.2019.10.006",
+  "category": "Other",
+  "tags": [],
+  "estimated_time_mins": 54,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Method details",
+      "instruction": "This article introduces the Framework to Evaluate SpaTial Indices (FESTIval), a versatile method for conducting experimental evaluations of spatial indices. Before describing the details of FESTIval, we shortly discuss the context and motivation behind its development.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Method validation: employing FESTIval to measure the efficiency of eFIND",
+      "instruction": "In this section, we show how FT_QueryWorkload (Algorithm 3) is employed to validate eFIND and how the statistical results can be extracted to measure its performance gains. eFIND [18], [19] is a generic approach that transforms a disk-based spatial index (e.g., the R-tree) into an efficient flash-aware spatial index (e.g., eFIND R-tree). The examples described in this section details a part of the experimental evaluation conducted by us in [19]. These experiments compare eFIND against FAST, which is the closest competitor to eFIND among existing approaches to implementing flash-aware spatial indices. eFIND and FAST are employed to port the traditional R-tree to SSDs, forming the following configurations: the eFIND R-tree and the FAST R-tree, respectively. The used spatial dataset (i.e., src_id) is the brazil_buildings2017\n[31], containing 1,485,866 regions that represent the buildings of Brazil. Both configurations employed an in-memory buffer of 512 KB, log size of 10 MB, and the flushing unit size equal to 5. The best parameter values were applied for the remaining specific parameters. This means that we did not vary specific parameter values for each configuration (i.e., sc_id=50031 for the eFIND R-tree and sc_id=1323 for the FAST R-tree). On the other hand, basic parameter values (i.e., bc_id) are varied to evaluate the eFIND R-tree and the FAST R-tree under page sizes from 2 KB to 32 KB. A generic buffer was not employed in the experiments (i.e., buf_id=1). We conducted the experiments on a Kingston SSD V300 of 480 GB.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Method validation: employing FESTIval to measure the efficiency of eFIND",
+      "instruction": "The next SQL SELECT statements execute the workload depicted in Algorithm 3 to evaluate the performance of the eFIND R-tree and the FAST R-tree, respectively, using the page size equal to 4 KB (i.e., bc_id=53). The files efind_results.sql and fast_results.sql, maintained in an HDD, are employed to store statistical data for the eFIND R-tree and the FAST R-tree, respectively:SELECT FT_QueryWorkload(8, ‘/opt/efind_rtree1’, 5, 53, 50031, 1, ‘/HDD/efind_results.sql’);SELECT FT_QueryWorkload(4, ‘/opt/fast_rtree1’, 5, 53, 1323, 1, ‘/HDD/fast_results.sql’);",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Method validation: employing FESTIval to measure the efficiency of eFIND",
+      "instruction": "Similar SQL SELECT statements are issued to evaluate the eFIND R-tree and the FAST R-tree for different page sizes. Each SQL SELECT statement is executed 5 times, varying the name of each index file, in order to calculate the average index time of the index construction and the execution of the IRQs. The cache of the PostgreSQL and the operating system is cleaned between the executions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Method validation: employing FESTIval to measure the efficiency of eFIND",
+      "instruction": "As previously discussed, collecting statistical data requires the execution of SQL SELECT statements on the FESTIval's data schema. For instance, the next query returns the average index time and its standard deviation to construct an eFIND R-tree for each employed page size:SELECT b.page_size, avg(e.index_time), stddev(e.index_time)FROM fds.basicconfiguration b, fds.specializedconfiguration sc,fds.indexconfiguration ic, fds.spatialindex si, fds.execution eWHERE b.bc_id = ic.bc_id AND sc.sc_id = ic.sc_id ANDic.config_id = si.config_id AND si.idx_id = e.idx_id ANDic.sc_id = 50031 AND execution_name = ‘Query Worload - Index Creation’GROUP BY b.page_sizeORDER BY b.page_size;",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Method validation: employing FESTIval to measure the efficiency of eFIND",
+      "instruction": "The same structure of query can be also used for extracting performance results of the FAST R-tree.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Method validation: employing FESTIval to measure the efficiency of eFIND",
+      "instruction": "In our analyses, we collected the average of the total elapsed time required to execute each set of 100 IRQs. The following SQL SELECT statement is performed when collecting results for the query windows with 0.001% of the area of Brazil:SELECT t.page_size, avg(t.s), stddev(t.s)FROM (SELECT si.idx_name, b.page_size, sum(e.index_time) as sFROM fds.basicconfiguration b, fds.specializedconfiguration sc,fds.indexconfiguration ic, fds.spatialindex si, fds.execution eWHERE b.bc_id = ic.bc_id AND sc.sc_id = ic.sc_id ANDic.config_id = si.config_id AND si.idx_id = e.idx_id AND ic.sc_id = 50031 ANDexecution_name = ‘Query Worload - Execution of IRQs with Query Windows of 0.001GROUP BY si.idx_name, b.page_size) as tGROUP BY t.page_sizeORDER BY t.page_size;",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Method validation: employing FESTIval to measure the efficiency of eFIND",
+      "instruction": "The subquery returns the sum of the index time required to process the 100 IRQs with query windows of 0.001% for each built index and page size. Note that we have 5 spatial indices with the same configurations created by the multiple executions of FT_QueryWorkload; each spatial index has a different name stored in idx_name. Then, the outer query returns the average and the standard deviation of the total elapsed time for each page size. A similar approach is used to extract the performance results of the FAST R-tree.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Method validation: employing FESTIval to measure the efficiency of eFIND",
+      "instruction": "By using the returned results of the SQL SELECT statements, we can employ data analytics tools (Fig. 1) to analyze the performance results. For instance, we can visualize the results by using bar graphs, where the x-axis is the first returned column (i.e., page_size) and the y-axis is the average time with the errors bar for the standard deviation, as shown in Fig. 4. In our experiments, the eFIND R-tree overcame the FAST R-tree when building indices in all employed page sizes. Its performance gains were very expressive, ranging from 60% to 77% for the Kingston SSD (Fig. 4a). As for the query processing (Fig. 4b–d), the eFIND R-tree provided the best performance only for larger pages, showing gains of 22% and 23% for the index pages of 16 KB and 32 KB, respectively. The efficiency of eFIND comes from the use of a set of design goals specified to fully exploit SSD performance [18].Fig. 4FESTIval was very useful to measure the performance gains of the eFIND R-tree, which reduced the time spent when building spatial indices (a) and when processing IRQs (b, c, and d).Fig. 4",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T09:34:26.127631Z",
+  "llm_normalised": false
+}

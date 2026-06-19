@@ -1,0 +1,99 @@
+{
+  "protocol_id": "extraction_of_crispr_targeted_sequences_from_the_metagenome",
+  "parent_protocol_id": null,
+  "title": "Extraction of CRISPR-targeted sequences from the metagenome",
+  "author": "Sugimoto, Nishimura, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "source_name": "star_protocols",
+  "source_id": "PMC9256941",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256941/",
+  "doi": "10.1016/j.xpro.2022.101525",
+  "citation": "10.1016/j.xpro.2022.101525",
+  "category": "Genomics & Sequencing",
+  "tags": [
+    "crisper",
+    "metagenome",
+    "bioinformatics",
+    "data analysis",
+    "python"
+  ],
+  "estimated_time_mins": 42,
+  "materials": [
+    "SPAdes",
+    "BBtools",
+    "Bedtools",
+    "Mcl",
+    "Blast",
+    "CRISPRDetect",
+    "Samtools",
+    "Cdhit",
+    "Biopython",
+    "NumPy",
+    "Scipy",
+    "custom python scripts",
+    "Linux computer"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Metagenome assembly",
+      "instruction": "Timing: 1–12 h (Varies strongly depending on library)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Metagenome assembly",
+      "instruction": "Assemble metagenome contigs from the preprocessed FASTQ files.4.Assemble preprocessed FASTQ file using SPAdes.$ spades.py -t 8 -m 100 --meta --only-assembler --12 ecc.fastq.gz -o {path to spades output directory}Note: We skipped the error-correction step in the SPAdes program to avoid the occasional endlessly running problem. Please refer to the troubleshooting section for detail.5.Assign unique identifiers to all assembled contigs.$ cd {path to spades output directory}$ id=$(openssl rand -hex 12)awk -v id=${id} '/ˆ>/ {n++; print \">contig_\"id\"_\"n;} !/ˆ>/{print}' scaffolds.fasta > scaffolds.renamed.fastaCRITICAL: Assigning unique identifiers is important to avoid conflicts in the later analyses. Here, we used randomly generated strings; however, any unique readable identifier, such as sample IDs, could be used instead.Optional: We recommend removing contigs shorter than 1k bases to reduce the file size.Note: The pre and assembling processes are independently conducted for each paired FASTQ file.Optional: We advise that the system has sufficient disk space to store all preprocessed FASTQ and assembled FASTA files. The rest of the files, including intermediate and temporary files, can be deleted to save the disk space.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Extraction of CRISPR direct repeats from the assembled contigs",
+      "instruction": "Timing: 1–2 h",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Extraction of CRISPR direct repeats from the assembled contigs",
+      "instruction": "From the assembled contigs, discover CRISPR consensus direct repeats.6.Run CRISPRDetect to discover consensus CRISPR direct repeats.$ CRISPRDetect.pl -q 0 -f scaffolds.renamed.fasta -o crispr_detect_output -array_quality_score_cutoff 27.From the output gff file, extract direct repeats, and convert them into a FASTA file.$ grep 'repeat_region' crispr_detect_output.gff | cut -f 9 | tr ';' '∖n' | egrep 'ˆNote=' | cut -f 2 -d '=' | awk '{n++; printf(\">DR_%i∖n%s∖n\", n, $0)}' > crispr_dr.fastaNote: Again, these direct repeat extractions are independently conducted for each assembled FASTA file.8.After discovering all direct repeats from each assembled FASTA file, we merge them into a single file, assign unique identifiers, and remove redundancy.$ cat {all crispr dr fasta files} > merged_crispr_dr.fasta$ awk '/ˆ>/ {n++; print \">dr_\"n; } !/ˆ>/ {print}' merged_crispr_dr.fasta > merged_crispr_dr.renamed.fasta #giving new unique identifiers$ cd-hit-est -S 1 -c 1 -i merged_crispr_dr.renamed.fasta -o merged_crispr_dr.repr.fastaOptional: We provided the direct repeat sequences extracted from the human gut metagenomes in the previous study. The sequences are stored in a FASTA formatted file located in the supplementary folder (supplementary_data/crispr/drs/all_dr.clustered.fasta).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Extraction of CRISPR spacers from the preprocessed reads",
+      "instruction": "Timing: 1 h\nAlternatives: A pipeline script for the spacer collection is provided in the repository (pipeline_scripts/collect_spacers.sh).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Extraction of CRISPR spacers from the preprocessed reads",
+      "instruction": "Here, we return to the preprocessed FASTQ files. From them, we extract CRISPR spacers from reads containing CRISPR direct repeats.9.Extract direct repeat-containing reads. This initial filtering step significantly reduces the number of reads, effectively speeding up the following spacer extraction processes.$ bbduk.sh in=ecc.fastq.gz ref=merged_crispr_dr.repr.fasta outm=dr_containing_reads.fastq.gz interleaved=t k=21 hdist=1 rename=t10.Second filter to mask the direct repeats in the reads.$ bbduk.sh in=dr_containing_reads.fastq.gz ref=merged_crispr_dr.repr.fasta kmask=R k=19 hdist=1 out=dr_masked.fastq mink=1511.Extract spacers from the masked reads using our python script.$ {path to the virome_scripts directory}/pipeline_scripts/extract_spacers.py -s {sample name} dr_masked.fastq > spacers.fastaNote: The python script used above is available from our repository (pipeline_scripts/extract_spacers.py).Optional: The python program used above does not output short ( 50 bp) sequences by default. These parameters can be changed by options (-s and -l).Note: Spacer extraction is conducted for each preprocessed FASTQ file.12.Merge all discovered spacers, assign unique identifiers, and remove redundancy.$ cat {all spacer fasta files} > all_spacers.fasta$ awk '/ˆ>/ {sub(/ˆ[ˆ[:space:]]+[[:space:]]/, \"\"); n++; printf(“>spacer_\"n\"∖t\"$0);} !/ˆ>/ {print}' all_spacers.fasta > all_spacers.renamed.fasta #giving new unique identifiers$ cd-hit-est -T 8 -M 10000 -d 0 -sf 1 -s 0.9 -c 0.98 -i all_spacers.renamed.fasta -o all_spacers.repr.fastaOptional: It is highly advisable to make each spacer and direct repeat trackable to the original samples, contigs, and/or associated direct repeats. This can be achieved using FASTA descriptions in each record.Optional: We provided the spacer sequences extracted from the human gut metagenomes in the previous study. The sequences are stored in a FASTA formatted file located in the supplementary folder (supplementary_data/crispr/spacers/all_spacers.clustered.removed_short.fasta).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Quantification and statistical analysis",
+      "instruction": "•Sequence clustering should be conducted to remove redundancy and fragmentations from the final output sequences.•Genomic completeness could be investigated by checking terminal redundancy or inverted terminal repeats. In the repository, we provided python scripts that extract terminally redundant or inverted repeat sequences from a FASTA file (utils/circular_contigs.py and utils/inverted_repeat_contigs.py).•CRISPR-Cas systems target various elements, including viruses, plasmids, transposons, and chromosomes. A protein homology search is a common method to classify the novel genomes. We suggest using a high-sensitivity homology search method based on hidden Markov models.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-19T01:33:04.347477Z",
+  "llm_normalised": true
+}
