@@ -59,6 +59,10 @@ KNOWN_SOURCES = [
     "figshare",         # CC-BY — figshare public API, no prohibition found
     "openwetware",      # CC-BY-SA 3.0 — MediaWiki API, share-alike (not pure CC-BY)
     "github_opentrons", # Apache-2.0 / MIT — git clone of public repos, 832 protocols
+    "star_protocols",          # CC-BY — STAR Protocols journal, PMC full-text XML
+    "methodsx",                # CC-BY — MethodsX journal, PMC full-text XML
+    "biological_procedures",   # CC-BY — Biological Procedures Online, Springer/PMC
+    "current_protocols",       # CC-BY — Current Protocols OA subset, Wiley/PMC
 ]
 RETRY_FALLBACKS = False  # set by --retry-fallbacks flag
 
