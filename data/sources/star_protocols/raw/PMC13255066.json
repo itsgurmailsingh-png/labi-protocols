@@ -1,0 +1,67 @@
+{
+  "source_name": "star_protocols",
+  "source_id": "PMC13255066",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+  "doi": "10.1016/j.xpro.2026.104611",
+  "title": "MorphoGrad: A MATLAB toolbox for simulating steady-state morphogen gradients under cell-to-cell variability",
+  "author": "Adelmann, Vetter, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "SummaryStudying morphogen gradient-based tissue patterning in silico while accounting for biological variability remains challenging. Here, we present a MATLAB-based protocol for simulating steady-state morphogen gradients in one- and two-dimensional tissues with cell-to-cell variability in model parameters. We describe steps for configuring cell-based geometries, defining reaction-diffusion equations and model parameters, assigning stochastic parameter variability, setting boundary conditions and solver options, running simulations, and analyzing stochastic gradients to quantify patterning precision.For complete details on the use and execution of this protocol, please refer to Long et al.1",
+  "steps_raw": [
+    {
+      "title": "Before you begin",
+      "instruction": "This protocol describes how to generate and analyze synthetic morphogen gradients under cell-to-cell parameter variability in one- and two-dimensional epithelial tissues using MATLAB, based on the conceptual framework introduced by Vetter and Iber.2 In this model, morphogen molecules are produced within a designated source region and then diffuse across the surrounding tissue, where they bind to receptors, degrade, or get turned over otherwise. To represent this process mathematically, we solve steady-state reaction-diffusion equations of the form:DΔC(x,y)=R(C,x,y)where C(x,y) is the morphogen concentration at position (x,y) in the tissue, D is the morphogen diffusion coefficient, Δ is the Laplace operator, and R(C,x,y) represents parameterized chemical reaction terms. In previous applications, we used the following form:D(∂2c(x,y)∂x2+α∂2c(x,y)∂y2)=dC(x,y)n−pH(−x)"
+    },
+    {
+      "title": "Before you begin",
+      "instruction": "Here, α is an anisotropy factor that allows diffusion to differ between the x- and y-directions. The term dC(x,y)n models concentration-dependent degradation at rate d with an exponent n, where values n>1 model nonlinear decay.3\npH(-x) represents morphogen production restricted to the source region, with H the Heaviside step function, which evaluates to 1 for positive arguments (i.e., inside the source) and to 0 for negative arguments (i.e., outside the source). For one-dimensional simulations, the y-dependence and the corresponding diffusion term are removed."
+    },
+    {
+      "title": "Before you begin",
+      "instruction": "The computational framework divides both the source and the patterning region into discrete cells. Each cell can have its own parameter set (for example, diffusion, degradation, or production rates), enabling simulation of tissue-level heterogeneity. To incorporate biological variability, parameters are sampled from log-normal distributions. Log-normal distributions are biologically plausible, as many measured cellular properties, such as cell areas and biochemical rate parameters, are right-skewed and strictly non-negative. As shown in Adelmann et al.,4 the precise choice of distribution does not affect the qualitative behavior of the simulated gradients, if certain properties (such as non-negativity) are met."
+    },
+    {
+      "title": "Before you begin",
+      "instruction": "Morphogen gradients play a central role in many developmental processes by providing positional information that enables cells to adopt distinct cell fates within a tissue. According to Wolpert’s famous French flag model, fixed thresholds Cθ(xθ,y) define the position of domain boundaries.5 Due to biological variability, boundary positions vary between embryos i, resulting in a positional error that can be quantified as the standard deviation of the readout positions,σx=std(xθ,i)."
+    },
+    {
+      "title": "Before you begin",
+      "instruction": "Quantification of the positional error allows us to assess how cell-to-cell parameter variability and cell-area variability affect precision of cell fate boundaries.6 An example output of a noisy two-dimensional gradient is shown in Figure 1.Figure 1Visualization of a 2D stochastic gradient simulation output"
+    },
+    {
+      "title": "Setting up the geometry and domain",
+      "instruction": "Timing: 2–5 min"
+    },
+    {
+      "title": "Setting up the geometry and domain",
+      "instruction": "In this section, we describe how to configure the simulation geometry and domain using the MorphoGrad graphical user interface (GUI).1.Launch the GUI by calling morphograd.gui.ConfigBuilder().2.In the Setup tab, select whether the simulation is one- or two-dimensional (Figure 2).Figure 2Defining the dimension in the configuration builder3.Open the Domain tab (Figure 3).a.1D: Define the total domain length L. Specify the start and end positions of the source region. The remaining domain is labeled as patterning domain.b.2D: Additionally specify the tissue width in y-direction. Specify distinct diameters in x- and y-direction.Figure 3Setup of 1D and 2D domainsNote: The source can be placed at an arbitrary position along the x-direction but always completely spans the y-direction.CRITICAL: The patterning length, the source length, and (in 2D) the tissue width must be integer multiples of the specified cell diameters, to allow to discretize the domain into a whole number of cells. Cells are approximated as line segments in 1D and as rectangles in 2D. See troubleshooting 1."
+    },
+    {
+      "title": "Setting up the differential equations",
+      "instruction": "Timing: 10–20 min"
+    },
+    {
+      "title": "Setting up the differential equations",
+      "instruction": "In this section, we describe how to select preset equations or define a custom reaction term using valid MATLAB syntax.4.Open the Equation tab (Figure 4).Figure 4Defining the reaction terms5.Choose whether to use a preset equation or define a custom reaction equation. The following presets are available (1D and 2D):a.Linear decay with production in the source and degradation:DΔC+pH(x)−dC=0b.Nonlinear decay with production in the source and nonlinear degradation (n>1):DΔC+pH(x)−dCn=06.If the presets do not match your desired model, define a custom reaction term. Enter a valid MATLAB expression in the text field. The syntax follows the following rules:a.Variables: C is the species concentration, x and y are spatial coordinates. The species can be written as C,C(x),C(x,y).b.Source terms: Terms active only in the source region must be multiplied by H, the Heaviside function which evaluates to 1 in the source and to 0 outside of it.c.Vectorization: The code is vectorized. If you are familiar with the syntax, use element-wise operators (.∗, ./, .ˆ).d.Functions: You can include standard MATLAB functions (e.g., sqrt, exp, log, log10, sin, cosh).e.Reserved names: Parameter names must not conflict with the reserved identifiers C,x,y,D,α,n,H, and C_ref.Note: The reaction term is everything excluding the diffusion term DΔC and has the form R(C,x,y;params), where C is the species (e.g. the morphogen) concentration and params are the different parameters.CRITICAL: Highly nonlinear equations (n≫1) can lead to slow solver convergence. In such cases, provide an appropriate initial guess or adjust solver error tolerance as needed."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Morphogen gradient precision is quantified using ensembles of independent stochastic gradient simulations. Simulation outputs are analyzed to assess how variability in morphogen gradient profiles translates into variability in patterning outcomes."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "One approach to quantifying precision is to define a readout position, which corresponds to the spatial location at which a concentration threshold is crossed and marks the boundary between different cell fates. Variability in this readout position across independent stochastic gradient realizations is quantified by the positional error, defined as the standard deviation of the readout positions, and is a measure of boundary precision."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "More generally, summary statistics can be used to quantify the variability across stochastic gradient simulations. These may include, for example, the mean readout position, the positional error, coefficients of variation, and corresponding standard errors. Together, these measures allow the assessment of gradient robustness and precision across ensembles of stochastic realizations. Figures 10B and 10C, and 11B show representative examples of such analyses, but they are not exhaustive. Additional workflows for stochastic gradient simulations, parameter screens, parallelization, reproduction of published figures, and further analysis and visualization methods are provided in the associated Git repository."
+    }
+  ],
+  "materials": [
+    "REAGENT or RESOURCESOURCEIDENTIFIERSoftware and AlgorithmsMATLAB R2022a or newerThe MathWorks, Inc.https://www.mathworks.comMATLAB files for simulationThis workhttps://git.bsse.ethz.ch/iber/Publications/2026_adelmann_morphogradhttps://doi.org/10.5281/zenodo.20134353",
+    "This study did not generate new unique materials."
+  ],
+  "fetched_at": "2026-06-18T23:45:25.637701+00:00"
+}

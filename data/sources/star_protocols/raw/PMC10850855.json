@@ -1,0 +1,112 @@
+{
+  "source_name": "star_protocols",
+  "source_id": "PMC10850855",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10850855/",
+  "doi": "10.1016/j.xpro.2024.102868",
+  "title": "Protocol to train a support vector machine for the automatic curation of bacterial cell detections in microscopy images",
+  "author": "Steemans, Govers",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "SummaryManual curation of bacterial cell detections in microscopy images remains a time-consuming and laborious task. This work offers a comprehensive, step-by-step tutorial on training a support vector machine to autonomously distinguish between good and bad cell detections. Jupyter notebooks are included to perform feature extraction, labeling, and training of the machine learning model. This method can readily be incorporated into profiling pipelines aimed at extracting a multitude of features across large collections of individual cells, strains, and species.For complete details on the use and execution of this protocol, please refer to Govers et al.1",
+  "steps_raw": [
+    {
+      "title": "Before you begin",
+      "instruction": "The protocol below details the generation of training data and the training of a support vector machine (SVM) model for the curation of Escherichia coli cell detections in phase contrast, snapshot microscopy images. However, the protocol can be readily used to train SVM models for cell detections of other bacterial species or even mixtures of species. In principle, this approach can even be extended beyond bacterial cells to yeast, plant or human cells. This will likely require customization of the feature extraction to accommodate different cell types, data structures and imaging approaches, but training of the SVM model would occur in the exact same way."
+    },
+    {
+      "title": "Setting up the python environment",
+      "instruction": "Timing: 30 min"
+    },
+    {
+      "title": "Setting up the python environment",
+      "instruction": "Before any training can be performed using the provided Jupyter notebooks, it is important to install and set up the required Python environment.1.Install Anaconda:a.Download the appropriate version of Anaconda for your operating system from the official website (https://www.anaconda.com/products/individual).b.Follow the installation instructions specific to your operating system.CRITICAL: This protocol is tailored for Windows operating systems.2.Create a Virtual Environment (troubleshooting 1):a.Open an Anaconda Prompt/Terminal.b.Create a new virtual environment by running the following code:> conda create --name svm_env python=3.10.8"
+    },
+    {
+      "title": "Setting up the python environment",
+      "instruction": "When asked ‘Proceed ([y]/n)?’, answer y.Note: Python version 3.10.8 is used in all our analyses.3.Activate the Virtual Environment and install the required libraries:Note: Run all code in the Anaconda Prompt unless specified otherwise.a.Activate the environment by running this line of code:> conda activate svm_envb.Run the following lines of code separately to install the required libraries:>pip install numpy==1.23.4>pip install pandas==2.0.1>pip install tifffile==2022.10.10>pip install tqdm==4.64.1>pip install opencv-python-headless==4.6.0.66>pip install scikit-image==0.19.3>pip install scipy==1.9.3>pip install shapely==2.0.1>pip install scikit-learn==1.1.3>pip install matplotlib==3.6.2Note: We used these library versions for writing the notebooks. Newer versions might no longer be compatible with each other and prevent the notebooks from working correctly.4.Set up Jupyter Notebook:a.In the Python environment, install Jupyter Notebook by running the following code:> conda install jupyterWhen asked ‘Proceed ([y]/n)?’, answer y.b.Launch Jupyter Notebook by running the following code:> jupyter notebookc.Jupyter Notebook should open in your default web browser, displaying the file browser interface.5.Clone our GitHub repository using Git:a.Download Git from the official website: https://git-scm.com/downloads.b.Open a Command Prompt (not the Anaconda Prompt).c.Run the following code to clone our GitHub Repository:> git clonehttps://github.com/Govers-Lab/Steemans_and_Govers_2023.git.d.The Steemans_and_Govers_2023 repository that contains folders with the notebooks, feature data and labeled feature data is now downloaded on your local computer and located in your current working directory.e.For immediate testing of the notebooks, readers are referred to the ‘feature extraction’ section."
+    },
+    {
+      "title": "Feature extraction",
+      "instruction": "Timing: 15 min"
+    },
+    {
+      "title": "Feature extraction",
+      "instruction": "In this step, cellular features are extracted from the cell meshes and phase contrast images, using the ‘feature_extraction.ipynb’ notebook. This will result in a DataFrame with 26 features that, together with the frame number, cell ID and cell contour, are exported in a pickle file. The feature extraction script can deal with segmentation results obtained from various sources and/or algorithms, as long as these results come in the form of cell meshes (described above). To test the notebook, you can use the cell meshes and images provided in our Mendeley data repository (key resources table).6.Activate the virtual environment (svm_env) and open Jupyter Notebook.7.Open the feature_extraction.ipynb file inside the ‘Notebooks’ folder of the Steemans_and_Govers_2023 repository.8.Run every code cell of the notebook in the correct order:a.Import necessary libraries: run this code cell to import the required Python libraries (troubleshooting 1).b.Load image and mesh data: to load raw images, provide the path to the folder where the images are located. Images should be stored as separate TIF files in this folder. To load the cell mesh data, specify both the path and the file name where the mesh data is stored.c.Load functions: instead of adding a separate helper function file, we opted to include the functions that calculate the features in the notebook itself. Running this code cell will load in the functions that are used in the subsequent code cell of the notebook.d.Extract features: running this code cell will extract the features from the cell meshes.Note: After feature extraction, the first five rows are displayed underneath the code cell. This serves as an initial validation step that allows a quick assessment of the calculated feature values, and whether or not these were calculated successfully.e.Save DataFrame: save the DataFrame to a specific folder by changing the file_path. Preferably, the name of the pickle file should end with ‘svm_features.pkl’."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Overview of the cellular features that are extracted from cell meshes and phase contrast images, along with an explanation of how they are calculated."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell length (μm): individual step lengths (between each segment of the cell mesh) are determined by computing the distance between the midpoints of the lines formed by the coordinates (x1, y1) and (x2, y2). The calculated step lengths are subsequently summed to obtain the total cell length."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell width (μm): the cell width is computed as the mean of the top one-third of the segment widths (i.e., are the distances between coordinates (x1, y1) and (x2, y2))."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell area (μm2): the pixel area is computed based on the contour that outlines the cell using shapely.Polygon()."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell volume (μm³): each cell segment is assumed to be a cylinder, and the volume of each cell segment is computed using the trapezoidal rule and summed up to obtain the total volume of the cell."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell surface area (μm2): each cell segment is assumed to be a cylinder, and the surface area is calculated as 2π∗(width2)∗step_length. Individual surface areas of each cell segment are summed to obtain the total surface area."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max, min and mean contour curvature: the curvature characteristics are computed using the gradient and the second derivative of the contour coordinates."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Cell perimeter (μm): the perimeter is calculated by summing up the distances between two consecutive points of the (subpixel) cell contour. From the cell perimeter, other features such as circularity, compactness, and sphericity are calculated. Cell circularity:4π∗areaperimeter2Cell compactness:perimeter2areaCell sphericity:1.5πperimeter2π1.5area"
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Total phaco intensity (A.U.): the sum of all phase contrast pixel intensity values inside the cell contour.Note: the phase contrast image is inverted, and a background subtraction is performed by deducting the mean intensity value outside all cell segmentation masks from the image."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max and mean phaco intensity (A.U.): Maximum and mean of the phase contrast pixel intensity values inside the cell contour."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Phaco contour intensity peaks (A.U.): The number of peaks in the phase contrast intensity along the cell contour, determined using the find_peaks() method from the SciPy library."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max, min and mean contour intensity (A.U.): The maximum, minimum and mean values of the phase contrast intensity along the cell contour."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max and mean contour intensity variability: The rolling window standard deviation is computed for the contour intensity values using a window size of 10. This captures fluctuations in contour intensity along the contour, and calculates both the maximum and mean values."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Midline intensity skewness: The skewness of the distribution of phase contrast intensity values along the cell midline."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Midline intensity kurtosis: The kurtosis of the distribution of phase contrast intensity values along the cell midline."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Max and mean expanded contour intensity (A.U.): The contour is expanded by 2 pixels and the maximum and mean phase contrast values along the expanded contour are then calculated."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Mean cell edge gradient (A.U.): This feature uses both an expanded and an eroded cell contour. The intensity values along these contours are subtracted from each other and averaged to calculate the mean gradient over the cell contour."
+    }
+  ],
+  "materials": [
+    "REAGENT or RESOURCESOURCEIDENTIFIERBacterial and virus strainsE. coli MG1655Guyer et al.8(Ec)Chemicals, peptides, and recombinant proteinsYeast extractOxoidCAT#LP0021TryptoneOxoidCAT#LP042BNaClSigma-AldrichCAT#71380AgarBDCAT#2038654AgaroseEurogentecCAT#310526Na2HPO4VWRCAT#1741KH2PO4Merck Life ScienceCAT#1048731000NH4ClSigma-AldrichCAT#199970010MgSO4Sigma-AldrichCAT#M1880CaCl2Merck Life ScienceCAT#1.02382.1000L(+)-arabinoseFisher ScientificCAT#104980250GlucoseFisher ScientificCAT#G/0450/65GlycerolAcros OrganicsCAT#158920010L-alanineFisher ScientificCAT#451852500Casamino acidsFisher ScientificCAT#12747109Thiamine hydrochlorideFisher ScientificCAT#148991000VaselineMerck Life ScienceCAT#16415Lanolin, anhydrousFisher ScientificCAT#413005000ParaffinVWRCAT#10048500Deposited dataMG1655 Images & MeshesThis paper; Mendeley Datahttps://doi.org/10.17632/ynj2m6zt6x.1Software and algorithmsPython programming languagePython Software Foundationhttps://www.python.org/downloads/AnacondaAnaconda, Inc.https://www.anaconda.com/products/individualGitGitHub, Inc.https://git-scm.com/downloadsJupyter NotebookProject Jupyterhttps://jupyter.org/installNotebooks to extract features, label data, and train SVMThis paperhttps://github.com/Govers-Lab/Steemans_and_Govers_2023.gitNumPyhttp://www.numpy.orgRRID: SCR_008633pandashttps://pandas.pydata.orgRRID: SCR_018214openCVhttps://opencv.org/RRID: SCR_015526scikit-imagehttps://scikit-image.org/RRID: SCR_021142SciPyhttp://www.scipy.org/RRID: SCR_008058scikit-learnhttp://scikit-learn.org/RRID: SCR_002577Matplotlibhttp://matplotlib.sourceforge.netRRID: SCR_008624OtherFisherbrand glass square coverslipsFisher ScientificCAT#12393138Rogo Sampaic glass microscope slidesFisher ScientificCAT#11864782Tape, temperature resistant (yellow, 25.4 mm)VWRCAT#817-1631Gas burnerVWRN/AImmersion oil type F 30ccNikonN/A",
+    "LB (Lennox) mediumReagentAmountYeast extract2.5 gTryptone5 gNaCl2.5 gH2Oup to 500 mLTotal500 mLAutoclaved (121°C, 20 min) LB can be stored at room temperature (20°C–25°C) for multiple weeks. When you detect signs of contamination, do not use the medium and discard it using the appropriate procedures.\nLB-agar platesReagentAmountYeast extract2.5 gTryptone5 gNaCl2.5 gAgar7.5 gH2Oup to 500 mLTotal500 mLPoured LB-agar plates can be stored at 4°C for multiple weeks.\n10× M9 saltsReagentAmountNa2HPO460 gKH2PO430 gNaCl5 gNH4Cl10 gH2Oup to 1000 mLTotal1000 mLAutoclaved (121°C, 20 min) 10× M9 salts can be stored at room temperature (20°C–25°C) for multiple weeks.\nM9 medium + carbon source (L-arabinose, glucose, glycerol or L-alanine)ReagentAmount10× M9 salts100 mL1 M MgSO42 mL1 M CaCl20.1 mLCarbon source (10%)4 mLH2O893.9 mLTotal1000 mLFilter sterilized M9 medium + carbon source can be stored at room temperature (20°C–25°C) for several weeks. When you detect signs of contamination, do not use the medium and discard it using the appropriate procedures.\nNote: The M9 medium + carbon source can be supplemented with casamino acids (final concentration of 0.1%) and thiamine hydrochloride (final concentration of 1 μg/mL) to increase growth rate and yield.\nAgarose pads for microscopy (prepared in glass culture tubes)ReagentAmountMedium/Buffer3 mLAgarose0.045 gTotal3 mLDissolve the agarose by gradually heating up the mixture with the flame of a Bunsen burner. Carefully remove the glass tube from the flame when the mixture starts to boil to avoid excessive evaporation or an overflow. Repeat until the agarose dissolves completely. This process typically takes approx. 2 min. As boiling is minimized, there is no need to account for evaporation of water during this process. For these agarose pads, either growth medium or a buffer can be used.\nNote: A glass tube with a solidified mixture of medium/buffer and agarose can be stored for one day at room temperature. To reuse, reheat the mixture with a Bunsen burner but exercise caution as pressure can build up from the bottom causing the solidified mixture to shoot upwards. Do not reheat the solidified mixture more than three times.\nVALAP Sealant9ReagentAmountVaseline50 mLLanolin50 mLParaffin50 mLTotal150 mLAfter heating, VALAP can be kept for over a year at room temperature.\nNote: Heat the mixture on a hot plate (90°C) before each use. When it liquifies, the color should be golden yellow. Darker brown indicates overheating of the mixture.",
+    "This study did not generate new unique reagents."
+  ],
+  "fetched_at": "2026-06-19T00:08:55.050156+00:00"
+}

@@ -1,0 +1,115 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "13030",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.qyedxte",
+  "title": "BSA-seq in Maize",
+  "author": "Harry Klein",
+  "doi": "dx.doi.org/10.17504/protocols.io.qyedxte",
+  "source_url": "https://www.protocols.io/view/bsa-seq-in-maize-qyedxte",
+  "fetched_at": "2026-06-16T20:49:29.254380Z",
+  "stats": {
+    "views": 1947,
+    "runs": 1,
+    "bookmarks": 6,
+    "comments": 1,
+    "forks": 0
+  },
+  "peer_reviewed": false,
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Upload data 1. https://usegalaxy.org/ has its own uploading format, but it is limited to 2GB of data uploaded. Chances are, the data is much larger than 2GB, so use a FTP to upload your data. The maximum amount of memory available on the Galaxy server for a given user account is 250Gb. If very large sequencing files are being used, we recommend using another solution. We found that 250Gb was plenty of space to run our protocol, however, some files may need to be deleted to remain under the 250Gb limit. For mapping to B73, upload the reference genome downloaded from maizesequence.org. 2. We used CyberDuck, but there is a large list of free FTP uploaders to choose from. CyberDuck has an option to set the server, which means that it sets the location of where your data is going (Fig. 1). After connecting to Galaxy (https://galaxyproject.org/ftp-upload/), simply drag your raw sequencing files into the Cyberduck program and they will begin uploading. a 3. Once your FTP uploader has finished uploading the data, click the tab on Galaxy that says “choose FTP file” in Get Data&gt;Upload File. In your instance, your data files should show and you can have them be uploaded to the history (Fig 2.)."
+    },
+    {
+      "title": "",
+      "instruction": "Check the quality of your sequencing data Check the quality of your sequencing data with FastQC. We use this step to assess our sequencing run and determine a good quality cutoff. Contaminant list and submodules are optional. a"
+    },
+    {
+      "title": "",
+      "instruction": "Check the format of your sequencing files (Optional step depending on the aligner used) If you map your sequencing data using Bowtie2, it requires your data to be in the fastqsanger format . In some instances, the format of the original sequencing data is in the fastq format, which means that it needs to be changed in order for https://usegalaxy.org/ to recognize and align data. Use the program FASTQ Groomer to convert your files. a"
+    },
+    {
+      "title": "",
+      "instruction": "Optional step: Concatenate multiple datasets Use &#39;cat&#39; to merge multiple sequencing files into one file. Often, sequencing files will be broken up by the Illumina machines. a"
+    },
+    {
+      "title": "",
+      "instruction": "Map your reads We used Bowtie2 to map reads to version 4 of the B73 reference genome. Select paired end or single end reads. Build a genome from your history and select the B73 reference genome. All other options are optional. Typically this step takes 4-24 hours depending on how big your sequencing data files are. a"
+    },
+    {
+      "title": "",
+      "instruction": "Call variants from your alignment Run Samtools Mpileup, choose your genome from your history, choose Do not perform genotype likelihood computation (output pileup), and output base positions on reads. a"
+    },
+    {
+      "title": "",
+      "instruction": "Filter your Mpileup file Use Samtools filter pileup plugin to filter SNPs on coverage. Assign a coverage cutoff based on the average cutoff of your data. If you have low average coverage (&lt;15) call all reads with coverage &gt;2. Reads with a coverage of 1 can be sequencing error, so a coverage of 2 can give you more confidence. For high coverage data (&gt;15X), a coverage cutoff of 8 should be sufficient. Additionally, print total number of differences. a"
+    },
+    {
+      "title": "",
+      "instruction": "Trim reads with Trimmomatic Run Trimmomatic on your data. Typically, we trim reads with &lt;20 Phred quality scores and use a sliding window of 4. This is the default setting for the Trimmomatic tool on Galaxy. Select your files and chug away. a"
+    },
+    {
+      "title": "",
+      "instruction": "Calculate coverage from your data Run Samtools Flagstat on your alignment file. The flagstat results will tell you how many reads mapped to the reference genome, handy for calculating sequencing coverage. a"
+    },
+    {
+      "title": "",
+      "instruction": "Generate a Varscan SNP and Indel vcf file from your Mpileup file Use the Varscan plugin to filter SNPs on coverage and output SNPs in vcf format. These Varscan files contain the same SNP positions as the filtered pileup file, but they are in vcf format. The vcf format is necessary for input into SnpEff (candidate SNP identification) later on. Run Varscan with a coverage cutoff of 2 for low coverage data (&lt;10) and 8 for high coverage data (&gt;15). We also typically set the minimum frequency to call a homozygote to 0.99 as that provides a stringest cutoff for allele frequency and aids in calling homozygous SNPs later on. Additionally, output a Varscan file calling indels. This file will be useful for verifying your mapping region and further fine mapping using large indels (&gt;=10bp) as markers. a a"
+    },
+    {
+      "title": "",
+      "instruction": "Phase 2 Overview To plot homozygous SNPs in our filtered pileup file, we use the R packages dplyr and ggplot2 in R studio. Before plotting, we first change the format of our filtered pileup file to make it easy to manipulate in R studio. Then we use dplyr to remove background SNPs in the data. And finally, we plot our data as binned homozygous SNPs along each chromosome."
+    },
+    {
+      "title": "",
+      "instruction": "Change format of the filtered pileup file before importing into R 1. In a terminal or command prompt, change your working directory to the directory with your filtered pileup file. cd working_directory 2. Extract chromosomes from the filtered pileup file and divide the total number of deviants by the quality adjusted coverage (output to new column in the file) to get your allele frequency (f_variant). This step and all following steps will need the line of code run for each chromosome. awk &#39;{if ($1== Chromosome number e.g. 1) print $0}&#39; filtered.pileup | awk &#39;{$14=$13/$12; print $0}&#39; &gt; chr1.freq.pileup 3. Filter for f_variant &gt;0.5, to filter SNP variants that are not homozygous awk &#39;{if($14&gt;0.5)print$0}&#39; chr1.freq.pileup &gt; chr1_0.5.pileup 4. Print position, ref, alternate, fvariant, coverage from pileup chr file awk &#39;{print$2&#39; &#39;$3&#39; &#39;$5&#39; &#39;$14&#39; &#39;$11}&#39; chr1_0.5.pileup &gt; chr1_filter.pileup 5. Convert tttt..ttTT and AaaAA..,, and GGgg..,, and CcccC..,, in 2nd column to T,A,G,C awk &#39;$3~/[Aa]/{$3=&#34;A&#34;} $3~/[Tt]/{$3=&#34;T&#34;} $3~/[Gg]/{$3=&#34;G&#34;} $3~/[Cc]/{$3=&#34;C&#34;} 1&#39; chr1_filter1.pileup &gt; chr1_filter2.pileup Optional step 5a: Code to extract only EMS variants, may be needed if a clear mapping region is not identified. awk &#39;{if ($2==&#34;C&#34; &amp;&amp; $3~/[Tt]/) print $0; else if ($2==&#34;G&#34; &amp;&amp; $3~/[Aa]/) print $0 }&#39; chr1_filter.pileup &gt; chr1_filter2.pileup Optional step 5b: Convert tttt..ttTT and AaaAA..,, in 2nd column to T and A awk &#39;$3~/[Aa]/{$3=&#39;A&#39;} $3~/[Tt]/{$3=&#39;T&#39;} 1&#39; chr1_filter2.pileup &gt; chr1_filter3.pileup 6. Covert to .csv awk &#39;{print$1&#39;,&#39;$2&#39;,&#39;$3&#39;,&#39;$4&#39;,&#39;$5}&#39; chr1_filter3.pileup &gt; chr1_EMS.csv 7. Add a header to your csv by first creating this csv header in a text editor and then copying into your working directory: position,ref,alt,f_variant,coverage \\n cat header.csv chr1.csv &gt; chr1_final.csv"
+    },
+    {
+      "title": "",
+      "instruction": "Load R packages dplyr and ggplot2 Start up R studio and begin a new R script: install.packages(&#39;dplyr&#39;) library(dplyr) library(ggplot2)"
+    },
+    {
+      "title": "",
+      "instruction": "Read your files into R studio (All commands are run the same for each chromosome) chr1_final &lt;- read.csv(&#39;path to chr1_final.csv&#39;) If you have files with SNP positions from the WT background or from the maize Hapmap, read these in also. WT_chr1 &lt;- read.table(&#39;path to WT_chr1&#39;) Hapmap_chr1 &lt;- read.table(&#39;path to Hapmap_chr1&#39;) If these files are a single column of positions, then you can simply add a header with: colnames(WT_chr1) &lt;- c(“position”) The &#34;position&#34; header is essential for later steps."
+    },
+    {
+      "title": "",
+      "instruction": "Optional step: Filter for coverage +- 1SD of the mean chr1_coverage100 &lt;- filter(chr1_180502, coverage&lt;=100) chr1_summary &lt;- summarise(chr1_coverage100,mean=mean(coverage), sd=sd(coverage)) chr1_filtercov &lt;- filter(chr1_coverage100, coverage&gt;=&#34;lowerlimit&#34; &amp; coverage&lt;=&#34;upperlimit&#34;)"
+    },
+    {
+      "title": "",
+      "instruction": "Remove background SNPs chr1_final_NoWT &lt;- anti_join(chr1_final, WT_chr1, by=&#39;position&#39;) chr1_final_NoWTHapmap &lt;- anti_join(chr1_final_NoWT, Hapmap_chr1, by=&#39;position&#39;)"
+    },
+    {
+      "title": "",
+      "instruction": "Plot homozygous SNPs with ggplot2 Initial plot to figure out which chromosome has the most SNPs. ggplot(subset(chr1_final_NoWTHapmap, f_variant&gt;=0.99), aes(x=position)) + geom_histogram(binwidth=1000000) + expand_limits(y=c(0,chr1_final_NoWTHapmap)) +scale_x_continuous(breaks = round(seq(min(0), max(chr1_final_NoWTHapmap$position), by=20000000), 10000000)) +theme(axis.text.x = element_text(angle = 70, hjust = 1)) + theme_bw() Adjust the y-axis for the chromosome with the highest amount of SNPs (Varies from data to data). ggplot(subset(chr1_final_NoWTHapmap, f_variant&gt;=0.99), aes(x=position)) + geom_histogram(binwidth=1000000) + expand_limits(y=c(0, 1000 )) +scale_x_continuous(breaks = round(seq(min(0), max(chr1_final_NoWTHapmap$position), by=20000000), 10000000)) +theme(axis.text.x = element_text(angle = 70, hjust = 1)) + theme_bw() The mapping region will be a region of abundant SNPs in your data."
+    },
+    {
+      "title": "",
+      "instruction": "Processing the Varscan file for input into SnpEff We ran these commands on a high performance computing cluster. Regular expression commands can take a long time if they are run locally. 1. Divide Varscan by chromosome awk ‘{if($1==”Chromosome number”)print$0}’ Varscan.vcf &gt; chr1.vcf 2. Extract mapping region (vns here) awk ‘{if($2&gt;=40000000 &amp;&amp; $2&lt;=70000000)print$0}’ chr1.vcf &gt; chr1_mapping_region.vcf 3. Remove background SNPs (Hapmap and WT) (analyzed on MGHPCC) bsub -o chr1_mapping_region_NoWT.vcf -e background.err -n 1 -R rusage[mem=4096] -W 120 -q short grep –wvFf background_SNPs.txt chr1_mapping_region.vcf Alternatively use: awk &#39;FNR==NR {hash[$0]; next} !($2 in hash)&#39; Hapmap_chr1.txt chr1_mapping_region.vcf &gt; chr1_NoHapmap.vcf 4. Filter for EMS variants awk &#39;{if ($4==&#39;C&#39; &amp;&amp; $5==&#39;T&#39;) print $0; else if ($4==&#39;G&#39; &amp;&amp; $5==&#39;A&#39;) print $0 }&#39; chr1_NoHapmap.vcf &gt; chr1_NoHapmap_EMS.vcf"
+    },
+    {
+      "title": "",
+      "instruction": "Run SnpEff on your filtered EMS SNPs You can build a database in SnpEff for version 4 of the maize genome using instructions from the manual (http://snpeff.sourceforge.net/SnpEff_manual.html). Once your database is built, navigate to the SnpEff folder, move your filtered EMS SNP file there, and run the following: java -jar snpEff.jar Zmv4 chr1_NoHapmap_EMS.vcf We submitted this command to our computing cluster with additional flags. bsub -o vns_SNPeff.vcf -e vns_SNPeff.err -n 4 -R rusage[mem=4096] -W 120 -q short bsub = command to submit a job -o = output file -e = error log file -n = number of computing cores -R = amount of memory per core -W = run for a max of 120 minutes -q = submit to short queue"
+    },
+    {
+      "title": "",
+      "instruction": "Filter your SnpEff file 1. Filter for Moderate effect SNPs grep MODERATE vns_SNPeff.vcf &gt; MODERATE.vcf 2. Filter for High effect SNPs grep HIGH vns_SNPeff.vcf &gt; HIGH.vcf 3. Filter for homozygous SNPs in both your Moderate and High effect files. grep HOM=1 MODERATE.vcf &gt; MODERATE_HOM.vcf grep HOM=1 HIGH.vcf &gt; HIGH_HOM.vcf"
+    },
+    {
+      "title": "",
+      "instruction": "Optional step: Confirm mapping region and narrow down candidate SNPs Once a mapping region has been identified from your plotting, you can use the Varscan indel file to design markers and verify your mapping region. Additionally, if there are several candidate SNPs in your interval, you can use these markers to narrow down the mapping interval. 1. Extract the mapping region awk ‘{if($2&gt;=40000000 &amp;&amp; $2&lt;=70000000)print$0}’ chr1_varscan.vcf &gt; chr1_mapping_region.vcf 2. Call homozygous Indels grep HOM=1 chr1_mapping_region.vcf &gt; chr1_mapping_region_HOM.vcf Pick indels that are &gt;=10bp for best results. Design primers over the indel, perform PCR, and run the product on a 3.5% agarose gel. Differences in band size will indicate the genetic background at that indel."
+    },
+    {
+      "title": "",
+      "instruction": "Annotate Moderate and High effect genes Download the version 4 gene annotations from maizesequence.org (ftp://ftp.gramene.org/pub/gramene/CURRENT_RELEASE/gff3/zea_mays/gene_function). Use this file and your Moderate and High effect vcf to annotate your genes. First, extract gene IDs from your Moderate and High effect vcf files 1. Cut out &#34;gene:Zm&#34; from your vcf awk -F&#39;|&#39; &#39;{print$5}&#39; MODERATE.vcf &gt; MODERATE_filter1.vcf 2. Remove &#39;gene:&#39; awk -F&#39;:&#39; &#39;{print$2}&#39; MODERATE_filter1.vcf &gt; MODERATE_gene_IDs.txt Then extract your Moderate IDs from the annotation file. grep -wf MODERATE_gene_IDs.txt B73v4.gene_function.txt"
+    },
+    {
+      "title": "",
+      "instruction": "Optional step: Use Provean to assess Moderate SNPs You can use Provean to determine if a Moderate SNP is likely to be deleterious (http://provean.jcvi.org/seq_submit.php). The accuracy of Provean is about 77.9% and may miss your candidate SNP. Additionally, Provean is low throughput for non-human genomes, so for large numbers of Moderate SNPs an alternative program or narrowing down the mapping interval may be more successful for candidate SNP identification."
+    }
+  ]
+}

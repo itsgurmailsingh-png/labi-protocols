@@ -1,0 +1,91 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "235950",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.rm7vzenqxvx1/v1",
+  "title": "High-throughput isoform-wide miRNome sequence reconstruction in the TCGA-LUAD cohort using FAS2rDNA",
+  "author": "Marvin De los Santos",
+  "doi": "dx.doi.org/10.17504/protocols.io.rm7vzenqxvx1/v1",
+  "source_url": "https://www.protocols.io/view/high-throughput-isoform-wide-mirnome-sequence-reco-hinnb4ddf",
+  "fetched_at": "2026-06-16T21:25:13.939226Z",
+  "stats": {
+    "views": 61,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false,
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Acquire or download the TCGA-LUAD miRNome annotation data. For the purpose of this exercise, the GDAC Broad Institute database will be used to obtain molecular data."
+    },
+    {
+      "title": "",
+      "instruction": "Visit the GDAC portal of Broad Institute at https://gdac.broadinstitute.org/ ."
+    },
+    {
+      "title": "",
+      "instruction": "Select &#39;Lung adenocarcinoma&#39; or LUAD cohort from the list. Note: You must agree to the TCGA guidelines on the responsible use of data to proceed."
+    },
+    {
+      "title": "",
+      "instruction": "From the LUAD Archive pop-up, navigate to the &#39;miRSeq&#39; section and select &#39;illuminahiseq_mirnaseq-miR_isoform_expression&#39;"
+    },
+    {
+      "title": "",
+      "instruction": "Wait until the download is finished (the file is normally in the form of tab-delimited .txt file type)."
+    },
+    {
+      "title": "",
+      "instruction": "Preprocess and normalize the genomic coordinate annotations."
+    },
+    {
+      "title": "",
+      "instruction": "Open the file using a spreadsheet program."
+    },
+    {
+      "title": "",
+      "instruction": "Inspect the data and filter out any missing values or incorrectly formatted valued."
+    },
+    {
+      "title": "",
+      "instruction": "Ensure that the &#39;isoform_coords&#39; header of your data follow the FAS2rDNA-required format: Standard format: assembly:chromosome:start-end:strand Example data: hg19:9:106938220-106938244:+"
+    },
+    {
+      "title": "",
+      "instruction": "Once quality check is done, rename the &#39;SampleId&#39;, &#39;miRNA_ID&#39;, &#39;isoform_coords&#39;, and &#39;read_count&#39; headers to &#39;sample_id&#39;, &#39;gene_id&#39;, &#39;seq_loc&#39;, and &#39;description&#39;, respectively. This will ensure the data is properly formatted for FAS2rDNA."
+    },
+    {
+      "title": "",
+      "instruction": "Perform isoform-wide sequence reconstruction using FAS2rDNA. For the purpose of this exercise, the FAS2rDNA-CLI version will be used (available at https://fas2rdna.chordexbio.com/ )"
+    },
+    {
+      "title": "",
+      "instruction": "Install the required python dependencies. pip install pandas pyfaidx tqdm apt-get update -qq apt-get install -y samtools"
+    },
+    {
+      "title": "",
+      "instruction": "Install or download the FAS2rDNA-CLI script. Note that the technical documentation of FAS2rDNA can be accessed publicly on GitHub (available at https://github.com/mahvin92/FAS2rDNA )"
+    },
+    {
+      "title": "",
+      "instruction": "Run FAS2rDNA using the the format below, specifying the location of the TCGA-LUAD miRNA annotation text file: python3 fas2rdna.py \\ --input-dir /Users/Desktop/FAS2rDNA or build a custom FASTA header by running the following line: python3 fas2rdna.py \\ --input-dir /Users/Desktop/FAS2rDNA \\ --header &#34;{sample_id}|{gene_id}|{seq_loc}|{description}&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "After FAS2rDNA finishes running, inspect the resulting .fasta ouput files. FAS2rDNA will generate the individual .fasta file from multiple text files and the combined .fasta file, compiling all multi-FASTA sequences in one file. The result map is in the following structure: /Users/Desktop/FAS2rDNA/ ├── LUAD.txt ├── test.txt └── fas2rdna_output/ ├── genomes/ ├── fasta/ │ ├── LUAD.fasta │ └── test.fasta └── All_sequences.fasta"
+    },
+    {
+      "title": "",
+      "instruction": "Cross-reference the generated sequences with the data input, ensuring all samples were represented, the sequences are in FASTA-format and the .fasta files are not empty. Sample LUAD data: sample_idgene_idseq_locdescription TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938243-96938263:+1 TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938243-96938264:+4 TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938243-96938265:+1 TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938243-96938266:+4 TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938244-96938263:+13 ... Sample reconstructed LUAD miRNome FASTA-formatted sequences (FAS2rDNA result): &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 ATGAGGTAGTAGGTTGTATAG &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 ATGAGGTAGTAGGTTGTATAGT &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 ATGAGGTAGTAGGTTGTATAGTT &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 ATGAGGTAGTAGGTTGTATAGTTT &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 TGAGGTAGTAGGTTGTATAG ..."
+    },
+    {
+      "title": "",
+      "instruction": "FAS2rDNA operates in batch (multiple experiments), multi-assembly (detects different assembly versions like hg17, hg18, hg19, hg38 in humans), multi-loci (can reconstruct sequence from different DNA locations), auotomated formatting (compile multi-FASTA-formatted results, ready for downstream analyses), and multi-species (supports assemblies from humans to yeast genomes) workflows, giving users the speed, scalability, confidence and convenience needed to analyze and perform experiments using large genomic data."
+    }
+  ]
+}

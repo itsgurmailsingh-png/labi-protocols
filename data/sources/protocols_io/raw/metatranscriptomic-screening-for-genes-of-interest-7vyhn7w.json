@@ -1,0 +1,115 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "28312",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.7vyhn7w",
+  "title": "Metatranscriptomic screening for genes of interest",
+  "author": "Helena Pound",
+  "doi": "dx.doi.org/10.17504/protocols.io.7vyhn7w",
+  "source_url": "https://www.protocols.io/view/metatranscriptomic-screening-for-genes-of-interest-7vyhn7w",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Blast assembly against reference database you just created - e-value can be changed to your preference - final.txt will produce list of contigs from assembly that had blast hits, to be referred to as &#34;candidates&#34;"
+    },
+    {
+      "title": "",
+      "instruction": ">blastx -query assembly.fasta -db reference.fasta -out final.txt -outfmt \"6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe\" -e-value 1E-10 >blastx -query assembly.fasta -db reference.fasta -out final.txt -outfmt \"6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe\" -e-value 1E-10"
+    },
+    {
+      "title": "",
+      "instruction": ">makeblastdb -dbtype prot -in reference.fasta -parse_seqids >makeblastdb -dbtype prot -in reference.fasta -parse_seqids"
+    },
+    {
+      "title": "",
+      "instruction": "Make a database from the list of genes of interest (referred to as the reference.fasta) in command line window. Protein sequences are required for phylogenetic placement in later steps."
+    },
+    {
+      "title": "",
+      "instruction": "Extract only the aligned portion of candidate contigs. - Sometimes, contigs from assembly may be longer than a single gene. To accurately estimate transcript expression, we want to trim candidates to the exact length of the reference gene, by trimming it according to the start and finish locations of the blast alignment. Custom python script performs this trimming. Script relies on column order, so double-check that your .txt file contains all columns listed in 2.1. If a candidate contig hits to more than one reference sequence, the lowest start point and the highest end point from all hits will be used to capture the entire candidate sequence."
+    },
+    {
+      "title": "",
+      "instruction": "Custom python script found at https://github.com/Wilhelmlab/general-scripts/blob/master/Pound2019_Extract_aligned.py"
+    },
+    {
+      "title": "",
+      "instruction": "Convert .txt file generated from step 3.1 to a .csv file -Open .txt file in Microsoft Excel and save as .csv"
+    },
+    {
+      "title": "",
+      "instruction": "Import .csv file into CLC Workbench as &#34;sequences in .csv format&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Sort sequences by length and delete sequences smaller than 150 nucleic acids or personal preference This length cutoff can be changed based on personal preference."
+    },
+    {
+      "title": "",
+      "instruction": "Export sequence list as .fasta file and .csv file (named trimmed.fasta/csv or something similar)."
+    },
+    {
+      "title": "",
+      "instruction": "Perform Diamond blastx against NCBI non-redundant database. -This step is a quality control mechanism to identify sequences that may not be of viral origin. - Diamond is used to for expediting the process (faster than traditional blast)"
+    },
+    {
+      "title": "",
+      "instruction": "Download non-redundant database from NCBI in .fasta format -rename nonredundant.fasta"
+    },
+    {
+      "title": "",
+      "instruction": "Make diamond database &gt;diamond makedb --in non-redundant.fasta -d non-redundant"
+    },
+    {
+      "title": "",
+      "instruction": "Blast >diamond blastx -d nonredundant -q trimmed.fasta -o candidates.txt -f 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe stitle -k 1 >diamond blastx -d nonredundant -q trimmed.fasta -o candidates.txt -f 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe stitle -k 1"
+    },
+    {
+      "title": "",
+      "instruction": "Open candidates.txt file and trimmed.csv file in Excel. Copy sequences from trimmed.csv to a new column in candidates.txt file in excel (make sure sequence names match up)."
+    },
+    {
+      "title": "",
+      "instruction": "Delete sequences that are not viral in origin (refer to diamond blast hit in the candidates.txt file). Be sure to delete the entire row."
+    },
+    {
+      "title": "",
+      "instruction": "Create a new .csv file with viral sequences and query frames from candidates.txt file - 3 columns: sequence name, sequence, query frame"
+    },
+    {
+      "title": "",
+      "instruction": "Sort by query frame. Create a new .csv file for each query frame containing respective sequences Ex. CandidatesQF+1.csv"
+    },
+    {
+      "title": "",
+      "instruction": "Import each query frame.csv file into CLC workbench as separate sequence lists"
+    },
+    {
+      "title": "",
+      "instruction": "Create new sequence list and combine all query frame sequence lists - rename &#34;FinalCandidatesNucleicAcid&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Translate individual query frame sequence list to protein based on the query frame."
+    },
+    {
+      "title": "",
+      "instruction": "Create new sequence list and combine all protein sequences - rename &#34;FinalCandidatesProtein&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Export FinalCandidatesProtein sequence list as a .fasta file"
+    }
+  ],
+  "fetched_at": "2026-06-16T21:42:42.832234Z",
+  "stats": {
+    "views": 303,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false
+}

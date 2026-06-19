@@ -1,0 +1,76 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC10416020",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10416020/",
+  "doi": "10.1016/j.mex.2023.102297",
+  "title": "FLIIMP - a community software for the processing, calibration, and reporting of liquid water isotope measurements on cavity-ring down spectrometers",
+  "author": "Sodemann, Mørkved, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "Precise and accurate measurements of the stable isotope composition from precipitation, land ice, runoff, and oceans provide critical information on Earth's water cycle. The analysis, post-processing, and calibration of raw analytical signals from laser spectrometers during sample analysis involves a number of critical procedures to counteract instrumental drift, inter-sample memory effects, and the quantification of total uncertainty. We present a new software tool for the post-processing and calibration named FLIIMP (FARLAB Liquid Water Isotope Measurement Processor). FLIIMP facilitates sample processing by (1) a graphical user interface that guides the user along the processing steps from corrections for memory effects, drift, and mixing ratio to calibration, and (2) allows to monitor long-term measurement system behaviour, currently for Picarro-brand water isotope analysers. Final data files are accompanied by a detailed calibration report. Being an open-source software for the major operating systems, users can adapt FLIIMP to their laboratory environment, and the community can contribute the software development.•FLIIMP facilitates post-processing, calibration and reporting for stable water isotope liquid sample analysis.•The stepwise, interactive graphical user interface reduces possibility of errors and shortens processing time.•Open source software enables future development of FLIIMP by the user community.",
+  "steps_raw": [
+    {
+      "title": "Data file import (Step 1)",
+      "instruction": "FLIIMP in interactive mode is started by running the main routine FLIIMP.m in MATLAB or the icon of the compiled app. After start, FLIIMP presents a window with the first processing panel (Step 1, Fig. 2). Here, the user enters input and output paths, select the instrument on which the run was performed, as well as the time range of the analysis or make a manual file selection (Fig. 2). Based on the user entries, FLIIMP displays the current search path for instrument file input above the date entry fields. If a run consists of several input files, both the start and end date have to be specified (format YYYYMMDD_HHMMSS, or parts thereof). The entered date will be used as part of a pattern matching to find all relevant files (e.g., 20220501_01*). If a run is contained within exactly one output file, no end date needs to be specified. If users prefer, and in the case that file name does not match the expected pattern (Appendix B.2), for example when using manually edited files, it is also possible to directly select and add the files to be processed by using the option Select files. Users can test FLIIMP with an input data file provided as part of the git repository2 and described in the installation notes.Fig. 2Start panel of FLIIMP with GUI elements to specify the input file, analyser, and file locations.Fig 2"
+    },
+    {
+      "title": "Pre-processing procedures (Step 2)",
+      "instruction": "We now return to processing in interactive mode. At the start of Step 2, the software tries to load and combine all input files that match the specified instrument and time patterns specified in Step 1, and presents these in the window for sample screening (Fig. 3). FLIIMP allows the user to perform four pre-processing steps before calibration that can correct for or help identify typical analytical problems during a run: (i) sample and injection outlier screening, (ii) memory correction, (iii) correction of mixing-ratio dependent baseline effects, and (iv) assignment of quality flags.Fig. 3User interface for Step 2 (sample pre-processing) in FLIIMP. The green symbols in the panels on the right-hand side indicate the result of memory correction applied to the raw delta values (black and blue markers). Orange text in the left panel indicate samples that either have large inter-sample mixing ratio variations, or large standard deviations of the mixing ratio during one injection.Fig 3"
+    },
+    {
+      "title": "Memory correction (Step 3)",
+      "instruction": "Step 3 in the FLIIMP processing sequence consists of the user interface to correct for inter-sample memory effects (Fig. 4). FLIIMP memory correction uses a two-component model, and assists the user by automatically obtaining the optimal fitting parameters. This step is available from the button Memory correction in the pre-processing window (Fig. 3). First, the underlying correction algorithm is described, before describing the corresponding GUI.Fig. 4Memory correction in FLIIMP. Computation of memory correction for δD based on all samples that have 10 injections or more. In the presented example, laboratory standards are measured with 10 injections, and samples with 6, such that the memory correction is only based on standards.Fig 4"
+    },
+    {
+      "title": "Memory correction method",
+      "instruction": "An important measurement artifact during laser spectroscopy of liquid samples are memory effects. Memory effects result from the carry-over of sample material on walls and other parts of the analyser between samples. Several methods have been proposed in the past to reduce memory effects between injections, and to correct for memory effects as part of post-processing [9]. FLIIMP has the option to correct all samples of a run based on memory correction coefficients obtained typically from a set of injections of calibration or drift standards, that have a sufficiently large number of injections. Similar to Gröning [10], the memory correction in FLIIMP is based on a model that combines the effect of a slow and a fast memory component for each injection j:(3)Mj=C0(we−aj+(1−w)e−bj)"
+    },
+    {
+      "title": "Memory correction method",
+      "instruction": "The two memory components contribute to memory as described by exponent a and b for the fast and slow processes, respectively, that decreases to 0 at N−n injections, where N is the total number of injections. The total memory Mj is then obtained by a weighted mean of both memory components, using the weight factor w where w ∈ [0 . . . 1] (Eq. (3)), multiplied with the maximum, initial memory C0 for injection j=1. Thereby, C0 is obtained in a three-step process. First, the final value of the raw δ-value, y˜i, is calculated for each sample yi, using the last n of N injections:(4)y˜i=〈yN−ni,...,yNi〉"
+    },
+    {
+      "title": "Memory correction method",
+      "instruction": "Then, the difference between the final δ-values of consecutive sample i−1 and i is used to compute the percent memory Mij affecting each sample i at injection j:(5)Mji=y˜i−y˜iy˜i−1−y˜i·100%"
+    },
+    {
+      "title": "Memory correction method",
+      "instruction": "Note that negative values are not excluded during memory correction to prevent a positive bias when fitting the memory correction."
+    },
+    {
+      "title": "Memory correction method",
+      "instruction": "When sequential samples have small difference in isotope ratio, the memory quantification becomes more uncertain. Therefore, all available memory estimates are weighted by their relative contribution to the sum of the absolute value of the step between final δ -values from consecutive samples i−1 and i:(6)βi=|y˜i−1−y˜i|∑|y˜i−1−y˜i|"
+    },
+    {
+      "title": "Memory correction method",
+      "instruction": "Weighting of each memory estimate for each injection by βi gives more weight to memory estimates that have been obtained from a large inter-sample difference of δ-values. Based on the weighted individual memory estimates for each sample and injection, Mji·βi, the memory model (Eq. (3)) can then be fitted, using root mean square error (RMSE) minimisation. Averaging over a larger number of injections n lowers sensitivity of the correction to other sources of variability, while requiring sufficiently many injections."
+    },
+    {
+      "title": "Memory correction method",
+      "instruction": "After fitting, the computed memory correction M˜ji for each sample i at injection j ∈ [2 … N] is forced to zero at the last n values using a linear deprecation of the form(7)M^ji=M˜ji−M˜N−1i·(1−(N−j)/N)."
+    },
+    {
+      "title": "Memory correction method",
+      "instruction": "FLIIMP then applies the computed memory correction M^ji, resulting from the deprecated superposition of the two exponential correction functions to all samples. In the program code, all memory processing is done in routine FLIIMP_memory_analysis.m."
+    },
+    {
+      "title": "Changing sample description and sample ID (Step 4)",
+      "instruction": "Step 4 in the FLIIMP processing sequence is a user interface to change sample names and sample identifiers (IDs). The distinction between sample names and sample IDs allows to trace each sample with a unique identifier during analytical procedures, while keeping the customer's sample names intact. However, sometimes operators make mistakes in the naming of either sample names or identifiers, such as swapping the position of the two. To avoid manually changing the input csv files, FLIIMP allows to easily re-assign and swap sample names and sample IDs. Thereby, the name changes are applied as a (saved) operation during the sample processing, keeping the original data files without modification."
+    },
+    {
+      "title": "Changing sample description and sample ID (Step 4)",
+      "instruction": "To edit individual sample names and identifiers, users click on a line in the table on the left, and edit directly in the edit fields in the top right (Fig. 5). If all or several changes are desired, the lower right controls allow to swap all sample names and sample IDs, or to assign a new sample ID, based on a base string, and appending a numbered sequence starting at the value provided in Start index. Samples with names provided in the field Standards (space separated) are thereby skipped over. Both, original names, and original sample IDs can be restored any time during the renaming step. Modified table entries are highlighted in orange colour.Fig. 5User interface for sample renaming and re-assignment of sample identifiers in FLIIMP (Step 4). See text for details.Fig 5"
+    },
+    {
+      "title": "Sample calibration/normalisation (Step 5)",
+      "instruction": "Step 5 in the FLIIMP processing sequence is the specification of the information needed for producing the report, and for performing the calibration (or normalisation) to VSMOW-SLAP scale. First, the instrument drift during the run can be quantified and assessed. Furthermore, inspection of control standards allows to judge the performance of the measurement system during a given run. Finally, the processing report is exported, containing all information for internal monitoring or for an end user."
+    },
+    {
+      "title": "Sample calibration/normalisation (Step 5)",
+      "instruction": "All calibration parameters are specified in the GUI during step 5 (Fig. 6). These parameters include the calibration set, the calibration standards (with names separated by space), and the drift and control standards. It is also possible to activate or deactivate different pre-processing steps (humidity dependency correction, drift correction, and memory correction) during this step. In particular without memory correction, it may be desirable to restrict the processing to the last n injections of a sample. Specifying a value of −1 will use all available injections in the processing of each sample. Operators will also at least need to provide a project name and a run identifier. After completion of the specification, FLIIMP is ready for calibration of the samples, which is started by a click on the Calibrate button. FLIIMP will then create the output files in a new folder, including the calibration report (Sec. 4).Fig. 6User interface for Step 5: report and calibration settings in FLIIMP.Fig 6"
+    }
+  ],
+  "materials": [],
+  "fetched_at": "2026-06-19T00:33:41.831406+00:00"
+}

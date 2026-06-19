@@ -1,0 +1,159 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "6461",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.ii5ccg6",
+  "title": "The draft genome sequence of a desert tree Populus pruinosa",
+  "author": "",
+  "doi": "dx.doi.org/10.17504/protocols.io.ii5ccg6",
+  "source_url": "https://www.protocols.io/view/the-draft-genome-sequence-of-a-desert-tree-populus-ii5ccg6",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Filter the input raw sequences by using the Lighter lighter -r *.1.filter.fq.gz -r *.2.filter.fq.gz -k 17 590000000 alpha -t 10 -trim Lighter v1.0.7"
+    },
+    {
+      "title": "",
+      "instruction": "Filter the input raw sequences by using the 01.QualityControlAndMergeReads.pl script we wrote"
+    },
+    {
+      "title": "",
+      "instruction": "Filter the input raw sequences by using the Fastuniq fastuniq -i reads_list.txt -t q -o *.1.filter.fq -p *.2.filter.fq FastUniq v1.1"
+    },
+    {
+      "title": "",
+      "instruction": "Run Platanus (version 1.2.1 ) to assemble our genome. Platanus Assembler (PLATform for Assembling NUcleotide Sequences v1.2.1 linux http://platanus.bio.titech.ac.jp/?page_id=5 platanus assemble -f xx.1.fq xx.2.fq ... -t 50 -m 290 -o Pprplatanus scaffold -o Ppr -c Ppr_contig.fa -b Ppr_contigBubble.fa -t 64 -IP1 158bp.1.fq 158bp.2.fq -IP2 483bp.1.fq 483bp.2.fq -IP3 780bp.1.fq 780bp.2.fq -OP4 2k.1.fq 2k.2.fq -OP5 5k.1.fq 5k.2.fq -OP6 ...platanus gap_close -c Ppr_scaffold.fa -o platanus_gapclose -t 64 -IP1 158bp.1.fq 158bp.2.fq -IP2 483bp.1.fq 483bp.2.fq -IP3 780bp.1.fq 780bp.2.fq -OP4 2k.1.fq 2k.2.fq -OP5 5k.1.fq 5k.2.fq -OP6 ... Plastanus v1.2.1 platanus assemble -f xx.1.fq xx.2.fq ... -t 50 -m 290 -o Ppr platanus scaffold -o Ppr -c Ppr_contig.fa -b Ppr_contigBubble.fa -t 64 -IP1 158bp.1.fq 158bp.2.fq -IP2 483bp.1.fq 483bp.2.fq -IP3 780bp.1.fq 780bp.2.fq -OP4 2k.1.fq 2k.2.fq -OP5 5k.1.fq 5k.2.fq -OP6 ... platanus gap_close -c Ppr_scaffold.fa -o platanus_gapclose -t 64 -IP1 158bp.1.fq 158bp.2.fq -IP2 483bp.1.fq 483bp.2.fq -IP3 780bp.1.fq 780bp.2.fq -OP4 2k.1.fq 2k.2.fq -OP5 5k.1.fq 5k.2.fq -OP6 ... Plastanus v1.2.1"
+    },
+    {
+      "title": "",
+      "instruction": "Estimate the genome size with k-mer analysis. SOAP: short oligonucleotide alignment program v2.2 SOAPec http://soap.genomics.org.cn/about.html"
+    },
+    {
+      "title": "",
+      "instruction": "Perform Gapcloser (version 1.12) to further close gaps in our genome obtained in step3. GapCloser v1.02 linux http://soap.genomics.org.cn/soapdenovo.html BGI GapCloser -a scaffold.fa -b soapGapClose.config -o Ppr_GapCloser.fa -t 64 -l 100 GapCloser v1.02"
+    },
+    {
+      "title": "",
+      "instruction": "We first examined the coverage of highly conserved genes using BUSCO to evaluate the completeness of our assembly BUSCO v1.22 linux http://busco.ezlab.org/v2/"
+    },
+    {
+      "title": "",
+      "instruction": "the unigenes obtained in our study and the protein-coding genes predicted in the P. euphratica and P. trichocarpa genomes were aligned to our genome assembly using the BLAT algorithm with default parameters"
+    },
+    {
+      "title": "",
+      "instruction": "we applied the FRC v1.3.0 (Feature-Response Curves) method to evaluate the trade-off between the contiguity and correctness of our assembly. FRC (Feature-Response Curves) v1.3.0 linux https://github.com/vezzi/FRC_align FRC --genome-size 590000000 --pe-sam 483bp.bam --mp-sam 2000bp.bam --pe-max-insert 500 --mp-max-insert 2000 --out frcurve FRCurve v1.3.0"
+    },
+    {
+      "title": "",
+      "instruction": "We mapped the clean reads from the paired-end libraries to the P. pruinosa genome using the Burrows-Wheeler Aligner (BWA) and performed variant calling using the Genome Analysis Toolkit(GATK). BWA(Burrows-Wheeler Aligner) v0.7.12 linux https://sourceforge.net/projects/bio-bwa/files/ bwa mem -t 12 -R '@RG ID: GATK v3.5 java -Xmx10g -jar GenomeAnalysisTK.jar -R Ppr_genome.fa -T RealignerTargetCreator -o .intervals -I .rmdup.bam java -Xmx10g -jar GenomeAnalysisTK.jar -R Ppr_genome.fa -T IndelRealigner -targetIntervals .intervals -o .realn.bam -I .rmdup.bam GATK v3.5"
+    },
+    {
+      "title": "",
+      "instruction": "Run RepeatMasker and RepeatProteinMask (version 4.0.6) to identify repeats in the genome at DNA and protein level, respectively, by aligning sequences against existing databases, Repbase TE library and TE protein database. RepeatMasker -nolow -no_is -norna -parallel 1 -species RepeatMasker v4.0.6 RepeatProteinMask -engine abblast -noLowSimple -pvalue 0.0001 Ppr_genome.fa RepeatProteinMask v4.0.6"
+    },
+    {
+      "title": "",
+      "instruction": "we annotated tandem repeats using the software Tandem Repeat Finder (TRF v4.07b) trf Ppr_genome.fa 2 7 7 80 10 50 2000 -d -h TRF v4.07b"
+    },
+    {
+      "title": "",
+      "instruction": "Run RepeatModeler, and RepeatScout, respectively, to build de novo library based on the input assembled genome sequence. BuildDatabase -name ppr Ppr_genome.faRepeatModeler -pa 30 -database ppr RepeatModeler v1.0.8 BuildDatabase -name ppr Ppr_genome.fa RepeatModeler -pa 30 -database ppr RepeatModeler v1.0.8 RepeatMasker -lib RM*/consensi.fa.classified -pa 30 Ppr_genome.fa RepeatMasker v4.0.6"
+    },
+    {
+      "title": "",
+      "instruction": "Download protein sequences of homlog species ( P. euphratica , P. trichocarpa , Ricinus communis , Arabidopsis thaliana , Carica papaya and Eucalyptus grandis ), then align these against our masked genome sequences with BLAST, and then using BLAST2GENE to obtain the position informations of the BLAST mapping results, run GeneWise (version 2.4.1 ) to predict genes. blastall -p tblastn -d BLAST2GENE v17 blast.parse.pl protein2query.out &gt; protein2query.bp blast2gene.pl protein2query.bp &gt; protein2query.bl2g BLAST2GENE v17"
+    },
+    {
+      "title": "",
+      "instruction": "Run Augustus (version 3.2.1) and GenScan to de novo predict genes in the repeat-masked genome sequences. Augustus v3.2.1 linux http://bioinf.uni-greifswald.de/augustus/downloads/"
+    },
+    {
+      "title": "",
+      "instruction": "For transcriptome-based approach, the P. pruinosa transcripts obtained above were aligned to the P. pruinosa genome and further assembled using the Program to Assemble Spliced Alignments (PASA v2.0.2) to detect likely protein coding regions."
+    },
+    {
+      "title": "",
+      "instruction": "we integrate genes predicted in step 17-19 to obtain the consensus gene set by using EVM v1.1.1. EVM v1.1.1 linux http://evidencemodeler.github.io/"
+    },
+    {
+      "title": "",
+      "instruction": "we assembled these RNA-seq reads using Trinity Trinity v2.1.1 linux https://github.com/trinityrnaseq/trinityrnaseq/releases"
+    },
+    {
+      "title": "",
+      "instruction": "we reduced the redundancy of transcript sequences (&gt;95% similarity) using CD-Hit v4.6.1 next spet 11. CD-HIT v4.6.1 linux http://weizhongli-lab.org/cd-hit/"
+    },
+    {
+      "title": "",
+      "instruction": "we use the software TransDecoder v2.1.0 to identify candidate coding regions within the transcript sequences we filtered at step 12. TransDecoder v2.1.0 linux https://github.com/TransDecoder/TransDecoder/releases TransDecoder.LongOrfs -t cd-hit_out.fa;TransDecoder.Predict -t cd-hit_out.fa TransDecoder v4.6.1 TransDecoder.LongOrfs -t cd-hit_out.fa; TransDecoder.Predict -t cd-hit_out.fa TransDecoder v4.6.1"
+    },
+    {
+      "title": "",
+      "instruction": "Determine the blocks syntenic between P. pruinosa and P. euphratica by the software MCScanX. 1.using default parameters, which at least five genes were required to call synteny. 2.put the blast result and gff files into the same directory."
+    },
+    {
+      "title": "",
+      "instruction": "process the whole-genome alignment using the program ‘LAST’. lastdb -uNEAR -cR11 ref_db ref.falastal -P48 -m100 -E 0.05 ref_db Ppr_genome.fa | last-split > query2db.mafmaf-swap query2db.maf | last-split > query2db.maf.sing.maf LAST v802 lastdb -uNEAR -cR11 ref_db ref.fa lastal -P48 -m100 -E 0.05 ref_db Ppr_genome.fa | last-split &gt; query2db.maf maf-swap query2db.maf | last-split &gt; query2db.maf.sing.maf LAST v802"
+    },
+    {
+      "title": "",
+      "instruction": "Align the single-copy gene families identified in the orthomcl result with MUSCLE v3.8.31 and low quality regions of the alignments were identified and trimmed with Gblocks v0.91b using default parameters. Finally, concatenate these Gblocks results into one ‘super gene’ for each species to construct a phylogenetic tree using RAxML v8.2.8. clustalw2 -INFILE=align.part.fa -CONVERT -OUTFILE=alian.part.phy -OUTPUT=PHYLIPraxmlHPC-PTHREADS-AVX -T 30 -f a -x 12345 -p 12345 -# 100 -m GTRGAMMA -s align.part.phy -n tre RaxML v8.2.8 clustalw2 -INFILE=align.part.fa -CONVERT -OUTFILE=alian.part.phy -OUTPUT=PHYLIP raxmlHPC-PTHREADS-AVX -T 30 -f a -x 12345 -p 12345 -# 100 -m GTRGAMMA -s align.part.phy -n tre RaxML v8.2.8"
+    },
+    {
+      "title": "",
+      "instruction": "Cluster the gene family using OrthoMCL v3.1 on all the protein-coding genes of P. pruinosa and 10 additional species ( P. euphratica , P. trichocarpa , Salix suchowensis , Ricinus communis , Arabidopsis thaliana , Carica papaya , Fragaria vesca , Cucumis sativus , Eucalyptus Grandis and Vitis vinifera ). orthomclInstallSchema orthomcl.config.templateorthomclAdjustFasta compliantFasta/species species.pep 1orthomclFilterFasta compliantFasta/ 10 20makeblastdb -in goodProteins.fasta -dbtype protblastp -db goodProteins.fasta -query goodProteins.fasta -out all-all.blastp.out -evalue 1e-5 -outfmt 6 -num_threads 24orthomclBlastParser all-all.blastp.out compliantFasta > similarSequences.txtorthomclLoadBlast orthomcl.config.template similarSequences.txtorthomclPairs orthomcl.config.template orthomcl_pairs.log cleanup=noorthomclDumpPairsFiles orthomcl.config.templatemcl mclInput --abc -I 1.5 -o mclOutputorthomclMclToGroups cluster 1 groups.txt orthoMCL v3.1 orthomclInstallSchema orthomcl.config.template orthomclAdjustFasta compliantFasta/species species.pep 1 orthomclFilterFasta compliantFasta/ 10 20 makeblastdb -in goodProteins.fasta -dbtype prot blastp -db goodProteins.fasta -query goodProteins.fasta -out all-all.blastp.out -evalue 1e-5 -outfmt 6 -num_threads 24 orthomclBlastParser all-all.blastp.out compliantFasta &gt; similarSequences.txt orthomclLoadBlast orthomcl.config.template similarSequences.txt orthomclPairs orthomcl.config.template orthomcl_pairs.log cleanup=no orthomclDumpPairsFiles orthomcl.config.template mcl mclInput --abc -I 1.5 -o mclOutput orthomclMclToGroups cluster 1 &lt; mclOutput &gt; groups.txt orthoMCL v3.1"
+    },
+    {
+      "title": "",
+      "instruction": "examine gene family evolution across entire genomes using the CAFÉ (Computational Analysis of gene Family Evolution, v3.1). CAFÉ (Computational Analysis of gene Family Evolution) v3.1 linux https://sourceforge.net/projects/cafehahnlab/?source=typ_redirect"
+    },
+    {
+      "title": "",
+      "instruction": "Estimate the divergence time based on the phylogenetic relationships by the software of MCMCTree, using fossil calibration times for divergence between A. thaliana and C. papaya (54-90 million years ago, Mya), A. thaliana and R. communis (95-109 Mya), V. vinifera and A. thaliana (106-119 Mya), which were obtained from the TimeTree database (http://www.timetree.org/). PAML v4.9 linux http://abacus.gene.ucl.ac.uk/software/paml.html"
+    },
+    {
+      "title": "",
+      "instruction": "we align the transcriptome reads we obtained from three tissues to the genome assemly using tophat v2.1.1 and then compute the expression of each gene we predicited using cufflinks v2.2.1 Cufflinks v2.2.1 linux http://cole-trapnell-lab.github.io/cufflinks/install/"
+    },
+    {
+      "title": "",
+      "instruction": "Determine the blocks syntenic between P. pruinosa and P. euphratica by the software MCScanX. MCScanX linux http://chibba.pgml.uga.edu/mcscan2/"
+    },
+    {
+      "title": "",
+      "instruction": "Cluster the gene family using OrthoMCL v2.0.9 on all the protein-coding genes of P. pruinosa and 10 additional species ( P. euphratica , P. trichocarpa , Salix suchowensis , Ricinus communis , Arabidopsis thaliana , Carica papaya , Fragaria vesca , Cucumis sativus , Eucalyptus Grandis and Vitis vinifera ). orthoMCL v2.0.9 linux http://orthomcl.org/common/downloads/software/ orthomclInstallSchema orthomcl.config.templateorthomclAdjustFasta compliantFasta/species species.pep 1orthomclFilterFasta compliantFasta/ 10 20makeblastdb -in goodProteins.fasta -dbtype protblastp -db goodProteins.fasta -query goodProteins.fasta -out all-all.blastp.out -evalue 1e-5 -outfmt 6 -num_threads 24orthomclBlastParser all-all.blastp.out compliantFasta > similarSequences.txtorthomclLoadBlast orthomcl.config.template similarSequences.txtorthomclPairs orthomcl.config.template orthomcl_pairs.log cleanup=noorthomclDumpPairsFiles orthomcl.config.templatemcl mclInput --abc -I 1.5 -o mclOutputorthomclMclToGroups cluster 1 groups.txt orthoMCL v2.0.9 orthomclInstallSchema orthomcl.config.template orthomclAdjustFasta compliantFasta/species species.pep 1 orthomclFilterFasta compliantFasta/ 10 20 makeblastdb -in goodProteins.fasta -dbtype prot blastp -db goodProteins.fasta -query goodProteins.fasta -out all-all.blastp.out -evalue 1e-5 -outfmt 6 -num_threads 24 orthomclBlastParser all-all.blastp.out compliantFasta &gt; similarSequences.txt orthomclLoadBlast orthomcl.config.template similarSequences.txt orthomclPairs orthomcl.config.template orthomcl_pairs.log cleanup=no orthomclDumpPairsFiles orthomcl.config.template mcl mclInput --abc -I 1.5 -o mclOutput orthomclMclToGroups cluster 1 &lt; mclOutput &gt; groups.txt orthoMCL v2.0.9"
+    },
+    {
+      "title": "",
+      "instruction": "Align the single-copy gene families identified in the orthomcl result with MUSCLE v3.8.31 and low quality regions of the alignments were identified and trimmed with Gblocks v0.91b using default parameters. Finally, concatenate these Gblocks results into one ‘super gene’ for each species to construct a phylogenetic tree using RAxML v8.2.8. clustalw2 -INFILE=align.part.fa -CONVERT -OUTFILE=alian.part.phy -OUTPUT=PHYLIPraxmlHPC-PTHREADS-AVX -T 30 -f a -x 12345 -p 12345 -# 100 -m GTRGAMMA -s align.part.phy -n tre RaxML v8.2.8 clustalw2 -INFILE=align.part.fa -CONVERT -OUTFILE=alian.part.phy -OUTPUT=PHYLIP raxmlHPC-PTHREADS-AVX -T 30 -f a -x 12345 -p 12345 -# 100 -m GTRGAMMA -s align.part.phy -n tre RaxML v8.2.8"
+    },
+    {
+      "title": "",
+      "instruction": "Estimate the divergence time based on the phylogenetic relationships by the software of MCMCTree, using fossil calibration times for divergence between A. thaliana and C. papaya (54-90 million years ago, Mya), A. thaliana and R. communis (95-109 Mya), V. vinifera and A. thaliana (106-119 Mya), which were obtained from the TimeTree database (http://www.timetree.org/). PAML v4.9 linux http://abacus.gene.ucl.ac.uk/software/paml.html"
+    },
+    {
+      "title": "",
+      "instruction": "examine gene family evolution across entire genomes using the CAFÉ (Computational Analysis of gene Family Evolution, v3.1). CAFÉ (Computational Analysis of gene Family Evolution) v3.1 linux https://sourceforge.net/projects/cafehahnlab/?source=typ_redirect"
+    },
+    {
+      "title": "",
+      "instruction": "process the whole-genome alignment using the program ‘LAST’. lastdb -uNEAR -cR11 ref_db ref.falastal -P48 -m100 -E 0.05 ref_db Ppr_genome.fa | last-split > query2db.mafmaf-swap query2db.maf | last-split > query2db.maf.sing.maf last v802 lastdb -uNEAR -cR11 ref_db ref.fa lastal -P48 -m100 -E 0.05 ref_db Ppr_genome.fa | last-split &gt; query2db.maf maf-swap query2db.maf | last-split &gt; query2db.maf.sing.maf last v802"
+    },
+    {
+      "title": "",
+      "instruction": "Map protein sequences of the final gene set to existing databases to identify their functions or motifs, such as SwissProt, TrEMBL, KEGG, InterPro."
+    }
+  ],
+  "fetched_at": "2026-06-16T22:29:15.195536Z",
+  "stats": {
+    "views": 380,
+    "runs": 2,
+    "bookmarks": 0,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false
+}

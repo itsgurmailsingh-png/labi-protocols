@@ -1,0 +1,184 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC13022626",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13022626/",
+  "doi": "10.1016/j.mex.2026.103866",
+  "title": "A reproducible method to generate multi-building, multi-climate HVAC operation datasets with a stochastic exploratory controller",
+  "author": "Domingo, Alonso, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "Building control research increasingly requires datasets that are reproducible, controllable, and rich in action–state coverage. We present a method to generate multi-year HVAC operation time series across heterogeneous buildings and climates using open-source building simulation frameworks, which expands control diversity using a deliberately stochastic supervisory controller. The workflow combines EnergyPlus-based simulation via Sinergym for multi-building/multi-climate “source” domains and Modelica-based simulation via BOPTEST for a distinct “target” domain to support transfer-learning evaluation and reproducible comparisons. Alongside the default rule-based controller (RBC), we implement a stochastic exploratory policy that interleaves stochastic drift, ramps, oscillations, jumps, and noisy holds to produce non-routine heating/cooling setpoint trajectories under operational bounds. The method produces standardized 15-minute multivariate time series including indoor temperature, outdoor weather, setpoints, and HVAC power, and releases both the datasets and the full code needed to reproduce or extend them.•Reproducible pipeline combining Sinergym (EnergyPlus) and BOPTEST (Modelica) under a common interface.•Stochastic HVAC supervisor that broadens setpoint distributions beyond standard schedules.•FAIR release of code + datasets to enable evaluation and reproducible comparisons, transfer learning, and robustness studies.",
+  "steps_raw": [
+    {
+      "title": "Method details",
+      "instruction": "The method generates HVAC operation datasets by executing 1 full year building simulations at 15-minute resolution under two supervisory control strategies:•Default rule-based controller (RBC): the conventional schedule-based control provided by the simulation environments.•Stochastic exploratory controller: a supervisory policy that randomly alternates between multiple short-term behaviors to generate diverse heating and cooling setpoint trajectories."
+    },
+    {
+      "title": "Method details",
+      "instruction": "For each scenario (building × climate × control policy), the method collects multivariate time series containing indoor temperature, HVAC power, heating/cooling setpoints, and outdoor weather variables. Scenarios are aggregated into dataset splits (training and test) and exported to Parquet format, along with metadata enabling separation of series and policies."
+    },
+    {
+      "title": "Method details",
+      "instruction": "The simulated buildings included in the dataset are summarized in Table 1, Table 2. Five source buildings were simulated using the Sinergym framework. These buildings differ in geometry, floor area, and number of thermal zones. An additional building is simulated using the Boptest framework [14]. To support research on transfer learning, the five buildings simulated using Sinergym are designated as source buildings, from which models are expected to learn transferable patterns, while the building simulated using Boptest is designated as the target building, on which knowledge transfer is evaluated.Table 1Source buildings geometry.Table 1: dummy alt textBuilding nameNumber of zonesFloor area (m²)5Zone5463.6Warehouse34,598OfficeMedium154,979.6ShopWithVanBattery5390.2OfficeGridStorageSmoothing1946,320.0Table 2Target building geometry.Table 2: dummy alt textBuilding nameNumber of zonesFloor area (m²)BestestAir (Case 900)148"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Each source building was simulated under three distinct Typical Meteorological Year (TMY3) climates, listed in Table 3, representing hot desert, humid subtropical, and marine west coast conditions. The target building was simulated under a single climate, shown in Table 4, corresponding to a semi-arid continental profile. All simulated buildings have both heating and cooling systems.Table 3Source climates used for Sinergym simulations.Table 3: dummy alt textLocationClimate typeDescriptionTucson, AZHot desertVery hot, dry summers and mild winters; cooling-dominatedNew York, NYHumid subtropicalHot, humid summers and cold winters with year-round precipitationPort Angeles, WAMarine west coastCool, cloudy climate with frequent rain; heating-dominatedTable 4Target climate used for Boptest simulations.Table 4: dummy alt textLocationClimate typeDescriptionDenver, COSemi-arid continentalCold winters and hot, dry summers with large daily temperature swings"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Two supervisory control policies were applied during simulation. The first is a default rule-based controller provided by the simulation frameworks, representing standard HVAC operation. The second is a deliberately stochastic exploratory policy that generates diverse heating and cooling setpoint trajectories by interleaving multiple short-term behaviours. Both control policies were applied consistently across buildings and climates. More details on the control policies are given in the next section."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Based on the simulated scenarios, multiple dataset splits were created for training and evaluation purposes. An overview of all datasets, including their role, composition, and duration, is provided in Table 5. Training datasets include multi-building source data as well as target-only data generated under individual control policies.Table 5Training and test datasets overview (15-minute sampling).Table 5: dummy alt textRoleDataset nameCompositionDurationTrainsource-all5 source buildings × 3 climates × {default, chaotic}30 yearsTrainsource-default5 source buildings × 3 climates × {default}15 yearsTraintarget-default1 target building × 1 climate × {default}10 monthsTraintarget-chaotic1 target building × 1 climate × {chaotic}10 monthsTesttarget-heat-test1 target building × 1 climate × {mixed policy}1 monthTesttarget-cool-test1 target building × 1 climate × {mixed policy}1 month"
+    },
+    {
+      "title": "Method details",
+      "instruction": "In Table 5, “years” refers to full calendar years of continuous simulation at 15-minute sampling (Jan 1 00:00 to Dec 31 23:45) for each (building × climate × control policy) scenario. For the target domain, the released training sets (target-default, target-chaotic) contain 10 months of data and exclude the two test months used to evaluate seasonal performance. The target test sets are fixed calendar windows to ensure reproducibility: January is used for heating evaluation (target-heat-test) and July for cooling evaluation (target-cool-test). We do not perform an explicit warm-up period, the exported time series starts at the simulator’s default initial conditions and includes the complete year. For reproducibility, random seeds are fixed per scenario (building × climate × control policy × year), enabling deterministic regeneration of the controller trajectories and resulting datasets."
+    },
+    {
+      "title": "Method details",
+      "instruction": "In both target test sets, the controller applied during simulation alternates between the default rule-based controller (RBC) and the stochastic policy within the same continuous month-long trajectory. The switching schedule is predefined in configuration and fixed across runs for reproducibility. The rationale for this mixed-policy design is to evaluate model robustness under supervisory-policy changes without resetting the system state, thereby testing adaptation across distinct action distributions within a single thermodynamically continuous trajectory."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Each dataset is a single multivariate time series or a collection of concatenated time series sampled at 15-minute resolution. The following variables are present in all datasets:"
+    },
+    {
+      "title": "Method details",
+      "instruction": "All variables are stored using physical units as indicated in their column names. No normalization, aggregation, or rescaling is applied to the released data. HVAC Power Consumption measured in Watts (W) represents instantaneous average electrical HVAC power over the 15-min timestep, reported at environment level (whole building). Includes all HVAC electricity exposed by the simulator interface. For multi-zone EnergyPlus buildings, Indoor Air Temperature is the arithmetic mean of zone air temperatures in °C; for single-zone models it is the zone temperature."
+    },
+    {
+      "title": "Method details",
+      "instruction": "The exported variable set is intentionally minimal and restricted to signals that are (i) consistently available across all simulated buildings and (ii) comparable across both simulation stacks used in this work (EnergyPlus/Sinergym and Modelica/BOPTEST) [15]. In practice, many additional control relevant variables (e.g., component-level power breakdown (fans/coils/pumps), airflow rates, valve/damper commands, zone humidity/latent loads, or internal gains/occupancy indicators) are model dependent and not uniformly exposed across environments. Including them in the default release would therefore reduce cross-building and cross-simulator compatibility and complicate reproducible benchmarking. The chosen schema preserves a consistent interface focused on the core supervisory control loop, while still supporting common tasks such as system identification, evaluation under diverse setpoint trajectories, and transfer-learning evaluation and reproducible comparisons."
+    },
+    {
+      "title": "Method details",
+      "instruction": "To make the release directly usable for transfer-learning studies, we recommend the following tasks that can be instantiated from the common schema (Table 6) under both supervisory policies (RBC and stochastic):•One-step / multi-step prediction: forecast Room Air Temperature and/or HVAC Power from past observations, weather, and setpoints (with configurable horizons).•Power prediction under setpoint changes: predict HVAC Power Consumption given weather, temperature history, and setpoint trajectories (useful for demand-aware control).Table 6Common variables description.Table 6: dummy alt textVariable nameTypeDescriptionRoom Air Temperature (°C)float64Indoor air temperatureOutdoor Air Temperature (°C)float64Outdoor dry-bulb temperatureOutdoor Humidity (%)float64Outdoor relative humidityDirect Solar Radiation (W/m²)float64Direct normal solar radiationWind Speed (m/s)float64Outdoor wind speedCooling Setpoint (°C)float64Cooling temperature setpointHeating Setpoint (°C)float64Heating temperature setpointHVAC Power Consumption (W)float64Electrical power consumption of the HVAC system"
+    },
+    {
+      "title": "Method details",
+      "instruction": "All datasets were generated using open-source building simulation frameworks. For source buildings, we used Sinergym v3.9.5, which exposes a Gym-compatible Python interface. For the target building, we used BOPTEST v0.7.1 patched with the fix described in issue 769, together with BOPTEST-Gym v0.7.0, which provides a unified Gym interface. These tools enable simple data collection directly from Python."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Both simulators were controlled from Python through their Gym-compatible environments (Sinergym itself and BOPTEST-Gym for BOPTEST). The Sinergym environment IDs used in this work correspond to the five source buildings listed in Table 1 (5Zone, Warehouse, OfficeMedium, ShopWithVanBattery, OfficeGridStorageSmoothing). For the target simulator, we used the BOPTEST “bestest_air” testcase (BestestAir / Case 900, Table 2) exposed via BOPTEST-Gym. In both cases, actions/observations are exchanged through the standard Gym step() loop. We use the default configurations shipped with each environment, while the released code includes the exact observation/action mapping used to build the standardized dataset columns in Table 6 for both simulators."
+    },
+    {
+      "title": "Method details",
+      "instruction": "In this workflow, EnergyPlus (via Sinergym) and Modelica (via BOPTEST) are not executed in a coupled manner. Each building scenario is simulated independently within its respective engine, and datasets are generated separately. The common Gym-compatible interface provides a standardized interaction layer (observations, actions, and logging), but no runtime exchange of variables occurs between the two simulation engines."
+    },
+    {
+      "title": "Method details",
+      "instruction": "To make Sinergym (EnergyPlus) and BOPTEST (Modelica) outputs comparable, we export a common set of variables with fixed names and units (Table 6): temperatures in °C, outdoor RH in %, direct normal solar radiation in W/m², wind speed in m/s, and HVAC electrical power in W. At each 15 min step, the supervisory controller outputs two scalar actions (Heating Setpoint (°C) and Cooling Setpoint (°C)) which are mapped to the simulators’ zone/thermostat setpoint inputs (Sinergym: thermostat schedule/setpoint actuators; BOPTEST: zone temperature setpoint inputs). When a model has multiple zones, the exported Room Air Temperature (°C) corresponds to the environment’s standard “zone temperature” observation (single-zone for BestestAir; for multi-zone EnergyPlus buildings, the zone temperature is computed as the average of each zone temperature. HVAC Power Consumption (W) is the total HVAC electrical power reported by each environment (aggregated at environment level),"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Both Sinergym and BOPTEST are accessed through a standard Gym-like loop: reset() returns the initial observation at the start of the episode; then at each 15-min step the controller computes two supervisory actions (Heating Setpoint (°C) and Cooling Setpoint (°C)) which are written to the environment action interface (Sinergym: thermostat setpoint actuators; BOPTEST: zone temperature setpoint inputs). The environment then advances one simulation step and returns (observation, reward, done, info). We log the observation channels listed in Table 6 (Room Air Temperature, weather variables, setpoints, HVAC Power) at every step; reward/done/info are used only for stepping/termination and are not part of the released dataset schema."
+    },
+    {
+      "title": "Method details",
+      "instruction": "All simulations are executed with a 15-minute control step, matching the released dataset sampling resolution. In both Sinergym (EnergyPlus) and BOPTEST (Modelica), the supervisory controller updates the heating/cooling setpoints once every 15 minutes, and the simulator returns observations and HVAC power at the same 15-minute timestamps. This produces aligned, regular time indices across engines (no resampling or post-hoc aggregation is applied)."
+    },
+    {
+      "title": "Method details",
+      "instruction": "To estimate the computational effort required to generate one full year of simulated data per scenario, all simulations were executed using the following setup:•Compute node: Google Cloud e2-standard-4 (4 vCPUs, 16 GB RAM; Intel Broadwell, x86_64)•Host operating system: Ubuntu 25.04•Container base image: Ubuntu 22.04 (Docker)"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The tables below report the execution time required to simulate one full year of building operation at a 15-minute sampling resolution. Modelica based BOPTEST simulations require substantially more computation time, as they resolve more detailed physical models of both the building envelope and HVAC systems. In contrast, EnergyPlus based Sinergym simulations rely on predefined component models and execute significantly faster. This difference in simulation fidelity motivated the use of BOPTEST as the target domain (Table 7, 8).Table 7Execution times for Boptest simulations.Table 7: dummy alt textTest nameControl policyDurationbestest_airStochastic03 h 52 m 54.7 sbestest_airDefault02 h 36 m 37.0 sTable 8Execution times for Sinergym simulations.Table 8: dummy alt textTest nameControl policyDuration5zoneStochastic00 m 40 s5zoneDefault00 m 29 sofficeStochastic02 m 07 sofficeDefault01 m 43 sofficegridStochastic02 m 03 sofficegridDefault01 m 33 sshopStochastic00 m 55 sshopDefault00 m 36 swarehouseStochastic01 m 11 swarehouseDefault00 m 43 s"
+    },
+    {
+      "title": "Method details",
+      "instruction": "We designate BOPTEST as the target domain due to fidelity and computational cost differences (more detailed Modelica-based physics), rather than any coupling between simulation engines."
+    },
+    {
+      "title": "Method details",
+      "instruction": "The default rule-based control (RBC) schedules for each building simulated with Sinergym are summarized in Table 9, while Table 10 shows those simulated with Boptest. These schedules define occupied and unoccupied periods and the corresponding heating and cooling temperature setpointTable 9Sinergym (EnergyPlus) source buildings and default RBC schedules.Table 9: dummy alt textBuildingGeometryOccupied hours / setpoints (°C)Unoccupied hours / setpoints (°C)5Zone06:45–17:30 / [21.1, 23.9]17:45–06:30 / [12.8, 40.0]Warehouse04:45–16:30 / [21.1, 23.9]16:45–04:30 / [15.6, 29.4]OfficeMedium05:45–20:30 / [21, 24]20:45–05:30 / [15.6, 26.7]ShopWithVanBattery08:45–17:30 / [21, 24]17:45–08:30 / [9, 33]OfficeGridStorage04:45–20:30 / [21, 24]20:45–04:30 / [15.6, 26.7]Table 10BOPTEST (Modelica) target building and default RBC schedule.Table 10: dummy alt textBuildingGeometryOccupied hours / setpoints (°C)Unoccupied hours / setpoints (°C)BestestAir08:00–17:45 / [21, 24]18:00–07:45 / [10, 30]"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The stochastic policy is a supervisory setpoint generator that produces diverse setpoint trajectories while enforcing operational bounds. At runtime, it alternates between a set of short-horizon behaviors:•Ornstein–Uhlenbeck drift: random walk around a target with mean reversion.•Ramp: gradual increase/decrease with random direction changes.•Oscillation: sinusoidal oscillations with additive noise.•Jump: abrupt setpoint change to a new random value.•Hold: constant setpoints with small perturbations."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Switching rule: every K steps, where K is randomly sampled in a predefined interval (e.g., 10–100 steps), the controller selects a behavior uniformly (or via conFig.d probabilities). In all experiments, heating and cooling setpoints are clipped to fixed operational bounds consistent with the underlying building models. In addition, the implementation supports an optional minimum deadband (i.e., minimum separation between heating and cooling setpoints) to avoid overlap (which we did not use no our experiments). In the released datasets, the default configuration preserves the native simulator-level thermostat logic (EnergyPlus/BOPTEST), which internally enforces physically consistent operation and prevents simultaneous heating and cooling conflicts. Because the control resolution is 15 minutes, no additional anti-chatter or dwell-time logic was required in practice, and no pathological high-frequency switching was observed in the resulting trajectories."
+    },
+    {
+      "title": "Method details",
+      "instruction": "High-level implementation:"
+    },
+    {
+      "title": "Method details",
+      "instruction": "1. Initialize setpoints within bounds; set random seed for reproducibility."
+    },
+    {
+      "title": "Method details",
+      "instruction": "2. For each time step:•If remaining duration in current behavior is 0: sample a new behavior and new duration.•Update heating and cooling setpoints according to the behavior dynamics.•Clip setpoints to bounds; optionally enforce minimum separation between heating and cooling.•Output setpoints to the simulator; log resulting state and power."
+    },
+    {
+      "title": "Method details",
+      "instruction": "The stochastic policy is intentionally allowed to generate non routine setpoint combinations to broaden action–state coverage. In practice, both simulation stacks enforce feasibility at the actuator level: setpoint commands are clipped to conFig.d bounds before being applied, and the underlying simulators (EnergyPlus via Sinergym; Modelica via BOPTEST) enforce additional model-specific operational limits (e.g., controller/actuator constraints). As a result, extreme requests do not lead to unbounded behavior; they either saturate at the imposed limits or yield physically consistent responses within the model. We monitor simulation completion and log simulator messages; across the published runs we did not observe systematic simulation failures attributable to the exploratory policy."
+    },
+    {
+      "title": "Method details",
+      "instruction": "The released code contains exact hyperparameters (noise scales, ramp rates, oscillation amplitudes/periods, bounds, and seed handling), enabling reproduction of the published datasets. Table 11, Table 12 summarize the parameter ranges and dataset specific bounds used in the experiments.Table 11Parameterization of chaotic HVAC supervisory setpoint primitives. Distributions are sampled at primitive initialization unless otherwise stated. All values are applied in the native units of the simulation environment (°C in Sinergym source datasets; K in BOPTEST target datasets).Table 11: dummy alt textPrimitiveParameterExact Value / DistributionWhen AppliedOUBehavior (Mean-Reverting Drift)Cooling mean targetμ_c ∼ Uniform(cool_min, cool_max)Once per instanceHeating mean targetμ_h ∼ Uniform(heat_min, heat_max)Once per instanceMean reversion rateθ ∼ Uniform(0.05, 0.5)Once per instanceNoise scaleσ ∼ Uniform(0.5, 2.0)Once per instanceTime incrementdt = 1.0Each stepProcess noiseε ∼ Normal(0, 1), scaled by σEach stepRampBehavior (Gradual Drift + Turns)Ramp incrementδ ∼ Uniform(0.2, 1.0) × directionEach stepInitial directiondirection = +1At initializationTurn probabilityp_turn ∼ Uniform(0.05, 0.30)At initializationOscillationBehavior (Sinusoidal)Initial phaseφ ∼ Uniform(0, 2π)Once per instanceFrequencyf ∼ Uniform(0.01, 0.1)Once per instanceAmplitudeA ∼ Uniform(1.0, 5.0)Once per instancePhase updateφ ← φ + f + Normal(0, 0.1·f)Each stepRelative phase offset (heat vs cool)Δφ ∼ Uniform(0, π/2)Once per instanceAdditive jitterNormal(0, 0.3)Each stepStepJumpBehavior (Abrupt Redraw)HoldWithNoiseBehaviorCooling setpointUniform(cool_min, cool_max)Each step in behaviorHeating setpointUniform(heat_min, heat_max)Each step in behaviorAdditive noiseNormal(0, 0.3)Each stepOrdering enforcementCooling ≥ Heating via swap(max, min)Every stepTable 12Dataset-specific supervisory setpoint bounds and random seeds used for chaotic policy generation. Cooling and heating bounds define hard constraints applied to all primitives. Seeds ensure full reproducibility of trajectory generation.Table 12: dummy alt textScript / DatasetUnitsCooling Bounds (min, max)Heating Bounds (min, max)Seedrun_office.py°C(22.5, 30.0)(15.0, 22.5)42run_5zone.py°C(23.25, 30.0)(12.0, 23.25)42run_shop.py°C(22.5, 35.0)(10.0, 22.5)42run_warehouse.py°C(22.5, 35.0)(15.0, 22.5)42run_bestest_air.py (BOPTEST)K(295.65, 308.15)(283.15, 295.65)42"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "We validate the method along two dimensions: (i) functional reproducibility and (ii) action-space enrichment achieved by the stochastic controller."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Regarding functional reproducibility, the full simulation and dataset assembly pipeline is released with a DOI and includes pinned dependency versions, configuration files, and scripts to regenerate every published dataset split. Each dataset repository provides loading examples and unit-consistent columns."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "A core goal of the method is to enrich action-state coverage beyond routine RBC schedules. Under RBC-only operation, heating and cooling setpoints concentrate at a small number of scheduled values, providing a narrow distribution. By design, the stochastic controller produces trajectories with ramps, oscillations, drifts, and jumps, resulting in broader distributions for both heating and cooling setpoints while remaining within operational bounds. Fig. 1 below shows a comparison of the value distribution for cooling and heating setpoints between source-all dataset and source-default dataset.Fig. 1Value distribution for control variables on source-all dataset compared to source-default.Fig 1: dummy alt text"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "To assess whether this action diversity translates into richer state and response coverage, we additionally compare distributions of indoor air temperature and HVAC power consumption. Fig. 2 shows that the exploratory controller expands the support of indoor temperature and HVAC power distributions relative to RBC operation. In particular, indor air temperature exhibits a wider dynamic range and increased occupancy of intermediate operating regions, indicating excitation of part-load and transient behaviors that are underrepresented in routine schedules.Fig. 2Value distribution for state variables on source-alll dataset compared to source-default.Fig 2 dummy alt text"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "This validation supports the method’s intended use for robustness and transfer-learning research, where diversity of supervisory control inputs is critical (Table 13).Table 13Quantitative action–state coverage metrics (mean ± std over 15 one-year source scenarios).Table 13: dummy alt textMetricsDefault (RBC)StochasticJSD (RBC vs Stochastic)H(Heating setpoint) [bits]1.03 ± 0.183.92 ± 0.380.78 ± 0.05H(Cooling setpoint) [bits]1.12 ± 0.243.96 ± 0.390.81 ± 0.07H(Heating, Cooling joint) [bits]1.13 ± 0.227.56 ± 0.640.98 ± 0.01C(Heating, Cooling) [% bins visited]0.8% ± 0.5%88.8% ± 23.1%—H(Room Temp, Power_norm) [bits]6.26 ± 0.357.52 ± 0.470.28 ± 0.05C(Room Temp, Power_norm) [% bins visited]24.8% ± 5.6%51.7% ± 9.8%—Joint coverage (Action + State) [% of union bins]2.5% ± 0.8%97.9% ± 0.8%—"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "In this work, action–state coverage refers to how broadly the dataset explores the joint space of supervisory control actions (heating and cooling setpoints) and resulting system states (indoor temperature and HVAC power consumption)."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "To quantify coverage beyond visual histograms, we compute reproducible bin-based metrics between default and chaotic time-series. Metrics used are:1.Shannon entropy (H) to measure distributional diversity: H = − Σ pᵦ log₂ pᵦ, where pᵦ is the empirical probability of bin b.2.Support coverage (C) defined as the fraction of bins visited: C = (number of bins with at least one sample) / (total bins).3.Jensen–Shannon divergence (JSD) between RBC and chaotic distributions to quantify distributional shift."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "The three measures capture complementary aspects of how broadly the dataset explores possible operating conditions. Shannon entropy (H) measures how spread out a variable’s values are across the defined bins: higher entropy indicates that the system visits many different values rather than concentrating on only a few typical ones. Support coverage (C) measures how much of the possible range of values is actually visited, expressed as the fraction of bins that contain at least one observation. Finally, Jensen–Shannon divergence (JSD) quantifies how different two distributions are, in this case, the distributions produced by the default rule-based controller and the stochastic controller. Larger JSD values indicate that the exploratory controller produces behavior that is substantially different from the routine scheduled control."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "For comparability across buildings and climates:•Heating, cooling setpoints and indoor temperature are discretized using 0.5 °C bins.•HVAC power is normalized per scenario by the 95th percentile (P_norm = P / P95, clipped to [0, 16]) and discretized using 0.05 bins.•Metrics are computed per one-year (building × climate) scenario and reported as mean ± standard deviation across all 15 source scenarios."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "The results quantitatively confirm the action–state enrichment introduced by the stochastic controller. Entropy of heating and cooling setpoints increases by more than 3x relative to RBC, and joint action entropy increases from 1.13 bits to 7.56 bits, indicating substantially broader exploration of the supervisory action space. Action-bin support coverage expands from less than 1% under RBC to nearly 89% under chaotic control."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "This way action diversity propagates to the physical system response. Joint temperature–power entropy increases, and state support coverage approximately doubles (24.8% to 51.7%), indicating excitation of operating regions that are rarely visited under schedule-based control. The near complete joint action–state coverage (97.9% of union bins) under stochastic operation further demonstrates that the method systematically expands the explored operating manifold rather than merely perturbing scheduled setpoints."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Taken together, these results provide quantitative evidence that the proposed controller not only increases action diversity but also broadens the range of system states that are visited, reinforcing its suitability as a mechanism for generating rich trajectories and transfer-learning evaluations."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "All simulations are executed with fixed random seeds (see Table 12) and pinned versions of Sinergym, EnergyPlus, BOPTEST, and their dependencies. The stochastic controller is fully seed controlled and does not rely on any non-deterministic runtime sources. Under identical software versions and configuration files, re-running the pipeline yields identical time series. Because the workflow relies on deterministic building simulation engines (EnergyPlus and Modelica-based BOPTEST), no stochastic numerical variance is expected across runs. Minor floating-point differences could in principle arise if different solver versions or compiler builds are used; however, with the provided containerized environment and pinned versions, outputs are reproducible without observed numerical drift."
+    }
+  ],
+  "materials": [],
+  "fetched_at": "2026-06-19T00:10:21.867723+00:00"
+}

@@ -1,0 +1,94 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC13011222",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13011222/",
+  "doi": "10.1016/j.mex.2026.103859",
+  "title": "Percentile-based slope-constrained linear interpolation for robust imputation of highly volatile PM2.5 time series",
+  "author": "Somnugpong, Butploy, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "Reliable reconstruction of missing observations is essential for environmental time-series analysis, particularly for highly volatile air-quality indicators such as PM2.5. Although linear interpolation is widely used for short-gap imputation due to its simplicity and computational efficiency, it does not explicitly regulate slope dynamics and may produce physically implausible transitions in rapidly fluctuating data. This study proposes a percentile-based slope-constrained linear interpolation method that estimates a slope threshold from the empirical distribution of historical first-order differences and applies a sequential constraint during interpolation to prevent unrealistic gradient changes. The approach requires only a single data-driven parameter and maintains linear computational complexity.•Data-driven slope threshold estimated from the percentile distribution of historical first-order differences.•Sequential slope constraint applied to prevent unrealistic gradient transitions during interpolation.•Linear-time method that preserves the simplicity of standard interpolation while improving reconstruction accuracy.",
+  "steps_raw": [
+    {
+      "title": "Data preparation",
+      "instruction": "The dataset used in this study was obtained from the Pollution Control Department (PCD) of Thailand, serving as a statistical repository sourced from automated air quality monitoring stations in the Bangkok Metropolitan Area. The data is structured as a univariate time series from a single point-source monitoring station. Typically, such datasets exhibit non-linear behavior, seasonal fluctuations, and are influenced by both meteorological factors and anthropogenic activities [3,4,9]. To ensure the reliability of the baseline values, the data underwent a quality control process aligned with the guidelines of the World Meteorological Organization (WMO) [18]. The dataset spans a full calendar year [19], comprising 366 daily average PM2.5 readings. To quantify the degree of volatility within the dataset, the Coefficient of Variation (CV) was employed. The CV serves as a standardized measure of relative variability, allowing for a consistent comparison of fluctuations across different datasets [20,21]. The interpretation and calculation of this variance are based on equation (1).(1)CV=1N−1∑i=1N(xi−μ)21N∑i=1Nxi"
+    },
+    {
+      "title": "Data preparation",
+      "instruction": "Interpretation of CV is categorized into three levels: low variability, CV 0.5. The measurement of variance in this study yielded a Coefficient of Variation (CV) of 1.0595. This can be interpreted as the time-series data used in this experiment having high volatility."
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "3.1) The slope distribution is estimated using the first-order differences of consecutive observed values in the PM2.5 time series. The first-order difference is defined as:(2)Δxi=xi−xi−1"
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "The absolute slope magnitude is then calculated as:(3)si=|Δxi|"
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "For a dataset containing N observed values, this process produces N−1 slope estimates. These slopes are used to construct the empirical slope distribution of the time series."
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "Next, the value τ is calculated as a threshold to determine whether the interpolation slope at any given point is anomalous. To obtain this threshold, we apply the percentile-based threshold principle, which has been reported as an effective method for distinguishing normal behavior from extreme events [10,22,26].(4)τ=Percentilep({si})"
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "A sensitivity analysis was conducted to examine percentile levels ranging from 80% to 99%. The results indicate that the 95th percentile provides the best balance between preserving natural variability and preventing unrealistic gradient changes. In this dataset, the 95th percentile corresponds to a slope magnitude of τ = 15.70 µg/m³ per day."
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "3.2) The next step involves initiating data interpolation using the standard linear interpolation method [1,2], which provides a numerically stable and computationally efficient baseline for reconstructing short missing segments in environmental time series. In this study, the classical linear interpolation framework is extended by introducing a percentile-based slope constraint to regulate unrealistic gradient transitions generated during the interpolation process. The process is applying equation (5) to every missing data point located between the two observed points under consideration, (ta,xa) and (tb,xb).(5)x^k(lin)=xa+tk−tatb−ta(xb−xa)"
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "3.3) Subsequently, the slope of the points generated through linear interpolation is calculated using equation (6)(6)Δx^k=x^k(lin)−x^k−1"
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "The condition for applying the slope-constraint at any given point is as follows: if |Δx^k|>τ, the slope will be clipped using equation (7). Otherwise, the value will be defined as x^k=x^k(lin)(7)x^k=x^k−1+sign(Δx^k).τ"
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "The sign(Δx^k) is utilized to determine the direction of the slope. The proposed method aims to constrain the slope magnitude by increasing or decreasing it while maintaining its original direction. Therefore, whether to increase or decrease the value is determined by the condition in equation (8). Following this, equation (7) is applied to calculate the exact magnitude of the slope adjustment for each interpolated point.(8)sign(Δx^k)={Δx^k>0→Δx^k=0→Δx^k<0→+10−1"
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "The operational procedure can be summarized as shown in Algorithm 1Algorithm 1Slope - constrained linear interpolation.Algorithm 1 dummy alt textInput:1. Time series {(ti,xi)}i=1N where xi may contain missing values2. Percentile threshold pOutput:Reconstructed time series x^iStep 1: Compute Empirical Slope Threshold1.1 Compute first-order differences from observed data:Δxi=xi−xi−11.2 Compute absolute slopes:si=|Δxi|1.3 Estimate percentile threshold:τ=Percentilep({si})Step 2: Perform Linear InterpolationFor each missing segment between observed points (ta,xa) and (tb,xb)2.1 For each missing time tkbetween taand tb:x^k(lin)=xa+tk−tatb−ta(xb−xa)Step 3: Apply Slope Constraint (Clipping)For each reconstructed point x^k(lin):3.1 Compute interpolated slope:Δx^k=x^k(lin)−x^k−1if |Δx^k|>τ then x^k=x^k−1+sign(Δx^k).τelse x^k=x^k(lin)Step 4: Return Reconstructed SeriesReturn the final reconstructed time series x^i after applying both the interpolation and slope constraint procedures.Overall complexity: O(N)"
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "From Algorithm 1, the overall process can be described as follows: when a data gap occurs, an initial estimation is calculated using standard linear interpolation. Subsequently, the system enters a validation phase to determine if the resulting interpolated slope exhibits any structural implausibility. This is performed by analyzing the slope at each specific point; if the slope exceeds the predefined boundaries, an adjustment process is triggered. This process recalibrates the imputed values to align with either the upper or lower slope limits while strictly preserving the original direction of the slope."
+    },
+    {
+      "title": "Estimation and imputation procedure under percentile-based slope-constraint",
+      "instruction": "The output of Algorithm 1 is illustrated in Fig. 2, which provides an example of the slope-clipping process using the proposed constraint. In the real dataset, certain points generated by standard linear interpolation exhibit extreme values, raising concerns regarding potential overshooting. When these points are evaluated, if they meet the slope-constraint condition—meaning the slope at that point exceeds τ—the slope is clipped to the magnitude defined by our designated percentile. In this study, we utilized the 95th percentile slope, which is 15.70. Conversely, if the condition is false, no clipping occurs, and the original interpolated data point is retained for the imputation. In this study, the upper and lower slope boundaries are determined solely by the percentile, which serves as the only required parameter. Identifying the optimal percentile directly impacts the accuracy of the data imputation. Furthermore, the application of a percentile-based constraint allows the method to adapt to the unique characteristics of different datasets without requiring rigid parametric assumptions [27].Fig. 2Conceptual illustration of the percentile-based slope-constraint mechanism applied to linear interpolation.Fig 2 dummy alt text"
+    },
+    {
+      "title": "Evaluation metrics and robustness analysis",
+      "instruction": "The effectiveness of the proposed method was evaluated using R2, Mean Absolute Error (MAE) and Root Mean Square Error (RMSE). These are standard performance metrics widely utilized in data imputation and time-series forecasting research [7,22,23].(9)R2=1−∑i=1n(yi−y^i)2∑i=1n(yi−y¯i)2(10)MAE=∑i=1N|yi−y^i|N(11)RMSE=∑i=1N(yi−y^i)2N"
+    },
+    {
+      "title": "Evaluation metrics and robustness analysis",
+      "instruction": "R2 is used to measure the proportion of variance in the data that the proposed method can explain. In this context, yi represents the ground truth, y^i represents the imputed PM2.5 value, and y¯i represents the average of the observed data. The performance is interpreted that an R2 value approaching 1 indicates that the proposed imputation method effectively preserves the original data structure. Conversely, a value approaching 0 suggests a high level of error in the estimation. For MAE and RMSE, the interpretation follows a similar logic. Both metrics measure the deviation between the imputed values and the ground truth. For these indicators, a lower value signifies higher efficiency and accuracy in the data imputation process."
+    },
+    {
+      "title": "Parameter selection and sensitivity analysis",
+      "instruction": "This experiment was conducted to investigate the percentile parameters at 80%, 85%, 90%, 95%, and 99% to evaluate how the level of constraint strictness affects data imputation performance. The Parameter Sensitivity Analysis was performed in conjunction with the Progressive Missing Rate Evaluation to determine the optimal parameter values across all missing rate scenarios. An example of these experimental results is presented in Table 4, which illustrates the Parameter Sensitivity Analysis specifically at a 20% missing rate.Table 4Sensitivity analysis of percentile-based slope threshold (Missing Rate 20%).Table 4 dummy alt textPercentileR²MAERMSE80%0.7124.186.5785%0.7164.126.5090%0.7194.096.4695%0.7204.076.4699%0.7184.106.48"
+    },
+    {
+      "title": "Parameter selection and sensitivity analysis",
+      "instruction": "The sensitivity analysis results indicate that at low missing rates (5–15%), increasing the percentile from 80% to 95% leads to a slight upward trend in R2, while MAE and RMSE consistently decrease. This reflects that an overly strict slope constraint (80%) may diminish the model's ability to track actual data trends, aligning with the bias–variance trade-off in model constraint management [21,30]; specifically, excessive constraints increase bias, whereas a more relaxed constraint (95%) provides a superior balance. For moderate missing rates (20–30%), the results across all percentiles are highly similar, with negligible R2 differences of less than 0.01. The increase in missing data at this level likely leads to missing data blocks, which is consistent with the findings of Junninen et al. [26] and Mariethoz et al. [30], who reported that the effectiveness of structural constraints diminishes as data gaps lengthen. Regarding performance at high missing rates (40–50%), the differences between percentiles become statistically insignificant, demonstrating that the method is stable under degradation (Figs. 5 and 6).Fig. 5Empirical distribution of absolute daily PM2.5 slopes and the 95th percentile threshold (left), and sensitivity of R² performance to percentile threshold selection (right).Fig 5 dummy alt textFig. 6Performance deviation from the 95th percentile slope threshold across different missing rates.Fig 6 dummy alt text"
+    },
+    {
+      "title": "Parameter selection and sensitivity analysis",
+      "instruction": "Based on this parameter sensitivity analysis, this research adopts the 95th percentile as the standard value for the slope constraint. This setting consistently delivers peak or near-peak performance across all missing rate levels and exhibits robust stability against increasing data loss."
+    }
+  ],
+  "materials": [
+    "Image, application 1"
+  ],
+  "fetched_at": "2026-06-19T00:10:25.705323+00:00"
+}

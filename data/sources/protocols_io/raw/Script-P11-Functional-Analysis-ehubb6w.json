@@ -1,0 +1,139 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "2324",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.ehubb6w",
+  "title": "Script P11: Functional Analysis",
+  "author": "HANNIGAN GD",
+  "doi": "dx.doi.org/10.17504/protocols.io.ehubb6w",
+  "source_url": "https://www.protocols.io/view/Script-P11-Functional-Analysis-ehubb6w",
+  "fetched_at": "2026-06-16T20:36:58.960346Z",
+  "stats": {
+    "views": 203,
+    "runs": 0,
+    "bookmarks": 1,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false,
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "In order to perform KEGG functional analysis, we had to blast our samples against the KEGG database and then use the program HUMAnN to analyze coverage/abundance of different modules/pathways. First we downloaded the program, HUMAnN. Then, since blastx is very time intensive, we first subsampled our sequences to 10,000 using the seqtk toolkit. mkdir ./HUMAnN_10kmkdir ./HUMAnN_10k/subsampled_inputfor file in $(ls ./MetaPhlAn_trimmed/input_reads); do seqtk sample ./MetaPhlAn_trimmed/input_reads/$file 10000 > ./HUMAnN_10k/subsampled_input/${file/fastq/_subsampled.fastq} seqtk seq -a ./HUMAnN_10k/subsampled_input/${file/fastq/_subsampled.fastq} > ./HUMAnN_10k/subsampled_input/${file/.fastq/_subsampled.fa}donecd ./HUMAnN_10k/subsampled_input/rm *.fastq mkdir ./HUMAnN_10k mkdir ./HUMAnN_10k/subsampled_input for file in $(ls ./MetaPhlAn_trimmed/input_reads); do seqtk sample ./MetaPhlAn_trimmed/input_reads/$file 10000 &gt; ./HUMAnN_10k/subsampled_input/${file/fastq/_subsampled.fastq} seqtk seq -a ./HUMAnN_10k/subsampled_input/${file/fastq/_subsampled.fastq} &gt; ./HUMAnN_10k/subsampled_input/${file/.fastq/_subsampled.fa} done cd ./HUMAnN_10k/subsampled_input/ rm *.fastq"
+    },
+    {
+      "title": "",
+      "instruction": "Some of our samples had fewer than 10,000 sequences, and were removed from further analysis. This included samples MG100184 and MG100755 for the metagenome and samples MG100099, MG100105, MG100416, MG100497, and MG100613 for the virome. Next, we blasted our samples against the KEGG database. We used an e-value of 1e-10 for the whole metagenome samples and 1e-5 for the virome samples. BLAST Toolkit 2.2.0 Unix ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ NCBI run.blast.parallel.for.kegg.HUMAnN () { blastx -query ./HUMAnN_10k/subsampled_input/${1}.fa -out ./HUMAnN_10k/humann-0.99/input/${1}.blastx -db references/kegg/kegg.reduced.fasta -outfmt 6 -num_threads 2 -evalue 1e-10}export -f run.blast.parallel.for.kegg.HUMAnNls ./HUMAnN_10k/subsampled_input/ | sed -e 's/^.*\\/.*\\///g' | sed 's/\\.fa//g' | xargs -I {} --max-procs=128 sh -c ' run.blast.parallel.for.kegg.HUMAnN () { blastx -query ./HUMAnN_10k/subsampled_input/${1}.fa -out ./HUMAnN_10k/humann-0.99/input/${1}.blastx -db references/kegg/kegg.reduced.fasta -outfmt 6 -num_threads 2 -evalue 1e-10 } export -f run.blast.parallel.for.kegg.HUMAnN ls ./HUMAnN_10k/subsampled_input/ | sed -e &#39;s/^.*\\/.*\\///g&#39; | sed &#39;s/\\.fa//g&#39; | xargs -I {} --max-procs=128 sh -c &#39;&#34;run.blast.parallel.for.kegg.HUMAnN {}&#34;&#39;"
+    },
+    {
+      "title": "",
+      "instruction": "Finally, we are ready to run HUMAnN HUMAnN: The HMP Unified Metabolic Analysis Network 0.99 Unix Curtis Huttenhower We performed downstream analyses in R in order to generate Supplemental Figure 12. cd ./HUMAnN_10k/humann-0.99/scons cd ./HUMAnN_10k/humann-0.99/ scons"
+    },
+    {
+      "title": "",
+      "instruction": "In order to perform gene ontology analysis, we used the online Gene Ontology Enrichment Analysis Software Toolkit. Under GOEAST Advance, we used Customized-GOEAST. This treats the data like it is a microarray. In our case, the microarray probes are the open reading frames (ORFs) from our contigs."
+    },
+    {
+      "title": "",
+      "instruction": "In order to compare the virome and metagenome samples, we first grouped them by microenvironment (sebaceous, moist, and intermittently moist). For each microenvironment, we annotated all of the virome ORFs and metagenome ORFs with GO terms by blasting the contigs against the UniProt SwissProt database and mapping the SwissProt hits to GO IDs."
+    },
+    {
+      "title": "",
+      "instruction": "For step one of Customized-GOEAST, our annotation file contained all of the annotated contigs from both the virome and metagenome samples. We ran this analysis twice, first using only the virome contigs as our input list of probes and then using only the metagenome contigs as our list of probes for step 2 of Customized-GOEAST. We used the default parameter settings in the optional section."
+    },
+    {
+      "title": "",
+      "instruction": "Since we need to map our ORFs (detected by glimmer3) to GO IDs, we first subsampled (to 1000 sequences) and blasted the ORFs against the SwissProt database. We do not remove any samples with fewer than 1000 sequences. cd ./glimmer3mkdir orf_uniprot_blast_swissprot_subrunblastxorfs () { # Remove block formatting fasta_formatter -w 0 ./glimmer3/output/${1}_no_block.genes # Subsample seqtk sample ./glimmer3/output/${1}_no_block.genes 1000 > ./glimmer3/orf_uniprot_blast_swissprot_sub/${1}_sub.genes # Blast blastx -query ./glimmer3/orf_uniprot_blast_swissprot_sub/${1}_sub.genes -out ./glimmer3/orf_uniprot_blast_swissprot_sub/${1}_orf_uniprot_blastx.txt -db references/SwissProt/uniprot_sprot.fasta -outfmt 6 -num_threads 16 -evalue 1e-10 -max_target_seqs 1}export -f runblastxorfsls ./glimmer3/output/*_no_block.genes | sed -e 's/^.*\\/.*\\///g' | sed 's/\\_no_block.genes//g' | xargs -I {} --max-procs=128 sh -c 'runblastxorfs {}' cd ./glimmer3 mkdir orf_uniprot_blast_swissprot_sub runblastxorfs () { # Remove block formatting fasta_formatter -w 0 &lt; ./glimmer3/output/${1}.genes &gt; ./glimmer3/output/${1}_no_block.genes # Subsample seqtk sample ./glimmer3/output/${1}_no_block.genes 1000 &gt; ./glimmer3/orf_uniprot_blast_swissprot_sub/${1}_sub.genes # Blast blastx -query ./glimmer3/orf_uniprot_blast_swissprot_sub/${1}_sub.genes -out ./glimmer3/orf_uniprot_blast_swissprot_sub/${1}_orf_uniprot_blastx.txt -db references/SwissProt/uniprot_sprot.fasta -outfmt 6 -num_threads 16 -evalue 1e-10 -max_target_seqs 1 } export -f runblastxorfs ls ./glimmer3/output/*_no_block.genes | sed -e &#39;s/^.*\\/.*\\///g&#39; | sed &#39;s/\\_no_block.genes//g&#39; | xargs -I {} --max-procs=128 sh -c &#39;runblastxorfs {}&#39;"
+    },
+    {
+      "title": "",
+      "instruction": "Now that we have UniProt hits for our open reading frames, we had to find a way to match our UniProt hits to GO IDs. We downloaded and formatted the following reference file for our use: wget ftp://ftp.ebi.ac.uk/pub/databases/GO/goa/UNIPROT/gp_association.goa_uniprot.gzgunzip gp_association.goa_uniprot.gztail -n +24 gp_association.goa_uniprot | awk '{print $2,$4}' > gp_association.goa_uniprot.goeast_formatted wget ftp://ftp.ebi.ac.uk/pub/databases/GO/goa/UNIPROT/gp_association.goa_uniprot.gz gunzip gp_association.goa_uniprot.gz tail -n +24 gp_association.goa_uniprot | awk &#39;{print $2,$4}&#39; &gt; gp_association.goa_uniprot.goeast_formatted"
+    },
+    {
+      "title": "",
+      "instruction": "Next, we combine samples by their microenvironment. We broke the mapping file up into two separate mapping files- one for the whole metagenome and one for the virome. In this new mapping file, column 1 contained the sample ID and column 5 contained the site symbol. # group by bodysitecat SkinMet_001_metadata_subset.tsv | awk '$5== sebaceous_skinmet_samples.txt cat SkinMet_001_metadata_subset.tsv | awk &#39;$5==&#34;Ax&#34; || $5==&#34;Um&#34; || $5==&#34;Tw&#34; {print $1}&#39; &gt; moist_skinmet_samples.txt cat SkinMet_001_metadata_subset.tsv | awk &#39;$5==&#34;Ac&#34; || $5==&#34;Pa&#34; {print $1}&#39; &gt; rimoist_skinmet_samples.txt cat Virome_001_metadata_subset.tsv | awk &#39;$5==&#34;Fh&#34; || $5==&#34;Ra&#34; || $5==&#34;Sc&#34; {print $1}&#39; &gt; sebaceous_virome_samples.txt cat Virome_001_metadata_subset.tsv | awk &#39;$5==&#34;Ax&#34; || $5==&#34;Um&#34; || $5==&#34;Tw&#34; {print $1}&#39; &gt; moist_virome_samples.txt cat Virome_001_metadata_subset.tsv | awk &#39;$5==&#34;Ac&#34; || $5==&#34;Pa&#34; {print $1}&#39; &gt; rimoist_virome_samples.txt for file in $(ls *_samples.txt); do name=${file/samples.txt/uniprot_blastx.txt} for sample in $(cat $file); do cat ${sample}_orf_uniprot_blastx.txt &gt;&gt; $name done awk &#39;{print $1&#34;\\t&#34;$2}&#39; $name | sed &#39;s/.orf[0-9]*//g&#39; | sed &#39;s/sp|//g&#39; | sed &#39;s/|.*//g&#39; | sort -u &gt; ${name/.txt/_formatted_unique.txt} cut -f 1 ${name/.txt/_formatted_unique.txt} | sort -u &gt; ${name/.txt/_unique_probes.txt} done&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;1127C8FE8EE64FD6A88086EDE4C53141&#34; &gt; # group by bodysite cat SkinMet_001_metadata_subset.tsv | awk &#39;$5==&#34;Fh&#34; || $5==&#34;Ra&#34; || $5==&#34;Sc&#34; {print $1}&#39; &gt; sebaceous_skinmet_samples.txt cat SkinMet_001_metadata_subset.tsv | awk &#39;$5==&#34;Ax&#34; || $5==&#34;Um&#34; || $5==&#34;Tw&#34; {print $1}&#39; &gt; moist_skinmet_samples.txt cat SkinMet_001_metadata_subset.tsv | awk &#39;$5==&#34;Ac&#34; || $5==&#34;Pa&#34; {print $1}&#39; &gt; rimoist_skinmet_samples.txt cat Virome_001_metadata_subset.tsv | awk &#39;$5==&#34;Fh&#34; || $5==&#34;Ra&#34; || $5==&#34;Sc&#34; {print $1}&#39; &gt; sebaceous_virome_samples.txt cat Virome_001_metadata_subset.tsv | awk &#39;$5==&#34;Ax&#34; || $5==&#34;Um&#34; || $5==&#34;Tw&#34; {print $1}&#39; &gt; moist_virome_samples.txt cat Virome_001_metadata_subset.tsv | awk &#39;$5==&#34;Ac&#34; || $5==&#34;Pa&#34; {print $1}&#39; &gt; rimoist_virome_samples.txt for file in $(ls *_samples.txt); do name=${file/samples.txt/uniprot_blastx.txt} for sample in $(cat $file); do cat ${sample}_orf_uniprot_blastx.txt &gt;&gt; $name done awk &#39;{print $1&#34;\\t&#34;$2}&#39; $name | sed &#39;s/.orf[0-9]*//g&#39; | sed &#39;s/sp|//g&#39; | sed &#39;s/|.*//g&#39; | sort -u &gt; ${name/.txt/_formatted_unique.txt} cut -f 1 ${name/.txt/_formatted_unique.txt} | sort -u &gt; ${name/.txt/_unique_probes.txt} done"
+    },
+    {
+      "title": "",
+      "instruction": "We annotate the UniProt hits with GO IDs and format them for input as step one of Customized-GOEAST. GOEAST (Gene Ontology Enrichment Analysis Software Toolkit) Unix Institute of Genetics and Developmental Biology For Figure S10, we pulled out a section of interest from the Biological Process graph from the sebaceous virome samples. For Figure S10, we pulled out a section of interest from the Biological Process graph from the sebaceous virome samples. cat sebaceous_skinmet_uniprot_blastx_unique_probes.txt sebaceous_virome_uniprot_blastx_unique_probes.txt > sebaceous_probes.txtcat sebaceous_skinmet_uniprot_blastx_formatted_unique.txt sebaceous_virome_uniprot_blastx_formatted_unique.txt | sort -u -k 2 > sebaceous_hits.txtjoin -1 2 -2 1 sebaceous_hits.txt gp_association.goa_uniprot.goeast_formatted > sebaceous_GO_ids.txtawk '{print $2 sebaceous_GO_ids_unique.txt for line in $(cat sebaceous_probes.txt); do grep -w &#34;$line&#34; sebaceous_GO_ids_unique.txt | perl -pe &#39;s/&#39;$line&#39;/\\/\\//g&#39; | tr &#39;\\t&#39; &#39; &#39; | tr &#39;\\n&#39; &#39; &#39; | sed &#39;s/^\\/\\///g&#39; | sed &#39;s/$/\\n/g&#39; | sed &#34;s/^/$line\\t/g&#34; &gt;&gt; sebaceous_GO_ids_formatted.txt done cat moist_skinmet_uniprot_blastx_unique_probes.txt moist_virome_uniprot_blastx_unique_probes.txt &gt; moist_probes.txt cat moist_skinmet_uniprot_blastx_formatted_unique.txt moist_virome_uniprot_blastx_formatted_unique.txt | sort -u -k 2 &gt; moist_hits.txt join -1 2 -2 1 moist_hits.txt gp_association.goa_uniprot.goeast_formatted &gt; moist_GO_ids.txt awk &#39;{print $2&#34;\\t&#34;$3}&#39; moist_GO_ids.txt | sort -u &gt; moist_GO_ids_unique.txt for line in $(cat moist_probes.txt); do grep -w &#34;$line&#34; moist_GO_ids_unique.txt | perl -pe &#39;s/&#39;$line&#39;/\\/\\//g&#39; | tr &#39;\\t&#39; &#39; &#39; | tr &#39;\\n&#39; &#39; &#39; | sed &#39;s/^\\/\\///g&#39; | sed &#39;s/$/\\n/g&#39; | sed &#34;s/^/$line\\t/g&#34; &gt;&gt; moist_GO_ids_formatted.txt done cat rimoist_skinmet_uniprot_blastx_unique_probes.txt rimoist_virome_uniprot_blastx_unique_probes.txt &gt; rimoist_probes.txt cat rimoist_skinmet_uniprot_blastx_formatted_unique.txt rimoist_virome_uniprot_blastx_formatted_unique.txt | sort -u -k 2 &gt; rimoist_hits.txt join -1 2 -2 1 rimoist_hits.txt gp_association.goa_uniprot.goeast_formatted &gt; rimoist_GO_ids.txt awk &#39;{print $2&#34;\\t&#34;$3}&#39; rimoist_GO_ids.txt | sort -u &gt; rimoist_GO_ids_unique.txt for line in $(cat rimoist_probes.txt); do grep -w &#34;$line&#34; rimoist_GO_ids_unique.txt | perl -pe &#39;s/&#39;$line&#39;/\\/\\//g&#39; | tr &#39;\\t&#39; &#39; &#39; | tr &#39;\\n&#39; &#39; &#39; | sed &#39;s/^\\/\\///g&#39; | sed &#39;s/$/\\n/g&#39; | sed &#34;s/^/$line\\t/g&#34; &gt;&gt; rimoist_GO_ids_formatted.txt done&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;B68BE7B20C2249AB9B9D3EBE49E7AE0B&#34; &gt; cat sebaceous_skinmet_uniprot_blastx_unique_probes.txt sebaceous_virome_uniprot_blastx_unique_probes.txt &gt; sebaceous_probes.txt cat sebaceous_skinmet_uniprot_blastx_formatted_unique.txt sebaceous_virome_uniprot_blastx_formatted_unique.txt | sort -u -k 2 &gt; sebaceous_hits.txt join -1 2 -2 1 sebaceous_hits.txt gp_association.goa_uniprot.goeast_formatted &gt; sebaceous_GO_ids.txt awk &#39;{print $2&#34;\\t&#34;$3}&#39; sebaceous_GO_ids.txt | sort -u &gt; sebaceous_GO_ids_unique.txt for line in $(cat sebaceous_probes.txt); do grep -w &#34;$line&#34; sebaceous_GO_ids_unique.txt | perl -pe &#39;s/&#39;$line&#39;/\\/\\//g&#39; | tr &#39;\\t&#39; &#39; &#39; | tr &#39;\\n&#39; &#39; &#39; | sed &#39;s/^\\/\\///g&#39; | sed &#39;s/$/\\n/g&#39; | sed &#34;s/^/$line\\t/g&#34; &gt;&gt; sebaceous_GO_ids_formatted.txt done cat moist_skinmet_uniprot_blastx_unique_probes.txt moist_virome_uniprot_blastx_unique_probes.txt &gt; moist_probes.txt cat moist_skinmet_uniprot_blastx_formatted_unique.txt moist_virome_uniprot_blastx_formatted_unique.txt | sort -u -k 2 &gt; moist_hits.txt join -1 2 -2 1 moist_hits.txt gp_association.goa_uniprot.goeast_formatted &gt; moist_GO_ids.txt awk &#39;{print $2&#34;\\t&#34;$3}&#39; moist_GO_ids.txt | sort -u &gt; moist_GO_ids_unique.txt for line in $(cat moist_probes.txt); do grep -w &#34;$line&#34; moist_GO_ids_unique.txt | perl -pe &#39;s/&#39;$line&#39;/\\/\\//g&#39; | tr &#39;\\t&#39; &#39; &#39; | tr &#39;\\n&#39; &#39; &#39; | sed &#39;s/^\\/\\///g&#39; | sed &#39;s/$/\\n/g&#39; | sed &#34;s/^/$line\\t/g&#34; &gt;&gt; moist_GO_ids_formatted.txt done cat rimoist_skinmet_uniprot_blastx_unique_probes.txt rimoist_virome_uniprot_blastx_unique_probes.txt &gt; rimoist_probes.txt cat rimoist_skinmet_uniprot_blastx_formatted_unique.txt rimoist_virome_uniprot_blastx_formatted_unique.txt | sort -u -k 2 &gt; rimoist_hits.txt join -1 2 -2 1 rimoist_hits.txt gp_association.goa_uniprot.goeast_formatted &gt; rimoist_GO_ids.txt awk &#39;{print $2&#34;\\t&#34;$3}&#39; rimoist_GO_ids.txt | sort -u &gt; rimoist_GO_ids_unique.txt for line in $(cat rimoist_probes.txt); do grep -w &#34;$line&#34; rimoist_GO_ids_unique.txt | perl -pe &#39;s/&#39;$line&#39;/\\/\\//g&#39; | tr &#39;\\t&#39; &#39; &#39; | tr &#39;\\n&#39; &#39; &#39; | sed &#39;s/^\\/\\///g&#39; | sed &#39;s/$/\\n/g&#39; | sed &#34;s/^/$line\\t/g&#34; &gt;&gt; rimoist_GO_ids_formatted.txt done"
+    },
+    {
+      "title": "",
+      "instruction": "We also calculated operational protein families to assess core and flexible OPFs, potential auxiliary metabolic genes, and the functional diversity. The OPFs are defined below. Start by clustering the predicted ORFs using Uclust to remove the redundant sequences and pull out representative sequences. mkdir ./define_core_protein_clustersecho Sorting fasta with uclust...uclust --sort ./glimmer3/output/Contigs_no_block_with_names_glimmer_output_final.fa --output ./define_core_protein_clusters/glimmer_final_sorted.fa mkdir ./define_core_protein_clusters echo Sorting fasta with uclust... uclust --sort ./glimmer3/output/Contigs_no_block_with_names_glimmer_output_final.fa --output ./define_core_protein_clusters/glimmer_final_sorted.fa"
+    },
+    {
+      "title": "",
+      "instruction": "Use the sorted file for de novo clustering. echo Using uclust for sequence clustering...uclust --input ./define_core_protein_clusters/glimmer_final_sorted.fa --uc ./define_core_protein_clusters/protein_clusters_uclust.txt --id 0.75 echo Using uclust for sequence clustering... uclust --input ./define_core_protein_clusters/glimmer_final_sorted.fa --uc ./define_core_protein_clusters/protein_clusters_uclust.txt --id 0.75"
+    },
+    {
+      "title": "",
+      "instruction": "Convert output to fasta. echo Converting uclust output to fasta...uclust --uc2fasta ./define_core_protein_clusters/protein_clusters_uclust.txt --input ./define_core_protein_clusters/glimmer_final_sorted.fa --output ./define_core_protein_clusters/protein_clusters_with_repeats.fa echo Converting uclust output to fasta... uclust --uc2fasta ./define_core_protein_clusters/protein_clusters_uclust.txt --input ./define_core_protein_clusters/glimmer_final_sorted.fa --output ./define_core_protein_clusters/protein_clusters_with_repeats.fa"
+    },
+    {
+      "title": "",
+      "instruction": "Pull out the clustered sequences which have representative seqs in their sequences. echo Pulling out representative seqs from uclust fasta output...grep -A 1 ./define_core_protein_clusters/protein_clusters.fa&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;D19F00BE8AFC4BF3B10FE64598111F5B&#34; &gt; echo Pulling out representative seqs from uclust fasta output... grep -A 1 &#34;*&#34; ./define_core_protein_clusters/protein_clusters_with_repeats.fa | grep -v -P ^-- &gt; ./define_core_protein_clusters/protein_clusters.fa"
+    },
+    {
+      "title": "",
+      "instruction": "Get the length information for each protein cluster representative sequence. Use the defined operational protein families to generate a OPF relative abundance table which can be used in R for diversity, definition of core OPFs, etc. awk 'NR % 2 {printf $0 ./define_core_protein_clusters/protein_cluster_length.txt sed &#39;s/&gt;//g&#39; ./define_core_protein_clusters/protein_cluster_length.txt &gt; ./define_core_protein_clusters/protein_cluster_length_no_greater_sign.txt&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;8BA6BBE7FE8541A394E205594DD8761B&#34; &gt; awk &#39;NR % 2 {printf $0&#34;\\t&#34;} !(NR % 2) {print length($0)}&#39; ./define_core_protein_clusters/protein_clusters.fa &gt; ./define_core_protein_clusters/protein_cluster_length.txt sed &#39;s/&gt;//g&#39; ./define_core_protein_clusters/protein_cluster_length.txt &gt; ./define_core_protein_clusters/protein_cluster_length_no_greater_sign.txt"
+    },
+    {
+      "title": "",
+      "instruction": "Run bowtie2 of the background cleaned samples against the contig reference database. First build bowtie reference of the OPFs. mkdir ./protein_cluster_rel_abund_tablebowtie2-build -f ./define_core_protein_clusters/protein_clusters.fa ./protein_cluster_rel_abund_table/bowtie2_contig_build mkdir ./protein_cluster_rel_abund_table bowtie2-build -f ./define_core_protein_clusters/protein_clusters.fa ./protein_cluster_rel_abund_table/bowtie2_contig_build"
+    },
+    {
+      "title": "",
+      "instruction": "Map the sequences to the OPFS. mkdir ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hitsrun_bowtie2_against_contigs () {if [ -f /etc/profile.d/modules.sh ]; thensource /etc/profile.d/modules.shfimodule load bowtie2-2.1.0bowtie2 -x ./protein_cluster_rel_abund_table/bowtie2_contig_build -f ./negative_clean_seqs/$1 -S ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/$1 -L 25 -N 1}export -f run_bowtie2_against_contigsls ./negative_clean_seqs/ | xargs -I {} --max-procs=128 sh -c 'run_bowtie2_against_contigs {} mkdir ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits run_bowtie2_against_contigs () { if [ -f /etc/profile.d/modules.sh ]; thensource /etc/profile.d/modules.sh fi module load bowtie2-2.1.0 bowtie2 -x ./protein_cluster_rel_abund_table/bowtie2_contig_build -f ./negative_clean_seqs/$1 -S ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/$1 -L 25 -N 1 } export -f run_bowtie2_against_contigs ls ./negative_clean_seqs/ | xargs -I {} --max-procs=128 sh -c &#39;run_bowtie2_against_contigs {}&#34;&#39;"
+    },
+    {
+      "title": "",
+      "instruction": "Rename the files to be .sam files. for file in $(ls ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits); domv ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/ for file in $(ls ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits); domv ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/&#34;${file}&#34; ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/&#34;${file/%.fa/.sam}&#34; done"
+    },
+    {
+      "title": "",
+      "instruction": "Calculate the hit abundances from bowtie2 using estimation perl script. Perl script available here . mkdir ./protein_cluster_rel_abund_table/abundance_from_samfor file in $(ls ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits); doperl calculate_abundance_from_sam.pl ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/${file} ./protein_cluster_rel_abund_table/abundance_from_sam/${file}done mkdir ./protein_cluster_rel_abund_table/abundance_from_sam for file in $(ls ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits); doperl calculate_abundance_from_sam.pl ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/${file} ./protein_cluster_rel_abund_table/abundance_from_sam/${file} done"
+    },
+    {
+      "title": "",
+      "instruction": "Rename the sam files to text files. for file in $(ls ./protein_cluster_rel_abund_table/abundance_from_sam); domv ./protein_cluster_rel_abund_table/abundance_from_sam/ for file in $(ls ./protein_cluster_rel_abund_table/abundance_from_sam); domv ./protein_cluster_rel_abund_table/abundance_from_sam/&#34;${file}&#34; ./protein_cluster_rel_abund_table/abundance_from_sam/&#34;${file/%.sam/.txt}&#34; done"
+    },
+    {
+      "title": "",
+      "instruction": "Add in OPF length information using awk and calculate RPKM. mkdir ./protein_cluster_rel_abund_table/abundance_with_lengthfor file in $(ls ./protein_cluster_rel_abund_table/abundance_from_sam); doexport SUM=$(awk '{ SUM += $2 } END { print SUM }' ./protein_cluster_rel_abund_table/abundance_from_sam/${file}) mkdir ./protein_cluster_rel_abund_table/abundance_with_length for file in $(ls ./protein_cluster_rel_abund_table/abundance_from_sam); doexport SUM=$(awk &#39;{ SUM += $2 } END { print SUM }&#39; ./protein_cluster_rel_abund_table/abundance_from_sam/${file})"
+    },
+    {
+      "title": "",
+      "instruction": "Add an echo of the sum value to confirm that the sum is being calculated. echo Sum is $SUMawk --assign=sum=$SUM 'FNR==NR { a[$1]=$2; next } $1 in a { print $1 ./protein_cluster_rel_abund_table/abundance_with_length/${file} done&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;60400783C7FA45F6A048B0FBCFA91767&#34; &gt; echo Sum is $SUMawk --assign=sum=$SUM &#39;FNR==NR { a[$1]=$2; next } $1 in a { print $1&#34;\\t&#34;$2&#34;\\t&#34;a[$1]&#34;\\t&#34;$2*1000000000/(a[$1]*sum) }&#39; ./define_core_protein_clusters/protein_cluster_length_no_greater_sign.txt ./protein_cluster_rel_abund_table/abundance_from_sam/${file} &gt; ./protein_cluster_rel_abund_table/abundance_with_length/${file} done"
+    },
+    {
+      "title": "",
+      "instruction": "Get columns of only the contig IDs and the normalized RPKM abundance counts and add sample name to top of column for when this is used in distance matrix calculations, mkdir ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_idfor file in $(ls ./protein_cluster_rel_abund_table/abundance_with_length); doNAME=$(echo ${file} | sed 's/_R1\\.txt//')echo Name is $NAMEcut -f 1,4 ./protein_cluster_rel_abund_table/abundance_with_length/${file} | sed ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id/${file} done&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;FB9E953A74F447CD9EB558019700EE79&#34; &gt; mkdir ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id for file in $(ls ./protein_cluster_rel_abund_table/abundance_with_length); doNAME=$(echo ${file} | sed &#39;s/_R1\\.txt//&#39;)echo Name is $NAMEcut -f 1,4 ./protein_cluster_rel_abund_table/abundance_with_length/${file} | sed &#34;1 s/^/Contig_ID\\t${NAME}\\n/&#34; &gt; ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id/${file} done"
+    },
+    {
+      "title": "",
+      "instruction": "Make master list of the contig numbers as a reference for mergin the data matrix values."
+    },
+    {
+      "title": "",
+      "instruction": "Merge the sample hit files to the master OPF list. After this runs, all of the resulting files should have the same number of lines because they were all merged with the same master list. mkdir ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_listfor file in $(ls ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id); do awk 'FNR==NR {a[$1]=$2;next}{ print $1 ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list/${file} done&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;EBCACB9BE00B4C999DEA5D14287FB940&#34; &gt; mkdir ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list for file in $(ls ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id); do awk &#39;FNR==NR {a[$1]=$2;next}{ print $1&#34;\\t&#34;a[$1] }&#39; ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id/${file} ./define_core_protein_clusters/master_contig_list.txt | sed &#39;/[0-9]\\t[0-9]/!s/$/0/&#39; | sed &#39;1 s/\\t0//&#39; | sed &#39;1 s/0$//&#39; &gt; ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list/${file} done"
+    },
+    {
+      "title": "",
+      "instruction": "Get only the abundance values so that they can be merged to the master contig list and used for distance matrix calculations. mkdir ./protein_cluster_rel_abund_table/abundance_RPKM_for_mergefor file in $(ls ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list); do cut -f 2 ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list/$file > ./protein_cluster_rel_abund_table/abundance_RPKM_for_merge/${file}done mkdir ./protein_cluster_rel_abund_table/abundance_RPKM_for_merge for file in $(ls ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list); do cut -f 2 ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list/$file &gt; ./protein_cluster_rel_abund_table/abundance_RPKM_for_merge/${file} done"
+    },
+    {
+      "title": "",
+      "instruction": "Merge the abundances with the OPF names."
+    },
+    {
+      "title": "",
+      "instruction": "Format the contig IDs."
+    },
+    {
+      "title": "",
+      "instruction": "Transpose the files. This relative abundance table can now be used in R for further analysis. python transpose_tab_delim.py -i ./protein_cluster_rel_abund_table/contig_otu_table_format.tsv -o ./protein_cluster_rel_abund_table/contig_otu_table_transposed.txt"
+    }
+  ]
+}

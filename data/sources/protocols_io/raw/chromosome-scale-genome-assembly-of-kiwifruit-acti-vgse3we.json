@@ -1,0 +1,59 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "17650",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.vgse3we",
+  "title": "Chromosome-scale genome assembly of kiwifruit Actinidia eriantha with single-molecule sequencing and chromatin interaction mapping",
+  "author": "Wei Tang",
+  "doi": "dx.doi.org/10.17504/protocols.io.vgse3we",
+  "source_url": "https://www.protocols.io/view/chromosome-scale-genome-assembly-of-kiwifruit-acti-vgse3we",
+  "fetched_at": "2026-06-16T20:53:42.796856Z",
+  "stats": {
+    "views": 1019,
+    "runs": 0,
+    "bookmarks": 3,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false,
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "1) Deduplication with super_deduper ( https://github.com/dstreett/Super-Deduper ) (Optional) super_deduper -s 5 -l 40 -p prefix -1 read1.fq -2 read2.fq 2) Adaptor trimming with Trimmomatic ( https://github.com/timflutre/trimmomatic ) java -jar trimmomatic-0.35.jar PE -phred33 \\R1.fq.gz R2.fq.gz out.R1.fq.gz out.R1.un.fq.gz out.R2.fq.gz out.R2.un.fq.gz \\ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 MINLEN:25 3) Mate-pair reads cleanning with nextclip ( https://github.com/richardmleggett/nextclip ) nextclip --remove_duplicates --min_length 20 --number_of_reads 60 --log log.txt --number_of_reads 10000000 -i read1.fq -j read2.fq -o out"
+    },
+    {
+      "title": "",
+      "instruction": "Assembly with Canu ( https://github.com/marbl/canu ) canu -p prefix corOutCoverage=50 -d pacbio_all genomeSize=705m -pacbio-raw Pacbio.fastq.gz >>canu.log pbalign --tmpDir tmp --nproc 6 --concordant --hitPolicy randombest --minAccuracy 70 --minLength 50 --algorithmOptions \\\"--minMatch 12 --bestn 10 --minPctIdentity 70.0\\\" subreads.bam contigs.fasta aligned.subreads.bam >aligned.log variantCaller -j 64 --algorithm arrow -r contigs.fasta --coverage 150 --diploid --minConfidence 40 --minCoverage 5 -o variants.gff -o canu.consensus.fasta -o canu.consensus.fastq aligned.subreads.rh.bam >variantCaller.log Assembly with wtdbg ( https://github.com/ruanjue/wtdbg ) wtdbg-1.1.006 -t 96 -i pb-reads.fa -o dbg -H -k 21 -S 1.02 -e 3 2>&1 | tee log.wtdbgwtdbg-cns -t 96 -i dbg.ctg.lay -o dbg.ctg.lay.fa -k 15 2>&1 | tee log.cns.1 Assembly merge with Quickmerge ( https://github.com/mahulchak/quickmerge ) merge_wrapper.py assembly1.fasta assembly2.fasta"
+    },
+    {
+      "title": "",
+      "instruction": "bowtie2 --rf --no-unal -I min -X max -x index -1 read1.fq -2 read2.fq -S align.samjava -Xmx300G -jar pilon-1.22.jar --genome contig.fa --frags PE.bam --jumps MP.bam --output out --outdir outdir --changes --vcf --tracks --diploid --fix snps,indels --threads 60 --flank 0"
+    },
+    {
+      "title": "",
+      "instruction": "Anchoring with LACHESIS ( https://github.com/shendurelab/LACHESIS ) Using recommended protocol with parameters to be set as &#34;CLUSTER_MIN_RE_SITES=48, CLUSTER_MAX_LINK_DENSITY=2, CLUSTER_NONINFORMATIVE_RATIO=2, ORDER_MIN_N_RES_IN_TRUN=14, ORDER_MIN_N_RES_IN_SHREDS=15&#34;&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Identification of MITE perl MITE_Hunter_manager.pl -i assembly.fasta -n 64 -c 64 -S 12345678cat genome_Step8_*.fa genome_Step8_singlet.fa > MITE.lib Identification of LTR Details can be found in Campbell MS, Law M, Holt C, Stein JC, Moghe GD, Hufnagel DE, Lei J, Achawanantakun R, Jiao D, Lawrence CJ. 2014. MAKER-P: a tool kit for the rapid creation, management, and quality control of plant genome annotations. Plant physiology 164:513-524. Masking genome with MITE and LTR libraries RepeatMasker -pa 64 -lib MITE_LTR.lib -dir . assembly.fasta Identification of novel repeats with RepeatModeler perl rmaskedpart.pl assembly.fasta.masked 50 > umseqfileBuildDatabase -name umseqfiledb -engine ncbi umseqfileRepeatModeler -pa 64 -database umseqfiledb"
+    },
+    {
+      "title": "",
+      "instruction": "Preparation of transcriptome evidence #de novo assemblyTrinity --seqType fq --max_memory 200G --CPU 50 --normalize_reads --left r1.fq --right r2.fq --output trinity_denovo#genome guided assemblySTAR --genomeDir gd --alignIntronMax 80000 --twopassMode Basic --runThreadN 50 --readFilesCommand zcat --readFilesIn r1.fq r2.fq --outFileNamePrefix mapped_starTrinity --genome_guided_bam mapped_starAligned.out.s.bam --max_memory 200G --genome_guided_max_intron 80000 --CPU 50 --output trinity_GGcat Trinity-DN.fasta Trinity-GG.fasta > transcripts.fasta#stringtie assembly hisat2 --dta -p 64 -x assembly.fasta -1 r1.fq -2 r2.fq -S hisat2.map.samstringtie hisat2.map.sort.bam -o stringtie.gtf -p 60 $PASA_HOME/misc_utilities/accession_extractor.pl tdn.accs$PASA_HOME/scripts/Launch_PASA_pipeline.pl \\-c $PASA_HOME/pasa_conf/alignAssembly.config \\--MAX_INTRON_LENGTH 60000 \\--cufflinks_gtf stringtie.gtf \\-C -R --CPU 64 \\-g aseembly.fa \\-t transcripts.fasta \\--TDN tdn.accs \\--ALIGNERS blat,gmap Model training with Braker braker.pl \\--cores=64 \\--BAMTOOLS_PATH=bamtools-2.4.1-0/bin \\--AUGUSTUS_BIN_PATH=/bin \\--AUGUSTUS_CONFIG_PATH=config \\--AUGUSTUS_SCRIPTS_PATH=/bin \\--genome=assembly.fa \\--species=species \\--softmasking=1 \\--prot_seq=homologous_protein.fa \\--prg=spaln \\--ALIGNMENT_TOOL_PATH=spaln/bin \\--bam=rnaseq.sort.bam Gene prediction and intergration with MAKER-P Following protocol in Campbell MS, Law M, Holt C, Stein JC, Moghe GD, Hufnagel DE, Lei J, Achawanantakun R, Jiao D, Lawrence CJ. 2014. MAKER-P: a tool kit for the rapid creation, management, and quality control of plant genome annotations. Plant physiology 164:513-524."
+    },
+    {
+      "title": "",
+      "instruction": "python run_BUSCO.py -i protein.fa -o pep_busco -l embryophyta_odb9/ -m proteins -c 60python run_BUSCO.py -i Actinidia_eriantha.chr.fa -o genome_busco -l embryophyta_odb9/ -m genome -c 60 -sp tomato"
+    },
+    {
+      "title": "",
+      "instruction": "jellyfish count -C -m 17 -s 10000000000 -t 40 -o db.jf *.fq jellyfish histo -t 40 db.jf > db.histo"
+    },
+    {
+      "title": "",
+      "instruction": "Orthogroup construction orthofinder -t 64 -M msa -A mafft -I 1.5 -f dir Phylogeny with single-copy orthogroups for i in OG*.fa;do#aligning sequencesmafft --maxiterate 1000 --localpair --thread 60 $i > ${i}.mafft;#alignment trimmingtrimal -automated1 -in ${i}.mafft -out ${i}.mafft.trimal;#ML tree construction with automatic model selectioniqtree -s ${i}.mafft.trimal -nt AUTO;#root tree using rice as the outgroupete3 mod --outgroup rice ${i}.mafft.trimal.treefile > ${i}.mafft.trimal.treefile.root;done For each single-copy orthogroup, we examined its tree topology and perseved if gene tree was consistent with the species tree. We concatenated alignments for those orthogroups passed our examination. Maximum likelihood phylogeny for the concatenated alignments iqtree -s alignment.phy -nt AUTO Molecular dating with MCMCTree The protocol is described in the manual ( http://abacus.gene.ucl.ac.uk/software/MCMCtree.Tutorials.pdf ). We used &#34;Relaxed rate&#34; and two time constrains: 5-10 mya for tomato and potato, &lt; 5 mya for two kiwifruits. The maximum time limit for the root is 150 mya. Gene family evolution with CAFE # separate large gene familiespython CAFE/python_scripts/cafetutorial_clade_and_size_filter.py -i Orthogroups.GeneCount.reformat -o largeFam -scafe tree tree_estimated_from_MCMCTree; load -i filtered_cafe_input.txt -filter -l filtered_cafe_input.logfile -p 0.05 lambda -sreport filtered_cafe_input.cafe #for large families, assign a lambda value estimated above with command \"lambda -l\""
+    }
+  ]
+}

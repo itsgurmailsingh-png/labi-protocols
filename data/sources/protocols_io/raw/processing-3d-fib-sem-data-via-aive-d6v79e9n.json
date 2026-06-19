@@ -1,0 +1,251 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "125599",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.14egn48x6v5d/v1",
+  "title": "Processing 3D FIB-SEM data via AIVE",
+  "author": "Benjamin Padman",
+  "doi": "dx.doi.org/10.17504/protocols.io.14egn48x6v5d/v1",
+  "source_url": "https://www.protocols.io/view/processing-3d-fib-sem-data-via-aive-d6v79e9n",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Select a subset of 3D FIB-SEM slices for processing, and deposit them in a new directory; Smaller stacks will process faster, but contain less information."
+    },
+    {
+      "title": "",
+      "instruction": "Using ImageJ/FIJI, run the built-in virtual stack registration plugin (select &#34;Plugins → Registration → Register Virtual Stack Slices&#34;). Apply to the folder containing your selected dataset, and set the registration model and transformations to &#34;Translation only&#34;."
+    },
+    {
+      "title": "",
+      "instruction": "Once the registration is complete, save the resulting TIFF stack for subsequent processing. Ensure that the scale is correctly set for the dataset (Inspect by selecting &#34;Image → Properties&#34;) If there was significant image drift during data acquisition, the perimeters of the dataset will now have large empty regions. Crop the dataset down to the smallest viable stack to save time on subsequent computations. The correct pixel scale must be set for the images, or all subsequent stages will fail."
+    },
+    {
+      "title": "",
+      "instruction": "Place the original TIFF Stack you intend to process in a new directory for CLAHE processing. The correct pixel scale must be set for all tiff stacks, or the subsequent stages will fail."
+    },
+    {
+      "title": "",
+      "instruction": "Drag and drop the &#34; CLAHE-Batch-3DCLAHE-AnisotropicXYZ.ijm &#34; script into FIJI, then run the script."
+    },
+    {
+      "title": "",
+      "instruction": "Select the directory containing the TIFF stack(s) you intend to process. Do not interact with your computer during the process. Accidentally selecting an unrelated window during processing will switch the CLAHE plugin to that window."
+    },
+    {
+      "title": "",
+      "instruction": "The target folder should now contain CLAHE processed versions of the TIFF stack, which will now be referred to as the &#34;CLAHE processed stack&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Open FIJI/ImageJ, drag and drop the &#34;ML-Features-PART1-3DFeatSplitter-Sigma8.bsh&#34; script into FIJI. Run the script."
+    },
+    {
+      "title": "",
+      "instruction": "A new dialog box will now open, with 5 parameters that must be entered before proceeding: Input Stack - Select your original TIFF Stack (which was generated during pre-processing) Output directory - Select/create a new directory on a HDD/SSD with ample storage. Temporary directory - Select/create a new directory, preferably on an SSD (with ample storage). Additional target slices per loop - This number determines the number of slices that will be processed per calculation cycle. Starting Slice - This number defines the which slice the processing will start at (useful for resuming the process if it is ever interrupted.) When setting the &#34; Additional target slices per loop&#34; , The goal is to choose a number that maximizes RAM usage, without exceeding your RAM capacity (Which may crash your computer). Start with a low number (2-3) while monitoring your memory usage... If the first full computation loop succeeds, but you have RAM to spare, increase this number. If the first full computation loop fails due to insufficient memory, reduce this number. Once you have set all 5 parameters, press Ok."
+    },
+    {
+      "title": "",
+      "instruction": "The TIFF stack generated during this stage will be referred to as the &#34;original TIFF Stack&#34; from this point onward."
+    },
+    {
+      "title": "",
+      "instruction": "Leave the process to run. This process may take minutes, hours, or even days. It all depends on the specifications of your computer and the size of your dataset."
+    },
+    {
+      "title": "",
+      "instruction": "Once the process is complete, delete all files in the &#34;TEMPORARY STORAGE DIR&#34; and proceed to the next stage. Store backups of your 3D features if required."
+    },
+    {
+      "title": "",
+      "instruction": "Open FIJI/ImageJ, drag and drop the &#34;ML-Features-PART2-2DFeatSplitter.bsh&#34; script into FIJI. Run the script. For expert users, the script also includes optional extra features which are commented out at the end of the script. Please inspect the script and adjust as per your requirements."
+    },
+    {
+      "title": "",
+      "instruction": "A new dialog box will now open, with 3 parameters that must be entered before proceeding: Input Stack - Select your original TIFF Stack (which was generated during pre-processing) Output directory - Select/create a new directory on a HDD/SSD with ample storage. Temporary directory - Select/create a new directory, preferably on an SSD (with ample storage). Once you have set all 3 parameters, press Ok."
+    },
+    {
+      "title": "",
+      "instruction": "Leave the process to run. This process may take minutes, hours, or even days. But it will typically be faster than the 3D feature calculations."
+    },
+    {
+      "title": "",
+      "instruction": "Once the process is complete, delete all files in the &#34;Temporary directory&#34; and proceed to the next stage. Store backups of your 2D features if required."
+    },
+    {
+      "title": "",
+      "instruction": "Open FIJI/ImageJ, drag and drop the &#34;ML-Features-PART3-Combine3Dand2DFeatures.bsh&#34; script into FIJI. Run the script."
+    },
+    {
+      "title": "",
+      "instruction": "A new dialog box will now open, with 3 parameters that must be entered before proceeding: Folder 1 - Select the directory containing your 3D Features. Folder 2 - Select the directory containing your 2D Features. Output directory - Select/create a new directory, where your final feature stacks will be deposited. Once you have set all 3 parameters, press Ok."
+    },
+    {
+      "title": "",
+      "instruction": "Leave the process to run."
+    },
+    {
+      "title": "",
+      "instruction": "Once the process is complete, the Output directory will be populated with individual tiff stacks, each containing the features corresponding to one slice from the original stack. This directory will now be referred to as the &#34;Feature Stack Directory&#34; You may now proceed to machine learning. You can now delete the original 2D and 3D features, but it is strongly advised that you confirm that the preceding stages were successful before doing so."
+    },
+    {
+      "title": "",
+      "instruction": "Open Microscopy Image Browser (MIB), and load the &#34;original TIFF Stack&#34; for annotation. This section can be conducted in parallel with the feature generation stages described above, simply by using different computers. Create a new labeling model and add 4 &#34;materials&#34; to that model. Each &#34;material&#34; represents a class of structure that the machine learning model will be trained to detect. Alternatively, you can use whatever number of &#34;materials&#34; you would prefer, provided that one of those &#34;materials&#34; represents a type of structure that generates electron signal (i.e. membranes). This is required for AIVE."
+    },
+    {
+      "title": "",
+      "instruction": "Rename the each of the &#34;materials&#34; as follows: &#34; 1Void &#34; - To represent empty extracellular regions of the sample &#34; 2Sol &#34; - To represent granular protein content of the cytoplasm and nucleus &#34; 3Matter &#34; - To represent electron-dense homogenous materials that do not belong to a membrane (i.e. mitochondrial matrix) &#34; 4Memb &#34; - To represent cellular membranes. Alternatively, you can name the classes however you desire, provided that one of those classes is used to identify a class of structure that generates electron signal (i.e. membranes). This is required for AIVE."
+    },
+    {
+      "title": "",
+      "instruction": "Randomly choose a slice in the stack; only proceed if there are representative examples of each material described above. Make a note of the slice number for future reference."
+    },
+    {
+      "title": "",
+      "instruction": "On the designated slice, use the brush tool to annotate empty extracellular regions of the image, and add those annotations to the material named 1Void . You may proceed to the next step once you have labelled at least 2000 pixels."
+    },
+    {
+      "title": "",
+      "instruction": "On the designated slice, use the brush tool to annotate intracellular cytosolic regions and proteinaceous content of the cell, and add those annotations to the material named 2Sol. You may proceed to the next step once you have labelled at least 2000 pixels."
+    },
+    {
+      "title": "",
+      "instruction": "On the designated slice, use the brush tool to annotate electron-dense homogenous materials that can occur between membranes (Mitochondrial matrix, ER lumen, non-membranous lipid in lipid droplets, etc.), and add those annotations to the material named 3Matter. You may proceed to the next step once you have labelled at least 2000 pixels."
+    },
+    {
+      "title": "",
+      "instruction": "On the designated slice, use the brush tool to annotate cellular membranes, and add those annotations to the material named 4Memb. You may proceed to the next step once you have labelled at least 2000 pixels."
+    },
+    {
+      "title": "",
+      "instruction": "Repeat this process go to step #23 , until you have labelled at least 8 random slices in the stack. Randomization is important, but it is more important to ensure adequate coverage of the stack. If any of the randomly chosen slices seem too close to another annotated slice, ensure you choose a new slice."
+    },
+    {
+      "title": "",
+      "instruction": "Save the completed training labels as TIFF slices, by selecting &#34;Model → Save Model As...&#34;; Under the &#34;Save As Type:&#34; tab, choose &#34;Tiff Format (.tif)&#34;. Choose a new directory for the labels, then press Ok. A new dialog will appear asking how the TIFF files should be formatted. Select &#34;Sequence of 2D files&#34;. The directory containing these files will now be referred to as the &#34;Training Label Directory&#34; Remember to save a backup of the training labels, so that you can revisit them later if required."
+    },
+    {
+      "title": "",
+      "instruction": "Open FIJI/ImageJ, drag and drop the &#34;ML-CorePartA-ExtractTrainingDataFromFeatures.bsh&#34; script into FIJI. Run the script."
+    },
+    {
+      "title": "",
+      "instruction": "A new dialog box will now open, with 5 parameters that must be entered before proceeding: Feature Stack Directory - Select the &#34;Feature Stack Directory&#34; (as prepared above) Binary Labels Directory - Select the &#34;Training Label Directory&#34; (as prepared above) Output directory - Select/create a new directory, where you will store the training data. File number to train - The slice number that training data will be extracted from. Num. of samples per class - The number of random measurements that will be made per class. For &#34; File number to train &#34; , you must enter a slice number corresponding to one of the slices that you have already labelled for training. If you have been following the instructions, then you will have kept a record of which slices are available for training. For &#34;Num. of samples per class &#34; , higher numbers are better, but the number cannot exceed the number of pixels annotated for any class on any slice. (i.e. even if you&#39;ve annotated millions of pixels for all the other classes and slices, if any class only has 500 pixels annotated on any slice, then your maximum number of samples is 500)"
+    },
+    {
+      "title": "",
+      "instruction": "Repeat the training data extraction for each slice that you have previously annotated. You should now have 8 unique ARFF (Attribute-Relation File Format) files in the output directory. This output directory will now be referred to as the &#34; Training Data Directory &#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Once all .ARFF files have been pooled into a single file, you are ready to proceed to machine learning."
+    },
+    {
+      "title": "",
+      "instruction": "Open WEKA (Waikato Environment for Knowledge Analysis) , and press the &#34;Explorer&#34; button. In the explorer window, open the pooled .ARFF file described in the previous section (press the &#34;Open File...&#34; button)."
+    },
+    {
+      "title": "",
+      "instruction": "Once the data is loaded in the explorer window, navigate to the &#34;Classify&#34; tab."
+    },
+    {
+      "title": "",
+      "instruction": "Click the &#34;Choose&#34; button and select Random Forest (weka &gt; classifiers &gt; trees &gt; RandomForest). Alternatively, you can choose your own preferred model architecture for machine learning. Left-click the text bar next to the &#34;Choose&#34; button. You are free to adjust the parameters listed, but the following settings are recommended: bagSizePercent - Should be 10, but can be reduced for particularly massive datasets. numFeatures - Should be the square root of the number of features available in each feature stack. numIterations - 200 is a good starting point, but fewer iterations will generate a faster model. seed - We prefer 1337; whatever your choice of random seed, try to ensure you stay consistent. Once the training parameters are configured to your satisfaction, you can train the model."
+    },
+    {
+      "title": "",
+      "instruction": "Press the &#34;Start&#34; button in the explorer window to start training the model. You will know that the training is complete when the bird animation in the lower right corner stops dancing."
+    },
+    {
+      "title": "",
+      "instruction": "Once training is complete, right-click on the corresponding line in the &#34;Results List&#34; (on the left hand side of the window) and save the trained model. The trained model can now be applied."
+    },
+    {
+      "title": "",
+      "instruction": "Open FIJI/ImageJ, drag and drop the &#34;ML-CorePartB-ApplyClassifierToFeatures.bsh&#34; script into FIJI. Run the script."
+    },
+    {
+      "title": "",
+      "instruction": "A new dialog box will now open, with 4 parameters that must be entered before proceeding: Features Directory - Select the &#34;Feature Stack Directory&#34; (as prepared above) WEKA Model - Select the model you trained in WEKA Output Directory - Select/create a new directory, for storage of the results Starting Slice - This number defines the which slice the processing will start at (useful for resuming the process if it is ever interrupted.) Once you have set all parameters, press Ok."
+    },
+    {
+      "title": "",
+      "instruction": "Leave the process to run. This may take several hours, depending on the complexity of the trained model and your data"
+    },
+    {
+      "title": "",
+      "instruction": "Once the process is complete, the output directory will be populated with one stack of machine learning predictions per slice. To convert these results into one stack of slices per predicted class, drag and drop the &#34;ML-postCorePartB-SlicesToStacks.ijm&#34; script into FIJI, then run it. Select the Output Directory from the previous script, then select a new directory for the converted outputs. Each of the resulting stacks will represent the raw probabilistic predictions for one class, as were originally defined in Step 22. The tiff stack corresponding to the membrane channel will be referred to as the &#34;Raw Membrane Predictions&#34; from this point onward. If required, the machine learning outputs from this section can be thresholded and imported back into MIB as new training data. By curating the outputs from a preliminary model, a second round of machine learning to be conducted with with a greater number of samples."
+    },
+    {
+      "title": "",
+      "instruction": "Open Microscopy Image Browser (MIB), and load the &#34;original TIFF Stack&#34; for annotation. OR You can use any classification method or program you want, provided that final result is a &#34;label image&#34; TIFF stack in which each voxel value represents the identity of an organelle class."
+    },
+    {
+      "title": "",
+      "instruction": "Organize your data in final preparation for AIVE. Create a new directory, where you will conduct the AIVE processing. This will be the &#34;Main Directory&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Create a new labeling model, and add a new &#34;material&#34; for each category of organelle you intend to annotate."
+    },
+    {
+      "title": "",
+      "instruction": "When the classification labels are complete, save them as one TIFF stack by selecting &#34;Model → Save Model As...&#34;; Under the &#34;Save As Type:&#34; tab, choose &#34;Tiff Format (.tif)&#34;. Choose a destination for the labels, then press Ok. A new dialog will appear asking how the TIFF files should be formatted. Select &#34;3D Tiff&#34;. The resulting file will be referred to as the &#34;Organelle Class Stack&#34; from this point onward. If all the above sections are complete, then input data required to complete AIVE is ready; you may now proceed with the final stages."
+    },
+    {
+      "title": "",
+      "instruction": "Label each organelle of interest, ensuring that it is added to the correct &#34;material&#34; in each instance. As long as you don&#39;t stray into unrelated organelles, and you annotate the entire organelle, you don&#39;t need to stay within the perimeter of that organelle! Ensure that you frequently save backups of the classification labels."
+    },
+    {
+      "title": "",
+      "instruction": "Copy the following precomputed TIFF stacks into the &#34;0 Originals&#34; sub-directory: CLAHE processed stack (From &#34;3D Contrast Limited Adaptive Histogram Equalization (CLAHE)&#34;) Raw Membrane Predictions (From &#34;Machine Learning with WEKA - Applying the trained model&#34;) Organelle Class Stack (From &#34;Organelle annotation for AIVE&#34;) Reminder! The correct pixel scale must be set for all images, or subsequent stages will fail."
+    },
+    {
+      "title": "",
+      "instruction": "Drag and drop the &#34;AIVE-Macro1-ConvertLabelImageToBinaryStacks.ijm&#34; script into the FIJI window. Run the script. Select the &#34; Organelle Class Stack &#34;. Select the &#34;1 Masks&#34; sub-directory. Wait for process to finish. The &#34;Organelle Class Stack&#34; will be converted into one binary TIFF stack per organelle class. Assign file-names to the outputs now, to indicate their corresponding organelle classes. It will help you stay organized and the filenames will be conserved in subsequent steps."
+    },
+    {
+      "title": "",
+      "instruction": "Create five sub-directories in the main directory, using the following names: &#34;0 Originals&#34;, &#34;1 Masks&#34;, &#34;2 Processed Masks&#34;, &#34;3 Membrane Merge&#34;, &#34;4 FIB Merge&#34;. The directory structure should look like this: .../MAIN DIRECTORY/ ├── 0 Originals ├── 1 Masks ├── 2 Processed Masks ├── 3 Membrane Merge ├── 4 FIB Merge"
+    },
+    {
+      "title": "",
+      "instruction": "Drag and drop the &#34;AIVE-Macro5-MergeTheMaskedMLoutputsWithCLAHE.ijm&#34; script into the FIJI window. Run the script. Select the 3D Median filtered &#34;CLAHE processed stack&#34; generated during the prior stage. Select the &#34;3 Membrane Merge&#34; sub-directory. Select the &#34;4 FIB Merge&#34; sub-directory. Wait for process to finish. These outputs are the final AIVE results. Once the final AIVE results are available they can be subjected to a variety of 3D analyses, modifications, and 3D visualizations. The following additional scripts have been provided on GitHub as demonstrative examples: Post-AIVE-BatchMorpholibJMeasurement.ijm Post-AIVE-FillMitochondrialStructures.ijm Post-AIVE-PrepDataFor3DEnvironments.ijm Post-AIVE-StrayVesicleSeparator.ijm"
+    },
+    {
+      "title": "",
+      "instruction": "This stage is really designed for handling multiple CLAHE processed stack s at the same time. You can still follow this procedure if you only have one file to process, but you can also just apply the 10nm radius median filter manually, then save it as a separate file. Create a new sub-directory called &#34;CLAHE Median&#34; in the &#34;0 Originals&#34; directory, then transfer the CLAHE processed stacks into the new directory. Drag and drop the &#34;AIVE-Macro4-MedianFilterTheCLAHEstacks.ijm&#34; script into the FIJI window. Run the script. Select the &#34;CLAHE Median&#34; sub-directory. Wait for process to finish. A 3D median blur will now have been applied to the CLAHE results, to denoise them."
+    },
+    {
+      "title": "",
+      "instruction": "Drag and drop the &#34;AIVE-Macro3-MergeMLoutputsWithClasses.ijm&#34; script into the FIJI window. Run the script. Select the &#34;Raw Membrane Predictions&#34; . Select the &#34;2 Processed Masks&#34; sub-directory. Select the &#34;3 Membrane Merge&#34; sub-directory. Wait for process to finish. The organelle masks will have been merged with the membrane predictions."
+    },
+    {
+      "title": "",
+      "instruction": "Drag and drop the &#34;AIVE-Macro2-GaussianFilterTheClassBinaries.ijm&#34; script into the FIJI window. Run the script. Select the &#34;1 Masks&#34; sub-directory. select the &#34;2 Processed Masks&#34; sub-directory. Wait for process to finish. The boundaries of each individual binary mask will now be blurred."
+    },
+    {
+      "title": "",
+      "instruction": "Open FIJI/ImageJ."
+    },
+    {
+      "title": "",
+      "instruction": "Open WEKA (Waikato Environment for Knowledge Analysis) , and start the command line dialog by clicking the &#34;Simple CLI&#34; button."
+    },
+    {
+      "title": "",
+      "instruction": "Using the following command, combine each pair of ARFF files in your &#34;Training Data Directory&#34;, until all files are combined into a single ARFF file (Edit the directory &amp; file names to suit your needs): java weka.core.Instances append &#34;C:\\Training Data Directory\\ File1.arff &#34; &#34;C:\\Training Data Directory\\ File2.arff &#34; &gt; &#34;C:\\Training Data Directory\\ File1+File2.arff &#34;"
+    }
+  ],
+  "fetched_at": "2026-06-16T22:00:12.303998Z",
+  "stats": {
+    "views": 143,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false
+}

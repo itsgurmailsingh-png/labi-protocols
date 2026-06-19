@@ -1,0 +1,59 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "57520",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.b4eqqtdw",
+  "title": "Data normalisation of RT-qPCR data for detection of SARS-CoV-2 in wastewater ",
+  "author": "Adrian Roberts",
+  "doi": "dx.doi.org/10.17504/protocols.io.b4eqqtdw",
+  "source_url": "https://www.protocols.io/view/data-normalisation-of-rt-qpcr-data-for-detection-o-b4eqqtdw",
+  "fetched_at": "2026-06-16T21:00:38.089901Z",
+  "stats": {
+    "views": 532,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false,
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Normalisation requires population size and water flow at the collection site. Depending on the level of information available for particular site and date (such as ammonia content in wastewater or historical flow) different processing paths are available, as described below in the step by step algorithm. The decision process is also described in the following figure"
+    },
+    {
+      "title": "",
+      "instruction": "For illustration purposes we present the extract of the code for prediction of ammonia and flow which is used in the BioSS processing pipeline in R. normalisation - ammonia prediction library(mgcv)Rdate = as.Date(strptime(RNA$Date, \"%m/%d/%Y\"))Rfdate = as.numeric(Rdate)[!is.na(RNA$Ammonia..mg.l.)]Rfsite = factor(RNA$Site)[!is.na(RNA$Ammonia..mg.l.)]RfAm = RNA$Ammonia..mg.l.[!is.na(RNA$Ammonia..mg.l.)]flowobj = gam(log(RfAm + 1) ~ s(Rfdate, k = 90) + Rfsite) #k chosen by preliminary analysis# flow ammonia modelwwdat$Flow-> FlowMeanAm = wwdat$AmmoniaPop = rep((sitedata$PercentageNationalPop * sitedata$NationalPop)[isite], length(FlowMean))# 0 = has flow, 1 = has only ammonia, 2 = has neitherdataType = is.na(FlowMean)*(1+ is.na(Am))# do we have *any* flow/ammonia data for site?if ((sum(!is.na(wwdat$Flow)) +sum(!is.na(wwdat$Am)) )>0){minAm = min(Am, na.rm=T)#fill in missing ammonias with ammonia from modelif (sum(!is.na(Am)) > 0) Am[is.na(Am)] = exp(predict(flowobj, data.frame(Rfdate = as.numeric(as.Date(strptime(wwdat$Date, \"%m/%d/%Y\"))), Rfsite = wwdat$Site))[is.na(Am)]) - 1Am = pmax(Am, minAm) #do not allow ammonia to go below minimum seenif (sitename %in% ammoniacoef$site){param = ammoniacoef[ammoniacoef$site == sitename,]# note adrian is based on log10 values, we reverse the reparameterisationpred = matrix(rep(10^(param$intercept+param$slope.lgpop*log10( param$Population )+param$slope.lgammonia*log10 (Am[is.na(wwdat$Flow)])), 3), ncol = 3)} else {# not in ammonia est, use unknownparam = ammoniacoef[ammoniacoef$site == \"Unknown\",]pred = matrix(rep(10^(param$intercept+param$slope.lgpop*log10( Pop[1] )+param$slope.lgammonia*log10 (Am[is.na(wwdat$Flow)])), 3), ncol = 3)}FlowMean[is.na(wwdat$Flow)] = pred[,1]# if prediction fails use meanFlowMean[is.na(FlowMean)] = mean(FlowMean, na.rm = T) } else {# if a site has no flow/am data at all, use a national linear model based on populationlogP = log10((sitedata$PercentageNationalPop * sitedata$NationalPop)[match(RNA$Site, sitedata$Simple)])pred = predict(lm(log10(RNA$Flow) ~logP), newdata = list(logP = log10(Pop)),interval = \"prediction\", level = WaterPredLev)FlowMean[is.na(FlowMean)] = 10^pred[,1]}var2 = wwdat$N1.Reported*FlowMean/(sitedata$PercentageNationalPop[isite]*sitedata$NationalPop[1]) /1e6 # calc Mgc/p/d"
+    },
+    {
+      "title": "",
+      "instruction": "If flow data exist for a specific site and date (Flow[site, date]) GO TO normalisation step 8 , otherwise continue."
+    },
+    {
+      "title": "",
+      "instruction": "If flow data is not available, but measurements of ammonia concentration exist for a specific site and date (Am[site, date]) GO TO prediction step 7 , otherwise continue."
+    },
+    {
+      "title": "",
+      "instruction": "The missing amonia values can be infered from a generalized additive (GAM) spline model which fits sea minAm = min(Am) am_model = gam(log(Am + 1) ~ s(dates, k = 90) + sites) Am[site, date] = exp(predict(am_model, date, site)) - 1 Am = max(Am, minAm) sonal ammonia data. minAm = min(Am) am_model = gam(log(Am + 1) ~ s(dates, k = 90) + sites) Am[site, date] = exp(predict(am_model, date, site)) - 1 Am = max(Am, minAm) Observations: - the smoothing parameter k=90 was chosen by preliminary analysis - the predicted value is prevented from being l ower than ever observed GO TO to flow prediction step 7"
+    },
+    {
+      "title": "",
+      "instruction": "If a site has no flow/ammonia data at all, use a national linear model based on population to predict flow flow_model = lm(log10(Flow) ~ logPopulations) pred = predict(flow_model, site_population) Flow[site, date] = 10^pred Observations: - One has to take into account that by using flow historical average, the seasonal aspects are not considered, such as heavier rain fall in particular sites and seasons. GO TO to normalisation step 8"
+    },
+    {
+      "title": "",
+      "instruction": "When flow measurements are unavailable, but ammonia concentration in wastewater is available (directly or by estimation), a linear mixed statistical model can be used to estimate flow. More specifically, a random coefficients model is used combining data from ammonia content and the population of each specific site. In this model the log of the flow is regressed on the log of the population and log of ammonia, which are used as fixed effects. This model is used to calculate site specific coeficients, for those sites which have at least 25 dates with both ammonia and flow data availables. For the remaining sites the &#34;fixed&#34; effects are used. flow_model = lmer(logflow ~ logpop + logammonia + (logammonia | site), REML=TRUE, data) ammoniacoef[site] = coef(flow_model)[data_rich_sites] ammoniacoef[&#34;Unknown&#34;] = fixef(flow_model) The precomputed parameters are used to predict the flow (a table wth site specif coeficients is attached to this protocol). param = ammoniacoef[site] || ammoniacoef[&#34;Unknown&#34;] Flow[site, date ] = 10^(param$intercept+param$slope.lgpop*log10( site_population ) + param$slope.lgammonia*log10(Am[site,date])) Observations: - The coefficients parameters were update only every so often, with a degree of care like identifying outliers in the data. flow_mixed_model_coefficients_2021-08-10.csv GO TO to normalisation step 8"
+    },
+    {
+      "title": "",
+      "instruction": "To produce a daily value of RNA copies per person, the raw RNA measurement is multiplied by the daily flow total, and divided by the population served at each site. The flow for a specific site (waterworks location) is either measured directly or estimated using one of the methods from above. normalized = gen_copies*Flow[site, date]/(site_population)/1e6 # unit [Mgc/p/d]"
+    },
+    {
+      "title": "",
+      "instruction": "If there are no measurements for flow or ammonia concentration for a site on any dates GO TO step 5 , or, alternatively, go to step 6 if historical flow is available."
+    }
+  ]
+}

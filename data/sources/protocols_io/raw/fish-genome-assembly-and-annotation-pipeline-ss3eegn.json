@@ -1,0 +1,71 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "14907",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.ss3eegn",
+  "title": "Fish genome assembly and annotation pipeline",
+  "author": "Chang Li",
+  "doi": "dx.doi.org/10.17504/protocols.io.ss3eegn",
+  "source_url": "https://www.protocols.io/view/fish-genome-assembly-and-annotation-pipeline-ss3eegn",
+  "fetched_at": "2026-06-16T21:17:13.984522Z",
+  "stats": {
+    "views": 1101,
+    "runs": 0,
+    "bookmarks": 3,
+    "comments": 0,
+    "forks": 1
+  },
+  "peer_reviewed": false,
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Get raw sequencing data in Fastq format. Filter the input raw sequences by using SOAPnuke (v.1.5.6). using parameters &#34; -l 5 -q 0.5 -n 0.1 -Q 2 --seqType 0&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Estimate the genome size (650 Mb) with k-mer analysis. k=17; about 27.7Gb reads from as input; the genome size with the formula: G = N*(L − 17 + 1)/K_depth, where N and L are the total number of reads and the length of reads, respectively, and K_depth indicates the frequency of k-mers occurring more frequently than the others."
+    },
+    {
+      "title": "",
+      "instruction": "1) Run SOAPdenovo2(v. 2.04.4) to assemble our genome. 2) Perform krskgf (v. 1.19) and Gapcloser (v. 1.10) to further close gaps in our genome obtained in step3. 1) performing &#34;pregraph ( -K 57 -p 10)-&gt;contig (-g)-&gt;map (-p 10 -k 39)-&gt;scaff(-p 10)&#34; modes in turn; 2) using reads from all insert-size libraries."
+    },
+    {
+      "title": "",
+      "instruction": "1) Run RepeatModeler to build de novo library based on the input assembled genome sequence. 2) Basing on the library constructed in step 5 as database, run RepeatMasker (v. 3.3.0) to find and then classify the repetitive sequences. 2) using parameters &#34;-nolow -no_is -norna -parallel 1&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Run TRF (v. 4.09), RepeatMasker and RepeatProteinMask (v. 3.3.0) to identify repeats in the genome at DNA and protein level, respectively, by aligning sequences against Repbase library (v. 17.01). using parameters &#34;-noLowSimple -pvalue 0.0001&#34; when running RepeatProteinMask"
+    },
+    {
+      "title": "",
+      "instruction": "Mask these repetitive regions obtained above (step 5-7) with &#39;N&#39;s. Before gene prediction, mask the TEs in genome."
+    },
+    {
+      "title": "",
+      "instruction": "Run Augustus (v. 2.5.5) and Genscan (v. 2.1) to de novo predict genes in the repeat-masked genome sequences. using parameters &#34;--species=Lateolabrax_maculatus --uniqueGeneId=true --noInFrameStop=true --gff3=on --strand=both&#34; when running Augustus; using default parameters when runing Genescan."
+    },
+    {
+      "title": "",
+      "instruction": "Download protein sequences of teleost species (Danio rerio (NCBI, GenBank ID:50), D. labrax (NCBI, GenBank ID:2659), Gasterosteus aculeatus (NCBI, GenBank ID:146), Lates calcarifer (NCBI, GenBank ID:14180), Oreochromis niloticus (NCBI, GenBank ID:197), Oryzias latipes (NCBI, GenBank ID:542), Tetraodon nigroviridis (NCBI, GenBank ID:191) and Takifugu rubripes (NCBI, GenBank ID:63)), then align these against our masked genome sequences with BLAT, and then based on the BLAT mapping results, run GeneWise (v. 2.2.0 ) to predict genes. with parameters &#34;--max divergence rate 0.3 --extend length for both sides of regions 2000&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Download transcriptome data of the spotted sea bass from NCBI. The data was assembled by Trinity (v.2013.11). Mapp this sequence to our genome with BLAT and then based on the BLAT results, reduced redundancy genes. default parameters"
+    },
+    {
+      "title": "",
+      "instruction": "Integrate genes predicted in step 9-11 to obtain the consensus gene set by using GLEAN. filtering with criterion &#34;overlap cutoff 0.8 and at least one homolog support&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Added the genes which were supported by the transcriptome data and D. labrax’s based prediction after manual evolution to the GLEAN gene set."
+    },
+    {
+      "title": "",
+      "instruction": "Map protein sequences of the final gene set to existing databases to identify their functions or motifs, such as SwissProt, TrEMBL, KEGG, InterPro. SwissProt, TrEMBL and KEGG: using BLASTP; Interpro: using InterProScan (version 4.7) with seven different models (Profilescan, blastprodom, HmmSmart, HmmPanther, HmmPfam, FPrintScan and Pattern-Scan)"
+    }
+  ]
+}

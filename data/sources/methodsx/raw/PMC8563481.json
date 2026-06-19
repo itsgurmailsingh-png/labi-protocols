@@ -1,0 +1,144 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC8563481",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563481/",
+  "doi": "10.1016/j.mex.2021.101499",
+  "title": "Pipeline for Annual Averaged Wind Power Output Generation Prediction of Wind Turbines Based on Large Wind Speed Data Sets and Power Curve Data",
+  "author": "Wacker, Schlüter",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "Graphical abstract",
+  "steps_raw": [
+    {
+      "title": "Method details",
+      "instruction": "Let {vj}j=1N be a time series of measured wind speed at a certain weather station. Let (vk,Pk) be measured power curve data of a manufacturer’s wind turbine prototype. These data sets build our foundation for our wind power output generation prediction algorithm. We portray the graphical flowchart of our algorithm in Figure 1. All steps coincide with our procedure presented in our abstract. We mainly follow our preprint but add further details regarding our methods. However, we especially discuss power curve modeling and uncertainty quantification in a more detailed manner.Fig. 1A flowchart of our abstract framework for annual averaged power output generation predictionFig. 1"
+    },
+    {
+      "title": "Step 1: Processing of wind speed data sets",
+      "instruction": "In our complete pipeline, we process wind speed data sets provided by the German Weather Service (DWD) [5] and National Centers for Environmental Information [6]. Since both data sets differ, we have to adjust our processing steps accordingly."
+    },
+    {
+      "title": "Step 1: Processing of wind speed data sets",
+      "instruction": "Let us first consider wind speed data sets from the German Weather Service. We take a closer look at data from the weather station located at Bremen, Germany (Station ID: 00691). Data can be extracted from the corresponding ZIP-archive and data are contained in the text-file named produkt_ff_stunde_00691.txt. The fourth column consists of measured wind speed with physical unit ms."
+    },
+    {
+      "title": "Step 1: Processing of wind speed data sets",
+      "instruction": "Image 2"
+    },
+    {
+      "title": "Step 1: Processing of wind speed data sets",
+      "instruction": "Missing data are replaced by −999. This fact implies that we have to delete these entries from our code. As an outlook, we also need to delete zero wind speed values from this column for estimation of two-parameter Weibull distributions (compare Step 3)."
+    },
+    {
+      "title": "Step 1: Processing of wind speed data sets",
+      "instruction": "International data sets from National Centers for Environmental Information need different treatment. A short extract of such files is given below."
+    },
+    {
+      "title": "Step 1: Processing of wind speed data sets",
+      "instruction": "Image 3"
+    },
+    {
+      "title": "Step 1: Processing of wind speed data sets",
+      "instruction": "The ninth column contains wind speed values scaled by a factor of ten. For this reason, we have to rescale these data by dividing these values by a factor of ten. Since international data sets are archived for every year, we must put together complete time series. If we want to adjust the given wind speeds of the weather stations at reading height to hub height, we need so-called power laws [7], [8]. If hr is the reading height and vr is the measured wind speed at reading height, the extrapolation power law for the new wind speed v at hub height h readsv=vr·(hhr)αwhere α is an empirical coefficient depending on the location’s roughness. For further details, we refer interested readers to [7], [8]. Concluding this step, we provide short pseudo-code which describe our wind speed processing procedure in Algorithm 1.Algorithm 1Pseudo-code for wind speed data processingAlgorithm 1"
+    },
+    {
+      "title": "Step 1: Processing of wind speed data sets",
+      "instruction": "Since all following steps are the same for different time series of wind speeds, we restrict our discussion and results to the case of wind speeds measured at reading height. However, all our mentioned steps can still be carried out if we apply the power law to the wind speeds at our pre-processing step 1."
+    },
+    {
+      "title": "Step 2: Power curve modeling",
+      "instruction": "A typical course of wind power curves is shown in Figure 2.Fig. 2Plot of a general wind power curveFig. 2"
+    },
+    {
+      "title": "Step 2: Power curve modeling",
+      "instruction": "We observe that wind power curves can be described by piecewise defined functions. This general approach reads(1)PPower(v)={0,v∈[0,vcut-in)q(v),v∈[vcut-in,vrated]Prated,v∈(vrated,vcut-off)0,v∈[vcut-off,∞)where q(v) is an arbitrary function on [vcut-in,vrated]. Here, v represents wind speed while vcut-in, vrated and vcut-off denote cut-in wind speed, rated wind speed and cut-off wind speed respectively. Prated is the rated power output."
+    },
+    {
+      "title": "Step 2: Power curve modeling",
+      "instruction": "Before considering power curve modeling in more detail, we summarize given wind speed data from manufacturer Vestas [9] in Table 1.Table 1Hourly Power Output Data For Wind Turbine Vestas V112Table 1Wind SpeedPower OutputWind SpeedPower Output0.0013.530750.5014.030751.0014.530751.5015.030752.0015.530752.5016.030753.02616.530753.57317.030754.013317.530754.520718.030755.030218.530755.541619.030756.055419.530756.571720.030757.090720.530757.5112621.030758.0137521.530758.5165222.030759.0198522.530759.5228223.0307510.0258523.5307510.5282124.0307511.0299724.5307511.5305025.0307512.0306725.5012.5307426.0013.0307526.50"
+    },
+    {
+      "title": "Step 2: Power curve modeling",
+      "instruction": "We clearly see that we can algorithmically determine vcut-in, vrated and vcut-off from these data. Determination of vcut-in is portrayed in Algorithm 2.Algorithm 2Pseudo-code for determination of vcut-inAlgorithm 2"
+    },
+    {
+      "title": "Step 2: Power curve modeling",
+      "instruction": "Determination of vrated is shown in Algorithm 3.Algorithm 3Pseudo-code for determination of vratedAlgorithm 3"
+    },
+    {
+      "title": "Step 2: Power curve modeling",
+      "instruction": "Finally, our procedure for calculation of vcut-off is given in Algorithm 4.Algorithm 4Pseudo-code for determination of vcut-offAlgorithm 4"
+    },
+    {
+      "title": "Step 2: Power curve modeling",
+      "instruction": "Now, we can use these results to interpolate power curve data points by certain power curve models. We restrict ourselves to two methods of cubic spline interpolation and logistic regression. For further models, we refer interested readers to [2]."
+    },
+    {
+      "title": "Step 2: Power curve modeling",
+      "instruction": "At first, we begin with cubic spline interpolation. Let v1,…,vM∈[vcut-in,vrated] be M ascending data points in the interval of interest, i.e.vcut-in=v1<v2<…<vM−1<vM=vrated.Our cubic spline interpolation model qcub reads(2)qcub(v|θcub)={a1·v3+b1·v2+c1·v+d1,v∈[v1,v2)a2·v3+b2·v2+c2·v+d2,v∈[v2,v3)......aM·v3+bM·v2+cM·v+dM,v∈[vM−1,vM]where al,bl,cl,dl for l∈{1,…,M} are all cubic interpolation parameters and θcub all summarizes them in one vector. To build the linear system, all data points have to be passed and first derivatives must be continuous. We further need to define appropriate boundary conditions. For further details on cubic spline interpolation methods, we refer interested readers to Fritsch and Carlson [10] or Hyman [11]. With respect to the scripting language R, all these variants are implemented by splinefun."
+    },
+    {
+      "title": "Step 2: Power curve modeling",
+      "instruction": "Let us now consider logistic regression. The logistic regression model function qlog is defined by(3)qlog(v|θlog)=BC+D·exp(−E·v+F)where B,C,D,E,F are all logistic regression parameters which are summarized in θlog. To apply ordinary least-squares regression, we define an optimization cost function J by(4)J(θlog)=∑j=1M(qlog(vj|θlog)−Pj)2where (vj,Pj) are given power curve data points. We refer interested readers to the optimization book of Nocedal and Wright for details on different algorithms to solve this problem formulation [12]."
+    },
+    {
+      "title": "Step 3: Wind speed probability distribution modeling",
+      "instruction": "A given time series {vk}j=1N of N wind speed data points is our input for wind speed probability distribution modeling. Since we only can provide a non-exhaustive overview on this vast field, we refer interested readers to the review by Wang and co-authors [13]."
+    },
+    {
+      "title": "Step 3: Wind speed probability distribution modeling",
+      "instruction": "We concentrate on three probability speed distribution models which are often applied in wind speed modeling [4] - two-parameter Weibull distributions, four-parameter Kappa distributions and five-parameter Wakeby distributions."
+    },
+    {
+      "title": "Step 3: Wind speed probability distribution modeling",
+      "instruction": "Let us start with the two-parameter Weibull distribution, the most-common used wind speed probability distribution in wind speed analytics. It is often obtained by maximizing log-likelihood functions. This method has favorable statistical properties. Recently, Wacker, Kneib and Schlüter also proved that this functional has a unique global maximizer [14]. Hence, numerical optimization simplifies in this case."
+    },
+    {
+      "title": "Step 3: Wind speed probability distribution modeling",
+      "instruction": "The two-parameter Weibull distribution reads(5)pWei(v|AWei,kWei)=kWeiAWei·(vAWei)kWei−1·exp(−(vAWei)kWei)for all v>0 where AWei denotes the scale parameter and kWei the shape parameter of the corresponding distribution [15]. The corresponding maximum log-likelihood function is defined by(6)L(AWei,kWei)=N·ln(kWei)−N·kWei·ln(AWei)+(kWei−1)·∑j=1Nln(vj)−∑j=1N(vjAWei)kWei.We determine first derivatives of L by(7)∂L(AWei,kWei)∂AWei=−N·kWeiAWei+∑j=1NkWeiAWei·(xjAWei)kWeiand(8)∂L(AWei,kWei)∂kWei=NkWei−N·ln(AWei)+∑j=1Nln(vj)−∑j=1Nln(vjAWei)·(vjAWei)kWeirespectively. If we set these equations equal to zero, we will obtain a nonlinear system of equations which can be solved, for example, by Newton methods [12]. We use such methods which are supplied by R-packages EnvStats\n[16] or fitdistrplus\n[17]."
+    },
+    {
+      "title": "Step 3: Wind speed probability distribution modeling",
+      "instruction": "Let θKap=(AKap,kKap,μKap,hKap) be the summarizing vector of all four parameters for the Kappa distribution. The four-parameter Kappa distribution is then defined by(9)pKap(v|θKap)=1AKap·{1−kKap·(v−μKap)AKap}1kKap−1·{FKap(v)}1−hKapfor all v≥0 with scale parameter AKap, shape parameter kKap, location parameter μKap and second shape parameter hKap. Here, the cumulative distribution function is given by(10)FKap(v|θKap)={1−hKap·{1−kKap·(v−μKap)AKap}1kKap}1hKap."
+    },
+    {
+      "title": "Step 3: Wind speed probability distribution modeling",
+      "instruction": "Finally, let θWak=(AWak,γWak,kWak,μWak,hWak) be the summarizing vector of all five parameters for the Wakeby distribution. The five-parameter Wakeby distribution is then defined by(11)pWak(v|θWak)={AWak·{1−FWak(v)}γWak−1+kWak·{1−FWak(v)}−kWak−1}−1for all v≥0 with scale parameter AWak, second scale parameter γWak, shape parameter kWak, location parameter μWak and second shape parameter hWak. Here, the cumulative distribution function is implicitly given by(12)FWak−1(v|θWak)=μWak+AWakμWak·{1−(1−FWak(v))γWak}−kWakhWak·{1−(1−FWak(v))−hWak}.In contrast to two-parameter Weibull and four-parameter Kappa distributions, this implies that five-parameter Wakeby distributions are only implicitly defined. An often applied method to estimate parameters in four-parameter Kappa and five-parameter Wakeby distributions is the estimation method of L-moments. This method is implemented in the R-package lmomco from Hosking. For details on this estimation technique, we refer interested readers to Hosking’s paper [18] since we use Hosking’s Fortran implementation."
+    },
+    {
+      "title": "Step 4: Calculation of annual averaged wind power output generation values",
+      "instruction": "The important output of algorithmic procedure are semi-empirical and estimated annual averaged wind power output generation values from from arbitrary power curves PPower and arbitrary wind speed probability distributions pWind. This calculation is based on approximations of finite integrals."
+    },
+    {
+      "title": "Step 4: Calculation of annual averaged wind power output generation values",
+      "instruction": "The semi-empirical averaged hourly wind power output generation value reads(13)PHourly,Semi−Emp.¯≈∑j=1NPPower(vj)Nfor all wind speed data vj≥0 for all j∈{1,…,N} with physical unit kWh−1. Finally, the semi-empirical averaged annual wind power output generation value is obtained by calculating(14)PAnn.,Semi-Emp.¯=365·24·PHourly,Semi-Emp.¯1000000with physical unit GWyear. These values serve as comparative values for our estimations."
+    },
+    {
+      "title": "Step 4: Calculation of annual averaged wind power output generation values",
+      "instruction": "Now, we are able to approximate estimation values based on finite integrals. Let us begin with estimated hourly averaged wind power output generation values. We calculate them by(15)PHourly,Th.¯=∫0∞PPower(v|θPower)·pWind(v|θWind)dv≈∫vcut-invcut-offPPower(v|θPower)·pWind(v|θWind)dv.For example, one could use left-sided Riemannian sums(16)PHourly,LRS¯≈∑m=10·vcut-in10·vcut-offpWind(m10|θWind)·PPower(m10|θPower)·110because wind speeds are normally measured in 0.1 steps. Other possibilities are right-sided Riemannian sums, trapezoidal approximations or Simpson’s rule. Since numerical integration is a vast field, we refer interested readers to the book by Davis and Rabinowitz [19]. This integral yields one hourly averaged wind power output generation value with physical unit kWh−1. Finally, the annual averaged wind power output generation value is given by(17)PAnn.,Th.¯=365·24·PHourly,Th¯1000000and the physical unit of annual averaged wind power output generation values reads GWyear."
+    },
+    {
+      "title": "Step 5: Goodness-of-fit measures and uncertainty quantification",
+      "instruction": "Since we want to compare different fits to curves, we often challenge the problem of comparing them. Coefficients of determination are applied to compare parametric models. Let vi∈[vcut-in,vcut-off] be all measured wind speeds which are larger than the cut-in wind speed vcut-in and which are smaller than the cut-off wind speed vcut-off. Denote empirical wind speed probabilities by pEmp.(vi) and estimated wind speed probabilities of certain wind speed distribution models by pWind(vi). The mean of all empirical wind speed probabilities is represented by pEmp.(vi)¯. The coefficient of determination reads(18)R2=1−∑vi(pEmp.(vi)−pWind(vi))2∑vi(pEmp.(vi)−pEmp.(vi)¯)2where summations are performed over all measured wind speeds which are larger than vcut-in and which are smaller than vcut-off."
+    },
+    {
+      "title": "Step 5: Goodness-of-fit measures and uncertainty quantification",
+      "instruction": "We discuss error analysis on this two-parameter Weibull distributions in a more detailed manner. Our analysis relies on Taylor’s book [20]. Our starting point is (15). Assume both functions pWei and PPower to be uncertain. Here, the wind speed probability distribution function is the two-parameter Weibull distribution. Assume that the variables x1,…,xn are measured with uncertainties δx1,…,δxn and these values are used to compute a function value f(x1,…,xn). If formula (3.48)δf≤∑j=1n|∂f∂xj|·δxjfor the uncertainty δf of f from [20] is applied, the lower bound error of pWei readspWei(v|AWei,kWei)−δpWei≥pWei(v|AWei,kWei)−∂pWei(v|AWei,kWei)∂v·Δv−∂pWei(v|AWei,kWei)∂AWei·σAWei−∂pWei(v|AWei,kWei)∂kWei·σkWeiwhere σAWei and σkWei are standard deviations of AWei and kWei respectively and Δv is the absolute measurement error in wind speed measurements. The lower bound error of PPower is given byPPower(v|θWind)−δPPower≥PPower(v|θWind)−∂PPower(v|θWind)∂v·Δvwhere we neglect uncertainties in our parameter vector θWind because we mainly apply cubic spline interpolation. Consequently, the absolute error ΔPHourly,Th.¯ is calculated by(19)ΔPHourly,Th.¯=∑m=10·vcut-in10·vcut-off(110·pWind(m10|θWind)·PPower(m10|θPower)×{|∂pWind∂v(m10|θWind)|·Δv+|∂pWind∂AWei(m10|θWind)|·σAWei+|∂pWind∂kWei(m10|θWind)|·σkWei}+|∂PPower∂v(m10|θPower)|·Δv−|∂PPower∂v(m10|θPower)|·Δv·{|∂pWind∂v(m10|θWind)|·Δv+|∂pWind∂AWei(m10|θWind)|·σAWei+|∂pWind∂kWei(m10|θWind)|·σkWei})as we multiply pWei(v|AWei,kWei)−δpWei and PPower(v|θWind)−δPPower to obtain our approximate lower bound. The same argument holds for upper bounds. The first derivatives of two-parameter Weibull distributions read∂pWei(v|AWei,kWei)∂v=(kWei−1)·kWei·exp(−(vAWei)kWei)·(vAWei)kWei−2AWei2−kWei2·exp(−(vAWei)k)·(vAWei)2·kWei−2AWei2,∂pWei(v|AWei,kWei)∂AWei=kWei2·exp(−(vAWei)kWei)·(vAWei)2·kWeiAWei·v−kWei2·exp(−(vAWei)kWei)·(vAWei)kWeiAWei·vand∂pWei(v|AWei,kWei)∂kWei=exp(−(vAWei)kWei)·(vAWei)kWei−1AWei+kWei·exp(−(vAWei)kWei)·(vAWei)kWei−1·ln(vAWei)AWei−kWei·exp(−(vAWei)kWei)·(vAWei)2·kWei−1·ln(vAWei)AWei."
+    },
+    {
+      "title": "Step 5: Goodness-of-fit measures and uncertainty quantification",
+      "instruction": "Since one main goal of this article is the prediction of annual averaged wind power output generation values, absolute differences of such values are suitable comparative measures. The absolute difference between semi-empirical and estimated annual averaged wind power output generation values reads(20)ΔPValues=|PAnn.,Semi-Emp.¯−PAnn.,Th.¯|."
+    },
+    {
+      "title": "Step 6: Summary of results",
+      "instruction": "All obtained data are summarized in one file. We list the important results that one might want access."
+    },
+    {
+      "title": "Step 6: Summary of results",
+      "instruction": "These data are saved in one file named Results_01.txt. A reduced version of collected data is saved in one file named Results_02.txt."
+    }
+  ],
+  "materials": [],
+  "fetched_at": "2026-06-19T00:40:19.910456+00:00"
+}

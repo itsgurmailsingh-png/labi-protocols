@@ -1,0 +1,131 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "84859",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.n92ldm98xl5b/v1",
+  "title": "WGSA2 workflow - a tutorial",
+  "author": "Angelina Angelova",
+  "doi": "dx.doi.org/10.17504/protocols.io.n92ldm98xl5b/v1",
+  "source_url": "https://www.protocols.io/view/wgsa2-workflow-a-tutorial-cw43xgyn",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "(T) Trimming &amp; filtering of raw reads Trimming and filtering steps are performed with fastp . Note: This step is not as thorough as the recommended pre-processing performed by our QC pipeline and therefore should not be considered as its replacement. If you have run your dataset through the QC pipeline, feel free to leave this option unselected. In this quick trim and filtering step, WGSA2 verifies that the reads from the submitted dataset have met the minimal quality and length standards required for assembly. However, if the user has selected customizations through the &#34;Additional trim &amp; filter&#34; option in the Job options menu (see step 6 of this protocol), then those more stringent parameters will be applied. Additional trim &amp; filter If you choose to select the additional trim and filter checkbox from the WGSA2 options menu (see step 6 of this protocol), a few more options will appear where you can provide more detail for the trimming &amp; filtering parameters of your choice."
+    },
+    {
+      "title": "",
+      "instruction": "(D) Decontamination Performed with Kraken 2 . In the pre-assembly processing, the dataset undergoes a thorough cleaning process to remove host DNA and non-informative elements, such as homopolymeric or simple sequence repeats. This is achieved by utilizing a Host Decontamination database , containing a curated collection of thematically related host organism genomes. The decontamination process is crucial for reducing the dataset size, by excluding biologically irrelevant data (non-informative host DNA, junk and repeat sequences). Thus the assembly quality of each sample is significantly improved. The Host Decontamination database used in this processing step, is user-electable in the Job options menu (see step 6 of this protocol). By default, WGSA2 will decontaminate any dataset against the Human &amp; Mouse DB , however you may elect (from the drop-down menu of the Job Options) a more appropriate decontamination database for your submitted dataset, depending on the host organism or environment from which your dataset&#39;s microbial community is collected . Host Decontamination DB choices All decontamination databases of WGSA2 are custom curated based on a theme of host organisms or environments that a microbial community might be sourced from. The user choices for Host Decontamination DBs are: Human &amp; Mouse Host DB (includes human + mouse host genomes)[ default DB for quickest removal of most common host contaminants] Marine Hosts DB (includes human + 18 common marine host organism genomes) Mosquito Hosts DB (includes human + 2 common mosquito species genomes) Nematode Hosts DB (includes human + 15 common nematode host organism genomes) Rodent Hosts DB (includes human + 5 common rodent host organisms) Primates Hosts DB (includes human + 9 common primate host organisms) Plant Hosts DB (includes human + &gt;110 common plant host organisms) Please see WGSA2&#39;s documentation page for more detail on the specific genomes and assembly versions each database contains."
+    },
+    {
+      "title": "",
+      "instruction": "Taxonomic profiling Performed with Kraken 2 By default, WGSA2 generates taxonomic profiles from the TEDreads of every sample individually, utilizing the Kraken2 tool. This highly accurate and computationally efficient method for taxonomic identification relies on a comprehensive database of k-mers derived from entire genomes of known organisms. This enables accurate taxonomic assignments for both coding and non-coding sequences, contained within the TEDreads. For this processing step, the taxonomic classification DB is also user-electable . The applied default is a Kraken2 version of NCBI&#39;s RefSeq DB (Kraken2 Standard Reference Genomes DB; kr2_REFdb ). However, depending on interest and dataset source, user may choose one of a few other options: The Mouse Gastrointestinal Gut Catalogue DB ( MGBCdb ), containing &gt;26.6K prokaryotic organisms characteristic for mouse gut microbiomes (both reference and non-reference organisms), and the Eukaryotic Pathogens DB ( EuPATHdb ), containing genomes of known eukaryotic pathogens. For more information about the available classification DBs, please, refer to WGSA2 documentation page . To have WGSA2 perform TAX classification based on a different DB, other than the default, the user may elect a taxonomic classification DB in the Job options menu (see step 6 of this protocol) upon job submission. Taxonomic classification DB"
+    },
+    {
+      "title": "",
+      "instruction": "(E) Error-correction Performed automatically with fastp . PE sequences are merged, and sequencing errors are corrected within the PE overlapping regions. This process is specifically designed to improve assembly efficiency and success. This process is mandatory for the pipeline and undergoes no customization (see step 5, Pipeline selection section)"
+    },
+    {
+      "title": "",
+      "instruction": "Assembly Performed by metaSPAdes assembler In this step, a de novo assembly of the TED reads is performed for each sample independently. This produces long contiguous sequences (contigs), that are then arranged, oriented, and connected (with Ns), based on PE data of the incorporated reads until scaffolds of contigs are achieved. As metagenomic datasets are composed of numerous genomes, the produced assemblies are composed of numerous long (and short) scaffolds, each representing a genomic loci of a contained organism. This is a rather time and resource consuming step and tends to take even longer for large datasets containing complex communities! Please be patient with the WGSA2 processing."
+    },
+    {
+      "title": "",
+      "instruction": "Assembly processing - Abundance scoring Performed by SAMtools and some math The aligned reads are evaluated (GC content, plus/minus strand alignments) and enumerated. Abundance scores are produced per scaffold per sample (scaffold length, depths, coverage, reads per million (RPM), etc.), and other statistics are collected. This information is used for downstream abundance assessments, as well as every other downstream processing step of the pipeline."
+    },
+    {
+      "title": "",
+      "instruction": "Gene prediction Performed with Prodigal The tool scans through scaffold sequence in each sample and predicts potential partial or full-length continuous coding regions (features, genes) that commonly occur in prokaryotes, and unicellular eukaryotes."
+    },
+    {
+      "title": "",
+      "instruction": "Assembly processing - Read mapping (read alignments) Performed with Bowtie2 and SAMtools In this step the TED reads are again used to align to the corresponding sample’s scaffolds (a process called ‘mapping’). The alignment of the reads is also QC’d and cleaned (de-replicated, mate pairs are fixed, etc.) to ensure each pair of reads maps best and only once to the produced assembly. This is one of the most time and resource consuming stages of the pipeline and depending on sample size may take longer than a few hours per sample. Parallelization is used to achieve assembly of multiple samples simultaneously (however, patience is still required). Pipeline failures in this processing stage suggests problematic sample depths or read quality."
+    },
+    {
+      "title": "",
+      "instruction": "Gene abundance scoring Performed by VERSE tool (used setting: “featureCounts”) and pipeline math Gene abundance scores are computed by enumerating the number of reads aligned to the gene coordinates of the scaffold. Reads per Million (RPM) mapped reads and transcripts per million (TPM) values are calculated based on per transcript instance in each scaffold in each sample and produce the abundance scores of each gene. In WGSA2 pipeline, the notation &#39;iTPM&#39; is used to denote conventional TPM scores. This is to distinguish from another statistic of the pipeline &#39;geneTPM&#39; which represents calculated average abundance score (TPM) for each unique annotation within sample. A geneTPM abundance matrix is also provided with WGSA2."
+    },
+    {
+      "title": "",
+      "instruction": "Pathway (PWY) inference Performed with MinPath The produced gene annotations (KO or EC) are mapped against a user-elected database of cellular pathways ( KEGG or MetaCyc ). A parsimony approach is then used to reconstruct the minimal set of pathways (from the selected DB) that can be described by the annotations (query of genes) within each sample (MinPath). The default WGSA2 database for PWY inference is the KEGG db, along with the KO annotations produced in each sample. Users may opt for a different approach: to use the EC annotations of the samples to map against the MetaCyc db of pathways (instead of KEGG), which provides a different metabolic PWY classification system and will therefore produce a slightly different metabolic representation for each sample. The DB of choice is to be elected based on your convenience and familiarity. Although the results may slightly differ, there is no known incorrect option. PWY DB election"
+    },
+    {
+      "title": "",
+      "instruction": "PWY abundance estimation Performed by ‘ genes.to.kronaTable.py ’ &amp; pipeline math The abundance of each pathway is then calculated by averaging the TPM values from each instance of gene, within each inferred pathway."
+    },
+    {
+      "title": "",
+      "instruction": "TAX profile visualizations Performed with Krona Tools In this processing step, the resulting taxonomic profiles (from the previous step) are re-formatted and visualized using Krona tools on a per-sample basis. The resulting plots are in HTML format and present the community&#39;s taxonomic composition in a circular interactive plot produced per sample. With the latest WGSA2 pipeline update, the highest taxonomic level is presented in the taxonomic ID (UUID or TAXid) for each detected organism. Example Krona taxonomic profile plot (per sample) Since the MGBCdb include non-reference organisms and taxonomically undefined (yet) genomes, its taxonomic IDs do not correspond to NCBI&#39;s UUIDs."
+    },
+    {
+      "title": "",
+      "instruction": "Start by going to the Nephele web platform at https://nephele.niaid.nih.gov/ Front page of Nephele Web Platform"
+    },
+    {
+      "title": "",
+      "instruction": "Run the &#34;WGSA2&#34; pipeline by clicking the &#34;Start job&#34; button To initiate a job with WGSA2, click on the &#34;Start job&#34; button. This will take you through the subsequent steps of submitting a job Selecting the WGSA2 pipeline You can learn more about this pipeline, its tools, methods and workflow by clicking the &#39; Learn more &#39; button, or go to https://nephele.niaid.nih.gov/details_wgsa/"
+    },
+    {
+      "title": "",
+      "instruction": "Select the &#34;Analyze&#34; tab and proceed to select the WGSA2.2 pipeline. We will start a WGSA2 job by following simple steps, described below The &#34;Analyze&#34; tab We strongly recommend that you first run the Pre-processing (QA) pipeline , and choose to trim and filter reads. This is to ensure only the best quality reads are being used for WGSA2 processing. You can read more about the QA pipeline from its details page (documentation) . An example/template mapping file specific for this QA pipeline can be downloaded here . To download a mapping file for the QA pipeline, use this: QC_pipeline_template_paired_end_N2.xlsx Pre-processing tab"
+    },
+    {
+      "title": "",
+      "instruction": "General submission tasks (data upload) More detail about these steps, including how to upload data, can be found in the section &#34; How to submit a job &#34;."
+    },
+    {
+      "title": "",
+      "instruction": "Make an account and sign in In order to run any job in Nephele, you need to make an account using some basic information (&lt;2 min) and log in. Making an account with Nephele is easy! All you need is an email and a trusty password. The account is free as well as running all the available workflows."
+    },
+    {
+      "title": "",
+      "instruction": "Upload sequence data Nephele provides multiple ways for data upload including FTP, direct upload and via Globus endpoint. More about how to upload data can be found in the section &#34; How to submit a job &#34;. The input sequences must be paired-end (PE) , whole metagenome shotgun reads ( not merged ) in FASTQ format . No special characters in sequence file names. Dataset size should not exceed the 150Gb size limit (gzipped) Both zipped (.gz) and unzipped FASTQ files are accepted (.fastq.gz &amp; .fastq) Due to the huge resource and time requirements of WGSA2, which grows with dataset size, the entire submitted dataset must not exceed 150Gb gzipped. In the rare cases your dataset might exceed this size, please consider splitting it into separate submissions."
+    },
+    {
+      "title": "",
+      "instruction": "Upload metadata The metadata table will be used by the WGSA2 pipeline to locate and identify your files, associate them with sample names and group them appropriately for the community exploration at the last steps of the pipeline. This is a tab-delimited file containing information about submitted samples (sample names), the names of their respective FASTQ files, and a simple grouping column (called &#34;TreatmentGroup&#34;) that provides grouping information for dataset stats and visualization steps. It is advised such a file is prepared before submission. The template can be downloaded here . Mapping file can be an .xlsx file or a simple .txt file with the following format: Metadata file format For your convenience, an example / template metadata file, specific for WGSA2, is attached below. wgsa_example_mapping.xlsx It is a good rule of thumb to have your metadata file filled out and ready to upload at this step of the job submission. However, it is not a problem if you need to download and fill out the template during submission. You will not be logged out from our system or lose your progress within the submission process, for a few hours."
+    },
+    {
+      "title": "",
+      "instruction": "Main pipeline info Once your data and metadata are uploaded, the Nephele job submission system will take you to a &#34;Pipeline Selection&#34; screen that allows to you familiarize yourself with the main steps of processing that WGSA2 will go through. This screen is primarily informational and mostly makes you aware that certain processing steps will always happen while others are conditional or optional to datasets (with 2+ samples or user elections). Read through and hit &#34;select&#34;. Pipeline main steps info"
+    },
+    {
+      "title": "",
+      "instruction": "Selecting WGSA2 job settings (WGSA2 job options menu) In this menu, you get to customize the settings of WGSA2 based on your processing needs for your dataset. WGSA2 job customization options Apart from the basic Job Name (a brief description of your job for your ease of recognition), these settings include additional trimming and filtering, choice of databases for decontamination, taxonomic classification and metabolic pathways hierarchy. Users may also select WGSA2 to perform additional steps of analysis such as AMR finding, gene-based taxonomic classification, MAGs formation, and more. The default parameters of WGSA2 are a great starting point for any metagenomic dataset! You may choose to run your first job on any dataset with the pre-set default parameters, and the results will provide you with enough information to familiarize yourself with your dataset&#39;s communities and pipeline outputs. Once you understand the workflow, parameters, and output of the pipeline, you may customize the jobs for any dataset at will. In the next sections of this protocol, we will be describing what each step of the pipeline&#39;s workflow does, and how the customization options from this menu affect the pipeline&#39;s behavior and output. We hope that through those instructions, you will gain the understanding needed to independently choose the best options for any of your datasets and research goals."
+    },
+    {
+      "title": "",
+      "instruction": "Submit job For now, let us leave the dataset to the default settings (as is) and click &#39;Submit&#39; . Your job with WGSA2 will then start, and you will be provided with a job ID . This job ID is important for customer support in case of problems, as well as keeping track of your job status. An email will also be sent to you upon job start and job completion. This email will include the job ID, job details and other job information. You can have multiple jobs submitted and running at once. Upon completion of the pipeline, you will be able to view some results directly in your browser. All detailed results and outputs will be provided as downloadable files. WGSA2 is a completely command line free &amp; automated pipeline. Beyond submitting a job, you will not need to do anything to produce the pipeline results."
+    },
+    {
+      "title": "",
+      "instruction": "Gene annotation Performed by EggNOG-mapper2 and integrated EggNOG-v5 database The predicted features are compared to a database of known genes (EggNOG-v5) and upon sufficient homology the gene annotation is transferred to the feature. Gene annotations obtained are based on KO, EC and COG annotation systems."
+    },
+    {
+      "title": "",
+      "instruction": "PWY profile visualizations Performed by Krona Tools The metabolic characterization for each sample (representing the functional profile) are summarized for each sample in an interactive HTML report. PWY krona plot"
+    },
+    {
+      "title": "",
+      "instruction": "Exploratory visualizations and statistics Performed with R statistical language The steps in this module are conditional to datasets containing multiple samples (best if &gt;3 samples), as they require statistical calculations and summary visualizations. The obtained TAX and PWY abundance matrices , are used to produce community characterizing visualization plots (e.g. alpha and beta diversity plots, abundance profile heat-maps etc.). These are especially useful for quick familiarization with the composition of the samples in your dataset and understanding some of the community relations."
+    },
+    {
+      "title": "",
+      "instruction": "Convert to biom format Performed by biom-format The taxonomic and functional abundance matrices are further formatted into biom files that include the user metadata. These biom files can be conveniently uploaded into [ MicrobiomeDB ] or customized as needed for other user-specific purposes."
+    },
+    {
+      "title": "",
+      "instruction": "Data collation Performed in R statistical language The steps in this module are among the most important ones for the summary characterizations of any dataset. Since the pipeline has already created per-sample individualized profiles and summaries, this module is conditional to datasets with multiple samples (best if &gt;2 samples). In this module, the feature characterizations and abundance information from each individual sample are collected and summarized (collated) into a dataset-wide abundance matrix. This matrix is a non-redundant feature (TAX, PWY or GENE) representation of each sample&#39;s composition (abundance matrix). The abundance matrix is a table that contains the feature identity (taxonomic or functional) and abundance information for each sample within a dataset. It is the abundance matrix that is the fundamental part of any downstream community-based microbial exploration . Example feature abundance table"
+    }
+  ],
+  "fetched_at": "2026-06-16T22:41:40.904084Z",
+  "stats": {
+    "views": 1198,
+    "runs": 0,
+    "bookmarks": 2,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false
+}

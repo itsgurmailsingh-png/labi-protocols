@@ -1,0 +1,59 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "13498",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.re2d3ge",
+  "title": "Transcript Coverage Analysis from Long Reads",
+  "author": "David A Eccles",
+  "doi": "dx.doi.org/10.17504/protocols.io.re2d3ge",
+  "source_url": "https://www.protocols.io/view/transcript-coverage-analysis-from-long-reads-re2d3ge",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "LAST Debian GNU/Linux http://last.cbrc.jp/last/ Martin Frith lastdb Mus_musculus.GRCm38.cds.all.fa Create the transcriptome index from the transcriptome fasta file using lastdb. An anonymous pipe is used"
+    },
+    {
+      "title": "",
+      "instruction": "Map the reads to the Mmus transcripts with LAST. The results of that mapping can be piped through last-map-probs to exclude unlikely hits, then through my maf_bcsplit.pl script to convert to a one-line-per-mapping CSV format. This CSV format is further processed to make sure that there is only one mapping per transcript-read pair, and then aggregated to sum up counts per transcript. for id in trnCounts_LAST_${id}_vs_Mmus_transcriptome.txt done&#34; description=&#34;LAST mapping; probable hit filtering, read counting, and conversion to count file&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;1B6502BF437946C3A38477D61796DC83&#34; &gt; for id in &#34;fwd_4T1_BC06&#34; &#34;rev_4T1_BC06&#34; &#34;fwd_4T1_BC07&#34; &#34;rev_4T1_BC07&#34; do lastal Mus_musculus.GRCm38.cds.all.fa &lt;(pv ${id}.correctedReads.uniqueOnly.fasta.gz | zcat) | \\ last-map-probs | ~/scripts/maf_bcsplit.pl | awk -F&#39;,&#39; &#39;{print $1,$2,$3}&#39; | sort | \\ uniq | awk &#39;{print $2,$3}&#39; | sort | uniq -c &gt; trnCounts_LAST_${id}_vs_Mmus_transcriptome.txt done LAST mapping; probable hit filtering, read counting, and conversion to count file"
+    },
+    {
+      "title": "",
+      "instruction": "Transcript counts are converted into a narrow table (one line per transcript/count/barcode tuple) that includes strand direction and a barcode tag: trnCounts &lt;- lapply(c(&#34;fwd_4T1_BC06&#34;, &#34;rev_4T1_BC06&#34;, &#34;fwd_4T1_BC07&#34;, &#34;rev_4T1_BC07&#34;), function(x){ res &lt;- read.table(sprintf((&#34;trnCounts_%s_vs_Mmus_transcriptome.txt&#34;), x), stringsAsFactors=FALSE, col.names=c(&#34;Count&#34;,&#34;Transcript&#34;, &#34;Direction&#34;)); if(grepl(&#34;rev&#34;,x)){ res$Direction = c(&#34;-&#34; = &#34;+&#34;, &#34;+&#34; = &#34;-&#34;)[res$Direction]; } res$DB &lt;- paste0(sub(&#34;..._4T1_&#34;,&#34;&#34;,x), res$Direction); return(res); }); trnCounts &lt;- rbind(trnCounts[[1]],trnCounts[[2]],trnCounts[[3]],trnCounts[[4]]); trnCounts &lt;- lapply(c(&#34;fwd_4T1_BC06&#34;, &#34;rev_4T1_BC06&#34;, &#34;fwd_4T1_BC07&#34;, &#34;rev_4T1_BC07&#34;), function(x){ res &lt;- read.table(sprintf((&#34;trnCounts_%s_vs_Mmus_transcriptome.txt&#34;), x), stringsAsFactors=FALSE, col.names=c(&#34;Count&#34;,&#34;Transcript&#34;, &#34;Direction&#34;)); if(grepl(&#34;rev&#34;,x)){ res$Direction = c(&#34;-&#34; = &#34;+&#34;, &#34;+&#34; = &#34;-&#34;)[res$Direction]; } res$DB &lt;- paste0(sub(&#34;..._4T1_&#34;,&#34;&#34;,x), res$Direction); return(res); }); trnCounts &lt;- rbind(trnCounts[[1]],trnCounts[[2]],trnCounts[[3]],trnCounts[[4]]);"
+    },
+    {
+      "title": "",
+      "instruction": "The transcript revision number (if any) is removed from the transcript ID: trnCounts$Transcript &lt;- sub(&#34;\\\\.[0-9]+$&#34;,&#34;&#34;,trnCounts$Transcript); trnCounts$Transcript &lt;- sub(&#34;\\\\.[0-9]+$&#34;,&#34;&#34;,trnCounts$Transcript);"
+    },
+    {
+      "title": "",
+      "instruction": "The annotation file is loaded into memory: ensembl.df &lt;- read.delim(&#34;ensembl_mm10_geneFeatureLocations.txt.gz&#34;, col.names=c(&#34;Transcript&#34;,&#34;Description&#34;,&#34;Start&#34;, &#34;End&#34;,&#34;Strand&#34;,&#34;Gene&#34;,&#34;Chr&#34;), stringsAsFactors=FALSE); ensembl.df &lt;- read.delim(&#34;ensembl_mm10_geneFeatureLocations.txt.gz&#34;, col.names=c(&#34;Transcript&#34;,&#34;Description&#34;,&#34;Start&#34;, &#34;End&#34;,&#34;Strand&#34;,&#34;Gene&#34;,&#34;Chr&#34;), stringsAsFactors=FALSE);"
+    },
+    {
+      "title": "",
+      "instruction": "The dplyr and tidyr packages are used to convert to a wide format, and pull the associated annotation from the ensembl annotation file: library(dplyr); library(tidyr); trnCounts.wide &lt;- group_by(trnCounts, DB, Transcript) %&gt;% summarise(Count = sum(Count)) %&gt;% spread(DB, Count) %&gt;% inner_join(ensembl.df, by=&#34;Transcript&#34;); library(dplyr); library(tidyr); trnCounts.wide &lt;- group_by(trnCounts, DB, Transcript) %&gt;% summarise(Count = sum(Count)) %&gt;% spread(DB, Count) %&gt;% inner_join(ensembl.df, by=&#34;Transcript&#34;);"
+    },
+    {
+      "title": "",
+      "instruction": "Missing data is set to a count of zero to simplify subsequent computation: trnCounts.wide$WTfwd &lt;- coalesce(trnCounts.wide$`BC06+`,0L); trnCounts.wide$WTrev &lt;- coalesce(trnCounts.wide$`BC06-`,0L); trnCounts.wide$ρ0fwd &lt;- coalesce(trnCounts.wide$`BC07+`,0L); trnCounts.wide$ρ0rev &lt;- coalesce(trnCounts.wide$`BC07-`,0L); trnCounts.wide$WTfwd &lt;- coalesce(trnCounts.wide$`BC06+`,0L); trnCounts.wide$WTrev &lt;- coalesce(trnCounts.wide$`BC06-`,0L); trnCounts.wide$ρ0fwd &lt;- coalesce(trnCounts.wide$`BC07+`,0L); trnCounts.wide$ρ0rev &lt;- coalesce(trnCounts.wide$`BC07-`,0L);"
+    },
+    {
+      "title": "",
+      "instruction": "This was a pilot experiment with no replicate data (hence why I refer to this as &#39;differential coverage&#39;, rather than differential expression. I would usually use software with proper statistical modeling (such as DESeq2 ), but in this case I&#39;m generating a quick rough-cut comparison using basic R. I introduce a fudge factor to account for missing data, and use this factor in the calculation of differential coverage (as log2 fold change). The strand-specificity of the sequencing and transcript annotation allows this differential coverage to be determined for only those reads mapping in the correct direction. Results are rounded to 1 d.p. as an additional warning that these results have a low precision. As the alignment is to transcripts, the direction of the gene is ignored: fcFudge &lt;- 5; trnCounts.wide$DCov &lt;- round(log2(trnCounts.wide$WTfwd+fcFudge)-log2(trnCounts.wide$ρ0fwd+fcFudge),1); fcFudge &lt;- 5; trnCounts.wide$DCov &lt;- round(log2(trnCounts.wide$WTfwd+fcFudge)-log2(trnCounts.wide$ρ0fwd+fcFudge),1); However, if aligning to genome sequences, use the following code: fcFudge &lt;- 5; trnCounts.wide$DCov &lt;- round(ifelse(trnCounts.wide$Strand == 1, log2(trnCounts.wide$WTfwd+fcFudge)-log2(trnCounts.wide$ρ0fwd+fcFudge), log2(trnCounts.wide$WTrev+fcFudge)-log2(trnCounts.wide$ρ0rev+fcFudge)),1); fcFudge &lt;- 5; trnCounts.wide$DCov &lt;- round(ifelse(trnCounts.wide$Strand == 1, log2(trnCounts.wide$WTfwd+fcFudge)-log2(trnCounts.wide$ρ0fwd+fcFudge), log2(trnCounts.wide$WTrev+fcFudge)-log2(trnCounts.wide$ρ0rev+fcFudge)),1);"
+    },
+    {
+      "title": "",
+      "instruction": "Finally, the resultant table is writtent out to a CSV file, ordered by the absolute value of the differential coverage statistic: trnCounts.wide &lt;- arrange(trnCounts.wide, -abs(DCov)); write.csv(trnCounts.wide[,c(&#34;Transcript&#34;,&#34;WTfwd&#34;,&#34;WTrev&#34;,&#34;ρ0fwd&#34;,&#34;ρ0rev&#34;, &#34;DCov&#34;,&#34;Gene&#34;,&#34;Description&#34;,&#34;Chr&#34;,&#34;Start&#34;,&#34;End&#34;)], file=&#34;wide_transcript_Counts_WTvsρ0.csv&#34;, row.names=FALSE); trnCounts.wide &lt;- arrange(trnCounts.wide, -abs(DCov)); write.csv(trnCounts.wide[,c(&#34;Transcript&#34;,&#34;WTfwd&#34;,&#34;WTrev&#34;,&#34;ρ0fwd&#34;,&#34;ρ0rev&#34;, &#34;DCov&#34;,&#34;Gene&#34;,&#34;Description&#34;,&#34;Chr&#34;,&#34;Start&#34;,&#34;End&#34;)], file=&#34;wide_transcript_Counts_WTvsρ0.csv&#34;, row.names=FALSE);"
+    }
+  ],
+  "fetched_at": "2026-06-16T22:32:04.071559Z",
+  "stats": {
+    "views": 567,
+    "runs": 0,
+    "bookmarks": 1,
+    "comments": 0,
+    "forks": 17
+  },
+  "peer_reviewed": false
+}

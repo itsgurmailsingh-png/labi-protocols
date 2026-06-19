@@ -1,0 +1,60 @@
+{
+  "source_name": "star_protocols",
+  "source_id": "PMC9850185",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9850185/",
+  "doi": "10.1016/j.xpro.2022.101998",
+  "title": "A network-guided protocol to discover susceptibility genes in genome-wide association studies using stability selection",
+  "author": "Climente-González, Azencott, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "SummaryWe present a network-based protocol to discover susceptibility genes in case-control genome-wide association studies (GWASs). In short, this protocol looks for biomarkers that are informative of disease status and interconnected in an underlying biological network. This boosts discovery and interpretability. Moreover, the protocol tackles the instability of network methods, producing a stable set of genes most likely to replicate in external cohorts. To apply the procedure to a provided GWAS dataset, install the required software and execute our command-line tool.For complete details on the use and execution of this protocol, please refer to Climente-González et al.1",
+  "steps_raw": [
+    {
+      "title": "Prepare the files used in the analysis",
+      "instruction": "Timing: 15 min"
+    },
+    {
+      "title": "Prepare the files used in the analysis",
+      "instruction": "Prepare the GWAS dataset on which we will find genes associated with the phenotype. Optionally, prepare also the files describing the gene-gene interaction network and the linkage disequilibrium patterns in the population.9.Prepare the case-control GWAS dataset on which to conduct the biomarker discovery procedure. It must be in PLINK binary format (bed, fam, and bim).Note: If it is not in PLINK binary format already, you can probably make the conversion using PLINK 1.93 using the -make-bed flag. (PLINK needs to be installed separately.) For instance, if your data is in PLINK text format (ped and map), the following command will take input.ped and input.map and produce output.bed, output.fam, and output.bim:> plink -file input -make-bed -out outputNote: The pipeline does not perform quality control steps (e.g., imputation, sample and SNP filtering, population structure stratification). If required, perform them a priori.Note: If you only have access to summary GWAS statistics, refer to Problem 2 in the troubleshooting section.Optional: Prepare a file describing the gene-gene interaction network. It must be a tab-separated table enumerating the edges by their terminal nodes. The two columns must be named “gene1” and “gene2”. Since the methods assume that the network is undirected, the order of the genes does not matter.Note: If this file is not provided, the pipeline will query HINT8 for all human protein-protein interactions obtained via high-throughput experiments.Optional: Prepare a GWAS dataset to be used as the reference for linkage disequilibrium patterns. It needs to be in PLINK binary format (bed, fam, and bim).Note: If this dataset is not provided, the pipeline will use the control samples in the GWAS dataset.Note: One option are ancestry-matched genotypes from the Phase 3 of the 1000 Genome Project.9 They can be downloaded in PLINK binary format from the VEGAS2 page (section Offline version).CRITICAL: Make sure the samples in this dataset have similar ancestry to those in the dataset from step 9 (e.g., they both target the same population). Failure to do so might produce artifactual results. In case of doubt, do not provide this file."
+    },
+    {
+      "title": "Step-by-step method details",
+      "instruction": "We have encapsulated the complex pipeline from Climente-González et al. (2021)1 into a single command (see run the pipeline and Figure 1A). The pipeline performs the following steps:Figure 1Overview of the pipeline stable_network_gwas.nf and its output(A) Visual depiction of the pipeline. The Manhattan plot comes from in Climente-González et al. (2021).1(B) Top 10 lines from the stable_consensus.tsv file applied to the data in Climente-González et al. (2021).1"
+    },
+    {
+      "title": "Step-by-step method details",
+      "instruction": "Subsample the input GWAS dataset multiple times (five, by default) without replacement. Each equally sized subsample is analyzed independently, and only the final results are aggregated in the last step. The rationale is that the common part of the solutions obtained independently captures something true about the data. In contrast, the differing parts result from the sampling procedure and idiosyncrasies of the algorithm."
+    },
+    {
+      "title": "Step-by-step method details",
+      "instruction": "Compute a chi-squared test of association between each SNP and the phenotype using PLINK 1.9.10"
+    },
+    {
+      "title": "Step-by-step method details",
+      "instruction": "Compute a gene-level association score based on the association at the SNP level using VEGAS2.11"
+    },
+    {
+      "title": "Step-by-step method details",
+      "instruction": "Use five algorithms to find important genes in a biological network: dmGWAS,2 heinz,3 LEAN,4 SConES5,12 and SigMod.6 SConES uses SNP-level information, while the rest uses gene-level information."
+    },
+    {
+      "title": "Step-by-step method details",
+      "instruction": "Compile the solutions of the different methods on the multiple subsamples."
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Timing: 1 h"
+    },
+    {
+      "title": "Quantification and statistical analysis",
+      "instruction": "Often stable_consensus.tsv requires a curation step to obtain a final subnetwork, which depends heavily on the desired outcome and the nature of the data. For reference, we include here the steps followed by Climente-González et al. (2021)1 to find a stability-based consensus network:1.Study how often each gene was selected e.g., using a histogram. In Climente-González et al. (2021),1 this produced a long-tailed histogram in which a few genes were often selected, while the rest were only present in a few runs.2.Based on this inspection, decide on a threshold to determine which genes were selected “often enough.” For instance, Climente-González et al. (2021)1 only considered the top 1% most selected genes.3.From the original gene-gene interaction network, take the subnetwork consisting only of the genes selected more often than the threshold chosen in step 2. Include all the edges connecting these nodes in the original network in this subnetwork."
+    }
+  ],
+  "materials": [
+    "REAGENT or RESOURCESOURCEIDENTIFIERSoftware and algorithmsDockerhttps://www.docker.comhttps://www.docker.comgwas-toolsGitHubhttps://github.com/hclimente/gwas-toolsgwas-tools Docker imageDocker Hubhttps://hub.docker.com/r/hclimente/gwas-toolsNextflowDi Tommaso et al. (2017)7https://nextflow.ioOtherCase-control GWAS datasetProvided by the userN/A(Optional) Gene-gene interaction networkProvided by the userN/A(Optional) Ancestry-matched GWAS dataset from the general populationProvided by the userN/A",
+    "The workflow presented below can run on most computational environments, efficiently using the available resources if Nextflow is configured appropriately (see step 5.b in install gwas-tools and its prerequisites). Since many steps are independent, they will run in parallel whenever possible. Hence, more available CPUs will result in lower computing time. Ultimately, the computational time and memory requirements will depend on the size of the GWAS dataset and the complexity of the network. For instance, the analysis of Climente-González et al. (2021)1 took 378.1 CPU hours (around 15.8 days) on a CentOS 7 Linux server. By allowing up to 60 processes to run in parallel, the protocol took 68.8 actual hours (around 2.8 days). In terms of memory, most methods used less than 16GB of RAM.",
+    "This study did not generate new unique reagents."
+  ],
+  "fetched_at": "2026-06-19T00:42:09.119072+00:00"
+}

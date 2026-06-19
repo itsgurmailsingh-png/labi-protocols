@@ -1,0 +1,88 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC7509463",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7509463/",
+  "doi": "10.1016/j.mex.2020.101061",
+  "title": "Method for generating high-quality tetrahedral meshes of geological models by utilizing CGAL",
+  "author": "Wang, Mei, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "High-quality computational meshes are crucial in the analysis of displacements and stabilities of rock and soil masses. In this paper, we present a method for generating high-quality tetrahedral meshes of geological models to be used in stability analyses of rock and soil masses. The method is implemented by utilizing the Computational Geometry Algorithms Library (CGAL). The input is a geological model consisting of triangulated surfaces, and the output is a high-quality tetrahedral mesh of the geological model. To demonstrate the effectiveness of the presented method, we apply it to generate a series of computational meshes of geological model, and we then analyse the stabilities of the rock and soil slopes on the basis of the generated tetrahedral mesh models. The applications demonstrate the effectiveness and practicability of the present method.•A method for generating high-quality tetrahedral meshes of geological models is presented.•We evaluate the quality of the tetrahedral mesh of geological model using four metrics.•Three applications demonstrate the effectiveness and practicability of the presented method.",
+  "steps_raw": [
+    {
+      "title": "Method details",
+      "instruction": "In this section, we will describe the implementation details of presented method for generating high-quality tetrahedral meshes of geological models."
+    },
+    {
+      "title": "Presented method for generating high-quality tetrahedral meshes of geological models",
+      "instruction": "The presented method is devoted to tetrahedral mesh generation of a geological model, see Fig. 1. The domain representing the geological model is typically composed of several strata, each one must be the union of at least one connected component of the complement of the 2D triangulated surface. Subdomain indices belonging to the corresponding subdomain must be defined and the orientation of each surface patch should be determined. Before the meshing process, the input pairs of the subdomain should be constructed according to the orientation and the subdomain indices, which represent the subdomains on both sides of the triangulated surfaces.Fig. 1Workflow of the presented method.Fig. 1"
+    },
+    {
+      "title": "Presented method for generating high-quality tetrahedral meshes of geological models",
+      "instruction": "The meshing process will preserve the features of the geological model. The mesh generator is customized to output the meshes that cater to the user's needs as much as possible, such as the mesh size and user-customized quality criteria in Fig. 2. The output meshes are composed of tetrahedral meshes, which approximate each input domain feature: subdomains, boundary triangulated surfaces or input domain features with dimensions of 0 or 1.Fig. 2Illustration of the process of generating the tetrahedral mesh of a geological model. (a) All the surfaces must be triangulated and guaranteed the geometric and topological consistency. (b) The domain is divided several subdomain, each subdomain is identified by a subdomain index. (c) Each triangulated surfaces is orientated. We utilize any point located in subdomain to determine the positive or negative orientation. (d) The geological model is meshed with tetrahedrons, which can be used as the computational model in numerical analysis.Fig. 2"
+    },
+    {
+      "title": "Step 1: Inputting a geological model consisting of triangulated surfaces",
+      "instruction": "The geological model to be meshed is enclosed by a collection of triangulated surfaces, forming a complex as in Fig. 2(a). Each triangle of the triangulated surface is called a facet. There are two constraints on triangulated surfaces. First, triangulated surfaces of the complex cannot self-intersect. Second, two triangulated surfaces of the complex are either disjoint or share a subset of their border edges. Fig. 3(a) shows invalid input. The intersection line cannot guarantee topological consistency. There are many isolated points. In this method, isolated points are forbidden. Fig. 3(b) shows valid input. Thus, an important precondition for the meshing algorithm to work correctly is that any two surface patches cannot intersect. If two surfaces intersect, the intersection edges must be part of the input surfaces and have 1-dimensional features.Fig. 3(a) The two triangulated surfaces are not valid inputs since the topological consistency is not promised. (b) The two triangulated surfaces are valid inputs. Geometric and topological consistency are guaranteed.Fig. 3"
+    },
+    {
+      "title": "Step 2: Determining the orientation of each triangulated surface",
+      "instruction": "The orientation of each triangulated surface must be identified. Each triangulated surface is oriented and has two sides. Each triangulated surface has a positive orientation and a negative orientation. The orientation of each surface is the same as that of all its facets. The positive side is the union of the positive side of each triangulated facet, usually called the \"exterior\" of the surface. The negative side is the other side of the surface. We can utilize any point located in the subdomain to determine the orientation of the triangulated surfaces in Fig. 2(c)."
+    },
+    {
+      "title": "Step 2: Determining the orientation of each triangulated surface",
+      "instruction": "The function CGAL::orientation (p, q, r, s) in CGAL can be used to determine the orientation of a plane composed of the point p, q, r, which is composed of a triangle in the surface patch. Point s is located on the left side or right side of this triangle. Therefore, taking the three points of facets of triangulated surfaces and a point located in the subdomain as the function argument, we can determine the orientation."
+    },
+    {
+      "title": "Step 3: Constructing the input pairs of subdomains",
+      "instruction": "In a geological model, each subdomain represents the corresponding stratum. The subdomains have indices of integer type, and the exterior of the mesh domain is associated with the subdomain index 0. Each subdomain index ranging from 1 to the number of subdomains should be defined. It is also important that for each triangulated surface, the subdomain indices on both sides of the surface are known. The input pairs of subdomains are used to combine the subdomain indices of both sides of each triangulated surface. One subdomain index is on the positively oriented \"side\" of the triangulated surface. The other subdomain index is on the negative side. The interface of sub-domains is supposed to be provided and sub-domains are sharing input interfaces with different subdomain indices. Besides, we also mark corresponding subdomain indices for the interface. For each triangulated surface, there is a corresponding input pair of subdomain indices. The order of the constructed input pair of triangulated surfaces should be consistent with the order in which the triangulated surfaces are saved. These input pairs of subdomain indices associating the subdomain with triangulated surfaces can guarantee correct mesh generation for each subdomain."
+    },
+    {
+      "title": "Step 4: Generating tetrahedral meshes",
+      "instruction": "To achieve the user's needs with respect to the size of the mesh elements and the accuracy of the boundary approximation, we applied some criteria implemented by CGAL. The criteria can drive the Delaunay refinement process and mainly contain the cell size and facet size. The cell size controls the size of the tetrahedral mesh and the facet size controls the size of the surface facets. The mesh generation process is a Delaunay refinement process followed by an optimization. The optimization phase contains four optimization processes: Optimal Delaunay Triangulation (ODT) smoothing [1], a Lloyd smoothing [2], a perturber and an exuder [3]. It should be executed as follows: an ODT smoother, a Lloyd smoother, a sliver perturber, and a sliver exuder. ODT is optimal Delaunay triangulation. The process of each application can be activated based on the needs of the user. After the optimization phase, the average mesh quality will be improved. When the program finishes, it will generate high-quality tetrahedral meshes, such as that in in Fig. 2(d), and will output a mesh format file containing the point, triangle and tetrahedral mesh information."
+    },
+    {
+      "title": "Step 4: Generating tetrahedral meshes",
+      "instruction": "In general, the surface mesh is typically fixed during the volume mesh generation. When the required volume size is less than half the size of the surface meshes, the method will refine the surface meshes for the generation of the required volume sizes by the package. When the required volume size is greater than half the size of the surface meshes and less than the size of surface meshes, the original surface meshes are fixed, and the refinement is ignored. And the output will be high-quality mesh. Thus, we recommend that the size of the required volume and the surface meshes are as consistent as possible. When the required volume size is greater than the size of the surface meshes, the method will generate ill-shape meshes which can influence the result of numerical simulation. Thus, we recommend that the required volume size should less than or equal to surface meshes size."
+    },
+    {
+      "title": "Step 4: Generating tetrahedral meshes",
+      "instruction": "The conformity of surface mesh means that there is no isolated point. The method will automatically guarantee the conformity in the refinement process so that the user does not need to do additional settings. Only if the initial surface meshes is conformal, the method will generate meshes with overall conformity."
+    },
+    {
+      "title": "Applications of the Presented Method",
+      "instruction": "To demonstrate the effectiveness of the presented method, we apply it to generate a series of computational meshes of geological model. FLAC3D\n[4] is often used for numerical simulation in geotechnical engineering applications. We also developed an application interface to convert the mesh format file generated by CGAL to a FLAC3D format file. We then analysed the stabilities of the rock and soil slopes on the basis of the generated tetrahedral mesh models."
+    },
+    {
+      "title": "Applications of the Presented Method",
+      "instruction": "The measurement metrics of the element quality include (1) the qualitytest1, (2) the qualitytest2, (3) the aspect ratio, and (4) the orthogonality. Qualitytest1 and qualitytest2 are the measurements of the volume over the edge length and skew, see Eqs. (1) and (2), respectively.(1)B=V/L3where B represents the volume over the edge length, V represents tetrahedron volume and L represents shortest edge length.(2)Tskew=(Videal−V)/Videalwhere Tskew represents the skew, V represents tetrahedron volume and Videal is the volume according to the radius of the circumscribed ball."
+    },
+    {
+      "title": "Applications of the Presented Method",
+      "instruction": "The aspect ratio of tetrahedral mesh is the ratio of the longest edge length to the shortest edge length in Eq. (3).(3)Aratio=Llongest/Lshortestwhere Aratio represents the aspect ratio, Llongest represents longest edge length and Lshortest represents shortest edge length."
+    },
+    {
+      "title": "Applications of the Presented Method",
+      "instruction": "The ortho skew quality for meshes is computed using the face normal vector, and the vector from the tetrahedron centroid to each of the faces. Fig. 4 illustrates the vectors used to determine the ortho skew quality for a mesh.Fig. 4Vectors used to compute the ortho skew quality of a tetrahedron.Fig. 4"
+    },
+    {
+      "title": "Applications of the Presented Method",
+      "instruction": "The ortho skew for a tetrahedron is computed as the maximum of the following quantities computed for each face i in Eq. (4).(4)Oratio=→Ai.→Fi→|Ai|.→|Fi|where Ai→ is the face normal vector and Fi→ is a vector from the centroid of the tetrahedron to the centroid of that face."
+    },
+    {
+      "title": "Effectiveness of the presented method",
+      "instruction": "Mesh generation of a geological model can be achieved by the presented method. Currently, this method can generate high-quality tetrahedral meshes of geological models consisting of triangulated surfaces. These tetrahedral meshes meet the mesh criteria by as much as possible. The output meshes are reasonably well represented by geological features."
+    },
+    {
+      "title": "Effectiveness of the presented method",
+      "instruction": "Examples demonstrate that the method is practical. These meshes can be used in other simulation software. We import these computational meshes into FLAC3D and set boundary conditions for the model. The simulation results are obtained from FLAC3D which is often used for numerical simulation; and the results of the calculation show that these tetrahedral meshes of the geological model can be used in stability analysis of rock and soil masses. Thus, the simulation results are also reliable."
+    },
+    {
+      "title": "Effectiveness of the presented method",
+      "instruction": "Measuring the mesh quality is important for this method. For the different mesh generation methods, the measurement metrics of the element quality are similar, which usually include the aspect ratio and the orthogonality. Besides, we also add the metrics of the volume over the edge length and skew. These quantities are mainly used to determine the quality based on the degree and edge length of elements and to identify degenerate elements. In general, the majority of meshes had a high-quality value and smooth distributions are also visible from the statistic of mesh quality metrics, which indicates the high quality in the model."
+    }
+  ],
+  "materials": [],
+  "fetched_at": "2026-06-19T00:44:15.300837+00:00"
+}

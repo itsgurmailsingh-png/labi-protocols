@@ -1,0 +1,91 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "32832",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.bca8ishw",
+  "title": "Visualizing Calling Card Data on the WashU Epigenome Browser",
+  "author": "Arnav Moudgil",
+  "doi": "dx.doi.org/10.17504/protocols.io.bca8ishw",
+  "source_url": "https://www.protocols.io/view/visualizing-calling-card-data-on-the-washu-epigeno-bca8ishw",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "During the course of a calling card experiment, or after all the analysis has been said and done, you may want to visually inspect the data. These can be the raw insertions (stored as a CCF file), insertion densities (as a bedgraph file), or the peak boundaries (as a BED file). Instructions for generating these kinds of files can be found in the following protocols: Processing Bulk RNA Calling Card Sequencing Data Processing Single Cell Calling Card Sequencing Data Calling Peaks on piggyBac Calling Card Data"
+    },
+    {
+      "title": "",
+      "instruction": "The WashU Epigenome Browser natively supports visualizing CCF files as a calling card track. In addition, it supports standard genomic file formats such as BED, bedgraph, bigWig, and HiC. This allows us to compare and contrast calling card data to popular genomic assays like ChIP-seq, DNase-seq, ATAC-seq, and Hi-C. There are two ways load data onto the browser: Hosting your data on a publicly-accessible server and letting the browser fetch the data. Directly uploading text files to the browser. The first method is preferred: track information and preferences can be stored in a simple text file, which can then be shared with collaborators. This saves the effort and cost of moving around potentially large datasets. Instead, the data remains in one place and can be accessed by anyone from anywhere. The second option can be used if a public server is not available to you, or if you want to rapidly look at files that are already on your computer."
+    },
+    {
+      "title": "",
+      "instruction": "For this protocol, we will use the following files: HCT-116_PBase.ccf, a file of raw calling card insertions HCT-116_PBase.bedgraph, a file of calling card insertion densities across the genome HCT-116_PBase_peaks.bed, a file of peaks inferred from calling card data"
+    },
+    {
+      "title": "",
+      "instruction": "BED, bedgraph, and CCF files are all text-based formats. Before being hosted on an external server, these files must be compressed and indexed. This allows for fast, random-access to the data. For this step, make sure you have installed htslib (see Materials). To compress the file: bgzip HCT-116_PBase.ccf This will compress the original file, creating HCT-116_PBase.ccf.gz To index the compressed file: tabix -p bed HCT-116_PBase.ccf.gz This will create an index file, HCT-116_PBase.ccf.gz.tbi Both HCT-116_PBase.ccf.gz and HCT-116_PBase.ccf.gz.tbi should be copied to a publicly-accessible webserver. These steps also apply to bedgraph and BED files."
+    },
+    {
+      "title": "",
+      "instruction": "Next, we create a JSON file. JSON is a generic standard describing objects and their properties. Here, we use it to describe each track, its data, and any options we may want to customize. The JSON file is plain text; it is recommended that you use a text editor (e.g. Sublime, Atom, Visual Studio Code, vim/emacs, etc.) instead of a word processor (e.g. Microsoft Word) to create this file. We will create HCT-116_PBase.json for our data. Here is the structure of a JSON file for a single track depicting calling card data: [ { &#34;type&#34;:&#34;callingcard&#34;, &#34;url&#34;:&#34;https://htcf.wustl.edu/files/xXl8ZAXy/HCT-116_PBase.ccf.gz&#34;, &#34;name&#34;:&#34;piggyBac insertions&#34;, &#34;showOnHubLoad&#34;:&#34;true&#34;, &#34;options&#34;:{ &#34;color&#34;:&#34;#3182bd&#34;, &#34;height&#34;:100, &#34;logScale&#34;:&#34;log10&#34;, &#34;markerSize&#34;:3, &#34;opacity&#34;:[100], &#34;show&#34;:&#34;all&#34;, &#34;sampleSize&#34;:1000, }, }, ] All tracks in the JSON file must be between the square brackets [...]. Curly braces {...} and commas separate invidual tracks, and within a track, another set of curly braces may be used to specify grouped options. Let&#39;s consider each of these entries in turn: &#34;type&#34;:&#34;callingcard&#34;, This specifies the track type, which in this case is a calling card track. &#34;url&#34;:&#34;https://htcf.wustl.edu/files/xXl8ZAXy/HCT-116_PBase.ccf.gz&#34;, This points to the web address where your data are stored. Note that this must point to the compressed file. The browser will automatically located the index file. (If the index file is not present, it will throw an error). &#34;name&#34;:&#34;piggyBac insertions&#34;, This is the track label. &#34;showOnHubLoad&#34;:&#34;true&#34;, This specifies whether the track should be display immediately after the JSON file has been uploaded. The default value is &#34;false.&#34; There are also a number of options that can be specified to customize the track appearance. While all of them can be changed after the tracks have been loaded, specifying them in the JSON file helps to record and reproduce settings. Note that these only need to be set if you wish to override defaults. &#34;color&#34;:&#34;#f4916c&#34;, This sets the color of the individual calling card markers. The defaul is blue. &#34;height&#34;:100, This sets the height of the track in pixels. The default is 40. &#34;logScale&#34;:&#34;log10&#34;, This transforms the y-axis from a linear scale to a logarithmic scale. By default, the track uses a linear scale, but for calling card experiments we recommed using a logarithmic scale. &#34;markerSize&#34;:3, This is the radius of the marker in pixels. The default value is 3. &#34;opacity&#34;:[100], This specifies the opacity of the markers, which can help emphasize data-dense regions. This takes an integer value between 0 and 100. The value supplied must be in square brackets. The default value is 100. &#34;show&#34;:&#34;all&#34;,&#34;sampleSize&#34;:1000, This pair of options specify whether the browser should display all data points, or simply a random subsample. If there are many (e.g. thousands) of data points in view, it can slow down your web browser. Subsampling can help preserve a global representation of your data while still remaining responsive and memory-friendly. The &#34;show&#34; option can take two values: &#34;all&#34; (default) or &#34;sample.&#34; The former draws all data points. If the latter is specified, then the &#34;sampleSize&#34; option is applied. This number determines how many points to subsample and is set to 1000 by default."
+    },
+    {
+      "title": "",
+      "instruction": "We can also add the bedgraph and BED files to the JSON: [ { &#34;type&#34;:&#34;callingcard&#34;, &#34;url&#34;:&#34;https://htcf.wustl.edu/files/xXl8ZAXy/HCT-116_PBase.ccf.gz&#34;, &#34;name&#34;:&#34;piggyBac insertions&#34;, &#34;showOnHubLoad&#34;:&#34;true&#34;, &#34;options&#34;:{ &#34;color&#34;:&#34;#3182bd&#34;, &#34;height&#34;:100, &#34;logScale&#34;:&#34;log10&#34;, &#34;markerSize&#34;:3, &#34;opacity&#34;:[100], &#34;show&#34;:&#34;all&#34;, &#34;sampleSize&#34;:1000, }, }, { &#34;type&#34;:&#34;bedgraph&#34;, &#34;url&#34;:&#34;https://htcf.wustl.edu/files/xXl8ZAXy/HCT-116_PBase.bedgraph&#34;, &#34;name&#34;:&#34;HCT-116 PBase density&#34;, &#34;showOnHubLoad&#34;:&#34;true&#34;, &#34;options&#34;:{ &#34;color&#34;:&#34;#3182bd&#34;, &#34;height&#34;:50, }, }, { &#34;type&#34;:&#34;bed&#34;, &#34;url&#34;:&#34;https://htcf.wustl.edu/files/xXl8ZAXy/HCT-116_PBase.bed&#34;, &#34;name&#34;:&#34;HCT-116 PBase peaks&#34;, &#34;showOnHubLoad&#34;:&#34;true&#34;, &#34;options&#34;: { &#34;color&#34;:&#34;#3182bd&#34;, &#34;height&#34;:20, &#34;displayMode&#34;:&#34;density&#34;, } }, ] Many options have the same names and settings as the calling card track. A complete list of options for bedgraph and BED tracks can be found here ."
+    },
+    {
+      "title": "",
+      "instruction": "Now we can upload this file to the browser and visualize it. Go to the homepage and select the appropriate genome:"
+    },
+    {
+      "title": "",
+      "instruction": "Once the genome has loaded, click on the blue &#34;Tracks&#34; button and select &#34;Custom tracks.&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Select the second tab, &#34;Add Custom Data Hub.&#34; Clicking on the second dialog box (&#34;Choose datahub file&#34;) will open a filesystem navigator window. Find the JSON file on your system and upload it. Upon successful upload, you should see a table listing the uploaded tracks:"
+    },
+    {
+      "title": "",
+      "instruction": "After closing the custom track pane (with the red X in the upper right corner), all three tracks should be visible: Note that the gencodeV29 track has been removed for this screenshot."
+    },
+    {
+      "title": "",
+      "instruction": "Right clicking on the calling card track will bring up a preference pane, where tracks can be dynamically customized: SImilar preference panes exist for the BED and bedgraph tracks."
+    },
+    {
+      "title": "",
+      "instruction": "As an alternative to hosting your data externally, you can directly upload text-based data files, including CCF, bedgraph, and BED. If you choose this option, your files should not be compressed. Also, for very large files, this approach may slow down your browser."
+    },
+    {
+      "title": "",
+      "instruction": "Click on the blue &#34;Tracks&#34; button and select &#34;Text track.&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Select &#34;callingcard&#34; from the dropdown menu, then click on the &#34;Choose Files&#34; button. Select one or more CCF files to upload. The browser will then load the tracks; this may take a few moments, depending on the size of the file(s)."
+    },
+    {
+      "title": "",
+      "instruction": "After the tracks have been loaded, close the pane by clicking on the red X in the top right corner. When directly uploading text files, tracks will be rendered with default options. These steps can be repeated for BED and bedgraph files."
+    },
+    {
+      "title": "",
+      "instruction": "The calling card track was designed for interactive exploration. This is chiefly accomplished by a rollover box that appears as the mouse cursor nears a data point. An approximate location is at the top of the pane, while the bottom lists the read count, strand, and barcode for each insertion:"
+    },
+    {
+      "title": "",
+      "instruction": "This example showcases all the different options available for calling card tracks, such as color, marker size, opacity, and subsampling:"
+    }
+  ],
+  "fetched_at": "2026-06-16T22:40:22.562046Z",
+  "stats": {
+    "views": 696,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 1,
+    "forks": 0
+  },
+  "peer_reviewed": false
+}

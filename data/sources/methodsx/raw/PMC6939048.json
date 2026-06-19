@@ -1,0 +1,72 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC6939048",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6939048/",
+  "doi": "10.1016/j.mex.2019.10.003",
+  "title": "A three tier rapid mass programming method",
+  "author": "Steane, Trifilo, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "Graphical abstract",
+  "steps_raw": [
+    {
+      "title": "Method details",
+      "instruction": "The aim of the proposed methodology is to enable rapid mass programming of physical Target devices. This methodology has been specifically implemented to support research into IoT networks built from ESP8266 type devices, using the ESP-01 modules, but could just as easily be applied to any other application with large numbers of target devices that need programming. All materials needed to reproduce the test-bed implementation of this methodology can be found here [1], including schematics, PCB layouts, and code."
+    },
+    {
+      "title": "Method details",
+      "instruction": "This method implements a three-tiered approach to programming devices. The first tier is the Master Controller, while the second tier is comprised of multiple Local Controllers embedded with the third and final tier which is the Target devices to be programmed or flashed. Tiers 1 and 2 are connected via Ethernet, this can be as simple as using a network switch (as presented here) but could also be distributed more broadly across a larger area using a more complex network setup. Tiers 2 and 3 are plugged into sockets mounted on PCBs to form tower modules with one Tier 2 Local Controller to several Tier 3 target devices."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Different test applications will require different network configurations, as has been mentioned the tower modules can be distributed around a wide area representing clusters of devices. For this reason, when target devices are plugged into the tower modules they can be mounted in various orientations in the X, Y and Z plane. However, when individually scattered devices are required for testing, target devices can be programmed on the tower modules for convenient programming and then removed and connected to other supporting hardware for individual scattering."
+    },
+    {
+      "title": "Method details",
+      "instruction": "In the case of our IoT implementation, the Master controller is run on a PC while Local Controllers are run on multiple Raspberry Pis connected to the Target device ESPs via a single serial port which is multiplexed to handle up to 15 IoT devices."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Once the tiers are setup and configured, programming is a fairly simple task, summarised below and in Fig. 1:1Image files are prepared for the target devices2A simple configuration file is prepared, detailing which images are to be distributed to which devices.3These files are then feed into the Master Controller which will distribute programming commands and files to all connected Local Controllers.4Local Controllers then begin programming each of the target devices one at a time.5Once a device is programmed it is then restarted and its status logged.Fig. 1Simplified Block Diagram of Methodology's Test-bed.Fig. 1"
+    },
+    {
+      "title": "Method details",
+      "instruction": "To understand the operation of this method, it is helpful to first understand how the test-bed’s architecture achieves its functionality."
+    },
+    {
+      "title": "Method details",
+      "instruction": "The Master Controller is run as a Python script, Python offers socket libraries to build up a TCP interface. Multi-threading is used to handle connections to towers, a new thread is created upon receiving a request for connection from a tower. Once a tower is connected, the Master Controller will then begin transferring all the different, pre-compiled image files to be programmed on the target devices. If all devices are being programmed with the same image only one file will be transferred. The controller begins by first sending the filename and size, which can be used to validate the file transfer, followed by the file itself. This process is summarised in Fig. 2. Once the controller has transferred all the files, it begins sending commands to the Local Controller to program each target device and logs the results.Fig. 2Sequence Diagram for initial connection of Master and Local Controllers.Fig. 2"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The Configuration File uses the YAML language to create a human-readable configuration that is easy to write and interpret. Fig. 3 shows an example of a configuration file. Image files are specified at the top of the file and assigned an alias which can be repeated below more easily. The rest of the file is simply a list of towers and the target devices with the assigned image. Note that not all target devices need to be specified and only those specified will be programmed.Fig. 3An example of a YAML configuration file for programming two different images to 6 target devices on 2 towers.Fig. 3"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Future work will aim to further simplify these files by allowing for key words such as “ALL”, “EVEN”, and “ODD” to assign images to all devices on a tower more quickly. Further support would also be added to assist in validation and error correction in these files."
+    },
+    {
+      "title": "Method details",
+      "instruction": "The Local Controller similar to the Master Controller, is a python script that runs on a Raspberry Pi connected to each tower. It is connected to the Master Controller via the Raspberry Pi’s Ethernet port, and the script will automatically attempt to connect to the controller on start-up. As described above, the Local Controller receives files and programming commands from the master controller, it then uses the ESPtool to program the target devices as detailed in Fig. 4. The Local Controller uses 2 Serial Port pins and 2 GPIO pins to program target devices. These 4 pins are multiplexed using analogue switches for bi-directional connections meaning no pre-configuration of Target devices is required. This approach allows for greater flexibility in the test-bed allowing for logging of data back from the target devices serial lines after devices are programmed and running. In total 8 GPIO pins from the Raspberry Pi are used, 4 for data and 4 to select the correct target device before programming.Fig. 4Sequence Diagram for programming, “Flashing” of ESP target device.Fig. 4"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Target Devices this method has focused on the programming of ESP8266 family Chips and specifically the ESP-01 modules. However, the PCB design could easily be adapted to program other ESP modules, and the schematic and method could be adapted to programming other devices."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Tower Architecture for ESP unit is centred around a custom PCB with the multiplexing circuitry, shown in Fig. 5, to connect the Target devices to the local controller, a Raspberry Pi. This circuit uses 4 pins on the ESP target devices, Tx, Rx, Chip_enable and RST, to program or ‘flash’ the target devices one at a time.Fig. 5Multiplex configuration used for each line of the serial port connecting the Local controller to Target Devices, using 2 1:8 Mux devices and an enable line to select between the two Muxs.Fig. 5"
+    },
+    {
+      "title": "Method details",
+      "instruction": "As has been mentioned, the tower module could easily be distributed around a large network and this is to facilitate the testing of the Programmed protocols on the target devices. To this end 3 other considerations have gone into the design of the towers. Firstly, the towers have a robust power supply capable of powering the Raspberry Pi Controller as well as all 15 devices at once even at their highest loads. This power circuitry maintains 3.3 V to each ESP as well as 5 V to the Raspberry Pi. Secondly, the layout of the towers allows for a variety of orientations for the target devices and with the addition of 90° daughter board devices can be oriented in x, y and z planes to accommodate testing sensitive to physical orientation. Thirdly, the Raspberry Pi and the bi-directional multiplexing circuit allow for the logging of data coming back from the target devices serial lines, allowing for detailed performance analysis of protocols in a physical implementation."
+    },
+    {
+      "title": "Method details",
+      "instruction": "This tested architecture allows any number of pre-compiled image files to be programmed to any number of target devices quickly and easily. Image files are assigned to devices in the configuration file which is supplied to the management PC that will distribute the images to the relevant towers and then begin supplying programming commands to the towers. The Local Controllers on the towers then select the appropriate device using the multiplexing circuit and flash the image file to the device."
+    }
+  ],
+  "materials": [],
+  "fetched_at": "2026-06-19T00:47:12.259034+00:00"
+}

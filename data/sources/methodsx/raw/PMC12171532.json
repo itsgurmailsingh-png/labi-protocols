@@ -1,0 +1,104 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC12171532",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12171532/",
+  "doi": "10.1016/j.mex.2025.103395",
+  "title": "Automated grading using natural language processing and semantic analysis",
+  "author": "Ayaan, Ng",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "Educational institutions' grading systems have evolved significantly toward automation, propelled by advances in Natural Language Processing (NLP) and Artificial Intelligence (AI). This research comprehensively explores automated grading systems, analyzing traditional methods alongside contemporary approaches and research on exam grading. Through extensive literature review, we examine the advantages and disadvantages of keyword-centric techniques, NLP-based systems, and hybrid models. We implement a novel NLP-based automatic grading system that combines multiple similarity measures with semantic analysis using TensorFlow's Universal Sentence Encoder. The system evaluates student responses by comparing them to reference answers using a weighted combination of edit similarity, cosine similarity, Jaccard similarity, normalized word count, and semantic similarity. Experiments conducted on 14 student responses demonstrate the system's ability to provide consistent and accurate grading while identifying cases requiring further human review. This study contributes to understanding automated grading systems, offering insights into their efficacy, limitations, and prospects in educational assessment practices.•Hybrid evaluation: The proposed methodology combines traditional NLP techniques with advanced semantic analysis to provide comprehensive evaluation of student answers; the system integrates both surface-level textual similarity and deep semantic analysis to evaluate open-ended student responses.•Weighted scoring: The system computes a weighted base score by combining four NLP metrics (Jaccard, edit distance, cosine similarity, normalized word count) and then blends this with a semantic similarity score from the Universal Sentence Encoder to assign marks.•Rule-based final scoring: The final scoring layer applies threshold logic to assign zero, partial, or full marks based on semantic score and word count, and flags responses that fall into ambiguous ranges for teacher review.",
+  "steps_raw": [
+    {
+      "title": "Method details",
+      "instruction": "The proposed methodology for evaluating student answers against reference answers is based on a combination of similarity measures, providing a comprehensive and nuanced assessment of students’ responses. Each of the similar measures has a weight that contributes to the calculations."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Fig. 1. illustrates the overall flow of the grading pipeline, from input preprocessing to final score computation using combined NLP and semantic similarity.1. Natural Language Processing Technique:Fig. 1Overall architecture of the automated grading pipeline.Fig 1"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The grading function utilizes multiple NLP techniques to evaluate the similarity between student answers and reference answers. These techniques capture various aspects of textual similarity, ensuring a thorough assessment. The primary NLP techniques used include:a.Edit Similarity: Measures character-level changes needed to transform one text into another. This score captures the exactness of the student's answer, allowing for minor typographical errors while highlighting significant deviations. Lower edit distance indicates higher similarity. The edit distance score is assigned a weight of 0.05, out of 1, to ensure a balanced consideration of character-level differences in the assessment process. The edit similarity score is inverted while calculating, so the final score recorded is out of 1.b.Cosine Similarity: Calculates the cosine of the angle between two vectors, evaluating the semantic closeness of word usage and frequency. This measure recognizes synonymous terms and different phrasing, supporting a fair and flexible grading process. The cosine similarity score, with a weight of 0.15 out of 1, captures semantics by robustly measuring the angle between the vectors of word frequencies.c.Jaccard Similarity: Compares the intersection and union of keyword sets from student and sample answers. This metric assesses the presence of key terms and concepts, enhancing the system's ability to recognize partially correct answers using varied terminology. The Jaccard score, weighed 0.15 out of 1, respectively, offers insights into lexical similarity and synonym overlaps of keywords, providing a fairer assessment.d.Normalized Word Count: Normalizes the student's word count against the reference answer's word count to ensure length variations do not disproportionately affect grading. It is calculated by dividing the sample answer's keywords by the student's answer's keywords. The normalized word count score is allotted a weight of 0.15, balancing its contribution in normalizing the impact of answer length across different metrics.2. TensorFlow's Sentence Encoder:"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The grading system integrates TensorFlow's Universal Sentence Encoder to evaluate the semantic similarity between student and reference answers. This approach provides a deep understanding of the context and meaning behind the responses.a. Semantic Similarity (Universal Sentence Encoder): A significant part of the grading function is the semantic similarity score calculated using TensorFlow's Universal Sentence Encoder model. This score evaluates the meaning of the entire sentence, providing a deep understanding of the context and semantics of the student's answer compared to the sample answers provided by teachers."
+    },
+    {
+      "title": "Method details",
+      "instruction": "The sentence encoder model delves into the deeper meaning and context of the texts, often leveraging advanced NLP techniques and pre-trained models. The semantic similarity score is weighed significantly at 0.5 out of 1. This measure is vital for understanding the broader context and intent behind the student's answer, going beyond mere textual similarity. Capturing the semantic relationship between the students and the reference answers ensures that the grading system accurately assesses the true understanding and knowledge demonstrated by the student.3. Combined Scoring Mechanism:"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The final grading is determined by combining the various similarity measures using weighted sums."
+    },
+    {
+      "title": "Method details",
+      "instruction": "All these scores are combined using a weighted sum. The combined NLP score includes Jaccard, edit, cosine, and normalized word count scores, ensuring a balanced assessment based on different similarity measures, which also facilitates partial scoring. Finally, the semantic similarity score, weighted significantly from the TensorFlow model, is combined with the NLP score to produce the final confidence score. By integrating multiple similarity measures, the system provides partial scoring that recognizes varying degrees of correctness and understanding. This approach ensures a balanced assessment based on different aspects of textual and semantic similarity.a.Combined NLP Score or Base Score Calculation: This score combines the Jaccard, Edit, and Cosine scores, and Normalized word count using their respective weights.(a)Cnlp=min(max(0,wj·Sj+we·(Se)−1+wc·Sc+ww·Sw),1)where:Cnlp:BaseScorewj,we,wc,ww:WeightsforJaccard,Edit,Cosine,andNormalizedWordCountSj,Se,Sc,Sw:Jaccard,Cosine,andNormalizedWordCountScores(Se)−1:InverseoftheEditSimilarityScoreb.Confidence Score Calculation: This score integrates the semantic similarity score obtained from the TensorFlow universal sentence encoder model with the combined NLP score.(b)C=min(max(0,wtf·Stf+(1−wtf)·Cnlp),1)where:C:ConfidenceScorewtf:WeightforSemanticSimilarityScoreStf:SemanticSimilarityScoreCnlp:CombinedNLPScorefromEquation(a)c.Final Score Calculation: If the semantic similarity score is very low (0.2), the final score is set to 0. If the semantic similarity score is very high (0.9) and the normalized word count is also high (0.85), the final score is set to 1. Otherwise, the final score is the confidence score, which facilitates partial scoring.(c)F={0,ifStf<0.21,ifStf≥0.9andSw≥0.85C,otherwise}where:F:FinalScoreStf:SemanticSimilarityScoreSw:NormalizedWordCountScored.Marks Given: The final score is scaled to the total possible marks and rounded to the nearest ceiling integer.(d)M=⌈min(F·T,T)⌉where:M:MarksGivenT:TotalMarksoftheQuestion"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Software and Environment:"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The proposed automated grading system was implemented using a combination of modern NLP libraries and deep learning frameworks. This section outlines the technical specifications of the implementation to enhance reproducibility."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Software Environment•Programming Language: Python 3.8.10•Operating System: Windows 11•Development Environment: Jupyter Notebook 6.4.3"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Libraries and Frameworks•TensorFlow(Version 2.13.0): Used for implementing the Universal Sentence Encoder model•NLTK(Version 3.8.1): Used for text preprocessing, tokenization, and basic NLP operations•scikit-learn(Version 1.3.2): Used for implementing cosine similarity and other vector-based metrics•NumPy(Version 1.24.3): Used for numerical operations and array manipulations•Pandas(Version 2.0.3): Used for data handling and organization•Matplotlib: (Version 3.5.0) and Seaborn (Version 0.11.2): Used for visualization, including radar charts"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Model Specifications"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Universal Sentence Encoder:•Model: Universal-Sentence-Encoder/4 from TensorFlow Hub•Embedding Dimension: 512•Architecture: Transformer-based•Trained on a variety of internet sources, including Wikipedia, news, web forums, and other web sources•Default parameters were used without fine-tuning"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Experiment:"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "This quiz forms part of a research experiment designed to evaluate the performance of an automated grading system tailored for educational purposes was created using Microsoft Forms. 14 students who took part in the assessment were asked to provide answers in a free-form format to simulate real-world scenarios where answers may vary in structure and detail. The primary goal was to test the system's capability to handle diverse responses and accurately assess the depth of understanding demonstrated by each participant."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Fig. 2. Results summary of the automated grading system. The table displays student IDs, names, and their respective scores, along with a “Teacher’s Attention” flag. This table also includes a \"Teacher's Attention\" column, indicating whether a teacher's review is required to finalize the score. This feature ensures that any anomalies or uncertainties in the automated grading process are flagged for further human review, maintaining the accuracy and fairness of the grading system.Fig. 2Results of the automated grading system applied to 14 student responses, showing the correlation between computed scores and the teacher’s attention.Fig 2"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Performance Comparison:"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "The results were obtained from different sample references and student answers. To further visualize and compare these results, we employ radar charts. Radar charts capture multidimensional data on the answer's similarity based on criteria such as Jaccard similarity, edit distance, cosine similarity, and semantic relevance."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Fig. 3a. Radar chart highlighting a significant overlap between the reference and student answers, indicating a high level of similarity across all evaluated metrics. Consequently, the Final score is determined as 0.83 because the Semantic score and Normal word count place it within the second criteria, and the student is awarded full marks for the answer.Fig. 3(a-d): Radar charts visualize multi-dimensional similarity analyses between student responses and reference answers. Each axis represents a distinct similarity metric: (a) high overall similarity with semantic score of 0.83 resulting in full marks; (b) moderate similarity with noticeable metric variations and semantic score of 0.52 enabling partial scoring; (c) low similarity despite higher word count, resulting in zero score; and (d) moderate overall similarity with semantic score of 0.70 and partial scoring despite extended response length.Fig 3"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Fig. 3b. Radar chart revealing discrepancies between the reference and student responses, with notable deviations in certain metrics such as edit distance and semantic relevance. Here, the Final score is determined as 0.52 because the Semantic score is not higher than 0.9, making partial scoring feasible."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Fig. 3c. Radar chart demonstrates low similarity across most metrics despite a higher word count. Despite the higher word count, the final score was determined to be 0. This indicates that the student's answer had significant deviations from the reference answer across several metrics, resulting in a low semantic score and an overall low final score."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Fig. 3d. Radar chart for a case with moderate overall similarity. The Final score is determined as 0.70 because the Semantic score is also not high enough for this case, making partial scoring feasible, despite the longer word count."
+    }
+  ],
+  "materials": [],
+  "fetched_at": "2026-06-19T00:17:04.659431+00:00"
+}

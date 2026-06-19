@@ -1,0 +1,144 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC11836493",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11836493/",
+  "doi": "10.1016/j.mex.2025.103183",
+  "title": "Implementation of a practical sand constitutive model coupled with the high cycle accumulation framework in PLAXIS",
+  "author": "Tantivangphaisal, Taborda, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "A modification of the high-cycle accumulation (HCA) framework coupled with a practical constitutive model for sands and its numerical implementation as a user-defined soil model in PLAXIS is presented. The implemented model is compared against data from the original high-cyclic tests in Karlsruhe fine sand and more recent laboratory tests in Dunkirk sand. A reference 15 MW offshore wind turbine monopile foundation subject to lateral cyclic wave loading is used in an engineering design scenario at three different load levels to verify the current numerical implementation.Details include:•Modifications made to the HCA framework to couple it with a practical sand constitutive model,•Implementation of an efficient workflow to switch between low and high cycle constitutive equations in PLAXIS, and•Verification of the implementation at single element and boundary value problem scales.",
+  "steps_raw": [
+    {
+      "title": "Method details",
+      "instruction": "Niemunis et al. [3] proposed that the mechanical behaviour of soils subject to cyclic loading can be characterized by a series of empirical functions relating the change in average strain state with number of cycles, cyclic strain amplitude, average stress state and cyclic loading history, supported by an initial set of laboratory tests from Wichtmann [7]. The fundamental assumption of this method is that the characterisation of these variables at the level of an integration point in a finite element enables the accurate modelling of their effects on the structure considered in a boundary value problem. To compute these boundary value problem, two distinctive constitutive schemes, originally termed “calculation strategies”, are used. The original terminology of “implicit” and “explicit” calculation phases can cause confusion as the terms also describe numerical integration methods which are independent of the constitutive schemes. Instead, “low-cycle” and “high-cycle” analysis phases are used in this work."
+    },
+    {
+      "title": "Method details",
+      "instruction": "For low-cycle phases of an analysis, a conventional elasto-plastic constitutive model is adopted. At any material point in a continuum representing a body of soil (integration point in a finite element), given some total strain increment {Δεtot}, the constitutive model is required to return the plastic strain increment {Δεpl} and the tangent elastic stiffness matrix [Dela] to predict a corresponding conventional stress increment {Δσcon}.(1){Δσcon}=[Dela]({Δεtot}−{Δεpl})"
+    },
+    {
+      "title": "Method details",
+      "instruction": "In this framework, during high-cycle analysis phases, total strain increments {Δεtot}=ΔN·{∂εtot∂N} no longer denote conventional physical increments of strain, but rather the change in the average strain state during a package of ΔN cyclic loads. Accumulated strain increments are given by the rate of change in the average strain state {∂εacc∂N} given some constant average stress boundary conditions. The equivalent HCA tangent elastic stiffness matrix [DHCA,ela] governs the relationship between strain accumulation and stress relaxation. These two terms form the core of the HCA framework. Finally, plastic strain increments {Δεpl}=ΔN·{∂εpl∂N} ensure the stress state persists on the underlying model's yield surface in stress space. The accumulated stress change during high-cycle phases predicted by the constitutive model is {Δσacc}, which is evaluated as:(2){Δσacc}=ΔN·{∂σacc∂N}=ΔN·[DHCA,ela]({∂εtot∂N}−{∂εpl∂N}−{∂εacc∂N})"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The types of analysis phases are illustrated in Fig. 1 for an arbitrary scalar strain measure. Low-cycle analysis phases are also separated into irregular phases (where the state variable εampl is not updated and shown in black in Fig. 1) and regular recording phases (where εampl is updated and shown in blue in Fig. 1).Fig. 1Schematic of the HCA framework at a material point illustrated for an arbitrary strain measure.Fig 1"
+    },
+    {
+      "title": "Method details",
+      "instruction": "In their large database of laboratory experiments on clean sands, Wichtmann [7,8] found that the magnitude of the strain accumulation rate ∥{∂εacc∂N}∥ at any material point is generally dependent on:1.A scalar measure of cyclic strain amplitude εampl,2.The average void ratio eav,3.The average mean effective stress pav′,4.A measure of the average stress ratio Javpav′, and5.A measure of the cyclic history gcyc. where p′,J,θ are the conventional soil mechanics invariants of the Cauchy stress tensor σij, and the subscript av denotes the average value during regular cyclic loading."
+    },
+    {
+      "title": "Method details",
+      "instruction": "The magnitude of the rate of strain accumulation is composed of the product of empirical functions taking these factors into account:(3)||{∂εacc∂N}||=∂gcyc∂N·fefpfY"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The form of fp from Niemunis et al. [3] remains unchanged in the current implementation:(4)fp=exp(−Cp·(pav′101.3[kPa]−1))"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The cyclic history function gcyc and its rate of change are modified to a power-law function as it best fit observations of Dunkirk sand laboratory tests [6]. gcyc is defined as the product of the amplitude and cycle-number factors:(5)gcyc=fN·famplwhere:(6)fampl=(min(εampl,εlim)10−4)Campland the scalar cyclic strain amplitude εampl is defined in Niemunis et al. [3]."
+    },
+    {
+      "title": "Method details",
+      "instruction": "fN is the newly proposed power-law:(7)fN=CN1(1+N)CN2−CN1"
+    },
+    {
+      "title": "Method details",
+      "instruction": "To derive the evolution of the cyclic history variable, ∂gcyc∂N, fampl is assumed constant during an arbitrary cyclic load package from N0 to N, i.e. ∂fampl∂N=0 and therefore:(8)∂gcyc∂N=∂fN∂N·fampl=(CN1CN2(1+N)(CN2−1))·fampl"
+    },
+    {
+      "title": "Method details",
+      "instruction": "An arbitrary increment in gcyc is the integral of this quantity over the considered load package (i.e. from N0 to N):(9)Δgcyc=gcyc(N)−gcyc(N0)=∫N0Nfampl·(CN1CN2(1+N)(CN2−1))dNwhere gcyc(N0) is the value of gcyc at the last update of the cyclic strain amplitude εampl (and hence fampl). Integrating and rearranging Eq. (9) with respect to N results in:(10)N=[gcyc(N)−gcyc(N0)fampl·CN1+(1+N0)CN2]1CN2−1"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Finally, on substitution into Eq. (8):(11)∂gcyc∂N=fampl·∂fN∂N=fampl·CN1CN2(gcyc(N)−gcyc(N0)fampl·CN1+(1+N0)CN2)(1−1CN2)"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The void ratio dependency function fe is also modified to be bounded between 0 and 1 and to prevent numerical issues at excessively low or high void ratios:(12)fe={1,e≥emax0,e<emax−1/Ce1−Ce(emax−e),otherwise"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The exponential relationship is retained for the stress ratio function fY but normalisation is made consistent with the failure criterion of the selected low-cycle model:(13)fY=exp(CY·Javpav′g(ϕmag′,θav))where:"
+    },
+    {
+      "title": "Method details",
+      "instruction": "g(ϕmag′,θav) is the available strength defined by the Mohr-coulomb failure criterion expressed as a stress ratio, and"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Campl,CN1,CN2,Ce,emax,Cp,CY,ϕmag′,εlim are material parameters calibrated against laboratory tests."
+    },
+    {
+      "title": "Method details",
+      "instruction": "High-cycle specific state variables are the average stresses pav′,Jav,θav, average void ratio eav, cyclic history during the current high-cycle phase gcyc, previous cyclic history gcyc(N0),N0, and strain amplitude εampl."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Fig. 2 illustrates the modified forms of fe and fY compared to those originally proposed in Niemunis et al. [3] and adopted in Wichtmann et al. [9] and Machacek et al. [10]. As global integration error controls available to the user vary from software to software, the current implemented forms ensure that:1.In case of densification beyond some arbitrary minimum void ratio or maximum relative density, the predicted void ratio dependency does not reverse as seen in Fig. 2(a) for Ce=0.95emin.2.If the current stress ratio at any integration point exceeds the available strength defined by ϕmag′, large jumps (discontinuities) caused by the original Matsuoka-Nakai normalisation can be avoided. This is seen on the left-hand side of Fig. 2(c).Fig. 2Illustration of the (a) original and (b) modified forms of fe and (c) original and (d) modified forms of fY for improved numerical stability.Fig 2"
+    },
+    {
+      "title": "Method details",
+      "instruction": "A final modification is made to decouple strain accumulation direction with magnitude. This unit accumulation direction vector {m→}={∂εacc∂N}/||{∂εacc∂N}|| is normal to the standard Modified Cam Clay surface fitted through the current average stress state with its size defined by material parameter ϕdir′. This modifies the original proposal to use the angle of shearing resistance at critical state in Wichtmann et al. [11], and allows direct calibration of strain accumulation direction using laboratory observations without a need to quantify anisotropy [9]."
+    },
+    {
+      "title": "Updating of low-cycle model state variables during high-cycle analysis phases",
+      "instruction": "Approximations made by the HCA framework to overcome the computational cost of large numbers of loading cycles include the assumption of a negligible change to the single-cycle strain amplitude εampl over several cycles. Small changes to εampl occurring over large numbers of cycles can be taken into account 1) by re-engaging the low-cycle model or 2) via an adaptive update approach [12]."
+    },
+    {
+      "title": "Updating of low-cycle model state variables during high-cycle analysis phases",
+      "instruction": "Simulations of multiple load packages of varying sizes must utilise the former approach and re-engage the low-cycle model over a single recording cycle (average-peak-trough-average) in order to update the high-cycle state variable εampl. This approach, however, requires tracking the low-cycle model's state variables without explicitly using their original evolution rules. Although the second adaptive strain update approach investigated by Staubach et al. [12] cannot account for load packages that vary in size sequentially, its underlying philosophy has merit and is examined to help derive an appropriate evolution rule for the state variables in the current low-cycle model during accumulation phases."
+    },
+    {
+      "title": "Updating of low-cycle model state variables during high-cycle analysis phases",
+      "instruction": "The adaptive strain approach assumes that strain amplitude is inversely proportional to the soil stiffness, following a simple logic that under the same stress cycle a stiffer material experiences smaller strains. Thus, instead of the re-engaging the low-cycle model to update the strain amplitude state variable, this update is simply the ratio of previous-to-current stiffness tensor norms. Staubach et al. [12] suggests that both a ‘tangent’ and ‘secant’ measure of stiffness can be used, opting for the ‘secant’ measure as their definition of ‘tangent’ is step size dependent. It is presumed here that what is meant by the ‘secant’ measure is in fact the elastic stiffness tensor of the underlying low-cycle model at the start of an equivalent update cycle. Denoting the incremental rank-4 tangent elastic tensor as Cijkl, i.e. Δσij=CijklΔεklela, an update of εampl between two cyclic packages with subscripts 1 and 2 is:(14)ε2ampl=∥Cijkl∥1∥Cijkl∥2ε1ampl=(CijklCijkl)1(CijklCijkl)2ε1ampl"
+    },
+    {
+      "title": "Updating of low-cycle model state variables during high-cycle analysis phases",
+      "instruction": "Using an isotropic elastic stiffness in the current low-cycle model [5], Eq. (14) can be re-written using the tangent elastic shear and bulk moduli. Assuming a constant small-strain Poisson's ratio, this can be further written as a ratio between the tangent elastic shear moduli at the start of cyclic package 1 and 2 as:(15)ε2ampl=(20Gtan2+9Ktan2)1(20Gtan2+9Ktan2)2ε1ampl=Gtan1(e1,p1′,Ed1*)Gtan2(e2,p2′,Ed2*)ε1ampl"
+    },
+    {
+      "title": "Updating of low-cycle model state variables during high-cycle analysis phases",
+      "instruction": "When re-engaging the underlying low-cycle model, the update to ∥Cijkl∥ is thus assumed to only be a function of changes in e and p'. Therefore, any history variables required by the underlying model's hypoelastic formulation to track reversals [13,14], such as measures derived from history of the deviatoric strain invariant Ed, namely the tensorial lag and reversal strain states, are modified to evolve together with the total input strain step during high-cycle analysis phases."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "The current modifications and numerical implementation in PLAXIS were first tested against results from the original formulation [3] in its entirety without modifications and the laboratory tests on which it was based. This was developed based on a large set of tests on Karlsruhe fine sand carried out by Wichtmann [7]. Further details of those laboratory test results and the corresponding calibrated parameters (of the original model formulation) can be found in Wichtmann [[8]:p.134]. The same initial conditions of p0′=200 kPa, q0=150 kPa and an average initial relative density of 62.5 %, corresponding to an initial void ratio e0=0.82 are used herein. A comparison between laboratory test data and the simulated response for four different applied stress amplitudes qampl is shown in Fig. 6. HCA parameters are taken from Table 4.2 in Wichtmann [[8]:p.135].Fig. 6Comparison of current implementation of the original HCA formulation (solid lines), the modified functions (dashed lines) using parameters and laboratory test data (symbols) for Karlsruhe Fine Sand from the literature [8].Fig 6"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "The main modifications made to the HCA functions, fe and fN (and correspondingly its derivative with respect to number of cycles ∂f/∂N), are then verified. Re-calibration of parameters CN1,CN2 and Ce is carried out simply by fitting the modified forms against the original, as illustrated in Fig. 7. The same element test simulations were recomputed and shown as dashed lines in Fig. 6. The differences at the single element level are negligible and show the applicability of the modified functions to capture the same behaviour at the material point level.Fig. 7Modified functions compared to their original forms using re-calibrated CN1,CN2,Ce parameters.Fig 7"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "To demonstrate the model implementation in PLAXIS for use in foundation design in a natural sand deposit, data from Dunkirk sand laboratory experiments [6] and in-situ site investigation [17] were examined and used to calibrate both low-cycle and high-cycle parts of the current model. As calibration results and discussion are outside of the scope of the current paper, a single representative set of parameters for the natural Dunkirk sand deposit (Table 2) was used in the model application. Representative monotonic and cyclic single element response at a wide range of stresses and densities are presented in Fig. 8, Fig. 9 respectively.Table 2Calibrated model parameters for Dunkirk sand.Table 2Low-cycle parameter, see Taborda et al. [5]Gref(MPa)mGνa(%)bRminecs,refλξϕcs′(∘)klCalibrated value94.40.5150.1802.21·10−20.9110.1040.9100.1350.17933.92.343.91High-cycle parameterCamplCN1CN2CeemaxCpCYϕmag′(∘)εlim(%ε)ϕdir′(∘)Calibrated value1.541.95·10−40.170.130.910.151.6433.90.126.8Fig. 8Drained isotropically-consolidated triaxial compression tests simulated using calibrated parameters for Dunkirk Sand in terms of (a) axial strain-deviatoric stress and (b) axial strain-volumetric strain.Fig 8Fig. 9Cyclic drained triaxial test simulations using current calibrated parameters for Dunkirk Sand demonstrating the effect of (a) strain amplitude, (b) mean effective stress and (c) initial stress ratio.Fig 9"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "The simulated monotonic drained response in Fig. 8 captures well the shear-volumetric coupling trends typical across a large range of densities and confining stresses. Denser and less confined sands (corresponding to more negative values of the state parameter ψ) exhibit greater dilation on shearing and greater softening in stress-strain space with both characteristics well reproduced by the model. The calibrated model's cyclic strain accumulation trends for a similarly wide range of density and stress conditions matches the same trends seen in drained cyclic triaxial laboratory tests [6,8,18] in Fig. 9."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Finally, the current implementation is verified for use in a boundary value problem in PLAXIS using a reference monopile foundation, with a diameter of 10m and an embedment of 45m, supporting a 15MW offshore wind turbine, the details of which can be found in Gaertner et al. [19]. Three analyses at different load levels are performed, where 100,000 cycles are applied at 10 metres above mudline level to simulate long-term wave loading. The structure is modelled using 6-noded quadratic shell elements with an isotropic linear elastic material with E=200 MPa and ν=0.26 following specifications in Gaertner et al. [19]. The soil-structure interface is explicitly modelled using 12-noded zero-thickness quadratic interface elements with a Mohr-Coulomb failure criterion defined by the angle of shearing resistance at critical state of the adjacent soil. The 200 m by 200 m by 90 m deep soil domain was assumed fully drained and discretized using 52,590 10-noded tetrahedral elements, resulting in 210,360 integration points. The mesh is highly refined in areas likely to experience concentrated changes in stress, such as those close to the pile. A hydrostatic initial pore pressure profile, a uniform relative density of 60 % and K0=0.4 are assumed for the current offshore design scenario. Fig. 10 illustrates the employed mesh and applied loading boundary conditions.Fig. 10Schematic of the boundary value problem, boundary conditions and mesh employed.Fig 10"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "The computed low-cycle response at mudline level is shown in Fig. 11. Mudline displacement is normalised by the pile diameter (10 m) and the applied load F by the reference load at 10 % diameter displacement at the same level, as defined in Fig. 10. Hysteretic damping at the global level is captured during these cycle-by-cycle analysis phases.Fig. 11The low-cycle load-displacement response at three load levels plotted at mudline level (solid: irregular cycles; dashed: regular recorded cycles).Fig 11"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "The subsequent high-cycle analysis phase was computed up to 100,000 cycles and the pile head response is shown in Fig. 12 for normalised displacement and rotation at mudline. Total displacement and its rate of increase with number of cycles is observed to grow non-linearly with applied load level.Fig. 12a) normalised displacement and b) tilt at pile head for the reference monopile with number of cycles.Fig 12"
+    },
+    {
+      "title": "Method validation",
+      "instruction": "Fully modelling the soil continuum as finite elements allows an assessment of the underlying mechanisms driving the global foundation response. Changes in void ratio due to 100,000 applied loading cycles at the three load levels is shown in Fig. 13 for section A-A’ (indicated in Fig. 10). Increased densification in the predominant loading direction is seen with increasing load level.Fig. 13Contours of void ratio changes due to long-term cycling around the monopile foundation at three load levels. Negative void ratio change denotes compaction.Fig 13"
+    }
+  ],
+  "materials": [],
+  "fetched_at": "2026-06-19T00:19:45.680737+00:00"
+}

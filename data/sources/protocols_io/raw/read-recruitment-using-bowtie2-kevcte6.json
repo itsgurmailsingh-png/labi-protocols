@@ -1,0 +1,79 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "8373",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.kevcte6",
+  "title": "Read Recruitment Using Bowtie2",
+  "author": "James E Thornton Jr",
+  "doi": "dx.doi.org/10.17504/protocols.io.kevcte6",
+  "source_url": "https://www.protocols.io/view/read-recruitment-using-bowtie2-kevcte6",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Log into the HPC. $ ssh hpc$ ocelote $ ssh hpc $ ocelote"
+    },
+    {
+      "title": "",
+      "instruction": "Move into your project directory. Then create a &#39;read_recruit&#39; directory. Move into that directory. $ cd /rsgrps/bh_class/username$ mkdir read_recruit$ cd !$ $ cd /rsgrps/bh_class/username $ mkdir read_recruit $ cd !$"
+    },
+    {
+      "title": "",
+      "instruction": "Move into the assembly/megahit-out directory created from the previous protocol. $ cd /rsgrps/bh_class/username/assembly/megahit-out"
+    },
+    {
+      "title": "",
+      "instruction": "Simpifly the fasta headers of your combined-contigs.fa file using fasta_renamer from the Fastx toolkit. $ module load fastx$ fastx_renamer -n COUNT -I combined-contigs.fa -o final-contigs.fa $ module load fastx $ fastx_renamer -n COUNT -I combined-contigs.fa -o final-contigs.fa Important: If you get &#39;This looks like a multi-line FASTA file&#39;, try this alternative method to rename sequence headers: awk &#39;/^&gt;/{print &#34;&gt;&#34; ++i; next}{print}&#39; &lt; contigs_in.fa &gt; contigs_out.fa"
+    },
+    {
+      "title": "",
+      "instruction": "Create a bam and bowtie2 index directory. $ mkdir bam bt2_index"
+    },
+    {
+      "title": "",
+      "instruction": "Move into the contig indexing directory. And create the contig index. $ cd bt2_index$ module load bowtie2$ bowtie2-build -f /rsgrps/bh_class/username/assembly/megahit-out/final-contigs.fa contig_index $ cd bt2_index $ module load bowtie2 $ bowtie2-build -f /rsgrps/bh_class/username/assembly/megahit-out/final-contigs.fa contig_index This step could take awhile depending on the size of your contig file."
+    },
+    {
+      "title": "",
+      "instruction": "Move into your bam directory found at /rsgrps/bh_class/username/read_recruit/bam $ cd ../bam"
+    },
+    {
+      "title": "",
+      "instruction": "For paired end only: Move into your fasta directory. Ensure only 1 pair from each file is in the fasta directory. Keep the pair that is &#34;_1.fasta&#34;. Move all &#34;_2.fasta&#34; files into the fastq directory. $ cd /rsgrps/bh_class/username/assembly/fasta$ mv *_2.fasta ../../fastq $ cd /rsgrps/bh_class/username/assembly/fasta $ mv *_2.fasta ../../fastq In the previous protocol we ended up only using 1 pair for assembly to simplify the process. In this protocol we only want to map the one pair that we used during assembly. Make sure the fasta directory only contains the _1.fasta of the pair."
+    },
+    {
+      "title": "",
+      "instruction": "Make directories for standard error and standard out. $ mkdir std-err std-out"
+    },
+    {
+      "title": "",
+      "instruction": "Copy the following script named bt2_align.sh. Edit the username variables found in the script. Many of you actually had your fasta files located in: /rsgrps/bh_class/username/assembly/fasta Which is fine, just make sure the script points to the correct location. #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l select=1:ncpus=4:mem=15gb#PBS -l pvmem=14gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m beaecho “my job_id is: ${PBS_JOBID}”#####change here #######FASTA_DIR= $FASTA_LIST echo &#34;Samples to be processed:&#34; $(cat $FASTA_LIST) module load bowtie2 module load samtools while read FASTA; do FASTA_N=$(basename $FASTA | cut -d &#39;.&#39; -f 1) bowtie2 -x $BT2_INDEX -U $FASTA -f --maxins 800 --fr --very-sensitive-local -p 4 -S $OUT_DIR/$FASTA_N.sam cd $OUT_DIR echo &#34;Converting $FASTA_N.sam using reference $CONTIGS&#34; samtools view -@ 16 -bT $CONTIGS $FASTA_N.sam &gt; $FASTA_N.temp echo &#34;Sorting $FASTA_N&#34; samtools sort -@ 16 $FASTA_N.temp &gt; $FASTA_N.bam echo &#34;Removing $FASTA_N.temp&#34; rm $FASTA_N.temp cd $FASTA_DIR done &lt; $FASTA_LIST&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;3DB62C63B8D84B5D9357F8DBB068F40E&#34; &gt; #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l select=1:ncpus=4:mem=15gb #PBS -l pvmem=14gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea echo “my job_id is: ${PBS_JOBID}” #####change here ####### FASTA_DIR=&#34;/rsgrps/bh_class/username/fasta&#34; BT2_INDEX=&#34;/rsgrps/bh_class/username/read_recruit/bt2_index/contig_index&#34; OUT_DIR=&#34;/rsgrps/bh_class/username/read_recruit/bam&#34; CONTIGS=&#34;/rsgrps/bh_class/username/assembly/megahit-out/final-contigs.fa&#34; ####################### cd $FASTA_DIR export FASTA_LIST=&#34;$FASTA_DIR/fasta-list&#34; ls *fasta &gt; $FASTA_LIST echo &#34;Samples to be processed:&#34; $(cat $FASTA_LIST) module load bowtie2 module load samtools while read FASTA; do FASTA_N=$(basename $FASTA | cut -d &#39;.&#39; -f 1) bowtie2 -x $BT2_INDEX -U $FASTA -f --maxins 800 --fr --very-sensitive-local -p 4 -S $OUT_DIR/$FASTA_N.sam cd $OUT_DIR echo &#34;Converting $FASTA_N.sam using reference $CONTIGS&#34; samtools view -@ 16 -bT $CONTIGS $FASTA_N.sam &gt; $FASTA_N.temp echo &#34;Sorting $FASTA_N&#34; samtools sort -@ 16 $FASTA_N.temp &gt; $FASTA_N.bam echo &#34;Removing $FASTA_N.temp&#34; rm $FASTA_N.temp cd $FASTA_DIR done &lt; $FASTA_LIST Important: CONTIGS variable is the contigs that you combined with your partner."
+    },
+    {
+      "title": "",
+      "instruction": "Submit the job. $ qsub -e std-err/ -o std-out/ bt2_align.sh"
+    },
+    {
+      "title": "",
+      "instruction": "Upon job completion navigate to your bam std-err directory. $ cd /rsgrps/bh_class/username/read_recruit/bam/std-err"
+    },
+    {
+      "title": "",
+      "instruction": "Cat the standard error file to view the alignment rate for each file. $ cat 881767.head1.cm.cluster.ER Your file name will differ"
+    },
+    {
+      "title": "",
+      "instruction": "Append your final.contigs.fa file with your partners final.contigs.fa file. $ cat final.contigs.fa /rsgrps/bh_class/partnerusrname/assembly/megahit-out/final.contigs.fa >"
+    }
+  ],
+  "fetched_at": "2026-06-16T22:09:36.574059Z",
+  "stats": {
+    "views": 615,
+    "runs": 0,
+    "bookmarks": 1,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false
+}

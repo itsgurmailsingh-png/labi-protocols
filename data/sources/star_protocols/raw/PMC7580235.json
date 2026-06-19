@@ -1,0 +1,68 @@
+{
+  "source_name": "star_protocols",
+  "source_id": "PMC7580235",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7580235/",
+  "doi": "10.1016/j.xpro.2020.100061",
+  "title": "Protocol for Projecting Allele Frequency Change under Future Climate Change at Adaptive-Associated Loci",
+  "author": "Blumstein, Richardson, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "SummaryWe describe how to predict population-level allele frequency change at loci associated with locally adapted traits under future climate conditions. Our method can identify populations that are at higher risk of local extinction and those that might be prime targets for conservation intervention. We draw on previously developed community ecology statistical methods and apply them in novel ways to plant genomes. While a powerful diagnostic tool, our method requires a wealth of genomic data for use.For complete details on the use and execution of this protocol, please refer to Blumstein et al. (2020).",
+  "steps_raw": [
+    {
+      "title": "Step-By-Step Method Details",
+      "instruction": "Note: all steps are performed in the statistical computing environment “R”. Example code for each step can be found at https://github.com/blumsteinm/Projecting_MAF_ClimateChange/STAR_Protocol_Example_Code.R"
+    },
+    {
+      "title": "Define the Major Axes of Climate Variation Using a Principal Component Analysis",
+      "instruction": "Timing: 10–20 min"
+    },
+    {
+      "title": "Define the Major Axes of Climate Variation Using a Principal Component Analysis",
+      "instruction": "This step takes the climatic data from the past Normals data and future GCM projections and puts them into principal components (PC) space. PCs pull out major axes of explanatory variation, which is particularly useful when many climate variables are highly correlated and thus difficult to use in a statistical model.3.Order rows in both climate files by population to ensure they match. This is essential for the principal component analysis (PCA) predictions.4.Use “prcomp” from the vegan package to run a PCA of the past climate Normals data, inputting a matrix of all climate variables as the object.a.Ensure that both “scale” and “center” are equal to TRUE. If not, climate variables with large values will disproportionately drive axis variation.5.Use “predict” and the future climate data as “newdata” to project the future climate variables into PC space.6.Check results using “biplot” from the vegan package (Figure 1)."
+    },
+    {
+      "title": "Define the Major Axes of Climate Variation Using a Principal Component Analysis",
+      "instruction": "Figure 1Visualizing Current and Future Climate in Principle Components SpaceA visualization of (A) climate variable correlations and (B) climate principal components space. The (A) correlations plot shows positive (blue) and negative (red) correlations between climate variables, with circle size and depth of color indicating the strength of the correlation. The (B) PCA plot depicts climate variables (blue arrows) in the first two axes of pc space. Where populations fall in PC space are shown with the colored dots, with the closed dots representing the past 30-years of climate data and their open counterparts representing where populations are expected to fall in the PC space in 2080."
+    },
+    {
+      "title": "Fit a Canonical Correspondence Analysis to Current Allele Frequencies versus Climate",
+      "instruction": "Timing: 15–30 min"
+    },
+    {
+      "title": "Fit a Canonical Correspondence Analysis to Current Allele Frequencies versus Climate",
+      "instruction": "This step uses the climate PCs and the MAFs by population that we have tabulated to fit a canonical correspondence analysis (CCA) model. This model is the relationship between past climate and current MAFs. This CCA will be used to project MAFs into the future under climate change.7.Merge the past climate dataframe and MAFs dataframe using “merge” in base R. We merged based on “population name”, so that when data is put into models in subsequent steps, all columns are in the same order by population.a.Record the index of the climate and MAF columns so that you can distinguish between the two when running the CCA.8.Run a Null Model CCA with no predictors using “cca” from package vegan.a.This will be used for model comparisons in a future step. In this case, no explanatory predictors are put into the model, just allele data.b.We ran ours with 4,000 permutations.9.Run a CCA with all climate predictors included using “cca” from package vegan.a.Again, we ran this with 4,000 permutations.10.Drop environmental predictors that are collinear/non-significant via a step-wise model comparison using “ordistep” in the vegan package.a.We inputted the null CCA as the object, with the scope set to the full CCA predictor model.b.We ran ours in both directions, forward and backward, then used the optimal model returned as our CCA model. Using “$anova” with the model object will return the significance of variables remaining in the model."
+    }
+  ],
+  "materials": [
+    "1.Climate Data",
+    "a.Past Climate Normal information for population locations (.csv file format)",
+    "i.Normals data are three-decade averages of climate variables and are produced every 10 years. They are essential to use instead of daily or annual climate data as we are interested in questions of local adaptation to climate, not weather.",
+    "ii.We used 1 km resolution climate monthly Normals data from 1961–1990 from Climate WNA (http://www.climatewna.com/) (Hamann et al., 2013, Blumstein et al., 2020, Wang et al., 2012). These data were interpolated from the original 4x4 km WNA data using demography information, then point values were extracted using each genotype’s latitude and longitude of origin.",
+    "iii.Example Dataset is Climate_Normals_1961_1990.csv",
+    "b.Projected Climate Change information for population locations (.csv file format)",
+    "i.Climate projections should come from a Global Climate Model (GCM) or ensemble of several GCMs.",
+    "ii.We used 1 km resolution ensemble projections for the 2080 decade from ClimateWNA (Hamann et al., 2013, Blumstein et al., 2020, Wang et al., 2012).",
+    "iii.Example Dataset is Climate_Projections_Ensemble2080s.csv",
+    "2.Sequence Samples (.bed file format)",
+    "a.You will need genomic sequences for the genotypes in your study. These can be full genome sequences or subsets of sequences gathered by reduced sampling representation techniques (eg. RADSeq)",
+    "b.We used genomes resequenced by the Joint Genome Institute and made publicly available (Joint Genome Institute, D. O. E, 2019) for the genotypes in our study",
+    "c.All loci with MAF <3% should be excluded from analysis.",
+    "d.Example Dataset is POTR_SNPs_Subset [.fam/.bed/.bim]",
+    "3.Loci of Interest",
+    "a.A list of the genes or loci of interest in your study. These should be loci that contribute to or are associated with local adaptation. They can be pulled from the literature, previous work, or Quantitative Trait Loci (QTL)/Genome Wide Association Sudies (GWAS). Ideally these loci will show signatures of local adaptation in your own populations (Qst > Fst). If performing QTL or GWAS studies, it is important to correct for genetic relatedness/population structure in your model. See “Resources Availability” section for data resources such as Phytozome for plant genomic and genetic information.",
+    "b.We measured an adaptive trait in common gardens (Nonstructural Carbohydrate Storage (NSC)) and used this data to perform a Genome Wide Association Study (GWAS) with our genomic resequenced data, control for genetic relatedness in the model (Blumstein et al., 2020). This analysis identified loci that were significantly associated with our trait of interest.",
+    "c.Example Dataset is Example_SNPs.csv",
+    "Note: Example data can be found at https://github.com/blumsteinm/Projecting_MAF_ClimateChange/tree/master/Example_Data1.Climate Dataa.Past Climate Normal information for population locations (.csv file format)i.Normals data are three-decade averages of climate variables and are produced every 10 years. They are essential to use instead of daily or annual climate data as we are interested in questions of local adaptation to climate, not weather.ii.We used 1 km resolution climate monthly Normals data from 1961–1990 from Climate WNA (http://www.climatewna.com/) (Hamann et al., 2013, Blumstein et al., 2020, Wang et al., 2012). These data were interpolated from the original 4x4 km WNA data using demography information, then point values were extracted using each genotype’s latitude and longitude of origin.iii.Example Dataset is Climate_Normals_1961_1990.csvb.Projected Climate Change information for population locations (.csv file format)i.Climate projections should come from a Global Climate Model (GCM) or ensemble of several GCMs.CRITICAL: ensure that the projected climate variable names match the normals climate variables for use in the statistical model in step 2 and all geographic data are in the same projection.ii.We used 1 km resolution ensemble projections for the 2080 decade from ClimateWNA (Hamann et al., 2013, Blumstein et al., 2020, Wang et al., 2012).iii.Example Dataset is Climate_Projections_Ensemble2080s.csv2.Sequence Samples (.bed file format)a.You will need genomic sequences for the genotypes in your study. These can be full genome sequences or subsets of sequences gathered by reduced sampling representation techniques (eg. RADSeq)b.We used genomes resequenced by the Joint Genome Institute and made publicly available (Joint Genome Institute, D. O. E, 2019) for the genotypes in our studyc.All loci with MAF Fst). If performing QTL or GWAS studies, it is important to correct for genetic relatedness/population structure in your model. See “Resources Availability” section for data resources such as Phytozome for plant genomic and genetic information.b.We measured an adaptive trait in common gardens (Nonstructural Carbohydrate Storage (NSC)) and used this data to perform a Genome Wide Association Study (GWAS) with our genomic resequenced data, control for genetic relatedness in the model (Blumstein et al., 2020). This analysis identified loci that were significantly associated with our trait of interest.c.Example Dataset is Example_SNPs.csv",
+    "REAGENT or RESOURCESOURCEIDENTIFIERDeposited DataExample Datasets and codehttps://github.com/blumsteinm/Projecting_MAF_ClimateChangen/aSoftware and AlgorithmsR v.3.6.0R Core Team (2019). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/n/aBiocManager v.1.30.10Martin Morgan (2019). BiocManager: Access the Bioconductor Project Package Repository. R package version 1.30.10. https://CRAN.R-project.org/package=BiocManagern/asnpStats v.1.34.0David Clayton (2019). snpStats: SnpMatrix and XSnpMatrix classes and methods. R package version 1.34.0.n/adata.table v.1.12.8Matt Dowle and Arun Srinivasan (2019). data.table: Extension of “data.frame”. R package version 1.12.8. https://CRAN.R-project.org/package=data.tablen/avegan v.2.5-6Jari Oksanen, F. Guillaume Blanchet, Michael Friendly, Roeland Kindt, Pierre Legendre, Dan McGlinn, Peter R. Minchin, R. B. O'Hara, Gavin L. Simpson, Peter Solymos, M. Henry H. Stevens, Eduard Szoecs and Helene Wagner (2019). vegan: Community Ecology Package. R package version 2.5-6. https://CRAN.R-project.org/package=vegann/a",
+    "Here are some suggested places to get started looking for the various datasets you will need.",
+    "Climate data with past and project climate",
+    "North American Climate – Climate WNA (http://www.climatewna.com/)",
+    "Global – WorldClim (https://www.worldclim.org/data/index.html)",
+    "Genomic Resources (Reference Genomes and Mapping Populations)",
+    "JGI’s Phytozome (https://phytozome.jgi.doe.gov/pz/portal.html)",
+    "Hardwood Genomics (https://www.hardwoodgenomics.org/)"
+  ],
+  "fetched_at": "2026-06-19T00:59:49.834987+00:00"
+}

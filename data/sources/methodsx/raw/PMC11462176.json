@@ -1,0 +1,38 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC11462176",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11462176/",
+  "doi": "10.1016/j.mex.2024.102955",
+  "title": "GAM4water: An R-based method for extracting wetted areas from remotely-sensed images",
+  "author": "Redana, Lancaster, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "We present ‘GAM4water,’ a R-based method to classify wetted and non-wetted (dry) areas using remotely sensed image indices derived from such images. The GAM4water classification algorithm is built around a Generalized Additive Model (GAM) capable of accounting for non-linear responses. GAM4water can use any type of radiometric data, whether from drones, satellites or other platforms, and can be used with data of different spatial resolutions, geographic extents and spatial reference systems. It is a supervised tool that uses pixel information to distinguish between wetted and dry areas within an image set, extract them and produce a rich output that includes a binary raster, polygons of wetted areas, and a classification performance report. We tested the method in two case-studies, one using high resolution drone images and another using satellite images. The tests show that GAM4water can produce highly accurate classifications of wetted and non-wetted areas, and has the additional benefit of being easily customizable and not requiring complex implementation procedures.•This paper introduces the first R based method of wetted area extraction for remotely-sensed images.•The method is based on Generalized Additive Models and is applicable to any remotely-sensed data.",
+  "steps_raw": [
+    {
+      "title": "Data preparation, processing and user customizations",
+      "instruction": "The following procedures are internal to GAM4water and can be customized by the user (Fig. 1) before launching the function."
+    },
+    {
+      "title": "Data preparation, processing and user customizations",
+      "instruction": "GAM4water first homogenizes the resolution of the input rasters, then verifies consistency between their coordinate reference systems and spatial extents. The user can indicate a convenient projection system to transform all the input raster (that, nonetheless, must already have a reference projection system). In case of different resolutions, the user can choose if the raster with lower or higher resolution should be used as reference. This is achieved internally by using the “resample” function of the terra package for R [26]. To speed up computational time, the user can indicate a particular AOI (i.e., a polygon shapefile), which is used to crop the input raster; this is especially convenient for satellite images. To further reduce computation time, the user has the option to indicate an aggregating factor that is used to degrade the resolution of the input raster. This procedure uses the ‘aggregate’ function from the terra package [26] that groups pixels according to an aggregating factor expressed as number of pixels in each direction (horizontally and vertically); the value in the new cell is the mean of the aggregated pixels."
+    },
+    {
+      "title": "Data preparation, processing and user customizations",
+      "instruction": "Firstly, GAM4water, stacks all the input rasters producing a single multilayer raster, then extracts radiometric information from all the pixels contained in the input shapefile (i.e., samples of wetted/dry pixels) across each layer of the input rasters. It is worth mentioning here that a larger number of input rasters will increase the computational time, especially for AOIs containing large number of pixels (i.e., large areas or high-resolution rasters). Nonetheless, the amount and diversity of radiometric information can substantially improve the classification performance (see Limitation Section), so there is potentially a trade-off between accuracy and computational time that the user must consider. The radiometric information for each pixel is then stored in a data frame that includes pixel coordinates. At this point each pixel represents a single annotated (i.e., wetted or dry) observation with known radiometric values for each layer/raster."
+    },
+    {
+      "title": "Data preparation, processing and user customizations",
+      "instruction": "The data frame is then randomly divided into a training and validation data set (but see Accuracy of wetted area classification), each with a 2/3 ratio of wetted and dry pixels. The training dataset (2/3 of the data) is used to implement a default classification GAM that can have two forms:(1)logit(μi)=f1(ly1)+...+f1(lyn)+f2(x,y)(2)logit(μi)=f1(ly1)+...+f2(lyn)where logit(μi) is equal to log⁡(μi1−μi), that is the ratio of the probability μi of success (i.e., pixel being wetted) to the probability of failure (i.e., pixel being dry) as function of the radiometric values assumed by each pixel at each provided layer/raster (ly). The user can decide if the position (x,y) of a given pixel can be used in its classification as either wetted or dry (i.e., Eq. (1)). This allows the user to account for the often not random distribution of wetted and dry cells, which typically results from the interaction between water volume and bed topography which influences the border between wetted vs dry points across a surface (e.g., lake or river edge). The use of position can be turned on by the user through the initial setting customization within GAM4water. The parameters f1 and f2, a single smoother and a tensor product respectively, are implemented with a shrinkage version of a thin plate spline function. The shrinkage smoother method [29] shrinks predictor coefficient estimates towards zero. This has been shown to be an effective method of model predictor selection by forcing non-significant effects to 0 and thus effectively dealing with bias caused by predictor correlation and concurvity. The two default models ((1), (2)) are relatively simple, but the user can define more complex equation structure and interaction terms if preferred. The estimation of the smoothing parameters is done using the fast Restricted Maximum Likelihood (fREML) method [30] through the bam option in the mgcv package. The function bam [[31], [32], [33]] fits a GAM model, but it is designed specifically for large datasets to optimize memory use, and save computational time; it can be run in parallel over multiple processor cores (the number can specified by the user). Optionally, GAM4water can output a summary and a predictor effects plot from the GAM function."
+    },
+    {
+      "title": "Data preparation, processing and user customizations",
+      "instruction": "The fitted model (Eqs. (1) or (2)) is then used to estimate each pixel's probability of being wet or dry for the whole AOI, based on their specific radiometric values. In the default set up any pixel with probability ≤0.5 is classified as dry, while those with probabilty >0.5 are considered wet. However, the user can alter these probability thresholds."
+    }
+  ],
+  "materials": [
+    "Image, application 1"
+  ],
+  "fetched_at": "2026-06-19T00:33:56.934243+00:00"
+}

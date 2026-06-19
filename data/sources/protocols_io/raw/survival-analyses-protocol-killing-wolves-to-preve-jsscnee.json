@@ -1,0 +1,343 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "7730",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.jsscnee",
+  "title": "Survival analyses protocol: Killing wolves to prevent predation on livestock may protect one farm but harm\nneighbors",
+  "author": "Francisco Santiago-Ávila",
+  "doi": "dx.doi.org/10.17504/protocols.io.jsscnee",
+  "source_url": "https://www.protocols.io/view/survival-analyses-protocol-killing-wolves-to-preve-jsscnee",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Variables and Sample STATA 14 .Do file used for survival analyses at each spatial scale"
+    },
+    {
+      "title": "",
+      "instruction": "Here, we make available basic sample code for the statistical survival analyses employed in our manuscript. This code should allow for replication of analyses at all spatial scales for all datasets involved.*"
+    },
+    {
+      "title": "",
+      "instruction": "1. VARIABLES USED (and description):"
+    },
+    {
+      "title": "",
+      "instruction": "ID_TRS_yr --&gt; identifier for each area-year combination (please see study for more information)"
+    },
+    {
+      "title": "",
+      "instruction": "Interv_dich --&gt; intervention type (lethal, non-lethal)"
+    },
+    {
+      "title": "",
+      "instruction": "wolves_killed --&gt; number of wolves killed"
+    },
+    {
+      "title": "",
+      "instruction": "Interv_dummy --&gt; dummy variable for intervention type (0 if ‘non-lethal’, 1 if ‘lethal’)"
+    },
+    {
+      "title": "",
+      "instruction": "Delay_in_yrstop_time --&gt; time to recurrent event (in days) or censoring"
+    },
+    {
+      "title": "",
+      "instruction": "status_event --&gt; failure binary variable (1 if recurrent event; 0 if censored)"
+    },
+    {
+      "title": "",
+      "instruction": "start_time --&gt; start time variable (all obs ‘0’)"
+    },
+    {
+      "title": "",
+      "instruction": "yr_stratum --&gt; order of recurrent events within a particular area-yr†"
+    },
+    {
+      "title": "",
+      "instruction": "year --&gt; year variable (1998-2014)"
+    },
+    {
+      "title": "",
+      "instruction": "2. SAMPLE .DO FILE (Section scale)‡:"
+    },
+    {
+      "title": "",
+      "instruction": "clear all"
+    },
+    {
+      "title": "",
+      "instruction": "cd “/Location/Of/File”"
+    },
+    {
+      "title": "",
+      "instruction": "log using &#34;Name.smcl&#34;, replace"
+    },
+    {
+      "title": "",
+      "instruction": "set mem 1g"
+    },
+    {
+      "title": "",
+      "instruction": "use &#34;Data.dta&#34;, replace"
+    },
+    {
+      "title": "",
+      "instruction": "set more off, permanently"
+    },
+    {
+      "title": "",
+      "instruction": "************************************************"
+    },
+    {
+      "title": "",
+      "instruction": "****Replacing intervention type if wolves_killed = 0§"
+    },
+    {
+      "title": "",
+      "instruction": "************************************************"
+    },
+    {
+      "title": "",
+      "instruction": "replace Interv_dich=&#34;non-lethal&#34; if wolves_killed==0"
+    },
+    {
+      "title": "",
+      "instruction": "replace Interv_dummy=0 if Interv_dich==&#34;non-lethal&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "************************************************"
+    },
+    {
+      "title": "",
+      "instruction": "***Set data as survival time for PWP-GT model"
+    },
+    {
+      "title": "",
+      "instruction": "************************************************"
+    },
+    {
+      "title": "",
+      "instruction": "stset Delay_in_yrstop_time, failure(status_event) exit(time .) enter(start_time)"
+    },
+    {
+      "title": "",
+      "instruction": "list ID_TRS_yr _t0 _t _d _st**"
+    },
+    {
+      "title": "",
+      "instruction": "stdescribe"
+    },
+    {
+      "title": "",
+      "instruction": "stsum"
+    },
+    {
+      "title": "",
+      "instruction": "************************************************"
+    },
+    {
+      "title": "",
+      "instruction": "***Limiting analysis to # of Strata††"
+    },
+    {
+      "title": "",
+      "instruction": "************************************************"
+    },
+    {
+      "title": "",
+      "instruction": "use “Data_Strata#.dta”"
+    },
+    {
+      "title": "",
+      "instruction": "stset Delay_in_yrstop_time, failure(status_event) exit(time .) enter(start_time)"
+    },
+    {
+      "title": "",
+      "instruction": "stdescribe"
+    },
+    {
+      "title": "",
+      "instruction": "stsum"
+    },
+    {
+      "title": "",
+      "instruction": "*Comparing survival functions by group"
+    },
+    {
+      "title": "",
+      "instruction": "sts list, by(Interv_dich)"
+    },
+    {
+      "title": "",
+      "instruction": "sts list, by(Interv_dich) compare"
+    },
+    {
+      "title": "",
+      "instruction": "*Graphing survival functions by group"
+    },
+    {
+      "title": "",
+      "instruction": "sts graph, by(Interv_dich)"
+    },
+    {
+      "title": "",
+      "instruction": "sts graph, fail by(Interv_dich)"
+    },
+    {
+      "title": "",
+      "instruction": "*Graphing smoothed hazard estimates (hazard ratio) by group"
+    },
+    {
+      "title": "",
+      "instruction": "sts graph, hazard by(Interv_dich)"
+    },
+    {
+      "title": "",
+      "instruction": "sts graph, cumhaz by(Interv_dich)"
+    },
+    {
+      "title": "",
+      "instruction": "*Testing equality of survival functions by group (Log-rank test)"
+    },
+    {
+      "title": "",
+      "instruction": "sts test Interv_dich"
+    },
+    {
+      "title": "",
+      "instruction": "sts test Interv_dich, strata(yr_stratum)"
+    },
+    {
+      "title": "",
+      "instruction": "***COX MODELS (stcox)***"
+    },
+    {
+      "title": "",
+      "instruction": "**STRATIFIED**"
+    },
+    {
+      "title": "",
+      "instruction": "stcox Interv_dummy year, strata(yr_stratum) vce(cluster ID_TRS_yr)"
+    },
+    {
+      "title": "",
+      "instruction": "stcox Interv_dummy year, nohr strata(yr_stratum) vce(cluster ID_TRS_yr)"
+    },
+    {
+      "title": "",
+      "instruction": "*Checking Proportional Hazard assumptions"
+    },
+    {
+      "title": "",
+      "instruction": "estat phtest, log detail"
+    },
+    {
+      "title": "",
+      "instruction": "estat phtest, plot(Interv_dummy)"
+    },
+    {
+      "title": "",
+      "instruction": "stphplot, by(Interv_dummy)"
+    },
+    {
+      "title": "",
+      "instruction": "estat phtest, plot(year)"
+    },
+    {
+      "title": "",
+      "instruction": "stphplot, by(year)"
+    },
+    {
+      "title": "",
+      "instruction": "*Adding time-varying covariate to account for proportional hazard assumption violation"
+    },
+    {
+      "title": "",
+      "instruction": "stcox Interv_dummy year, tvc(Interv_dummy) texp(_t) strata(yr_stratum) vce(cluster ID_TRS_yr)"
+    },
+    {
+      "title": "",
+      "instruction": "*FRAILTY (MIXED-EFFECTS) MODEL**"
+    },
+    {
+      "title": "",
+      "instruction": "strmcure Interv_dummy year, shared(ID_TRS_yr) strata(yr_stratum)"
+    },
+    {
+      "title": "",
+      "instruction": "************************************************"
+    },
+    {
+      "title": "",
+      "instruction": "***Correlation between delay between incidents and wolves killed (for ‘Lethal’ only)"
+    },
+    {
+      "title": "",
+      "instruction": "************************************************"
+    },
+    {
+      "title": "",
+      "instruction": "spearman Delay_in_yrstop_time wolves_killed if Interv_dich==&#34;Lethal&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "log close"
+    },
+    {
+      "title": "",
+      "instruction": "* This sample code does not include code lines for dropping or adding observations, which we did for the alternate datasets used. However, this should only involve basic coding, and descriptions of observations included or dropped for each dataset can be found in the study."
+    },
+    {
+      "title": "",
+      "instruction": "† ‘Area’ refers to the section, neighborhood or neighborhood of township area scales."
+    },
+    {
+      "title": "",
+      "instruction": "‡ A similar procedure was used for the township and neighborhood of township scales, using their respective spatial unit identifiers."
+    },
+    {
+      "title": "",
+      "instruction": "§ This section was used for our main dataset. We removed this section of code for our alternate ‘traps-placed’ dataset, to include as ‘lethal’ those cases were attempts were made to trap wolves (please see study)."
+    },
+    {
+      "title": "",
+      "instruction": "** May need to break ties in Delay_in_yrstop_time variable to retain observations (please see stset help in Stata)"
+    },
+    {
+      "title": "",
+      "instruction": "†† A separate dataset was created including only those area-year records with strata (yr_stratum) values with enough observations to be properly modelled (please see study)."
+    },
+    {
+      "title": "",
+      "instruction": "---------------"
+    },
+    {
+      "title": "",
+      "instruction": "----------------------------------------"
+    },
+    {
+      "title": "",
+      "instruction": "---------------"
+    },
+    {
+      "title": "",
+      "instruction": "----------------------------------------"
+    },
+    {
+      "title": "",
+      "instruction": "Santiago-Ávila, Cornman &amp; Treves, 2017"
+    }
+  ],
+  "fetched_at": "2026-06-16T22:27:22.777524Z",
+  "stats": {
+    "views": 91,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false
+}

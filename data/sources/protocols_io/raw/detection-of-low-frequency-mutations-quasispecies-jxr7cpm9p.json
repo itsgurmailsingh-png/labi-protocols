@@ -1,0 +1,87 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "314911",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.n92ld4e18l5b/v1",
+  "title": "Detection of Low-Frequency Mutations (Quasispecies Diversity) in RNA Viral Genome Sequencing Data",
+  "author": "Keerthic Aswin",
+  "doi": "dx.doi.org/10.17504/protocols.io.n92ld4e18l5b/v1",
+  "source_url": "https://www.protocols.io/view/detection-of-low-frequency-mutations-quasispecies-jxr7cpm9p",
+  "fetched_at": "2026-06-16T21:02:08.109243Z",
+  "stats": {
+    "views": 63,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false,
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Verify input file integrity and ensure BAM files are properly sorted and indexed before proceeding."
+    },
+    {
+      "title": "",
+      "instruction": "Verify BAM file integrity: samtools quickcheck input.bam Expected output: No output indicates the file is valid. Any error message requires re-generating the BAM file from raw reads."
+    },
+    {
+      "title": "",
+      "instruction": "Sort the BAM file by coordinate: samtools sort -o sorted.bam input.bam"
+    },
+    {
+      "title": "",
+      "instruction": "Index the sorted BAM file: samtools index sorted.bam"
+    },
+    {
+      "title": "",
+      "instruction": "(Recommended) Filter reads by minimum mapping quality to remove poorly aligned reads: samtools view -b -q 20 sorted.bam &gt; filtered.bam samtools index filtered.bam Critical: Reads with mapping quality &lt; 20 are unreliable for variant calling and should be excluded. If your BAM was generated with a mapper that already filters by MAPQ, verify thresholds before applying additional filtering."
+    },
+    {
+      "title": "",
+      "instruction": "(Recommended) Remove PCR duplicates if amplicon-free library preparation was used: samtools markdup -r filtered.bam deduped.bam Note: For amplicon-based sequencing (e.g., ARTIC protocol), do NOT remove PCR duplicates, as this will reduce coverage disproportionately."
+    },
+    {
+      "title": "",
+      "instruction": "Generate a permissive mpileup file retaining all reads and base calls. Stringent filtering is applied at later steps to preserve sensitivity. samtools mpileup \\ -A -d 0 -Q 0 \\ -f reference.fasta \\ filtered.bam &gt; raw.mpileup Parameter Rationale: -A: Include anomalous read pairs (important for amplicon data) -d 0: Remove per-position depth cap (samtools default cap is 8,000×; removing it is critical for deeply sequenced samples) -Q 0: No base quality filtering at this stage (applied during iVar calling in Step 3) CRITICAL: Using -d 0 is essential. The default samtools depth cap of 8,000× will silently truncate read counts at high-coverage positions, leading to underestimated allele frequencies and missed low-frequency variants."
+    },
+    {
+      "title": "",
+      "instruction": "Call variants using iVar with relaxed thresholds. Stringent quality filtering is applied in subsequent steps, so it is preferable to call broadly and filter downstream. ivar variants \\ -p variants.tsv \\ -q 20 \\ -t 0.01 \\ -m 10 \\ -r reference.fasta \\ -g annotation.gff \\ &lt; raw.mpileup Parameter Explanation: -p variants.tsv: Output file prefix -q 20: Minimum base quality score (Phred ≥ 20) for a base to be counted -t 0.01: Minimum allele frequency threshold for variant reporting (1%); lower values increase sensitivity but also noise -m 10: Minimum read depth at a position for variant calling -r reference.fasta: Reference genome (must match the BAM alignment reference) -g annotation.gff: Annotation file for codon and amino acid change annotation (optional but recommended) Output: variants.tsv — tab-separated file containing: position, reference allele, alternate allele, allele frequency, depth, quality scores, and (if GFF provided) gene name and amino acid change."
+    },
+    {
+      "title": "",
+      "instruction": "Generate a second mpileup applying base quality filtering. This is used specifically for strand-resolved read counting to validate variants called in Step 3. samtools mpileup \\ -A -d 0 -Q 20 \\ -f reference.fasta \\ filtered.bam &gt; filtered.mpileup Rationale: Applying -Q 20 here ensures that strand-specific counts used for bias evaluation are derived from high-confidence base calls only."
+    },
+    {
+      "title": "",
+      "instruction": "Parse the filtered mpileup to extract forward and reverse strand read counts for both the reference and alternate alleles at each variant position. This step requires a custom parsing script. mpileup Base String Encoding (Reference) Forward strand reference reads: &#39;.&#39; (dot) Reverse strand reference reads: &#39;,&#39; (comma) Forward strand alternate reads: uppercase base letter (A, T, C, G) Reverse strand alternate reads: lowercase base letter (a, t, c, g) Insertions: &#39;+&#39; followed by length and inserted sequence Deletions: &#39;-&#39; followed by length and deleted sequence For each variant position from variants.tsv, extract from filtered.mpileup: Forward reference reads (count of &#39;.&#39; characters) Reverse reference reads (count of &#39;,&#39; characters) Forward alternate reads (count of uppercase alt base) Reverse alternate reads (count of lowercase alt base) NOTE: Custom Python or R scripts are required for this step. Standard mpileup parsers (e.g., pysam or the R package Rsamtools) can decode base strings. Ensure your script correctly handles read-start (&#39;^&#39;) and read-end (&#39;$&#39;) markers, as well as insertion/deletion encoding, which must be stripped before counting."
+    },
+    {
+      "title": "",
+      "instruction": "For each variant, calculate strand bias: strand_bias = max(fwd_alt, rev_alt) / (fwd_alt + rev_alt) Apply the following exclusion criteria: Exclude variants where strand_bias &gt; 0.90 (i.e., &gt; 90% of alternate reads on one strand) Require a minimum of 5 alternate-supporting reads on each strand (fwd_alt ≥ 5 AND rev_alt ≥ 5) NOTE: Thresholds may need adjustment based on library preparation method. For strand-specific library protocols, expected strand asymmetry is normal and must be accounted for. Consult your library kit documentation before applying symmetric strand filters."
+    },
+    {
+      "title": "",
+      "instruction": "Apply the following positional and contextual filters to remove residual artefacts: Minimum position depth ≥ 400 reads Minimum base quality ≥ 20 (Phred score) Exclude variants in homopolymeric regions (runs of ≥4 identical nucleotides); these are particularly prone to error in ONT data Exclude variants at positions flagged as error-prone based on the no-virus control (see below) (ONT only) Apply additional indel-specific filtering: require consistent indel length and sequence across ≥90% of supporting reads"
+    },
+    {
+      "title": "",
+      "instruction": "Process the no-virus control BAM file through Steps 1–3 with identical parameters. Generate a list of variant positions detected in the control. Exclude any position appearing in the control variant list from the experimental variant calls, regardless of frequency. Rationale: Variants present in a no-virus control represent background sequencing noise and platform-specific error signatures. Their removal is essential for accurate low-frequency variant calling."
+    },
+    {
+      "title": "",
+      "instruction": "Compile the high-confidence variant list and export in standard formats for downstream analysis. Required Output Fields Genomic position (1-based) Reference allele Alternate allele Allele frequency (%) Total read depth at position Forward reference read count Reverse reference read count Forward alternate read count Reverse alternate read count Strand bias score Gene name and amino acid change (if GFF annotation was provided) Export Formats Primary: TSV file (compatible with Excel and R/Python parsing) Optional: VCF format using bcftools (for compatibility with downstream population genetics tools)"
+    },
+    {
+      "title": "",
+      "instruction": "Detection of variants at allele frequencies as low as ~1% at ≥400× coverage Substantially reduced false-positive rate through strand-bias correction and no-virus control subtraction High-confidence variant list suitable for phylogenetic analysis, diversity metrics (e.g., Shannon entropy, nucleotide diversity), and resistance mutation profiling"
+    },
+    {
+      "title": "",
+      "instruction": "Problem: Excess false positives Possible Cause: Low-quality bases included; no-virus control not used Recommended Solution: Increase base quality threshold (Q ≥ 20); exclude variants present in no-virus control Problem: Strand-biased variants Possible Cause: PCR artefacts or sequencing platform errors Recommended Solution: Apply strict strand bias filter (reject if &gt;90% on one strand); require ≥5–10 alt reads per strand Problem: Low variant detection sensitivity Possible Cause: Over-filtering at the calling stage Recommended Solution: Reduce allele frequency threshold; use -t 0.01 in iVar; revisit depth requirements Problem: High noise in ONT data Possible Cause: Platform-specific indel errors in homopolymeric regions Recommended Solution: Apply additional indel/homopolymer filtering; cross-validate with Illumina short reads if possible Problem: Missing iVar annotations Possible Cause: Absent or misformatted GFF file Recommended Solution: Validate GFF format; ensure chromosome names match reference FASTA headers Problem: Low depth at variant sites Possible Cause: Uneven coverage, dropout regions Recommended Solution: Increase sequencing depth target (≥400×); review alignment quality in low-coverage regions"
+    }
+  ]
+}

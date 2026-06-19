@@ -1,0 +1,39 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "12566",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.qhwdt7e",
+  "title": "Introduction to calculating dN/dS ratios with codeml",
+  "author": "Frank O Aylward",
+  "doi": "dx.doi.org/10.17504/protocols.io.qhwdt7e",
+  "source_url": "https://www.protocols.io/view/introduction-to-calculating-dn-ds-ratios-with-code-qhwdt7e",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "When calculating dnds ratios, file organization and consistent formatting are key. This is because it is necessary to create amino acid alignments of proteins first, and then convert them to nucleic acid. For this to happen we need to have both amino acid and nucleic acid sequences in separate files, and the proteins and genes in those file need to have the exact same unique identifiers in their FASTA headers. First we can download some pre-compiled data from GitHub: git clone https://github.com/faylward/dnds If you navigate into the dnds/ folder you should see four files: One amino acid FASTA file (.fna), one nucleic acid FASTA file (.faa), one codeml control file (.ctl), and one python script used for parsing the final codeml output (.py)."
+    },
+    {
+      "title": "",
+      "instruction": "First we want to align the amino acid sequences using clustal omega. The command here is simple enough if we use default parameters: clustalo -i cluster_1.faa -o cluster_1.aln.faa The .aln.faa file should have the amino acid alignment we need."
+    },
+    {
+      "title": "",
+      "instruction": "Now we can use pal2nal to get a codon-based nucleic acid alignment. This is critical since we need to be sure the nucleic acid alignment is alined codon-by-codon we we know when substitutions result in a synonymous or nonsynonymous amino change. If we had simply performed an alignment on the nucleic acid sequence, we could not be sure that every single codon was lined up for this kind of calculation. pal2nal.pl cluster_1.aln.faa cluster_1.fna -output paml -nogap &gt; cluster_1.pal2nal Here we input the aligned amino acid sequences and the raw nucleic acid sequences. The flags &#39;-output paml&#39; indicates that we want the output format to be in paml format (for simplicity in subsequent steps). The &#39;-nogap&#39; flag indicates that we want to remove gaps and inframe stop codons, since those are not used in subsequent steps. Just type &#39;pal2nal.pl&#39; for a full description of all of the options."
+    },
+    {
+      "title": "",
+      "instruction": "To run codeml all we need to do is type &#39;codeml&#39; in the same folder that the codeml.ctl file is in. All of the options are in the codeml.ctl file. There are lots of different options here that are described in the PAML manual. The key ones here are: seqfile = cluster_2.pal2nal [this tells the program where to find the codon-aligned nucleic acid sequences] outfile = codeml.txt [this tells the program where we want the output] runmode = -2 [this indicates we want to perform pairwise comparisons] Some codeml applications require a phylogenetic tree to be provided in .nwk format, but since we are doing pairwise comparisons here it is not required. When we run codeml, the calculation may take around a minute to finish, and a large number of files will be created. The file codeml.txt is what we want though. We can parse results with the parse_codeml_output.py python script: python parse_codeml_output.py codeml.txt Note that not all gene-pairs will be printed out. This is because the script filters out all pairs for which dS was &lt; 0.01 or &gt; 2. Values &lt; 0.01 indicate that we may not get a reliable estimate of dN/dS, since the sequences are so similar. dS values &gt; 2 indicate that the sequences are quite divergent and multiple substitutions have likely occured at most sites, so dN/dS estimates will again be compromised. The overall workflow should provide results that look something like this: a The real power comes from estimating dN/dS from multiple genes across several genomes, and looking for overall trends. But that will be a tutorial for another day :)"
+    }
+  ],
+  "fetched_at": "2026-06-16T21:33:17.888185Z",
+  "stats": {
+    "views": 16426,
+    "runs": 1,
+    "bookmarks": 17,
+    "comments": 6,
+    "forks": 0
+  },
+  "peer_reviewed": false
+}

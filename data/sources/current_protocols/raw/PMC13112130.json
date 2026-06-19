@@ -1,0 +1,296 @@
+{
+  "source_name": "current_protocols",
+  "source_id": "PMC13112130",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13112130/",
+  "doi": "10.1002/cpz1.70368",
+  "title": "Cell Painting PLUS: An Iterative Staining‐Elution Protocol for High‐Content Phenotypic Screenings",
+  "author": "Wedler, von Coburg, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "AbstractCell Painting (CP) methods use a combination of fluorescent dyes to label multiple cellular compartments simultaneously, enabling the comprehensive analysis of phenotypic changes through morphological profiling. Here, we present a detailed protocol for the Cell Painting PLUS (CPP) method along with an automated image and data analysis strategy. In CPP, the iterative staining, elution, and re‐staining of cells with seven fluorescent dyes enable multiplexed analysis of nine cellular compartments and organelles. Each dye is captured in individual imaging channels to specifically distinguish effects on the plasma membrane, actin cytoskeleton, cytoplasmic and nucleolar RNA, lysosomes, nuclear DNA, endoplasmic reticulum, mitochondria, and Golgi apparatus. During the image analysis procedure, 894 morphological features (readouts) are extracted from single cells to generate comprehensive phenotypic profiles that resemble morphological perturbations. For efficient processing of the extracted features, we provide an automated data analysis workflow, which includes quality control, data normalization, and various data visualization tools. This workflow is based on a customized CPPAnalyzer Jupyter notebook and a CPPManager KNIME workflow, which can be easily applied without any special bioinformatics knowledge. In this way, CPP expands the multiplexing capacity, customizability, and, importantly, organelle specificity of the available CP‐based screening methods. © 2026 The Author(s). Current Protocols published by Wiley Periodicals LLC.\nBasic Protocol 1: Seeding of U2OS, MCF‐7, or HepG‐2 cells in multiwell plates and treatment of cells with compounds\nSupport Protocol 1: Preparation of assay‐ready compound plate\nAlternate Protocol: Seeding and differentiation of primary RPTEC‐TERT1 cells in multiwell plates\nBasic Protocol 2: Staining and imaging of cells using Cell Painting PLUS\nBasic Protocol 3: Image analysis\nBasic Protocol 4: Data normalization and data quality control\nBasic Protocol 5: Visualization of data using CPPManager KNIME workflow",
+  "steps_raw": [
+    {
+      "title": "PREPARATION OF ASSAY‐READY COMPOUND PLATES",
+      "instruction": "After designing an appropriate plate layout that includes both the test compounds of interest, suitable control compounds, and solvent controls (see Strategic Planning), the next step is to prepare compound assay‐ready plates for use in the experiments, in which all compounds are spotted onto multiwell plates in advance of the experiment. Preparing all compounds at once for all replicates increases reproducibility between replicates and saves time on the day of the experiment. In this way, the compound assay‐ready plates can simply be stored at –20°C until the screening. To produce the assay‐ready plates, (acoustic) liquid handlers that precisely transfer very small volumes (nanoliter resolution) and enable randomized plate layouts for each replicate are preferred. On the day of the experiment, when the cells are to be treated with the test compounds, cell culture medium is added to the assay‐ready plates to dilute the compounds. From this compound solution, a defined volume is then transferred to the cells to expose them to the test compounds."
+    },
+    {
+      "title": "PREPARATION OF ASSAY‐READY COMPOUND PLATES",
+      "instruction": "For example, 100 nl of a 1,000× compound stock solution (at 100% DMSO) are spotted on an assay‐ready plate. On the day of the experiment, 20 µl of medium is added to the assay‐ready plate, generating a 5× compound solution (at 0.5% [v/v] DMSO). Adding this 5× compound solution to the cells in a 1:5 dilution (10 µl of 5× compound solution added to cells grown in 40 µl of growth medium in the multiwell plate) results in the final 1 compound solution (at 0.1% [v/v] DMSO) to be tested on the cells. We recommend preparing at least one copy of the assay‐ready plate for each biological replicate of the screen and storing them at –20°C until use."
+    },
+    {
+      "title": "Additional Materials (also see Basic Protocol 1)",
+      "instruction": "RPTEC‐TERT1 cells (Wieser et al., 2008) growing in collagen‐coated cell culture flasksFetal bovine serum (FBS; TICO Europe, cat. no. FBSEU500)Cell growth medium for RPTEC cells (see recipe)384‐well microplates for cell seeding, suitable for microscopy (e.g., Greiner Bio‐One, cat. no. 781866), precoated with collagen (see Basic Protocol 1, steps 1‐6)"
+    },
+    {
+      "title": "STAINING AND IMAGING OF CELLS USING CELL PAINTING PLUS",
+      "instruction": "This protocol describes the iterative staining‐elution cycle. In the first staining cycle, the cells are stained with the first set of dyes (including live‐cell dyes for mitochondria and lysosomes, as well as fixed‐cell dyes for RNA and actin), followed by imaging of cells using an automated fluorescence microscope. Subsequently, dyes are eluted using an elution buffer. In the second staining cycle, cells are re‐stained with a second set of dyes (including fixed‐cell dyes for DNA, Golgi, and ER) and re‐imaged. Generally, automated pipetting and plate‐handling devices to perform the staining protocols are recommended to avoid variation in the pipetting processes to the extent possible. However, for small‐scale or pilot experiments, manual pipetting can also be conducted."
+    },
+    {
+      "title": "IMAGE ANALYSIS",
+      "instruction": "We previously compared the performance of image analysis pipelines built for the open‐source software CellProfiler (Carpenter et al., 2006) and the commercial software Harmony (Revvity Inc.) for analysis of CPP images (von Coburg et al., 2025a). Both pipelines extract hundreds to thousands of features (i.e., cellular readouts) from the images by measuring pixel intensity and distribution parameters. A feature is thereby a quantified phenotypic trait that typically comprises information about the analysis module (e.g., morphology, distribution, texture, intensity, and granularity) and the cellular region (e.g., nucleus, cytoplasm, membrane) for each imaging channel. For example, the feature Intensity_Cytoplasm_Alexa 488 Mean describes the mean intensity of the Alexa 488 imaging channel in the cytoplasm. However, not all CPP features are based on a single channel: for example, Morphology_Cell Area is measured from the overall size of the cell."
+    },
+    {
+      "title": "IMAGE ANALYSIS",
+      "instruction": "For Harmony, our image analysis pipeline delivers 894 preselected features, whereas the analogous CellProfiler pipeline provides 3,648 features (von Coburg et al., 2025a). We showed that both pipelines are generally applicable to CPP data (von Coburg et al., 2025a). However, using CellProfiler typically requires an additional time‐consuming step for image export from proprietary microscope software data formats. Furthermore, the numerous CellProfiler features also contain higher numbers of missing or constant values, thus needing more extensive filtering of features during the data cleaning procedure, which makes using CellProfiler somewhat less practical overall. In this protocol, we therefore describe the image analysis pipeline using Harmony. For more details on CPP image analysis using CellProfiler, we refer readers to von Coburg et al. (2025a) and Wedler, Körber, & Liu (2026)."
+    },
+    {
+      "title": "IMAGE ANALYSIS",
+      "instruction": "In Harmony, an image analysis sequence is composed of a number of building blocks (BBs) and application‐specific building blocks (ABBs), each of them representing one step of the analysis pipeline. More details on the specific BB can be found in the Harmony manual (Revvity Inc.). Some key BBs of the Harmony CPP image analysis pipeline are listed in Table 3. The final outputs of the analysis from all BBs are collected for each single cell at the end of the analysis sequence and can be exported as a .txt file. The Harmony CPP image analysis pipeline presented here is described in detail by von Coburg and Dunst (2026). This may also serve as a guide for designing own customized pipelines. Note that using BBs in Harmony generally requires an additional license, which can be requested from Revvity Inc. Additionally, make sure to download and install the version of the ABB “Add Channels 4i” (see Materials) that matches the Harmony software version used."
+    },
+    {
+      "title": "Basal live‐cell staining buffer, 2X",
+      "instruction": "Thaw LysoBrite Component B stock solution (containing the Live Cell Staining Buffer, not including dyes; part of the Cell Navigator Lysosome Staining Kit NIR Fluorescence, AAT Bioquest, cat. no. 22652) protected from light. Mix 50 ml LysoBrite Component B with 0.5 g bovine serum albumin (BSA), low endotoxin, lyophilized powder (PAN Biotech, cat. no. P06‐139350), to generate a 1% (w/v) BSA solution. Sterile filter using a 0.22‐µm‐pore‐size filter to avoid crystals, e.g., using a bottle‐top vacuum filter system with a 0.22‐µm filter (Sigma‐Aldrich, cat. no. 430769). Aliquot the solution as needed and store at −20°C."
+    },
+    {
+      "title": "Basal live‐cell staining buffer, 2X",
+      "instruction": "Based on our experience, the aliquots can be stored for at least 4 weeks and up to 6 months. Although the buffer's stability was not systematically tested, we did not observe any adverse effects on staining quality when using aliquots that had been stored long term."
+    },
+    {
+      "title": "Basal fixed‐cell staining buffer, 2X",
+      "instruction": "Mix 100 ml Dulbecco's Balanced Salt Solution (DPBS; PAN Biotech, cat. no. P04‐36500) with 1 g bovine serum albumin (BSA), low endotoxin, lyophilized powder (PAN Biotech, cat. no. P06‐139350) to generate a 1% (w/v) BSA solution. Sterile filter the solution using a 0.22‐µm‐pore‐size filter to avoid crystals, e.g., using a bottle‐top vacuum filter system with a 0.22‐µm filter (Sigma‐Aldrich, cat. no. 430769)."
+    },
+    {
+      "title": "Basal fixed‐cell staining buffer, 2X",
+      "instruction": "Store at 4°C. In our experience, the aliquots can be stored for up to 6 months. Although the buffer's stability was not systematically tested, we did not observe any adverse effects on staining quality when using aliquots that had been stored long term."
+    },
+    {
+      "title": "Live‐cell staining solution, 2X",
+      "instruction": "Thaw LysoBrite Component A (containing the LysoBrite NIR dye) and MitoTracker stock solution (see dye stock solutions) protected from light. Briefly vortex them and spin down for 10 sec at a tabletop centrifuge at maximal speed."
+    },
+    {
+      "title": "Live‐cell staining solution, 2X",
+      "instruction": "To prepare 50 ml of 2× live‐cell staining solution, add 200 µl of 500× LysoBrite Component A and 50 µl of 1 mM MitoTracker stock solutions to 49.75 ml of 2× basal live‐cell staining buffer (see recipe; also see Table 6 for a summary of dye concentrations). Mix well and keep solution protected from light."
+    },
+    {
+      "title": "Live‐cell staining solution, 2X",
+      "instruction": "Proceed with Basic Protocol 2 on the same day."
+    },
+    {
+      "title": "Live‐cell staining solution, 2X",
+      "instruction": "Prepare the live‐cell staining solutions freshly on the day of the experiment before proceeding with Basic Protocol 2. Note that the staining and fixation solution volumes needed for the experiment depend on the number of plates to be processed and the void volume (“dead volume”) needed for the respective pipetting device. For example, for each staining solution, 15 µl/well are needed (that is, 5.76 ml per 384‐well plate). We usually calculate assuming 7‐10 ml of void volume in the reservoirs containing the staining solution for the Janus pipetting robot to ensure that pipet tips do not aspirate any air."
+    },
+    {
+      "title": "Cycle 1 staining and permeabilization solution, 2X",
+      "instruction": "Thaw phalloidin and SYTO14 stock solutions protected from light (see recipe for dye stock solutions). Briefly vortex dye stock solutions and spin down for 10 sec using a tabletop centrifuge at maximum speed."
+    },
+    {
+      "title": "Cycle 1 staining and permeabilization solution, 2X",
+      "instruction": "To prepare 50 ml of 2× cycle 1 staining and permeabilization solution, add 50 µl of 66 µM phalloidin and 6.25 µl of 5 mM SYTO14 to 50 ml of 2× basal fixed‐cell staining buffer (see recipe). Add 0.1 ml of 100% (v/v) Triton X‐100 (Sigma, cat. no. T8787) to 49.9 ml of the staining solution to obtain a 0.2% (v/v) Triton‐X concentration. Mix well and keep solution protected from light."
+    },
+    {
+      "title": "Cycle 1 staining and permeabilization solution, 2X",
+      "instruction": "Prepare solution fresh on the day of the experiment. Proceed with Basic Protocol 2 on the same day."
+    },
+    {
+      "title": "Cycle 2 staining solution, 2X",
+      "instruction": "Thaw WGA and ConA stock solutions (see recipe for dye stock solutions) protected from light. Briefly vortex dye stock solutions and spin down for 10 sec using a table top centrifuge at maximum speed."
+    },
+    {
+      "title": "Cycle 2 staining solution, 2X",
+      "instruction": "To prepare 50 ml of 2× cycle 2 staining solution, add 125 µl of 1 mg/ml WGA, 200 µl of 5 mg/ml ConA, and 25 µl of 10 mg/ml Hoechst to 50 ml of 2× basal fixed‐cell staining buffer (see recipe). Mix well and keep solution protected from light."
+    },
+    {
+      "title": "Cycle 2 staining solution, 2X",
+      "instruction": "Prepare solution fresh on the day of the experiment. Proceed with Basic Protocol 2 on the same day."
+    },
+    {
+      "title": "Cell seeding (Basic Protocol 1/Alternate Protocol)",
+      "instruction": "For basic cell cultivation before seeding of cells on plates, we recommend passaging the cells every 2‐3 days when they reach ∼80% confluency. To minimize variability between biological replicates in a screen, set up a cell bank of cryopreserved cells, use cells at the same passage numbers, and maintain identical cultivation protocols and splitting schedules across all replicates. Ideally, use cells no later than passage 5 for seeding. For seeding cells in multiwell plates, use a plate type with a clear flat bottom that is compatible with your automated microscope of choice and suitable for cell growth. Based on our experience, 384‐well PhenoPlates (Revvity Inc.) are suited for U2OS, HepG2, and MCF‐7 cells, but 384‐well Screenstar plates (Greiner Bio‐One) work best for RPTEC cells. Notably, the cell seeding density must be adjusted depending on the growth time on the plate and the duration of the screen. Due to varying cell growth and between‐lab variations, testing cell seeding conditions for the cell line of choice in pilot experiments beforehand is recommended. In our experience, cell confluency ∼80% at the time of stimulation, and imaging of ideally 2,000 to 2,500 cells per well (for solvent control wells), result in robust phenotypic profiles."
+    },
+    {
+      "title": "Cell seeding (Basic Protocol 1/Alternate Protocol)",
+      "instruction": "During cell seeding, equal distribution of cells across all wells of a plate is essential for reliable results. When using multichannel pipets or other automated pipetting devices for cell seeding, make sure that cells remain in a homogeneous cell suspension during the pipetting process. When using reservoirs, mix the cell suspension well before and in between pipetting steps to avoid sedimentation of cells to the bottom of the reservoir. After seeding, allow the plates to remain in the biosafety cabinet for 1 hr before transferring them to the incubator to promote a more homogeneous cell distribution."
+    },
+    {
+      "title": "Staining (Basic Protocol 2)",
+      "instruction": "During the staining procedure, ensure consistent pipetting of staining solution across all wells and plates. When using an automated pipetting and plate‐handling device, we recommend testing the respective pipetting programs beforehand and visually checking that all wells are equally pipetted and that pipet tips do not aspirate air. When processing multiple plates in parallel in an automated plate‐handling pipeline, make sure to prevent contamination of live‐cell staining solution with fixation solution: Ensure that your automated pipetting pipeline first completes pipetting all plates with live‐cell staining solution before emerging tips in fixation solution when reusing the same set of tips."
+    },
+    {
+      "title": "Staining (Basic Protocol 2)",
+      "instruction": "For protocol steps, when liquid must be aspirated from the plate (e.g., Basic Protocol 2, step 1), we recommend using a microplate washer to ensure efficient aspiration and wash steps. Importantly, adjust the settings of the microplate washer to the plate type used, and make sure that the cell layer is not disrupted during wash and aspiration steps."
+    },
+    {
+      "title": "Image analysis (Basic Protocol 3)",
+      "instruction": "When using the Harmony CPP image analysis pipeline for the first time, we recommend checking for correct cell segmentation by manually executing the respective BB, especially Find Nuclei, Find Cytoplasm, and Find Spots (Nucleoli) (Table 3). BB are executed by simply clicking on the respective BB in the analysis sequence. Note that BB are executed successively, one after another. The results of the respective task performed by the BB (e.g., Find Nuclei) will be displayed directly in the image panel, shown in the middle of the user interface (e.g., Nuclei will be highlighted in the image). Visually check that the cell regions are correctly identified. Importantly, when using channel names other than those described in Table 2, the respective channel names must be adjusted in each of the corresponding BB in the Harmony CPP image analysis pipeline."
+    },
+    {
+      "title": "Data analysis (Basic Protocol 4 and Basic Protocol 5)",
+      "instruction": "The data analysis pipeline presented here was specifically designed for data generated using the Harmony CPP image analysis pipeline. Using a different Harmony CPP image analysis pipeline than the one described in Basic Protocol 3, might result in different feature naming or different output data structure. Therefore, the CPPAnalyzer Jupyter notebook offers several parameters that can be easily adapted by the user to account for differences in feature naming (Table 5). The parameter “Nucleoli” requests user input as to whether nucleolus‐related features are present in the dataset. The Harmony CPP image analysis pipeline described here does generate nucleolus‐related features. Therefore, the parameter should be set to “Nucleoli = TRUE”. However, when using other Harmony pipelines that do not include nucleolus features, this parameter should be set to FALSE. The parameter “Featag” requests user input for a string that is included in all feature names. This is usually defined by the “Output population” in the Harmony analysis pipeline. If the output population was named as “Cells” (as in the Harmony CPP image analysis pipeline), each feature will have the prefix “Cells”. If Featag = “Cells”, all columns with this tag in the column header will be used for data analysis. If the output population is named differently, this parameter can be adjusted accordingly."
+    },
+    {
+      "title": "Data analysis (Basic Protocol 4 and Basic Protocol 5)",
+      "instruction": "The CPPAnalyzer Jupyter notebook automatically searches the input folder for the respective exported Harmony evaluation files. Therefore, the folder structure should be implemented as described in Fig. 1C. The raw data files need to contain single cell (per object) information: that is, each row in the table should represent one measurement of all features for a single cell. Analysis of CPP data using the CPPAnalyzer Jupyter notebook requires the three Excel sheets Table_to_exclude_wells.xlsx, Compound_layout.xlsx, and Table_planes.xlsx (see Basic Protocol 4) to be present in the input folder. In these sheets, the plate names have to match with the plate names defined during image acquisition and image analysis (see Basic Protocol 3, step 4). If these Excel sheets are named differently, the file name can be adapted (Table 5). Note that the CPPAnalyzer Jupyter notebook could be, in principle, used to analyze data generated by other software than Harmony, but this requires tab‐separated text files, with each line containing information of each cell. Columns representing a morphological feature need to have one common tag, so the Jupyter notebook can identify them (see parameter “Featag” above). The columns “Column” and “Row” are needed to identify the well position."
+    },
+    {
+      "title": "Data analysis (Basic Protocol 4 and Basic Protocol 5)",
+      "instruction": "The automated CPPManager KNIME workflow was designed to process normalized CPP data generated with the Harmony CPP image analysis pipeline that have been normalized with the CPPAnalyzer Jupyter notebook (Basic Protocol 4 and Basic Protocol 5). Using a different Harmony pipeline requires adjustment of the KNIME workflow when the output data structure or names and numbers of features or channels differ. KNIME nodes that depend on specific feature or channel names are highlighted with red color in the KNIME workflow (e.g., Rule engine node, R snippet nodes for plots). In the respective nodes, the feature or channel names need to be changed according to the new names if other image analysis pipelines resulting in different feature names are used."
+    },
+    {
+      "title": "Data analysis (Basic Protocol 4 and Basic Protocol 5)",
+      "instruction": "In general, within a single plate, treatment conditions can be randomized. However, randomization across multiple plates—that is, with subsets of compounds and corresponding concentrations being present on different plates for each replicate—would require modifying the KNIME analysis workflow used for BMC calculation, as it would disrupt the grouping node step of this workflow. Each compound plate is expected to have the same set of compounds across all four biological replicates."
+    },
+    {
+      "title": "Statistical Analysis",
+      "instruction": "Generally, statistical analysis of CPP data follows the statistical methods previously described for CP (Caicedo et al., 2017; Nyffeler et al., 2021; Nyffeler et al., 2020) and was described in detail for CPP in von Coburg et al. (2025a) and Wedler et al. (2026). The first steps comprise data cleaning and standardization/normalization and are automatically performed by the CPPAnalyzer Jupyter notebook (Basic Protocol 4). The data are first cleaned by column, that is, by excluding features with missing values (typically indicated as “NA”). The proportion of missing values tolerated for each feature can be defined by adjusting the parameter propNAfea (Table 5). We usually exclude features with ≥15% missing values (by setting propNAfea = 0.15). From our past screening experience, this threshold provided sufficiently clean datasets. Importantly, the features are not filtered out from the tables, but they are set to NA. Consequently they are not used in downstream analysis. Next, the data are cleaned by row, i.e., by excluding all detected objects (single cells) containing still some missing values (“NA”) in the remaining features. The proportion of missing values tolerated for each object (single cell) can be defined by adjusting the parameter propNAcell (Table 5). We usually set propNAcell = 0 to exclude all cells with any missing values."
+    },
+    {
+      "title": "Statistical Analysis",
+      "instruction": "The CPPAnalyzer Jupyter notebook offers different normalization approaches: The user can choose between well‐level normalization, cell normalization, and B‐score normalization (Table 4). Well‐level normalization is widely applied in the CP community (Bray et al., 2016; Chandrasekaran et al., 2024; Cimini et al., 2023), but cell normalization is also used (Nyffeler et al., 2020; von Coburg et al., 2025a). B‐score normalization was suggested before for compensation of plate position effects (Caicedo et al., 2017; Mpindi et al., 2015). When in doubt as to which normalization option is best for their dataset, we encourage readers to test the different methods and compare the results for positive and negative control compounds (see Understanding Results)."
+    },
+    {
+      "title": "Statistical Analysis",
+      "instruction": "The automated CPPManager KNIME workflow (Basic Protocol 5) offers the option to perform BMC modeling for dose‐response data sets. The following steps are performed automatically by the CPPManager KNIME workflow. The BMC describes the concentration at which a phenotypic response exceeds a defined baseline activity—that is, the benchmark response (BMR) value—which is determined from the solvent control wells. Curve‐fitting is performed using the R package tpclfit 2 (Sheffield et al., 2022), which is implemented as an R snippet node in the CPPManager KNIME workflow. Five different curve‐fitting models are used (cnst, hill, poly1, poly2, pow), from which the best fitting‐curve is chosen to calculate BMC for each feature (Sheffield et al., 2022). If no BMC can be calculated for a respective feature or the calculated BMC is greater than the highest tested non‐cytotoxic concentration (BMChigh), the feature is considered inactive (von Coburg et al., 2025a). In cases where the estimated BMC is smaller than the lowest tested non‐cytotoxic concentration (BMClow), the BMC cannot be reliably extrapolated from the curve fitting. In these cases, the BMC can be adjusted to a modified lowest concentration (half‐log smaller concentration than the lowest tested concentration; Eqn. 1; see Basic Protocol 5, step 11)."
+    },
+    {
+      "title": "Statistical Analysis",
+      "instruction": "Equation 1 (von Coburg et al., 2025a):\nlog10BMCLOW=log10(lowesttestedconc.)−0.5"
+    },
+    {
+      "title": "Statistical Analysis",
+      "instruction": "An optional filtering step will exclude BMCs with a hit call of ≤0.9, missing BMDU/BMDL values, or BMC value greater than the maximal nontoxic concentration (BMChigh) from the subsequent analysis and visualization. Including this filter is highly recommended (Feshuk et al., 2023; Nyffeler et al., 2023). This BMC filtering option can be enabled or disabled by the user of the automated CPPManager KNIME workflow (Basic Protocol 5, step 10)."
+    },
+    {
+      "title": "Statistical Analysis",
+      "instruction": "After calculating BMCs for single features, the features can be grouped into feature categories (see Supporting Information Table 3). Note slight changes to a few feature categories compared to our previously published work (von Coburg et al., 2025a; see Supporting Information Table 4). A feature category is considered active if at least 30% of the features show a response, i.e., have a valid BMC. The active CPP feature categories are then plotted in accumulation and magnitude plots, as described before (von Coburg et al., 2025a; see Understanding Results)."
+    }
+  ],
+  "materials": [
+    "5 mg/ml collagen type 1, rat tail (Ibidi, cat. no. 50201)",
+    "Dulbecco's Balanced Salt Solution (DPBS), without Ca and Mg (PAN Biotech, cat. no. P04‐36500), sterile",
+    "Cell line, growing in a standard cell culture flask: U2OS (HTB‐96, ATCC); HepG2 (ACC 180, DSMZ), or MCF‐7/vBOS (Michigan Cancer Foundation‐7/variantBOS; Bischoff et al., 2020; Kornhuber, Dunst, Schönfelder, & Oelgeschläger, 2021)",
+    "Cell dissociation solution: e.g., Accumax Cell Dissociation Solution (PAN Biotech, cat. no. P10‐21250)",
+    "Cell growth medium appropriate for the cells used (U2OS, HepG2, or MCF‐7/vBOS; see recipes)",
+    "0.4% Trypan Blue stain (Invitrogen/Thermo Fisher Scientific, cat. no. T10282), for determination of cell viability",
+    "Assay‐ready compound plate containing test compounds and control compounds (see Support Protocol 1)",
+    "384‐well microplates for cell seeding, suitable for microscopy: e.g., PhenoPlates (Revvity, cat. no. 6057302)",
+    "Sterile cell culture materials: e.g., cell culture flask (TPP, cat. nos. TPP90076 [T75] and TPP90151 [T150])",
+    "Cell culture incubator, 37°C, 5% CO2, and high humidity (∼95% relative humidity; e.g., Memmert ICO50)",
+    "Serological pipets",
+    "Conical tube",
+    "Cell counting system: e.g., automated cell counter (Life Technologies/Thermo Fisher Scientific Countess II FL)",
+    "Multichannel pipet",
+    "Automated pipetting device suitable for 384‐well format: e.g., JANUS Automated Liquid Handling Workstation (Revvity Inc.)",
+    "Centrifuge (e.g., Thermo Fisher Scientific Megafuge 16R)",
+    "5 mg/ml collagen type 1, rat tail (Ibidi, cat. no. 50201)Dulbecco's Balanced Salt Solution (DPBS), without Ca and Mg (PAN Biotech, cat. no. P04‐36500), sterileCell line, growing in a standard cell culture flask: U2OS (HTB‐96, ATCC); HepG2 (ACC 180, DSMZ), or MCF‐7/vBOS (Michigan Cancer Foundation‐7/variantBOS; Bischoff et al., 2020; Kornhuber, Dunst, Schönfelder, & Oelgeschläger, 2021)Cell dissociation solution: e.g., Accumax Cell Dissociation Solution (PAN Biotech, cat. no. P10‐21250)Cell growth medium appropriate for the cells used (U2OS, HepG2, or MCF‐7/vBOS; see recipes)0.4% Trypan Blue stain (Invitrogen/Thermo Fisher Scientific, cat. no. T10282), for determination of cell viabilityAssay‐ready compound plate containing test compounds and control compounds (see Support Protocol 1)\n384‐well microplates for cell seeding, suitable for microscopy: e.g., PhenoPlates (Revvity, cat. no. 6057302)Sterile cell culture materials: e.g., cell culture flask (TPP, cat. nos. TPP90076 [T75] and TPP90151 [T150])Cell culture incubator, 37°C, 5% CO2, and high humidity (∼95% relative humidity; e.g., Memmert ICO50)Serological pipetsConical tubeCell counting system: e.g., automated cell counter (Life Technologies/Thermo Fisher Scientific Countess II FL)Multichannel pipet\nAutomated pipetting device suitable for 384‐well format: e.g., JANUS Automated Liquid Handling Workstation (Revvity Inc.)Centrifuge (e.g., Thermo Fisher Scientific Megafuge 16R)",
+    "Test compounds or compound library of interest for screening (as defined by the user)",
+    "Standard set of assay‐independent performance negative and positive controls: We recommend tetrandrine (Sigma‐Aldrich, cat. no. T2695), nocodazole (Sigma‐Aldrich, cat. no. M1404), and/or cytochalasin D (Sigma‐Aldrich, cat. no. C8273)",
+    "Solvent control: e.g., dimethyl sulfoxide (DMSO; ChemCruz, cat. no. sz‐358801)",
+    "384‐well V‐bottom PP microplates (Greiner, cat. no. 781280)",
+    "Liquid‐handling pipetting device: e.g., Echo acoustic liquid handler (Beckman Coulter).",
+    "Test compounds or compound library of interest for screening (as defined by the user)Standard set of assay‐independent performance negative and positive controls: We recommend tetrandrine (Sigma‐Aldrich, cat. no. T2695), nocodazole (Sigma‐Aldrich, cat. no. M1404), and/or cytochalasin D (Sigma‐Aldrich, cat. no. C8273)Solvent control: e.g., dimethyl sulfoxide (DMSO; ChemCruz, cat. no. sz‐358801)\n384‐well V‐bottom PP microplates (Greiner, cat. no. 781280)Liquid‐handling pipetting device: e.g., Echo acoustic liquid handler (Beckman Coulter).",
+    "RPTEC‐TERT1 cells (Wieser et al., 2008) growing in collagen‐coated cell culture flasks",
+    "Fetal bovine serum (FBS; TICO Europe, cat. no. FBSEU500)",
+    "Cell growth medium for RPTEC cells (see recipe)",
+    "384‐well microplates for cell seeding, suitable for microscopy (e.g., Greiner Bio‐One, cat. no. 781866), precoated with collagen (see Basic Protocol 1, steps 1‐6)",
+    "RPTEC‐TERT1 cells (Wieser et al., 2008) growing in collagen‐coated cell culture flasksFetal bovine serum (FBS; TICO Europe, cat. no. FBSEU500)Cell growth medium for RPTEC cells (see recipe)384‐well microplates for cell seeding, suitable for microscopy (e.g., Greiner Bio‐One, cat. no. 781866), precoated with collagen (see Basic Protocol 1, steps 1‐6)",
+    "Cell assay plates (Basic Protocol 1 or Alternate Protocol)",
+    "2× live‐cell staining solution (see recipe)",
+    "2× fixation solution (see recipe)",
+    "Phosphate‐buffered saline (PBS; Santa Cruz, cat. no. sc‐362299)",
+    "2× cycle 1 staining and permeabilization solution (see recipe)",
+    "CPP elution buffer (see recipe)",
+    "2× cycle 2 staining solution (see recipe)",
+    "Automated liquid‐ and plate‐handling workstation: We use JANUS pipetting robot (Revvity Inc.), plate incubator (Liconic STX44 ICSA), microplate washer (BioTek 405LSUVS), and plate handler robot (Denso VS050A1‐AV6‐NNN)",
+    "Appropriate pipetting tips and liquid reservoirs for the respective automated pipetting device: We use sterile 384‐well, 30‐µL Janus MDT filter tips (Revvity, cat. no. 6001620) and 384 pyramid base geometry reservoirs for Janus G3 (Agilent, cat. no. 204612‐100)",
+    "High‐content imaging system equipped with 20× water objective and respective lasers and emission filter sets (Table 1): We use an Opera Phenix High Content Screening System (Revvity, HH14000000) equipped with Harmony software (v4.8), but other automated fluorescence microscopes equipped with same lasers and filter sets can also be used",
+    "Cell assay plates (Basic Protocol 1 or Alternate Protocol)2× live‐cell staining solution (see recipe)2× fixation solution (see recipe)Phosphate‐buffered saline (PBS; Santa Cruz, cat. no. sc‐362299)2× cycle 1 staining and permeabilization solution (see recipe)CPP elution buffer (see recipe)2× cycle 2 staining solution (see recipe)\nAutomated liquid‐ and plate‐handling workstation: We use JANUS pipetting robot (Revvity Inc.), plate incubator (Liconic STX44 ICSA), microplate washer (BioTek 405LSUVS), and plate handler robot (Denso VS050A1‐AV6‐NNN)Appropriate pipetting tips and liquid reservoirs for the respective automated pipetting device: We use sterile 384‐well, 30‐µL Janus MDT filter tips (Revvity, cat. no. 6001620) and 384 pyramid base geometry reservoirs for Janus G3 (Agilent, cat. no. 204612‐100)High‐content imaging system equipped with 20× water objective and respective lasers and emission filter sets (Table 1): We use an Opera Phenix High Content Screening System (Revvity, HH14000000) equipped with Harmony software (v4.8), but other automated fluorescence microscopes equipped with same lasers and filter sets can also be used",
+    "Harmony image analysis software (Revvity Inc.) (we use Harmony v4.8, but applicability to higher Harmony software versions has also been confirmed);",
+    "ABB Add Channel 4i (Kirsch, 2025) for image registration in Harmony software versions v4.8, v4.9, v5.2, v5.3, as described in von Coburg & Dunst (2026) and von Coburg et al. (2025a) (we use Add Channel 4i ABB v1.0.4, available at https://doi.org/10.5281/zenodo.15119993)",
+    "Harmony CPP image analysis pipeline integrating the customized Add Channel 4i application‐specific building block (ABB) for image registration as described in von Coburg & Dunst (2026) and von Coburg et al. (2025a) and available as Supplementary Data 19 in von Coburg et al. (2025b) at https://doi.org/10.5281/zenodo.14982928",
+    "CPP image data (Harmony measurements of CPP cycles 1 and 2)",
+    "Optional: CPP image data (available as Harmony measurement files) to serve as input for the Harmony CPP image analysis pipeline, if the user has not yet generated their own CPP images (these are data from a CPP screen using U2OS cells published in von Coburg et al., 2025a):\nBiological replicate 1 (imaging cycle 1), available at https://doi.org/10.5281/zenodo.17414605\nBiological replicate 1 (imaging cycle 2), available at https://doi.org/10.5281/zenodo.17491084\nBiological replicate 2 (imaging cycle 1), available at https://doi.org/10.5281/zenodo.17543163\nBiological replicate 2 (imaging cycle 2), available at https://doi.org/10.5281/zenodo.17550730\nBiological replicate 3 (imaging cycle 1), available at https://doi.org/10.5281/zenodo.17569912\nBiological replicate 3 (imaging cycle 2), available at https://doi.org/10.5281/zenodo.17579155\nBiological replicate 4 (imaging cycle 1), available at https://doi.org/10.5281/zenodo.17589464\nBiological replicate 4 (imaging cycle 2), available at https://doi.org/10.5281/zenodo.17596663",
+    "Biological replicate 1 (imaging cycle 1), available at https://doi.org/10.5281/zenodo.17414605",
+    "Biological replicate 1 (imaging cycle 2), available at https://doi.org/10.5281/zenodo.17491084",
+    "Biological replicate 2 (imaging cycle 1), available at https://doi.org/10.5281/zenodo.17543163",
+    "Biological replicate 2 (imaging cycle 2), available at https://doi.org/10.5281/zenodo.17550730",
+    "Biological replicate 3 (imaging cycle 1), available at https://doi.org/10.5281/zenodo.17569912",
+    "Biological replicate 3 (imaging cycle 2), available at https://doi.org/10.5281/zenodo.17579155",
+    "Biological replicate 4 (imaging cycle 1), available at https://doi.org/10.5281/zenodo.17589464",
+    "Biological replicate 4 (imaging cycle 2), available at https://doi.org/10.5281/zenodo.17596663",
+    "Workstation or high‐performance computer (HPC) system (with at least 25 GB RAM for analysis of CPP data using the CPPAnalyzer Jupyter notebook)",
+    "Jupyter notebook software (Kluyver et al., 2016), https://www.jupyter.org/",
+    "R (R Core Team, 2024), https://www.R‐project.org/ (we use R v.4.2.0)",
+    "R packages RColorBrewer (Neuwirth, 2022), tools (R Core Team, 2024), data.table (Barrett et al., 2025), foreach (Microsoft Corporation & Weston, 2022), grid (R Core Team, 2024), gridExtra (Auguie, 2017), ggplot2 (Wickham, 2016), doParallel (Microsoft Corporation & Weston, 2022), matrixStats (Bengtsson, 2025), pheatmap (Kolde, 2025), and readxl (Wickham & Bryan, 2025)",
+    "CPPAnalyzer Jupyter notebook (CPPAnalyzer.ipynb file) and corresponding R source code (https://doi.org/10.5281/zenodo.18385218)",
+    "Compound layout file (see step 2 of this protocol; an example file can be found at https://zenodo.org/records/18385218\n)",
+    "Table to exclude wells with known experimental error from analysis (see step 3 of this protocol; an example file can be found at https://doi.org/10.5281/zenodo.18385218)",
+    "Harmony image analysis result output files (.txt format; see step 13 of Basic Protocol 3)",
+    "Optional: Harmony image analysis result output files (https://doi.org/10.5281/zenodo.18184315) to serve as input for the CPPAnalyzer Jupyter notebook, if the user has not yet generated their own CPP data",
+    "1Set up the folder structure as illustrated in Figure 1C, and save the Harmony image analysis results output files (.txt format) on the high‐performance computer system or workstation. As the Jupyter notebook will access the chosen file path to read the respective files automatically, we recommend keeping the file structure as described in Fig. 1C.Example folder structure: [Screen ID]/[plate name]/evaluation 1/objects_population ‐ nucleoli.txt and objects_population ‐ cells.txtPrepare the following three Excel files (step 2‐4) and save them under the main [Screen ID] folder. The CPPAnalyzer Jupyter notebook will automatically access these files to retrieve this information.",
+    "2Prepare a “compound layout” Excel file that lists, for each plate and each well position, the respective compound and concentration. In the column‐based layout file, all wells of all plates are listed in one table. The layout file should contain at least the following information: “Column”, “Row”, Compound′, “Concentration”, “Compound_ID”, “Plate”, “PlateNumber”, “ScreenPlateID”, “Replicate”, and “Trep” (technical replicate; see file Compound_layout_columnbased.xlsx at https://doi.org/10.5281/zenodo.18385218 as an example).",
+    "3Prepare a “wells to exclude” Excel file that lists, for each plate, all wells with known experimental errors that should be excluded from the analysis (for example, due to known pipetting errors during the staining procedure). The column headers of the Excel sheet should represent the plate names. Under each plate name/column, the wells to be excluded from the respective plate should be listed. Note that all plate names need to be listed here, even when no well is to be excluded from the respective plate (just list the plate name as column header, without listing any wells underneath). This also makes it possible to limit the analysis to a subset of the wells per plate, if deemed useful. An example file, Table_to_exclude_wells.xlsx, can be found at https://doi.org/10.5281/zenodo.18385218.",
+    "4Prepare a “planes” Excel file that states, for each plate, the optical section (z‐plane) that should be analyzed. This is useful when several z‐planes have been imaged and analyzed in Harmony (e.g., in batch mode) but only one is meant to be used for profile generation. If one or more planes have been analyzed in Harmony, the Harmony image analysis result output files will contain a column called “plane.” The respective Excel file should indicate, for each plate, which z‐plane is to be used for analysis in the Jupyter notebook. See the file Table_planes.xlsx at https://doi.org/10.5281/zenodo.18385218 as an example.The file Table_planes.xlsx must be prepared in any case. However, if image analysis was done using maximum‐intensity projection of several planes, there will be no “plane” column in the Harmony image analysis results output files. In this case, the file Table_planes.xlsx will be ignored by the CPPAnalyzer Jupyter notebook.",
+    "5Create a new, separate folder where the result files will be saved later. Save the CPPAnalyzer.ipynb file in this results folder with your preferred name. In this way, the notebook is saved along with the results in the same folder and allows the user later to retrace chosen parameter settings in the notebook if needed.",
+    "6Open the CPPAnalyzer Jupyter notebook within the aforementioned folder. Instructions on how to open and run the Jupyter notebook depending on the operation system can be found on the Jupyter website (https://docs.jupyter.org/en/latest/running.html).",
+    "7Indicate the locations of the input data folder and the output folder for results in the first field of the notebook, as well as the location of the corresponding R source code.",
+    "8Change the parameter variables (Table 5) to customize your analysis, if needed, and save the notebook. The variable “norm” will define which normalization method is used (Table 4).",
+    "9To start the analysis, choose “Cell” → “Run all” in the menu.",
+    "10When the notebook has finished its analysis, it will automatically save the unnormalized data and the normalized data (aggregated to median or mean per well) in the indicated results folder.",
+    "11Examine the QC plots that are generated for possible batch or plate position effects (Fig. 2). See Supporting Information Table 1 for an overview of the plots and files that are automatically generated by the CPPAnalyzer Jupyter notebook. Also see the Understanding Results section for more information.",
+    "12If needed, adjust parameter settings, for example nuclear size filter or wells to be excluded, and run the CPPAnalyzer Jupyter notebook again.",
+    "13The normalized data can then be fed into the CPPManager KNIME workflow for further analysis and data visualization (Basic Protocol 5).",
+    "KNIME Analytics Platform (Berthold et al., 2007), https://www.knime.com (we use KNIME version 5.4.3); a user guide to KNIME installation and operation can be found at https://docs.knime.com/ap/5.4/, and earlier KNIME versions can be downloaded from https://www.knime.com/downloads/previous",
+    "KNIME extensions: KNIME Interactive R Statistics Integration (https://hub.knime.com/knime/extensions/org.knime.features.r/latest), KNIME Parallel Chunk Loop Nodes (https://hub.knime.com/knime/extensions/org.knime.features.virtual/latest), and KNIME HCS Tools (Max Planck Institute of Molecular Cell Biology and Genetics, 2014) which can be found at https://hub.knime.com/mpicbg-tds/extensions/de.mpicbg.tds.knime.hcstools.feature/latest",
+    "R (R Core Team, 2024), https://www.R‐project.org/ (we use R version 4.2.0)",
+    "R packages: data.table (Barrett et al., 2025), doParallel (Microsoft Corporation & Weston, 2022), dplyr (Wickham, François, Henry, Müller, & Vaughan, 2023), foreach (Microsoft Corporation & Weston, 2022), ggpubr (Kassambara, 2025), gg.gap (Lou, Zhang, Lvy, & Jin, 2019), ggplot2 (Wickham, 2016), stringr (Wickham, 2023), matrixStats (Bengtsson, 2025), pheatmap (Kolde, 2025), RColorBrewer (Neuwirth, 2022), Readxl (Wickham & Bryan, 2025), Rserve (Urbanek, 2025), Scales (Wickham, Pedersen, & Seidel, 2025), Svglite (Wickham, Henry, et al., 2025), tcplfit2 (Sheffield et al., 2022), tibble (Müller & Wickham, 2023), and tidyverse (Wickham et al., 2019)",
+    "CPPManager KNIME workflow (for KNIME v5.4) as described below, available as a .knar file at https://doi.org/10.5281/zenodo.18184356",
+    "An Excel file grouping the compounds or treatment conditions into different subgroups for analysis, if needed (see step 2 of this protocol; for an example, see the file Example_Compound_Group.xlsx, available at https://doi.org/10.5281/zenodo.18184356)",
+    "Normalized CPP data (well level) as .csv file",
+    "Optional: Normalized CPP data (https://doi.org/10.5281/zenodo.18184315) to serve as exemplary input for the CPPManager KNIME workflow, if the user has not yet generated their own CPP data",
+    "1Download the CPPManager KNIME workflow, included in the CPP_Manager_KNIME_workflow.knar file, from https://doi.org/10.5281/zenodo.18184356. Open KNIME, go to the file menu, choose “Import KNIME workflow”, and select the appropriate .knar file. Note that all KNIME callee workflows and the “Manager” workflow (caller workflow) must be located in the same subfolder within your local KNIME workspace.Note that you may need to adjust settings of the R nodes (e.g., R snippet, R source, and R to R nodes) in KNIME depending on your R environment. Open the respective node configuration window, go to advanced and choose “Specify path to R home” to set a path to the root folder of the R installation. Alternatively, use the default settings by deselecting “Overwrite default path to R home”. If you wish to use a Conda environment to manage R, including all required R packages, connect the respective R nodes with a Conda Environment Propagation node, which is part of “KNIME Conda Integration” feature provided by KNIME AG, Zurich, Switzerland (https://hub.knime.com/knime/extensions/org.knime.features.conda/latest).",
+    "2Create an Excel file that groups the compounds or treatment conditions into different subgroups for analysis (i.e., Example_Compound_Group.xlsx). This can be useful when several compounds or compound libraries belonging to different projects have been tested side by side in the same screen, but separate plots and data files need to be generated for individual data analysis. In such a case, the CPPManager KNIME workflow will save the results for each compound group in a separate subfolder. If you do not wish to separate your compounds into subgroups, just list all compounds in one group file. See the file Example_Compound_Group.xlsx available at https://doi.org/10.5281/zenodo.18184356 as an example. To avoid problems arising from special characters in chemical naming, using a compound ID instead of the compound name is strongly recommended. Such compound IDs should preferentially be used as unique identifiers instead of parsing compound names through the KNIME pipeline.",
+    "3In KNIME, open the “Manager” workflow in the folder “CPP_Harmony_Automated KNIME manager workflow”.",
+    "4Read the compound group file using the “Excel reader” node and the normalized data using the “CSV reader” node as indicated in the workflow annotations.",
+    "5Execute and open the user interface component by right‐clicking on the node and choosing “Execute and Open Views”. This will open an interactive user interface where several parameters can be adjusted.",
+    "6In the user interface, enter the screen ID.The screen ID is a unique identifier for your CPP screen experiment. It will, for example, be documented automatically in the analysis details sheet (see Supporting Information Table 2) to help you trace which data were analyzed with the workflow. We usually use screen ID labels composed of two letters, for the initials of the experiment owner, and a three‐digit experiment number: e.g., MW009.",
+    "7In the user interface, enter the file path to a folder where the result files will be saved later.",
+    "8Enter a numerical value for the cytotoxicity threshold in the user interface. This value defines the minimum acceptable cell count (expressed as a percentage relative to the solvent control). If the percentage in at least half of the replicate screens falls below the defined threshold, the condition will be classified as cytotoxic and excluded from downstream analysis. Cell counts are determined based on the number of objects (i.e., nuclei) identified in the Harmony analysis sequence.The definition of the cytotoxicity threshold strongly depends on the experimental setup, cell line, cell population doubling time, and compound exposure time, and it can be adjusted as needed. For example, in earlier CP‐ or CPP‐based studies using U2OS or MCF‐7 cells, treatment conditions resulting in <50% of cell count compared to the solvent control were regarded as cytotoxic and excluded from analysis (Nyffeler et al., 2023; von Coburg et al., 2025a).",
+    "9Choose the analysis based on data type: For concentration‐response data sets (when multiple concentrations per compound have been tested), additional BMC modeling can be performed. For single‐dose screening data, the BMC modeling step should be omitted by selecting the corresponding option in the user interface.",
+    "10By clicking the respective option in the user interface, choose whether you would like to apply filtering options for BMC modeling, as described previously (Feshuk et al., 2023; Nyffeler et al., 2023; US EPA, 2012). In that case, the filtering will define BMCs as inactive and replace the calculated value with a missing value when the following conditions apply: a hitcall of ≤0.9, missing BMDU/BMDL values, or a BMC value greater than the maximal nontoxic concentration (BMChigh).Hitcall is a parameter generated by the tcplfit2 R package, indicating the probability of a treatment condition being active. A hitcall ≤0.9 may indicate noisy or borderline response with overfit curves and less reproducibility, and thus hitcall >0.9 is used as one filter in CPPManager for active BMC (Feshuk et al., 2023). BMDU (upper bound) and BMDL (lower bound) indicate the 95% confidence interval of the BMC. If BMDU and BMDL values are missing, this implies insufficient curve fitting, or missing data points, or inactivity of the compound.",
+    "11Additionally, define in the user interface, if you would like to apply the following modification to calculated BMC values lower than the lowest tested concentration (BMClow). In that case, BMClow values are set to a generic value that is a half‐log concentration smaller than the lowest tested concentration (see Statistical Analysis) to visually separate features in the data plots for which no reliable BMCs could be calculated by interpolation, as described previously (Nyffeler et al., 2021; von Coburg et al., 2025a; also see Statistical Analysis).",
+    "12The parameter “Chunk for Plots” defines how many chunks (blocks) will be processed in parallel. This does not affect the analysis results, but choosing a larger number of parallel chunks will speed up the computation. This increases CPU usage by distributing workflow computations across multiple CPUs. In our experience, selecting 5 chunks give a reasonably fast data processing without generating an excessive workload to the server.",
+    "13The parameter “plot height” defines the dimensions in inches for the saved output graphs (applicable for the output graphs #3 and #4 as listed in Supporting Information Table 2).",
+    "14Click “Apply temporarily” and close the window.",
+    "15Execute all executable nodes by clicking on the double green arrow in the top menu bar to run all downstream nodes and execute the workflow. When the workflow is finished, all results will be automatically saved, including .txt files along with all raw data (normalized z‐score data and BMC modeling results). Generated plots will be saved as .svg and .pdf files.",
+    "16Upon finishing the CPPManager workflow successfully, the user will receive an automated notification via e‐mail. This can be useful when analyzing large amounts of data that take longer to process. To indicate the e‐mail address to which this email should be sent, enter the address in the Table Creator node at the end of the Manager workflow, as indicated in the respective node annotation in the workflow.",
+    "465 ml DMEM (1.0 g/L glucose, sodium pyruvate, no glutamine, no phenol red; 93% [v/v] final, Gibco/Thermo Fisher Scientific, cat. no. 11880‐028)",
+    "25 ml fetal bovine serum (FBS; 5% [v/v] final, Sigma, cat. no. BCBQ7890V)",
+    "5 ml penicillin‐streptomycin mix (1% (v/v) final = 100 µg/ml streptomycin, 100 U/ml penicillin final, PanBiotech, Cat. no. P06‐07100)",
+    "5 ml GlutaMAX (1% (v/v) final = 2 mM final, Gibco/Thermo Fisher Scientific, Cat. no. 35050‐061)",
+    "Mix well.",
+    "Store up to 1 month at 4°C.",
+    "465 ml DMEM (1.0 g/L glucose, sodium pyruvate, no glutamine, no phenol red; 93% [v/v] final, Gibco/Thermo Fisher Scientific, cat. no. 11880‐028)",
+    "25 ml fetal bovine serum (FBS; 5% [v/v] final, Biochrom/Merck, cat. no. S0615; estradiol levels: 22.3 pg/ml)",
+    "5 ml penicillin‐streptomycin mix (1% [v/v] final = 100 µg/ml streptomycin/100 U/ml penicillin final, PanBiotech, cat. no. P06‐07100)",
+    "5 ml GlutaMAX (1% (v/v) final = 2 mM final, Gibco/Thermo Fisher Scientific, Cat. no. 35050‐061)",
+    "Mix well.",
+    "Store up to 1 month at 4°C.",
+    "483 ml DMEM, no glucose, sodium pyruvate, or glutamine (48.3% [v/v] final; Gibco/Thermo Fisher Scientific, cat. no. 11966025)",
+    "483 ml Ham's F‐12 Nutrient Mix (48.3% [v/v] final; Gibco/Thermo Fisher Scientific, cat. no. 21765029)",
+    "5 ml penicillin‐streptomycin mix (50 µg/ml streptomycin and 50 U/ml penicillin final, PanBiotech, cat. no. P06‐07100)",
+    "10 ml of 200 mM GlutaMAX stock (2 mM final; Gibco/Thermo Fisher Scientific, Cat. no. 35050‐061)",
+    "10 ml insulin‐transferrin‐sodium selenite mix (∼5 µg/ml insulin, ∼5 µg/ml transferrin, and ∼5 ng/ml sodium selenite final; Sigma‐Aldrich/Merck, cat. no. I1884‐1VL)",
+    "5 ml FBS (0.5% [v/v] final; TICO Europe, cat. no. FBSEU500)",
+    "1 ml of 10 µg/ml hEGF stock (10 ng/ml final; Sigma‐Aldrich/Merck, cat. no. E9644‐2MG)",
+    "1 ml hydrocortisone (36 ng/ml final; Sigma‐Aldrich/Merck, cat. no. H0135‐1MG)",
+    "2 ml of 50 mg/ml G418 stock (0.1 mg/ml final; Roche, cat. no. 04727894001)",
+    "Mix well.",
+    "Store up to 1 month at 4°C.",
+    "470 ml DMEM (4.5 g/L glucose, sodium pyruvate, glutamine, no phenol red, 94% [v/v] final; PanBiotech, cat. no. P04‐03588)",
+    "25 ml fetal bovine serum (FBS; 5% [v/v] final, Sigma, cat. no. BCBQ7890V)",
+    "5 ml penicillin‐streptomycin mix (1% (v/v) final = 100 µg/ml streptomycin, 100 U/ml penicillin final; PanBiotech, cat. no. P06‐07100)",
+    "Mix well.",
+    "Store up to 1 month at 4°C",
+    "Mix 25 ml of 32% (w/v) PFA stock solution (Invitrogen/Thermo Scientific, cat. no. 047377.9M) with 75 ml of DPBS (PAN Biotech, cat. no. P04‐36500) to generate an 8% (v/v) PFA solution.",
+    "This should ideally be prepared freshly before use. Proceed with Basic Protocol 2 on the same day.",
+    "MitoTracker Orange CMTMROS (Invitrogen, cat. no. M7510): Each vial contains 50 µg of lyophilized powder. Add 117 µl DMSO to prepare a 1 mM stock solution. Briefly vortex and spin down using a tabletop centrifuge at maximum speed for 10 s. Store the solution at –20°C protected from light.",
+    "Cell Navigator Lysosome Staining Kit NIR Fluorescence (AAT Bioquest, cat. no. 22652): This kit has two components. Component A contains the LysoBrite NIR lysotropic dye, delivered as a 500× ready‐to‐use stock solution in DMSO; Component B contains the live cell staining buffer. Store both components at –20°C protected from light.",
+    "Alexa Fluor Plus 405 Phalloidin (Invitrogen cat. no. A30104): Each vial contains 300 U as a lyophilized powder. Add 150 µl DMSO to prepare a 66 µM stock solution. Briefly vortex and spin down using a tabletop centrifuge at maximum speed for 10 s. Store the solution at –20°C protected from light.",
+    "Wheat germ agglutinin (WGA), Alexa Fluor 488 Conjugate (Invitrogen, cat. no. W11261): Each vial contains 5 mg of lyophilized powder. Add 5 ml PBS to prepare a 1 mg/ml stock solution. Store at –20°C protected from light.",
+    "Concanavalin A, Alexa Fluor 647 Conjugate (Invitrogen, cat. no. C21421): Each vial contains 5 mg of lyophilized powder. Add 1 ml of 0.1 M sodium bicarbonate to each vial to prepare a 5 mg/ml stock solution. Store the solution at –20°C, protected from light, and use within 1 month.",
+    "SYTO 14 Green Fluorescent Nucleic Acid Stain (Invitrogen, cat. no. S7576): Each vial contains a 5 mM ready‐to‐use stock solution in DMSO. Store the solution at –20°C protected from light.",
+    "Hoechst 33342 (Invitrogen, cat. no. H3570): Each vial contains a 10 mg/ml (16.2 mM) ready‐to‐use stock solution in water. Store the solution at 4°C protected from light."
+  ],
+  "fetched_at": "2026-06-19T00:20:21.346922+00:00"
+}

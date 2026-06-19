@@ -1,0 +1,107 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "50171",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.bu83nzyn",
+  "title": "Pristionchus Whole Genome Sequence Analysis",
+  "author": "erick.rios.",
+  "doi": "dx.doi.org/10.17504/protocols.io.bu83nzyn",
+  "source_url": "https://www.protocols.io/view/pristionchus-whole-genome-sequence-analysis-bu83nzyn",
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Create a workspace folder and download the sequence files in the compressed format, fq.gz . Each genome should be at least two files from paired-end reads. BGI files may need to be concatenated into two files. Each compressed genome file could be up to 1 Gb."
+    },
+    {
+      "title": "",
+      "instruction": "Decompress each file from the Terminal. On Mac OS10.12.x, open &#39;New Terminal at Folder&#39; from your workspace. Each file should now end with .gz, ~3 Gb each. - ls (list the files) - gunzip -d filename (decompress)"
+    },
+    {
+      "title": "",
+      "instruction": "If concatenating the files is necessary, perform the following and then run the alignment on combined_reads.fq. ~6 Gb each. - cat reads1.fq reads2.fq .... readsN.fq &gt; combined_reads.fq"
+    },
+    {
+      "title": "",
+      "instruction": "Rödelsperger&#39;s Whole Genome Sequence workflow requires BWA, samtools, and bcftools which are tools or packages that can be readily downloaded and installed. These tools are &#34;Linux/Mac based&#34;. Windows users need to download an &#34;emulator&#34; of linux terminal such as &#34;ubuntu 20.04&#34; from sources such as the Microsoft store. ( e.g. ubuntu 20.04.)"
+    },
+    {
+      "title": "",
+      "instruction": "For Windows 10: Install “ubuntu 20.04 LTS” (free) from the Microsoft store Once installed correctly Open windows command shell and type “bash”; it may take a few moments for first time running. $ sudo apt-get install bwa $ sudo apt-get install samtools $ sudo apt-get install bcftools You are now free to continue. For Mac users: Open terminal/console $ brew install bwa $ brew install samtools $ brew install bcftools You are now free to continue."
+    },
+    {
+      "title": "",
+      "instruction": "Some computer systems may require admin or even root permissions in order to run the bash script. Use: - sudo -i sudo -s OR - chmod -R 777 ./ Bash script can now be ran with full permissions. You must enter this request for each run."
+    },
+    {
+      "title": "",
+      "instruction": "Download or move the reference sequences into the same folder. You will need an addition mutant genome if the mutations were generated on top of an existing mutant strain. The following files are needed/used for this example ( Rödelsperger&#39;s workflow provides instructions for acquiring these files; With the only exception being the Automation_v1_3.sh bash script): El Paco Genome (Representative wild-type genome of P. pacificus) El_Paco_V3_gene_annotations_bcftools.gff3 (annotates the El Paco genome) SRR546092 (PS1843, Washington WILD mapping strain) ERR4367042 ( nhr-40 suppressor, SUP, pooled mapping panel) ERR4367073 ( nhr-40 suppressor mutant line ( tu515 )) ERR4367101 ( nhr-40 mutant line ( tu505 )) count_allele_frequencies.pl Automation_v1_3.sh Automation_v1_3.sh"
+    },
+    {
+      "title": "",
+      "instruction": "Acquiring Automation_v1_3.sh Copy the following Automation_v1_3.sh Bash script into a text document (The code is located in the appendix section)"
+    },
+    {
+      "title": "",
+      "instruction": "Name the script as desired and save the .txt file. Example image of the bash script pasted into Notepad; Take note of the bottom right (&#34;Windows (CRLF)&#34;) for the next steps. If CRLF is present, then steps 4.3 and 4.4 will be needed. If the bottom right states &#34;Unix (LF)&#34;, then 4.3 and 4.4 can be skipped."
+    },
+    {
+      "title": "",
+      "instruction": "Open up bash terminal and navigate to where the script is located."
+    },
+    {
+      "title": "",
+      "instruction": "Most likely Windows users will be required to convert the .txt from &#34;Windows (CRLF)&#34; to &#34;Unix (LF)&#34; because bash terminal can only utilize bash scripts in Unix (LF). CRLF and LF are &#34;control characters&#34; or &#34;bytecode&#34; and are different ways of reading files. To convert from CRLF to LF enter in a Bash terminal (Enter the name of the script inplace of &#34;FILENAME&#34;): fromdos FILENAME.txt Note: You may need to use sudo apt install tofrodos Before &#34;fromdos&#34; After &#34;fromdos&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "Finally change the file extension from .txt to .sh The script should now be usable."
+    },
+    {
+      "title": "",
+      "instruction": "ENTIRE=n ALIGNMENTS=n REGIONS=n MUTATIONS=n INDEX=n echo -n &#34;Perform ENTIRE Protocol? (Y/n): &#34; read ENTIRE if [[ &#34;$ENTIRE&#34; == Y ]]; then echo &#34;WILL perform ENTIRE protocol.&#34; fi if [ $ENTIRE != n -a $ENTIRE != Y ]; then echo &#34;You said $ENTIRE, assuming &#39;NO&#39;&#34; ENTIRE=n fi ################################### if [[ &#34;$ENTIRE&#34; == n ]]; then echo -n &#34;Perform candidate regions protocol? (Y/n): &#34; read REGIONS if [ $REGIONS != n -a $REGIONS != Y ]; then echo &#34;You said $REGIONS, assuming &#39;NO&#39;&#34; REGIONS=n fi echo -n &#34;Perform candidate mutations protocol? (Y/n): &#34; read MUTATIONS if [ $MUTATIONS != n -a $MUTATIONS != Y ]; then echo &#34;You said $MUTATIONS, assuming &#39;NO&#39;&#34; MUTATIONS=n fi fi #################################### if [ $ENTIRE == Y -o $ALIGNMENTS == Y -o $REGIONS == Y -o $MUTATIONS == Y ]; then echo -n &#34;Enter representative genome (include file extension): &#34; read GENOME echo -n &#34;Index your representative genome? (Y/n): &#34; read INDEX if [ $INDEX != Y -a $INDEX != n ]; then echo &#34;You said $INDEX, assuming &#39;NO&#39;&#34; echo &#34;Will NOT index genome.&#34; INDEX=n fi fi #################################### if [ $ENTIRE == Y -o $MUTATIONS == Y -o $ALIGNMENTS == Y ]; then echo -n &#34;Do you have suppressor reads? (Y/n)&#34; read SUPPREAD if [ $SUPPREAD == Y ]; then echo -n &#34;Enter suppressor read 1 (include file extension): &#34; read SUPP_1 echo -n &#34;Enter suppressor read 2 (include file extension): &#34; read SUPP_2 fi if [ &#34;$SUPPREAD&#34; != Y -a $SUPPREAD != n ]; then echo &#34;No suppressor reads. Only mutant reads will be used.&#34; SUPPREAD=n fi echo -n &#34;Enter mutant read 1 (include file extension): &#34; read MUT_1 echo -n &#34;Enter mutant read 2 (include file extension): &#34; read MUT_2 fi if [ &#34;$ENTIRE&#34; == Y -o $MUTATIONS == Y ]; then echo -n &#34;Candidate mutations; Enter annotation file (include file extension): &#34; read ANNOTATION fi if [ &#34;$ENTIRE&#34; == Y -o $REGIONS == Y -o $ALIGNMENTS == Y ]; then echo -n &#34;Enter wild read 1 (include file extension): &#34; read WILD_1 echo -n &#34;Enter wild read 2 (include file extension): &#34; read WILD_2 echo -n &#34;Enter map read 1 (include file extension): &#34; read MAP_1 echo -n &#34;Enter map read 2 (include file extension): &#34; read MAP_2 if [ &#34;$ENTIRE&#34; == Y -o $REGIONS == Y ]; then echo -n &#34;Candidate regions; Enter &#39;Source Code 1&#39; perl script (include file extension): &#34; read PERL fi fi #################################### if [ $ENTIRE == Y -o $ALIGNMENTS == Y -o $REGIONS == Y -o $MUTATIONS == Y ]; then echo -n &#34;How many CPU threads to dedicate for alignments? (Minimum: 1; Max: 5): &#34; read THREAD fi ###################################################################################### if [[ &#34;$INDEX&#34; == Y ]];then bwa index $GENOME fi ####################### REGIONS ###################################################### if [ &#34;$ENTIRE&#34; == Y -o $REGIONS == Y ]; then bwa mem -t $THREAD -o WILD.sam $GENOME $WILD_1 $WILD_2 bwa mem -t $THREAD -o MAP.sam $GENOME $MAP_1 $MAP_2 samtools view -S -b MAP.sam &gt; MAP_unsorted.bam samtools view -S -b WILD.sam &gt; WILD_unsorted.bam samtools sort -o MAP.bam MAP_unsorted.bam samtools sort -o WILD.bam WILD_unsorted.bam samtools index MAP.bam samtools index WILD.bam rm MAP_unsorted.bam MAP.sam rm WILD_unsorted.bam WILD.sam bcftools mpileup -Ou -f $GENOME WILD.bam | bcftools call -mv -Ov -o WILD.vcf awk &#39;{if($6&gt;100) print}&#39; WILD.vcf | grep -v INDEL |awk &#39;{print $1 &#34;\\t&#34; $2}&#39; &gt; positions.txt samtools mpileup -f $GENOME -l positions.txt MAP.bam &gt; pileup_data.txt perl $PERL pileup_data.txt &gt; mapping_data.txt echo &#34;Candidate regions finished; Look for &#39;mapping_data.txt&#39; file.&#34; fi ############################### MUTATIONS ############################################ if [ $SUPPREAD == Y ]; then bwa mem -t $THREAD -o SUPP.sam $GENOME $SUPP_1 $SUPP_2 bwa mem -t $THREAD -o MUT.sam $GENOME $MUT_1 $MUT_2 samtools view -S -b SUPP.sam &gt; SUPP_unsorted.bam samtools view -S -b MUT.sam &gt; MUT_unsorted.bam samtools sort -o SUPP.bam SUPP_unsorted.bam samtools sort -o MUT.bam MUT_unsorted.bam samtools index SUPP.bam samtools index MUT.bam rm SUPP_unsorted.bam SUPP.sam rm MUT_unsorted.bam MUT.sam bcftools mpileup -Ou -f $GENOME SUPP.bam | bcftools call -mv -Ou | bcftools view -i &#39;%QUAL&gt;=20&#39; -Oz &gt; SUPP.vcf.gz bcftools mpileup -Ou -f $GENOME MUT.bam | bcftools call -mv -Ou | bcftools view -i &#39;%QUAL&gt;=20&#39; -Oz &gt; MUT.vcf.gz bcftools index SUPP.vcf.gz bcftools index MUT.vcf.gz bcftools filter -O z SUPP.vcf.gz &gt; SUPP_filtered1.vcf.gz bcftools index SUPP_filtered1.vcf.gz bcftools isec -C SUPP_filtered1.vcf.gz MUT.vcf.gz &gt; pos.txt bcftools filter -O z -R pos.txt SUPP_filtered1.vcf.gz &gt; SUPP_filtered2.vcf.gz bcftools sort -O z SUPP_filtered2.vcf.gz &gt; SUPP_filtered2_sorted.vcf.gz bcftools index SUPP_filtered2_sorted.vcf.gz bcftools csq -p s -f $GENOME -g $ANNOTATION SUPP_filtered2_sorted.vcf.gz &gt; SUPP_variants_annotated.vcf grep missense SUPP_variants_annotated.vcf &gt; Candidate_Mut.txt grep stop_gained SUPP_variants_annotated.vcf &gt;&gt; Candidate_Mut.txt grep synonymous SUPP_variants_annotated.vcf &gt;&gt; Candidate_Mut.txt grep INDEL SUPP_variants_annotated.vcf &gt;&gt; Candidate_Mut.txt echo &#34;Candidate mutations protocol finished; Look for &#39;Candidate_Mut.txt&#39; file&#34; fi if [ $SUPPREAD == n ]; then bwa mem -t $THREAD -o MUT.sam $GENOME $MUT_1 $MUT_2 samtools view -S -b MUT.sam &gt; MUT_unsorted.bam samtools sort -o MUT.bam MUT_unsorted.bam samtools index MUT.bam rm MUT_unsorted.bam MUT.sam bcftools mpileup -Ou -f $GENOME MUT.bam | bcftools call -mv -Ou | bcftools view -i &#39;%QUAL&gt;=20&#39; -Oz &gt; MUT.vcf.gz bcftools index MUT.vcf.gz bcftools csq -p s -f $GENOME -g $ANNOTATION MUT.vcf.gz &gt; MUT.vcf grep missense MUT.vcf &gt; Candidate_Mut.txt grep stop_gained MUT.vcf &gt;&gt; Candidate_Mut.txt grep synonymous MUT.vcf &gt;&gt; Candidate_Mut.txt grep INDEL MUT.vcf &gt;&gt; Candidate_Mut.txt fi ###################################################################################### if [[ $ENTIRE == n ]]; then if [[ &#34;$REGIONS&#34; == n ]]; then echo &#34;Candidate regions protocol was not performed.&#34; fi if [[ &#34;$MUTATIONS&#34; == n ]]; then echo &#34;Candidate mutations protocol was not performed.&#34; fi fi if [ $ENTIRE == n -a $REGIONS == n -a $MUTATIONS == n -a $INDEX == n -a $ALIGNMENTS == n ];then echo &#34;Nothing was accomplished this day.&#34; else echo &#34;Something was accomplished!&#34; fi"
+    },
+    {
+      "title": "",
+      "instruction": "After script completion, these are the resulting files: &#34;mapping_data.txt&#34; is the result of the &#34;candidate regions&#34; part of Rödelsperger&#39;s workflow to be taken to Rstudio. &#34;Candidate_Mut.txt&#34; is the missense, stop _ gained, synonymous, and INDEL results from the &#34;Candidate Mutations&#34; part of Rödelsperger&#39;s workflow."
+    },
+    {
+      "title": "",
+      "instruction": "After the files have been gathered and prepared. To initiate the script, in a bash terminal enter: ./Automation_v1_3.sh You will be prompted a series of questions regarding what jobs you wish the script to handle for you. After all questions have been answered the script will commence running Rödelsperger&#39;s workflow and may take a few hours to complete."
+    },
+    {
+      "title": "",
+      "instruction": "Processing &#34;mapping_data.txt&#34; through Rstudio yields (see Rödelsperger&#39;s workflow for the R scripts):"
+    },
+    {
+      "title": "",
+      "instruction": "The script places &#34;candidate mutations&#34; into the &#34;Candidate_Mut.txt&#34; file: This txt list can be imported into Excel or other spread sheet applications in a tab delineated format."
+    },
+    {
+      "title": "",
+      "instruction": "Large insertions and deletions &gt;1 kb will not be identified by the Candidate Mutation workflow. Instead, use the Integrative Genomics Viewer (IGV) to hone in on the chromosomal region you have identified by positional mapping. You will need to load the following files to IGV (using a csu60 example): El Paco Genome (Representative genome of P. pacificus) El_Paco_V3_gene_annotations_bcftools.gff3 (annotates the El Paco genome) Ppa-hsd-2(csu60) whole genome sequence .bam file ( csu60 raw reads are on Figshare ) Indexed Ppa-hsd-2(csu60) whole genome sequences (or, run &gt;Samtools index csu60.bam to obtain the .bai file) Note: Additional tracks show other genome alignments in addition to csu60 onto the El Paco reference genome for PS312."
+    },
+    {
+      "title": "",
+      "instruction": "We recommend sequencing the genomes of multiple alleles in addition to chromosomal mapping to find likely phenotype-causing genes. To compare candidate mutation lists, use the following commands: >perl extract_genes.pl Mut1_variants_annotated_all.vcf> set1.txt>perl extract_genes.pl Mut2_variants_annotated_all.vcf> set2.txt>perl compare_lists.pl set1.txt set2.txt &gt;perl extract_genes.pl Mut1_variants_annotated_all.vcf&gt; set1.txt &gt;perl extract_genes.pl Mut2_variants_annotated_all.vcf&gt; set2.txt &gt;perl compare_lists.pl set1.txt set2.txt"
+    },
+    {
+      "title": "",
+      "instruction": "Perl scripts for comparing related mutant genomes. extract_genes.pl #!/usr/bin/perl use strict; open(IN, $ARGV[0] ); while(){ if (/BCSQ=/){ s/.+BCSQ=//g; ## remove first part of the line s/\\s+.+//g; ## remove second part of the line my ($type, $id) = split( /\\|/, $_ ); ## split by &#34;|&#34; symbol unless($type eq &#34;synonymous&#34; || $type eq &#34;intron&#34; ){ print &#34;$id\\n&#34;; } } } close(IN);"
+    },
+    {
+      "title": "",
+      "instruction": "compare_lists.pl #!/usr/bin/perl use strict; my $usage = &#34; checks for common entries in the lists &gt; program list1.txt list2.txt [-a/-n]\\n &#34;; if( $#ARGV == -1 ){ print $usage; exit 0;} my @list1 = `less $ARGV[0]`; my $list2; my $printCom = 1; my $all = 0; $printCom = 0 if( $ARGV[2] eq &#34;-n&#34; ); $all = 1 if( $ARGV[2] eq &#34;-a&#34; ); open( IN , $ARGV[1]); while(my $l = ){ $l =~ s/\\s+//g; $list2-&gt;{ $l } = 1; } my $commons = 0; $list2 =~ s/\\t/ /g; foreach my $element (@list1){ chomp $element; $element = $element; #print &#34;$element\\n&#34;; my $found = 0; $found = 1 if( exists $list2 -&gt;{$element} ) ; unless( $all ){ if( exists $list2 -&gt;{$element} ){ $commons++; print $element.&#34;\\n&#34; if( $printCom ); } else{ print $element.&#34;\\n&#34; unless( $printCom ); } } if( $all ){ print &#34;$element\\t$found\\n&#34;; } } print STDERR &#34;non-coms $printCom\\n &#34; unless( $printCom ); print STDERR &#34;Commons: $commons\\n&#34;;"
+    }
+  ],
+  "fetched_at": "2026-06-16T21:59:54.633786Z",
+  "stats": {
+    "views": 436,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0,
+    "forks": 0
+  },
+  "peer_reviewed": false
+}

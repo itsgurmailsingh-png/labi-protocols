@@ -1,0 +1,91 @@
+{
+  "source_name": "protocols_io",
+  "source_id": "1922",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.d5a82d",
+  "title": "Building an HPC blast pipeline",
+  "author": "Bonnie Hurwitz",
+  "doi": "dx.doi.org/10.17504/protocols.io.d5a82d",
+  "source_url": "https://www.protocols.io/view/Building-an-HPC-blast-pipeline-d5a82d",
+  "fetched_at": "2026-06-16T20:35:48.174470Z",
+  "stats": {
+    "views": 1010,
+    "runs": 0,
+    "bookmarks": 3,
+    "comments": 1,
+    "forks": 0
+  },
+  "peer_reviewed": false,
+  "steps_raw": [
+    {
+      "title": "",
+      "instruction": "Login to the hpc (at the University of Arizona) with your user name Note that this script runs on the head node. This script is not compute intensive, and we need to create the smaller files first, before we can distribute the data on the cluster as smaller blast jobs. ssh username@login.hpc.arizona.edu"
+    },
+    {
+      "title": "",
+      "instruction": "Create a directory for the pipeline mkdir hpc-blastcd hpc-blast mkdir hpc-blast cd hpc-blast"
+    },
+    {
+      "title": "",
+      "instruction": "Go to the hpc-blast directory and create sub directories to hold std-err, std-out, data, blastdb, blast-results and scripts. mkdir std-err std-out data blastdb blast-results scripts"
+    },
+    {
+      "title": "",
+      "instruction": "Go to the blastdb directory and create the blast database. go to the blastdb directory load irods get the peptides from the Gordon Betty Moore Foundation Marine Microbes in iPlant. load blast create the blast database to compare against go up a directory cd blastdbmodule load irodsiget /iplant/home/shared/imicrobe/projects/43/CAM_PROJ_MarineMicrobes.pep.famodule load blastmakeblastdb -in CAM_PROJ_MarineMicrobes.pep.fa -dbtype protcd .. cd blastdb module load irods iget /iplant/home/shared/imicrobe/projects/43/CAM_PROJ_MarineMicrobes.pep.fa module load blast makeblastdb -in CAM_PROJ_MarineMicrobes.pep.fa -dbtype prot cd .."
+    },
+    {
+      "title": "",
+      "instruction": "Copy the input files over from iPlant. We will be using the day/night transcriptomes we discussed last week. go to the data directory change directories in irods to the day/night transcriptome data directory get the day transcriptome fasta file get the night transcriptome fasta file go up a directory cd dataicd /iplant/home/shared/imicrobe/class/night_dayiget SRR006596_day.fastaiget SRR006597_night.fastacd .. cd data icd /iplant/home/shared/imicrobe/class/night_day iget SRR006596_day.fasta iget SRR006597_night.fasta cd .."
+    },
+    {
+      "title": "",
+      "instruction": "You will use two of the Perl scripts from the homework in the hpc pipeline. Put these into the scripts directory. go to the scripts directory copy the fasta-splitter and blast-search perl programs from your homework to the scripts dir. note you will need to change the path to point to the location of the scripts in your home directory. cd scriptscp /my-path/week10/01-fasta-splitter.pl 01-fasta-splitter.pl cp /my-path/week11/01-bio-searchio.pl 01-bio-searchio.plcd .. cd scripts cp /my-path/week10/01-fasta-splitter.pl 01-fasta-splitter.pl cp /my-path/week11/01-bio-searchio.pl 01-bio-searchio.pl cd .."
+    },
+    {
+      "title": "",
+      "instruction": "config.sh : Now we need to create the config.sh script. This script will contain all of the environmental variables that the user will be able to modify for running blast. The idea of this script is to give the user one place to make any changes they need to run their particular blast job. The user should not have to go in and change any of the scripts in the &#39;scripts&#39; directory. Instead, we will capture all of these variable here. * note the the config.sh script is in the hpc-blast directory (in the first part of the pipeline), where it is easy for the user to modify it. set the parameters for the location of the directories set the blast parameters that the user can change (e.g. e-value, blast program, and database to compare against). Note that we created the blast database in a previous step. vi config.sh#enter all of the text below------------------------------#!/bin/bash# directories we needexport CWD=$PWDexport SCRIPT_DIR= vi config.sh #enter all of the text below ------------------------------ #!/bin/bash # directories we need export CWD=$PWD export SCRIPT_DIR=&#34;$CWD/scripts&#34; export FASTA_DIR=&#34;$CWD/data&#34; export STDERR_DIR=&#34;$CWD/std-err&#34; export STDOUT_DIR=&#34;$CWD/std-out&#34; export SPLIT_FA_DIR=&#34;$FASTA_DIR/faSplit&#34; export SPLIT_READ_CT=&#34;25000&#34; export BLAST_OUT_DIR=&#34;$CWD/blast-results&#34; # BLAST parameters export EVAL=&#34;1e-10&#34; export BLAST=&#34;blastx&#34; export BLASTDB=&#34;$CWD/blastdb/CAM_PROJ_MarineMicrobes.pep.fa&#34;"
+    },
+    {
+      "title": "",
+      "instruction": "blast-pipeline.sh : Now we will create the &#34;driver script&#34;, the script that is used to run each part of the pipeline. Note that steps 1-3 are run on the head node of the cluster, these steps are not compute intensive. These steps set up the environmental variables and split up the fasta files into smaller chunks to run on the cluster. Step 4 runs blast and parses the blast results on the cluster once the blast analysis has finished. Note that these are being sent to compute nodes using the &#34;qsub&#34; command, and that the environmental variables that are useful for each step are being sent along as well. Also note that the second step is &#34;held&#34; until the first step completes. You can set this to run, only in the case that the prior step completes without errors &#34;afterok&#34; or no matter what &#34;afterany&#34;. The first requires that none of the jobs produces an error. Also note that we are using a job array &#34;-J 1-NUM_SPLIT_FILES&#34;, where the number of split files is equal to the total split file for that file. Also, note that the qsub commands run shell scripts that execute the actual work. vi blast-pipeline.sh#enter all of the text below------------------------------#!/bin/sh# Step1: get the env variables and create a list of filessource ./config.sh# Step 2: get all of the fasta files for inputcd $FILES_LIST # Step 3: split the fasta files into smaller chunks $SCRIPT_DIR/run-fasta-splitter.sh # Step 4: run blast on each of the file chunks while read FILE; do export FILE=&#34;$FILE&#34; cd $SPLIT_FA_DIR export SPLIT_FILES_LIST=&#34;$SPLIT_FA_DIR/split.$FILE&#34; ls $FILE.* &gt; $SPLIT_FILES_LIST NUM_SPLIT_FILES=$(wc -l $SPLIT_FILES_LIST | cut -d &#39; &#39; -f 1) ## run blast on each of the smaller chunks against a blast database JOB_ID1=$(qsub -v SCRIPT_DIR,SPLIT_FA_DIR,BLAST,EVAL,BLASTDB,BLAST_OUT_DIR,FILE -N blast -e &#34;$STDERR_DIR&#34; -o &#34;$STDOUT_DIR&#34; -J 1-$NUM_SPLIT_FILES $SCRIPT_DIR/run-blast.sh) ## parse the blast results for each of the chunked files JOB_ID2=$(qsub -v SCRIPT_DIR,BLAST_OUT_DIR,FILE -W depend=afterany:$JOB_ID1 -e &#34;$STDERR_DIR&#34; -o &#34;$STDOUT_DIR&#34; -J 1-$NUM_SPLIT_FILES $SCRIPT_DIR/run-parse-blast.sh) done &lt; $FILES_LIST&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;B82A75A9DD8A4D038569E2D41500F665&#34; &gt; vi blast-pipeline.sh #enter all of the text below ------------------------------ #!/bin/sh # Step1: get the env variables and create a list of files source ./config.sh # Step 2: get all of the fasta files for input cd &#34;$FASTA_DIR&#34; export FILES_LIST=&#34;$FASTA_DIR/files-list&#34; pwd ls *.fasta | sed &#34;s/^\\.\\///&#34; &gt; $FILES_LIST # Step 3: split the fasta files into smaller chunks $SCRIPT_DIR/run-fasta-splitter.sh # Step 4: run blast on each of the file chunks while read FILE; do export FILE=&#34;$FILE&#34; cd $SPLIT_FA_DIR export SPLIT_FILES_LIST=&#34;$SPLIT_FA_DIR/split.$FILE&#34; ls $FILE.* &gt; $SPLIT_FILES_LIST NUM_SPLIT_FILES=$(wc -l $SPLIT_FILES_LIST | cut -d &#39; &#39; -f 1) ## run blast on each of the smaller chunks against a blast database JOB_ID1=$(qsub -v SCRIPT_DIR,SPLIT_FA_DIR,BLAST,EVAL,BLASTDB,BLAST_OUT_DIR,FILE -N blast -e &#34;$STDERR_DIR&#34; -o &#34;$STDOUT_DIR&#34; -J 1-$NUM_SPLIT_FILES $SCRIPT_DIR/run-blast.sh) ## parse the blast results for each of the chunked files JOB_ID2=$(qsub -v SCRIPT_DIR,BLAST_OUT_DIR,FILE -W depend=afterany:$JOB_ID1 -e &#34;$STDERR_DIR&#34; -o &#34;$STDOUT_DIR&#34; -J 1-$NUM_SPLIT_FILES $SCRIPT_DIR/run-parse-blast.sh) done &lt; $FILES_LIST"
+    },
+    {
+      "title": "",
+      "instruction": "run-fasta-splitter.sh . Create a shell script that runs the fasta splitter perl code. Note that this script runs on the head node. This script is not compute intensive, and we need to create the smaller files first, before we can distribute the data on the cluster as smaller blast jobs. cd scriptsvi run-fasta-splitter.sh#enter the text below#!/bin/bashsource /usr/share/Modules/init/bashif [[ ! -d cd scripts vi run-fasta-splitter.sh #enter the text below #!/bin/bash source /usr/share/Modules/init/bash if [[ ! -d &#34;$SPLIT_FA_DIR&#34; ]]; then echo Cannot find faSplit \\&#34;$SPLIT_FA_DIR\\&#34; mkdir -p $SPLIT_FA_DIR fi if [[ ! -e &#34;$FILES_LIST&#34; ]]; then echo Cannot find files list \\&#34;$FILES_LIST\\&#34; exit 1 fi cd $FASTA_DIR while read FILE; do echo $FILE $SCRIPT_DIR/01-fasta-splitter.pl -n $SPLIT_READ_CT -o $SPLIT_FA_DIR $FILE done &lt; $FILES_LIST"
+    },
+    {
+      "title": "",
+      "instruction": "run-blast.sh : Create a shell script that runs blast on a compute node. vi run-blast.sh# enter the text below#!/bin/bash#PBS -W group_list=bhurwitz#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=2:mem=4gb#PBS -l place=pack:shared#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M youruser@email.arizona.edu#PBS -m bea# BLAST parametersNUM_THREADS=2 # make sure this is requested in the above vi run-blast.sh # enter the text below #!/bin/bash #PBS -W group_list=bhurwitz #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=2:mem=4gb #PBS -l place=pack:shared #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M youruser@email.arizona.edu #PBS -m bea # BLAST parameters NUM_THREADS=2 # make sure this is requested in the above &#34;select&#34; DESC=10 ALN=10 MAX_HSPS=10 module load blast cd &#34;$SPLIT_FA_DIR&#34; FASTA=&#34;$SPLIT_FA_DIR/$FILE.${PBS_ARRAY_INDEX}&#34; # run blast on each file chunk $BLAST -query $FASTA -db $BLASTDB -evalue $EVAL -out $BLAST_OUT_DIR/$FILE.${PBS_ARRAY_INDEX}.blastout -max_hsps $MAX_HSPS -num_descriptions $DESC -num_alignments $ALN -num_threads $NUM_THREADS"
+    },
+    {
+      "title": "",
+      "instruction": "run-parse-blast.sh : Create a shell script to parse the blast output that runs on a compute node on the cluster. Like the previous script the PBS commands at the beginning of the script indicate the resource needed to run the job. Also note that we need to load blast and perl, to access blast commands and the version of perl with bioperl installed. Also note that we are using the variable ${PBS_ARRAY_INDEX}. This variable stores information about which blast job we are running from 1-NUM_SPLIT_FILES that is specified in the driver script with a &#34;-J&#34; vi run-parse-blast.sh# enter the text below#!/bin/bash#PBS -W group_list=bhurwitz#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=2:mem=4gb#PBS -l place=pack:shared#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M youruser@email.arizona.edu#PBS -m beamodule load blastcd $BLAST_OUT_DIRBLOUT= $BLOUT.parsed&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;B18A08065F314146BC5A813E28F06C05&#34; &gt; vi run-parse-blast.sh # enter the text below #!/bin/bash #PBS -W group_list=bhurwitz #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=2:mem=4gb #PBS -l place=pack:shared #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M youruser@email.arizona.edu #PBS -m bea module load blast cd $BLAST_OUT_DIR BLOUT=&#34;$BLAST_OUT_DIR/$FILE.${PBS_ARRAY_INDEX}.blastout&#34; echo File \\&#34;$FILE.${PBS_ARRAY_INDEX}.blastout\\&#34; $SCRIPT_DIR/04-blast-search.pl $BLOUT &gt; $BLOUT.parsed"
+    },
+    {
+      "title": "",
+      "instruction": "04-blast-search.pl : modify the blast search script. Update the e-value to be less stringent. Modify the Perl script 04-blast-search.pl to include additional information about the hit. # make a few modifications in the 01-bio-searchio.pl script# change the e-value in the scriptmy $min = 1e-10;# update the print statement# add additional information about the hit.say join query_name, $hit-&gt;name, $hit-&gt;description, $hsp-&gt;percent_identity, $hsp-&gt;length(&#39;total&#39;), $hsp-&gt;evalue;&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;A5504FF579C9437A960E7C6E4A7552C7&#34; &gt; # make a few modifications in the 01-bio-searchio.pl script # change the e-value in the script my $min = 1e-10; # update the print statement # add additional information about the hit. say join &#34;\\t&#34;, $result-&gt;query_name, $hit-&gt;name, $hit-&gt;description, $hsp-&gt;percent_identity, $hsp-&gt;length(&#39;total&#39;), $hsp-&gt;evalue;"
+    },
+    {
+      "title": "",
+      "instruction": "Make all of the scripts executable and then run the pipeline. If you don&#39;t get any errors, the pipeline will take &lt;1 day to run. chmod 755 *sh *plcd ..chmod *sh./blast-pipeline.sh make sure your scripts are executable for before running chmod 755 *sh *pl cd .. chmod *sh ./blast-pipeline.sh make sure your scripts are executable for before running"
+    },
+    {
+      "title": "",
+      "instruction": "Check to see if the pipeline is running qstat -u username for me this command is:qstat -u bhurwitz qstat -u username for me this command is: qstat -u bhurwitz"
+    },
+    {
+      "title": "",
+      "instruction": "Once the pipeline is finished running (and you don&#39;t see the jobs listed under qstat), check for std-errors and std-out. Note you can check while the pipeline is running too. cd std-errls -1# you should see zero length filescd ..cd std-outls -l# you should see some description about the amount of compute time used per job cd std-err ls -1 # you should see zero length files cd .. cd std-out ls -l # you should see some description about the amount of compute time used per job"
+    },
+    {
+      "title": "",
+      "instruction": "Now you try. See if you can update the pipeline to add one final step that puts all of the parsed blast output into a single file for each of the original fasta files. Note that you can comment out the parts of the blast-pipeline.sh that you have already run in the steps above, to test your code. Otherwise, these will run again. Also, before you run this final step, make sure the blast parsing is complete. Can this run on the head node, or should we run this on a compute node? The complete pipeline can be found in github here ."
+    },
+    {
+      "title": "",
+      "instruction": "Commit your code to your own github abe487 repository using the directory: hpc-blast"
+    }
+  ]
+}

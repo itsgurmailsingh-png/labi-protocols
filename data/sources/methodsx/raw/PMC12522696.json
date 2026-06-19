@@ -1,0 +1,116 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC12522696",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12522696/",
+  "doi": "10.1016/j.mex.2025.103653",
+  "title": "Quantum-enhanced LSTM for predictive maintenance in industrial IoT systems",
+  "author": "K, S, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "An innovative solution for predictive maintenance in IIoT systems combining quantum computing with the proficiency of LSTM neural networks is proposed by us. Our concept is guided by a hybrid quantum-classical architecture to facilitate quantum computing to exploit high-dimensional industrial sensor measurements while preserving crucial temporal relationships through particular quantum channels. Through the combination of the representational ingenuity of quantum circuits, along with the sequence-based modelling of classical LSTMs, QE-LSTM is uniquely positioned to handle complicated time series coming out of industrial sensors. At the heart of our methodology are the following unique elements:•A collaborative framework integrating quantum and classical technologies allowing for the quantum computer to manage the complex analysis of high dimensional sensor data in the industry.•Quantum channel designs were aimed at minimizing temporal dependencies in temporal series industrial measurements, thereby maximizing the quality of sequential analysis.•Under ODS hindcasting, QE-LSTM improved F1 by 4–5 percentage points on SECOM and reduced RMSE and NASA Score on C-MAPSS; trends were consistent on IMMD (Table 1, Table 2).Table 1Performance comparison across datasets.Table 1:DatasetModelAccuracyPrecisionRecallF1AUCSECOMLSTM0.8640.8420.8090.8250.902CNN-LSTM0.8780.8620.8240.8420.914QE-LSTM (sim)0.9040.8920.8610.8760.938QE-LSTM (hardware)0.8960.8810.8500.8650.930IMMDLSTM0.9060.8830.8620.8720.943CNN-LSTM0.9130.8910.8690.8800.949QE-LSTM (sim)0.9280.9080.8880.8980.960QE-LSTM (sim) vs LSTM F1 deltas: SECOM +5.1 pp, IMMD +2.6 pp; paired t-test p < 0.01.Table 2RUL prediction performance metrics.Table 2:MetricClassical LSTMCNN-LSTMQE-LSTM (sim)QE-LSTM (hardware)Improvement vs LSTMRMSE ↓20.619.418.118.712.1%MAE ↓15.414.613.814.310.4%NASA Score ↓69264860362112.8%* Evaluations are positive if all the metrics have smaller values. Score is a metric that stands out because of the tendency to heavily penalise late predictions (which is highly relevant to effective maintenance planning).In the application of failure detection of bearing, QE-LSTM improves F1 over classical baselines on SECOM by 4–5 pp, with similar gains on IMMD; results on C-MAPSS (RUL) show consistent reductions in RMSE and NASA score.",
+  "steps_raw": [
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "We evaluate on three benchmarks."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "SECOM (classification): We use the original pass/fail labels. Windows of T = 256 with stride S = 64 are constructed from the standardized sensor streams; each window is labeled by the majority label in its span (ties resolved as fail)."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "IMMD (industrial machinery monitoring, classification): Failures are defined as vibration RMS exceeding 3.0 g for ≥2 h, corroborated by maintenance logs."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "C-MAPSS (RUL regression): We follow FD001. For a binary variant we mark failure if RUL ≤ 30 cycles."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "Normalization & leakage control: Missing values are imputed by a 5-sample median filter followed by forward-fill (cap 16 samples). Per-sensor min–max scaling is fit on train only and applied to val/test. If PCA is used, components are fit on train only and applied to val/test; the number of components is chosen by ≥95 % explained variance."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "Splits (C-MAPSS FD001): Engines are split by ID to prevent cross-engine leakage: train ={1,2,4,5,6,9,10,11,12,14,15,16,18,20}, validation ={3,7,8,17}, test ={13,19,21}. Operating conditions are balanced across splits."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "Measures collected by industrial sensors are pre-processed and cleaned before being fed to the quantum system; normalization, noise reduction, and preliminary feature selection [5]."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "Quantum Encoding and Processing: The extracted features are encoded into quantum states through the process of amplitude encoding and then passed through quantum parameterized circuits to determine complex feature interdependence [6]."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "We implement the VQC in PennyLane (Torch interface) targeting Qiskit backends. Unless stated otherwise, we use n = 8qubits and L = 4 variational layers. Per layer, the circuit applies 2n=16 parameterized rotations (RY,RZ)and n = 8 CNOTs in a ring pattern (even–odd parallel scheduling). We adopt a ring CNOT pattern CNOTi,(i mod n)+1 ​ for uniform entanglement and a fixed parameter budget. On real hardware (heavy‑hex), non-native edges are handled by SABRE layout and direction corrections; additional SWAPs increase depth and two-qubit counts, which we report post-transpile. In ablations, a linear-chain entangler performed within 0.3–0.6 F1 points of the ring while slightly reducing post-transpile depth; all-to-all entanglement did not improve accuracy but increased depth. Parameter count is 2nL=64. Pre-transpile gate counts are therefore 64 single-qubit rotations and 32 two-qubit gates. With parallel scheduling the pre-transpile depth per layer is ∼4 (two rotation stages + two entangler stages), giving ∼16 for L = 4."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "Backends: we use Qiskit Aer (statevector_simulator for ablations; qasm_simulator with shots=4096 for measurement sampling) and the IBM device ibm_perth (heavy‑hex, 7 × 4 lattice). Transpilation uses optimization_level=3, SABRE layout, and basis gates {sx,rz,cx}. On ibm_perth, mapping the 8-qubit ring typically yields post-transpile depth ∼50–70 and two-qubit gate count ∼45–60 depending on qubit allocation and CX direction; we report the exact counts per experiment alongside results. Measurement mitigation (M3) is applied for hardware runs.Qubits nLayers LTrainable Params 2nL1Q Rotations (pre)2Q CNOTs (pre)Depth (pre)2Q Gates (post)Depth (post)84646432165662"
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "Classical LSTM Layers: These quantum-processed features are further supplied to LSTM layers to capture temporal dynamics to predict equipment failures’ probabilities."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "Prediction Output: The last layer produces the prognosis of the equipment’s condition, failure risk, and the remaining useful life."
+    },
+    {
+      "title": "Data preprocessing and feature extraction",
+      "instruction": "This is a combination of architectures that are optimized for high-dimensional data in quantum computing, and LSTM, which was recognized for its sequence modeling."
+    },
+    {
+      "title": "Measurement and feature extraction",
+      "instruction": "The result is achieved through expectation values of Pauli observables where they are channeled out by the quantum circuit. As the reconstructed density matrices contain noisy components, the expectation values of Pauli-Z operators for each qubit and certain selected two-qubit correlations can be compared. fᵢ = ⟨ψₒᵤₜ|Zᵢ|ψₒᵤₜ⟩ fᵢ,ⱼ = ⟨ψₒᵤₜ|Zᵢ ⊗ Zⱼ|ψₒᵤₜ⟩ where |ψₒᵤₜ⟩ = Uᵥₐᵣ(θ)Uₑₙₖ(x)|0⟩ is the output state of the quantum circuit."
+    },
+    {
+      "title": "Measurement and feature extraction",
+      "instruction": "Measuring in this way gives a total of"
+    },
+    {
+      "title": "Measurement and feature extraction",
+      "instruction": "n + n(n-1)/2 = n + (n^2- n)/2 = n^2/2 features that take into account the probabilities of all individual qubits as well as two-qubit correlations. Some of these features are then fed to a classical Long Short Term Memory (LSTM) network where they have been processed using quantum processing. We compute all single-qubit expectations ⟨Zᵢ⟩ and select K = 12 pairwise ⟨Zᵢ⊗Zⱼ⟩ by mutual information with labels on the training set, yielding a 20-dimensional vector for n = 8 (n + K). This avoids quadratic growth while preserving the most informative correlations. On SECOM, F1 for K∈{0,8,12,16,28} was {0.866, 0.870, 0.874, 0.875, 0.875}, showing diminishing returns beyond K = 12."
+    },
+    {
+      "title": "Method validation",
+      "instruction": "In order to test our method we used three real datasets from three different industries and three different maintenance types and sensor placements."
+    },
+    {
+      "title": "Early fault detection and warning time analysis",
+      "instruction": "In the bearing failure case study using the IMMD dataset, we determined when each model racked the limit at failure of 0.7 first Table 3, Table 4.Table 3Early failure detection comparison.Table 3:ModelHours Before FailureImprovement Over Classical LSTMClassical LSTM42–CNN-LSTM6862 %QE-LSTM105150 %Table 4Quantum Advantage vs. Feature Dimensionality.Table 4:Feature DimensionsPerformance Improvement Over Classical LSTM501.30 %1003.20 %2006.50 %3009.80 %40012.40 %50014.90 %591 (full)16.70 %"
+    },
+    {
+      "title": "Early fault detection and warning time analysis",
+      "instruction": "We model per-event savings as"
+    },
+    {
+      "title": "Early fault detection and warning time analysis",
+      "instruction": "Savings=Δt⋅(Cunplanned−Cscheduled)⋅u where Δt=63 h is the additional lead time, Cunplanned=$5200/h, Cscheduled=$1800/h,and u∈[0,1] is the fraction of lead time actually realized. Results:Utilization uSavings per event0.25$53,5500.50$107,1000.75$160,6501.00$214,200"
+    },
+    {
+      "title": "Quantum advantage analysis with feature dimensionality",
+      "instruction": "The dimensionality of input features versus quantum advantage in performance was found in our study strongly correlated. We looked at the correlation between performance gains and the input feature dimensionality by successively reducing the dimensionality of the SECOM dataset with the use of principal component analysis:"
+    },
+    {
+      "title": "Quantum advantage analysis with feature dimensionality",
+      "instruction": "This rather linear trend confirms our theoretical expectations for quantum advantage in high dimensional datasets. For higher dimensionality of the input space, it will become more valuable: the compact encodings that, in practice here, yielded gains that grew with dimensionality of the states of quantum-machines."
+    },
+    {
+      "title": "Quantum advantage analysis with feature dimensionality",
+      "instruction": "Case Study: Early Bearing Failure Detection"
+    },
+    {
+      "title": "Quantum advantage analysis with feature dimensionality",
+      "instruction": "Finally, in a case study for bearing failure detection using IMMD dataset, this study noted that the proposed QE-LSTM was capable of identifying early failure signs and crossing critical probability line 105 hrs before failure as compared to 68 hrs for CNN-LSTM and 42 hrs for Classical LSTM."
+    },
+    {
+      "title": "Quantum advantage analysis with feature dimensionality",
+      "instruction": "The summary of cost–benefit analysis would reveal that QE-LSTM, in this particular scenario, would cut total failure cost by 37 % as compared to Classical LSTM based on norms of maintenance cost and losses due to downtime."
+    }
+  ],
+  "materials": [],
+  "fetched_at": "2026-06-19T00:13:03.480725+00:00"
+}

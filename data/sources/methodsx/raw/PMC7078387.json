@@ -1,0 +1,82 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC7078387",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7078387/",
+  "doi": "10.1016/j.mex.2020.100819",
+  "title": "Graphs based methods for simultaneous smoothing and sharpening",
+  "author": "Pérez-Benito, Jordán, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "We present two new methods for simultaneous smoothing and sharpening of color images: the GMS3 (Graph Method for Simultaneous Smoothing and Sharpening) and the NGMS3(Normalized Graph-Method for Simultaneous Smoothing and Sharpening). They are based on analyzing the structure of local graphs computed at every pixel using their respective neighbors. On the one hand, we define a kernel-based filter for smoothing each pixel with the pixels associated to nodes in its same connected component. On the other hand, we modify each pixel by increasing their differences with respect to the pixels in the other connected components of those local graphs. Our approach is shown to be competitive with respect to other state-of-the-art methods that simultaneously manage both processes.•We provide two methods that carry out the process of smoothing and sharpening simultaneously.•The methods are based on the analysis of the structure of a local graph defined from the differences in the RGB space among the pixels in a 3 × 3 window.•The parameters of the method are adjusted using both observers opinion and the well-known reference image quality assessment BRISQUE (Blind/Referenceless images spatial quality Evaluator) score.",
+  "steps_raw": [
+    {
+      "title": "Method details",
+      "instruction": "First, let us describe the steps in which the GMS3 can be divided. The NGMS3 can be later deduced with a slight modification of the GMS3. Given a color image F, we consider each image pixel represented by their three color components in the RGB space F0=(F0R,F0G,F0B). Except the computations required in Step 0.1, the rest of steps are included in the file GMS3.m."
+    },
+    {
+      "title": "Method details",
+      "instruction": "STEP 0: Definition of the local graph at every pixel."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Consider a 3 × 3 window centered at F0. The rest of the pixels are denoted as Fi=1,…,8.0.1The threshold U is estimated with ThresholdEstimation.m, which computes the optimal threshold from an estimation of the noise appearing in the image (GaussianNoiseEstimation.m), that, through a regression returns the optimal value (Regression.m). The threshold U is given by the expression U=4.59τ+11.16, where τ is an estimation of the standard deviation of the noise. Further details on how this estimation is achieved through a Mutual Information analysis can be found in [7].0.2Now, we define the local weighted graph GF0=(V(GF0),L(GF0)) for every pixel F0, where V(GF0) stands for the set of nodes and L(GF0) for the set of links or edges. ThenV(GF0)={Fi,i=0,…,8}andL(GF0)={(Fi,Fj),i≠j,∥Fi−Fj∥2≤U},with ∥ ∥2 standing for the Euclidean norm. Lastly, if (Fi,Fj)∈L(GF0), its weight will be defined as w(Fi,Fj)=∥Fi−Fj∥2."
+    },
+    {
+      "title": "Method details",
+      "instruction": "STEP 1: Determination of the connected components of the local graphs."
+    },
+    {
+      "title": "Method details",
+      "instruction": "For this part, we will only consider the pixels whose nodes lay in the same connected component as the pixel F0. To determine these pixels, we compute the adjacency matrix (AdjacencyMatrix.m) having into account the weights of the links. Then, the connected components are computed with the functions fila.m and clases.m."
+    },
+    {
+      "title": "Method details",
+      "instruction": "STEP 2: Smoothing"
+    },
+    {
+      "title": "Method details",
+      "instruction": "We define a kernel-based filter for smoothing, which gives more importance to the pixels closest to the central pixel F0. The new value for the pixel F0S, namely F0S, will be defined as:F0S:=∑i∈V(CCF0)e−||Fi−F0||22α2Fi∑i∈V(CCF0)e−||Fi−F0||22α2,where α > 0 is a parameter that controls the smoothing effect and CCF0 denotes the connected component that contains the pixel F0. We will discuss later the fitting of this parameter."
+    },
+    {
+      "title": "Method details",
+      "instruction": "STEP 3: Sharpening"
+    },
+    {
+      "title": "Method details",
+      "instruction": "Afterwards, the sharpening part is done taking into account the pixels outside the connected component to which F0 belongs."
+    },
+    {
+      "title": "Method details",
+      "instruction": "3.1. For the GMS3, the new value of the pixel F0 including the smoothing and sharpening effect will be defined asF0GMS3:=F0S−λvbeingv:=∑i∉V(CCF0)(Fi−F0S)9−card(V(CCF0)),where λ∈[0,1] is a parameter controlling the sharpening effect, and card (V(CCF0)) stands for the cardinal of the connected component of the pixel F0."
+    },
+    {
+      "title": "Method details",
+      "instruction": "3.2. For the NGMS3, in order to define the new value of the pixel F0NGMS3, we only have to normalize the vector v in the sharpening part.F0NGMS3:=F0S−λv||v||2"
+    },
+    {
+      "title": "Method details",
+      "instruction": "The script GMS3.m allows us to execute both methods, thanks to the variable “version”. When calling to GMS3(image, alpha, lambda, version), if version=0 we have the GMS3 method, and if version=1 we have the NGMS3."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Implementation: Both methods, GMS3 and NGMS3 have been implemented in Matlab.1 The implementation can be found in the supplementary material. For running any of these methods we only have to introduce the noisy image, and the values of α and λ. They are implemented in GMS3.m"
+    },
+    {
+      "title": "Method details",
+      "instruction": "As it is indicated in [8], the values of α and λ have been estimated in two different ways:•From the opinions of a pool of observers. All the observers have visualized the set of images, randomly ordered, under the same conditions: in a dark room, with the same screen, at a distance of about 50 cm of it, and after five minutes of visual adaptation. In this case the optimum parameters of (α,λ), where (4.43,0.16) for the GMS3 and (8.67,4.54) for the NGMS3.•By minimizing the sum of the squares of the BRISQUE score [4,5] over a dataset of images, using the Interior Point Algorithm [1]. In this case the optimum parameters of (α,λ), where (7,0.275) for the GMS3 and (5.5,3.5) for the NGMS3."
+    },
+    {
+      "title": "Method details",
+      "instruction": "There are differences in the adjustment of the parameters. In the case of the GMS3, the observers smooth and sharpen less than what BRISQUE score would have suggested. However, the opposite effect happens with the NGMS3."
+    },
+    {
+      "title": "Method details",
+      "instruction": "Our methods have been compared with the (i) Forward-and-backward diffusion method (FAB) [9], (ii) the Fuzzy networks based technique (Fuzzy) [10] and, (iii) the collaborative filtering based method (BM3D) [2]. The comparison was based on the well-known non-reference image quality assessment (BRISQUE) score [4,5]. Our methods are competitive with them, both in terms of objective assessment and visual evaluation. Details on this comparison can be found in [8]."
+    }
+  ],
+  "materials": [
+    "Supplementary material and/or Additional information:We attach the implementation in Matlab of both methods.Image, application 1"
+  ],
+  "fetched_at": "2026-06-19T00:46:31.459961+00:00"
+}

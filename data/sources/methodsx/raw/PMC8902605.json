@@ -1,0 +1,74 @@
+{
+  "source_name": "methodsx",
+  "source_id": "PMC8902605",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8902605/",
+  "doi": "10.1016/j.mex.2022.101640",
+  "title": "Methodology for a reverse engineering process chain with focus on customized segmentation and iterative closest point algorithms",
+  "author": "Mönchinger, Schröder, et al.",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "description": "One-off construction is characterized by a multiplicity of manual manufacturing processes whereby it is based on consistent use of digital models. Since the actual state of construction does not match the digital models without manually updating them, the authors propose a method to automatically detect deviations and reposition the model data according to reality. The first essential method is based on the “Segmentation of Unorganized Points and Recognition of Simple Algebraic Surfaces” presented by Marek Vanco (2003). The second method is the customization of the iterative closest point (ICP) algorithm. The authors present the overall structure of the implemented software, based on open source and relate it to the general reverse engineering (RE) framework by Buonamici et al. (2017).A highlight will be given on.•The general architecture of the software prototype.•A customized segmentation and clustering of unorganized points and recognition of simple algebraic surfaces.•The deviation analysis with a customized iterative closest point (CICP) algorithm.Especially in the field of one-off construction, characterized by small and medium companies, automated assessment of 3D scan data during the design process is still in its infancy. By using an open source environment progress for consistent use of digital models could be accelerated.",
+  "steps_raw": [
+    {
+      "title": "Customized method: Segmentation by Vanco",
+      "instruction": "Marek Vanco [2] presented a segmentation method based on normal vectors that includes a variable reference vector. The aim is to detect planar faces. The algorithm uses the region growing principle, meaning that starting from an initial point, a segment is created by iteratively checking the difference of normal vectors of neighbouring candidates. The variable reference vector is the average normal vector of all points already belonging to the segment. It is updated each time a point is added. Thus, two conditions are imposed: first, a condition for local curvature by checking the candidate's normal vector against the segment's neighbouring normal vector. Second, a condition on global orientation of the candidate's normal vector by checking against the reference vector. We implemented Vanco's algorithm as it is, and additionally we simplified it: We added the option to fix the reference vector, such that segments with a desired orientation are detected. This turned out to be useful in our use case, since in the global CAD-assembly, orientations of surfaces are already known. To detect scan segments that correspond to a certain CAD surface, we simply used the known CAD surface normal vector as reference vector. As initial data, a polygon mesh is preferred for the segmentation. Using a mesh, the information about neighbours are given through edge and vertex connections. This makes a separate neighbour search unnecessary."
+    },
+    {
+      "title": "Customized method: Segmentation by Vanco",
+      "instruction": "In the following, the essential elements of how we implemented the segmentation algorithm of Vanco using the variable reference vector is presented as pseudo code. The algorithm constitutes one region growing cycle, starting with one random point of the point cloud, called “seed”. To obtain our variant using a fixed reference vector, line 6 becomes vref=fixedvector and line 17 is dropped. The algorithm is also simplified to no usage of a reference vector if all three lines 6, 14 and 17 are dropped and only the local condition is checked in line 15, obtaining a more general approach for a segmentation method. All variants have their advantages and disadvantages, depending on the actual application."
+    },
+    {
+      "title": "Customized method: Segmentation by Vanco",
+      "instruction": "Variable names and explanations:Pall pointsαllocal normal vector differenceSall points in segmentαrglobal normal vector difference to reference vectorBall points on segment boundaryτlthreshold local angle criterionC[p]All neighbouring candidates of point pτrthreshold global angle criterion to reference vectorpccurrent pointvrefreference vectorpttest point"
+    },
+    {
+      "title": "Customized method: Segmentation by Vanco",
+      "instruction": "Pseudo code:1// initialization2determineC[p]∀p∈P// determine all neighbours (candidates)3pc=randompoint∈P// determine random seed4S.add(pc)// add seed to segment5B.add(C[pc])// add neighbours of seed to boundary points6vref=normalofpc// determine first reference vector7// region growing8while(B≠empty)// while there are any boundary points9 while(C[pc]≠empty)// while there are still candidates for current point10 pt=C[pc][0]// test point11 v1=normalofpc12 v2=normalofpt13 αl=v2∡v114 αr=v2∡vref15 if(αl<τlANDαr<τr)// check for local and global criterion16 S.add(pt)// add test point to segment17 updatevrefwithv2// update reference vector by calculating new average Vector18 B.add(C[pt])// add all candidates of new point to boundary points19 C[pc].erase(pt)// erase test point from candidates of current point20B.erase(pc)// erase current point from boundary points21if(B≠empty)// if boundary points left, define new current point as one of boundary points22 pc=B[0]"
+    },
+    {
+      "title": "Customized method: Segmentation by Vanco",
+      "instruction": "To obtain segmentation results for not only one start point but the whole model, many or even all points of the model can be used as start points. Another strategy could be to choose the next seed out of the remaining points after one region growing cycle. If one does not explicitly exclude already in other segments used points, segments may overlap, thus having points in common. Ideally, each point on one segmented surface generates the same surface when used as start point. The fact of having overlapping patches lead to a further customization that we made in the subsequent step after segmentation."
+    },
+    {
+      "title": "Customized method: Segmentation by Vanco",
+      "instruction": "As mentioned, the scan data in the use case exhibits many noise artefacts and is very coarse at the same time, leading to very rough representations of surfaces. This is harmful for the segmentation results, since the local criterion is hard to fulfil. The angular threshold for the local condition may be increased, but a too large threshold may lead to regions, that erroneously traverse geometry edges. The seeds for the region growing segmentation are spread randomly over the scan data. Results of the segmentations are mostly small separate patches that initially belong to one single continuous surface. To counteract this problem, we invented a strategy to fuse segmentation results to larger clusters. Iteratively, all patches are examined if they overlap others – if so, by a certain minimum number of points, they will be merged Fig. 1. shows the principle. Left, the segmentation results without the cluster formation are depicted. Several small patches are next to and overlap each other, shown in different colours. Middle, the same patches are merged into larger clusters. This leads to a more proper description of the surface, despite of the bad scan data quality. Right, the corresponding CAD part is shown for this scan section, where the continuous planar surface is facing upwards.Fig. 1Cluster formation of scan segments. Left: patches without clustering; middle: clustered patches; right: corresponding CAD part.Fig 1"
+    },
+    {
+      "title": "Customized method: Iterative closest point",
+      "instruction": "The Iterative Closest Point (ICP) algorithm is a well-known tool for registration, aiming to minimize the distance between two point clouds by aligning the source point cloud with the target [3]. To this end, for each point in the source cloud, the nearest point in the target is determined and the summed squared distance of all point pairs is calculated. This value needs to be minimized iteratively by finding suitable transformations (rotations and translations) of the source cloud. Since regarding our use case we need to align CAD data with scan data, it seems evident to use this algorithm. PCL provides a ready-to-use implementation of ICP."
+    },
+    {
+      "title": "Customized method: Iterative closest point",
+      "instruction": "However, as a project requirement only transformations or rotations in specified degrees of freedom (DoF) were allowed. Therefore, we implemented a customized version and labelled it “Custom ICP” (CICP) that only takes one single DoF for the transformation into account. As measure for the distance between source and target, we took the average over all absolute pairwise distances instead of squared distances and termed it “fitness score”:fitnessscore=∑i=0npoints(|distance[i]|)npoints"
+    },
+    {
+      "title": "Customized method: Iterative closest point",
+      "instruction": "In the use case, the source is the CAD data and the target the 3D clusters resulting from the aforementioned segmentation. One CICP cycle is solely applied per surface, or rather for all surfaces that have the same orientation. For instance, a surface having a normal vector (1,0,0) is not suited approximate along y or z axes, but only in x direction. The following figure left shows a typical situation: from two surfaces with different orientations, scan sections could be obtained. Separately for each surfaces, the CICP is applied in the respective direction. Right, a close up of the scan sections (of the curved surface, left red framed) are depicted, showing the cad to scan fitting before (top) and after (bottom) the CICP process."
+    },
+    {
+      "title": "Customized method: Iterative closest point",
+      "instruction": "We obtained the source cloud as follows: the CAD data is imported as .stl file, such that we can upsample points on the polygon faces and afterwards downsample these to obtain a homogeneous distributed point cloud having a higher point density than the scan segments. Furthermore, there were several pre-processing steps required, which we described more in detail in our corresponding paper. The scan patches in Fig. 2 are already exempted from erroneous noise and outliers, thus ready for the CICP. The implementation is straightforward and presented as pseudo code in what follows. To obtain a registration that approximates in coarse steps at the beginning and refine steps when getting closer, we introduced certain refinement levels. Finding out which values for nr,\nxr and initial transformation matrices was achieved by trying and testing. A more intelligent solution that automatically determines and adapts to the current situation is conceivable and desirable in future. This CICP cycle depicts the alignment in one DoF. To transform the source along different DoFs, we applied these consecutively and tested different combinations.Fig. 2Left: exemplary scan segments and CAD data; Right Top: scan segments and CAD initial position; Right bottom: scan segments and transformed CAD position.Fig 2"
+    },
+    {
+      "title": "Customized method: Iterative closest point",
+      "instruction": "Variable names and explanations:Pssource pointsnrnumber of amplitude refinements; typically nr<5Ps,nsource points transformedfccurrent fitness scorePttarget pointsfnnew fitness scorexfactor for amplitude of transformationM4x4 transformation matrixxrRefinement factor for x, typically 0.01<x<0.25"
+    },
+    {
+      "title": "Customized method: Iterative closest point",
+      "instruction": "Pseudo code:1// initialization2type= determine type of transformation; could be \"translation\" or \"rotation\"3axis = determine translation or rotation axis; could be \"x\", \"y\", \"z\", or \"abitrary [x, y, z]\"4M=determinetransformationmatrix(type,axis)// transformation matrix set up according to given type and axis5x=16// iterative transformation7for(i=0;0 fa)// check if first transformation yields improvement; if not, switch direction13 M=−M14 while(fn<fa)// do while fitness score improves15 fa=fn16 Ps=Ps,n17 Ps,n=transform(Ps,M)18 fn=computefitnessscore(Ps,n,Pt)19 x=x*xr// refine factor for transformation"
+    },
+    {
+      "title": "Customized method: Iterative closest point",
+      "instruction": "Furthermore, we adapted the CICP to perform a parallel alignment. To this end, the fitness score in the algorithm is replaced by the average deviation of all distances to the fitness score:averagedeviation=∑i=0npoints(|distance[i]−fa|)npoints"
+    },
+    {
+      "title": "Customized method: Iterative closest point",
+      "instruction": "In line 12, the criterion states that the transformation is iteratively repeated until the average deviation is minimized. If two point clouds with similar geometric structure are parallel regardless their absolute distance, the distances of corresponding point pairs are everywhere equal, resulting in the deviation of distances going to zero. This method turned out to be necessary and well performing, since CAD parts could first be aligned parallel and afterwards transformed to minimize the distance to the scan."
+    }
+  ],
+  "materials": [
+    "Image, application 1"
+  ],
+  "fetched_at": "2026-06-19T00:39:08.868839+00:00"
+}
