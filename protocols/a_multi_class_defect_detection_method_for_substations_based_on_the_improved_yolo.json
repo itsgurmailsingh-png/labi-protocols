@@ -182,146 +182,125 @@
     },
     {
       "step_id": 21,
-      "title": "LFLayer principle schematic",
-      "instruction": "LFLayer principle schematic. (a) The original network structure of YOLOv10. (b) The network structure after adding LFLayer.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 22,
       "title": "Let",
       "instruction": "Let \nP2backbone\n denote the P2 feature map from the backbone network, with spatial dimensions \nH2×W2\n and \nC2\n channels. Let \nP5backbone\n represent the P5 feature map with dimensions \nH5×W5\n and \nC5\n channels, where typically \nH5=H2/8\n and \nW5=W2/8\n. The upsampling operation is formulated in Equation 5:",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 23,
+      "step_id": 22,
       "title": "where",
       "instruction": "where \nUpsample8×(⋅)\n represents an \n8×\n upsampling operation, typically implemented through bilinear or nearest-neighbor interpolation, bringing the spatial dimensions of \nP5up3\n to match those of \nP2backbone\n.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 24,
+      "step_id": 23,
       "title": "The channel adjustment before fusion is formulated in Equation 6:",
       "instruction": "The channel adjustment before fusion is formulated in Equation 6:",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 25,
+      "step_id": 24,
       "title": "where",
       "instruction": "where \nCtarget\n is the target channel number for fusion, and \nFCtarget1×1(⋅)\n denotes a \n1×1\n convolution operation that adjusts the channel dimension to \nCtarget\n. The resulting low-level feature fusion operation is defined in Equation 7:",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 26,
+      "step_id": 25,
       "title": "where",
       "instruction": "where \nConv3×3(⋅)\n denotes a \n3×3\n convolution for feature integration, and \nPLF\n represents the low-level fusion feature map that serves as input to the small target detection head.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 27,
+      "step_id": 26,
       "title": "This strategy of combining low-level detailed...",
       "instruction": "This strategy of combining low-level detailed features with high-level semantic features not only helps improve detection performance for small targets but also maintains computational efficiency to a certain extent. Through this method, the model can more accurately capture and recognize minute objects in images. The rationale is that low-level features, being closer to the input image, retain finer spatial information such as edges, corners, and texture patterns that are critical for localizing small defects. Meanwhile, the deeply upsampled high-level features provide semantic context that aids in distinguishing actual defects from background clutter. The element-wise addition operation allows the network to simultaneously leverage both information sources, creating a feature representation that is both spatially precise and semantically meaningful.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 28,
+      "step_id": 27,
       "title": "Traditional YOLO series models employ the...",
       "instruction": "Traditional YOLO series models employ the Path Aggregation Feature Pyramid Network (PAFPN) as their neck network. However, there is no information interaction between each layer of feature maps from the PAFPN and the backbone, which may result in the loss of some detailed features. The preservation of detailed features is particularly important for small target recognition.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 29,
+      "step_id": 28,
       "title": "Tan et al",
       "instruction": "Tan et al. proposed the Bi-directional Feature Pyramid Network (BiFPN), which adds cross-scale fusion layers compared to PAFPN, enabling top-down and bottom-up feature flow. By adding weights to each feature input, the feature fusion process is optimized, helping to retain more useful information. However, since BiFPN introduces dynamic weights that are optimized through backpropagation during network training, these learnable dynamic weights may increase the computational burden of the network. Additionally, the uncertainty in the magnitude of the original weights may lead to training instability in the early stages.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 30,
+      "step_id": 29,
       "title": "To address these issues, we redesign...",
       "instruction": "To address these issues, we redesign the original neck network by introducing a feature propagation path from the backbone directly to the downsampling path, reducing the loss of small target features during propagation. We propose a feature fusion strategy combining the CGA mechanism. This strategy dynamically adjusts fusion weights by evaluating the content relevance of feature maps at each layer. Unlike traditional BiFPN, which uses fixed algorithms to assign weights, the CGA mechanism can adaptively allocate more weight to features that are more critical to the final detection task based on the specific content in the feature maps. This not only enhances the model’s detection capability for small targets but also strengthens the model’s expressiveness across various scales. The network structure is shown in Figure 5.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 31,
-      "title": "The principle of the CGA mechanism...",
-      "instruction": "The principle of the CGA mechanism is illustrated in Figure 6. Let \nX\n be the input feature map with dimensions \nH×W×C\n, where H and W denote spatial height and width, and C represents the number of channels. The channel attention and spatial attention feature extraction steps are formulated in Equations 8, 9, respectively.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 32,
+      "step_id": 30,
       "title": "where",
       "instruction": "where \nWc∈ℝ1×1×C\n represents channel attention features, \nWs∈ℝH×W×1\n represents spatial attention features, \nFC1×1(⋅)\n denotes a \n1×1\n convolution with C output channels, r is the channel reduction ratio (typically set to 16), \nmax(0,⋅)\n represents the ReLU activation function, \nXGAPC∈ℝ1×1×C\n denotes global average pooling across spatial dimensions, and \nXGAPs∈ℝH×W×1\n and \nXGMPs∈ℝH×W×1\n represent global average pooling and global max pooling across channel dimensions, respectively. The concatenation operator \n[⋅,⋅]\n combines these two pooled features along the channel dimension.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 33,
+      "step_id": 31,
       "title": "Subsequently, the features from both dimensions...",
       "instruction": "Subsequently, the features from both dimensions are added and concatenated with the input \nX\n along the channel dimension. After a channel shuffle operation, the result passes through group convolution and a Sigmoid operation to obtain the fusion weight \nW\n is computed by Equation 10:",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 34,
+      "step_id": 32,
       "title": "where",
       "instruction": "where \nσ(⋅)\n represents the Sigmoid activation function that normalizes the output to the range [0, 1], \nGC7×7(⋅)\n denotes group convolution with a \n7×7\n kernel size (with the number of groups typically set to C/8, \nCS(⋅)\n represents the channel shuffle operation that promotes information flow across different channel groups, and \nConcat[⋅]\n denotes channel-wise concatenation.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 35,
+      "step_id": 33,
       "title": "The Content-Guided Attention fusion module comes...",
       "instruction": "The Content-Guided Attention fusion module comes in two variants: dual-input and triple-input. The dual-input fusion module principle is shown in Figure 7. For two input feature maps \nX1∈ℝH×W×C\n and \nX2∈ℝH×W×C\n, the fusion outputs are computed according to Equations 11, 12.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 36,
+      "step_id": 34,
       "title": "where",
       "instruction": "where \n⊙\n denotes element-wise multiplication (Hadamard product), \n(1−W)\n represents the complementary weight ensuring that the total weight sums to 2 (accounting for the residual connections), and \nFC1×1(⋅)\n is a \n1×1\n convolution that adjusts the channel dimension to the desired output size. This formulation ensures that the network can learn to balance contributions from different feature sources while maintaining residual connections that facilitate gradient flow during backpropagation.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 37,
-      "title": "The triple-input fusion module principle is illustrated in Figure 8",
-      "instruction": "The triple-input fusion module principle is illustrated in Figure 8. Here, \nX1\n and \nX2\n are similar to those in the dual-input fusion module, while \nX3∈ℝH×W×C\n is a cross-layer input from the same feature level in the backbone network. After weighted fusion and addition with the original inputs, the channel number is adjusted through convolution to obtain the output \nXfuse3\n:",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 38,
+      "step_id": 35,
       "title": "The division by 2 for the weighted terms of",
       "instruction": "The division by 2 for the weighted terms of \nX2\n and \nX3\n ensures a balanced contribution when fusing three feature sources, preventing any single source from dominating the fusion process.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 39,
+      "step_id": 36,
       "title": "To position YOLO-SMALLNET within the current...",
       "instruction": "To position YOLO-SMALLNET within the current landscape of defect detection algorithms, we conducted extensive comparisons with representative state-of-the-art object detection models. Table 3 summarizes the comprehensive performance comparison across both anchor-based and anchor-free approaches, as well as two-stage detectors. The results demonstrate that YOLO-SMALLNET achieves superior performance across all accuracy metrics. Compared to the two-stage Faster R-CNN detector, our method improves precision by 11.5%, recall by 11.6%, mAP@0.5 by 8.4%, and mAP@0.5:0.95 by 6.8%, while maintaining significantly higher inference speed (98 FPS vs. 18 FPS). Among YOLO series models, YOLO-SMALLNET outperforms YOLOv11n by 6.6% in precision, 7.4% in recall, 3.2% in mAP@0.5, and 2.7% in mAP@0.5:0.95. The marked improvement in recall is especially noteworthy, as reducing missed detections is critical in safety-critical infrastructure monitoring applications.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 40,
+      "step_id": 37,
       "title": "Figure 10 visualizes the trade-off between...",
       "instruction": "Figure 10 visualizes the trade-off between precision and recall at different confidence thresholds. YOLO-SMALLNET (red curve) demonstrates superior performance across the entire recall range, maintaining higher precision even at high recall levels. This indicates robust detection capability with fewer false positives and missed detections. The area under the PR curve (AP) for YOLO-SMALLNET is 83.7%, substantially exceeding all compared methods. The consistent advantage across varying thresholds validates the effectiveness of our proposed modifications in handling challenging small defect detection scenarios.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 41,
+      "step_id": 38,
       "title": "Precision-recall curves comparison of different methods...",
       "instruction": "Precision-recall curves comparison of different methods on the substation defect dataset.",
       "is_critical": false,
@@ -329,5 +308,6 @@
     }
   ],
   "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "merged_at": "2026-06-18",
+  "description": "LFLayer principle schematic. (a) The original network structure of YOLOv10. (b) The network structure after adding LFLayer. The principle of the CGA mechanism is illustrated in Figure 6. Let \nX\n be the input feature map with dimensions \nH×W×C\n, where H and W denote spatial height and width, and C represents the number of channels. The channel attention and spatial attention feature extraction steps are formulated in Equations 8, 9, respectively. The triple-input fusion module principle is illustrated in Figure 8. Here, \nX1\n and \nX2\n are similar to those in the dual-input fusion module, while \nX3∈ℝH×W×C\n is a cross-layer input from the same feature level in the backbone network. After weighted fusion and addition with the original inputs, the channel number is adjusted through convolution to obtain the output \nXfuse3\n:"
 }

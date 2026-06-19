@@ -26,6 +26,12 @@ MATERIALS_HEADERS = {
     "supplies", "buffers", "antibodies", "chemicals",
 }
 
+BACKGROUND_HEADERS.update({
+    "method details", "rationale", "rationale behind", "principle",
+    "theoretical basis", "key features", "motivation",
+    "resource availability", "validation",
+})
+
 # Steps that are clearly procedural (start with action verb)
 ACTION_VERBS = re.compile(
     r'^(add|mix|centrifuge|incubate|prepare|dissolve|transfer|wash|remove|place|'
@@ -114,7 +120,9 @@ def fix_protocol(data: dict) -> tuple[dict, bool]:
         if not instruction:
             continue
 
-        section_type = classify_header(title)
+        # Also check start of instruction if title is generic/empty
+        header_to_check = title if title else instruction[:60]
+        section_type = classify_header(header_to_check)
 
         if section_type == 'background':
             background_texts.append(instruction)

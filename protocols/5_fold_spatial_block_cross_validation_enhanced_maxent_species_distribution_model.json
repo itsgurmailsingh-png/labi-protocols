@@ -55,34 +55,27 @@
     },
     {
       "step_id": 2,
-      "title": "5-Fold Spatial Block Cross-Validation Setup",
-      "instruction": "5-Fold Spatial Block Cross-Validation Setup 3.1 Spatial block generation (ENMTools v1.1.2): • Divide study area into non-overlapping 1°×1° geographic grid blocks covering the full O. sinensis distribution range • Total: 24 geographic blocks • Block size rationale: matches the spatial autocorrelation scale of O. sinensis on the Tibetan Plateau 3.2 Fold assignment: • For each of 5 folds: randomly assign 1 geographic block as the independent test set • All remaining blocks form the training set • Ensure no geographic overlap between training and test sets in each fold • Fold assignments must be non-overlapping across the 5 folds 3.3 Background point selection: • Generate 10,000 random background points from the full study area (China boundary mask) • Stratify background points spatially to ensure coverage of full environmental space • Exclude background points within 10 km of known occurrence localities",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
       "title": "MaxEnt Model Tuning and Running",
       "instruction": "MaxEnt Model Tuning and Running 4.1 Hyperparameter tuning: • Test regularization multipliers (rm): 0.5, 1.0, 1.5, 2.0, 2.5, 3.0 • Test feature class combinations: L (linear), LQ (linear+quadratic), LQH (linear+quadratic+hinge), LQHP, LQHPT • For each rm × feature class combination, run MaxEnt with 5-fold SBCV • Select the combination maximizing mean test AUC across 5 folds • Final optimal settings: feature classes = LQH; regularization multiplier = 1.0 4.2 MaxEnt v3.4.1 settings for final model: • Maximum iterations: 500 • Background points: 10,000 (stratified random) • Output format: logistic • Replicates: 11 bootstrap replicates per SBCV fold (= 55 MaxEnt runs total) • Random seed: use fixed seed for reproducibility (e.g., seed = 42) • Jackknife: enabled (for variable importance analysis) • Do NOT use random test percentage (SBCV handles this externally) 4.3 Performance evaluation: • Primary metric: mean test AUC across all SBCV folds and bootstrap replicates • Secondary metrics: omission rate at FCV1 threshold, True Skill Statistic (TSS) • TSS = Sensitivity + Specificity – 1; values >0.5 indicate reliable performance • Expected results: mean training AUC = 0.963 ± 0.001; mean test AUC = 0.953 ± 0.002; TSS ≈ 0.85 4.4 Final model: • Train on all 201 occurrence points with optimal hyperparameters • Run 11 bootstrap replicates; average outputs for final suitability map",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 3,
       "title": "MESS Extrapolation Risk Analysis",
       "instruction": "MESS Extrapolation Risk Analysis 5.1 Data preparation:• Extract environmental values at all 201 occurrence points for all 16 optimized predictors• Partition into training (n=180, 90%) and test (n=21, 10%) sets• Standardize all variables: Z-score based on training set statistics(mean, SD)• Apply same transformation to test set using training set parameters (prevent data leakage) 5.2 MESS computation (Python 3.9):• For each variable i and each occurrence point j: - Calculate Si,j based on the min-max range of the training dataset - If p(i,j) < min(training): Si,j = ((p(i,j) - min(training)) / range(training)) × 100 - If p(i,j) > max(training): Si,j = ((max(training) - p(i,j)) / range(training)) × 100 - If min ≤ p(i,j) ≤ 50th percentile: Si,j = (p(i,j) - min) / (50th -min) × 100- If 50th percentile < p(i,j) ≤ max: Si,j = (max - p(i,j)) / (max -50th) × 100• Weight each variable by its percent contribution to MaxEnt model• Total MESS score = Σ(wi × Si,j) for all 16 predictors• MESS range: −∞ (extreme novelty) to 1.0 (complete similarity) 5.3 Risk stratification: • Low Risk: Si ≥ 0.8 (highly matched environment)• Moderate Risk: 0.5 ≤ Si < 0.8 (moderately matched)• High Risk: 0.2 ≤ Si < 0.5 (poorly matched)• Very High Risk: 0 ≤ Si < 0.2 (minimally matched)• Extreme Risk: Si < 0 (environment entirely out of training range) 5.4 Interpretation note: • IMPORTANT: MESS values reported here characterize the 201 occurrence localities only. • They do not characterize MESS distribution across all grid cells in the projected landscape. • Projected grid cells with low MESS scores should be flagged and interpreted with caution.• Expected results: mean MESS = 0.734 ± 0.135; no extreme risk samples (Si < 0) in occurrence dataset",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 4,
       "title": "Habitat Suitability Classification and Temporal Projections",
       "instruction": "Habitat Suitability Classification and Temporal Projections 6.1 Suitability thresholding (ArcGIS 10.8):• Primary threshold classification: - Very Unsuitable: <0.05- Unsuitable: 0.05–0.30 - Low Suitable: 0.30–0.50 - Moderately Suitable: 0.50–0.70 - Highly Suitable: >0.70 • Lower bound justification: 0.30 = minimum occurrence probability from field validation 6.2 Alternative threshold validation: • MaxSS threshold: threshold maximizing sum of training sensitivity + specificity• 10% OMT threshold: threshold at which 10% of training localities are omitted• ±0.05 interval shifts: 0.25 and 0.35 as lower bounds• Compare area estimates and spatial patterns across all thresholds 6.3 Temporal projections:• Apply final MaxEnt model to: (a) Historical baseline: 1970–2000 WorldClim layers (b) Near-term: 2021–2040 BCC-CSM2-MR SSP3-7.0 layers (c) Mid-century: 2041–2060 BCC-CSM2-MR SSP3-7.0 layers• NOTE: All future projections are conditional on the BCC-CSM2-MR model and SSP3-7.0 scenario.• Soil and terrain variables held constant across time periods. 6.4 Habitat change quantification (SDM Toolbox v2.5):• Calculate net area change between periods (denominator = 1970–2000 baseline suitable area = 396,000 km²)• Quantify range expansion and contraction zones• Calculate distribution centroid shifts (km and direction)• All areal percentage changes must clearly state denominator",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 5,
       "title": "Statistical Analysis and Reporting",
       "instruction": "Statistical Analysis and Reporting 7.1 AUC and TSS: Report mean ± SD across all folds and replicates 7.2 Omission rates: Report at FCV1 threshold (mean ± SD) 7.3 Variable importance: Report percent contribution and permutation importance from MaxEnt 7.4 Spatial block statistics: Report mean prediction probability and training-test differences per block 7.5 MESS statistics: Report mean ± SD, range, and risk category distribution for occurrence points 7.6 Habitat area estimates: Express as both km² and % of China land area; always specify denominator for percentage changes 7.7 Threshold sensitivity: Report range of area estimates across all tested thresholds",
       "is_critical": false,
@@ -90,5 +83,6 @@
     }
   ],
   "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "merged_at": "2026-06-18",
+  "description": "5-Fold Spatial Block Cross-Validation Setup 3.1 Spatial block generation (ENMTools v1.1.2): • Divide study area into non-overlapping 1°×1° geographic grid blocks covering the full O. sinensis distribution range • Total: 24 geographic blocks • Block size rationale: matches the spatial autocorrelation scale of O. sinensis on the Tibetan Plateau 3.2 Fold assignment: • For each of 5 folds: randomly assign 1 geographic block as the independent test set • All remaining blocks form the training set • Ensure no geographic overlap between training and test sets in each fold • Fold assignments must be non-overlapping across the 5 folds 3.3 Background point selection: • Generate 10,000 random background points from the full study area (China boundary mask) • Stratify background points spatially to ensure coverage of full environmental space • Exclude background points within 10 km of known occurrence localities"
 }
