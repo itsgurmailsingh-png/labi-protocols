@@ -33,161 +33,161 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Generate the index for STAR",
       "instruction": "Generate the index for STAR. STAR 2.7.9a STAR index STAR --runMode genomeGenerate \\ --genomeDir {params.outdir} \\ --genomeFastaFiles {input.fasta} \\ --sjdbGTFfile {input.gtf} \\ --sjdbOverhang {params.overhang} \\ --runThreadN {resources.cpus}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Align RNA-Seq reads for a sample using STAR",
       "instruction": "Align RNA-Seq reads for a sample using STAR. STAR 2.7.9a STAR align STAR --runMode alignReads \\ --runThreadN {resources.cpus} \\ --genomeDir {params.index_dir} \\ --readFilesIn {params.fastq_list} \\ --readFilesCommand zcat \\ --twopassMode Basic \\ --varVCFfile",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Get an individual-specific VCF file",
       "instruction": "Get an individual-specific VCF file. This is used by STAR to consider the individual&#39;s variants for better alignment. bcftools 1.12 https://github.com/samtools/bcftools bcftools view bcftools view -s {wildcards.rat_id} --min-ac=1 -O z -o {output} {input}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Get all exon regions from gene annotations",
       "instruction": "Get all exon regions from gene annotations. Exons from GTF annotations grep -v '^#' {input} | awk '$3==\"exon\"' | cut -f1,4,5 | gzip -c > {output}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Subset genotypes to only exon SNPs,...",
       "instruction": "Subset genotypes to only exon SNPs, SNPs with MAF &gt;= 0.2, and SNPs with &lt;10% missing values. bcftools 1.12 https://github.com/samtools/bcftools bcftools view bcftools view {input.vcf} \\ --regions-file {input.regions} \\ -Ou | bcftools view \\ --min-af 0.2:minor \\ -i 'F_MISSING samtools 1.12 https://github.com/samtools/samtools tabix tabix -p vcf {output.vcf}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "Count reads with REF vs",
       "instruction": "Count reads with REF vs. ALT allele in a sample for each SNP. gatk ASEReadCounter gatk ASEReadCounter \\ -R {input.ref} \\ -I {input.bam} \\ -V {input.vcf} \\ -O {output} \\ --min-depth-of-non-filtered-base 10 \\ --min-mapping-quality 250 \\ --min-base-quality 15",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "Compare similarity of genotypes and allele...",
       "instruction": "Compare similarity of genotypes and allele counts from RNA-Seq to identify mixups. qc_rna_to_geno_similarity.py Produces a matrix of RNA-Seq samples x VCF individuals giving similarity across the test SNPs. Similarity is mean(1 - abs(RNA_frac - geno_frac)), where RNA_frac is fraction of reads with ALT allele for each SNP, and geno_frac is fraction of DNA strands with ALT allele (i.e. 0, 0.5, or 1) for each SNP. Also produces a summary table with top similarity per RNA-Seq sample to quickly check for mismatches.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "For samples without a genotype match,...",
       "instruction": "For samples without a genotype match, check for matches in all rats. qc_rna_to_geno_all_rats.py After running the previous step, some mismatched RNA samples might still not have a genotype match. This rule will compare their test SNPs to those of all 6000+ rats we have genotypes for to see if any match. It&#39;s good to also include at least one RNA sample ID that did match as a positive control (as long as it&#39;s included in the all-rat VCF).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Examine the outputs to identify samples...",
       "instruction": "Examine the outputs to identify samples that need to be relabeled (e.g. if two labels get swapped) or removed. To relabel a sample, edit the ID in the 2nd column of fastq_map.txt for all of its FASTQ files so that its BAM file gets labeled correctly. You&#39;ll then need to regenerate the BAM file since it will now use the correct VCF individual as input to STAR. To remove a sample, remove its ID from rat_ids.txt and delete its BAM and any other generated files. If a match is found with a rat outside the current dataset in the previous step, you&#39;ll need to add the new matching genotypes to the VCF file. However, if the matching genotypes differ greatly from the current dataset, e.g. they include a very different set of SNPs, it may be better to just remove the sample.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Generate the index for RSEM",
       "instruction": "Generate the index for RSEM. RSEM rsem-prepare-reference rsem-prepare-reference \\ {input.fasta} \\ ref/rsem_reference/rsem_reference \\ --gtf {input.gtf} \\ --num-threads {resources.cpus}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Quantify expression from a BAM file",
       "instruction": "Quantify expression from a BAM file. RSEM rsem-calculate-expression rsem-calculate-expression \\ {params.paired_end_flag} \\ --num-threads {resources.cpus} \\ --quiet \\ --estimate-rspd \\ --no-bam-output \\ --alignments {input.bam} \\ {params.ref_prefix} \\ {params.out_prefix} gzip gzip gzip {params.out_prefix}.genes.results",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "Combine all isoforms of a gene into a single transcript",
       "instruction": "Combine all isoforms of a gene into a single transcript. collapse_annotation.py Originally used in the GTEx pipeline . python3 src/collapse_annotation.py \\ ref/Rattus_norvegicus.Rnor_6.0.99.gtf \\ ref/Rattus_norvegicus.Rnor_6.0.99.genes.gtf",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "Combine RSEM output from all samples...",
       "instruction": "Combine RSEM output from all samples into log-count and TPM expression tables. assemble_expression.py Also computes inverse-quantile normalized values to use for eQTL mapping. The filtered version is to avoid a tensorQTL error on phenotypes with 1 nonzero value. python3 src/assemble_expression.py {params.rsem_dir} {input.anno} {params.prefix} samtools 1.12 https://github.com/samtools/samtools bgzip bgzip {params.prefix}.log2.bedbgzip {params.prefix}.tpm.bedbgzip {params.prefix}.iqn.bedbgzip {params.prefix}.iqn.filtered.bed tabix tabix {params.prefix}.log2.bed.gztabix {params.prefix}.tpm.bed.gztabix {params.prefix}.iqn.bed.gztabix {params.prefix}.iqn.filtered.bed.gz",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "Get SNPs with sufficient variation in...",
       "instruction": "Get SNPs with sufficient variation in a given set of samples and convert VCF to plink. plink 2 plink2 make bed plink2 --make-bed \\ --vcf {input.vcf} \\ --keep {input.samples} \\ --maf 0.01 \\ --mac 2 \\ --max-alleles 2 \\ --out {params.prefix}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "Prune genotypes to compute covariate PCs",
       "instruction": "Prune genotypes to compute covariate PCs. --indep-pairwise parameters are based on GTEx methods. plink 2 plink2 prune plink2 \\ --bfile {params.prefix} \\ --geno 0.05 \\ --maf 0.05 \\ --indep-pairwise 200 100 0.1 \\ --out {params.pruned_prefix} plink2 subset to pruned plink2 \\ --bfile {params.prefix} \\ --extract {params.pruned_prefix}.prune.in \\ --export vcf bgz id-paste=iid \\ --out {params.pruned_prefix}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "Compute genotype (n=5) and expression (n=20)...",
       "instruction": "Compute genotype (n=5) and expression (n=20) PCs and combine into covariates table. covariates.R Rscript src/covariates.R {input.vcf} {input.bed} {params.n_geno_pcs} {params.n_expr_pcs} {output}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "Map cis-eQTLs, determining significance using permutations",
       "instruction": "Map cis-eQTLs, determining significance using permutations. Outputs the top association per gene. This script calls tensorQTL and uses the random_tiebreak parameter, which is important for outbred populations in which there are often multiple top eSNPs in 100% LD. Without the random tiebreak, the first or last tied top SNP is returned, resulting in positional bias. tensorQTL run_tensorqtl.py python3 src/run_tensorqtl.py \\ {params.geno_prefix} \\ {input.bed} \\ {output} \\ --covariates {input.covar} \\ --mode cis",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "Use stepwise regression to identify multiple...",
       "instruction": "Use stepwise regression to identify multiple conditionally independent cis-eQTLs per gene. tensorQTL python3 src/run_tensorqtl.py \\ {params.geno_prefix} \\ {input.bed} \\ {output} \\ --covariates {input.covar} \\ --cis_output {input.cis} \\ --mode cis_independent",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "Get summary statistics for all tested cis-window SNPs per gene",
       "instruction": "Get summary statistics for all tested cis-window SNPs per gene. tensorQTL tensorqtl cis_nominal python3 -m tensorqtl \\ {params.geno_prefix} \\ {input.bed} \\ {wildcards.tissue} \\ --covariates {input.covar} \\ --output_dir {params.outdir} \\ --mode cis_nominal",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "Map trans-eQTLs",
       "instruction": "Map trans-eQTLs. tensorQTL tensorqtl trans python3 -m tensorqtl \\ {params.geno_prefix} \\ {input.bed} \\ {wildcards.tissue} \\ --covariates {input.covar} \\ --output_dir {params.outdir} \\ --output_text \\ --batch_size 10000 \\ --mode trans",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
+      "title": "Extract all significant cis SNP-gene pairs",
       "instruction": "Extract all significant cis SNP-gene pairs. tensorqtl_all_signif.py python3 src/tensorqtl_all_signif.py {input.perm} {params.nom_prefix} {output}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
+      "title": "Extract p-values for all tested cis-window SNPs per gene",
       "instruction": "Extract p-values for all tested cis-window SNPs per gene. tensorqtl_all_cis_pvals.py python3 src/tensorqtl_all_cis_pvals.py {params.nom_dir} {output}",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 22,
-      "title": "",
+      "title": "Get effect size (allelic fold change)...",
       "instruction": "Get effect size (allelic fold change) for top association per gene and all significant cis-eQTLs. aFC https://github.com/secastel/aFC prepare_qtl_for_afc.py python3 tools/aFC/aFC.py \\ --vcf {input.vcf} \\ --pheno {input.bed} \\ --qtl",
       "is_critical": false,
       "timers": []

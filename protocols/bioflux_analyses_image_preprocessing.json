@@ -31,140 +31,140 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Convert video file into single images...",
       "instruction": "Convert video file into single images The source material provided as .AVI file is converted into single .TIFF images using opencv-python. Additional, a data frame containing meta data annotations is created.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Import of the required packages",
       "instruction": "Import of the required packages. import numpy as np import pandas as pd import cv2",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Example code for reading the video...",
       "instruction": "Example code for reading the video file from source path and saving the individual images to target path. cap = cv2.VideoCapture(source_path/video_file.AVI) i = 0 # read frames from video file while(cap.isOpened()): ret,frame = cap.read() if ret == False: break # convert to greyscale image frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # save to file cv2.imwrite((target_path + &#39;frame_%s.TIFF&#39;%i), frame) i += 1 cap.release() cv2.destroyAllWindows()",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Example output of individual image (2D array)",
       "instruction": "Example output of individual image (2D array) . Fig. 1.1 Example of Single Video Image.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Automated Image Rotation Image processing required...",
       "instruction": "Automated Image Rotation Image processing required vertical aligned chamber edges (Fig. 2.1-A). Unaligned video frames would result in peak values scattered in X-direction (conferring to Fig. 2.1-C and D). In order to gain vertical alignment, the rotation angle is estimated by minimising the peak width in X-direction by using a basin-hopping algorithm (scipy.optimize.basinhopping). Standard settings of the package are applied with respect to the convergence criteria. Initial rotation angle is set to 0° for all frames.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "Import of the required packages",
       "instruction": "Import of the required packages. import numpy as np import pandas as pd import cv2 import skimage import scipy",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "Example code of the Automated Image Rotation definition",
       "instruction": "Example code of the Automated Image Rotation definition. Strategy: calculate the median pixel intensity along the y-axis of image create derivative of median values (absolute values) to find the change in median pixel intensity along y-axis of image select peak values (representing position of chamber lines / peak width correlates to slope of chamber line) rotate image to minimise the peak width def score(a): # rotate image by given angle &#39;a&#39; img_rot = skimage.transform.rotate(img,a,resize=True) # calculate median of pixel intensity along the y-axis of image xmedian = np.zeros(len(img_rot)) for i in range(len(img_rot)): xmedian[i] = np.median(img_rot[i]) # add median values to data frame df = pd.DataFrame(data={&#39;xmedian&#39;:xmedian}) # create derivative along the median values (absolute values) # &#39;xdiff&#39; represents change in median pixel intensity along y-axis of image df[&#39;xdiff&#39;] = pd.DataFrame.diff(df.xmedian, periods=1, axis=0).abs() # select &#39;xdiff&#39; values &gt;= 98% percentile to new data frame qdf = df[df.xdiff &gt;= np.nanpercentile(df.xdiff,98)] qdf = qdf.reset_index() qdf.rename(columns={&#39;index&#39;:&#39;imgdex&#39;},inplace=True) # cluster selected xdiff values into 4 clusters # (representing the position of camber lines in y-direction) qdf[&#39;cluster&#39;] = pd.cut(qdf.imgdex,4,right=True,labels=[0,1,2,3]) # calculating the width of cluster imgdex = np.zeros(4) for i in range(4): imgdex[i] = qdf.imgdex[qdf.cluster == i].max() - \\ qdf.imgdex[qdf.cluster == i].min() imgdex = np.array(imgdex, dtype=&#39;float&#39;) # returning sum of cluster width return imgdex.sum()",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Example code of Automated Image Rotation execution",
       "instruction": "Example code of Automated Image Rotation execution. # load meta data frame data = pd.read_pickle((data_path + &#39;data.pkl&#39;)) # loop over all images angle = np.zeros(len(data)) for i in range(len(data)): # read respective image and invert img = 255 - skimage.io.imread((source_path + &#39;frame_%s.TIF&#39;%i)) # estimate rotation angle using basinhopping initial rotation angle = 0° answ = scipy.optimize.basinhopping(score,0,niter=200) angle[i] = answ.x[0] # append angles to meta data frame + save data frame to file data[&#39;angle&#39;] = angle data.to_pickle((data_path + &#39;data.pkl&#39;))",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Chamber Edge Determination The individual image...",
       "instruction": "Chamber Edge Determination The individual image contains two growth chambers separated by four edge lines (Fig. 2.1-A). Median pixel intensity (in Y-direction) is calculated for each position in X-direction (Fig 2.1-B), and subsequently derived into the absolute difference in median pixel intensity (Fig. 2.1-C). Values greater or equal to the 98 % percentile of the respective data set (peak values) are assigned into four equidistant clusters (Fig. 2.1-D). The maximum peak value of the respective cluster returns the X-position of the respective chamber edge. Visualisation of Chamber Edge Determination. Fig. 2.1 Visualisation of Chamber Edge Determination; A: Example video image; B: median pixel intensity along Y-direction; C: Absolutes of difference in median pixel intensity; D: Final assignment of chambers and reference space (in X-direction) based on the maximum peak value of the respective cluster.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Import of the required packages",
       "instruction": "Import of the required packages. import numpy as np import pandas as pd import skimage",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Example code of the Chamber Edge Determination definition",
       "instruction": "Example code of the Chamber Edge Determination definition. Strategy: calculate the median pixel intensity along the y-axis of image create derivative of median values (absolute values) to find the change in median pixel intensity along x-axis of image select peak values (representing position of chamber lines) calculation of 6 positions (left chamber (2 lines), inner space (2 lines), right chamber (2 lines)) def find_lines(img): #invert image img_bin = 255 - img # calculate median intensity row-wise xmedian = np.zeros(len(img_bin)) for i in range(len(img_bin)): xmedian[i] = np.median(img_bin[i]) # median values to DataFrame df = pd.DataFrame(data={&#39;xmedian&#39;:xmedian}) # calculate absolutes of differences of pixels row-wise df[&#39;xdiff&#39;] = pd.DataFrame.diff(df.xmedian, periods=1, axis=0).abs() # calculate 98% percentile &amp; pic values above this threshold qdf = df[df.xdiff &gt;= np.nanpercentile(df.xdiff,98)].copy() qdf.reset_index(inplace=True) qdf.rename(columns={&#39;index&#39;:&#39;imgdex&#39;},inplace=True) # assign imgdex to four clusters qdf[&#39;cluster&#39;] = pd.cut(qdf.imgdex,4,right=True,labels=[0,1,2,3]) # assign 6 lines (using 5 pixels safety distance) imgdex = np.zeros(6) imgdex[0] = qdf.imgdex[(qdf.cluster == 0) &amp; \\ (qdf.xdiff == qdf.xdiff[(qdf.cluster == 0)].max())].max() + 5 imgdex[1] = qdf.imgdex[(qdf.cluster == 1) &amp; \\ (qdf.xdiff == qdf.xdiff[(qdf.cluster == 1)].max())].min() - 5 imgdex[2] = qdf.imgdex[(qdf.cluster == 1) &amp; \\ (qdf.xdiff == qdf.xdiff[(qdf.cluster == 1)].max())].max() + 5 imgdex[3] = qdf.imgdex[(qdf.cluster == 2) &amp; \\ (qdf.xdiff == qdf.xdiff[(qdf.cluster == 2)].max())].min() - 5 imgdex[4] = qdf.imgdex[(qdf.cluster == 2) &amp; \\ (qdf.xdiff == qdf.xdiff[(qdf.cluster == 2)].max())].max() + 5 imgdex[5] = qdf.imgdex[(qdf.cluster == 3) &amp; \\ (qdf.xdiff == qdf.xdiff[(qdf.cluster == 3)].max())].min() - 5 imgdex = np.array(imgdex, dtype=&#39;int&#39;) # return lines as integer array return imgdex",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "Example code of the Chamber Edge Determination execution",
       "instruction": "Example code of the Chamber Edge Determination execution. # load meta data frame data = pd.read_pickle((data_path + &#39;data.pkl&#39;)) # loop over all images line1, line2, line3, line4, line5, line6 = [np.zeros(len(data)) for i in range(6)] for i in range(len(data)): clear_output() # read respective image img = skimage.io.imread((source_path + &#39;frame_%s.TIFF&#39;%i)) # rotate image img = skimage.transform.rotate(img,data.angle.median(),\\ resize=True,mode=&#39;constant&#39;,cval=1) # find lines lines = find_lines(img) line1[i], line2[i], line3[i], line4[i], line5[i], line6[i] = lines # append positions to meta data frame data[&#39;line1&#39;] = line1 data[&#39;line2&#39;] = line2 data[&#39;line3&#39;] = line3 data[&#39;line4&#39;] = line4 data[&#39;line5&#39;] = line5 data[&#39;line6&#39;] = line6 # convert values into integers data.line1 = pd.to_numeric(data.line1, errors=&#39;raise&#39;, downcast=&#39;integer&#39;) data.line2 = pd.to_numeric(data.line2, errors=&#39;raise&#39;, downcast=&#39;integer&#39;) data.line3 = pd.to_numeric(data.line3, errors=&#39;raise&#39;, downcast=&#39;integer&#39;) data.line4 = pd.to_numeric(data.line4, errors=&#39;raise&#39;, downcast=&#39;integer&#39;) data.line5 = pd.to_numeric(data.line5, errors=&#39;raise&#39;, downcast=&#39;integer&#39;) data.line6 = pd.to_numeric(data.line6, errors=&#39;raise&#39;, downcast=&#39;integer&#39;) save meta data frame to file data.to_pickle((data_path + &#39;data.pkl&#39;))",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "Chamber Selection and Background Removal Chambers...",
       "instruction": "Chamber Selection and Background Removal Chambers were selected from the respective video frame between the determined chamber edges (according to Fig. 2.1-D). In order to exclude the chamber edge itself, a safety distance of 5 pixels in X-direction is applied. Also, a background removal was performed by subtracting the median intensity of the reference space resolved in Y-direction. Reference was selected as a 100 pixel wide strip next to cluster 1 (Fig. 2.1-D).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "Import of the required packages",
       "instruction": "Import of the required packages. import numpy as np import pandas as pd import skimage from skimage import img_as_uint import cv2",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "Example code of image rotation and chamber cutting execution",
       "instruction": "Example code of image rotation and chamber cutting execution. # load meta data frame from file data = pd.read_pickle((data_path + &#39;data.pkl&#39;)) # loop over all images for i in range(len(data)): clear_output() print(&#39;processing file &#39;,i+1,&#39; of &#39;,len(data)) # read respective image img = skimage.io.imread((source_path + &#39;frame_%s.TIFF&#39;%i)) # rotate image img = skimage.transform.rotate(img,data.angle.median(),resize=False) # cut image into desired cambers # applying 10 pixels as safety distance in x-direction img_cham_A = img[data.line1[i]:data.line2[i], 10:len(img[0])-10] img_cham_B = img[data.line5[i]:data.line6[i], 10:len(img[0])-10] # save images to folder skimage.io.imsave((target_path + &#39;00_WT/frame_%s_WT.TIFF&#39;%i), \\ img_as_uint(img_cham_A)) skimage.io.imsave((target_path + &#39;01_MT/frame_%s_MT.TIFF&#39;%i), \\ img_as_uint(img_cham_B))",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "Example code of background removal execution",
       "instruction": "Example code of background removal execution. # load meta data frame from file data = pd.read_pickle((data_path + &#39;data.pkl&#39;)) # loop over all images for i in range(len(data)): clear_output() print(&#39;sample&#39;,k+1,&#39;processing file &#39;,i+1,&#39; of &#39;,len(data)) # read respective image # read + rotate original image img = cv2.imread((source_path + &#39;frame_%s.TIFF&#39;%i),0) img = skimage.transform.rotate(img,data.angle.median(),resize=False) img = img_as_ubyte(img) # invert image img = 255 - img # read chamber images img_cham_A = cv2.imread((source_path + &#39;00_WT/frame_%s_WT.TIFF&#39;%i),0) img_cham_B = cv2.imread((source_path + &#39;01_MT/frame_%s_MT.TIFF&#39;%i),0) # invert chamber images img_cham_A = 255 - img_cham_A img_cham_B = 255 - img_cham_B # rotate chamber images 90° img_cham_A = np.array([list(i) for i in zip(*img_cham_A)], dtype=np.int16) img_cham_B = np.array([list(i) for i in zip(*img_cham_B)], dtype=np.int16) # cut reference space (+ invert) refspace = img[data.line3[i]:data.line3[i]+100, 10:len(img[0])-10] # rotate refspace 90° refspace90 = np.array([list(i) for i in zip(*refspace)], dtype=np.int16) # calculate median intensity of background background = np.zeros(len(refspace90)) for j in range(len(refspace90)): background[j] = np.median(refspace90[j]) background = np.array(background,dtype=np.int16) # create new empty image cham_A_new = np.zeros(img_cham_A.shape, dtype=np.int16) cham_B_new = np.zeros(img_cham_B.shape, dtype=np.int16) # subtract background for l in range(len(background)): cham_A_new[l] = img_cham_A[l] - background[l] cham_B_new[l] = img_cham_B[l] - background[l] # rotate and invert new images back to 0° cham_A_new = 255 - np.array([list(i) for i in zip(*cham_A_new)], \\ dtype=np.int16).clip(0, 255) cham_B_new = 255 - np.array([list(i) for i in zip(*cham_B_new)], \\ dtype=np.int16).clip(0, 255) # save images to folder cv2.imwrite((target_path[k] + &#39;00_WT/frame_%s_WT.TIFF&#39;%i),cham_A_new) cv2.imwrite((target_path[k] + &#39;01_MT/frame_%s_MT.TIFF&#39;%i),cham_B_new)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "The mean pixel intensity I pix (i",
       "instruction": "The mean pixel intensity I pix (i. e. gray scale value; reflecting cell density) for each of the two chambers is calculated. The values are added into the respective data frame. Growth rates µ are derived from I pix using the central difference approximation below. \\mu(t_{\\rm i}) = \\frac{I_{\\rm pix}(t_{\\rm i+1}) - I_{\\rm pix}(t_{\\rm i-1})}{\\left(t_{\\rm i+1}-t_{\\rm i-1}\\right)\\cdot I_{\\rm pix}(t_{\\rm i})} Legend: µ(t i ) - growth rate µ at time point t i, I pix (t i ) - mean pixel intensity at time point t i , i - i th measurement",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "Import of the required packages",
       "instruction": "Import of the required packages. import numpy as np import pandas as pd import skimage from skimage import img_as_float",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "Example code of Mean Pixel Intensity Calculation",
       "instruction": "Example code of Mean Pixel Intensity Calculation. data = pd.read_pickle((data_path + &#39;data.pkl&#39;)) # create time column (within this batch: measurements every 20min -&gt; index / 3) data[&#39;time&#39;] = data.index / 3 # [h] meanGrayWT, meanGrayMT, \\ varGrayWT, varGrayMT = [np.zeros(len(data)) for i in range(4)] for k in range(len(data)): imgWT = 1 - img_as_float(skimage.io.imread((source_path + \\ &#39;00_WT/frame_%s_WT.TIF&#39;%k))) imgMT = 1 - img_as_float(skimage.io.imread((source_path + \\ &#39;01_MT/frame_%s_MT.TIF&#39;%k))) meanGrayWT[k] = np.mean(imgWT) meanGrayMT[k] = np.mean(imgMT) data[&#39;greyWTint&#39;] = meanGrayWT data[&#39;greyMTint&#39;] = meanGrayMT data[&#39;greyWTmu&#39;] = np.gradient(data.greyWTint) / data.greyWTint * 3 data[&#39;greyMTmu&#39;] = np.gradient(data.greyMTint) / data.greyMTint * 3 data.to_pickle((data_path + &#39;data.pkl&#39;))",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "Visualisation of the calculated data",
       "instruction": "Visualisation of the calculated data. Fig. 3.1 Visualisation of the data calculated for wild type strain (black) and mutant strains (red/blue) from the individual images; A: calculated mean pixel intensities I pix ; B: calculated growth rate µ.",
       "is_critical": false,
       "timers": []

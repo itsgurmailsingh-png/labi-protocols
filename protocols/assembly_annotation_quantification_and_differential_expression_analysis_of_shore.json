@@ -39,84 +39,84 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Assemble the reads using Trinity assembler...",
       "instruction": "Assemble the reads using Trinity assembler Trinity --seqType fq --max_memory 245G --left reads.PAPER1.left.fq --right reads.PAPER1.right.fq --CPU 20 --trimmomatic --monitoring > runPAPER1.log 2>&1 &",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Obtain the assembly statistics $TRINITY_HOME/util/TrinityStats",
       "instruction": "Obtain the assembly statistics $TRINITY_HOME/util/TrinityStats.pl Trinity.fasta > Assembly_stats.txt",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Query the nonredundant nucleotide sequences against A",
       "instruction": "Query the nonredundant nucleotide sequences against A. thaliana proteome blastx -query Trinity_reduced_output.fasta -db Araport11_genes.201606.pep.fasta -evalue 1e-10 -num_threads 33 -max_taget_seqs 1 -outfmt 6 -out blastx_trasncript_aradb_e10.outfmt6",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Query the nonredundant protein sequences against...",
       "instruction": "Query the nonredundant protein sequences against Pfam, PANTHER, GO, and KEGG databases ./interproscan.sh -i Trinity_reduced_output.pep.fasta -t n -appl Pfam,PANTHER -goterms -iprlookup -pa --cpu 30",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Align and estimate transcript abundance using Salmon $TRINITY_HOME/util/align_and_estimate_abundance",
       "instruction": "Align and estimate transcript abundance using Salmon $TRINITY_HOME/util/align_and_estimate_abundance.pl --transcript Trinity.fasta --seqType fq --samples_file samples_description.txt --est_method salmon --aln_method bowtie2 --thread_count 33 --prep_reference --trinity_mode --coordsort_bam",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "Construct matrices of counts and normalized values $TRINITY_HOME/util/abundance_estimates_to_matrix",
       "instruction": "Construct matrices of counts and normalized values $TRINITY_HOME/util/abundance_estimates_to_matrix.pl --est_method salmon --out_prefix Paper1_comORF_cdhit_only_c1 --name_sample_by_basedir leaf_1312_rep1/quant.sf leaf_1312_rep2/quant.sf leaf_1404_rep1/quant.sf leaf_1404_rep2/quant.sf leaf_1406_rep1/quant.sf leaf_1406_rep2/quant.sf --gene_trans_map Paper1_comORF_cdhit_only_c1.fasta.gene_trans_map",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "Perform pairwise comparison between the time points $TRINITY_HOME/Analysis/DifferentialExpression/run_DE_analysis",
       "instruction": "Perform pairwise comparison between the time points $TRINITY_HOME/Analysis/DifferentialExpression/run_DE_analysis.pl --matrix quant.sf/gene.counts.matrix --method DESeq2 --samples_file samples_description_DESeq.txt --contrasts contrast_DESeq.txt",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Extract the differentially expressed transcripts at...",
       "instruction": "Extract the differentially expressed transcripts at log 2 fold change ≥ 1, FDR &lt; 0.05 $TRINITY_HOME/Analysis/DifferentialExpression/analyze_diff_expr.pl --matrix ../ComORF_cdhit_only_c1.isoform.TMM.EXPR.matrix -C 1 -P 0.05 --samples ../samples_description.txt",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Extract the longest open reading frame (ORF) using TransDecoder TransDecoder",
       "instruction": "Extract the longest open reading frame (ORF) using TransDecoder TransDecoder.LongOrfs -t Trinity.fasta",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Query the extracted ORFs against Uniprot...",
       "instruction": "Query the extracted ORFs against Uniprot database using blastp blastp -query transdecoder_dir/longest_orfs.pep -db uniprot_sprot.fasta -max_target_seqs 1 -outfmt 6 \\-evalue 1e-5 -num_threads 10 > blastp.outfmt6",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Predict the single best ORF for each transcript TransDecoder",
       "instruction": "Predict the single best ORF for each transcript TransDecoder.Predict -t Trinity.fasta --single_best_only --retain_blastp_hits blastp.outfmt6",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "Remove highly similar protein sequences using CD-HIT cd-hit -i Trinity_paper1",
       "instruction": "Remove highly similar protein sequences using CD-HIT cd-hit -i Trinity_paper1.pep.fasta -o Trinity_paper1_output -T 0 -M 0 -d 0 -c 1 -n 5",
       "is_critical": false,
       "timers": []

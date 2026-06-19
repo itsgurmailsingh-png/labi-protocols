@@ -26,322 +26,322 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Collate a list of article identifiers...",
       "instruction": "Collate a list of article identifiers Begin with a list of articles identifiers (usually DOIs), for which you want to assess the openness of the datasets underlying these articles. These idetifiers can typically be obtained by searching publication databases (e.g. Pubmed, Web of Science, OpenAlex, Dimensions, Embase) using the relevant search criteria and exporting the results with the relevant metadata fields. Search criteria may include institutional affiliations of authors , specific research fields , specific journals , and typically, a publication date range . If the focus is on articles from a particular institution, a curated list of publications might be available directly from the institution (often provided by the institutional library). The development and optimization of ODDPub (Open Data Detection in Publications) algorithm have been aligned with Open Data criteria, similar to those cited below. However, some changes in the criteria have been introduced over time. Evgeny Bobrov, Nico Riedel, Miriam Kip. Operationalizing open and restricted-access data—Formulating verifiable criteria for the openness of data sets mentioned in biomedical research articles. Quantitative Science Studies, 2024; 5 (2): 383–407. http://10.1162/qss_a_00301",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Obtain the article full texts There...",
       "instruction": "Obtain the article full texts There are several options for this: via PubMed Central (Open Access articles) via unpaywall API : the full-text links (Open Access articles). via Publisher APIs: for full-text retrieval of subscription-based articles, offered by several major publishers, like Elsevier , Wiley , or Springer/Nature via full-text R package : a solution that combines several of those data sources for downloading full texts. These retrieval options are limited to articles that can be accessed as Open Access or through the subscription provided by the institution where the article are retrieved. Store all retrieved article full-texts in a single folder either as PDFs (preferred for current ODDPub version) or as text files (e.g. XML).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Apply ODDPub to article full texts...",
       "instruction": "Apply ODDPub to article full texts ODDPub (Open Data Detection in Publications) is an open source text mining algorithm implemented in R. It screens articles for data sharing statements throughout the article, using keywords and keyword combinations. To use ODDPub, the publications must be prepared in PDF or text file format and stored in a local folder. Only full-text publications can screened. There is no limit on the number of publications. The ODDPub workflow involves three steps : 1. Generation of text files out of PDF files (only if the full text is not already available in a text format, e.g. XML). 2. Search for the data availability statements (DAS) and keywords (in and outside of DAS), defined in the script, such as repository names, accession-identifier-similar strings, pre-defined data sharing expressions, or references to supplementary material. Keywords can be found both within and across sentence boundaries, potentially spread throughout a paragraph. 3. Matching detected keywords and regular expressions from the script. If a keyword group is matched, the publication is categorized as containing Open Data. In addition to detecting Open Data statements, the algorithm detects the location of shared data ( general-purpose repository, field-specific repository, supplement, data jorunal ), as well as statements related to Open Code ( open source software ). Recent updates to ODDPub (v7.0.0) introduce distinctions between (own) Open Data (column &#34;is_open_data&#34;) and Data Reuse (column &#34;is_reuse&#34;) categories, along with new categories like &#34;upon request&#34;, &#34;github&#34;, and &#34;unknown/misspecified url&#34; . Detected Data Availability and Code Availability statements are stored in separate columns. For more information about ODDPub&#39;s implementation, see the following sources: 1. Development, functionality, validation, and performance of ODDPub: Riedel, N., Kip, M. and Bobrov, E. (2020). ODDPub – a Text-Mining Algorithm to Detect Data Sharing in Biomedical Publications. Data Science Journal. http://doi.org/10.5334/dsj-2020-042 2. Performance, scalability, and outlook of ODDPub: Iarkaeva, A., Nachev, V., & Bobrov, E. (2023). Workflow for detecting biomedical articles with underlying open and restricted-access datasets. MetaArXiv. http://10.31222/osf.io/z4bkf The following steps describe how to use the ODDPub package in R.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Load the article DOIs and detected statements into Numbat",
       "instruction": "Load the article DOIs and detected statements into Numbat",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Preparation for manual extraction of Open...",
       "instruction": "Preparation for manual extraction of Open Data status For a detailed walkthrough of the manual extraction process of Open Data, see the instruction below under 5.1-5.4. To access the publication, use the DOI directly on doi.org website or enter the URL http://doi.org/ + DOI into browser&#39;s address bar, e.g. http://doi.org/10.1128/mBio.02755-20 . Please note that while this example may be straightforward, actual extraction can be time-consuming. Some cases may require extensive searching and checking, and occasionally more than one dataset may need to be extracted per article.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "The extraction process up to this point has been linear",
       "instruction": "The extraction process up to this point has been linear. Steps 9.1 to 9.4 outline optional procedures. Sometimes, it may be necessary to correct errors (9.1), or add one or more datasets to the extraction list. A new article entry can be uploaded to the existing Numbat list (9.2). If an extractor is unsure about the Open Data status of a dataset, the extraction can be reassigned to another extractor (9.3). Assessments from two or more extractors - whether for unclear cases or for quality assurance - can then be reconciled (9.4).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "First, install ODDPub package in R...",
       "instruction": "First, install ODDPub package in R with the following command: Installation of ODDPub # install.packages(\"devtools\") # if devtools currently not installeddevtools::install_github(\"quest-bih/oddpub\") Use e.g. RStudio. ODDPub Version 5",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Next, set the working directory to...",
       "instruction": "Next, set the working directory to the folder containing all the publications to be examined. In this example, the folder is named &#39;PDFs&#39;: R command for setting working directory setwd(\"C:\\Users\\username\\path\\to\\PDFs\") Create a new folder to store the converted text files from PDFs after algorithm application.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "After installing ODDPub and organizing the...",
       "instruction": "After installing ODDPub and organizing the PDFs, run the following command to start evaluation for Openness: ODDPub Script library(tidyverse)library(oddpub)oddpub::pdf_convert(\"PDFs/\", \"PDFs_to_text/\")PDF_text %str_remove(fixed(\".txt\")) %>%str_replace_all(fixed(\"+\"), \"/\") # Write results in CSV filewrite_csv(oddpub_results, \"oddpub_results.csv\") A minimal R-Script to run the Open Data and Open Code detection via the ODDPub algorithm ODDPub Version 7.0.0 After screening, an output file in .csv format will be created in the same folder as the ODDPub script. You can change the format to any other type if needed (e.g. .txt, .tsv). Below is an example of the output from the latest ODDPub version (7.0.0). This output will be further validated manually in Numbat (see from the step 4). %s %s article is_open_data open_data_category is_open_code open_data_statements open_code_statements 10.1186/s13054-022-03894-5 FALSE FALSE 10.1002/ana.26326 FALSE FALSE 10.1101/gr.275995.121 TRUE general-purpose repository TRUE software availability cadd-sv pre-scored variant sets as well as a website for the interpretation of novel deletions insertions and duplications are available at the cadd-sv webserver (https://cadd-sv.bihealth.org/) as well as zenodo (https://doi.org/10.5281/zenodo.5963396). the source code for the framework is available for download on 14 downloaded from genome.cshlp.org on march 15 2022 - published by cold spring harbor laboratory press github (https://github.com/kircherlab/cadd-sv/). the cadd-sv framework can be cloned and used from github (https://github.com/kircherlab/cadd-sv/) and is available as supplemental code file. the cadd-sv framework can be cloned and used from github (https://github.com/kircherlab/cadd-sv/) and is available as supplemental code file. 10.1002/jcsm.12927 FALSE FALSE 10.1001/jamaneurol.2021.5321 FALSE FALSE 10.1016/j.redox.2022.102242 FALSE FALSE 10.1073/pnas.2105691119 FALSE FALSE 10.1038/s41467-022-28515-1 TRUE field-specific repository, supplement FALSE the mass spectrometry proteomics data and search results have been deposited to the proteomexchange consortium via the pride partner repository70 with the dataset identiï¬er pxd021265. rna-sequencing data is available on gene expression omnibus (accession number gse162403). data availability the mass spectrometry proteomics data and search results generated in this study have been deposited to the proteomexchange consortium via the pride partner repository70 with the dataset identiï¬er pxd021265. the rna-sequencing data generated in this study are available on gene expression omnibus under accession number gse162403. in total we quantiï¬ed 6094 proteins with at least two peptides without missing values across all samples (supplementary data 1). to determine whether the differential expression of the proteins was accompanied by changes in rna expression levels we performed rna sequencing of the ï¬ve paired samples analyzed by proteomics (supplementary data 2). 3c supplementary data 1). 6a supplementary data 3). 6b supplementary data 4). in addition phosphorylation status of 558 proteins (1022 phosphopeptides) not regulated on global protein level was speciï¬cally downregulated after 24 h palbociclib treatment with an overlap of 45 proteins to the 3 h timepoint which we deemed particularly interesting since these phosphosites were downregulated at an early time point and in a sustained manner (supplementary data 3 supplementary fig. in addition lower phosphorylation levels were observed in palbociclib treated cells in several transcriptional regulators including rnf169 and zbtb38 as well as known cdk6 interactors and substrates jun and foxm1 (supplementary data 3)4647. tmt-channel annotation of patient proteomic data is available in supplementary data 1. tmt-channel annotation of mm.1s proteomic data is available in supplementary data 3. processed proteomics data are available in supplementary data 1 (patient proteomics data) and supplementary data 3 (mm1s proteomics data) processed patient rnaseq data is available in supplementary data 2.,",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "In case an extraction has to be corrected",
       "instruction": "In case an extraction has to be corrected : Go to the &#39; Do extractions &#39; section. Locate the dataset you need to correct. Open the extraction form as usual by clicking &#39; Extract &#39;. Change the answer(s) as needed, then click on &#39; Completed &#39; if required. If the extractions are finished and an export has already occured, delete the older version of the table from your storage and export the updated output via &#39;Export data&#39;. When correcting an extraction, all answers that depend logically on the affected answer will be deleted to prevent internal inconsistencies. Consequently, you will need to redo the extraction for all questions following the affected one. For example, if you change your response to the first question - whether there is a clear reference to the dataset in the article - from &#39;yes&#39; to &#39;no&#39;, all subsequent questions (except the last one) will be skipped. The previous answers will be overwritten once you click &#39;Complete&#39;.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Select &#39; Manage reference sets&#39; section...",
       "instruction": "Select &#39; Manage reference sets&#39; section from the Numbat menu, then click on &#39; Add new reference set&#39; . Fig. 7.1. Numbat main menu",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "Select the relevant columns from the dropdown menu (e",
       "instruction": "Select the relevant columns from the dropdown menu (e.g., doi, is_open_data, open_data_statement, is_reuse ) and assign a name to the set (e. g. &#39;Publications of 2020&#39;). Fig. 7.2. Process of adding a new reference set",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "Assign the new dataset to a...",
       "instruction": "Assign the new dataset to a user (or multiple users) via &#39; Manage extraction assignments&#39; in the Main menu : Select either all records or choose specific ones from the list. In the &#39; For the following form &#39; section, select the extraction form you want to use. In the &#39; For the following user &#39; section, choose the user(s) to whom you want to assign the tasks. Click &#39; Assign to user &#39; - a list will appear below, with successful assignments highlighted in green. Fig. 7.3. Process of user assignment Explore different assignment options, such as assigning articles that have already been screened by one rater or randomly selecting some articles.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "Prepare article list (ODDPub results) for...",
       "instruction": "Prepare article list (ODDPub results) for Numbat Filter the output from ODDPub in the is_open_data column to include only TRUE statements. You can use a table calculation program like Excel or any text editor. Save the filtered data in .tsv format (tab-delimited text file) as new input for Numbat. A text editor is more suitable than Excel for this task, as Excel spreadsheets are known to cause unexpected errors. For example, adding a small symbol or space can lead to incorrect file reading, even if the spreadsheet appears correct upon visual inspection. Additionally, copy and paste actions in Excel can result in lost or modified data. By using a text editor, you maintain control over every character.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "Preparing the ODDPub output for further...",
       "instruction": "Preparing the ODDPub output for further evaluation in Numbat To validate the presence of Open Data associated with the article, an extraction form was created in Numbat. This follows the Open Data Criteria for LOM ( leistungsorientierte Mittelvergabe or performance-based allocation of funds). Each publication is reviews individually to determine whether the Open Data statement detected by ODDPub (&#34;is_open_data&#34; = TRUE) indeed refers to an openly accessible dataset. A B 1 User administration Assignment of the account for new users 2 Manage reference sets Uploading and editing lists of datasets (only text format such as .tsv allowed) 3 Edit extraction form Implementation of extraction form 4 Attach files to references Upload of documents to link to records (not relevant here) 5 Manage extraction assignments Assignment of extraction forms AND / OR individual data records to specific users 6 Do extractions Actual checking of publications for open data 7 Import extractions Upload of further data to extract which was missing in the already uploaded dataset or was collected outside of Numbat 8 Reconcile finished extractions Overview of completed datasets and merging of answers from several users 9 Export data Export of finished table after test has been completed 10 Backup data Create a backup of all information Tab. 6. Menu items in Numbat and their descriptions",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "Select the &#39; Do extractions&#39; option...",
       "instruction": "Select the &#39; Do extractions&#39; option to begin extracting the Open Data status for publications where ODDPub has detected an Open Data statement (&#34;is_open_data&#34; = TRUE) by clicking on &#39; Extract&#39; . If there are multiple repositories, add a new sub-extraction for each repository after finishing the previous one. The extraction of other categories, such as &#34;is_reuse&#34; =TRUE or &#34;unknown url&#34;, is optional andshould be based on the specific goals of the screening.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "Open Data statement - Which ‘candidates’ are detected by ODDPub",
       "instruction": "Open Data statement - Which ‘candidates’ are detected by ODDPub? Review the detected statement(s) for details such as repository information or accession codes. Be sware of potential false positives, which may include open code or statements completely unrelated to data sharing. The extraction form not only covers open data in the strict sense (freely accessible data) but also data under restricted access and the reuse of open data. It allows documentation of these practices without completing a full extraction. Some reuse cases might lack a direct citation or referenceto the landing page in the article, even though they are indicated as a basis for the study provided by another institution or found in publicly accessible repositories. Where it is possible, answer all questions up to authorship . For cases where multiple criteria are challenging to assess, it is possible to document the reuse cases with the response &#34;Not checked (reuse)&#34; . To save time, you can skip extracting cases where it is clear that data have been reused or access is restricted. However, in many cases, this clarity emerges only during the detection process. Ignoring obvious cases may result in an incomplete overview. picture will not be complete. Always click &#39;C omplete&#39; to finish the extraction. Fig. 5.2. Open Data Statement in the red frame",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "Begin a new sub-extraction For each repository extract one dataset",
       "instruction": "Begin a new sub-extraction For each repository extract one dataset. Add a new Sub-Extraction to the current extraction. If datasets are shared across multiple repositories, begin with the first repository listed in the article . For each repository, if multiple dataset are shared, choose the first listed dataset for the extraction. Repeat the extractions by adding a new sub-extraction for each additional repository . The total number of sub-extractions will correspond to the number of data repositories mentioned in the article, plus any additional sub-extractions for explicitly referenced supplemental data. Typically, you will encounter one or two repositories and a few datasets each, but a larger number is possible. Fig. 5.4. Starting the extraction by adding a new sub-extraction How to add a new sub-extraction and delete any spurious ones:",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "How to upload new article to...",
       "instruction": "How to upload new article to an existing reference set (table): 1. Create a new .tsv document in your text editor. This document should include the same column names as your existing reference set and contain all the references (DOIs) that must be added. 2. Go to &#39; Manage reference set&#39; --&gt; then &#39; Your set name XY&#39; --&gt; and &#39;new reference&#39; . 3. Verify that the columns in the updated table match the existing ones . 4. Assign the new records to one or more users via &#39; Manage user assignments &#39;.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "How to assign a questionable dataset to another extractor",
       "instruction": "How to assign a questionable dataset to another extractor: At the end of every extraction, there is an &#39; Assign to&#39; option. Select the extractor(s) and the relevant extraction form (here: Openness ), then finalize the assignment by clicking on &#39; Completed&#39; . For our use case, we assigned datasets to other extractors whenever the Open Data status was marked &#39;unsure&#39;. Conversely, we did not reassign datasets if the status was clear to the first extractor (i.e., &#39;yes&#39; or &#39;no&#39;).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
+      "title": "How to reconcile the answers of different extractors",
       "instruction": "How to reconcile the answers of different extractors: This function is essential when multiple extractors have worked on the same articles. If more than one extractor has completed the extraction, their answers can be compared and reconciled. Overlapping responses can be reconciled immediately, while differing responses may require further discussion or a decision based on the extractors&#39; comments. Go to the &#39;Reconcile finished extractions&#39; section. The extractors who completed the extractions will be listed under the &#39; Extractors &#39; column. Click on &#39; Reconcile extractions &#39;: compare the answers of two or more extractors, which will be displayed in adjacent columns. a discussion among the extractors may be necessary to reach a clear conclusion, unless one extractor is designated as the &#39;master extractor&#39; and undertakes the final decision. Pay attention to the commentaries, as they may include valuable insights for decision-making. 5. Save the selected answer in the final report by clicking &#39;Copy to final&#39;. 6. The final copy can still be edited and enriched with additional comments if none of the original answers is fully satisfactory. 7. Copy each sub-extraction individually into the final copy. 7. As in the article extraction, ensure to click &#39; Completed&#39; after finishing the reconciliation.",
       "is_critical": true,
       "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
+      "title": "Search for other indications of Open...",
       "instruction": "Search for other indications of Open Data missed by ODDPub Although ODDPub is highly sensitive, it may still miss some Open Data statements, especially in fields less related to the biomedical field for which the workflow was developed and validated. To balance sensitivity and effort, it is recommended to review the article , focusing on the areas around the statements detected by ODDPub to check for any additional information that might have been missed. You can use keyword searches within the article to quickly locate the sections related to the ODDPub statements. If a statement appears to be a combination of different sections or sentences, use various keywords from the statement to access all detected sections. As new repositories and standard statements emerge, the frequency of missed Open Data statements may increase over time. Therefore, it is recommended ( though not strictly necessary , depending on your use case) to briefly scan the article itself for further indications of shared datasets. Follow these steps: Search for keywords such as &#34; data availability &#34;, &#34; data sharing &#34;, and &#34; data access &#34;. If you find a section named &#34; data availability statement &#34; or similar, review the entire section for indications on shared data. 2. If no such section is found, use keywords like &#34; dataset &#34;, &#34; data set &#34;, &#34; access *&#34; and &#34; availab *&#34;. Check all results with &lt;=10 hits for each keyword. Dismiss results where there are &gt;10 hits. 3. If no statement is found, search for the keyword &#34; data &#34;; if it yields &lt;=10 hits, review each result. If it yields &gt;10 hits, dismiss them. This procedure helps identify most datasets missed by ODDPub with minimal additional time investment. However, for a larger set of articles, this step may still be substantial, so consider implementing it only if missing datasets would significantly impact your use case.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 22,
-      "title": "",
+      "title": "To set up the Openness extraction...",
       "instruction": "To set up the Openness extraction form in your Numbat workspace, select &#39; Edit extraction form&#39; and click on the &#39; Import an extraction form&#39; button. Ensure that the extraction form is in JSON format. You may need to make additional adjustments, such as modifying conditions for when and how each question should appear.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 23,
-      "title": "",
+      "title": "The attached file contains the Numbat extraction form (Version 4)",
       "instruction": "The attached file contains the Numbat extraction form (Version 4). This form was automatically generated from Numbat in markdown format and then transformed into a PDF using https://md2pdf.netlify.app/ for better human readability. It contains all questions related to Open Data criteria for manual openness verification. ______________________________________________________________________________________________________________ Openness form 2024.pdf ______________________________________________________________________________________________________________",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 24,
-      "title": "",
+      "title": "How to export the final report table",
       "instruction": "How to export the final report table: You can only export the data if more than two records have been checked. Before downloading the results table, ensure that the answers have been reconciled if multiple users have checked the same data records. Otherwise, you may encounter duplicates. Go to the &#39; Export data&#39; section -&gt; &#39; Export Openness extractions&#39; to download the results table. Clean up the table: For Excel: go to the &#39;Data&#39; tab, then &#39;Text in Columns&#39; -&gt; celect &#39;Delimited&#39; + tab stop / comma (depending on your data) + Standard -&gt; Finish. Save the file in your desired format. Consider that the extraction dataset may contain several Open Data assessments per article. If you need an analysis at the article level, process the output accordingly. For example, when incentivizing data sharing at the article level, identify all publications in which at least one dataset was shared (openly or with restricted access). The output, in the form of a .csv file, can be downloaded any time from the Numbat server. This file contains all datarelated to criteria decisions as well as the final decision. %s %s article is_open_data open_data_category is_open_code open_data_statements open_code_statements reference_to_data comment_1_reference_to_data identifier own_or_reuse_data comment_2_own_data data_in_supplement comment_3_data_in_supplement findability comment_4_findability data_access comment_5_data_access is_machine_readable_format comment_6_format machine_readable_format_excel machine_readable_format_csv machine_readable_format_txt machine_readable_format_spss machine_readable_format_other_text_formats machine_readable_format_video machine_readable_format_audio machine_readable_format_picture machine_readable_format_fasta_fastq machine_readable_format_raw machine_readable_format_genetic_sequences machine_readable_format_subject_specific_format machine_readable_format_unsure comment_7_machine_readable_format illustrative_files comment_8_illustrative_files analytical_replication comment_9_analytical_replication assessment comment_10_open_data_discussion 10.1038/s41467-020-16734-3 TRUE general-purpose repository TRUE code availability all code used to analyze the dataset is openly available within lead-dbs/-connectome software (https://github.com/leaddbs/leaddbs). code availability all code used to analyze the dataset is openly available within lead-dbs/-connectome software (https://github.com/leaddbs/leaddbs). yes NULL supplement own_open_data NULL no NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL no_open_data only a supplement available 10.1038/s41467-020-16929-8 TRUE field-specific repository FALSE proteomics data have been deposited to pride server under accession code pxd017341 [http://proteomecentral.proteomexchange.org/cgi/getdataset? NA yes NULL http://proteomecentral.proteomexchange.org/cgi/GetDataset?ID=PXD017341 own_open_data NULL yes NULL yes NULL yes NULL yes NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL 1 NULL NULL NULL NULL yes NULL yes NULL open_data NULL 10.1186/s12916-020-01851-z TRUE supplement FALSE additional file 5. kaplan-meier raw data NA yes NULL TriNetX unsure NULL unsure NULL unsure NULL restricted not publicly available, the data are available from the authors upon reasonable request and with the permission of TriNetX. NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 25,
-      "title": "",
+      "title": "What is Numbat and how to...",
       "instruction": "What is Numbat and how to install it Numbat is a tool designed for extracting information from primary sources to assist in writing systematic reviews within an academic context and managing the resulting databases. It allows for assigning extraction tasks to multiple raters and reconciling their outcomes, meaning that it can compare and consolidate these into a joint assessment. Key Numbat functionalities: Create an extraction form (questionnaire) that corresponds to your needs, such as a list of questions about datasets. This form is applied to each record. Import information detected from sources like ODDPub into Numbat in the form of a .tsv table, which contains the records you wish to validate. You can assign the dataset to multiple users if you want to compare extractions between raters, or assign it to a single responsible person. The final dataset, with all answers to the extraction form, can be exported as a table. Numbat does not compute any statistics; its primary function is to collect information about records that would otherwise require fully manual entry without the aid of a semi-automated extraction form. Numbat is built on PHP and is free and open-source software under the GNU AGPL v3 license. How to install Numbat (for Windows OS): Requirements: Apache HTTP Server MySQL Database - provided by your company/organization PHP Installation on a server may require additional services and access rights; please contact your server&#39;s system administrator for assistance.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 26,
-      "title": "",
+      "title": "Install the XAMPP package It includes...",
       "instruction": "Install the XAMPP package It includes the Apache distribution and MySQL database. XAMPP 8.1.5 Windows, Linux, OS X Apache Friends This is what XAMPP looks like before any distributions are started: Fig. 10.2. XAMPP program (inactive mode)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 27,
-      "title": "",
+      "title": "Clone the Numbat repository from GitHub...",
       "instruction": "Clone the Numbat repository from GitHub locally You can use a GitHub account for this, or simply download the Numbat folder without logging in, as it is free open-source software. Fig. 10.1. Numbat repository clone from github",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 28,
-      "title": "",
+      "title": "Install Numbat in XAMPP Copy the...",
       "instruction": "Install Numbat in XAMPP Copy the entire repository into the &#39;htdocs&#39; folder within XAMPP. In XAMPP , start the Apache module by clicking on &#39; Start &#39;. Click on &#39; Admin&#39; button next to Apache - you should see the installation instruction if they are not yet completed. The following image shows a successful installation: Fig. 10.3. Numbat installation via Apache admin",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 29,
-      "title": "",
+      "title": "MySQL setup (probably provided by the company) In XAMPP",
       "instruction": "MySQL setup (probably provided by the company) In XAMPP : start the MySQL module by clicking on &#39;Start&#39;. Click the &#39; Admin &#39; button next to MySQL to access the database. Create a new MySQL database for Numbat Fig. 10.4.1. New database in MySQL Create a new user (yourself as a new admin). You can use the default preferences with your name and password, as shown in Figure 10.4.3 Fig. 10.4.2. New admin user in MySQL Fig. 10.4.3. Add user account in MySQL",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 30,
-      "title": "",
+      "title": "In XAMPP",
       "instruction": "In XAMPP : use the &#39;Admin&#39; button next to Apache to complete the installation. In the window that opens, fill out the database username , password, name , and host , as well as the URL name - everything except the URL you created in step 10.4.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 31,
-      "title": "",
+      "title": "New user registration",
       "instruction": "New user registration: To register as a new user in the existing Numbat instance, click on &#39;New here? Sign up&#39;. You only need to provide your email address, password, and name. After registration, the Numbat admin will activate your account. User administration: As an admin of the Numbat instance, navigate to the &#39;User administration&#39; section in the main menu. New users will appear with unverified email addresses. Verify their email addresses and assign the appropriate privileges - User or Admin . The descriptions of these privileges are provided on the same page.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 32,
-      "title": "",
+      "title": "The table below provides an overview...",
       "instruction": "The table below provides an overview of all Open Data criteria presented in the extraction form. question answers 1 Is there a clear reference to available datasets in the publication? Yes | No | Inapplicable | Unsure 2 Is the detected reference found in the data availability statement (DAS)? Yes, in a DAS | No, and there is no DAS in the article | No, but there is a DAS (= reference present, but outside of DAS) | Unsure 3 Can the data be found? Yes | No | Unsure | Not checked (reuse) 4 Has the data been shared in a repository? Yes | No | Unsure | Not checked (reuse) 5 Please state the identifier (preferably a link or DOI) of the data that will be used in this extraction. open text field 6 Select the applicable repository name from the tag list tags list + open text filed for new tags 7 Can the data be accessed? Yes | No, not persistent | No, access restricted - academic data | No, access restricted - pharma data | Data under embargo | Not checked (reuse) | No, not uploaded | Unsure 8 Has the restricted data been generated by the authors of the corresponding article („Own Data“) or is it re-used data generated by others („Data Reuse”)? Own restricted data | Reuse restricted data 9 Enter the year of publication of the most recent dataset version (use only a year in the format YYYY): open text field 10 Was the dataset shared under a standardized license? Yes | No | Unsure | Not checked (reuse) 11 Select the applicable license name from the tag list tags list + open text filed for new tags 12 Has the shared data been generated by the authors of the corresponding article („Own Data“) or is it re-used data generated by others („Data Reuse”)? Own data | Data reuse | Unsure 13 Has the data been shared in a machine-readable format? Yes | No | Unsure | Format not defined 14 Which format is the data presented in? XLS/XLSX | CSV/TSV | TXT/DOCS | Other text or table formats | Video | Audio | Image | FASTA/FASTQ | RAW | Other generic format | Other subject specific format | Unsure 15 If the data is image or audiovisual data: does the data have more than just illustrative character? Yes | No | Inapplicable | Unsure 16 Does the data allow the analytical replication of at least some results? Yes | No | Tends to be positive | Tends to be negative 17 Have the Open Data requirements been met? Is a discussion necessary? Open Data, no discussion needed | Unsure, discussion needed | No open data, no discussion needed Tab. 4.1. Inquiries and Responses Related to Open Data Criteria in the Openness Extraction Form (2024) A quick video tutorial on how to do the extractions can be found under Section 5.1.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 33,
-      "title": "",
+      "title": "Embargoed data",
       "instruction": "Embargoed data: data that are not yet public but whose publication is planned and precisely specified on the existing dataset landing page. they are documented through the &#34; Data under embargo &#34; button and can be validated after the embargo period ends.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 34,
-      "title": "",
+      "title": "Handling the documentation of the data set publication date",
       "instruction": "Handling the documentation of the data set publication date: typically, use the last update date. however, this can be confusing in some cases, as the last metadata update date may not correspond to the publication date. For example, in the Gene Expression Omnibus (GEO), the &#34; Status (public) &#34;, &#34; Submission date &#34; and &#34; Last update date &#34; are usually three different dates. The entry most closely related to the publication date is the &#34; Status (public) &#34;.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 35,
-      "title": "",
+      "title": "Genetic sequences and case reports",
       "instruction": "Genetic sequences and case reports: considered (open) data only when shared in a discipline-specific repository.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 36,
-      "title": "",
+      "title": "Managing Access with Registration Requirements",
       "instruction": "Managing Access with Registration Requirements: registration in a repository or databank should not be mandatory to access the data. If access is hindered in such way, it cannot be considered open access. simply clicking on an agreement without requiring registration is sufficient to meet the definition of open and free access.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 37,
-      "title": "",
+      "title": "What does count to the &#39;best identifier&#39;",
       "instruction": "What does count to the &#39;best identifier&#39;? the best option for an identifier is a persistent one, such as a DOI or Handle. if both a URL and a DOI are available, the DOI should be documented as it is a more stable and persistent identifier. for discipline-specific repositories that do not provide persistent identifiers, documenting the URL along with the accession number is the best approach. in cases like NCBI BioProject/SRA, link the project main page along with the corresponding SRA page leading to the data files. non-persistent URLs, such as those from GitHub or the Open Science Framework without a DOI, are not sufficient as identifiers or data sources because not just metadata, but also data files can be changed by the data owners. supplements are generally considered insufficient unless they are stored independently of the article.",
       "is_critical": true,
       "timers": []
     },
     {
       "step_id": 38,
-      "title": "",
+      "title": "Which types of articles might produce...",
       "instruction": "Which types of articles might produce data and therefore should not be excluded from the screening as potential sources of data? case report study protocol methodology short reports systematic review",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 39,
-      "title": "",
+      "title": "Own or Reuse data",
       "instruction": "Own or Reuse data: document both &#34;Own (Open) Data&#34; and &#34;Reused (Open) Data&#34; cases. typically, dataset metadata include author names, which can be compared with the article&#39;s authors to determine data ownership. In some cases, such as some of the NCBI repositories, the data owner may be listed only under an institution name. In such cases, if any author is affiliated with that institution, the dataset is considered &#34;own&#34; data. if neither author nor institution names are available, the article text (e.g., &#34; data were collected during... &#34;) and context should help to clarify the data origin. reuse statements are often found outside the &#34;Data Availability Statement&#34;. reuse of the datasets generated by other researchers is not considered Open Data per default, but need a separate verification for openness.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 40,
-      "title": "",
+      "title": "Criteria for restricted or reuse cases",
       "instruction": "Criteria for restricted or reuse cases: criteria for repository requirements and accessibility may vary for restricted data sets. A URL to the location or page where the data can be requested (rather than a general &#34; upon request &#34; statement in the article) is sufficient. the same approach applies to the reuse of restricted data sets.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 41,
-      "title": "",
+      "title": "Are classifieds (models) for ML training raw data",
       "instruction": "Are classifieds (models) for ML training raw data? classifiers for machine learning algorithms are not considered raw data according to our definition.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 42,
-      "title": "",
+      "title": "Systematic reviews",
       "instruction": "Systematic reviews: should include more than just a list of referenced publications; they should also provide extracted information and clearly outline the exclusion and inclusion criteria.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 43,
-      "title": "",
+      "title": "Are genomics summary statistics the same as other summary statistics",
       "instruction": "Are genomics summary statistics the same as other summary statistics? generally, summary statistics are not considered raw or unprocessed data. However, genomics summary statistics stored in specialized repositories, such as the GWAS Catalog, differ from typical summary statistics. They represent a collection of studies and are not directly comparable to standard statistics.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 44,
-      "title": "",
+      "title": "Pharma data",
       "instruction": "Pharma data: researchers may collaborate with or be part of a pharmaceutical company, but the primary consideration is whether the data is stored on an academic platform/database/repository or at a pharmaceutical company (e.g., Vivli, Yoda). mention of pharmaceutical platforms in the article indicates that the data are more likely to be stored outside academic repositories, and such cases are treated separately from common (academic) open data cases.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 45,
-      "title": "",
+      "title": "What does not count as a &#39;clear reference&#39;",
       "instruction": "What does not count as a &#39;clear reference&#39;? according to the current criteria (Bobrov, et al. 2024, 10.1162/qss_a_00301 ) supplements are not considered Open Data, partly because they are not shared independantly from the article. reference to data shared within the manuscript, without explicitely mentioning the word &#39;supplement&#39;, are also not sufficient. references to data presented in tables within articles do not qualify as clear references to raw data. reference to data upon reuqest by the authors is do not qualify as clear references to raw data.",
       "is_critical": true,
       "timers": []

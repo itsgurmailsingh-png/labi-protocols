@@ -26,28 +26,28 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Section tissue samples to 5 µm...",
       "instruction": "Section tissue samples to 5 µm thickness and mount onto plain glass slides. Perform deparaffinization, H\u0002&amp;E staining, and capture tissue morphology using the Olympus VS110 Slide Scanner microscope at 40× magnification. Thaw, wash, and equilibrate Visium HD slides using the manufacturer’s recommended buffers prior to tissue placement. After imaging, transfer tissue analytes from the glass slide to the Visium HD capture areas using the CytAssist instrument. Prepare all tissues using the Visium HD Spatial Gene Expression Kit with the human probe panel plus the custom GCAR1 probe panel addon. Perform probe extension and library construction steps exactly as described in the Visium HD User Guides (CG000684 and CG000685). Sequence libraries on an Illumina NextSeq 2000 with the following cycle settings: Read 1: 43 cycles i7 index: 10 cycles i5 index: 10 cycles Read 2: 50 cycles Generate FASTQ files onboard using Dragen BCL Convert v4.2.7.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Generate a custom reference genome using...",
       "instruction": "Generate a custom reference genome using spaceranger mkref (Space Ranger v3.0.1), incorporating human GRCh38 (GENCODE v32/Ensembl98) and the full GCAR1 construct sequences. Align FASTQ files and perform automated image detection/alignment using spaceranger count (Space Ranger v3.0.1 for ASPS-01 xenograft; v4.0.1 for ASPS-02 biopsies). Aggregate data to 24 µm bins. Process binned data in Seurat (v5.3.1) 1 : Normalize with NormalizeData() Select variable features with FindVariableFeatures() Scale data with ScaleData() Run Principal Component Analysis with RunPCA() Cluster bins using FindNeighbors() and FindClusters(). Exclude low-quality clusters (e.g., regions of hemorrhage or bins outside tissue) based on low gene counts.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Since 24 µm bins may contain...",
       "instruction": "Since 24 µm bins may contain multiple cells, 2 perform unsupervised deconvolution to identify cell types and cell states. 3 Identify over-dispersed genes per sample using STdeconvolve (v1.3.1) with the function restrictCorpus(removeAbove = 1.0, removeBelow = 0.01, alpha = 0.05). 4 Input results to consensus Non-negative Matrix Factorization (cNMF) via the mosaicMPI package 5 to derive expression programs and quantify their relative usage across bins. Annotate programs using established reference marker genes 6-10 and perform pathway enrichment analysis with g:Profiler. 4,11-12",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Load 24 µm bin data into Seurat (v5",
       "instruction": "Load 24 µm bin data into Seurat (v5.3.1), merge samples with merge(), join layers with JoinLayers(), and filter for bins with non-zero counts (subset(SeuratObject, nCount_Spatial.024um &gt; 0)). Extract spatial bin coordinates with seurat_object_coords() and identify neighbors for each bin using custom program_neighbours() functions. Restrict analysis to bins with non-infinite normalized program usage. Identify T-cell niches as bins positive for a T-cell program (usage ≥ 0.05), termed “bins of interest” (BOI). Binarize program usage values (≥ 0.05 = 1, else 0). For each BOI and its neighbouring bins (radius up to 3), calculate mean binarized program usage and visualize with ComplexHeatmap (v2.15.3). 13 Split the column dendrogram to define distinct niches; assign niche labels and visualize with Seurat’s DotPlot() function. Calculate the percent of bins expressing specific genes of interest per niche. Perform statistical analyses on contingency tables using Fisher’s Exact Test (fisher.test() from base R stats v4.3.1) and post-hoc pairwise comparisons with pairwise_fisher_test() from rstatix (v0.7.3). 14 For T cell-specific gene expression (independent of deconvolution): subset bins expressing any of CD3D, CD3E, CD3G, CD8A, or GCAR; classify neighbouring bins (radii 0–3) as “inside” or “outside” the T-cell radius; compare average expression of genes of interest using Student’s t-test via compare_means() from ggpubr (v0.6.2); visualize with ggplot2 (v3.5.2). 15 Perform differential gene expression on pseudobulked bins using ALDEx2 (v1.32.0) 16 with the call: aldex(mc.samples=128, test=&#34;t&#34;, effect=TRUE, denom=&#34;iVha&#34;, verbose=FALSE, paired.test=FALSE).",
       "is_critical": false,
       "timers": []

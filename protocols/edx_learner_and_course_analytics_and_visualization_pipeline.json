@@ -30,147 +30,147 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Review edX Research Guide, which provides...",
       "instruction": "Review edX Research Guide, which provides documentation for how a user may acquire edX course data from an edX Data Czar, how to properly and responsibly maintain and use these data in research, and describe in detail the data exports provided for a given edX courses. The edX Research guide is available for review at https://edx.readthedocs.io/projects/devdata/en/latest/index.html . When working with data that is outside of your home organization, it is essential to set up a data use agreement (DUA) between the organization holding the data and your institution, in addtion to an IRB. This process must be completed before you can access learner data, which contains information that can be used to re-identify learners. Data will be provided in a ZIP format that will need to be extracted in Step 3. edX Data Package",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Install R statistical software Install R...",
       "instruction": "Install R statistical software Install R programming language and R Studio Desktop to run the scripts used in this pipeline. Once these pieces of software are installed, you will need to run R Studio. In R studio, you will need to install from the package manager: tcltk2 - a GUI interface used to set paths to access data used in the pipeline. jsonlite - package used for parsing JSON data ndjson - package used for parsing streaming JSON data used in edX event logs. Hmisc - data analytics functions plyr - data aggregation reshape2 - data reshaping functions magrittr - piping functions stringr - string processing and manipulation ggplot2 - statistical visualization package GGally - supplements ggplot2 colorspace - color palette generation R programming language 3.3.3 of later Comprehensive R Archive Network The R Foundation R Studio Desktop 1.1.463 The R Studio, Inc.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Install Gephi Network Analysis and Visualization statistical software",
       "instruction": "Install Gephi Network Analysis and Visualization statistical software. Gephi 0.8.2 The Gephi Consortium Spatial Ranking Gephi Plugin Repository Mathieu Bastian Gephi provides a means of visualizing edX Course hieararchies (see step 15), and student&#39;s learner trajectory networks in figure 2 (see step 16). Make sure that you install the Spatial Ranking layout algorithms for replication of Figure 1.A and 1.C.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Set up the project directory workspaces...",
       "instruction": "Set up the project directory workspaces that separates course level data provided in the edX data package, and a space for processing outputs, analysis and visualization results. An example directory structure used in this protocol",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Extract edX Data Package into user identified directory space",
       "instruction": "Extract edX Data Package into user identified directory space. The pipeline expects a directory structure that separates original edX course data and processing results (Z:\\\\project\\data\\edx\\{Course_identifier}\\). Each course in our edX directory uses a common structure to separate course and user data (state) and daily events logs (events). Example edX course data directoy extracted from an edX Data Package.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "Review the processing scripts used in...",
       "instruction": "Review the processing scripts used in this analysis to understand how they function alone and as part of the overall pipeline. The UML process flow diagram provides an overview of how original data and processing outputs are used between scripts in the pipeline. UML Data Flow Diagram of edX Learner and Course Analytics Pipeline",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "Load and Run Script edX-1-courseStructureMeta",
       "instruction": "Load and Run Script edX-1-courseStructureMeta.R in R Studio. This script extracts a the course structure from the edX Data Package filesis used in processing log files and creating the node lists in learner trajectory networks. Make sure to set accurate pathways for reading in original data and saving processing outputs. Note that the script will create directories for processing results automatically, unless these are removed or commented out by a user.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Load and Run Script edX-2-studentUserList",
       "instruction": "Load and Run Script edX-2-studentUserList.R This script processes user profile data sets from the edX Data Package to identify active students in the course, and exclude instructors, teaching assistants and beta testers from the user log data sets. The script generates a list of edX user IDs.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Load and Run Script edX-3-eventLogExtractor",
       "instruction": "Load and Run Script edX-3-eventLogExtractor.R This script processes the daily edX course’s event tracking logs (which use streaming JSON format) for active students in the course. Logs are collected for each day of the course, combining all students actions in one file. The script loops through the users identified in the list of active students generated by the edX-2-studentUserList.R to extract a raw event log for each student in the course. The logs are saved as individual CSV files. The processing speed of this script will be based on the number of students and their volume of recorded activity.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Load and Run Script edX-4-eventLogFormatter",
       "instruction": "Load and Run Script edX-4-eventLogFormatter.R . This script processes the individual active students event logs, extracted by the edX-3-eventLogExtractor.R script. The script uses the course structure data set generated by edX-1-courseStructureMeta.R script as part of the log processing. The script allows a researcher to identify the types of events that are maintained in the final event logs for a student for analysis. All events to the are aligned to the lowest level of the course structural hierarchy; provides temporal ordering and event period calculations and outlier estimates. The script loops through the identified list of active students, and sorts students into further groups based on the size of their processed log files (for example, the script separates students with fewer than 10 events to remove them from the analysis). The script creates of two new lists of studen users based on analysis of the processed event logs: active and inactive students who were not excluded by edX-2-studentUserList.R script. The preset parameters in the script were used with the goal of identifing meaningful user initiated interactions, while preserving the maximal amount of log responses. The script provides detailed comments explaining processing choices.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Load and Run Script edX-5-learnerTrajectoryNet",
       "instruction": "Load and Run Script edX-5-learnerTrajectoryNet.R . This script creates a learner trajectory network for each student in the course based on the individual’s processed event logs and user list generated by edX-4-eventLogFormatter.R . The script first creates an edge list to document transitions between modules in a course, and then creating a node list, which calculates the student&#39;s interaction statistics for each low level module in the course. The script exports a node and an edge lists for each student as CSV files, as well as a JSON formatted learner trajectory network that combines the nodes and edge lists data sets are combined into a single file.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "Load and Run Script edX-6-moduleUseAnalysis",
       "instruction": "Load and Run Script edX-6-moduleUseAnalysis.R . This script uses the node lists generated by *edX-5-learnerTrajectoryNet.R* and lists of student IDs generated by *edX-4-eventLogFormatter.R*. The script aggregates the node lists from individual students’ learner trajectory networks to provide an analysis centering the course structure overall student interactions and activity. Analysis is completed for the lowest modules in the course hierarchy. The results are saved as a CSV data that can be joined to the course structure data set produced by *edX-1-courseStructureMeta.R* script",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "Load and Run Script edX-7-studentFeatureExtraction",
       "instruction": "Load and Run Script edX-7-studentFeatureExtraction.R . This script uses the course metadata generated by the edX-1-learnerTrajectoryNet.R script, and output user list and processed student logs and list of student IDs generated by the edx-4-eventLogFormatter.R script. The script loops through the list of student processed event logs to create a set of frequency statistics of student activity in an EdX course (e.g. number of sessions, events, unique modules, event_types), calculations of temporal use of content (overall, and relevant module and event types).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "Visualizations were created based on the...",
       "instruction": "Visualizations were created based on the outputs of the edX Learner and Course Analytics pipeline scripts detailed in the previous section. These visualizations are replicated on the project GitHub site using Rmarkdown scripts and sample data files generated from an edX course that are provided as part of the project repository. Sample data is described in the edX Learner and Course Analytics and Visualization Pipeline - Sample Data Index . Each of the sample data is described briefly, and along with a view of the data structure produced by R. The file also links to a detailed data dictionary describing each variable in a sample data set.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "Figure 2",
       "instruction": "Figure 2.A represents a course structure for an edX course. The course structural hierarchal tree was were visualized using Gephi 0.8.2, using the sample Data A was, which was generated using Script 1, found in step 7. Data A was loaded as a node list, and a copy was modified to keep the mod_hex_id and parentID as the source and target nodes in a new edge list CSV. Both files were loaded into Gephi using the tools Data Laboratory. The network was laid out using the Spatial Ranking ( https://gephi.org/plugins/#/plugin/spatial-ranking ) layout plugin for Gephi. Nodes are laid out along the X-axis based on the nodes&#39;.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "The script used to generate Figure 2",
       "instruction": "The script used to generate Figure 2.B is provided as a GitHub RMarkdown page available for review here, https://cns-iu.github.io/edx-learnertrajectorynetpipeline/edx-8-figure2-B.html Sample Data A and Data C were used to create these visualizations.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "Figure 2",
       "instruction": "Figure 2.C and Figure 3 visualize student&#39;s learning trajectory networks for the for the analyzed edX course. The networks were visualized using Gephi 0.8.2, using the network exports of script 7 found in step 13. The network uses JSON format that includes a list of node and list of edges. Data is also exported as CSV formatted node and edge list that are used for visualizing individual student&#39;s network data. See Sample Data Set B for an example of data used to create these visualizations. The nodes represent course structure, specifically all content and activity modules; and description of the student’s interaction with the content over the entire course. The edge list represents the student’s transitions between course content nodes The node and edge list CSV files were loaded into Gephi using the tools Data Laboratory. The networks shown visualized using two different layouts: The network shown in Figure 1.C was laid out using the Spatial Ranking ( https://gephi.org/plugins/#/plugin/spatial-ranking ) layout plugin for Gephi. Nodes are layed out on the X-axis based on the nodes&#39;. The networks shown in Figure 2 use a force directed layout using the Atlas2 algorithm bundled with Gephi.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "The script used to generate Figure...",
       "instruction": "The script used to generate Figure 3 and 4 is provided as a GitHub RMarkdown page available for review here, https://cns-iu.github.io/edx-learnertrajectorynetpipeline/edx-8-figure4and5.html . Sample Data E was used to create these visualizations.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "The script used to generate Figure...",
       "instruction": "The script used to generate Figure 5 is provided as a GitHub RMarkdown page available for review here, https://cns-iu.github.io/edx-learnertrajectorynetpipeline/edx-8-figure4and5.html . Sample Data D was used to create these visualizations.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "The script used to generate Figure...",
       "instruction": "The script used to generate Figure 6 is provided as a GitHub RMarkdown page available for review here, https://cns-iu.github.io/edx-learnertrajectorynetpipeline/edx-8-figure6.html . Sample Data D was used to create these visualizations.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
+      "title": "Load and Run Script edx-8-cohortLearnerPathwaysNet",
       "instruction": "Load and Run Script edx-8-cohortLearnerPathwaysNet.R . To run this script, you must provide a list of student user ids (e.g. enrollment roster of students, cluster groups, demographic groups), the course structural data, and processed students&#39; edX event log (CSV) to create a learner transition/pathway networks for a group of students using the igraph library. The network represents multiple student&#39;s interaction and transition between EdX blocks learning modules using a student&#39;s event log of click actions in an EdX course. Nodes statistics include the number of unique students that visited a module, and the aggregate counts of interactions with a module for a given period of time. Edges represent the directed pathway taken between modules, including self-loops. Edges statistics include the unique number of students taking a path, and the number of times a path was taken. Direction and distance are provided in the &#34;dis&#34; measure, with positive numbers indicating forward movement, and negative numbers representing backwards movement across the course (based on the order value of a module).",
       "is_critical": false,
       "timers": []

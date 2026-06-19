@@ -26,28 +26,28 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Create a polygon around your linear...",
       "instruction": "Create a polygon around your linear feature by extending it a D distance either circularly or by parallel shift from project_geojson import ProjectedFeature import json from shapely.geometry.geo import mapping from shapely.geometry import LineString, Point, Polygon, asShape import sys def bank(river, side, width_km=10): bank = river.parallel_offset(width_km*1000.0, side) river_coords = list(river.coords) bank_coords = list(bank.coords) if side==&#39;left&#39;: bank_coords = bank_coords[::-1] linestring = river_coords+bank_coords return Polygon(linestring) if __name__ == &#39;__main__&#39;: which_bank = sys.argv[1] width_km = 10 river_json = json.load(sys.stdin) river = ProjectedFeature(river_json[&#39;features&#39;][0][&#39;geometry&#39;], &#39;wgs84&#39;).lcc bank = ProjectedFeature(bank(river, which_bank, width_km), &#39;lcc&#39;).wgs84.buffer(0) meta = river_json[&#39;features&#39;][0][&#39;properties&#39;] meta[&#39;bank&#39;] = which_bank meta[&#39;width_km&#39;] = 10.0 print json.dumps(dict(type=&#34;Feature&#34;, geometry=mapping(bank), properties=meta)) Select the intersection of this polygon with the points of interest.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Make sure you know where the...",
       "instruction": "Make sure you know where the start and end of your linear feature is. Measure coordinates as distance along the feature to the start. bridge_rivermile = river.project(bridge) postoffice_rivermile = river.project(postoffice)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "def distance_to_nearest_bridge(river_mile, bridges)",
       "instruction": "def distance_to_nearest_bridge(river_mile, bridges): return min([abs(bridge[&#39;river_mile&#39;]-river_mile) for bridge in bridges]) for postoffice in postoffices: postoffice[&#39;distance_to_bridge&#39;] = distance_to_nearest_bridge(postoffice[&#39;river_mile&#39;], bridges)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Most geospatial data are in WGS84, which is not distance-invariant",
       "instruction": "Most geospatial data are in WGS84, which is not distance-invariant. Convert everything (points, lines) to a distance-invariant projection such as Lambert Conformal Conic. Make sure (x,y) coordinates are in meters. import pyproj from shapely.ops import transform from shapely.geometry.base import BaseGeometry from shapely.geometry import asShape from shapely.geometry import Point PROJECTIONS = dict( wgs84 = pyproj.Proj(&#34;+init=EPSG:4326&#34;), lcc = pyproj.Proj(proj=&#34;lcc&#34;), nhgis = pyproj.Proj(&#34;+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs&#34;), epsg3975 = pyproj.Proj(&#34;+proj=cea +lon_0=0 +lat_ts=30 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs&#34;), albers = pyproj.Proj(&#34;+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs &#34;), eov = pyproj.Prof(&#34;+proj=somerc +lat_0=47.14439372222222 +lon_0=19.04857177777778 +k_0=0.99993 +x_0=650000 +y_0=200000 +ellps=GRS67 +towgs84=52.17,-71.82,-14.9,0,0,0,0 +units=m +no_defs &#34;) ) def project_geometry(geometry, tfrom, tto): return transform(lambda x, y: pyproj.transform(PROJECTIONS[tfrom], PROJECTIONS[tto], x, y), geometry) class ProjectedFeature(object): def __init__(self, geometry, projection): &#39;&#39;&#39; Every incoming geometry (point, linestring, polygon) is stored in wgs84. &#39;&#39;&#39; if not isinstance(geometry, BaseGeometry): # if not shapely geometry, treat as geojson dictionary geometry = asShape(geometry) self.geometry = project_geometry(geometry, projection, &#39;wgs84&#39;) def __getattr__(self, projection): &#39;&#39;&#39; We can refer to projected features as an attribute, e.g. feature.wgs84 feature.lcc &#39;&#39;&#39; if projection in PROJECTIONS: return project_geometry(self.geometry, &#39;wgs84&#39;, projection) else: raise AttributeError if __name__ == &#39;__main__&#39;: union_sq = Point((1827011,574994)) union_sq_geojson = { &#34;type&#34;: &#34;Point&#34;, &#34;coordinates&#34;: [1827011, 574994] } Union_Sq = ProjectedFeature(union_sq, &#39;nhgis&#39;) print Union_Sq.wgs84 print Union_Sq.lcc Union_Sq = ProjectedFeature(union_sq_geojson, &#39;nhgis&#39;) print Union_Sq.wgs84",
       "is_critical": false,
       "timers": []

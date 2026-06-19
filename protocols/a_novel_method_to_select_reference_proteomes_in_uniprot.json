@@ -26,140 +26,140 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "The proteome data used for this...",
       "instruction": "The proteome data used for this study were the protein FASTA files of all the corresponding genome assemblies from the INSDC through the European Nucleotide Archive (ENA), as well as a set of selected proteomes from external databases such as RefSeq or Ensembl. Genome assemblies without an associated translated protein FASTA file were not included. The proteomes considered are listed in Table 1 of supplementary file 1.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "The workflow considers species that meet...",
       "instruction": "The workflow considers species that meet the following criteria for analysis: (1) the taxonomic identifier must be determined to the species level, i.e. the taxonomy identifier cannot be unspecific or at the genus level (for example, “Salmonella sp.” corresponding to NCBI:txid 599); (2) the taxonomic identifier cannot belong to Candidatus).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Also, the workflow only considers proteomes...",
       "instruction": "Also, the workflow only considers proteomes that meet the following criteria: (1) its genome assembly cannot be derived from metagenomes (genomes from metagenomes were identified by either RefSeq or by UniProt internal pipelines), unless these were already RPs; (2) its genome assemblies cannot come from NCBI’s Pathogen Detection resource (https://ftp.ncbi.nlm.nih.gov/pathogen/Results/BioProject_Hierarchy/latest.bioproject_hierarchy.txt).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Quality filtering of proteomes was performed...",
       "instruction": "Quality filtering of proteomes was performed by excluding those with only a single non-nuclear genome from the analysis. Moreover, proteomes associated with genome assemblies that have been flagged by either UniProt or RefSeq quality control analyses with warnings were excluded. The exclusion reasons are listed in Table 2 of supplementary file 1.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Proteomes meeting the criteria above were...",
       "instruction": "Proteomes meeting the criteria above were clustered using MMseqs2 easy-proteomecluster to identify RPs for each species.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "The following parameters were used for...",
       "instruction": "The following parameters were used for MMseqs2 clustering of proteomes, optimized to balance accurate protein grouping and RP selection across species. The protein sequence identity (--min-seq-id) and coverage (-c) were set as 0.9. These values were calculated from their average in protein clusters of orthologs between pairs of proteomes from the same species across the tree of life. The technical details of this analysis are shown on the supplementary file 2. The alignment coverage mode (--cov-mode), which controls the sequence length overlap, was set to 1 (“Target coverage”), to enable protein clusters to group isoforms and protein fragments with complete/canonical protein. The sequence identity mode (--seq-id-mode) was set to 0, where sequence identity is calculated solely from the alignment length without considering the length of the sequences. This ensures that sequence identity and coverage are independent variables. Clustering mode 2 (“Greedy incremental clustering mode”, --cluster-mode) was used, as it functions analogously to the CD-HIT clustering algorithm employed in the previous RP selection method. The cluster module was set to 0 (“Linclust”, --cluster-module) because it provides an efficient clustering workflow that scales linearly with input size whilst maintaining sensitivity comparable to UCLUST.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "The Proteome Priority Score (PPS) is...",
       "instruction": "The Proteome Priority Score (PPS) is the parameter that determines which proteome is selected as an RP, from the proteome cluster built from MMseqs2. It was designed to consider the selection based on proteome quality through the Benchmarking Universal Single-Copy Orthologs (BUSCO) (Simão et al., 2015). Also, it keeps the changes of RPs between UniProt releases to a low amount, ensuring a stability to the UniProtKB. It is defined by four components with respective weights:\nManually selected Reference Proteome score: Boolean (0 or 1) indicating whether the proteome was previously manually selected as an RP by UniProt curators;Representative Proteome score: Boolean (0 or 1) indicating whether the proteome was previously automatically selected as an RP by automatic methods;BUSCO score: Fraction (0 to 1) indicating completeness (including single and duplication scores) inferred from BUSCO minus the fragmented percentage;Representativeness score: Fraction of non-singleton protein clusters within the species (0 to 1) Clusters containing proteins from a single proteome are excluded from this calculation.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Manually selected Reference Proteome score",
       "instruction": "Manually selected Reference Proteome score: Boolean (0 or 1) indicating whether the proteome was previously manually selected as an RP by UniProt curators;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Representative Proteome score",
       "instruction": "Representative Proteome score: Boolean (0 or 1) indicating whether the proteome was previously automatically selected as an RP by automatic methods;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "BUSCO score",
       "instruction": "BUSCO score: Fraction (0 to 1) indicating completeness (including single and duplication scores) inferred from BUSCO minus the fragmented percentage;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Representativeness score",
       "instruction": "Representativeness score: Fraction of non-singleton protein clusters within the species (0 to 1) Clusters containing proteins from a single proteome are excluded from this calculation.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "The following formula describes the PPS, with the correspondent weights:",
       "instruction": "The following formula describes the PPS, with the correspondent weights:\n\nPPS=11,001*ManuallyselectedReferenceProteomescore+1,000*Representativeproteomescore+5,000*(BUSCOcompletescore−BUSCOfragmentedscore)+5,000*Representativenessscore",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "The weights are designed to prioritize certain proteomes for selection:",
       "instruction": "The weights are designed to prioritize certain proteomes for selection:\nThe Manually selected Reference Proteomes score weight ensures that these proteomes are selected as RPs in every release;The Representative Proteome score weight creates a tendency for previous RPs to be selected again as RPs;Both BUSCO score and Representativeness score weights combined ensure the selection of a proteome as an RP if the sum of these two scores are 20% greater than a proteome that was previously marked as an RP for this species. That is, if the current proteome is 20% greater in combined BUSCO and Representativeness scores than the previously selected RP, the current proteome will become the RP. This ensures that the most complete and representative proteomes tend to be selected as RPs. The BUSCO score is split into two subscores: the complete score and a penalty score for fragments. The more fragmented the proteome, the less likely it is to be selected as RP. Regardless of BUSCO and Representativeness scores, if a proteome is a Manually selected Reference Proteome, it will continue to be an RP.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "The Manually selected Reference Proteomes score...",
       "instruction": "The Manually selected Reference Proteomes score weight ensures that these proteomes are selected as RPs in every release;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "The Representative Proteome score weight creates...",
       "instruction": "The Representative Proteome score weight creates a tendency for previous RPs to be selected again as RPs;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "Both BUSCO score and Representativeness score...",
       "instruction": "Both BUSCO score and Representativeness score weights combined ensure the selection of a proteome as an RP if the sum of these two scores are 20% greater than a proteome that was previously marked as an RP for this species. That is, if the current proteome is 20% greater in combined BUSCO and Representativeness scores than the previously selected RP, the current proteome will become the RP. This ensures that the most complete and representative proteomes tend to be selected as RPs. The BUSCO score is split into two subscores: the complete score and a penalty score for fragments. The more fragmented the proteome, the less likely it is to be selected as RP. Regardless of BUSCO and Representativeness scores, if a proteome is a Manually selected Reference Proteome, it will continue to be an RP.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "Potential taxonomic misclassified proteomes were detected",
       "instruction": "Potential taxonomic misclassified proteomes were detected. This was achieved by clustering proteomes within the same species, and also clustering proteomes within the same genus. Proteomes that share more protein clusters with proteomes from a different species (of the same genus), compared to proteomes of the same species, were identified as being potentially misclassified taxonomically.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "In species where MMseqs2 selected more...",
       "instruction": "In species where MMseqs2 selected more than one RP with significant differences in BUSCO scores, manual curation was performed. RPs with the lowest BUSCO scores in each species were evaluated and demoted to non-RP status where appropriate.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "Manual curation was performed for species...",
       "instruction": "Manual curation was performed for species where MMseqs2 selected a large number of RPs. In these instances, literature research about the species was conducted alongside feedback from scientific community groups to guide the selection of one or a small set of RPs.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "From the GenBank assembly summary file...",
       "instruction": "From the GenBank assembly summary file from the NCBI FTP (https://ftp.ncbi.nlm.nih.gov/genomes/genbank/assembly_summary_genbank.txt), GenBank Assemblies (GCAs) marked as “ICTV species exemplar” were extracted, with one assembly per species. These GCAs were mapped to proteomes with translated proteins imported into UniProt. These proteomes, along with additional proteomes manually selected by UniProt curators, are designated as RPs for viruses.",
       "is_critical": false,
       "timers": []

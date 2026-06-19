@@ -35,294 +35,294 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Get GOanna Databases",
       "instruction": "Get GOanna Databases. There are two required directories to download: agbase_database and go_info. These can be obtained using GoCommands. This can be installed as a small binary file by the user (even on an HPC). Install GoCommands binary GOCMD_VER=$(curl -L -s https://raw.githubusercontent.com/cyverse/gocommands/main/VERSION.txt)curl -L https://github.com/cyverse/gocommands/releases/download/${GOCMD_VER}/gocmd-${GOCMD_VER}-linux-amd64.tar.gz | tar zxvf -chmod +x gocmd Initiate GoCommands ./gocmd init Fill in this data when prompted: iRODS Host [data.cyverse.org]: data.cyverse.org iRODS Port [1247]: 1247 iRODS Zone [iplant]: iplant iRODS Username: anonymous Pull data with GOCommands ./gocmd get -r --progress /iplant/home/shared/iplantcollaborative/protein_blast_dbs/go_info ../gocmd get -r --progress /iplant/home/shared/iplantcollaborative/protein_blast_dbs/agbase_database .",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "The tools in this workflow are...",
       "instruction": "The tools in this workflow are provided as containers which can be run using various container technologies. This protocol details the use of Docker and Apptainer . Which technology you need will depend on the compute system you intend to use. If you are running the analyses on a local computer or virtual machine you may want to install Docker. If you are running your analyses on a shared remote computing system (e.g. institutional HPC) you will need to use Apptainer.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Get combine_gafs container Get Combine GAFs...",
       "instruction": "Get combine_gafs container Get Combine GAFs container using Apptainer apptainer pull docker://agbase/combine_gafs:1.1",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Combine GAF outputs from GOanna and...",
       "instruction": "Combine GAF outputs from GOanna and InterProScan Combine GAFs has three parameters: -i InterProScan XML Parser GAF output-g GOanna GAF output-o output file basename Combine GAFs analysis using Apptainer apptainer run \\-B /directory/you/want/to/work/in:/work-dir \\combine_gafs_1.1.sif \\-i /path/to/GCF_031307605.1_gaf.txt \\-g /path/to/GCF_031307605.1_goanna_gaf.tsv \\-o GCF_031307605.1_complete_gaf Command explained: apptainer run: tells Apptainer to run -B /directory/you/want/to/work/in:/work-dir: mounts my current working directory on the host machine to &#39;/work-dir&#39; in the container combine_gafs_1.1.sif: the name of the Apptainer image file to use All the options supplied after the image name are Combine_GAFs options -i /path/to/GCF_031307605.1_gaf.txt: InterProScan XML Parser GAF output file. -g /path/to/GCF_031307605.1_gaf.tsv: GOanna GAF output file. -o GCF_031307605.1_complete_gaf: output file basename--a .tsv extension will be added",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "GOanna performs a BLAST search, allows...",
       "instruction": "GOanna performs a BLAST search, allows you to filter based on BLAST match parameters and transfers Gene Ontology (GO) functional annotations from the BLAST matches to your input proteins. GOanna accepts a protein FASTA file as input. BLAST databases are created by AgBase based upon proteins that have GO available and subsetted by phyla. We recommend selecting the database most closely related to the sequence used as input. We strongly recommend selecting only GO annotations based on experimental evidence codes. This will ensure the best quality annotations for your data. The remaining parameters are standard BLAST parameters. More information on determining the best BLAST parameters for your specific data set can be found in the section below.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "Run Pathannotator using Docker",
       "instruction": "Run Pathannotator using Docker. Pathannotator help using Docker docker run --rm agbase/pathannotator:4.1 -h Help and Usage: -h to see help and usage statement -k KEGG species code (NA or related species code if species not in KEGG) KEGG species codes can be found here: https://www.genome.jp/brite/br08611 -i input file (protein FASTA without header lines) -d (optional: default is .) output directory (the file path should be relative to, and inside of, your working directory) -f (optional: default is NA) FB for Flybase and DME Reactome annotations, NA for none -c (optional: default is nproc -1) number of cpus to use -o outbase (file basename to use for output files) Pathannotator analysis using Docker docker run \\--rm \\-v /path/to/your/input/files:/workdir \\-v /path/to/kofam/databases/:/data \\agbase/pathannotator:4.1 \\-k tca \\-i GCF_031307605.1_icTriCast1.1_protein.faa \\-d pathannotator \\-f FB \\-o GCF_031307605.1 docker run: tells docker to run --rm: removes the container when the analysis has finished. The image will remain for future use. -v /path/to/your/input/files:/workdir: mounts the working directory on the host machine to &#39;/workdir&#39; inside the container -v /path/to/kofam/databases/:/data: mounts the directory with the Kofam database files (or where you want them to be stored) on the host machine to &#39;/data&#39; inside the container agbase/pathannotator:4.1: the name of the Docker image to use All the options supplied after the image name are Pathannotator options -k tca: KEGG species code for Tribolium casteneum. Can be found here: https://www.genome.jp/brite/br08611 . If your species doesn&#39;t have a code choose a closely related species or &#39;NA&#39;. -i GCF_031307605.1_icTriCast1.1_protein.faa: input file (protein FASTA, no header lines). -d pathannotator: Directory where you want the pipeline outputs to go. The directory must exist before you run the pipeline. The file path should be relative to (and inside of) your working directory. -f FB: FB indicates that we want to get Flybase and Drosophila melanogaster Reactome pathways annotations in addition to KEGG annotations. -o GCF_031307605.1: this will be the prefix used to name all the output files",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "Get the Pathannotator container",
       "instruction": "Get the Pathannotator container. The Pathannotator tool is available as a Docker container on Docker Hub: Pathannotator container Get Pathannotator container using Docker docker pull agbase/pathannotator:4.1",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Get the KOfam databases",
       "instruction": "Get the KOfam databases. The KOfam &#39;profiles&#39; and &#39;ko_list&#39; databases are required to run the pipeline. If you don&#39;t already have these databases the pipeline will pull them during the first run. If you want to download them beforehand they are available from the KEGG website. Get the KOfam data wget https://www.genome.jp/ftp/db/kofam/profiles.tar.gzwget https://www.genome.jp/ftp/db/kofam/ko_list.gztar -xvzf profiles.tar.gzgunzip ko_list.tar.gz",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Run InterProScan analysis with Docker InterProScan...",
       "instruction": "Run InterProScan analysis with Docker InterProScan help using Docker docker run agbase/interproscan:5.75-106_2 -h InterProScan help and usage: Options: -a Optional, comma separated list of analyses. If this option is not set, ALL analyses will be run. -b Optional, base output filename (relative or absolute path). Note that this option, the output directory (-d) option and the output file name (-o) option are mutually exclusive. The appropriate file extension for the output format(s) will be appended automatically. By default the input file path/name will be used. -d Optional, output directory. Note that this option, the output file name (-o) option and the output file base (-b) option are mutually exclusive. The output filename(s) are the same as the input filename, with the appropriate file extension(s) for the output format(s) appended automatically . -c Optional. Disables use of the precalculated match lookup service. All match calculations will be run locally. -C Optional. Supply the number of cpus to use. -e Optional, excludes sites from the XML, JSON output -f Optional, case-insensitive, comma separated list of output formats. Supported formats are TSV, XML, JSON and GFF. Default for protein sequences are TSV, XML and GFF3, or for nucleotide sequences GFF3 and XML. -g Optional, switch on lookup of corresponding Gene Ontology annotation (IMPLIES -l lookup option) -h Optional, display help information -i Optional, path to fasta file that should be loaded on Master startup. Alternatively, in CONVERT mode, the InterProScan 5 XML file to convert. -l Also include lookup of corresponding InterPro annotation in the TSV and GFF3 output formats. -m Optional, minimum nucleotide size of ORF to report. Will only be considered if n is specified as a sequence type. Please be aware of the fact that if you specify a too short value it might be that the analysis takes a very long time! -p Optional, switch on lookup of corresponding Pathway annotation (IMPLIES -l lookup option) -t Optional, the type of the input sequences (dna/rna (n) or protein (p)). The default sequence type is protein. -T Optional, specify temporary file directory (relative or absolute path). The default location is temp/. -v Optional, display version number -r Optional. Mode required ( -r cluster) to run in cluster mode. These options are provided but have not been tested with this wrapper script. For more information on running InterProScan in cluster mode: https://github.com/ebi-pf-team/interproscan/wiki/ClusterMode -R Optional. Clusterrunid (crid) required when using cluster mode.-R unique_id OPTIONS FOR XML PARSER OUTPUTS -F This is the output directory from InterProScan. -D Supply the database responsible for these annotations. -x NCBI taxon ID of the ID being annotated -y Transcript or protein -n Name of the biocurator who made these annotations -M Optional. Mapping file. -B Optional. Bad input sequence file. Available InterProScan analyses: CDD COILS Gene3D HAMAP MOBIDB PANTHER Pfam PIRSF PRINTS PROSITE (Profiles and Patterns) SFLD SMART (unlicensed components only by default - this analysis has simplified post-processing that includes an E-value filter, however you should not expect it to give the same match output as the fully licensed version of SMART) SUPERFAMILY NCBIFAM (includes the previous TIGRFAM analysis) InterProScan analysis using Docker sudo docker run \\-v /your/local/data/directory:/data \\-v /where/you/downloaded/data/interproscan-5.75-106.0/data:/opt/interproscan/data \\-w /data \\agbase/interproscan:5.75-106_2 \\-i /path/to/your/input/file/GCF_031307605.1_icTriCast1.1_protein_test.faa \\-b GCF_031307605.1 \\-f tsv,xml \\-g \\-c \\-n AgBase \\-x 7070 \\-D RefSeq \\-l docker run: tells docker to run --rm: removes container when analysis finishes (image will remain for future analyses) -v /your/local/data/directory:/data: mount my working directory on the host machine into the /data directory in the container. The syntax for this is &lt;absolute path on host machine&gt;:&lt;absolute path in container&gt; -v /where/you/downloaded/data/interproscan-5.75-106.0/data:/opt/interproscan/data: mounts the InterProScan partner data (downloaded from FTP) on the host machine into the /opt/interproscan/data directory in the container -w /data: your working directory agbase/interproscan:5.75-106_2: the name of the Docker image to use All the options supplied after the image name are InterProScan options -i /path/to/your/input/file/GCF_031307605.1_icTriCast1.1_protein.faa: local path to input FASTA file. You can also use the mounted file path: /data/pnnl_10000.fasta -b GCF_031307605.1: output file basename -f tsv,xml: desired output file formats; xml output is required as input for the XML parser that generates the GAF and count files. -g: tells the tool to perform GO annotation -c: tells tool to perform local compute and not connect to EBI. This only adds a little to the run time but removes error messages from network time out errors -n AgBase: name to include in column 15 of GAF output file; if this contains spaces it should be enclosed in double quotes e.g. &#34;assigned_by&#34;. -x 7070: taxon ID of query species to be used in column 13 of GAF output file -D RefSeq: database of query accession to be used in column 1 of GAF output file -l: tells tools to include lookup of corresponding InterPro annotation in the TSV and GFF3 output formats.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Get the InterProScan container Get InterProScan...",
       "instruction": "Get the InterProScan container Get InterProScan container using Docker docker pull agbase/interproscan:5.75-106_2",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "InterPro is a database which integrates...",
       "instruction": "InterPro is a database which integrates together predictive information about proteins&#39; function from a number of partner resources, giving an overview of the families that a protein belongs to and the domains and sites it contains. Basic functions of this tool InterProScan: removes special characters from FASTA sequences splits FASTA into groups of 1000 sequences runs InterProScan with user-specified options on each of the 1000-sequence files in parallel re-combines output files from all groups of 1000 InterProScan XML parser: parses the XML output from InterProScan to generate a gene association file (GAF) and count files for domains, pathways and GO annotations InterProScan is very memory intensive and it may not be feasible to run on your local computer. Adjust the number of cpus (-C), the number of analyses (-a) or disable residue level annotation (-e) to improve performance.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "Run GOanna analysis with Docker GOanna...",
       "instruction": "Run GOanna analysis with Docker GOanna help using Docker docker run --rm agbase/goanna:2.4 -h GOanna help and usage: Options: -a BLAST database basename (arthropod, bacteria, bird, crustacean, fish, fungi, human, insecta, invertebrates, mammals, nematode, plants, rodents uniprot_sprot, uniprot_trembl, vertebrates or viruses) -c peptide fasta filename -o output file basename [-b transfer GO with experimental evidence only (yes or no). Default = yes.] [-d database of query ID. If your entry contains spaces either substitute an underscore (_) or, to preserve the space, use double quotes around your entry. Default: user_input_db] [-e Expect value (E) for saving hits. Default is 10.] [-f Number of aligned sequences to keep. Default: 3] [-g BLAST percent identity above which match should be kept. Default: keep all matches.] [-h help] [-m BLAST percent positive identity above which match should be kept. Default: keep all matches.] [-s bitscore above which match should be kept. Default: keep all matches.] [-k Maximum number of gap openings allowed for match to be kept. Default: 100] [-l Maximum number of total gaps allowed for match to be kept. Default: 1000] [-q Minimum query coverage per subject for match to be kept. Default: keep all matches] [-t Number of threads. Default: 8] [-u Assigned by field of your GAF output file. If your entry contains spaces (eg. firstname lastname) either substitute and underscore (_) or, to preserve the space, use quotes around your entry (eg. firstname lastname) Default: user] [-x Taxon ID of the query species. Default: taxon:0000] [-p parse_deflines. Parse query and subject bar delimited sequence identifiers] GOanna has three required parameters: -a BLAST database basename (acceptable options are listed in the help/usage)-c peptide FASTA file to BLAST-o output file basename Other parameters may be necessary for your particular analysis. The following parameters were evaluated for use with invertebrate whole proteome sets . GOanna analysis using Docker docker run \\--rm \\-v /location/of/agbase_database:/agbase_database \\-v /location/of/go_info:/go_info \\-v $(pwd):/work-dir \\agbase/goanna:2.4 \\-a invertebrates \\-c GCF_031307605.1_icTriCast1.1_protein.faa \\-o GCF_031307605.1 \\-g 70 \\-s 900 \\-r 1.2 \\-d RefSeq \\-u AgBase \\-x 7070 \\-k 9 \\-q 70 Command Explained: docker run: tells docker to run --rm: removes the container when the analysis has finished. The image will remain for future use. -v /location/of/agbase_database:/agbase_database: tells docker to mount the &#39;agbase_database&#39; directory you downloaded to the host machine to the &#39;/agbase_database&#39; directory within the container. The syntax for this is: &lt;absolute path on host&gt;:&lt;absolute path in container&gt; -v /location/of/go_info:/go_info: mounts &#39;go_info&#39; directory on host machine into &#39;go_info&#39; directory inside the container -v $(pwd):/work-dir: mounts my current working directory on the host machine to &#39;/work-dir&#39; in the container agbase/goanna:2.4: the name of the Docker image to use All the options supplied after the image name are GOanna options -a invertebrates: GOanna BLAST database to use--first of three required options. -c GCF_031307605.1_icTriCast1.1_protein.faa: input file--second of three required options -o GCF_031307605.1: output file basename--last of three required options -g 70: tells GOanna to keep only those matches with at least 70% identity -s 900: tells GOanna to keep only those matches with a bitscore above 900 -r 1.2: ratio of query length to subject length -d RefSeq: database of query ID. This will appear in column 1 of the GAF output file. -u AgBase: name to appear in column 15 of the GAF output file; if this contains a space it should be enclosed in double quotes e.g. &#34;assigned by&#34;. -x 7070: NCBI taxon ID of input file species will appear in column 13 of the GAF output file -k 9: tells GOanna to keep only those matches with a maximum number of 9 gap openings -q 70: tells GOanna to keep only those matches with query coverage of 70 per subject",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "Get the GOanna container Get GOanna...",
       "instruction": "Get the GOanna container Get GOanna container using Docker docker pull agbase/goanna:2.4",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "Understanding your results You should get 4 output files",
       "instruction": "Understanding your results You should get 4 output files: 1. &lt;basename&gt;.asn: This is standard BLAST output format that allows for conversion to other formats. You probably won’t need to look at this output. 2. &lt;basename&gt;.html: This output displays in your web browser so that you can view pairwise alignments to determine BLAST parameters. 3. &lt;basename&gt;.tsv: This is the tab-delimited BLAST output that can be opened and sorted in Excel to determine BLAST parameter values. The file contains the following columns: query ID query length query start query end subject ID subject length subject start subject end e-value percent ID query coverage percent positive ID gap openings total gaps bitscore raw score For more information on the BLAST output parameters see the NCBI BLAST documentation . 4. &lt;basename&gt;_goanna_gaf.tsv: This is the standard tab-separated gene association file format that is used by the GO Consortium and by software tools that accept GO annotation files to do GO enrichment.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "GOanna performs a BLAST 2 search,...",
       "instruction": "GOanna performs a BLAST 2 search, allows you to filter based on BLAST match parameters and transfers Gene Ontology (GO) functional annotations from the BLAST matches to your input proteins. GOanna accepts a protein FASTA file as input. BLAST databases are created by AgBase based upon proteins that have GO available and subsetted by phyla. We recommend selecting the database most closely related to the sequence used as input. We strongly recommend selecting only GO annotations based on experimental evidence codes. This will ensure the best quality annotations for your data. The remaining parameters are standard BLAST parameters. More information on determining the best BLAST parameters for your specific data set can be found in the section below.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "Get the GOanna container Get GOanna...",
       "instruction": "Get the GOanna container Get GOanna container using Apptainer apptainer pull docker://agbase/goanna:2.4",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "Run GOanna analysis with Apptainer GOanna...",
       "instruction": "Run GOanna analysis with Apptainer GOanna help using Apptainer apptainer run goanna_2.4.sif -h GOanna help and usage: Options: -a BLAST database basename (arthropod, bacteria, bird, crustacean, fish, fungi, human, insecta, invertebrates, mammals, nematode, plants, rodents uniprot_sprot, uniprot_trembl, vertebrates or viruses) -c peptide fasta filename -o output file basename [-b transfer GO with experimental evidence only (yes or no). Default = yes.] [-d database of query ID. If your entry contains spaces either substitute an underscore (_) or, to preserve the space, use double quotes around your entry. Default: user_input_db ] [-e Expect value (E) for saving hits. Default is 10.] [-f Number of aligned sequences to keep. Default: 3] [-g BLAST percent identity above which match should be kept. Default: keep all matches.] [-h help] [-m BLAST percent positive identity above which match should be kept. Default: keep all matches.] [-s bitscore above which match should be kept. Default: keep all matches.] [-k Maximum number of gap openings allowed for match to be kept. Default: 100] [-l Maximum number of total gaps allowed for match to be kept. Default: 1000] [-q Minimum query coverage per subject for match to be kept. Default: keep all matches] [-t Number of threads. Default: 8] [-u Assigned by field of your GAF output file. If your entry contains spaces (eg. firstname lastname) either substitute and underscore (_) or, to preserve the space, use quotes around your entry (eg. firstname lastname) Default: user] [-x Taxon ID of the query species. Default: taxon:0000] [-p parse_deflines. Parse query and subject bar delimited sequence identifiers] GOanna has three required parameters: -a BLAST database basename (acceptable options are listed in the help/usage)-c peptide FASTA file to BLAST-o output file basename Other parameters may be necessary for your particular analysis. The following parameters were evaluated for use with invertebrate whole proteome sets . GOanna analysis using Apptainer apptainer run \\-B /location/of/agbase_database:/agbase_database \\-B /location/of/go_info:/go_info \\-B /directory/where/you/will/work:/work-dir \\goanna_2.4.sif \\-a invertebrates \\-c GCF_031307605.1_icTriCast1.1_protein.faa \\-o GCF_031307605.1 \\-g 70 \\-s 900 \\-d RefSeq \\-u AgBase \\-x 7070 \\-t 28 \\-r 1.2 \\-q 70 \\-k 9 Command explained: On HPC systems this command should be submitted as a job with a proper header (e.g. slurm header). You will also need to ensure apptainer is installed on the system and load the apptainer module. apptainer run: tells Apptainer to run -B /location/of/agbase_database:/agbase_database: tells docker to mount the &#39;agbase_database&#39; directory I downloaded to the host machine to the &#39;/agbase_database&#39; directory within the container. The syntax for this is: &lt;absolute path on host&gt;:&lt;absolute path in container&gt; -B /location/of/go_info:/go_info: mounts &#39;go_info&#39; directory on host machine into &#39;go_info&#39; directory inside the container -B /directory/where/you/will/work:/work-dir: mounts my current working directory on the host machine to &#39;/work-dir&#39; in the container goanna_2.4.sif: the name of the Singularity image file to use All the options supplied after the image name are GOanna options -a invertebrates: GOanna BLAST database to use--first of three required options. -c GCF_031307605.1_icTriCast1.1_protein.faa: input file--second of three required options -o GCF_031307605.1: output file basename--last of three required options -g 70: tells GOanna to keep only those matches with at least 70% identity -s 900: tells GOanna to keep only those matches with a bitscore above 900 -d RefSeq: database of query ID. This will appear in column 1 of the GAF output file. -u AgBase: name to appear in column 15 of the GAF output file; if this contains a space it should be enclosed in double quotes e.g. &#34;assigned by&#34;. -x 7070: NCBI taxon ID of input file species will appear in column 13 of the GAF output file -t 28: number of threads to use for BLAST. This was run on a node with 28 cores. -r 1.2: ratio of query length to subject length -k 9: tells GOanna to keep only those matches with a maximum number of 9 gap openings -q 70: tells GOanna to keep only those matches with query coverage of 70 per subject",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "Understanding your results You should get 4 output files",
       "instruction": "Understanding your results You should get 4 output files: 1. &lt;basename&gt;.asn: This is standard BLAST output format that allows for conversion to other formats. You probably won’t need to look at this output. 2. &lt;basename&gt;.html: This output displays in your web browser so that you can view pairwise alignments to determine BLAST parameters. 3. &lt;basename&gt;.tsv: This is the tab-delimited BLAST output that can be opened and sorted in Excel to determine BLAST parameter values. The file contains the following columns: query ID query length query start query end subject ID subject length subject start subject end e-value percent ID query coverage percent positive ID gap openings total gaps bitscore raw score For more information on the BLAST output parameters see the NCBI BLAST documentation . 4. &lt;basename&gt;_goanna_gaf.tsv: This is the standard tab-separated gene association file format that is used by the GO Consortium and by software tools that accept GO annotation files to do GO enrichment.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "Get the InterProScan data Get InterProScan...",
       "instruction": "Get the InterProScan data Get InterProScan Data #Pull the tar fileswget ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.75-106.0/alt/interproscan-data-5.75-106.0.tar.gzwget ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.75-106.0/alt/interproscan-data-5.75-106.0.tar.gz.md5#Run checksumsmd5sum -c interproscan-data-5.75-106.0.tar.gz.md#Extract the tar filetar -pxvzf interproscan-data-5.75-106.0.tar.gz",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "Understanding Your Results InterProScan outputs",
       "instruction": "Understanding Your Results InterProScan outputs: https://interproscan-docs.readthedocs.io/en/v5/OutputFormats.html &lt;basename&gt;.gff3 &lt;basename&gt;.tsv &lt;basename&gt;.xml &lt;basename&gt;.json Parser Outputs &lt;basename&gt;_gaf.txt: -This table follows the formatting of a gene association file (GAF) and can be used in GO enrichment analyses. &lt;basename&gt;_acc_go_counts.txt: -This table includes input accessions, the number of GO IDs assigned to each accession and GO ID names. GO IDs are split into BP (Biological Process), MF (Molecular Function) and CC (Cellular Component). &lt;basename&gt;_go_counts.txt: -This table counts the numbers of sequences assigned to each GO ID so that the user can quickly identify all genes assigned to a particular function. &lt;basename&gt;_acc_interpro_counts.txt: -This table includes input accessions, number of InterPro IDs for each accession, InterPro IDs assigned to each sequence and the InterPro ID name. &lt;basename&gt;_interpro_counts.txt: -This table counts the numbers of sequences assigned to each InterPro ID so that the user can quickly identify all genes with a particular motif. &lt;basename&gt;_acc_pathway_counts.txt: -This table includes input accessions, number of pathway IDs for the accession and the pathway names. Multiple values are separated by a semi-colon. &lt;basename&gt;_pathway_counts.txt: -This table counts the numbers of sequences assigned to each Pathway ID so that the user can quickly identify all genes assigned to a pathway. &lt;basename&gt;.err: -This file will list any sequences that were not able to be analyzed by InterProScan. Examples of sequences that will cause an error are sequences with a large run of Xs.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
+      "title": "Get the InterProScan data Get InterProScan...",
       "instruction": "Get the InterProScan data Get InterProScan Data #Pull the tar fileswget ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.75-106.0/alt/interproscan-data-5.75-106.0.tar.gzwget ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.75-106.0/alt/interproscan-data-5.75-106.0.tar.gz.md5#Run checksumsmd5sum -c interproscan-data-5.75-106.0.tar.gz.md#Extract the tar filetar -pxvzf interproscan-data-5.75-106.0.tar.gz",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
+      "title": "Get the InterProScan container Get InterProScan...",
       "instruction": "Get the InterProScan container Get InterProScan container using Apptainer apptainer pull docker://agbase/interproscan:5.75-106_2",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 22,
-      "title": "",
+      "title": "Run InterProScan analysis with Apptainer InterProScan...",
       "instruction": "Run InterProScan analysis with Apptainer InterProScan help using Apptainer apptainer run interproscan_5.75-106_2.sif -h InterProScan help and usage: Options: -a Optional, comma separated list of analyses. If this option is not set, ALL analyses will be run. -b Optional, base output filename (relative or absolute path). Note that this option, the output directory (-d) option and the output file name (-o) option are mutually exclusive. The appropriate file extension for the output format(s) will be appended automatically. By default the input file path/name will be used. -d Optional, output directory. Note that this option, the output file name (-o) option and the output file base (-b) option are mutually exclusive. The output filename(s) are the same as the input filename, with the appropriate file extension(s) for the output format(s) appended automatically. -c Optional. Disables use of the precalculated match lookup service. All match calculations will be run locally. -C Optional. Supply the number of cpus to use. -e Optional, excludes sites from the XML, JSON output -f Optional, case-insensitive, comma separated list of output formats. Supported formats are TSV, XML, JSON and GFF. Default for protein sequences are TSV, XML and GFF3, or for nucleotide sequences GFF3 and XML. -g Optional, switch on lookup of corresponding Gene Ontology annotation (IMPLIES -l lookup option) -h Optional, display help information -i Optional, path to fasta file that should be loaded on Master startup. Alternatively, in CONVERT mode, the InterProScan 5 XML file to convert. -l Also include lookup of corresponding InterPro annotation in the TSV and GFF3 output formats. -m Optional, minimum nucleotide size of ORF to report. Will only be considered if n is specified as a sequence type. Please be aware of the fact that if you specify a too short value it might be that the analysis takes a very long time! -p Optional, switch on lookup of corresponding Pathway annotation (IMPLIES -l lookup option) -t Optional, the type of the input sequences (dna/rna (n) or protein (p)). The default sequence type is protein. -T Optional, specify temporary file directory (relative or absolute path). The default location is temp/. -v Optional, display version number -r Optional. Mode required ( -r cluster) to run in cluster mode. These options are provided but have not been tested with this wrapper script. For more information on running InterProScan in cluster mode: https://github.com/ebi-pf-team/interproscan/wiki/ClusterMode -R Optional. Clusterrunid (crid) required when using cluster mode.-R unique_id OPTIONS FOR XML PARSER OUTPUTS -F This is the output directory from InterProScan. -D Supply the database responsible for these annotations. -x NCBI taxon ID of the ID being annotated -y Transcript or protein -n Name of the biocurator who made these annotations -M Optional. Mapping file. -B Optional. Bad input sequence file. Available InterProScan analyses: CDD COILS Gene3D HAMAP MOBIDB PANTHER Pfam PIRSF PRINTS PROSITE (Profiles and Patterns) SFLD SMART (unlicensed components only by default - this analysis has simplified post-processing that includes an E-value filter, however you should not expect it to give the same match output as the fully licensed version of SMART) SUPERFAMILY NCBIFAM (includes the previous TIGRFAM analysis) InterProScan analysis using Apptainer apptainer run \\-B /your/local/data/directory:/data \\-B /where/you/downloaded/data/interproscan-5.75-106.0/data:/opt/interproscan/data \\interproscan_5.75-106_2.sif \\-i /your/local/data/directory/GCF_031307605.1_icTriCast1.1_protein.faa \\-b GCF_031307605.1 \\-f tsv,xml \\-g \\-c \\-n AgBase \\-x 7070 \\-D RefSeq \\-l Command explained: apptainer run: tells Apptainer to run -B /your/local/data/directory:/data: mounts my working directory on the host machine into the /data directory in the container the syntax for this is &lt;aboslute path on host machine&gt;:&lt;aboslute path in container&gt; -B /where/you/downloaded/data/interproscan-5.75-106.0/data:/opt/interproscan/data: mounts he InterProScan data directory that was downloaded from the FTP site into the InterProScan data directory in the container interproscan_5.75-106_2.sif: name of the image to use All the options supplied after the image name are InterProScan options -i /your/local/data/directory/GCF_031307605.1_icTriCast1.1_protein.faa: input FASTA file -b GCF_031307605.1: output file basename -f tsv,xml: desired output file formats; xml output is required as input for the XML parser that generates the GAF and count files. -g: tells the tool to perform GO annotation -c: tells tool to perform local compute and not connect to EBI. This only adds a little to the run time but removes error messages from network time out errors -n AgBase: name of biocurator to include in column 15 of GAF output file; if this includes a space it should by enclosed in double quotes e.g. &#34;assigned by&#34;. -x 7070: taxon ID of query species to be used in column 13 of GAF output file -D RefSeq: database of query accession to be used in column 1 of GAF output file -l: tells tools to include lookup of corresponding InterPro annotation in the TSV and GFF3 output formats.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 23,
-      "title": "",
+      "title": "Understanding Your Results InterProScan outputs",
       "instruction": "Understanding Your Results InterProScan outputs: https://interproscan-docs.readthedocs.io/en/v5/OutputFormats.html &lt;basename&gt;.gff3 &lt;basename&gt;.tsv &lt;basename&gt;.xml &lt;basename&gt;.json Parser Outputs &lt;basename&gt;_gaf.txt: -This table follows the formatting of a gene association file (GAF) and can be used in GO enrichment analyses. &lt;basename&gt;_acc_go_counts.txt: -This table includes input accessions, the number of GO IDs assigned to each accession and GO ID names. GO IDs are split into BP (Biological Process), MF (Molecular Function) and CC (Cellular Component). &lt;basename&gt;_go_counts.txt: -This table counts the numbers of sequences assigned to each GO ID so that the user can quickly identify all genes assigned to a particular function. &lt;basename&gt;_acc_interpro_counts.txt: -This table includes input accessions, number of InterPro IDs for each accession, InterPro IDs assigned to each sequence and the InterPro ID name. &lt;basename&gt;_interpro_counts.txt: -This table counts the numbers of sequences assigned to each InterPro ID so that the user can quickly identify all genes with a particular motif. &lt;basename&gt;_acc_pathway_counts.txt: -This table includes input accessions, number of pathway IDs for the accession and the pathway names. Multiple values are separated by a semi-colon. &lt;basename&gt;_pathway_counts.txt: -This table counts the numbers of sequences assigned to each Pathway ID so that the user can quickly identify all genes assigned to a pathway. &lt;basename&gt;.err: -This file will list any sequences that were not able to be analyzed by InterProScan. Examples of sequences that will cause an error are sequences with a large run of Xs.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 24,
-      "title": "",
+      "title": "Pathannotator annotates proteins with KEGG (Kyoto...",
       "instruction": "Pathannotator annotates proteins with KEGG (Kyoto Encyclopedia of Genes and Genomes), Flybase and Reactome Drosophila melanogaster pathways. It does this through the use of KofamScan , KEGG API , OrthoFinder , Flybase and Reactome . KofamScan is a gene functional annotation tool based on KEGG Orthology and hidden Markov model (HMM). It is provided by the KEGG project. The online version is available here . This pipeline pulls annotation directly from the KEGG API when possible. When that isn&#39;t possible the pipeline implements Kofamscan to identify homologous KEGG objects (KO). The pathways annotated to these KEGG objects are then transferred to the corresponding proteins in your species of interest. If specified, the pipeline will also provide annotations to Flybase pathways and Reactome Drosophila melanogaster pathways. To do this the pipeline uses OrthoFinder to identify homologous Drosophila melanogaster proteins for your input proteins. Flybase metabolic pathway and signaling pathway annotations and Drosophila melanogaster Reactome pathways are then transferred to your input proteins from these homologs.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 25,
-      "title": "",
+      "title": "Get the KOfam databases",
       "instruction": "Get the KOfam databases. The KOfam &#39;profiles&#39; and &#39;ko_list&#39; databases are required to run the pipeline. If you don&#39;t already have these databases the pipeline will pull them during the first run. If you want to download them beforehand they are available from the KEGG website. Get the KOfam data wget https://www.genome.jp/ftp/db/kofam/profiles.tar.gzwget https://www.genome.jp/ftp/db/kofam/ko_list.gztar -xvzf profiles.tar.gzgunzip ko_list.gz",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 26,
-      "title": "",
+      "title": "Get the Pathannotator container",
       "instruction": "Get the Pathannotator container. The Pathannotator tool is available as a Docker container on Docker Hub: Pathannotator container Get Pathannotator container using Apptainer apptainer pull docker://agbase/pathannotator:4.1",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 27,
-      "title": "",
+      "title": "Run Pathannotator using Apptainer",
       "instruction": "Run Pathannotator using Apptainer. Pathannotator help using Apptainer apptainer run /path/with/image/file/pathannotator_4.1.sif -h Help and Usage: -h to see help and usage statement -k KEGG species code (NA or related species code if species not in KEGG) KEGG species codes can be found here: https://www.genome.jp/brite/br08611 -i input file (protein FASTA without header lines) -d (optional: default is .) output directory (the file path should be relative to, and inside of, your working directory) -f (optional: default is NA) FB for Flybase and DME Reactome annotations, NA for none -c (optional: default is nproc -1) number of cpus to use -o outbase (file basename to use for output files) Pathannotator analysis using Apptainer apptainer run \\-B /directory/you/want/to/work/in:/workdir \\-B /directory/with/kofam/database/files:/data \\/path/with/image/file/pathannotator_4.1.sif \\-k tca \\-i GCF_031307605.1_icTriCast1.1_protein.faa \\-d pathannotator \\-f FB \\-o GCF_031307605.1 Command Explained apptainer run: tells Apptainer to run -B /directory/you/want/to/work/in:/workdir: mounts the working directory on the host machine to &#39;/workdir&#39; in the container -B /directory/with/kofam/database/files:/data: mounts the directory with the kofam database file (or where you want them stored) on the host machine to &#39;/data&#39; in the container /path/with/image/file/pathannotator_4.1.sif: the name of the Apptainer image to use Tip All the options supplied after the image name are Pathannotator options -k tca: KEGG species code for Tribolium casteneum. Can be found here: https://www.genome.jp/brite/br08611 . If you species doesn&#39;t have a code choose a closely related species or &#39;NA&#39;. -i GCF_031307605.1_icTriCast1.1_protein.faa: input file (protein FASTA, no header lines) -d pathannotator: Directory where you want the outputs of the pipeline to be stored. The directory must exist before you run the pipeline. The file path should be relative to (and inside of) your working directory. -f FB: FB indicates that you want Flybase pathways annotations in addition to KEGG annotations -o GCF_031307605.1: this will be the prefix used to name all the output files",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 28,
-      "title": "",
+      "title": "This tool can be used to...",
       "instruction": "This tool can be used to combine the gene association file (GAF) outputs from GOanna and InterProScan. The tool accepts two input files: GOanna GAF output InterProScan GAF output",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 29,
-      "title": "",
+      "title": "Combine GAF outputs from GOanna and...",
       "instruction": "Combine GAF outputs from GOanna and InterProScan Combine GAFs has three parameters: -i InterProScan XML Parser GAF output-g GOanna GAF output-o output file basename Combine_GAFs using Docker docker run \\--rm \\-v $(pwd):/work-dir \\agbase/combine_gafs:1.1 \\-i /path/to/GCF_031307605.1_gaf.txt \\-g /path/to/GCF_031307605.1_goanna_gaf.tsv \\-o GCF_031307605.1_complete_gaf Command explained: docker run: tells docker to run --rm: removes the container when the analysis has finished. The image will remain for future use. -v $(pwd):/work-dir: mounts my current working directory on the host machine to &#39;/work-dir&#39; in the container agbase/combine_gafs:1.1: the name of the Docker image to use All the options supplied after the image name are Combine_GAFs options -i /path/to/&lt;basename&gt;_gaf.txt: InterProScan GAF output file. -g /path/to/&lt;basename&gt;_goanna_gaf.tsv: GOanna GAF output file. -o &lt;basename_complete_gaf&gt;: output file basename--a .tsv extension will be added",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 30,
-      "title": "",
+      "title": "This tool can be used to...",
       "instruction": "This tool can be used to combine the gene association file (GAF) outputs from GOanna and InterProScan. The tool accepts two input files: GOanna GAF output InterProScan GAF output",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 31,
-      "title": "",
+      "title": "Get combine_gafs container Get Combine_GAFS container...",
       "instruction": "Get combine_gafs container Get Combine_GAFS container using Docker docker pull agbase/combine_gafs:1.1",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 32,
-      "title": "",
+      "title": "Understanding your results Combine GAFs will...",
       "instruction": "Understanding your results Combine GAFs will create a single GAF output file: &lt;basename&gt;.tsv: This is a GAF format file that contains all the GO annotations from both GOanna and InterProScan. The original input files will remain as they were.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 33,
-      "title": "",
+      "title": "Understanding your results Combine GAFs will...",
       "instruction": "Understanding your results Combine GAFs will create a single GAF output file: &lt;basename&gt;.tsv: This is a GAF format file that contains all the GO annotations from both GOanna and InterProScan. The original input files will remain as they were.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 34,
-      "title": "",
+      "title": "The Tribolium castaneum RefSeq (GCF_031307605",
       "instruction": "The Tribolium castaneum RefSeq (GCF_031307605.1-RS_2024_04) proteins are used as an example throughout this protocol. Tribolium castaneum RefSeq proteins Get the Tribolium castaneum data wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/031/307/605/GCF_031307605.1_icTriCast1.1/GCF_031307605.1_icTriCast1.1_protein.faa.gzgunzip GCF_031307605.1_icTriCast1.1_protein.faa.gz",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 35,
-      "title": "",
+      "title": "BLAST",
       "instruction": "BLAST : architecture and applications.. BMC bioinformatics. The InterPro protein families and domains database: 20 years on.. Nucleic acids research. InterProScan 5: genome-scale protein function classification.. Bioinformatics (Oxford, England). KEGG: biological systems database as a model of the real world.. Nucleic acids research. FlyBase: updates to the Drosophila genes and genomes database.. Genetics. The Reactome Pathway Knowledgebase 2024.. Nucleic acids research. Docker: lightweight Linux containers for consistent development and deployment. Linux Journal. Singularity: Scientific containers for mobility of compute.. PloS one. Workflows for Rapid Functional Annotation of Diverse Arthropod Genomes.. Insects. KEGG: integrating viruses and cellular organisms.. Nucleic acids research. OrthoFinder: phylogenetic orthology inference for comparative genomics.. Genome biology. KofamKOALA: KEGG Ortholog assignment based on profile HMM and adaptive score threshold.. Bioinformatics (Oxford, England).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 36,
-      "title": "",
+      "title": "Pathannotator annotates proteins with KEGG (Kyoto...",
       "instruction": "Pathannotator annotates proteins with KEGG (Kyoto Encyclopedia of Genes and Genomes), Flybase and Reactome Drosophila melanogaster pathways. It does this through the use of KofamScan , KEGG API , OrthoFinder , Flybase and Reactome . KofamScan is a gene functional annotation tool based on KEGG Orthology and hidden Markov model (HMM). It is provided by the KEGG project. The online version is available here . This pipeline pulls annotation directly from the KEGG API when possible. When that isn&#39;t possible the pipeline implements Kofamscan to identify homologous KEGG objects (KO). The pathways annotated to these KEGG objects are then transferred to the corresponding proteins in your species of interest. If specified, the pipeline will also provide annotations to Flybase pathways and Reactome Drosophila melanogaster pathways. To do this the pipeline uses OrthoFinder to identify homologous Drosophila melanogaster proteins for your input proteins. Flybase metabolic pathway and signaling pathway annotations and Drosophila melanogaster Reactome pathways are then transferred to your input proteins from these homologs.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 37,
-      "title": "",
+      "title": "Understanding Your Results The output files...",
       "instruction": "Understanding Your Results The output files you can expect will differ depending on the circumstances of your run. If you are using a KEGG species code you will get both KEGG reference and KEGG species pathways. Without a KEGG code (NA) you will only get KEGG reference pathway annotations. Under all circumstances you may specify whether or not you want to receive Flybase and Reactome Drosophila melanogaster pathways annotations as well. Whatever your options, the pathways will all be output into a single GMT formatted file. Expected output files: There will be 2-5 output files depending the on the options specified. All analyses will generate a KEGG reference output and GMT file: &lt;basename&gt;_KEGG_ref.tsv: These are annotations to the KEGG reference pathways. The pathway identifiers will begin with &#39;map&#39;. A B C D 1 Input_protein_ID KEGG_KO KEGG_ref_pathway KEGG_ref_pathway_name 2 XP_015835225.1 K26207 map04024 cAMP signaling pathway 3 XP_015835225.1 K26207 map04261 Adrenergic signaling in 4 XP_001813251.1 K01540 map04022 cGMPPKG signaling pathway &lt;basename&gt;_all_pathways.gmt: This file contains all of the pathways annotations generated by the analysis (KEGG ref, KEGG species, Flybase and Reactome) in GMT format. This is a tab-delimited file with N columns: Pathway ID, Description and Proteins annotated to that pathway (columns 3-N). This file has no header. A B C D E 1 FBgg0000882 FlyBase_pathway XP_018223192.1 XP_018223020.1 XP_018220038.1 2 R-DME-109606 Reactome_pathway XP_0182222056.1 XP_018221350.1 3 tca00130 KEGG_species_pathway XP_018219344.1 4 map00254 KEGG_reference_pathway XP_018220255.1 XP_018229887.1 If a KEGG species code was specified (rather than &#39;NA&#39;) there will also be a KEGG species output: &lt;basename&gt;_KEGG_species.tsv: These are annotations to the species-specific KEGG pathways. The pathway identifiers will begin with the KEGG species code. A B C D 1 Input_protein_ID KEGG_KO KEGG_tca_pathway KEGG_tca_pathway_name 2 XP_001813251.1 K01540 tca04820 Cytoskeleton in muscle cells - Tribolium castaneum (red flour beetle) 3 XP_001812480.1 K02268 tca00190 Oxidative phosphorylation - Tribolium castaneum (red flour beetle) 4 XP_008195997.1 K04676 tca04350 TGF-beta signaling pathway - Tribolium castaneum (red flour beetle) If &#39;FB&#39; was specified there will also be Flybase and Reactome outputs: &lt;basename&gt;_flybase.tsv: If you used the &#39;FB&#39; option for Flybase pathways annotations you will get this output. A B C D 1 Input_protein_ID Flybase_protein_ID Flybase_pathway_ID Flybase_pathway_name 2 NP_001034540.1 FBpp0077451 FBgg0001085 BMP Signaling Pathway Core Components 3 NP_001034503.2 FBpp0084690 FBgg0000904 Insulin-like Receptor Signaling Pathway Core Components 4 NP_001034492.1 FBpp0078442 FBgg0002045 CHITIN BIOSYNTHESIS &lt;basename&gt;_reactome.tsv: If you used the &#39;FB&#39; option you will get this output containing Reactome Drosophila melanogaster pathways annotations. A B C D 1 Input_protein_ID Uniprot_ID Reactome_pathway_ID Reactome_pathway_name 2 XP_018221664.1 Q9W5E1 R-DME-1234174 Cellular response to hypoxia 3 XP_018222787.1 Q9W4N8 R-DME-194315 Signaling by Rho GTPases 4 XP_018222841.1 Q7KVX1 R-DME-162582 Signal transduction",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 38,
-      "title": "",
+      "title": "Understanding Your Results The output files...",
       "instruction": "Understanding Your Results The output files you can expect will differ depending on the circumstances of your run. If you are using a KEGG species code you will get both KEGG reference and KEGG species pathways. Without a KEGG code (NA) you will only get KEGG reference pathway annotations. Under all circumstances you may specify whether or not you want to receive Flybase and Reactome Drosophila melanogaster pathways annotations as well. Whatever your options, the pathways will all be output into a single GMT formatted file. Expected output files: There will be 2-5 output files depending the on the options specified. All analyses will generate a KEGG reference output and GMT file: &lt;basename&gt;_KEGG_ref.tsv: These are annotations to the KEGG reference pathways. The pathway identifiers will begin with &#39;map&#39;. A B C D 1 Input_protein_ID KEGG_KO KEGG_ref_pathway KEGG_ref_pathway_name 2 XP_015835225.1 K26207 map04024 cAMP signaling pathway 3 XP_015835225.1 K26207 map04261 Adrenergic signaling in 4 XP_001813251.1 K01540 map04022 cGMPPKG signaling pathway &lt;basename&gt;_all_pathways.gmt: This file contains all of the pathways annotations generated by the analysis (KEGG ref, KEGG species, Flybase and Reactome) in GMT format. This is a tab-delimited file with N columns: Pathway ID, Description and Proteins annotated to that pathway (columns 3-N). This file has no header. A B C D E 1 FBgg0000882 FlyBase_pathway XP_018223192.1 XP_018223020.1 XP_018220038.1 2 R-DME-109606 Reactome_pathway XP_0182222056.1 XP_018221350.1 3 tca00130 KEGG_species_pathway XP_018219344.1 4 map00254 KEGG_reference_pathway XP_018220255.1 XP_018229887.1 If a KEGG species code was specified (rather than &#39;NA&#39;) there will also be a KEGG species output: &lt;basename&gt;_KEGG_species.tsv: These are annotations to the species-specific KEGG pathways. The pathway identifiers will begin with the KEGG species code. A B C D 1 Input_protein_ID KEGG_KO KEGG_tca_pathway KEGG_tca_pathway_name 2 XP_001813251.1 K01540 tca04820 Cytoskeleton in muscle cells - Tribolium castaneum (red flour beetle) 3 XP_001812480.1 K02268 tca00190 Oxidative phosphorylation - Tribolium castaneum (red flour beetle) 4 XP_008195997.1 K04676 tca04350 TGF-beta signaling pathway - Tribolium castaneum (red flour beetle) If &#39;FB&#39; was specified there will also be Flybase and Reactome outputs: &lt;basename&gt;_flybase.tsv: If you used the &#39;FB&#39; option for Flybase pathways annotations you will get this output. A B C D 1 Input_protein_ID Flybase_protein_ID Flybase_pathway_ID Flybase_pathway_name 2 NP_001034540.1 FBpp0077451 FBgg0001085 BMP Signaling Pathway Core Components 3 NP_001034503.2 FBpp0084690 FBgg0000904 Insulin-like Receptor Signaling Pathway Core Components 4 NP_001034492.1 FBpp0078442 FBgg0002045 CHITIN BIOSYNTHESIS &lt;basename&gt;_reactome.tsv: If you used the &#39;FB&#39; option you will get this output containing Reactome Drosophila melanogaster pathways annotations. A B C D 1 Input_protein_ID Uniprot_ID Reactome_pathway_ID Reactome_pathway_name 2 XP_018221664.1 Q9W5E1 R-DME-1234174 Cellular response to hypoxia 3 XP_018222787.1 Q9W4N8 R-DME-194315 Signaling by Rho GTPases 4 XP_018222841.1 Q7KVX1 R-DME-162582 Signal transduction",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 39,
-      "title": "",
+      "title": "InterPro is a database which integrates...",
       "instruction": "InterPro is a database which integrates together predictive information about proteins&#39; function from a number of partner resources, giving an overview of the families that a protein belongs to and the domains and sites it contains. Basic functions of this tool InterProScan: removes special characters from FASTA sequences splits FASTA into groups of 1000 sequences runs InterProScan with user-specified options on each of the 1000-sequence files in parallel re-combines output files from all groups of 1000 InterProScan XML parser: parses the XML output from InterProScan to generate a gene association file (GAF) and count files for domains, pathways and GO annotations",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 40,
-      "title": "",
+      "title": "BLAST",
       "instruction": "BLAST : architecture and applications.. BMC bioinformatics. The InterPro protein families and domains database: 20 years on.. Nucleic acids research. InterProScan 5: genome-scale protein function classification.. Bioinformatics (Oxford, England). KEGG: biological systems database as a model of the real world.. Nucleic acids research. FlyBase: updates to the Drosophila genes and genomes database.. Genetics. The Reactome Pathway Knowledgebase 2024.. Nucleic acids research. Docker: lightweight Linux containers for consistent development and deployment. Linux Journal. Singularity: Scientific containers for mobility of compute.. PloS one. Workflows for Rapid Functional Annotation of Diverse Arthropod Genomes.. Insects. KEGG: integrating viruses and cellular organisms.. Nucleic acids research. OrthoFinder: phylogenetic orthology inference for comparative genomics.. Genome biology. KofamKOALA: KEGG Ortholog assignment based on profile HMM and adaptive score threshold.. Bioinformatics (Oxford, England).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 41,
-      "title": "",
+      "title": "Get GOanna Databases",
       "instruction": "Get GOanna Databases. There are two required directories to download: agbase_database and go_info. These can be obtained using GoCommands. This can be installed as a small binary file by the user (even on an HPC). Install GoCommands binary GOCMD_VER=$(curl -L -s https://raw.githubusercontent.com/cyverse/gocommands/main/VERSION.txt)curl -L https://github.com/cyverse/gocommands/releases/download/${GOCMD_VER}/gocmd-${GOCMD_VER}-linux-amd64.tar.gz | tar zxvf -chmod +x gocmd Initiate GoCommands ./gocmd init Fill in this data when prompted: iRODS Host [data.cyverse.org]: data.cyverse.org iRODS Port [1247]: 1247 iRODS Zone [iplant]: iplant iRODS Username: anonymous Pull data with GOCommands ./gocmd get -r --progress /iplant/home/shared/iplantcollaborative/protein_blast_dbs/go_info ../gocmd get -r --progress /iplant/home/shared/iplantcollaborative/protein_blast_dbs/agbase_database .",
       "is_critical": false,
       "timers": []

@@ -26,147 +26,147 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "OCT detects the interference signal between...",
       "instruction": "OCT detects the interference signal between the reflected signals from the reference mirror and the biological sample, and then, through a series of reconstruction steps such as interpolation and Fourier transformation, it finally generates the structural diagram of the sample. The OCT signal is essentially a complex function containing amplitude and phase information, which can be expressed by the following equation:1\nE˜(x,z)=A(x,z)·exp(i·φ(x,z)),(1)where A(x,z) represents the amplitude of the OCT signal in the lateral x direction and depth z, and φ(x,z) represents the phase of the OCT signal in the lateral x direction and depth z.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "The SSADA algorithm processes the collected...",
       "instruction": "The SSADA algorithm processes the collected raw data along the wave number direction using multiple Gaussian windows for different bands of raw data. Then, it calculates the decorrelation signals of the data collected at the same band and at different times at the same location, obtaining multiple decorrelation signals of different bands at the same location. After averaging these signals, a thresholding method is adopted to extract the final blood flow signal. The specific calculation method of the decorrelation signals DSSADA(x,z) based on Eq. (1) is as follows: DSSADA(x,z)=1N−1·1M∑n=1N−1∑m=1M{1−Am,n(x,z)Am,n+1(x,z)[12Am,n(x,z)2+12Am,n+1(x,z)2]},(2)where M represents the number of spectral bands and N represents the repetition times of B-scan at the same position. The value of DSSADA(x,z) ranges from 0 to 1, and its magnitude indicates the degree of correlation between different B-scan collected at the same position at different times; the smaller the DSSADA(x,z), the lower the correlation between the B-scan; conversely, the higher the correlation.18",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "The ISCA obtains an improved speckle...",
       "instruction": "The ISCA obtains an improved speckle contrast image by calculating the ratio of the standard deviation between B-scan data collected at different times at the same location to the average intensity. To eliminate the high intensity values of static tissues and enhance the blood flow signal, it uses multiple averaged B-scan images and the speckle contrast image for masking processing to generate the final blood flow image. The specific calculation method for the improved ISC blood flow signal Iflow(x,z) based on Eq. (1) is as follows: Iflow(x,z)=1N−1·1N·∑n=1N−1|An+1(x,z)−An(x,z)|An+1(x,z)·An(x,z)·∑n=1NAn(x,z),(3)where N still represents the number of repetitions of the B-scan at the same location. The value of Iflow(x,z) indicates the intensity of the blood flow signal at that location; the smaller the Iflow(x,z), the lower the intensity of the blood flow signal, and conversely, the higher the intensity.21",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "The SSADA algorithm employs Gaussian windows...",
       "instruction": "The SSADA algorithm employs Gaussian windows to partition the full OCT spectrum into multiple narrow bands, yielding images with a reduced axial resolution that is comparable to the lateral resolution. Although spectral splitting methods based on Gaussian, Hanning, and Kaiser windows can accurately capture variations in blood flow signals, they inherently discard a portion of the data along the A-scan direction, leading to a degradation in the axial resolution of the reconstructed images. Consequently, this study utilized an improved Walsh function to generate window functions that cover the entire spectrum, thereby ensuring the accurate extraction of blood flow signals while minimizing the loss of axial resolution.28",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "As the values of the Walsh...",
       "instruction": "As the values of the Walsh function are only 1 and −1, when constructing the window function using it and applying the window to the collected original spectral data, it will cause positive and negative jumps at certain points in the original spectral signal. This results in an increase in spectral leakage after the fast Fourier transform (FFT), thereby affecting the extraction of blood flow. Therefore, in this paper, an arctangent function was constructed at the 5% points on both sides of the discontinuity points of the Walsh function’s jumps to smooth the Walsh window function, thereby reducing the impact of spectral leakage on the final blood flow extraction. The formula of the Walsh window function Walsh(n,x) constructed in this paper is as follows:29\nWalsh(n,x)={∏i=03{sign[sin(2i+1πx)]}gi,x∉(pm−α·N,pm+α·N)±2π arctan[β·(x−pmα·N)],x∈(pm−α·N,pm+α·N),(4)where n represents a decimal number; gi represents the i’th bit of the Gray code corresponding to the decimal number n; pm represents the position of the m’th jump discontinuity point of the Walsh function; and α is the truncation factor on the left and right of the jump discontinuity point of the Walsh function, which controls the width of the transition region. In this paper, its value was empirically set to 0.01 for our specific system setup. β is the scaling coefficient of the arctangent function along the x-axis, which controls the steepness of the smoothing curve, and its value was taken as 2. It is important to note that the selection of these aforementioned coefficients is not rigidly fixed but is systematically determined based on the mathematical properties of the arctangent function combined with the spectral sample size (N) of the current OCT system. The primary optimization criterion for determining α and β is to ensure that over 90% of the amplitude variation is completed within the defined transition region. Consequently, when applying this method to other OCT systems with different spectrometer resolutions, α and β should be adaptively adjusted to satisfy this transition criterion. N represents the length of the data; sign[⋅] is the sign function, and its specific expression can be sign[f(x)]={+1,f(x)>0−1,f(x)<0,(5)where f(x) is the variable of the sign function. In this paper, when constructing the window function, as the values of the first Walsh function are all 1, in the actual blood flow extraction algorithm, only the first 2, 3, and 4 Walsh functions were taken for calculation. The window function image improved based on the first four Walsh functions constructed in this paper is shown in Fig. 1. Figures 1(a)–1(d) are the window function images constructed based on the first four Walsh functions, respectively.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "Function graph of the first four Walsh windows",
       "instruction": "Function graph of the first four Walsh windows. (a) The first Walsh window function. (b) The second Walsh window function. (c) The third Walsh window function. (d) The fourth Walsh window function.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "The complete OCTA processing pipeline is illustrated in Fig",
       "instruction": "The complete OCTA processing pipeline is illustrated in Fig. 2. Prior to algorithmic reconstruction, standard volumetric data acquisition was performed, involving four repeated B-scans at each lateral position. The subsequent reconstruction procedure is characterized by three synergistic processing stages.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Flow chart of the complete OCTA processing pipeline",
       "instruction": "Flow chart of the complete OCTA processing pipeline. Block 1 illustrates the standard data acquisition protocol (a prerequisite step), whereas blocks 2, 3, and 4 represent the three specific stages of the proposed angiography reconstruction algorithm.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Walsh-window-based spectral division was first executed along the wavenumber direction",
       "instruction": "Walsh-window-based spectral division was first executed along the wavenumber direction. The raw spectral data were partitioned using the smoothed second, third, and fourth Walsh window functions, resulting in three distinct spectral subsets. These subsets were processed into depth-resolved amplitude signals using a standard SD-OCT reconstruction pipeline—encompassing background subtraction, interpolation, and fast Fourier transform.22 To mitigate motion-induced instability, the phase compensation method from Ref. 24 was directly applied. Following reconstruction, speckle contrast was calculated for each subset according to Eq. (3) to generate three dynamic signal volumes.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Structural reconstruction and layer segmentation were...",
       "instruction": "Structural reconstruction and layer segmentation were performed simultaneously using the full-spectrum raw data.18 To improve the signal-to-noise ratio and structural contrast, multiple frames at the same location were averaged to produce a high-quality structural volume.18 As illustrated in the OCT layering scheme in Fig. 3, the deep learning-based MIAS-3000 algorithm was then utilized to delineate the retina into distinct anatomical layers (from NFL to Choroid). Specifically, Fig. 3(a) presents an unsegmented OCT cross-section, whereas Fig. 3(b) displays the resulting segmentation boundaries mapped onto the structural image. This step provided the necessary anatomical constraints for subsequent signal refinement. Although the deep-learning-based MIAS-3000 algorithm was employed in this study for its high precision, it is important to note that the proposed signal enhancement strategy is algorithm-agnostic. The anatomical mask can be derived from any high-quality OCT layer segmentation, ensuring the versatility of our reconstruction framework across different clinical platforms.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "OCT layering diagram",
       "instruction": "OCT layering diagram. (a) OCT image without layering. (b) Mapping of layered results on the OCT image.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "Mask-assisted flow enhancement and en face...",
       "instruction": "Mask-assisted flow enhancement and en face projection constituted the final stage. The dynamic signal volumes and the structural segmentation results were integrated such that the segmented retinal boundaries provided a dynamic spatial template to isolate valid flow regions. Otsu’s thresholding30 was then applied to these isolated regions to truncate residual noise and enhance the blood flow B-scan intensity. Finally, en face angiograms were generated via mean projection along the depth (z) direction. As background noise was strictly suppressed by the layer-masking and thresholding procedures prior to projection, the mean accumulation effectively smoothed dynamic speckle variations and preserved microvascular continuity without the noise-dilution penalties typically associated with nonmaximum projection methods.31",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "The fractal dimension (FD) is a...",
       "instruction": "The fractal dimension (FD) is a robust mathematical metric used to measure the structural complexity of objects. In this study, the box-counting method was adopted due to its proven effectiveness in determining the self-similarity of complex vascular structures across varying dimensions. The fractal dimension DF is defined by the following relationship:32\nDF=lims→0ln Nsln(1s),(6)where Ns is the number of boxes of size s required to cover the structure in the image. Based on this, the local fractal dimension (LFD) is established in the image by using a sliding window, and the fractal dimension of each pixel in the window is calculated using Eq. (6). Currently, the local fractal dimension has been used to study image texture and surface roughness. The local fractal dimension DLF(i,j) corresponding to each pixel of the input image I(i,j) in the (2w+1)×(2w+1) window can be calculated using the following method:32–34\nDLF(i,j)=FD[I(i+k,j+k);−w<k<w],(7)where FD[⋅] represents the fractal dimension calculation method in Eq. (6). To better validate the performance of the fractal dimension method for subsequent clinical metrics, the window size w was carefully selected. If w is too small, the number of pixels containing vessel information is insufficient; conversely, if w is too large, fine capillaries are prone to being overlooked, leading to inaccurate fractal dimension calculations. Therefore, considering the minimum capillary resolution of the current system, the value of w was determined to range from 2 to 6. Specifically, for each localized pixel, the algorithm iterates through this range of kernel sizes, counts the corresponding vessel pixels (white pixels), and performs a logarithmic linear regression. The local fractal dimension is subsequently extracted directly as the slope of this fitted regression line.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "The vascular structure of the foveal...",
       "instruction": "The vascular structure of the foveal avascular zone (FAZ) is of great significance for elucidating the pathogenesis of glaucoma. The degeneration or atrophy of capillaries at the macula may affect the shape and size of the FAZ, which has been proven to have diagnostic and prognostic value for retinal diseases such as retinal vein occlusion (RVO) and diabetic retinopathy (DR). The circularity index (CI) of the FAZ is an important indicator for measuring the degree of deviation from a circular shape of the FAZ. It can be calculated based on the perimeter and area of the FAZ shape. The specific calculation formula for the FAZ circularity index ICI-FAZ is as follows: ICI-FAZ=4π×SFAZPFAZ,(8)where SFAZ represents the area of the FAZ and PFAZ represents the perimeter of the FAZ. The value of ICI-FAZ ranges from 0 to 1. The closer the value of ICI-FAZ is to 1, the more circular the shape of the FAZ is; the closer the value of ICI-FAZ is to 0, the less regular the shape of the FAZ is. In addition, the FAZ circularity index and perimeter are among the best discriminant parameters for the eyes of glaucoma patients and healthy controls:35",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "Vessel density index (VD) is an...",
       "instruction": "Vessel density index (VD) is an important indicator for assessing retinal vascular abnormalities. Conditions such as diabetic retinopathy (DR), retinal vein occlusion (RVO), sickle cell retinopathy (SCR), age-related macular degeneration (AMD), and glaucoma can all cause abnormal retinal vessels, potentially leading to vascular ischemia and detachment. As the early stages of most diseases are manifested at the capillary level, evaluating retinal vessel density is of great significance.1 In this article, VD is defined as the ratio of the vessel area to the area of the region of interest (ROI) in the OCTA image, which can be specifically expressed as: IVD=∑i,jV(i,j)∑i,jR(i,j)×100%,(9)where V(i,j) represents the area of blood vessels within the ROI and R(i,j) represents the area of the ROI. The higher the value of the vessel’s density IVD, the greater the vessel’s density in that area, and conversely, the lower the density.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "After obtaining the OCTA images through...",
       "instruction": "After obtaining the OCTA images through the OCTA reconstruction algorithm described in the previous chapters, a local fractal dimension analysis was performed on the OCTA images to extract the vessel parts and perform threshold segmentation through adaptive binarization to remove noise.36 Subsequently, parallel analysis was conducted on the obtained vessel images. One part was used to extract the FAZ to calculate its perimeter, area, and circularity index. During the extraction of the FAZ, the algorithm precisely applied a sequence of morphological operations. First, a morphological opening operation was utilized to remove isolated noise pixels and fine boundary artifacts from the binarized mask. Following a gray-scale inversion to highlight the avascular spaces, the algorithm automatically extracted the largest connected component, which reliably corresponds to the FAZ region. These precise steps allowed for the automated calculation of its perimeter, area, and circularity index without manual intervention. For the other part, the OCTA image after extracting the vessels was partitioned into each region, and the vessel density was calculated separately in each region. In this paper, according to the method described in Ref. 33, the circular region centered on the FAZ was first excluded, and the peripheral field around this circular region was divided into four regions: temporal (temporal, T), superior (superior, S), nasal (nasal, N), and inferior (inferior, I). Figure 4(a) shows the flowchart for calculating the OCTA clinical indicators, and Fig. 4(b) shows the OCTA image of the retinal IR vessels plexus and the schematic diagrams of the four peripheral field regions (T, S, N, I).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "OCTA clinical indicators generation",
       "instruction": "OCTA clinical indicators generation. (a) Flow chart of OCTA clinical index calculation. (b) Schematic diagram of OCTA vessels density zoning.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "To quantitatively evaluate the performance of...",
       "instruction": "To quantitatively evaluate the performance of the proposed reconstruction algorithm and the accuracy of the automated clinical indicator extraction, several standard metrics were employed. First, for image quality assessment, the analysis indicators included vessel connectivity, contrast, and signal-to-noise ratio (SNR).37 According to the robust evaluation methodology established in Ref. 36, the OCTA images before and after enhancement were strictly averaged to generate a fused vessel mask image M(i,j), which was subsequently skeletonized to a 1-pixel width. This averaged mask image served as the “ground truth.” It is important to emphasize that employing manual annotation for image quality assessment presents significant challenges; particularly in low-SNR OCTA images, microvessels are often indistinguishable from background noise, leading to severe subjective variability. By utilizing an averaging approach, we effectively eliminate the bias introduced by subjective human judgment. Furthermore, it ensures that the ground truth image maintains a balanced, equidistant baseline from all evaluated OCTA reconstructions, providing a fair and objective standard for calculating metrics such as contrast and SNR. The specific formula for calculating vessel connectivity Vconnectivity is as follows: Vconnectivity=Std[I(i,j)|M(i,j)=1],(10)where Std[⋅] is the standard deviation calculation function; I(i,j) is the OCTA image. The vessel connectivity defined by this equation is expressed as the standard deviation of the intensity of the OCTA image that completely overlaps with the mask image. The lower the value, the better the vessel connectivity in the OCTA image. The contrast Vcontrast of the OCTA image is calculated as follows: Vcontrast=Mean[I(i,j)|M(i,j)=1]Std[I(i,j)|M(i,j)=1],(11)where Mean[⋅] is the mean calculation function. The OCTA image contrast defined by this formula is expressed as the ratio of the mean intensity of the OCTA image that completely overlaps with the mask image to the standard deviation. The higher the value, the higher the OCTA image contrast. The formula for calculating the signal-to-noise ratio VSNR of the OCTA image is as follows: VSNR=10 lg{Mean[I(i,j)|M(i,j)=1]Std[I(i,j)|N(i,j)=1]},(12)where N(i,j) is the background mask image obtained by dilating and reversing M(i,j) using a 3×3 circular structuring element. The signal-to-noise ratio of the OCTA image defined by this formula is the ratio of the mean intensity of the OCTA image that completely overlaps with the mask image to the standard deviation of the OCTA image that completely overlaps with the background mask image. Here, the width of the vessels in the background image is comparable to the width of the large vessels in the OCTA image. The higher the value of VSNR, the higher the signal-to-noise ratio of the OCTA image.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "Furthermore, recognizing that intensity-based connectivity metrics...",
       "instruction": "Furthermore, recognizing that intensity-based connectivity metrics may be partially confounded by physiological variations in blood flow when comparing different algorithms, we introduced a purely morphological metric to evaluate structural connectivity directly: the largest connected component (LCC) ratio. To compute the LCC ratio, the OCTA image was first binarized using adaptive local thresholding and then processed with a morphological thinning algorithm to extract a skeletonized vascular network (1-pixel width). The LCC ratio is defined as the total number of pixels within the single largest interconnected vascular tree divided by the total number of vascular skeleton pixels in the entire image. A higher LCC ratio strictly indicates fewer fragmented capillaries and superior structural continuity, effectively isolating structural integrity from blood flow intensity.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "Second, for the evaluation of clinical...",
       "instruction": "Second, for the evaluation of clinical indicators, specifically to verify the accuracy of FAZ segmentation, 20 OCTA images of 10 volunteers were manually annotated by professional image readers to form the ground truth for the FAZ area. Because the FAZ boundary in the foveal region is morphologically distinct, manual annotation by experts provides a highly reliable and accurate reference for evaluating this specific macroscopic clinical indicator. Then, the similarity index and segmentation error between the algorithm in this paper and the ground truth results were analyzed to verify the accuracy of the local fractal dimension for segmenting the FAZ area. The similarity index is also called the kappa coefficient, which measures the similarity between two segmented regions by the ratio of the intersection area to the combined area of the two regions. The similarity index kFAZ for the FAZ area can be expressed as kFAZ=2|SGT∩SLFD||SGT|+|SLFD|,(13)where SGT represents the area of the FAZ region manually annotated by OCTA, and SLFD represents the area of the FAZ region segmented based on the local dimension algorithm. The value of kFAZ lies between 0 and 1; 0 indicates that the two regions do not have overlapping parts, whereas 1 indicates that the two regions are completely overlapping. In addition, this paper determines the segmentation error by calculating the false positive rate rP and the false negative rate rN. Here, the false positive rate represents the probability of non-FAZ regions being included in the automatic segmentation result, and vice versa. The calculation methods for the false positive rate and the false negative rate are to divide the area of the incorrectly segmented non-FAZ regions and the FAZ regions by the area of the FAZ region in the ground truth. The false positive rate rP and the false negative rate rN are respectively as shown in Eqs. (14) and (15).38\nrP=|SLFD|−|SGT∩SLFD||SGT|×100%,(14)rN=|SGT|−|SGT∩SLFD||SGT|×100%,(15)",
       "is_critical": true,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
+      "title": "To this end, the intraclass correlation...",
       "instruction": "To this end, the intraclass correlation coefficient (ICC) among the perimeter, area, and circularity index of the segmented regions by the automatic segmentation algorithm and the ground truth was calculated. The values range from 0 to 1, with 0 indicating complete unreliability and 1 indicating complete reliability.39",
       "is_critical": false,
       "timers": []

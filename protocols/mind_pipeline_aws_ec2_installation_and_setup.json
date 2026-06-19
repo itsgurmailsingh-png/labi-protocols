@@ -34,77 +34,77 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "After login to AWS EC2 web...",
       "instruction": "After login to AWS EC2 web console, launch a new instance based on the most recent Amazon Linux 2 AMI (at time of protocol revision, this was kernel v5.1 based). Compute optimized instances are preferred but this can be optimized based on the available instance types and task requirements. A good starting point are c5 instances like c5.xlarge as they provide a reasonable ratio of CPU cores vs. memory. Storage depends on the overall amount of data and storage strategy (methods of data storage on AWS in other ways are out of scope of this introduction protocol). Consider storage of raw data, extracted data and intermediate data. 50GB SSD storage is a recommended starting point for average (24-48 samples) NGS analysis projects. Launch the instance and connect via SSH",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Install required tools Update yum database...",
       "instruction": "Install required tools Update yum database sudo yum update Amazon Linux 2 Install wget and git sudo yum -y install wget git Amazon Linux 2",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "To clone the most recent version...",
       "instruction": "To clone the most recent version of the miND pipeline from gitlab, run the following command Clone miND from github cd ~git clone https://github.com/tamirna/miND.gitcd ~/miND Amazon Linux 2",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "miND expects genomic data (bowtie indices...",
       "instruction": "miND expects genomic data (bowtie indices of genomes, miRNAs and other RNA species) in a subfolder repository/data and a specific format. The whole process of downloading and building of required indices can be performed with a separate snakemake pipeline located in the subfolder &#34;repository&#34;. Building the data repository is required only once ! miND can then run multiple times using data from this repository. Only when updated public repository data is needed, the repository has to be rebuilt.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Configuration of data sources",
       "instruction": "Configuration of data sources: Note: The pipeline is pre-configured to run with data from Homo Sapiens and Mus Musculus . The following configuration steps can be skipped if data belongs to those two species. Three subfolders exists in the repository folder, each containing a snakemake workflow for one type of data source. Each has to be configured in a snakemake yml file to contain links to the most recent and desired data sources. genomes mirbase rnacentral Each of these subfolders contains a file &#34;config.yml&#34; in Snakemake configuration format. Initially, data for Mus Musculus and Homo Sapiens is setup. For other species all three of the confguration files have to be changed and supplied with URLs and other details to the data. Please see comments in the config.yml files for more details.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "Run build",
       "instruction": "Run build.sh command to build the repository A build.sh script is located in the repository subfolder which will run the snakemake commands of all three subfolders and thus download, extract and build all genomic data and databases. build data repository cd ~/miND/repository/./build.sh Amazon Linux 2 The script will check dependencies (conda, snakemake, etc.) and install them if needed. Installation of these dependencies and setup of conda environments might take some time, but is only needed during the first run .",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "miND pipeline needs to be made...",
       "instruction": "miND pipeline needs to be made aware of the available indices. As it is not a requirement to provide and build data with the scripts located in the repository folder, this data has to be added manually to the config.yml in the miND folder. Please make sure that the miND/config.yml file contains identical genomeIDs, code, genomeVersion and txid as the repository/data directory. New species can be added (if also data is available in the repository). Changes then also need to be reflected in the SampleContrastSheet.xlsx (see next step).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "For handling of recurring data, each...",
       "instruction": "For handling of recurring data, each project is configured with a XLSX file that can be easily edited by non-bioinformaticians. It contains all needed information about the data (analysis related) and links to the datafiles. It is recommended to generate a &#34;data&#34; folder outside of the miND folder and store each project&#39;s data in a subfolder. This protocol will use data from E-MTAB-6885 available on ArrayExpress as example data: IMPORTANT: This protocol does not try to reanalyze the data like the original authors did. The final analysis is useless on purpose. It is only used to demonstrate the general workflow of the miND pipeline. E-MTAB-6885 After downloading the fastq.gz sample data ( https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6885/samples/ ) for each of the 48 samples, data will be stored in ~/data/E-MTAB-6885 ~/data/E-MTAB-6885/3Bcoculture_S8_L001_R1_001.fastq.gz ~/data/E-MTAB-6885/3Bcoculture_S8_L002_R1_001.fastq.gz ~/data/E-MTAB-6885/3Bcoculture_S8_L003_R1_001.fastq.gz ~/data/E-MTAB-6885/3Bcoculture_S8_L004_R1_001.fastq.gz ~/data/E-MTAB-6885/3Bcontrol_S1_L001_R1_001.fastq.gz [...] miND pipeline can directly process the following file types : fastq/fq, fastq.gz/fq.gz, and bam (without alignments). When providing file names in the SampleContrastSheet.xlsx, file extensions are optional. miND will automatically try to find available files and process them accordingly.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Prepare SampleContrastSheet",
       "instruction": "Prepare SampleContrastSheet.xlsx file This file contains project specific information. This includes general information (that might not be used directly by the pipeline but will be part of the generated HTML report for documentation) and also sample specific information like raw data file names, group associations for differential expression. The last sheet of this file allows the selection of requested contrasts from differential expression (if wanted). The available groups are based on the given group levels in the sample group matrix. The SampleContrastSheet.xlsx for the example given can be found here: E-MTAB-6885_SampleContrastSheet.xlsx Make sure to read through all the settings in the first sheet (Project Details). Help is provided in the yellow columns to the right. It must be stored in the same folder as the raw data and any paths/filenames of the raw data files are always relative to the location of the sampleContrastSheet.xlsx file. ~/data/E-MTAB-6885/E-MTAB-6885_SampleContrastSheet.xlsx ~/data/E-MTAB-6885/3Bcoculture_S8_L001_R1_001.fastq.gz ~/data/E-MTAB-6885/3Bcoculture_S8_L002_R1_001.fastq.gz ~/data/E-MTAB-6885/3Bcoculture_S8_L003_R1_001.fastq.gz ~/data/E-MTAB-6885/3Bcoculture_S8_L004_R1_001.fastq.gz ~/data/E-MTAB-6885/3Bcontrol_S1_L001_R1_001.fastq.gz [...]",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "The miND pipeline is executed with a run",
       "instruction": "The miND pipeline is executed with a run.sh wrapper script. As with the repository build.sh script, this script will take care of all dependencies and setup them as needed during the first run. Again, this can take some time at the first run, but will not be repeated in subsequent runs. If everything is setup as in this example, the pipeline can be executed as follows: run.sh cd ~/miND./run.sh ../data/E-MTAB-6885/E-MTAB-6885_SampleContrastSheet.xlsx Amazon Linux 2 There are multiple options for this script. Please run &#34;./run.sh --help&#34; to see available options and how to use them. In general, the script runs the miND pipeline providing an input XLS sheet and an output folder. If only an input file is provided, the output folder name will be generated from the filename (_SampleContrastSheet.xlsx will always be stripped). In this case, the output directory will be in output/E-MTAB-6885",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "After the pipeline finished, all generated...",
       "instruction": "After the pipeline finished, all generated data will be stored in a subfolder of the output directory. The pipeline will report the path to the final output file, a zip file containing the most important results (e.g. multiQC.html, report.html and the SampleContrastSheet that was used to generate this report). Take a close look at the multiQC report to evaluate the quality of sequencing data. The final HTML report (analysis.html) can also be found in the zip file and will contain download links for various results (like count tables) for further analysis. Some intermediate data is kept (e.g. mapping data) as it does not require lots of storage space and is often needed for more in-depth analysis. If only the report is needed, the .zip file can be copied and the rest of the output folder deleted. Important : Snakemake is a file/folder driven workflow management tool. It will only run rules needed to generate files that are requested. Should you run the miND pipeline again with the same data and output folder, most likely nothing will be rerun, as the analysis.html (final file of the pipeline) file is already there. It is recommended to remove the output folder and rerun the pipeline with an empty output folder to ensure that all data is regenerated .",
       "is_critical": false,
       "timers": []

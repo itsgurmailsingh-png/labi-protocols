@@ -26,161 +26,161 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Login to the HPC ssh hpcocelote ssh hpc ocelote",
       "instruction": "Login to the HPC ssh hpcocelote ssh hpc ocelote",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Move to your user directory on bh_class cd /rsgrps/bh_class/username",
       "instruction": "Move to your user directory on bh_class cd /rsgrps/bh_class/username",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "If you are here, you must...",
       "instruction": "If you are here, you must be done with your contigs database, and have your BAM files ready. Good! It is time to initialize your BAM files, and create an anvi’o profile for your samples. Check and make sure you have &#34;bam&#34; files here. If not you need to run using a previous protocol. cd /rsgrps/bh_class/username/read_recruit/bamls *.bam cd /rsgrps/bh_class/username/read_recruit/bam ls *.bam",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Now we need to move all...",
       "instruction": "Now we need to move all of the bam files from the HPC to our personal computers to input into Anvi&#39;o. Go to the Anvi&#39;o terminal on your computer, where you created the contigs database in the previous protocol. Remember, we use Anvi&#39;o locally. (Docker for Windows users)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Download the bam files form the...",
       "instruction": "Download the bam files form the HPC to your computer scp username@sftp.hpc.arizona.edu:/rsgrps/bh_class/username/read_recruit/bam/*bam . Notice the",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "To help with downstream processing",
       "instruction": "To help with downstream processing. Create a list of the samples you have. We will call this file: SAMPLE_IDs SAMPLE_IDs",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "Anvi’o requires BAM files to be sorted and indexed",
       "instruction": "Anvi’o requires BAM files to be sorted and indexed. In most cases the BAM files you get back from your mapping software will not be sorted and indexed. You need to initialize your BAM files: Is ( ` ) specific to the bash command line? I don&#39;t think I&#39;ve seen it yet in perl6. backticks are in perl5 and essentially mean execute this &#34;command&#34; to get some sort of input. In perl6, there is the concept of processes that are &#34;run&#34; (that is the actual command). You can see examples in all of Ken&#39;s test suite programs. When I run this step it gives me an error of too few arguments. usage: anvi-init-bam [-h] [-o FILE_PATH] BAM_FILE PC users When you scp your files using Cygwin, move those files to a new folder in Documents. Then in docker quickstart terminal navigate to that folder and do pwd to get the full path. Then to launch Anvio: docker run --rm -v /path/to/files:/my_data -p 8080:8080 -it meren/anvio:latest Additional troubleshooting- if having issues do docker ps and see if there are existing sessions. If so do docker kill [session id] for sample in `cat SAMPLE_IDs`; do anvi-init-bam $sample.bam -o $sample.i.bam; done Reminder for PC users using the Docker image: docker run --rm -v /path/to/files:/my_data -p 8080:8080 -it meren/anvio:latest",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "In contrast to the contigs database,...",
       "instruction": "In contrast to the contigs database, an anvi’o profile database stores sample-specific information about contigs. Profiling a BAM file with anvi’o using anvi-profile anvi-profile creates a single profile that reports properties for each contig in a single sample based on mapping results. Each profile database links to a contigs database, and anvi’o can merge single profiles that link to the same contigs database into merged profiles (which will be covered later). In other words, the profiling step makes sense of each BAM file separately by utilizing the information stored in the contigs database. It is one of the most critical (and also most complex and computationally demanding) steps of the metagenomic workflow. The simplest form of the command that starts the profiling looks like this: anvi-profile -i SAMPLE-01.bam -c contigs.db anvi-profile -i SAMPLE-01.bam -c contigs.db When you run anvi-profile anvi-profile it will: Process each contig that is longer than 2,500 nts 2,500 nts by default. You can change this value by using --min-contig-length --min-contig-length flag. But you should remember that the minimum contig length should be long enough for tetra-nucleotide frequencies to have enough meaningful signal. There is no way to define a golden number for minimum length that would be applicable to genomes found in all environments. We empirically chose the default to be 2,500, and have been happy with it. You are welcome to experiment, but we advise you to never go below 1,000. You also should remember that the lower you go, the more time it will take to analyze all contigs. You can use –list-contigs parameter to have an idea how many contigs would be discarded for a given --min-contig-length --min-contig-length parameter. If you have an arbitrary list of contigs you want to profile, you can use the flag --contigs-of-interest --contigs-of-interest to ignore the rest. Make up some output directory, and sample names for you. We encourage you to use --output-dir --output-dir parameter to tell anvi’o where to store your output files, and --sample-name --sample-name parameter to give a meaningful, preferably not-so-long sample name to be stored in the profile database. This name will appear almost everywhere, and changing it later will be a pain. Processing of contigs will include: The recovery of mean coverage, standard deviation of coverage, and the average coverage for the inner quartiles (Q1 and Q3) for a given contig. Profiling will also create an HD5 file where the coverage value for each nucleotide position will be kept for each contig for later use. While the profiling recovers all the coverage information, it can discard some contigs with very low coverage declared by --min-mean-coverage --min-mean-coverage parameter (the default is 0, so everything is kept). The characterization of single-nucleotide variants (SNVs) for every nucleotide position, unless you use --skip-SNV-profiling --skip-SNV-profiling flag to skip it altogether (you will definitely gain a lot of time if you do that, but then, you know, maybe you shouldn’t). By default, the profiler will not pay attention to any nucleotide position with less than 10X 10X coverage. You can change this behavior via --min-coverage-for-variability --min-coverage-for-variability flag. Anvi’o uses a conservative heuristic to not report every position with variation: i.e., if you have 200X coverage in a position, and only one of the bases disagree with the reference or consensus nucleotide, it is very likely that this is due to a mapping or sequencing error, and anvi’o tries to avoid those positions. If you want anvi’o to report everything, you can use --report-variability-full --report-variability-full flag. We encourage you to experiment with it, maybe with a small set of contigs, but in general you should refrain reporting everything (it will make your databases grow larger and larger, and everything will take longer for -99% of the time- no good reason). Finally, because single profiles are rarely used for genome binning or visualization, and since clustering step increases the profiling runtime for no good reason, the default behavior of profiling is to not cluster contigs automatically. However, if you are planning to work with single profiles, and if you would like to visualize them using the interactive interface without any merging, you can use --cluster-contigs --cluster-contigs flag to initiate clustering of contigs. In this case anvi’o would use default clustering configurations for single profiles , and store resulting trees in the profile database. You do not need to use this flag if you are planning to merge multiple profiles (i.e., if you have more than one BAM files to work with, which will be the case for most people). anvi-profile -i SRR1647045.i.bam -c contigs.db --output-dir Ocean1 --sample-name Ocean1 Use appropriate output names (Ocean, Acid, Canine, Human, Gut, Oral, etc...) IMPORTANT: You must use the bam file that has been indexed (SRR34443.i.bam) Repeat this step for both yours and your partners bam files.",
       "is_critical": true,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "You have all your BAM files profiled",
       "instruction": "You have all your BAM files profiled! Did it take forever? Well, sorry about that. But now you are golden. The next step in the workflow is to to merge all anvi’o profiles. When you run anvi-merge anvi-merge , It will merge everything and create a merged profile (yes, thanks, captain obvious), It will attempt to create multiple clusterings of your splits using the default clustering configurations . Please take a quick look at the default clustering configurations for merged profiles –they are pretty easy to understand. By default, anvi’o will use euclidean distance and ward linkage algorithm to organize contigs, however, you can change those default values with --distance --distance and --linkage --linkage parameters (available options for distance metrics and linkage algorithms are listed in this release note ). Hierarchical clustering results are necessary for comprehensive visualization, and human guided binning, therefore, by default, anvi’o attempts to cluster your contigs using default configurations. You can skip this step by using --skip-hierarchical-clustering --skip-hierarchical-clustering flag. But even if you don’t skip it, anvi’o will skip it for you if you have more than 20,000 splits, since the computational complexity of this process will get less and less feasible with increasing number of splits. That’s OK, though. There are many ways to recover from this. On the other hand, if you want to teach everyone who is the boss, you can force anvi’o try to cluster your splits regardless of how many of them are there by using --enforce-hierarchical-clustering --enforce-hierarchical-clustering flag. You have the power. It will attempt to run CONCOCT to bin your splits automatically. CONCOCT can deal with hundreds of thousands of splits. Which means, regardless of the number of splits you have, and even if you skip the hierarchical clustering step, there will be a collection in the merged profile database (which will be called CONCOCT CONCOCT ) with genome bins identified by CONCOCT in an automatic manner. From which you can generate a summary, or run the interactive interface with --collection-name CONCOCT --collection-name CONCOCT parameter (more later on these). But if you would like to skip default CONCOCT clustering, you can use --skip-concoct-binning --skip-concoct-binning flag. anvi-merge */RUNINFO.cp -o SAMPLES-MERGED -c contigs.db",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "ADDITIONALLY Download your partners bam files",
       "instruction": "ADDITIONALLY Download your partners bam files. $ scp username@sftp.hpc.arizona.edu:/rsgrps/bh_class/partners/read_recruit/*bam .",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Launch the Anvi&#39;o interactive viewer",
       "instruction": "Launch the Anvi&#39;o interactive viewer. $ anvi-interactive -p SAMPLES-MERGED/PROFILE.db -c contigs.db",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "For a detailed overview of the...",
       "instruction": "For a detailed overview of the anvi&#39;o interactive viewer and all of the things you can do with it. See the weblink below. We will go over major components of the viewer in class. http://merenlab.org/2016/02/27/the-anvio-interactive-interface/",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "Click on the draw button in...",
       "instruction": "Click on the draw button in the layers tab in anvi&#39;o to draw a circle phylogram. Try zooming in and out of the viewer to see more or less detail. Try switching the colors for each of the body sites, and redraw the figure. Through the layers tab you can, Change general settings for the tree (i.e., switching between circle or rectengular displays, changing tree radius or width), and layers (i.e., editing layer margins, or activating custom layer margins). Load or save states to store all visual settings, or load a previously saved state. Customize individual layers by switching between different display modes depending on the layer type (i.e., ‘text’ or ‘color’ mode for categorical layers, or ‘bar’ or ‘intensity’ mode for numerical layers), set normalization (i.e., ‘square-root’, or ‘log’ normalization), minimum, and maximum cutoff values for numerical layers, or set layer height , and layer margin (i.e., its distance from the previous layer). Use the multi-selector at the bottom to change settings for multiple layers at once.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "In the bins tab, click on...",
       "instruction": "In the bins tab, click on the &#39;Load bin collection&#39; button. Select &#39;CONCOCT&#39; from the pop up window. Questions: How many bins did the CONCOCT algorithm find? These are meant to represent different &#39;genomes&#39; in your metagenomic sample. Do you see bins that are comprised of reads from only certain skin sites? Anvi’o allows you to create selections of items shown in the display (whether they are metagenomic contigs, 16S rRNA tags, or any other type of information). Bins tab allow you to maintain these selections. Any selection on the tree will be added to active bin in this tab (the state radio button next to a bin defines its activity). Through this tab you can, Create or delete bins , set bin names , change the color of a given bin , or sort bins based on their name, the number of units they carry, or completion and contamination estimates (completion / contamination estimates are only computed for genomic or metagenomic analyses). View the number of selected units in a given bin, and see the list of names in the selection by clicking the button that shows the number of units described in the bin. Store a collection of bins , or load a previously stored collection . Can you create better bins?",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "In the mouse tab, mouse over...",
       "instruction": "In the mouse tab, mouse over different regions of the graph. You can mouse over different regions of the graph to see data about individual contigs. You can also mouse over different levels to see more or less of the data in each of the circles, going from center (with the most info) to the ends (with the least).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "You can also right click on...",
       "instruction": "You can also right click on a contig and select &#34;inspect&#34; to see the detailed informaton about that contig, including genes and annotations (kegg and pfam) you loaded in the contigs db. Or, you can do a blast on the fly.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "Samples tab is for the additional...",
       "instruction": "Samples tab is for the additional data you provide the interface through a samples database (see samples order and samples information sections above). Through this layer you can, Change the order of layers using automatically-generated or user-provided orders of layers using the Sample order combo box, Customize individual samples information entries . Changes in this tab can be reflected to the current display without re-drawing the entire tree unless the sample order is changed.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "The interactive viewer is fun to...",
       "instruction": "The interactive viewer is fun to play with, but you might also want to create a summary of the data. You can do this from the anvi&#39;o command line: anvi-summarize -p SAMPLES-MERGED/PROFILE.db -c contigs.db -o SAMPLES-SUMMARY -C CONCOCT",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "Was Anvi&#39;o able to determine the...",
       "instruction": "Was Anvi&#39;o able to determine the taxonomy for each of the bins? Click on one of the buttons that says &#34;NONE&#34;. What taxa are present in that bin? Do you see a mixture?",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "How complete are the bins from CONCOCT",
       "instruction": "How complete are the bins from CONCOCT? Look at the &#34;Compl.&#34; tab to get an estimate fomr Anvi&#39;o on how complete your bins are based on the composition of core bacterial genes.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
+      "title": "When we try to estimate the...",
       "instruction": "When we try to estimate the completeness of a genome bin, we identify single-copy genes that appear more than once as &#34;contamination&#34;. Jed Fuhrman suggested that the use of &#34;redundancy&#34; would be more appropriate, since these are not always contaminations (sometimes there are hits due to not-very-specific HMM profiles, etc), and the word &#34;contamination&#34; is a bit scary.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
+      "title": "Do you have similar results across the two time points",
       "instruction": "Do you have similar results across the two time points?",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 22,
-      "title": "",
+      "title": "Can you use some of anvi&#39;os...",
       "instruction": "Can you use some of anvi&#39;os interactive features to create better and more complete bins?",
       "is_critical": false,
       "timers": []

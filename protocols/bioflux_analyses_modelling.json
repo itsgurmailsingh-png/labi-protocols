@@ -26,70 +26,70 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "The modelling presented here uses a...",
       "instruction": "The modelling presented here uses a simple ODE model fitted to the individual Bioflux I pix time series data sets (Fig. 1-A) in order to estimate the height as well as the time point of maximum observable growth (Fig. 2-B). Fig. 1. Example of Bioflux time series data sets; A: medium pixel intensity; B: calculated growth rate. Table 1 contains symbols and abbreviations used within the modelling approach and parameter estimation. Table 1. Symbols and abbreviations used within the modelling approach and parameter estimation.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Ordinary differential equation for discontinuous bioprocesses...",
       "instruction": "Ordinary differential equation for discontinuous bioprocesses The modelling presented here was carried out using the ordinary differential equation for discontinuous bioprocesses with respect to the mean pixel intensity calculated according to the protocol &#39;Bioflux Analyses: Image Preprocessing&#39;. \\frac{d I_{\\rm{pix}}}{d t} = \\mu_{\\rm{max}} \\cdot \\lambda(t) \\cdot \\chi(I_{\\rm{pix}}) \\cdot I_{\\rm{pix}} Growth Kinetics The growth of the culture was described using the following kinetics: logistic equation ( Verhulst -eqation; employed to modell the capacitive limit of the biomass accumulation) \\chi(I_{\\rm{pix}}) = 1 - \\frac{I_{\\rm{pix}}}{I_{\\rm{pix,max}}} lag phase ( Wolf -equation; employed to modell the initial lag phase of the culture due to adaptation) \\lambda(t) = 1 - \\exp\\left(-\\frac{t + t_d}{t_i + t_d}\\right) The model parameters µ max , I pix,max , t i as well as the start condition I pix,0 is estimated within Step No. 2. The adherence time t d represents the time difference between the seeding of the cells an the start of the experiment/simulation. t d was set to 1.5 h for all simulations in accordance to the experimental set-up.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Import of the required packages",
       "instruction": "Import of the required packages. import numpy as np import pandas as pd import scipy.integrate from scipy.optimize import fmin",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Definition of the growth kinetics",
       "instruction": "Definition of the growth kinetics. # logistic equation (Verhulst) def chi(Ipixmax,Ipix): return 1 - Ipix / Ipixmax # description of lag phase (Wolf-term) def wolf(ti,td,t): return 1 - np.exp( - ( t + td ) / ( ti + td ) ) # growth kinetics def mu(mumax,Ipixmax,ti,td,Ipix,t): return mumax * chi(Ipixmax,Ipix) * wolf(ti,td,t)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Definition of the ODE model",
       "instruction": "Definition of the ODE model. # Model #=========================================================================== def eq(indep_par,exp_par,start_t,end_t,incr): initial_cond = indep_par[0],0 mumax,Ipixmax,ti = indep_par[1:6] td = exp_par t = np.linspace(start_t, end_t,incr) # time grid # ------------------------------------------------------------------------ def funct(y,t): # ODE system Ipix = y[0] # biomass tin = y[1] # internal t (needed for Wolf-term) dIpixdt = mu(mumax,Ipixmax,ti,td,Ipix,tin) * Ipix dtindt = 1 return [dIpixdt,dtindt] # ------------------------------------------------------------------------ ds = scipy.integrate.odeint(funct,initial_cond,t) #integrate return (ds[:,0],t)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "Based on the ordinary differential equation...",
       "instruction": "Based on the ordinary differential equation above, the experimental I pix time series data sets were simulated individually for the respective experiment. The time series were simulated for an experiment time of 24 h. Numerical integration was carried out employing lsoda from ODEPACK (scipy.integrate.odeint). The objective of the parameter estimation was to identify the parameter values for the respective experiment. The model parameters µ max , I pix,max , t i as well as the start condition I pix,0 are vectorised as θ. The optimum parameter values Ω were estimated by minimising the cost function J(θ) using the downhill-simplex method (Nelder-Mead method; scipy.optimize.fmin). Standard settings regarding the convergence criteria were used with respect to the above package. J(\\theta) = \\sum_{i=1}^{n} \\left(I_{\\rm{pix,data}} - I_{\\rm{pix,model}}\\right)^2 J(\\Omega) =\\underset{\\theta}{\\text{min}}\\,J(\\theta)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "Definition of the scoring function (least-squares)",
       "instruction": "Definition of the scoring function (least-squares). # definition of scoring function (least-squares beased) def score(parms): # score difference between model and data points ss = lambda data,model:(( data - model )**2 ).sum() # get solution to system Ipix_model,t_model = eq(parms,exp_rates,0,time,100) # model index to compare to data mt=np.linspace(0,time,100) findindex=lambda x:np.where(mt&gt;=x)[0][0] Ipix_index=list(map(findindex,data.time)) data.Ipix_model = Ipix_model[Ipix_index] return ss(data.Ipix,data.Ipix_model)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Execution of the parameter estimation",
       "instruction": "Execution of the parameter estimation. initials = [Ipix_zero,mumax,ti,Ipix_max] exp_rates = 1.5 # [h] time = 24 # [h] answ = scipy.optimize.fmin(score, rates, full_output=1, retall=1, maxiter=1000) estimates = answ[0] score_value = answ[1]",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Based on the parametrised model Ipix...",
       "instruction": "Based on the parametrised model Ipix and growth rate time series were simulated for each experiment (Fig. 2-A and B). The subsequent evaluations were carried out using the modelled time series. Fig. 2. Example of the fitted Bioflux time series data sets; A: medium pixel intensity; B: growth rate. According to Fig. 2-B, the height as well as the time point of the maximum observable growth rate is recorded. These values are used for the comparison between the wild type an their respective mutant.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "In order to illustrate the differences...",
       "instruction": "In order to illustrate the differences in the biofilm formation between wild type and mutant strains, the observed maximum growth rates are plotted against their respective time points (Fig. 3.1)-A. The differential plot (Fi. 3.1-B), conferring to subfigure A, presents these differences between the mutant strains (arrow head) and their respective wild types (arrow tail). Fig. 3.1 Maximum observable growth rates max(µ) at their respective time points for wild type and mutant strains; A: Scatter plot of max(µ) at time point t from two examples (wild type vs. mutant); B: Difference plot for max(µ) at time point t, wild type (arrow tail) to respective mutant (arrow head).",
       "is_critical": false,
       "timers": []

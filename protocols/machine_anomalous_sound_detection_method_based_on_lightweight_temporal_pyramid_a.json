@@ -26,70 +26,70 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "To transform raw audio into a...",
       "instruction": "To transform raw audio into a perceptually meaningful representation, this work employs the Log-Mel spectrogram. This two-dimensional, time–frequency feature effectively embodies the non-linear human auditory perception [30]. The computation begins by partitioning a raw one-dimensional mono audio signal, x∈R1×L, into a sequence of overlapping frames. Each frame is weighted using a Hanning window, and a Short-Time Fourier Transform (STFT) is subsequently applied. For an audio sample x[m], this frequency decomposition is formally given by:(1)Xn,k=∑m=n−NW−1n xmωn−me−j2πkm/N\nwhere n indexes the temporal frame, NW is the window length; ω[·] denotes the windowing function, k is the frequency bin index, and N is the FFT size. This process yields a complex spectrogram from which the power spectrum, STFT(x)2, is derived.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "The linear frequency axis of the...",
       "instruction": "The linear frequency axis of the resulting spectrum is then warped to the Mel scale, formulated as:(2)melf=2595log101+f700",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "This mapping is implemented by a...",
       "instruction": "This mapping is implemented by a bank of 128 triangular filters, designated as HM, which performs a weighted summation of the power spectrum’s frequency bins. The final Log-Mel spectrogram FLM∈RM×T is obtained by applying a logarithmic compression to the filter bank’s output:(3)FLM=logHM⋅STFTx|2",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "To directly model temporal dynamics from...",
       "instruction": "To directly model temporal dynamics from the waveform, a dedicated feature extractor, TgramNet, is employed. This design draws inspiration from the convolutional interpretation of the STFT, where a large-kernel 1D convolutional layer initializes the process, conceptually mirroring a set of learnable bandpass filters [21]. Following this initial decomposition, the network refines the representation through multiple convolutional blocks to capture temporal dependencies. This architectural concept is illustrated in Figure 2, and its configuration is detailed in Table 1.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "As implemented in our model, the...",
       "instruction": "As implemented in our model, the first layer is a 1D convolution (nn.Conv1d) configured with an input channel of 1, an output channel of 128 (corresponding to the number of Mel bins, mel_bins), a kernel size of 1024 (win_len), and a stride of 512 (hop_len). This configuration directly isolates a time–frequency-like decomposition from the raw audio. After the initialization, a sequence of three identical blocks is applied. Each block is composed of a Layer Normalization (nn.LayerNorm) and a LeakyReLU activation, followed by a second 1D convolution (nn.Conv1d). This latter convolution is configured with 128 input and output channels, a kernel size of 3, a stride of 1, and a padding of 1. This structural design preserves the temporal resolution and dimensionality throughout the network, ensuring the final output retains a precise temporal structure. The computation of the resulting time-domain feature, denoted by FT, is defined as:(4)FT=TNx\nwhere TN(⋅) represents the complete TgramNet transformation. The output FT∈RM×T maintains a dimensionality of 128 × 313 units, which is strictly congruent with the Log-Mel spectrogram, facilitating direct feature-level concatenation in subsequent stages of the model.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "The Softmax function is extensively employed...",
       "instruction": "The Softmax function is extensively employed in image classification tasks, as it transforms the outputs of a classification problem into a probability distribution, thereby distinguishing features of different categories [31]. Nevertheless, Softmax does not impose explicit constraints on intra-class compactness or inter-class separability, which can limit its effectiveness in achieving high classification accuracy.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "The Softmax function is defined as follows:(5)Ls=−1m∑i=1∞ lneWγiTxi+bγi∑j=1n eWjTxi+bj",
       "instruction": "The Softmax function is defined as follows:(5)Ls=−1m∑i=1∞ lneWγiTxi+bγi∑j=1n eWjTxi+bj",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "In this expression, m denotes the...",
       "instruction": "In this expression, m denotes the batch size; i indexes the spectrogram; j represents the true label and WyiTxi+byi corresponds to the output of the fully connected layer. Here, WyiT, xi, byi and yi are the weight vector for the i-th spectrogram class, the feature vector of the spectrogram, the bias for the class, and the ground-truth label, respectively.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Softmax focuses solely on the correctness...",
       "instruction": "Softmax focuses solely on the correctness of sample classification and lacks mechanisms to enforce intra-class compactness or inter-class discrimination in multi-class tasks. To address these limitations, ArcFace Loss has been proposed as an enhancement over Softmax [32]. By introducing an additive angular margin t(t>0) to the angle θ between xi and Wyi, an additional penalty is applied to the angle between deep features and their corresponding weights. This approach enhances intra-class compactness while increasing inter-class separability. To facilitate learning of more discriminative angular features, the feature weights are fixed and the bias is set to zero, simplifying the model parameters. A schematic of the ArcFace Loss classification framework is shown in Figure 3.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "The ArcFace Loss is defined as:(6)LAreFace=−1m∑i=1m lnescosθyi+tescosθyi+t+∑j=1,j≠yiN escosθj",
       "instruction": "The ArcFace Loss is defined as:(6)LAreFace=−1m∑i=1m lnescosθyi+tescosθyi+t+∑j=1,j≠yiN escosθj",
       "is_critical": false,
       "timers": []

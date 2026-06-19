@@ -26,245 +26,245 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "This study proposes a method to...",
       "instruction": "This study proposes a method to obtain maize crop row lines through crop row segmentation and navigation line extraction. Crop row detection uses an improved DeeplabV3+ segmentation model to generate a segmentation mask for the crop rows. Then, crop anchor points are extracted from the crop rows, and RANSAC is used to fit the anchor points to obtain accurate crop row lines. The entire workflow is shown in Figure 1.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Section 2",
       "instruction": "Section 2.1 details the systematic approach to constructing a robust dataset for maize crop row detection. This includes the initial acquisition of raw images from the CRBD benchmark, the strategic application of data augmentation techniques to ensure environmental adaptability, and the rigorous manual annotation process used to establish high-precision semantic labels.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "To comprehensively evaluate the proposed method...",
       "instruction": "To comprehensively evaluate the proposed method and ensure its adaptability to complex field environments, a hybrid dataset was constructed. This dataset combines a public benchmark with newly acquired real field data, comprising a total of 834 original images. The first component of the hybrid dataset utilizes the public Crop Row Benchmark Dataset (CRBD) [24], which consists of 281 high-resolution images. These images were acquired in the spring of 2014 in Slavonia, Croatia, using a Panasonic LUMIX DMC-F2 digital camera with moderate variations in yaw, pitch, and roll angles. As illustrated in Figure 2, this subset provides substantial diversity, encompassing complex scenarios such as severe weed interference, distinct crop types (including potatoes, soybeans, sunflowers, and onions), varying morphological characteristics across different growth stages, and curved crop rows. To further validate the algorithm’s robustness under specific local agronomic conditions and expand the dataset volume, a second component of real field data was acquired in Gu’an City, Hebei Province, China. This acquisition contributed an additional 553 images of maize seedlings at the critical 3–5 leaf stage, which is the primary period for inter-row mechanical weeding and spraying. These target maize fields were characterized by a standard row spacing of 60 cm, a plant spacing of 28 cm, sparse weed distribution, and natural lighting variations. To provide a detailed statistical profile of the hybrid dataset, the category distribution across the 834 original images was analyzed. Maize constitutes the absolute majority (553 images, ~66.3%), followed by celery (10.2%), potatoes (8.5%), and onions (6.1%). Other crop types, including sunflowers and soybeans, account for the remaining 8.9% of the total samples. By combining these two distinct data sources, the diversity of feature information is ensured, enabling the model to learn and adapt to various unstructured agricultural scenarios.",
       "is_critical": true,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "Prior to model training, a standardized...",
       "instruction": "Prior to model training, a standardized preprocessing pipeline was uniformly applied to all 834 images in the hybrid dataset to ensure computational efficiency and feature stability. First, the original high-resolution images were resized to 512 × 512 pixels using bilinear interpolation to reduce the memory footprint. Second, pixel intensity values were normalized from the [0, 255] scale to a [0, 1] range to accelerate model convergence. Finally, to mitigate the impact of varying field illumination and sensor noise, the input channels were standardized using the ImageNet dataset’s mean and standard deviation. This standardization strictly aligns the color distribution, enabling the network to extract features robustly across diverse lighting and soil background conditions.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "To ensure the natural expression of...",
       "instruction": "To ensure the natural expression of image features, further improve the model’s generalization ability and robustness, and reduce overfitting, a systematic data augmentation strategy was implemented on the original dataset, as shown in Figure 3. Image transformation techniques such as brightness and contrast adjustment, horizontal flipping, vertical flipping, blurring, noise addition, and rotation were used. The dataset’s size was expanded to 5000 images, effectively enhancing the model’s ability to cope with complex farmland environments. The original images and enhanced samples are shown in the figure. The enhanced dataset is divided into training, validation, and test sets in an 8:1:1 ratio to ensure the scientific nature of the model’s training and evaluation.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "As detailed in Algorithm 1, the...",
       "instruction": "As detailed in Algorithm 1, the data augmentation was performed strictly on the training set after the initial 8:1:1 split of the raw dataset. This approach prevents data leakage and ensures that the validation and test sets remain composed of original, unseen images, thereby providing a more objective evaluation of the model’s generalization capabilities in unstructured agricultural environments.\nAlgorithm 1 Data Enhancement PipelineInput: Original collected dataset Draw; Target total samples N=5000; Split ratios (8:1:1).Output: Augmented training set Dtrain, validation set Dval, and test set Dtest.1. Dataset Splitting:            Split Draw into Dtrain_raw, Dval, and Dtest based on the 8:1:1 ratio.            Note: To avoid data leakage, augmentation is only applied to the training set.2. Initialize Dtrain←Dtrain_raw\n3. while |Dtrain|<N×0.8 do4.          Randomly select an image-mask pair (I,M) from Dtrain_raw.5.          Stochastic Transformation (Apply one or more operations based on Figure 4):             -Brightness_Contrast: Adjust α∈[0.8,1.2].              -Horizontal/Vertical Flip: 50% probability.             -Rotation: Random angle θ∈[−15°,15°].             -Blurring: Apply 3×3 Gaussian kernel.             -Noise Injection: Add Gaussian noise σ2=0.01.6.          Generate transformed pair (I′,M′).7.          Dtrain←Dtrain∪{(I′,M′)}.8. end while9. return Dtrain,Dval,Dtest.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "Brightness_Contrast",
       "instruction": "Brightness_Contrast: Adjust α∈[0.8,1.2].",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Horizontal/Vertical Flip",
       "instruction": "Horizontal/Vertical Flip: 50% probability.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Rotation",
       "instruction": "Rotation: Random angle θ∈[−15°,15°].",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Blurring",
       "instruction": "Blurring: Apply 3×3 Gaussian kernel.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Noise Injection",
       "instruction": "Noise Injection: Add Gaussian noise σ2=0.01.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "To construct a high-quality semantic segmentation...",
       "instruction": "To construct a high-quality semantic segmentation dataset, all images in the CRBD underwent meticulous pixel-level annotation using the CVAT online platform. The detailed workflow and an example of the resulting annotation mask are illustrated in Figure 4. The annotation process established two mutually exclusive semantic categories: “crop rows” (foreground) and “none” (background). Specifically, the “crop rows” category was defined by outlining the complete canopy area of the plants in each row using polygon tools, ensuring that the boundaries strictly adhered to the outermost leaves to provide precise spatial information for the segmentation model. The “none” category included all other image elements, such as soil, stones, and shadows.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "To ensure the scientific rigor of...",
       "instruction": "To ensure the scientific rigor of the ground truth, three principles were followed during the labeling process: (1) Consistency: The same boundary definition was applied across different growth stages and lighting conditions to prevent the model from learning environmental biases. (2) Detail Retention: Small gaps between plants within the same row were labeled as “Non-Crop Rows” to help the model learn the texture of discontinuous rows. (3) Double Verification: Each labeled image was cross-checked by another researcher to minimize human error and ensure that the annotation quality laid a solid foundation for high-precision navigation line extraction.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "The proposed methodology follows a hierarchical...",
       "instruction": "The proposed methodology follows a hierarchical vision-based pipeline designed for real-time agricultural navigation. It begins with image acquisition and data augmentation to ensure environmental robustness. The core consists of a lightweight SAC-DeepLabV3+ semantic segmentation model for pixel-level crop row identification. Finally, a geometric post-processing stage involving DBSCAN clustering and RANSAC fitting is executed to transform segmentation masks into precise navigation lines.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "DeeplabV3+ is a classic semantic segmentation...",
       "instruction": "DeeplabV3+ is a classic semantic segmentation model that adopts an encoder–decoder structure. This paper improves upon the traditional DeeplabV3+ model. First, a lightweight MobileNetV2 network is used to replace the main trunk extraction network Xception, enhancing the model’s feature extraction capabilities. At the same time, Split-Attention Convolution is used to replace the 3 × 3 Depthwise convolution in the Bottleneck, improving local attention modeling capabilities. Secondly, by modifying ASPP to the DenseASPP + SP module, the model can effectively utilize the global information of the image during multi-scale feature extraction of crop rows, thereby enhancing the model’s ability to identify crops in complex agricultural scenarios. The SP strips achieve a larger and more dense expansion rate through horizontal and vertical strip pooling, capturing long-distance relationships between isolated regions and extracting contextual information. The feature maps obtained by using strip pooling instead of global pooling in the backbone network retain more detailed information. Then, the CBAM attention mechanism is introduced into the decoder to enhance the model’s accurate perception of crop row boundaries, adaptively capture features of different scales, effectively suppress interference such as weeds and missing seedlings, and improve the segmentation accuracy of crop rows.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "As shown in Figure 5, the...",
       "instruction": "As shown in Figure 5, the input image in the encoder undergoes feature extraction through a lightweight backbone network, which divides the features into shallow features and deep features. Among these, the shallow features enter the decoder structure 1 × 1 Conv to increase the number of feature channels for the shallow features. Deeper features are obtained at various scales through the DenseASPP + SP module and then fused. Subsequently, a 1 × 1 convolution is applied to reduce the number of feature channels. Meanwhile, deep semantic features are quadruple-upsampled to match the height and width of shallow features, facilitating their integration with the reduced shallow semantic features. Deep features are merged with shallow features. After CBAM-enhanced attention, the merged features undergo 3 × 3 convolution feature compression and quadruple-upsampling to produce a final prediction of the same size as the original image.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "The backbone network of the DeeplabV3+...",
       "instruction": "The backbone network of the DeeplabV3+ original model is Xception [25], which has high accuracy but a large number of parameters. When deployed on mobile devices, it can easily lead to long inference times, making it impossible to process input image information in real time and affecting the efficiency of the device.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "In response to issues such as...",
       "instruction": "In response to issues such as the high computational cost and susceptibility to overfitting the backbone network Xception, it was replaced with the lightweight network MobileNetV2. This replacement reduces the computational complexity and memory usage of the model while maintaining semantic segmentation accuracy. MobileNetV2 adopts an inverted residual structure, which consists of three core components: First, 1 × 1 convolution is used for channel dimension expansion (expansion layer), followed by efficient feature extraction through 3 × 3 separable convolution (depth convolution layer), and finally dimension reduction (projection layer) through 1 × 1 convolution. The output is then connected to the original input through residual connection, thereby enhancing the model’s nonlinear expression capabilities and avoiding the loss of information. This structure not only significantly reduces the number of parameters and computations, but also occupies less memory and performs faster inference when deployed on mobile devices, while also possessing strong feature extraction capabilities. It effectively improves the running efficiency of the model, alleviates overfitting issues, and can accurately extract the details and structural features of complex crop objects such as corn rows. The spatial channels in MobileNetV2 features have weak interactions. To enhance the model’s ability to perceive textures, boundaries, and other regions in the early stages of feature extraction, Split-Attention Convolution is integrated into MobileNetV2, replacing the 3 × 3 Depthwise convolution in the Bottleneck, as shown in Figure 6. This improvement makes the features of the entire backbone network more discriminative while maintaining the simplicity of the network structure and end-to-end training consistency.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "The structural parameters of the improved...",
       "instruction": "The structural parameters of the improved MobileNetV2 backbone are detailed in Table 1. In this architecture, the Expansion Factor represents the multiplicity of the 1 × 1 convolutional upscaling within the inverted residual structure. The Output Channels indicate the depth of the resulting feature matrix. The Repetition Count denotes the number of times a specific bottleneck layer is repeated, and the Stride defines the step size of the convolution operation.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "Since the Deeplabv3+ network uses ASPP...",
       "instruction": "Since the Deeplabv3+ network uses ASPP to extract a limited number of pixels at once, ASPP lacks sufficient feature resolution along the scale axis, resulting in significant information loss. To address this issue, this study employs DenseASPP and introduces an SP pooling module to construct the DenseASPP + SP module with a larger receptive field. Both modules adopt a parameter-sharing mechanism, enabling them to use the same parameters. They capture features at various scales by applying zero convolutions across different receptive fields, then fuse these features and pass them to the next layer via dense connections, as is shown in Figure 7, where c denotes the contact connection operation. This network allows six feature layers of different scales to be connected in parallel. First, the input deep features are passed to the output position, followed by successive dilated convolutions with dilation factors of 3, 6, 12, 18, and 24. Each dilated convolution layer takes as input the concatenation of the outputs from all previous convolution layers and the initial input features, thereby generating features of different scales. This enables DenseASPP + SP to effectively utilize features of various scales, more efficiently processing details and contextual information in images. This reduces the need for sample training data, lowers the risk of overfitting, enhances the model’s robustness and stability, and ultimately improves overall segmentation accuracy.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
+      "title": "The expression for DenseASPP is(1)yl=Hk,dlyl−1,yl−2,…,y0,",
       "instruction": "The expression for DenseASPP is(1)yl=Hk,dlyl−1,yl−2,…,y0,\nwhere dl is the expansion rate of layer l; … indicates a concatenation operation; and yl−1,yl−2,…,y0 represents the connection of outputs from all previous layers. Compared to the original ASPP module, DenseASPP stacks all the dilated convolutions and creates dense connections.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
+      "title": "The fused multi-scale features are then...",
       "instruction": "The fused multi-scale features are then fed into the CBAM attention mechanism module, as shown in Figure 8. CBAM sequentially applies channel attention and spatial attention to the feature maps, performing fine-grained weighting optimization to significantly enhance the network’s ability to focus on critical target regions. Finally, the feature maps optimized by CBAM are sent to the first upsampling module, entering the decoding path to gradually restore spatial resolution and achieve precise image segmentation.",
       "is_critical": true,
       "timers": []
     },
     {
       "step_id": 22,
-      "title": "",
+      "title": "In the channel attention module, the...",
       "instruction": "In the channel attention module, the input feature maps are subjected to global average pooling and max pooling operations, respectively, to generate two channel description vectors, which are then input into a shared multi-layer perceptron (MLP) to calculate the attention weights for the channel dimension. This weight vector is multiplied channel-by-channel with the original feature map to obtain the channel-weighted feature map, effectively emphasizing channel information that is more sensitive to the task. Subsequently, the channel-weighted features are input into the spatial attention module. This module first performs max pooling and average pooling operations on feature maps in the channel dimension to generate two spatial description maps. These two maps are then concatenated and fused through a standard convolution layer to extract a spatial attention map. Finally, this spatial weight map is multiplied element-wise with the input feature map to generate a spatially optimized feature map, thereby precisely guiding the model to focus on key spatial locations in the target area.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 23,
-      "title": "",
+      "title": "The CBAM can adaptively adjust the...",
       "instruction": "The CBAM can adaptively adjust the representation of feature maps without significantly increasing computational overhead, enhancing the model’s ability to perceive local details such as crop row boundaries and textures. By introducing an attention mechanism, the model can more effectively distinguish between targets and backgrounds when faced with complex field environments, such as changes in lighting, background interference, and intermingled crops and weeds, significantly improving overall segmentation accuracy and environmental adaptability. In addition, the attention mechanism helps the model selectively ignore irrelevant information when faced with agricultural images containing unlabeled objects or background interference areas, further improving the accuracy and stability of crop row recognition. The channel attention mechanism is shown in Equation (2), and the spatial attention mechanism is expressed in Equation (3).(2)Mc=SigmoidMLPAvgPoolF+MLPMaxPoolF  =SigmoidW1W0Favgc+W1(W0(Fmaxc)),(3)Ms=Sigmoid(conv(AvgPool(F);MaxPool(F)))  =Sigmoid(conv()Favgc,Fmaxc).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 24,
-      "title": "",
+      "title": "In the formula, F—Input feature map;...",
       "instruction": "In the formula, F—Input feature map; AvgPoolF—Global average pooling; MaxPoolF—Global max pooling; Sigmoid(•)—Element-wise sigmoid activation, compressing values to the (0, 1) interval; and Favgc,Fmaxc—Perform average/maximum pooling on channel dimensions.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 25,
-      "title": "",
+      "title": "To comprehensively evaluate the performance of...",
       "instruction": "To comprehensively evaluate the performance of semantic segmentation models in agricultural machinery visual navigation tasks, this study employed multiple evaluation metrics, including Mean Pixel Accuracy (mPA), Mean Intersection over Union (mIoU), Precision, Recall, f1-score, Dice Coefficient, and Overall Accuracy. All these metrics are based on the confusion matrix.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 26,
-      "title": "",
+      "title": "This study focuses on binary classification...",
       "instruction": "This study focuses on binary classification problems and uses a binary confusion matrix to evaluate model performance. As shown in Figure 9, the confusion matrix includes four key metrics: ① True Positive (TP): The model correctly identifies crop row areas as crop rows. ② False Positive (FP): The model incorrectly identifies non-crop row areas as crop rows. ③ False Negative (FN): The model incorrectly identifies non-crop row areas as crop rows. ④ True Negative (TN): The model correctly identifies non-crop row areas as non-crop rows. As shown in Figure 10, the circle on the left represents the set of samples with true labels as crop rows, and the circle on the right represents the set of samples predicted by the model as crop rows. The intersection of the two sets is the true positive (TP), while the other areas represent false negatives (FN), false positives (FP), and true negatives (TN), respectively. This visualization method intuitively reveals the relationship between the model’s predictions and the true labels, aiding in a deeper understanding of the practical significance of each evaluation metric.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 27,
-      "title": "",
+      "title": "Measures the ratio of the intersection...",
       "instruction": "Measures the ratio of the intersection and union of the model prediction area and the actual annotation area. It is defined as(4)IoU=TPTP+FP+FN, mIoU=1N∑i=1NIoUi.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 28,
-      "title": "",
+      "title": "Accuracy refers to the proportion of...",
       "instruction": "Accuracy refers to the proportion of true positive samples in the results, reflecting the accuracy of the classification results:(5)Precision=TPTP+FP×100%.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 29,
-      "title": "",
+      "title": "The recall rate (R) quantifies the...",
       "instruction": "The recall rate (R) quantifies the proportion of positive samples correctly retrieved out of all positive samples, reflecting the completeness of the classification results:(6)Recall=TPTP+FN×100%.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 30,
-      "title": "",
+      "title": "Precision measures how many of the...",
       "instruction": "Precision measures how many of the predicted positive samples are actually true positives, while Recall reflects the proportion of all positive samples that are correctly predicted.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 31,
-      "title": "",
+      "title": "Mean Pixel Accuracy (mPA) represents the...",
       "instruction": "Mean Pixel Accuracy (mPA) represents the average pixel classification accuracy for each category:(7)mPA=1N∑i=1NTPiTPi+FNi.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 32,
-      "title": "",
+      "title": "The f1-score is the harmonic mean...",
       "instruction": "The f1-score is the harmonic mean of accuracy and recall, which balances the evaluation of accuracy and completeness:(8)f1−score=2TP2TP+FP+FN.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 33,
-      "title": "",
+      "title": "Since precision (P) and recall (R)...",
       "instruction": "Since precision (P) and recall (R) are complementary, this paper uses the harmonic mean f1 value of the two to evaluate the experimental results.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 34,
-      "title": "",
+      "title": "The proposed methodology follows a hierarchical...",
       "instruction": "The proposed methodology follows a hierarchical vision-based pipeline designed for real-time agricultural navigation. It begins with image acquisition and data augmentation to ensure environmental robustness. The core consists of a lightweight SAC-DeepLabV3+ semantic segmentation model for pixel-level crop row identification. Finally, a geometric post-processing stage involving DBSCAN clustering and RANSAC fitting is executed to transform segmentation masks into precise navigation lines.",
       "is_critical": false,
       "timers": []

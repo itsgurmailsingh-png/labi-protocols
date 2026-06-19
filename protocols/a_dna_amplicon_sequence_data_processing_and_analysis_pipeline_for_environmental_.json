@@ -26,77 +26,77 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Raw amplicon sequencing data is processed...",
       "instruction": "Raw amplicon sequencing data is processed using BU16S-ITS (Silverstein et al., 2024), a QIIME2 environment-based (Bolyen et al., 2019) pipeline, customized to run on the BU SCC. Briefly, BU16S-ITS first trims out primers from each sequence and filters out reads of less than 50 base pairs (which would provide unreliable taxonomic assignments and ASV construction (Liu et al., 2007)), using cutadapt (Martin, 2011), then identifies amplicon sequence variants (ASVs) that are 99% similar in rDNA sequence using DADA2 (Callahan et al., 2016). BU16S-ITS classifies a given ASV sequence to a reference database and assigns the taxonomy shared by the majority of the resulting hits. ASVs are assigned taxonomy if they have 95% or greater sequence identity to sequences from individual taxa in an online database: SILVA99 (Quast et al., 2013; version 138.1) for bacteria or UNITE dynamic database (Nilsson et al., 2019; version 9.0) for fungi, using VSEARCH (Rognes et al., 2016). This step is performed separately for each sequencing run. ASVs are assigned a hash, or encryption, of the sequences themselves, so that ASV identifiers are unique to a given sequence, but are the same across all runs.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "For analysis of microbial (alpha- and...",
       "instruction": "For analysis of microbial (alpha- and beta-) diversity and relative abundances of microbial (taxonomic or functional) groups across samples, we create sample type-specific datasets that can be cleaned and analyzed according to their unique properties (i.e., sequencing depth and diversity). First, the output ASV tables from the BU16S-ITS pipeline – which contain untransformed counts of each ASV in each sample – and the taxonomy tables – which contain the taxonomic classification information for each ASV – are combined across all sequencing runs into one dataset. This collects all replicate samples for a sample type into a single file. Because different sample types (e.g. soils vs. leaves) may have different sequencing depths or diversity levels, data from different sample types need to be cleaned and transformed separately to allow for optimal calculation of diversity and relative abundances of taxa. To accomplish this, the single data file is then separated by “sample type” for sample type-specific processing. Each sample type-specific dataset is converted into a phyloseq (McMurdie &amp; Holmes, 2013) object for downstream processing.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "To assign taxa to functional groups,...",
       "instruction": "To assign taxa to functional groups, fungal genera are matched to the FungalTraits database (Põlme et al., 2020) and assigned the corresponding Primary Lifestyle, and bacterial taxonomy was compared against an in-house functional database developed based on the presence of genes encoding enzymes involved in specific biochemical pathways, including copiotroph, oligotroph, cellulolytic, ligninolytic, methanotroph, chitinolytic, assimilatory nitrite-reducing, dissimilatory-nitrite reducing, assimilatory nitrate-reducing, dissimilatory nitrate-reducing pathways (Vietorisz et al., 2024; Werbin et al., 2024). Fungal plant pathogens are assigned to genera identified by the FungalTraits database (Põlme et al., 2020) with any plant pathogenic capacity description, while fungal animal pathogens are assigned to genera identified by the FungalTraits database with an animal biotrophic capacity description. To assign pathogen status to bacterial ASVs, representative sequences are mapped to the Multiple Bacterial Pathogen Detection database (X. Yang et al., 2023) using the blastn algorithm and classified with 95% or greater sequence identity.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "The total number of counts observed for a sample (i",
       "instruction": "The total number of counts observed for a sample (i.e., read depth) has strong effects on community dissimilarity calculations: for example, samples with low numbers of reads often show high beta diversity, or dissimilarity in community composition from other samples (McMurdie &amp; Holmes, 2014). This community dissimilarity may also be related to other properties of the sample (e.g., environmental condition from which the sample was collected), but it is impossible to confirm this if the sample sequenced poorly. Consequently, detection of potentially environmentally meaningful community differences between samples requires that we remove samples that have very low sequence (or read) counts after the quality control steps outlined above, then transform the data to “normalize” counts across samples by further reducing the effects of variable read depths (Gloor et al., 2017). Transformation and normalization is conducted after contaminating ASVs are removed. In the first component of this process, we identify the effect of sequencing depth on beta diversity of microbial communities for individual amplicon datasets (e.g., 16S vs. ITS) and remove low-read samples that have a highly unique microbial community composition, primarily because of sequencing depth (or read number), rather than other properties of the sample. Unique community composition in low-readsamples is detected as an “outlier” in ordination plots of community dissimilarity between samples, using the raw ASV table (in phyloseq format) generated from the previous Formatting step in the protocol as input data. To identify outlier samples, first a community dissimilarity matrix is calculated. We use the Aitchison’s distance metric, which performs a log ratio transformation of the data and accounts for the compositional nature of amplicon sequence data (Gloor et al., 2017). The dissimilarity data is visualizedin a non-metric multidimensional scaling (NMDS) plot with points labelled as the sample ID. As low-read samples are removed, the NMDS plotting is repeated until all outlier samples have been removed from the NMDS plot. This creates a curated dataset that can be used to test for effects of other properties of the sample (e.g., environmental condition) that could explain variation in microbial community characteristics. Ideally, we will have removed problematic (i.e. low-read) samples while retaining as many samples as possible in the dataset.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "The second component of this process...",
       "instruction": "The second component of this process is to evaluate your sample drop thresholds to determine whether beta diversity of microbial communities varies by expected properties of the sample, such as spatial distance between samples (Martiny et al., 2011; Talbot et al., 2014) or habitat from which samples are collected (Delgado-Baquerizo et al., 2018; Tedersoo et al., 2014), within the curated dataset. To run this test, a second set of NMDS is plotted, coloring samples by sample properties of interest (e.g., environmental conditions, such as habitat type). If the results of this test are not satisfactory, we repeat the first and second components of this step in the protocol with multiple sample read depth thresholds for each sample type, to see how they impact beta-diversity of the raw ASV counts, how many samples they would remove overall, and how many samples are removed from each environmental condition. Ideally, we choose a read depth threshold that will remove low-read count samples without majorly impacting data structure or removing too many samples from any one environmental condition.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "Sample data can be contaminated with...",
       "instruction": "Sample data can be contaminated with non-sample microorganisms at multiple points in the data collection and sequencing process (Jia et al., 2022), but computational approaches have recently been developed that can remove many of these contaminating sequences from the final microbiome dataset. We removed contaminating sequences from DNA amplicon sequence data with the decontam package in R (N. M. Davis et al., 2018). By default, contaminating ASVs are identified with the “prevalence” method, where an ASV’s prevalence in samples is statistically compared to prevalence in negative controls. ASVs that are identified as being more prevalent in negative controls than samples are labeled as contaminants and removed from the dataset. For any samples without a corresponding sequenced negative control, contaminating sequences are identified with the “frequency” method, where the frequency of an ASV is compared to the sample’s DNA concentration prior to pooling in a sequencing library. Contaminating sequences are assumed make up a larger fraction of DNA in samples that have little total DNA. Therefore, ASVs with a negative relationship between read count and sample DNA concentration will be labeled as contaminants and removed. These statistical methods allow for the removal of laboratory contaminants, rather than negative control contaminants that arise from cross-sample contamination. Additionally, any ASVs that are annotated to non-bacterial or archaeal taxa for 16S data or to non-fungal taxa for ITS data are removed from the dataset during this step.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "To check differences among samples due to batch (i",
       "instruction": "To check differences among samples due to batch (i.e., sequencing run) effects, the Aitchison distance matrix of untransformed data is calculated and a permutational multivaraiate analysis of variance (PERMANOVA) is performed with the the adonis2 function of the vegan package in R (Oksanen et al., 2015) is used to calculate the effect of a given variable or list of variables (i.e. sequencing run, sample type, etc.) on community dissimilarity between samples. The PERMANOVA test results of the given variables’ effect on community composition and an NMDS plot of the data, with sample points colored by the given variables, are output. Batch correction is then performed on the untransformed data and combined into one ASV table for downstream analysis. We use the ComBat_seq function in the sva package in R (Zhang et al., 2020), defining the batch variable (sample type, in the case of Atherton et al. 2025, as the leaf, soil, and root samples used different DNA extraction and PCR amplification methods and the sequencing batches did not have strong effects) and the environmental conditions to be preserved in the batch correction (tree age and site type, in the case of Atherton et al. 2025, as they were important variables in the study design). Batch correction is an optional step and does not need to be used in all downstream normalizations and transformations. For example, in Atherton et al. 2025, as batch correction was only done to account for differences in sample type for beta diversity analyses, not for differential abundance analyses.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "Untransformed counts of an ASV across...",
       "instruction": "Untransformed counts of an ASV across samples can vary by methodological differences between samples that may obscure differences in community features (such as alpha-diversity, beta-diversity, and microbial group abundances) due to environmental conditions of interest (Gloor et al., 2017; McMurdie &amp; Holmes, 2014). To “normalize” ASV counts so they are more comparable across samples and sample types, many different transformation processes can be used (Lin &amp; Peddada, 2024). Our protocol generates three different types of data transformations, which can be useful in different situations: center log-ratio (CLR) transformation, Z-score transformation, and rarefaction. CLR transformation is often preferred in sequence-based microbiome analyses, as it accounts for the compositional nature of amplicon sequence-based microbiome datasets (Gloor et al., 2017; Greenacre et al., 2021). Therefore, our code outputs a CLR-transformed ASV table, as well as an Aitchison dissimilarity matrix (which performs a log ratio transformation) for pair-wise comparison of community differences across all samples. Z-score transformation can create datasets that follow a normal or gaussian distribution around a mean (Lloréns-Rico et al., 2021) and is one way to make datasets from different sample types (e.g., soil vs. leaves) comparable. Rarefaction randomly selects sequences to include in each sample, holding all samples to the same read depth. This can remove data to the point that it is unsuitable for calculation of differential taxon abundances across samples (McMurdie &amp; Holmes, 2014). However, we have found that CLR does not sufficiently control for differences in sequencing depth across samples to calculate alpha diversity metrics. In addition, rarefaction can reduce the false discovery rate of ASVs when samples vary more than 10-fold in sequencing depth (Weiss et al., 2017), which is the case with most of our samples. As a result, we use rarefied data to calculate taxon and functional guild relative abundances, as well as alpha-diversity metrics. Rarefaction is conducted with the rarefy_even_depth function in the phyloseq package in R (McMurdie &amp; Holmes, 2013). ASV counts are rarefied for each sample type using random subsampling based on a read count that minimizes dropped samples and maximizes the number of reads per sample. Rarefied data was then used downstream to calculate alpha diversity and determine the percent relative abundances of microbial functional guilds in each sample.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "To perform downstream beta diversity analyses,...",
       "instruction": "To perform downstream beta diversity analyses, the Aitchison distance matrices of each data table are calculated. A pseudocount of “1” is added to all values prior to the calculation (Gloor et al., 2017), as this transformation cannot be performed until the zeros are adjusted, due to the use of centered log-ratio transformations in the calculation.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Using rarefied data, Shannon’s alpha diversity...",
       "instruction": "Using rarefied data, Shannon’s alpha diversity for each amplicon community is computed (Weiss et al., 2017) using the vegan package in R (Oksanen et al., 2015).",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Percent relative abundances of functional guilds...",
       "instruction": "Percent relative abundances of functional guilds in each sample is also calculated using rarefied data (Tatsumi et al., 2023). First, rarefied ASV count data are converted to percent relative abundances by dividing each ASV count by the total reads per sample. This ratio transformation allows us to fully convert data to proportions, accounts for compositionality, and makes comparisons of microbial group relative abundances between samples relatively straightforward, especially studies where different sample types are rarefied to different read counts, as was the case in Atherton et al. 2025. To calculate the percent of the microbial community represented by a functional guild, the ratio-transformed rarefied counts are then summed for ASVs assigned to each functional guild.",
       "is_critical": false,
       "timers": []

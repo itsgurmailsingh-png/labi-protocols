@@ -26,154 +26,154 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "As shown in Fig 1, distributed...",
       "instruction": "As shown in Fig 1, distributed generation grid-connection complex system is built based on IEC 61850-7-420 standard [25,26]. This system consists of 4 distributed generations (DGs), including synchronous generation (region 1 is thermal power generation, region 2 is hydropower generation) and inverter-based generation (region 3 is photovoltaic power generation, region 4 is wind power generation). Table 2 fully lists the key parameters of DG1 to DG4, including rated capacity (MVA), rated voltage (kV), active/reactive load (MW/MVar), and transformer voltage ratio (kV). To comprehensively simulate the system operation, two major operating states of non-islanding and islanding are simulated. For non-islanding condition, the focus is on simulating situations where the system is prone to be in detection blind zones, including single-line-to-ground (SLG) faults, double-line-to-ground (DLG) faults, three-line-to-ground (TLG) faults, and load changes, etc. Islanding condition is realized by disconnecting different circuit breakers such as CB0 to CB5. The three-phase voltage and current waveforms at each node under both islanding and non-islanding conditions are acquired, and time series are generated and exported to MATLAB workspace to provide data support for subsequent analysis.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "As shown in Fig 2, perform...",
       "instruction": "As shown in Fig 2, perform preprocessing of framing and windowing on timeseries signals of voltages and currents at each node. The framing process cuts the long time-series signal into several overlapping or non-overlapping micro-frames by setting a time window with fixed duration. Windowing process applies a window function with smooth attenuation characteristics to both ends of the signal within each frame to suppress abrupt changes in the signal at frame boundaries, reduce the spectrum leakage caused by framing operation, and enhance the continuity of signal within frame to ensure the integrity of local signal features. After the preprocessing is completed, the built-in function of spectrogram () is called to execute STFT on each windowed frame signal. The specific parameters of STFT are shown in Table 3.The essence of STFT is to realize local spectrum analysis of non-stationary signals by introducing an analysis window sliding over time, obtain the spectral characteristics of each frame, and finally generate a time-frequency spectrogram reflecting the dynamic changes of frequency over time [27].",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "The traditional Fourier transform can only...",
       "instruction": "The traditional Fourier transform can only obtain the overall frequency components of a signal within the entire time domain, and cannot characterize the instantaneous variation of frequency components over time, thus making it difficult to apply to non-stationary signal analysis. Through the localization processing of window function, STFT realizes the representation of signals on time-frequency two-dimensional plane [28]. STFT can effectively capture the time-varying characteristics of frequency components in non-stationary signals and has significant advantages in detecting transient characteristic signals such as frequency mutations and harmonic fluctuations during islanding detection [29].",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "By introducing time window, STFT captures...",
       "instruction": "By introducing time window, STFT captures the local frequency characteristics of the signal and obtains the dynamic characteristics of the signal changing over time. The generated time-frequency spectrograms is illustrated using a color heat map, where the horizontal axis corresponds to the time dimension, the vertical axis represents frequency information, and the depth of color reflects the signal energy intensity at the time-frequency point, facilitating the capture of characteristics such as frequency mutation points and harmonic injection when islanding occurs [30].",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Extract the time-domain signals of three-phase...",
       "instruction": "Extract the time-domain signals of three-phase voltages Va, Vb, Vc and three-phase currents Ia, Ib, Ic from IDT simulation results. The signals are collected at a sampling rate of 3840 Hz, with a total duration of 0.75 s, resulting in 2880 points. STFT is used to convert the time-domain signals of the three-phase voltages and currents into time-frequency spectrograms. The STFT parameters are set as follows: 256-point Hamming window, 192-point overlap, and 360-point FFT. After generating the spectrogram for each phase signal, the maximum amplitude value among the three phases is taken as the representative value of that time-frequency point to obtain a time-frequency matrix, thereby converting the three-dimensional signal into a two-dimensional time-frequency image. This can highlight the maximum energy components among the three phases, which is helpful for detecting anomalies. The images are displayed on a dB scale, with the frequency range limited to 0–1000 Hz and the dynamic range set to −60 to 20dB. These images are saved as high-resolution PNG files with 300dpi, providing input data for the subsequent CNN islanding detection model.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "To further highlight islanding features, it...",
       "instruction": "To further highlight islanding features, it is necessary to perform denoising and filtering processing on time-frequency spectrograms to suppress background noise and interference signals, optimize image quality, and make islanding features easier to identify. For the time-series signals of voltage and current under different operating conditions of islanding and non-islanding, the above processing procedure is repeatedly executed to construct a standardized time-frequency spectrogram atlas, providing high-quality feature datasets for the subsequent training of islanding detection algorithms.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "The spatial feature extraction capability of...",
       "instruction": "The spatial feature extraction capability of CNN model for time-frequency spectrograms is utilized to identify changes in harmonic distribution under islanding and non-islanding state. The network structure of CNN algorithm is shown in Fig 2, which is divided into input layer, convolution layer, pooling layer, fully connected layer, and output layer.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "After input layer receives the time-frequency...",
       "instruction": "After input layer receives the time-frequency spectrograms, feature processing is completed through the alternating stacking of convolution layers and pooling layers. The specific process is as follows. First, in order to achieve feature alignment, all input images of voltage time-frequency spectrum and current time-frequency spectrum are resized to 224 × 224 × 3 and then concatenated into a single tensor of size 224 × 224 × 6 [30].",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "The convolution layers extract local features of the time-frequency spectrograms",
       "instruction": "The convolution layers extract local features of the time-frequency spectrograms. Through multiple convolution kernels sliding from left to right and top to bottom on the time-frequency spectrograms, the inner product of local region and convolution kernel is calculated. Convolution kernel cover all channels of the input. Efforts are made to extract frequency bands strongly related to islanding state, such as frequency offsets in low-frequency bands and harmonic mutation variables in high-frequency bands, to reduce redundant information. A total of 3 convolutional layers are used, with 3 × 3 filters adopted for the convolutional layers, the padding method set Padding as ‘same,’ and the ReLU activation function applied. The number of filters is set to 16, 32 and 64 respectively to extract complex features.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Pooling layers reduce the parameter scale...",
       "instruction": "Pooling layers reduce the parameter scale and computational load by shrinking the size of feature maps, enhance robustness to translation and scaling of time-frequency spectrograms, and achieve dimension reduction and anti-interference. Max pooling is applied to the first two convolutional layers with a pooling size of 2 × 2 for dimensionality reduction. Global pooling is adopted for the last convolutional layer with a pooling size of 1 × 1 × 64 to mitigate the risk of overfitting.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Then, the fully connected layers fuse...",
       "instruction": "Then, the fully connected layers fuse the extracted local features into global features, flatten the multi-dimensional feature maps output by the pooling layers into one-dimensional vectors, and realize global feature fusion through full connection between weight matrices and neurons. Finally, the output layer generates the results and probabilities of islanding detection [31].",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "The time-frequency spectrum atlas is divided...",
       "instruction": "The time-frequency spectrum atlas is divided into a training-validation set and an independent test set at a ratio of 7:3. Due to the small sample size, it falls into the category of small-sample data. Therefore, the training-validation set is trained using five fold cross-validation to ensure that each sample participates in both training and validation. The specific operation is as follows: after randomly shuffling the time-frequency spectrogram atlas, it is evenly divided into five approximately equal-sized and non-overlapping fold. Then the model is train five times, each time using four folds for training and one fold for validation, with a different fold used for validation each time for cyclic validation. To avoid time waste caused by over-training, the maximum number of epochs in each fold training process is set to 10. After the training is completed, the average value of five fold results are finally taken as the final evaluation index of the model. The model with the best performance in five-fold training is selected, and its parameters are saved to the file of bestModel.mat. By inputting time-frequency spectrograms to be detected into this optimal model, the classification of islanding and non-islanding states can be completed [32]. The independent test set is input into the optimal model for islanding detection, and the results are compared with the true states to calculate the accuracy of the islanding prediction model, thereby measuring the generalization ability of the trained model.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "The proposed islanding detection technology performs...",
       "instruction": "The proposed islanding detection technology performs time-frequency spectrum analysis and calculation based on STFT to generate time-frequency spectrograms. After completing the extraction of feature data, CNN algorithm is used for training, and finally the optimal islanding detection model is obtained. Islanding detection is realized through the entire chain, and the specific flowchart is shown in Fig 3. Although the islanding detection method based on intelligent algorithms can significantly improve detection accuracy, it relatively increases determination time. Considering the handling of time urgency in relevant protection work [33–36], islanding detection can be set with a final time window guard of 1.8 s.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "As shown in Fig 4, a...",
       "instruction": "As shown in Fig 4, a simulation model of distributed generation grid-connection complex system was built in MATLAB/Simulink. Non-islanding cases were simulated by single-line-to-ground (SLG) faults, double-line-to-ground (DLG) faults, three-line-to-ground (TLG) faults, and load changes. and islanding cases were simulated by disconnecting CB0-CB5. The voltage and current waveforms at each node of the system under both islanding and non-islanding conditions were simulated, and time series were generated and exported to MATLAB workspace. During simulation, the sampling frequency was set to 10 kHz, and a total of 2124 groups of sample datasets were finally collected, as shown in Table 4.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "In the distribution lines, islanding conditions...",
       "instruction": "In the distribution lines, islanding conditions in regions 1–4 were simulated by disconnecting circuit breakers CB1–4, and 1062 sets of time-frequency spectrogram atlas under such conditions were obtained. Particular emphasis should be placed on simulating several common types of typical detection blind spots.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "Power balance between generation and load",
       "instruction": "Power balance between generation and load",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "A perfect islanding state with power...",
       "instruction": "A perfect islanding state with power balance is formed when the active power PDG of the distributed generation is almost equal to the active power PL of load, and the reactive power QDG is also approximately balanced with QL. At this time, parameters such as voltage, frequency, current, and harmonics at the monitoring point remain almost stable without obvious fluctuations exceeding the threshold, leading to the failure of passive detection methods. For active detection, since the output power of DGs can smooth out active disturbances, the disturbances cannot accumulate to the detection threshold, which also causes the failure of active detection methods. This kind of islanding state where power generation is almost equal to load eliminates the power imbalance between DGs and load, making neither parameter mutation in passive detection nor disturbance accumulation in active detection occur. As a result, existing mainstream detection methods lose their judgment basis, becoming a typical detection blind zone and a key issue to be solved in the research on grid-connection safety of distributed generation [37].",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "Cross compensation in multi-DGs coordinated operation",
       "instruction": "Cross compensation in multi-DGs coordinated operation",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "When grid is powered off, multiple...",
       "instruction": "When grid is powered off, multiple DGs such as photovoltaic power generation, wind power generation, thermal power generation, and hydropower generation jointly match load through power complementarity, forming multi-source coordinated islanding state. At this time, power fluctuation of a single DG is compensated by other DGs, the overall voltage and frequency of system are approximately stable. Actively injected disturbances are jointly diluted by multi-source collaboration, making it difficult for existing detection methods to identify [38].",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "Taking the disconnection of circuit breaker...",
       "instruction": "Taking the disconnection of circuit breaker CB0 at PCC at 0.4 s as an example to stop the power supply from the grid, so as to simulate the detection blind zone scenario of cross compensation in multi-DGs coordinated operation. The simulated voltage and current waveforms of each node are shown in Figs 5 and 6. After generating time series and exporting them to the MATLAB workspace, time-frequency spectrograms were generated by STFT, as shown in Figs 7 and 8. The time-frequency spectrogram of PCC voltage shows little change, which is the result of cross compensation caused by coordinated operation of multiple distributed generations. It can be seen from time-spectrogram of PCC current that both the amplitude and frequency of the spectrum change significantly after 0.4 s. The yellow spectrum components disappear, amplitude decreases, and dark blue spectrum appears at the same time, at which point PCC current reverses.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
+      "title": "Different fault conditions such as SLG,...",
       "instruction": "Different fault conditions such as SLG, DLG, TLG at different lines and load changes of L1-L5 were simulated on distribution system, resulting in 1062 time-frequency spectrogram atlas under non-islanding condition. Taking the phase A single-line-to-ground fault occurring at 0.3 s on distribution line 1 in region 1 as an example to simulate non-islanding state, the voltage and current waveforms of each node obtained from the simulation are shown in Figs 9 and 10. It can be observed that the voltage and current waveforms both exhibit obvious distorted burrs at 0.3 s, the three-phase symmetry is destroyed, and the zero-crossing timing and peak interval all change. The time series generated from the voltage and current of each",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
+      "title": "Node were exported to MATLAB workspace,...",
       "instruction": "Node were exported to MATLAB workspace, and time-frequency spectrograms were generated via STFT, as shown in Figs 11 and 12. It can be seen from the bright green frequency bands in Fig 11 that the voltage spectrum of each node is dominated by 50 Hz power frequency. After single-line-to-ground fault occurs at 0.3 s, yellow-orange distributions appear on both sides of the power frequency in spectrogram, and the power frequency component exhibits frequency drift. In Fig 12, the bright green frequency band of PCC current increases sharply at 0.3 s, reflecting a several-fold increase in the amplitude of the power frequency current. Due to the asymmetry of single-line-to-ground fault, multi-frequency energy of fault phase current in current spectrogram at B1 node is significantly higher than that of non-fault phases.",
       "is_critical": false,
       "timers": []

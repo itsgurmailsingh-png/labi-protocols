@@ -26,196 +26,196 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
+      "title": "Combine the transcript count data into a single data structure",
       "instruction": "Combine the transcript count data into a single data structure. To reduce confusion when this protocol is run multiple times, we declare an analysisDate variable to be used for output file names: countDate &lt;- format(Sys.Date(), &#34;%Y-%b-%d&#34;); We also load libraries that will be used in the protocol: ## steps 1-2 library(tidyverse); # data table manipulation ## steps 3-8 library(DESeq2); # differential expression analysis library(ashr); # for log fold change shrinking ## step 9 options(java.parameters = &#34;-Xmx10G&#34;); # may be needed to avoid Excel errors library(xlsx); # writing to an Excel file",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
+      "title": "Collect a list of the count data files",
       "instruction": "Collect a list of the count data files: data.files &lt;- list.files(pattern = &#34;_wide_transcript_counts.*\\\\.csv$&#34;); names(data.files) &lt;- sub(&#34;_wide_transcript_counts.*\\\\.csv$&#34;,&#34;&#34;,data.files); CHECK - print out the file names to make sure they&#39;re correct: data.files ## example output # CGAug18_004 #&#34;CGAug18_004_wide_transcript_counts_LAST.csv&#34; # CGDec17 # &#34;CGDec17_wide_transcript_counts_LAST.csv&#34; # CGJan19_006 #&#34;CGJan19_006_wide_transcript_counts_LAST.csv&#34; # CGMar19_009 #&#34;CGMar19_009_wide_transcript_counts_LAST.csv&#34; # CGNov18_005 #&#34;CGNov18_005_wide_transcript_counts_LAST.csv&#34;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
+      "title": "Set up the skeleton structures for creating the combined table",
       "instruction": "Set up the skeleton structures for creating the combined table. This is created in two parts: A gene lookup table, containing gene metadata A count table, containing transcript counts geneLookup.tbl &lt;- NULL; counts.raw.tbl &lt;- tibble(tdir=character());",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
+      "title": "The skeleton structures are then populated...",
       "instruction": "The skeleton structures are then populated with the data from individual library files: for(dfi in seq_along(data.files)){ data.files[dfi] %&gt;% read_csv %&gt;% mutate(tdir = paste0(transcript, &#34;_&#34;, dir)) -&gt; counts.sub.tbl; ## append columns without barcode names to gene table geneLookup.tbl %&gt;% rbind(geneLookup.tbl, select(counts.sub.tbl, -contains(&#34;BC&#34;), -contains(&#34;RB&#34;))) -&gt; geneLookup.tbl; ## append columns *with* barcode names to count table counts.sub.tbl %&gt;% select(&#34;tdir&#34;, contains(&#34;BC&#34;), contains(&#34;RB&#34;)) -&gt; counts.sub.tbl; ## add file label to barcode name column bcCols &lt;- grep(&#34;(BC|RB)&#34;, colnames(counts.sub.tbl)); colnames(counts.sub.tbl)[bcCols] %&lt;&gt;% paste0(names(data.files)[dfi], &#34;.&#34;, .); counts.raw.tbl %&gt;% full_join(counts.sub.tbl, by=&#34;tdir&#34;) -&gt; counts.raw.tbl; } ## Remove duplicates from the gene table geneLookup.tbl %&gt;% unique -&gt; geneLookup.tbl; CHECK - make sure that the column headings of the aggregated count table match the expected names: colnames(counts.raw.tbl) ## Example output # [1] &#34;tdir&#34; &#34;CGAug18_004.BC04&#34; &#34;CGAug18_004.BC05&#34; &#34;CGAug18_004.BC06&#34; # [5] &#34;CGDec17.BC06&#34; &#34;CGDec17.BC07&#34; &#34;CGJan19_006.BC03&#34; &#34;CGJan19_006.BC04&#34; # [9] &#34;CGJan19_006.BC05&#34; &#34;CGJan19_006.BC06&#34; &#34;CGJan19_006.BC07&#34; &#34;CGJan19_006.BC08&#34; #[13] &#34;CGMar19_009.BC07&#34; &#34;CGMar19_009.BC08&#34; &#34;CGMar19_009.BC09&#34; &#34;CGMar19_009.BC10&#34; #[17] &#34;CGNov18_005.BC01&#34; &#34;CGNov18_005.BC02&#34; &#34;CGNov18_005.BC03&#34; &#34;CGNov18_005.BC04&#34; #[21] &#34;CGNov18_005.BC05&#34; &#34;CGNov18_005.BC06&#34;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
+      "title": "Do some cleaning / reordering of...",
       "instruction": "Do some cleaning / reordering of the data, then create an intermediate aggregate count table",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
+      "title": "The sample metadata file (see Guidelines...",
       "instruction": "The sample metadata file (see Guidelines &amp; Warnings ) is read in, mostly as factors; the sample ID is converted to a character vector: read.csv(&#34;metadata.csv&#34;) %&gt;% mutate(SampleID = as.character(SampleID)) -&gt; meta.df; Metadata rows are subset and to match IDs present in the count table, and underscores are replaced with dots in the sample IDs: ## Filter metadata to only include the desired samples meta.df %&gt;% filter(SampleID %in% colnames(counts.raw.tbl)) %&gt;% ## Sort by condition arrange(Condition) -&gt; meta.df ## Replace &#39;_&#39; with &#39;.&#39; in column and metadata names meta.df$SampleID &lt;- gsub(&#34;_&#34;, &#34;.&#34;, meta.df$SampleID); colnames(counts.raw.tbl) &lt;- gsub(&#34;_&#34;, &#34;.&#34;, colnames(counts.raw.tbl));",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
+      "title": "Count table rows are subset and...",
       "instruction": "Count table rows are subset and re-ordered to match the order of the metadata table, and counts are combined with gene annotation: counts.raw.tbl %&gt;% ## only select forward-oriented transcripts filter(endsWith(tdir, &#34;_fwd&#34;)) %&gt;% ## convert to integer mutate_at(grep(&#34;\\\\.BC&#34;, colnames(.)), as.integer) %&gt;% ## convert NA values to 0 counts mutate_at(grep(&#34;\\\\.BC&#34;, colnames(.)), function(x){coalesce(x, 0L)}) %&gt;% distinct() %&gt;% ## join to transcript metadata left_join(geneLookup.tbl) %&gt;% ## reorder to match metadata table select(transcript, Chr, Strand, Start, End, Description, Gene, dir, tdir, match(meta.df$SampleID[meta.df$SampleID %in% colnames(.)], colnames(.))) -&gt; filt.count.tbl;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
+      "title": "The combined table is sorted based...",
       "instruction": "The combined table is sorted based on total expression across all samples and output to an intermediate file, using the analysis date as a file name: filt.count.tbl %&gt;% arrange(-rowSums(filt.count.tbl[,bcCols])) %&gt;% write_csv(sprintf(&#34;raw_counts_%s.csv&#34;, countDate));",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
+      "title": "Note",
       "instruction": "Note: What follows from here will be more case-specific. The steps outlined here represent one method of carrying out a differential expression analysis with a relatively simple statistical model. For further ideas for how to carry out a differential expression analysis, see the DESeq2 Workflow. Set up variables to change output file names and behaviour: Note: the countDate is not &#34;today&#34; because different explorations of differential expression could be done on the same count data. countDate &lt;- &#34;2022-Apr-11&#34;; # date of count aggregation l2FCShrink &lt;- TRUE; # whether the Log2FC values should be shrunk analysisDate &lt;- format(Sys.Date(), &#34;%Y-%b-%d&#34;); # date of DESeq analysis resultSource &lt;- &#34;GRCm39_ATP5KO&#34;; # descriptive label for results excluded.factors &lt;- &#34;Treatment&#34;; # factors to exclude from statistical model Read in the intermediate aggregated count file and the metadata file: sprintf(&#34;raw_counts_%s.csv&#34;, countDate) %&gt;% read_csv() -&gt; count.tbl; read.csv(&#34;metadata.csv&#34;) %&gt;% mutate(SampleID = gsub(&#34;_&#34;, &#34;.&#34;,as.character(SampleID))) %&gt;% ## Make sure metadata information only includes samples in the count table filter(SampleID %in% colnames(count.tbl)) -&gt; meta.df;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
+      "title": "Carry out metadata filtering (i",
       "instruction": "Carry out metadata filtering (i.e. sample exclusion) and count filtering (e.g. gene / sample QC)",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
+      "title": "Filter the metadata table to only...",
       "instruction": "Filter the metadata table to only include the desired samples: Note: this step will be situation specific meta.df %&gt;% ## Only keep 4T1 strain data filter(Strain == &#34;4T1&#34;) %&gt;% ## Sort by cell line, then replicate arrange(Line, Replicate) -&gt; meta.df",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
+      "title": "Filter the metadata file to match the count table (i",
       "instruction": "Filter the metadata file to match the count table (i.e. removing any samples filtered out in previous steps), and exclude any columns that have single values. Count tables are finally arranged as in the metadata table: for(x in colnames(meta.df)){ if(is.factor(meta.df[[x]])){ meta.df[[x]] %&gt;% factor -&gt; meta.df[[x]]; } } count.tbl %&gt;% select(transcript, Chr, Strand, Start, End, Description, Gene, dir, tdir, match(meta.df$SampleID[meta.df$SampleID %in% colnames(.)], colnames(.))) -&gt; filt.count.tbl; CHECK - make sure the SampleIDs in the column names match the exact order of the metadata table: colnames(filt.count.tbl)[grepl(&#34;(BC|RB)&#34;, colnames(filt.count.tbl)]] == meta.df$SampleID ## Example output # [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE #[16] TRUE TRUE",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
+      "title": "Create DESeq2 data structure, and run a differential expression analysis",
       "instruction": "Create DESeq2 data structure, and run a differential expression analysis",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
+      "title": "Identify factors for the statistical model...",
       "instruction": "Identify factors for the statistical model from the metadata file: setdiff(colnames(meta.df), c(c(&#34;SampleID&#34;,&#34;Label&#34;,&#34;Replicate&#34;,&#34;Notes&#34;), excluded.factors)) -&gt; factorNames;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
+      "title": "Create the transcript count matrix",
       "instruction": "Create the transcript count matrix: count.mat &lt;- as.matrix(count.tbl[grepl(&#34;(BC|RB)&#34;, colnames(filt.count.tbl))]); rownames(count.mat) &lt;- count.tbl$transcript;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
+      "title": "Convert to DESeq2 structure and run DESeq2",
       "instruction": "Convert to DESeq2 structure and run DESeq2: DESeqDataSetFromMatrix(count.mat, meta.df, as.formula(paste0(&#34;~ &#34;, paste(factorNames, collapse=&#34; + &#34;)))) %&gt;% DESeq -&gt; dds; CHECK - make sure dispersion and result names look reasonable: Note: The result names will not indicate every possible comparison; just a subset from which all comparisons can be derived from. png(&#34;dispEsts.png&#34;); plotDispEsts(dds); dev.off(); resultsNames(dds); ## Example output # [1] &#34;Intercept&#34; &#34;Experiment_CG005_vs_CG004&#34; # [3] &#34;Experiment_CG006_vs_CG004&#34; &#34;Experiment_CG009_vs_CG004&#34; # [5] &#34;Experiment_CGDec17_vs_CG004&#34; &#34;Line_p0D25_vs_p0&#34; # [7] &#34;Line_p0SC_vs_p0&#34; &#34;Line_p0SCL_vs_p0&#34; # [9] &#34;Line_WT_vs_p0&#34; Dispersion plot for nanopore transcript data. Ideally there should be a smooth curve, with higher dispersion for low-count genes, and lower dispersion for high-count genes.",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
+      "title": "Prepare results table skeletons for DESeq2 results",
       "instruction": "Prepare results table skeletons for DESeq2 results",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
+      "title": "Collect up comparisons to make",
       "instruction": "Collect up comparisons to make: resultList &lt;- NULL; for(fi in factorNames){ vn &lt;- unique(meta.df[[fi]]); vn &lt;- vn[order(-xtfrm(vn))]; if(length(vn) == 1){ next; } for(fai in seq(1, length(vn)-1)){ for(fbi in seq(fai+1, length(vn))){ cat(sprintf(&#34;%s: %s vs %s\\n&#34;, fi, vn[fai], vn[fbi])); resultList &lt;- c(resultList, list(c(fi, as.character(vn[fai]), as.character(vn[fbi])))); } } }",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
+      "title": "Create variance-stabilised [log2] count matrix from DESeq2 structure: dds",
       "instruction": "Create variance-stabilised [log2] count matrix from DESeq2 structure: dds.counts &lt;- assay(vst(dds, blind=FALSE)); Rescale VST values to have the same 99th percentile, but a minimum value of zero. This makes the scaled counts resemble more closely the actual read counts: dds.quantile99 &lt;- quantile(dds.counts[dds.counts &gt; min(dds.counts)], 0.99); ((dds.counts - min(dds.counts)) / (dds.quantile99 - min(dds.counts))) * (dds.quantile99) -&gt; dds.counts; Replace column names in the VST matrix with labels from the metadata: Note: the substution removes any initial whitespace from the label colnames(dds.counts)[match(meta.df$SampleID, colnames(dds.counts))] &lt;- paste0(&#34;adj.&#34;,sub(&#34;^ +&#34;, &#34;&#34;, as.character(meta.df$Label)));",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
+      "title": "Generate base count table",
       "instruction": "Generate base count table: dds.withCounts.tbl &lt;- count.tbl ## replace column names with metadata labels colnames(dds.withCounts.tbl)[match(meta.df$SampleID, colnames(dds.withCounts.tbl))] &lt;- paste0(&#34;raw.&#34;,sub(&#34;^ +&#34;, &#34;&#34;, as.character(meta.df$Label))); Tack on VST matrix: dds.withCounts.tbl[,colnames(dds.counts)] &lt;- round(dds.counts,2); Pre-populate wth minimum p-value column: dds.withCounts.tbl$min.p.val &lt;- 0;",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
+      "title": "Fetch DESeq2 results for each comparison...",
       "instruction": "Fetch DESeq2 results for each comparison from the DESeq2 data structure and add to the base table: for(rn in resultList){ print(rn); results.df &lt;- if(l2FCShrink){ as.data.frame(lfcShrink(dds, contrast=rn, type = &#34;ashr&#34;)); } else { as.data.frame(results(dds, contrast=rn)); } results.df$log2FoldChange &lt;- round(results.df$log2FoldChange, 2); results.df$pvalue &lt;- signif(results.df$pvalue, 3); results.df$padj &lt;- signif(results.df$padj, 3); rn.label &lt;- paste(rn, collapse=&#34;-&#34;); results.tbl &lt;- as.tbl(results.df[, c(&#34;log2FoldChange&#34;, &#34;lfcSE&#34;, &#34;pvalue&#34;, &#34;padj&#34;)]); colnames(results.tbl) &lt;- paste0(c(&#34;L2FC.&#34;, &#34;lfcSE.&#34;, &#34;pval.&#34;, &#34;padj.&#34;), rn.label); results.tbl$transcript &lt;- rownames(results.df); dds.withCounts.tbl &lt;- left_join(dds.withCounts.tbl, results.tbl, by=&#34;transcript&#34;); }",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
+      "title": "Write results out to a CSV file",
       "instruction": "Write results out to a CSV file: dds.withCounts.tbl$min.p.val &lt;- apply(dds.withCounts.tbl[,grep(&#34;^padj\\\\.&#34;,colnames(dds.withCounts.tbl))], 1, min, na.rm=TRUE); write.csv(dds.withCounts.tbl, row.names=FALSE, gzfile(sprintf(&#34;DE_%s_VST_%s_%s.csv.gz&#34;, if(l2FCShrink){&#34;shrunk&#34;} else {&#34;orig&#34;}, resultSource, analysisDate)));",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 22,
-      "title": "",
+      "title": "Separate results and put into an Excel file Note",
       "instruction": "Separate results and put into an Excel file Note: this step will be situation specific",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 23,
-      "title": "",
+      "title": "Split out mitochondrial genes",
       "instruction": "Split out mitochondrial genes: filtered.dds.tbl &lt;- filter(dds.withCounts.tbl, Chr != &#34;MT&#34;); MT.dds.tbl &lt;- filter(dds.withCounts.tbl, Chr == &#34;MT&#34;);",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 24,
-      "title": "",
+      "title": "Write split datasets out to the Excel file",
       "instruction": "Write split datasets out to the Excel file: write.xlsx2(as.data.frame(filtered.dds.tbl), sprintf(&#34;DE_%s_VST_%s_%s.xlsx&#34;, if(l2FCShrink){&#34;shrunk&#34;} else {&#34;orig&#34;}, resultSource, analysisDate), sheetName=&#34;Genome Data&#34;, row.names=FALSE); write.xlsx2(as.data.frame(MT.dds.tbl), sprintf(&#34;DE_%s_VST_%s_%s.xlsx&#34;, if(l2FCShrink){&#34;shrunk&#34;} else {&#34;orig&#34;}, resultSource, analysisDate), sheetName=&#34;MT Data&#34;, append=TRUE, row.names=FALSE);",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 25,
-      "title": "",
+      "title": "Add worksheets for differentially-expressed pairs",
       "instruction": "Add worksheets for differentially-expressed pairs: for(rn in resultList){ print(rn); if(rn[1] == &#34;Experiment&#34;){ next; } sheetName &lt;- sprintf(&#34;%s; %s vs %s&#34;, rn[1], rn[2], rn[3]); meta.df &lt;- meta.df[order(meta.df$Line, meta.df$Replicate),]; cnames &lt;- sub(&#34;^ +&#34;,&#34;&#34;,as.character(meta.df$Label[meta.df[[rn[1]]] %in% rn[2:3]])); cnames &lt;- c(paste0(&#34;raw.&#34;,cnames), paste0(&#34;adj.&#34;,cnames)); rn.label &lt;- paste(rn, collapse=&#34;-&#34;); res.tbl &lt;- filtered.dds.tbl[,c(colnames(filtered.dds.tbl)[c(6,7,8)], cnames,paste0(c(&#34;L2FC.&#34;,&#34;pval.&#34;, &#34;padj.&#34;), rn.label))]; res.tbl &lt;- res.tbl[res.tbl[[paste0(&#34;padj.&#34;, rn.label)]] &lt;= 0.1,]; res.tbl &lt;- res.tbl[order(-res.tbl[[paste0(&#34;L2FC.&#34;, rn.label)]]),]; write.xlsx2(as.data.frame(res.tbl), sprintf(&#34;DE_%s_VST_%s_%s.xlsx&#34;, if(l2FCShrink){&#34;shrunk&#34;} else {&#34;orig&#34;}, resultSource, analysisDate), sheetName=sheetName, append=TRUE, row.names=FALSE); }",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 26,
-      "title": "",
+      "title": "Filters are applied to make sure...",
       "instruction": "Filters are applied to make sure that only reliably-expressed genes are included: minCounts &lt;- 3; # minimum number of counts per transcript (across all samples) minSamples &lt;- 3; # minimum number of samples with expressed transcript bcCols &lt;- grep(&#34;\\\\.BC&#34;,colnames(filt.count.tbl)); ## Exclude genes with fewer than minimum total counts filt.count.tbl &lt;- filt.count.tbl[rowSums(filt.count.tbl[,bcCols]) &gt;= minCounts,]; ## Exclude genes with fewer than minimum totals samples filt.count.tbl &lt;- filt.count.tbl[apply(filt.count.tbl[,bcCols],1, function(x){sum(x &gt;= minCounts) &gt; minSamples}),]",
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 27,
-      "title": "",
+      "title": "Remove any unwanted comparisons for results output",
       "instruction": "Remove any unwanted comparisons for results output: ## Only keep comparisons that we want resultList &lt;- resultList[sapply(resultList, function(x){x[1] != &#34;Batch&#34;})];",
       "is_critical": false,
       "timers": []
