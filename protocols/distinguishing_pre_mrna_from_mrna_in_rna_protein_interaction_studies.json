@@ -41,22 +41,6 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "Total RNA-seq has previously been used to approximate transcriptional changes via pre-mRNA abundance2 as well as to determine posttranscriptional regulation.3 In contrast to these approaches, which compare total transcriptomes of two different conditions, this protocol is based on the comparison of two different fractions: RBP pull-down (PD) to Input fractions, each with a different sample complexity. The available analysis software used for differential expression analysis of samples with similar complexities is in general not suitable for the analysis of different fractions, necessitating custom solutions described in this protocol. In addition, we present a novel way for the quantitation of the relative abundance of pre-mRNA versus mRNA allowing to determine whether a given RBP prefers pre-mRNA or mRNA for binding.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "In Bestehorn et al.,1 this protocol was applied on TTP-bound RNA in the RAW264.7 mouse macrophage cell line to consolidate the discovery that the main TTP target is pre-mRNA not mRNA. This mechanism ensures that the TTP-bound target, once spliced and exported to the cytoplasm, is degraded before it can be translated.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
       "title": "Pull-down of RBP-bound RNA, library preparation, and sequencing",
       "instruction": "Timing: 8 days",
       "substeps": [],
@@ -64,7 +48,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 1,
       "title": "Pull-down of RBP-bound RNA, library preparation, and sequencing",
       "instruction": "This step includes the preparation of cells expressing the RBP and target RNAs, metabolic labeling of RNA with subsequent crosslinking, pull-down of RBP-RNA complexes, RNA isolation, library preparation and sequencing.",
       "substeps": [],
@@ -72,7 +56,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 2,
       "title": "Pull-down of RBP-bound RNA, library preparation, and sequencing",
       "instruction": "We use a RAW264.7 macrophage cell line which harbors a CRISPR/Cas9-mediated TTP deletion. These cells were engineered to inducibly express exogenous C-terminally Myc-tagged TTP from a doxycycline inducible promoter (Bestehorn et al1). While we have not tested the protocol for other cell lines or RBPs, we believe that it can be adapted for different cell lines and RBPs of interest (endogenous or exogeneous), provided antibodies for the pull-down step are available.",
       "substeps": [],
@@ -80,7 +64,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 3,
       "title": "Pull-down of RBP-bound RNA, library preparation, and sequencing",
       "instruction": "Clean workspace with an RNase decontamination solution and only use sterile filter tips throughout the experiment.",
       "substeps": [],
@@ -88,15 +72,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
-      "title": "Step-by-step method details",
-      "instruction": "The following steps detail the computational part of this analysis to obtain PD-enriched genes and calculate the ratio of intronic to exonic coverage (InEx). File names in the code snippets do not include directories as they are only placeholders for your preferred file name and location. Code for steps 1 - 7 is bash/awk; from step 8 onwards this protocol uses R code.",
-      "substeps": [],
-      "is_critical": true,
-      "timers": []
-    },
-    {
-      "step_id": 7,
+      "step_id": 4,
       "title": "Enrichment analysis",
       "instruction": "Timing: 1.5 h",
       "substeps": [],
@@ -104,7 +80,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 5,
       "title": "Enrichment analysis",
       "instruction": "In this step, we perform a basic enrichment analysis on TPM normalized counts.Note: Targets of the RBP are identified by their enrichment in the PD fraction over Input. Since most genes are depleted in the PD fraction and few genes are strongly enriched, the assumption of a common scale factor that DESeq2 depends on13 is not met for this data.11.Reduce false positives in enrichment analysis by setting a cutoff.Note: These false positives would originate from log-transformation-caused spreading of counts of lowly expressed genes and the concomitant introduction of noise in step 12. Therefore, filter for genes whose counts are above the mean in PD. Troubleshooting.a.Perform calculation and filtering.Optional: Save your filtered TPM count tables as intermediate files.# calculate mean overall TPM in PD as cutoff value>PD.mean data.TPM.cutoff %> lapply(filter, mean_PD>PD.mean)%>%> lapply(column_to_rownames,\"Row.names\")b.Check if the filtering worked.Note: The number of rows should decrease and genes with low PD counts should be removed.12.Log-transform normalized counts.Note: It is common practice to add a pseudocount to the normalized count value to avoid undefined values for not expressed genes here. However, genes with 0 counts were not of interest for this analysis and most likely already filtered out in step 11. Any remaining genes with nonfinite values after log-transformation are removed here.# function for removal of genes with nonfinite values (-Inf)>all.is.finite df %> filter_all(all_vars(is.finite(.)))> return(df)>}# log-transformation>data.log %> lapply(all.is.finite) #removing rows where log-transf. gave -Inf>names(data.log) t.test.per.df df %> rownames_to_column(\"gene\")%>%> rowwise() %>% #important to run t.test per gene!> mutate(p_val = t.test(c_across(contains(\"PD_\")),> c_across(contains(\"Input_\")),> alternative = \"two.sided\")$p.value)%>%> ungroup() %>% #important to run correction across all tests!> mutate(p_adj = p.adjust(p_val, method = \"BH\"))%>%> column_to_rownames(\"gene\")> return(df)>}# run t-test and p-value correction>data.ttest data.DE df % mutate(logFC=mean_PD-mean_Input)> return(df)> })%>%> lapply(function(df){> df %> mutate(\"enriched\"=case_when(> p_adj 0 ∼ \"enriched genes\",> T ∼ \"not enriched genes\"))> return(df)> })b.Manually check if your logFC values and the classification of enriched genes make sense.15.Extract lists of significantly enriched genes in exonic and intronic counts and combine into one list.Optional: Save enriched.genes as a csv file.# individual lists for enriched genes in intronic or exonic counts>enriched.genes.lists df %filter(p_adj 0)> return(df)> })%>%> lapply(rownames)# combined list>enriched.genes enriched.genes.lists$exon)",
       "substeps": [],
@@ -114,5 +90,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T00:52:40.568641Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Total RNA-seq has previously been used to approximate transcriptional changes via pre-mRNA abundance2 as well as to determine posttranscriptional regulation.3 In contrast to these approaches, which compare total transcriptomes of two different conditions, this protocol is based on the comparison of two different fractions: RBP pull-down (PD) to Input fractions, each with a different sample complexity. The available analysis software used for differential expression analysis of samples with similar complexities is in general not suitable for the analysis of different fractions, necessitating custom solutions described in this protocol. In addition, we present a novel way for the quantitation of the relative abundance of pre-mRNA versus mRNA allowing to determine whether a given RBP prefers pre-mRNA or mRNA for binding. In Bestehorn et al.,1 this protocol was applied on TTP-bound RNA in the RAW264.7 mouse macrophage cell line to consolidate the discovery that the main TTP target is pre-mRNA not mRNA. This mechanism ensures that the TTP-bound target, once spliced and exported to the cytoplasm, is degraded before it can be translated. The following steps detail the computational part of this analysis to obtain PD-enriched genes and calculate the ratio of intronic to exonic coverage (InEx). File names in the code snippets do not include directories as they are only placeholders for your preferred file name and location. Code for steps 1 - 7 is bash/awk; from step 8 onwards this protocol uses R code."
 }

@@ -56,83 +56,116 @@
     },
     {
       "step_id": 3,
-      "title": "It is assumed that you have...",
-      "instruction": "It is assumed that you have some prior knowledge of the plasmid length. If the length is unknown, it can be determined by looking at the L50 summary statistics produced from fastx-length.pl when run on a representative sample: scripts/fastx-length.pl reads_BC05.fq.gz &gt; /dev/null Example output: Total sequences: 8288 Total length: 29.360421 Mb Longest sequence: 19.739 kb Shortest sequence: 80 b Mean Length: 3.542 kb Median Length: 4.936 kb N10: 410 sequences; L10: 5.051 kb N50: 2747 sequences; L50: 5.007 kb &lt;== N90: 5310 sequences; L90: 2.947 kb A/T homopolymer lengths: Minimum: 0 bp Maximum: 1905 bp Mean: 13 bp Median: 6 bp Mode: 131 bp 10th percentile: 0 bp 90th percentile: 37 bp Predicted / modeled quality across all reads: Minimum: q2 Maximum: q20 Mean: q12 Median: q13 Mode: q20 10th percentile: q7 90th percentile: q16 In this case, the plasmid length is approximately 5kb, so a system variable is created containing that information, as well as a value half that length: plasmidLength=5000 plasmidHalfLength=2500 Filter out any reads that are less than half of the target read length, then from the remaining reads keep keep 100 of highest-quality reads. These reads are fragmented into 1.5kb pieces with 750bp overlap. for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do scripts/fastx-fetch.pl -lengthFilter ${plasmidHalfLength} -count 100 reads_${bc}.fq.gz | \\ ~/scripts/normalise_seqlengths.pl -fraglength 1500 -overlap 750 | \\ gzip &gt; Filtered_reads_${bc}.fq.gz; done",
+      "title": "410 sequences; L",
+      "instruction": "410 sequences; L",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
+      "title": "2747 sequences; L",
+      "instruction": "2747 sequences; L",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "5",
+      "instruction": "5.007 kb &lt;== N",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "5310 sequences; L",
+      "instruction": "5310 sequences; L",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "2.947 kb A/T homopolymer lengths",
+      "instruction": "2.947 kb A/T homopolymer lengths: Minimum: 0 bp Maximum: 1905 bp Mean: 13 bp Median: 6 bp Mode: 131 bp 10th percentile: 0 bp 90th percentile: 37 bp Predicted / modeled quality across all reads: Minimum: q2 Maximum: q20 Mean: q12 Median: q13 Mode: q20 10th percentile: q7 90th percentile: q16 In this case, the plasmid length is approximately 5kb, so a system variable is created containing that information, as well as a value half that length: plasmidLength=5000 plasmidHalfLength=2500 Filter out any reads that are less than half of the target read length, then from the remaining reads keep keep 100 of highest-quality reads. These reads are fragmented into 1.5kb pieces with 750bp overlap. for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do scripts/fastx-fetch.pl -lengthFilter ${plasmidHalfLength} -count 100 reads_${bc}.fq.gz | \\ ~/scripts/normalise_seqlengths.pl -fraglength 1500 -overlap 750 | \\ gzip &gt; Filtered_reads_${bc}.fq.gz; done",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
       "title": "This protocol assumes the reference sequence...",
       "instruction": "This protocol assumes the reference sequence has a name &#39;refName&#39;, and can be found at &#39;reference/refName.fa&#39;. Change &#39;refName&#39; here in the likely event that the sequence / file has a different name, then export the variable REFNAME to make subsequent steps easier. export REFNAME=&#34;refName&#34;",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 9,
       "title": "Create a LAST index for the reference sequence",
       "instruction": "Create a LAST index for the reference sequence: lastdb -uNEAR -R01 reference/${REFNAME}.fa reference/${REFNAME}.fa",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 10,
       "title": "Prepare a substitution matrix for barcode mapping",
       "instruction": "Prepare a substitution matrix for barcode mapping. I recommend doing this by training LAST, and incorporating quality scores into the trained matrix: last-train --matsym -Q 1 -P 10 reference/${REFNAME}.fa \\ Filtered_reads_BC*.fastq.gz Copy the last few lines from the output into a text file called ` plasmid.mat ` Here is a matrix that I have created from plasmid reads called using the guppy super-accuracy basecaller, v5.0.13: #last -Q 1 #last -t4.39812 #last -a 17 #last -A 18 #last -b 4 #last -B 5 #last -S 1 # score matrix (query letters = columns, reference letters = rows): A C G T A 6 -45 -34 -46 C -45 6 -46 -45 G -34 -46 6 -46 T -46 -45 -46 6 plasmid.mat This matrix has a moderate penalty for opening gaps (i.e. insertions and deletions), and a lower penalty for inserting them. Insertions are slightly less likely than deletions. It has a higher penalty for A/G transition variants, and a similar penalty for C/T transition variants as other substitution penalties.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 11,
       "title": "Map reads to the reference and...",
       "instruction": "Map reads to the reference and convert to BAM format using maf-convert and samtools : for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do echo ${bc}; lastal -j 7 -P 10 -p plasmid.mat reference/${REFNAME}.fa \\ Filtered_reads_{bc}.fastq.gz | last-split -n -m 0.99 | last-postmask | \\ maf-convert sam | samtools view -h --reference reference/${REFNAME}.fa | \\ samtools sort &gt; results/${bc}_vs_${REFNAME}.bam; samtools index results/${bc}_vs_${REFNAME}.bam; done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 12,
       "title": "Split reads into forward and reverse-mapped...",
       "instruction": "Split reads into forward and reverse-mapped sequences, and tally up base counts at each location: cat results/read_L50.txt | while read bc len; do echo ${bc} ${len}; samtools view -b -F 0x10 results/${bc}_vs_${REFNAME}.bam | \\ samtools mpileup --reference reference/${REFNAME}.fa -B -Q 0 - | \\ ~/scripts/readstomper.pl -c &gt; results/fwd_stomped_${bc}_vs_${REFNAME}.csv samtools view -b -f 0x10 results/${bc}_vs_${REFNAME}.bam | \\ samtools mpileup --reference reference/${REFNAME}.fa -B -Q 0 - | \\ ~/scripts/readstomper.pl -c &gt; results/rev_stomped_${bc}_vs_${REFNAME}.csv done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 13,
       "title": "Create a visualisation of the base-stomped output",
       "instruction": "Create a visualisation of the base-stomped output: for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do echo ${bc}; ~/scripts/stomp_plotter.r -f results/fwd_stomped_${bc}_vs_${REFNAME}.csv \\ -r results/rev_stomped_${bc}_vs_${REFNAME}.csv -prefix results/${bc}done Example output ( `results/BC02_stompPlot_reference_seq.png `): BC02 reads mapped to a reference sequence called &#39;reference_seq&#39;",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 14,
       "title": "Run a Canu assembly on each...",
       "instruction": "Run a Canu assembly on each read set, using default options: for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do echo ${x}; canu -nanopore Filtered_reads_${bc}.fq.gz -p ${bc} \\ -d results/canu_${bc} genomeSize=${plasmidLength}; done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 15,
       "title": "Trim the assembled contigs based on...",
       "instruction": "Trim the assembled contigs based on Canu&#39;s trim recommendations for the longest assembled contig: for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do echo ${bc}; samtools faidx results/canu_${bc}/${bc}.contigs.fasta $(grep &#39;^&gt;&#39; results/canu_${bc}/${bc}.contigs.fasta | \\ perl -pe &#39;s/^&gt;(.*?) .*trim=([0-9]+)-([0-9]+)/$1.&#34;:&#34;.($2+1).&#34;-&#34;.($3)/e&#39;) | \\ scripts/fastx-fetch.pl | \\ scripts/fastx-sort.pl -l | scripts/fastx-fetch.pl -c 1 | \\ perl -pe &#34;s/^&gt;/&gt;${bc}_/&#34; &gt; results/longest_circTrimmed_${bc}.fasta; done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 16,
       "title": "This protocol uses scripts that I...",
       "instruction": "This protocol uses scripts that I have developed over the course of my bioinformatics work to simplify fastq and fasta file processing. They can be downloaded from my gitlab repository : git clone https://gitlab.com/gringer/bioinfscripts.git scripts",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 17,
       "title": "If plasmid sequences contain a long...",
       "instruction": "If plasmid sequences contain a long polyA region, the assembled sequences can be oriented assuming that the longest homopolymer is this polyA region: for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do echo ${bc}; if scripts/fastx-hplength.pl results/longest_circTrimmed_${bc}.fasta | tail -n 1 | grep &#34;T&#34;; then scripts/fastx-rc.pl results/longest_circTrimmed_${bc}.fasta | \\ scripts/fastx-fetch.pl -oneline &gt; results/oriented_longest_circTrimmed_${bc}.fasta; else scripts/fastx-fetch.pl -oneline results/longest_circTrimmed_${bc}.fasta \\ &gt; results/oriented_longest_circTrimmed_${bc}.fasta; fi; done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 18,
       "title": "The plasmid can then be oriented...",
       "instruction": "The plasmid can then be oriented based on a known alignment sequence. First the alignment sequence is stored in a file &#39;align_seq.fa&#39;, and indexed using lastdb : echo -e &#34;&gt;align_seq\\nGAGACGGTCGACTGCGGCCGCTCGAGTCT&#34; &gt; align_seq.fa lastdb -uRY4 -R01 align_seq.fa align_seq.fa Then the alignment sequence is used to determine the rotation of the plasmid: for bc in $(awk &#39;{print $2}&#39; barcode_counts.txt); do echo ${bc}; scripts/fastx-rotate.pl \\ -o $(lastal align_seq.fa results/oriented_longest_circTrimmed_${bc}.fasta | \\ grep BC | awk &#39;{print $3}&#39;) \\ results/oriented_longest_circTrimmed_${bc}.fasta \\ &gt; results/rotated_longest_circTrimmed_${bc}.fasta; done",
       "is_critical": false,

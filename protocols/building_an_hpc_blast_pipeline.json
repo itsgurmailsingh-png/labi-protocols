@@ -84,62 +84,87 @@
     },
     {
       "step_id": 7,
-      "title": "Create blast-pipeline.sh Driver Script",
-      "instruction": "Create the `blast-pipeline.sh` driver script to run each part of the pipeline, managing environmental variables and submitting jobs via `qsub`. Use `vi blast-pipeline.sh` and enter the following text: #!/bin/sh # Step1: get the env variables and create a list of files source ./config.sh # Step 2: get all of the fasta files for input cd \"$FASTA_DIR\" export FILES_LIST=\"$FASTA_DIR/files-list\" pwd ls *.fasta | sed \"s/^\\.\\///\" > $FILES_LIST # Step 3: split the fasta files into smaller chunks $SCRIPT_DIR/run-fasta-splitter.sh # Step 4: run blast on each of the file chunks while read FILE; do export FILE=\"$FILE\" cd $SPLIT_FA_DIR export SPLIT_FILES_LIST=\"$SPLIT_FA_DIR/split.$FILE\" ls $FILE.* > $SPLIT_FILES_LIST NUM_SPLIT_FILES=$(wc -l $SPLIT_FILES_LIST | cut -d ' ' -f 1) ## run blast on each of the smaller chunks against a blast database JOB_ID1=$(qsub -v SCRIPT_DIR,SPLIT_FA_DIR,BLAST,EVAL,BLASTDB,BLAST_OUT_DIR,FILE -N blast -e \"$STDERR_DIR\" -o \"$STDOUT_DIR\" -J 1-$NUM_SPLIT_FILES $SCRIPT_DIR/run-blast.sh) ## parse the blast results for each of the chunked files JOB_ID2=$(qsub -v SCRIPT_DIR,BLAST_OUT_DIR,FILE -W depend=afterany:$JOB_ID1 -e \"$STDERR_DIR\" -o \"$STDOUT_DIR\" -J 1-$NUM_SPLIT_FILES $SCRIPT_DIR/run-parse-blast.sh) done < $FILES_LIST",
+      "title": "get the env variables and create...",
+      "instruction": "get the env variables and create a list of files source ./config.sh #",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
+      "title": "get all of the fasta files...",
+      "instruction": "get all of the fasta files for input cd \"$FASTA_DIR\" export FILES_LIST=\"$FASTA_DIR/files-list\" pwd ls *.fasta | sed \"s/^\\.\\///\" > $FILES_LIST #",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "split the fasta files into smaller chunks $SCRIPT_DIR/run-fasta-splitter",
+      "instruction": "split the fasta files into smaller chunks $SCRIPT_DIR/run-fasta-splitter.sh #",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "run blast on each of the...",
+      "instruction": "run blast on each of the file chunks while read FILE; do export FILE=\"$FILE\" cd $SPLIT_FA_DIR export SPLIT_FILES_LIST=\"$SPLIT_FA_DIR/split.$FILE\" ls $FILE.* > $SPLIT_FILES_LIST NUM_SPLIT_FILES=$(wc -l $SPLIT_FILES_LIST | cut -d ' ' -f 1) ## run blast on each of the smaller chunks against a blast database JOB_ID1=$(qsub -v SCRIPT_DIR,SPLIT_FA_DIR,BLAST,EVAL,BLASTDB,BLAST_OUT_DIR,FILE -N blast -e \"$STDERR_DIR\" -o \"$STDOUT_DIR\" -J 1-$NUM_SPLIT_FILES $SCRIPT_DIR/run-blast.sh) ## parse the blast results for each of the chunked files JOB_ID2=$(qsub -v SCRIPT_DIR,BLAST_OUT_DIR,FILE -W depend=afterany:$JOB_ID1 -e \"$STDERR_DIR\" -o \"$STDOUT_DIR\" -J 1-$NUM_SPLIT_FILES $SCRIPT_DIR/run-parse-blast.sh) done < $FILES_LIST",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
       "title": "Create run-fasta-splitter.sh Script",
       "instruction": "Create the `run-fasta-splitter.sh` shell script to run the Perl fasta splitter. This script runs on the head node. Navigate to the `scripts` directory, use `vi run-fasta-splitter.sh` and enter the following text: #!/bin/bash source /usr/share/Modules/init/bash if [[ ! -d \"$SPLIT_FA_DIR\" ]]; then echo Cannot find faSplit \"$SPLIT_FA_DIR\" mkdir -p $SPLIT_FA_DIR fi if [[ ! -e \"$FILES_LIST\" ]]; then echo Cannot find files list \"$FILES_LIST\" exit 1 fi cd $FASTA_DIR while read FILE; do echo $FILE $SCRIPT_DIR/01-fasta-splitter.pl -n $SPLIT_READ_CT -o $SPLIT_FA_DIR $FILE done < $FILES_LIST",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 12,
       "title": "Create run-blast.sh Script",
       "instruction": "Create the `run-blast.sh` shell script to execute BLAST on a compute node. Configure PBS directives for resource allocation (e.g., walltime=24:00:00). Use `vi run-blast.sh` and enter the following text: #!/bin/bash #PBS -W group_list=bhurwitz #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=2:mem=4gb #PBS -l place=pack:shared #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M youruser@email.arizona.edu #PBS -m bea # BLAST parameters NUM_THREADS=2 # make sure this is requested in the above \"select\" DESC=10 ALN=10 MAX_HSPS=10 module load blast cd \"$SPLIT_FA_DIR\" FASTA=\"$SPLIT_FA_DIR/$FILE.${PBS_ARRAY_INDEX}\" # run blast on each file chunk $BLAST -query $FASTA -db $BLASTDB -evalue $EVAL -out $BLAST_OUT_DIR/$FILE.${PBS_ARRAY_INDEX}.blastout -max_hsps $MAX_HSPS -num_descriptions $DESC -num_alignments $ALN -num_threads $NUM_THREADS",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 13,
       "title": "Create run-parse-blast.sh Script",
       "instruction": "Create the `run-parse-blast.sh` shell script to parse BLAST output on a compute node. Include PBS directives and load necessary modules (blast, perl). Use `vi run-parse-blast.sh` and enter the following text: #!/bin/bash #PBS -W group_list=bhurwitz #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=2:mem=4gb #PBS -l place=pack:shared #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M youruser@email.arizona.edu #PBS -m bea module load blast cd $BLAST_OUT_DIR BLOUT=\"$BLAST_OUT_DIR/$FILE.${PBS_ARRAY_INDEX}.blastout\" echo File \"$FILE.${PBS_ARRAY_INDEX}.blastout\" $SCRIPT_DIR/04-blast-search.pl $BLOUT > $BLOUT.parsed",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 14,
       "title": "Modify blast-search Perl Script",
       "instruction": "Modify the `04-blast-search.pl` (or `01-bio-searchio.pl`) Perl script. Update the e-value to `my $min = 1e-10;` and modify the print statement to include additional hit information: `say join \"\\t\", $result->query_name, $hit->name, $hit->description, $hsp->percent_identity, $hsp->length('total'), $hsp->evalue;`",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 15,
       "title": "Make Scripts Executable & Run Pipeline",
       "instruction": "Make all `.sh` and `.pl` scripts executable using `chmod 755 *sh *pl` and then run the pipeline using `./blast-pipeline.sh`. Make sure your scripts are executable before running. If there are no errors, the pipeline should complete in less than one day.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 16,
       "title": "Monitor Pipeline Status",
       "instruction": "Check the pipeline's running status using `qstat -u yourusername` (e.g., `qstat -u bhurwitz`).",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 17,
       "title": "Check Standard Error & Output",
       "instruction": "Once the pipeline finishes (no jobs listed under `qstat`), check the `std-err` and `std-out` directories. In `std-err`, files should be zero length. In `std-out`, examine job descriptions and compute time. You can also perform these checks while the pipeline is running.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 18,
       "title": "Commit Code to GitHub",
       "instruction": "Commit your code to your own GitHub repository using the directory: `hpc-blast`.",
       "is_critical": false,

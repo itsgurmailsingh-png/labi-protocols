@@ -131,97 +131,90 @@
     },
     {
       "step_id": 15,
-      "title": "Run bowtie2 of the background cleaned...",
-      "instruction": "Run bowtie2 of the background cleaned samples against the contig reference database. First build bowtie reference of the OPFs. mkdir ./protein_cluster_rel_abund_tablebowtie2-build -f ./define_core_protein_clusters/protein_clusters.fa ./protein_cluster_rel_abund_table/bowtie2_contig_build mkdir ./protein_cluster_rel_abund_table bowtie2-build -f ./define_core_protein_clusters/protein_clusters.fa ./protein_cluster_rel_abund_table/bowtie2_contig_build",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
       "title": "Map the sequences to the OPFS",
       "instruction": "Map the sequences to the OPFS. mkdir ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hitsrun_bowtie2_against_contigs () {if [ -f /etc/profile.d/modules.sh ]; thensource /etc/profile.d/modules.shfimodule load bowtie2-2.1.0bowtie2 -x ./protein_cluster_rel_abund_table/bowtie2_contig_build -f ./negative_clean_seqs/$1 -S ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/$1 -L 25 -N 1}export -f run_bowtie2_against_contigsls ./negative_clean_seqs/ | xargs -I {} --max-procs=128 sh -c 'run_bowtie2_against_contigs {} mkdir ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits run_bowtie2_against_contigs () { if [ -f /etc/profile.d/modules.sh ]; thensource /etc/profile.d/modules.sh fi module load bowtie2-2.1.0 bowtie2 -x ./protein_cluster_rel_abund_table/bowtie2_contig_build -f ./negative_clean_seqs/$1 -S ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/$1 -L 25 -N 1 } export -f run_bowtie2_against_contigs ls ./negative_clean_seqs/ | xargs -I {} --max-procs=128 sh -c &#39;run_bowtie2_against_contigs {}&#34;&#39;",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 16,
       "title": "Rename the files to be",
       "instruction": "Rename the files to be .sam files. for file in $(ls ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits); domv ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/ for file in $(ls ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits); domv ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/&#34;${file}&#34; ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/&#34;${file/%.fa/.sam}&#34; done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 18,
+      "step_id": 17,
       "title": "Calculate the hit abundances from bowtie2 using estimation perl script",
       "instruction": "Calculate the hit abundances from bowtie2 using estimation perl script. Perl script available here . mkdir ./protein_cluster_rel_abund_table/abundance_from_samfor file in $(ls ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits); doperl calculate_abundance_from_sam.pl ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/${file} ./protein_cluster_rel_abund_table/abundance_from_sam/${file}done mkdir ./protein_cluster_rel_abund_table/abundance_from_sam for file in $(ls ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits); doperl calculate_abundance_from_sam.pl ./protein_cluster_rel_abund_table/bowtie2_neg_cleaned_hits/${file} ./protein_cluster_rel_abund_table/abundance_from_sam/${file} done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 19,
+      "step_id": 18,
       "title": "Rename the sam files to text files",
       "instruction": "Rename the sam files to text files. for file in $(ls ./protein_cluster_rel_abund_table/abundance_from_sam); domv ./protein_cluster_rel_abund_table/abundance_from_sam/ for file in $(ls ./protein_cluster_rel_abund_table/abundance_from_sam); domv ./protein_cluster_rel_abund_table/abundance_from_sam/&#34;${file}&#34; ./protein_cluster_rel_abund_table/abundance_from_sam/&#34;${file/%.sam/.txt}&#34; done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 20,
+      "step_id": 19,
       "title": "Add in OPF length information using awk and calculate RPKM",
       "instruction": "Add in OPF length information using awk and calculate RPKM. mkdir ./protein_cluster_rel_abund_table/abundance_with_lengthfor file in $(ls ./protein_cluster_rel_abund_table/abundance_from_sam); doexport SUM=$(awk '{ SUM += $2 } END { print SUM }' ./protein_cluster_rel_abund_table/abundance_from_sam/${file}) mkdir ./protein_cluster_rel_abund_table/abundance_with_length for file in $(ls ./protein_cluster_rel_abund_table/abundance_from_sam); doexport SUM=$(awk &#39;{ SUM += $2 } END { print SUM }&#39; ./protein_cluster_rel_abund_table/abundance_from_sam/${file})",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 21,
+      "step_id": 20,
       "title": "Add an echo of the sum...",
       "instruction": "Add an echo of the sum value to confirm that the sum is being calculated. echo Sum is $SUMawk --assign=sum=$SUM 'FNR==NR { a[$1]=$2; next } $1 in a { print $1 ./protein_cluster_rel_abund_table/abundance_with_length/${file} done&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;60400783C7FA45F6A048B0FBCFA91767&#34; &gt; echo Sum is $SUMawk --assign=sum=$SUM &#39;FNR==NR { a[$1]=$2; next } $1 in a { print $1&#34;\\t&#34;$2&#34;\\t&#34;a[$1]&#34;\\t&#34;$2*1000000000/(a[$1]*sum) }&#39; ./define_core_protein_clusters/protein_cluster_length_no_greater_sign.txt ./protein_cluster_rel_abund_table/abundance_from_sam/${file} &gt; ./protein_cluster_rel_abund_table/abundance_with_length/${file} done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 22,
+      "step_id": 21,
       "title": "Get columns of only the contig...",
       "instruction": "Get columns of only the contig IDs and the normalized RPKM abundance counts and add sample name to top of column for when this is used in distance matrix calculations, mkdir ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_idfor file in $(ls ./protein_cluster_rel_abund_table/abundance_with_length); doNAME=$(echo ${file} | sed 's/_R1\\.txt//')echo Name is $NAMEcut -f 1,4 ./protein_cluster_rel_abund_table/abundance_with_length/${file} | sed ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id/${file} done&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;FB9E953A74F447CD9EB558019700EE79&#34; &gt; mkdir ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id for file in $(ls ./protein_cluster_rel_abund_table/abundance_with_length); doNAME=$(echo ${file} | sed &#39;s/_R1\\.txt//&#39;)echo Name is $NAMEcut -f 1,4 ./protein_cluster_rel_abund_table/abundance_with_length/${file} | sed &#34;1 s/^/Contig_ID\\t${NAME}\\n/&#34; &gt; ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id/${file} done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 23,
+      "step_id": 22,
       "title": "Make master list of the contig...",
       "instruction": "Make master list of the contig numbers as a reference for mergin the data matrix values.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 24,
+      "step_id": 23,
       "title": "Merge the sample hit files to the master OPF list",
       "instruction": "Merge the sample hit files to the master OPF list. After this runs, all of the resulting files should have the same number of lines because they were all merged with the same master list. mkdir ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_listfor file in $(ls ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id); do awk 'FNR==NR {a[$1]=$2;next}{ print $1 ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list/${file} done&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;EBCACB9BE00B4C999DEA5D14287FB940&#34; &gt; mkdir ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list for file in $(ls ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id); do awk &#39;FNR==NR {a[$1]=$2;next}{ print $1&#34;\\t&#34;a[$1] }&#39; ./protein_cluster_rel_abund_table/abundance_RPKM_with_only_contig_id/${file} ./define_core_protein_clusters/master_contig_list.txt | sed &#39;/[0-9]\\t[0-9]/!s/$/0/&#39; | sed &#39;1 s/\\t0//&#39; | sed &#39;1 s/0$//&#39; &gt; ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list/${file} done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 25,
+      "step_id": 24,
       "title": "Get only the abundance values so...",
       "instruction": "Get only the abundance values so that they can be merged to the master contig list and used for distance matrix calculations. mkdir ./protein_cluster_rel_abund_table/abundance_RPKM_for_mergefor file in $(ls ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list); do cut -f 2 ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list/$file > ./protein_cluster_rel_abund_table/abundance_RPKM_for_merge/${file}done mkdir ./protein_cluster_rel_abund_table/abundance_RPKM_for_merge for file in $(ls ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list); do cut -f 2 ./protein_cluster_rel_abund_table/RPKM_contig_count_on_master_list/$file &gt; ./protein_cluster_rel_abund_table/abundance_RPKM_for_merge/${file} done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 26,
+      "step_id": 25,
       "title": "Merge the abundances with the OPF names",
       "instruction": "Merge the abundances with the OPF names.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 27,
+      "step_id": 26,
       "title": "Format the contig IDs",
       "instruction": "Format the contig IDs.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 28,
+      "step_id": 27,
       "title": "Transpose the files",
       "instruction": "Transpose the files. This relative abundance table can now be used in R for further analysis. python transpose_tab_delim.py -i ./protein_cluster_rel_abund_table/contig_otu_table_format.tsv -o ./protein_cluster_rel_abund_table/contig_otu_table_transposed.txt",
       "is_critical": false,
@@ -229,5 +222,6 @@
     }
   ],
   "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "merged_at": "2026-06-18",
+  "description": "Run bowtie2 of the background cleaned samples against the contig reference database. First build bowtie reference of the OPFs. mkdir ./protein_cluster_rel_abund_tablebowtie2-build -f ./define_core_protein_clusters/protein_clusters.fa ./protein_cluster_rel_abund_table/bowtie2_contig_build mkdir ./protein_cluster_rel_abund_table bowtie2-build -f ./define_core_protein_clusters/protein_clusters.fa ./protein_cluster_rel_abund_table/bowtie2_contig_build"
 }

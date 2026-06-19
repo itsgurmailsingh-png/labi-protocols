@@ -40,14 +40,6 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "These protocols describe specific bioinformatic workflows for the analyses of The Cancer Genome Atlas (TCGA) genomic datasets and well-characterized immune traits (Thorsson et al., 2018). However, these methodologies can also be applied to other datasets with similar structures. The majority of analyzed immune traits are derived from gene expression data and can be adapted to other studies.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "Heritability analysis",
       "instruction": "Timing: 2 weeks",
       "substeps": [],
@@ -55,7 +47,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 1,
       "title": "Heritability analysis",
       "instruction": "Heritability analysis on 139 traits is conducted using a mixed-model approach implemented in the genome-wide complex trait analysis (GCTA) software package with the genomic-relatedness-based restricted maximum-likelihood (GREML) method (Yang et al., 2010) (Yang et al., 2011). This calculates the proportion of immune trait variation that is attributable to common genetic variants (% Heritability). Refer to the GCTA website for details (https://cnsgenomics.com/software/gcta).5.Format immune trait input file:a.Formatted input file of TCGA immune traits is provided in the (Sayaman et al., 2021) GitHub repository:",
       "substeps": [],
@@ -63,7 +55,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 2,
       "title": "Heritability analysis",
       "instruction": "“Immune.pheno.139.source.coded.TCGAID.9769.txt”.6.Identify genetic ancestry assignment of each individual and create a filtered sample list for each genetic ancestry cluster:a.Ancestry assignments for each TCGA individual are provided in “Table S1. TCGA Sample List Used in the Analysis” from (Sayaman et al., 2021).b.Formatted input file of TCGA patient barcodes assigned to each genetic ancestry cluster is provided in the (Sayaman et al., 2021) GitHub repository:",
       "substeps": [],
@@ -71,7 +63,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 3,
       "title": "Heritability analysis",
       "instruction": "“TCGAID_Cluster1.EUR.8036.txt”",
       "substeps": [],
@@ -79,7 +71,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 4,
       "title": "Heritability analysis",
       "instruction": "“TCGAID_Cluster2.ASIAN.605.txt”",
       "substeps": [],
@@ -87,7 +79,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 5,
       "title": "Heritability analysis",
       "instruction": "“TCGAID_Cluster3.AFR.904.txt”",
       "substeps": [],
@@ -95,7 +87,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 6,
       "title": "Heritability analysis",
       "instruction": "“TCGAID_Cluster4.AMR.222.txt”7.To conduct heritability analyses within each ancestry subgroup (NEuropean=7,813, NAfrican=863, NAsian=570, and NAmerican=209 individuals), subset individuals belonging to specified ancestry group from the QC TCGA HRC imputed genotyping data in PLINK (--keep) using ancestry assignments.plink --bfile [input_file]--keep [ancestry_cluster_sample_file_list]--make-bed--out [output_filename]",
       "substeps": [],
@@ -103,7 +95,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "Heritability analysis",
       "instruction": "See script:",
       "substeps": [],
@@ -111,7 +103,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 8,
       "title": "Heritability analysis",
       "instruction": "“qsub_plink_whitelist_geno_mind_unique.indv_chr.auto_hardy.nonriskSNP_maf_uniqueSNP_TCGAID_ancestry.txt”.Note: Analysis is automatically performed on samples with complete data. A subset of the defined samples within each genetic ancestry cluster are automatically skipped due to missing data (e.g., immune trait or covariate values).8.Estimate the genetic relatedness matrix (GRM) from all the autosomal SNPs with MAF > 0.01 within each ancestry group using GCTA:gcta64 --bfile [input_filename]--autosome--maf 0.01--make-grm--out [output_filename]--thread-num [numeric_value_number_threads]",
       "substeps": [],
@@ -119,7 +111,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 9,
       "title": "Heritability analysis",
       "instruction": "See script:",
       "substeps": [],
@@ -127,7 +119,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 10,
       "title": "Heritability analysis",
       "instruction": "“qsub_gcta_whitelist_geno_mind_unique.indv_chr.auto_hardy.nonriskSNP_maf_uniqueSNP_TCGAID_ancestry_grm.txt”.9.Filter out individuals for relatedness. GCTA removes one of a pair of individuals with estimated relatedness larger than the specified cut-off value (cut-off = 0.05):gcta64 --grm [input_filename]--grm-cutoff 0.05--make-grm--out [output_filename]",
       "substeps": [],
@@ -135,7 +127,7 @@
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 11,
       "title": "Heritability analysis",
       "instruction": "See script:",
       "substeps": [],
@@ -143,7 +135,7 @@
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 12,
       "title": "Heritability analysis",
       "instruction": "“qsub_gcta_whitelist_geno_mind_unique.indv_chr.auto_hardy.nonriskSNP_maf_uniqueSNP_TCGAID_ancestry_grm_grm.cutoff.0.05.txt”.10.Run GCTA GREML unconstrained (using default algorithm: Average Information) to estimate variance explained by SNPs with defined categorical and continuous covariates using the following parameters:gcta64 --reml-no-constrain--grm [input_filename]--pheno [immune_trait_matrix_filename]--mpheno [immune_trait_numeric_index_input_matrix]--covar [categorical_covariates_filename]--qcovar [continuous_covariates_filename]--thread-num [numeric_value_number_threads]--out [output_filename]",
       "substeps": [],
@@ -151,7 +143,7 @@
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 13,
       "title": "Heritability analysis",
       "instruction": "See script: “qsub_grm.cutoff.0.05_greml_EUR.ImmunePheno216_CancerTypeSex.covar_PCA.AgeYears.qcovar.txt”.CRITICAL: Run heritability analysis unconstrained. This will produce heritability estimates (Vg/Vp) and standard deviations outside the 0–1 range.11.From GCTA GREML “.hsq” result file, extract the ratio of genetic variance to phenotypic variance (Vg/Vp), estimate and SE; the LRT p-value and sample size (n) for each immune trait.12.Concatenate heritability analysis results across all immune traits tested.a.Annotate each result file with the corresponding immune trait, immune category and immune module (see “Table S2”, (Sayaman et al., 2021)).b.Append annotated result files from each immune trait.13.Correct for multiple-hypothesis testing ancestry group by calculating the FDR p-value using the Benjamini-Hochberg adjustment method.14.Optional: Visualize % heritability (Vg/Vp ∗ 100) across all immune traits per ancestry group for exploratory data analysis.Note: Scripts used in this section are available at: https://github.com/rwsayaman/TCGA_PanCancer_Immune_Genetics.",
       "substeps": [],
@@ -159,7 +151,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 14,
       "title": "Heritability analysis",
       "instruction": "Direct link: Heritability Analysis. The example code in this section were optimized for the high-performance compute environment at UCSF HPC employing Portable Batch System (PBS) job scheduling; consult your system administrator to adapt the provided code to your system.",
       "substeps": [],
@@ -167,7 +159,7 @@
       "timers": []
     },
     {
-      "step_id": 16,
+      "step_id": 15,
       "title": "Heritability analysis",
       "instruction": "Interactive visualization of heritability analysis from (Sayaman et al., 2021) can be done in CRI iAtlas (https://www.cri-iatlas.org/), in the “Germline Analysis” module (see the “interactive visualization of results” section of “expected outcomes”).",
       "substeps": [],
@@ -175,7 +167,7 @@
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 16,
       "title": "Epigenomic analysis",
       "instruction": "Timing: 1–2 days",
       "substeps": [],
@@ -183,7 +175,7 @@
       "timers": []
     },
     {
-      "step_id": 18,
+      "step_id": 17,
       "title": "Epigenomic analysis",
       "instruction": "This section describes the mapping of genome-wide significant and suggestive SNPs to the Roadmap Epigenomics Project Epigenomic Expanded 18-state model which uses 6 marks across 98 epigenomes: https://egg2.wustl.edu/roadmap/web_portal/chr_state_learning.html#exp_18state.",
       "substeps": [],
@@ -191,7 +183,7 @@
       "timers": []
     },
     {
-      "step_id": 19,
+      "step_id": 18,
       "title": "Epigenomic analysis",
       "instruction": "(Roadmap Epigenomics Consortium et al., 2015).26.Transform the Immune-Germline GWAS suggestive and genome-wide significant SNPs results table into a GRanges object using the “GenomicRanges” package in R.a.Import the GWAS suggestive and genome-wide significant SNP result table into R.b.Create a unique data frame of SNP IDs, chromosome and base pair positions.c.Convert into GRanges object using the makeGRangesFromDataFrame function in “GenomicRanges” package.27.Iteratively loop and import each Roadmap Epigenomics Project epigenome, and extract epigenomic states that overlap each of the Germline-Immune SNP chromosome and base pair position.a.Using “rtracklayer” package in R, import each epigenome bed file with the annotated Epigenomic Expanded 18-state model.b.At each GRanges SNP chromosome and base pair position, extract the corresponding epigenomic state from each epigenome using the mergeByOverlaps function in “GenomicRanges” package.28.Map epigenome IDs to corresponding epigenome descriptions of source cell types and tissue types using the “Roadmap.metadata.qc.jul2013.csv” annotation file.29.Annotate epigenetic states with published color schema using “FigureColors.csv” file.30.Manually curate immune-associated epigenomes via cell type or tissue of origin (see “Table S4, (Sayaman et al., 2021)).Note: Scripts and code description used in this section are available at: https://github.com/rwsayaman/TCGA_PanCancer_Immune_Genetics.",
       "substeps": [],
@@ -199,7 +191,7 @@
       "timers": []
     },
     {
-      "step_id": 20,
+      "step_id": 19,
       "title": "Epigenomic analysis",
       "instruction": "Direct link: Epigenomic Analysis.",
       "substeps": [],
@@ -207,7 +199,7 @@
       "timers": []
     },
     {
-      "step_id": 21,
+      "step_id": 20,
       "title": "Expression and splicing quantitative trait locus analysis (eQTLs and sQTL)",
       "instruction": "Timing: 1 week",
       "substeps": [],
@@ -215,7 +207,7 @@
       "timers": []
     },
     {
-      "step_id": 22,
+      "step_id": 21,
       "title": "Expression and splicing quantitative trait locus analysis (eQTLs and sQTL)",
       "instruction": "This section describes eQTL and sQTL analysis in TCGA and GTEx data. For GTEx data, eQTL/sQTL summary statistics across tissues were downloaded from https://gtexportal.org/home/index.html. For the TCGA dataset, the gene expression matrix was downloaded from: https://gdc.cancer.gov/about-data/publications/pancanatlas and analysis was conducted locally.31.TCGA Analysis.a.eQTL.i.Download gene expression matrix: “EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv”.ii.Download genes’ starts, ends, and types (i.e., protein coding, pseudogenes, miRNA, etc.) from “biomaRt” package from https://grch37.ensembl.org/biomart/martview/. Required columns from the “mart_report.txt” output files are: “Chromosome”, “Start”, “End”, and “Gene type”.iii.Transpose the gene expression matrix. This can be run with R script “OrganizeRNAMatrix.R”.iv.Run association analysis between genome-wide and suggestive SNPs and genes within 1 MB using a linear regression model accounting for genetic ancestry PC1-7, sex, age, and cancer type (see “Table S1”, (Sayaman et al., 2021)). This can be achieved using the script “eQTLanalysis.R”. This script also runs eQTL analysis for the 30 cancers separately.v.Summarize outcome: results will have the following: chromosome, position, gene name, distance from gene, pan-cancer sample size, pan-cancer effect size, pan-cancer p-value, and then the same information repeated for each cancer type.b.sQTL.i.Download 5′, 3′, exon skipping, intron retention, and mutually exclusive exon splice events data from https://gdc.cancer.gov/about-data/publications/PanCanAtlas-Splicing-2018.ii.Organize the data input and format it for SNP-splicing event association analysis. Use “script PrepareData.sh”. This script keeps the genes that mapped to the most significant SNPs (i.e., Suggestive and GW). Example: grep –f ListGenes.txt splice3prime > Data_3prime. It creates two more files that contain TCGA subject IDs, and splicing event IDs and types. It finally runs an R script “Analyze.R” that performs association analysis between SNP genotypes and splicing events using linear regression model accounting for genetic ancestry PC1-7, sex, age, and cancer type (for pan-cancer analysis only).iii.Summarize outcome, an output file containing association results as follows: chromosome, position, ensemble ID, gene name, splicing event ID.32.GTEx Analysis.a.Convert all GWAS suggestive and genome-wide significant SNP chromosome and base pair positions from build GRCh37 to build GRCh38 to match GTEx annotation.i.Import the GRanges object of SNP chromosome and base pair positions from 13.ii.Load the chain file “AH14150” for Homo sapiens rRNA hg19 to hg38 from the “AnnotationHub” package in R.iii.Convert SNP chromosome and base pair positions from build GRCh37 to build GRCh38 using the liftOver function in the “rtracklayer” package in R.See script: “GWAS.SNPs_liftOver.GRCh38_extended.r”.b.eQTL.i.From each tissue type, extract only GTEx eQTL SNP results that match the GWAS SNP GRCh38 chromosome and base pair position. The output is an R object of GTEx eQTL for suggestively significant variants.See script: “GTEx.eQTL.all.assoc_extract_GWAS.sugg.SNPs.server.r”ii.Concatenate filtered GTEx eQTL files from each tissue corresponding to the GWAS suggestively significant variants. Iteratively load, annotate with tissue source, extract GRCh38 chromosome and base pair position from variant ID, and append each file into a single data frame in R.iii.Calculate the false discovery rate (FDR) per variant across all genes and all tissues.iv.Using the GTEx Ensembl IDs, map to gene symbol and Entrez IDs using the “EnsDb.Hsapiens.v86” package in R.v.Merge with Immune-Germline SNP annotation.vi.Extract GTEx eQTL results for variant-gene pairs with an FDR < 0.05 in at least one tissue. Exclude the HLA and IL17R locus which are simple eQTLs.vii.Optional: Visualize results by plotting the GTEx eQTL -log10 FDR p-value against the distance from the TSS (“tss_distance”).See scripts: “GTEx.eQTL.all.assoc_processResults_GWAS.sugg.SNPs_extended.r” and “GTEx.eQTL.all.assoc_processResults_GWAS.sugg.SNPs_1mb_extended_plot.r”.c.sQTL.i.From each tissue type, extract only GTEx sQTL SNP results that match the GWAS SNP GRCh38 chromosome and base pair position. The output is an R object of GTEx eQTL for suggestively significant variants.ii.Run the Linux bash script “run_split_sqtl.sh”. Each GTEx sQTL file is very large. This step separates the large GTEx sQTL file into a number of small files. The input of this script is a list of file names for GTEx sQTL. Each line of this input file is a file name for GTEx sQTL. The script generates a number of small files for each original GTEx sQTL file.iii.Run the R script “r_extract.txt”. This script takes 2 input files. One is an R object for GWAS suggestively significant variants. The other input file is the GTEx sQTL file generated from the previous step. The output is an R object of GTEx sQTL for suggestively significant variants.iv.Concatenate filtered GTEx sQTL files from each tissue corresponding to the GWAS suggestively significant variants. Iteratively load, annotate with tissue source, extract GRCh38 chromosome and base pair position from variant ID, and append each file into a single data frame in R.v.For sQTL, limit analysis to +/- 500 KB region. Filter the resulting concatenated GTEx sQTL file using the absolute value of the “tss_distance”, set a threshold ≤ 500,000 bp.vi.Calculate the false discovery rate (FDR) per variant across all genes and all tissues.vii.Using the GTEx Ensembl IDs, map to gene symbol and Entrez IDs using the “EnsDb.Hsapiens.v86” package in R.viii.Merge with Immune-Germline SNP annotation.ix.Extract GTEx sQTL results for variant-gene pairs with an FDR < 0.05 in at least one tissue. Exclude the HLA and IL17R locus which are simple eQTLs.x.Optional: Visualize results by plotting the GTEx sQTL -log10 FDR p-value against the distance from the TSS (“tss_distance”).See scripts: “GTEx.sQTL.all.assoc_processResults_GWAS.sugg.SNPs_500kb _extended.r” and “GTEx.sQTL.all.assoc_processResults_GWAS.sugg.SNPs_500kb_extended_plot”.Note: Scripts and code description used in this section are available at: https://github.com/rwsayaman/TCGA_PanCancer_Immune_Genetics.",
       "substeps": [],
@@ -223,7 +215,7 @@
       "timers": []
     },
     {
-      "step_id": 23,
+      "step_id": 22,
       "title": "Expression and splicing quantitative trait locus analysis (eQTLs and sQTL)",
       "instruction": "Direct link: Expression and splicing quantitative trait locus analysis (eQTLs and sQTL). The example code in this section were optimized for the high-performance compute environment at UCSF HPC employing Portable Batch System (PBS) job scheduling; consult your system administrator to adapt the provided code to your system.",
       "substeps": [],
@@ -231,7 +223,7 @@
       "timers": []
     },
     {
-      "step_id": 24,
+      "step_id": 23,
       "title": "Rare variant analysis",
       "instruction": "Timing: 1 week",
       "substeps": [],
@@ -239,7 +231,7 @@
       "timers": []
     },
     {
-      "step_id": 25,
+      "step_id": 24,
       "title": "Rare variant analysis",
       "instruction": "This section includes a workflow to assess the contribution of rare cancer predisposition variants on different immune traits.35.Download VCF germline file (Huang et al., 2018) (see “key resources table”). Sub-select samples for which genotyping data are available and at least one phenotype is available (use “Sample List” as in “Table S1” from (Sayaman et al., 2021)).36.Download annotations of curated Pathogenic and Likely Pathogenic Cancer Predisposition Variants from (see “Table S2”, (Huang et al., 2018)), which consists in 853 variants.37.Annotate per-sample mutations using position information available in “Table S2” from (Huang et al., 2018).a.Extract unique variants from “Table S2” from (Huang et al., 2018) and write them in a space-delimited text file, say “list_snps.txt”, with format as follows: chromosome, position, position, dummy variable.b.Split downloaded vcf file per chromosome as follows, where “i” is the chromosome number:bcftools view -r $i PCA.r1.TCGAbarcode.merge.tnSwapCorrected.10389.vcf.gz -O b -o CHR\"$i\".bcf.gzc.Left normalize variants:bcftools norm -Ou -m -any CHR\"$i\".bcf.gz | bcftools norm -Ou -f human_g1k_v37.fasta | |bcftools --missing-to-ref | bcftools annotate -Ob -x ID -I +'%CHROM:%POS:-:%ALT' -O z -o CHR\"$i\"_norm.vcf.gzd.Replace missing genotypes by homozygous reference:bcftools +setGT CHR\"$i\"_norm.vcf.gz -O z -o CHR\"$i\"_norm_nomissing.vcf.gz -- -t . -n 0pe.Convert vcf files to PLINK formatted files:plink --vcf CHR\"$i\"_norm_nomissing.vcf.gz --keep-allele-order --vcf-idspace-to _ --const-fid --allow-extra-chr 0 --split-x 2699520 154931044 no-fail --make-bed --out CHR\"$i\"_norm_nomissingf.Extract the variant list prepared in step 37a and recode them mutations additively:plink --bfile CHR\"$i\"_norm --extract range list_snps.txt --recode A --out OUT$i --allow-no-sex38.Collapse mutations into genes (i.e., consider as “gene event” if any pathogenic or likely pathogenic variant is present in that gene).39.Collapse genes into mutually exclusive pathways (use category assignment as for in “Figure S7” from (Sayaman et al., 2021), which are called here “genotypic variables”.40.Only retain genotypic variables with at least 5 events across cancer.41.Download phenotypes as in “Table S2” from (Sayaman et al., 2021). Download genetic ancestry PC1-7, sex, age, and cancer type from “Table S1” from (Sayaman et al., 2021).42.Annotate each sample according to MANTIS score from (Bonneville et al., 2017) (“Data Supplement S1”). Use 0.4 as cut-off for MSI-H bs MSI-S.43.Run regression models pan cancer and per cancer for genes and pathways using “RareVariantAnalysis.R”.44.Perform pan-cancer analysis.a.For phenotypes with normal/quasi-normal distribution (see “Table S2”, (Sayaman et al., 2021)), run linear regression between genotypic variables with at least 5 events per cancer, using as co-variates, genetic ancestry PC1-7, sex, age, and cancer type. For selected variables (see “Table S2”, (Sayaman et al., 2021)), apply Log Transformation.b.For phenotypes with skewed distribution, dichotomize values as low vs high (see “Table S2”, (Sayaman et al., 2021)), run logistic regression between genotypic variables with at least 5 events per cancer, using as co-variate genetic ancestry PC1-7, sex, and age.45.Peform per-cancer analysis.a.Repeat steps 44a–b, without including cancer type as covariate.46.Generate outcome summary: exome files related to samples for which all the covariates and at least one immune trait was available should result in a master file of N = 9,138 samples. There will be 832 pathogenic/likely pathogenic SNPs/Indels events with at least one copy of rare allele in the whole exome sequencing data, corresponding to 586 distinct pathogenic SNPs/Indels mapping to 99 genes. The regression analysis provides p-values and beta coefficients of the association with immune traits.Note: Scripts and code description used in this section are available at: https://github.com/rwsayaman/TCGA_PanCancer_Immune_Genetics.",
       "substeps": [],
@@ -247,7 +239,7 @@
       "timers": []
     },
     {
-      "step_id": 26,
+      "step_id": 25,
       "title": "Rare variant analysis",
       "instruction": "Direct link: Rare Variant Analysis.",
       "substeps": [],
@@ -255,7 +247,7 @@
       "timers": []
     },
     {
-      "step_id": 27,
+      "step_id": 26,
       "title": "Heritability analysis",
       "instruction": "Output files from GCTA GREML is an .hsq file. For complete description of output variables, see: https://cnsgenomics.com/software/gcta/#GREMLanalysis. The combined results table include the ratio of genetic variance to phenotypic variance (Vg/Vp) estimate and SE; the likelihood-ratio test (LRT) p-value and sample size (n) for each immune trait; and the FDR p-value across all immune traits.",
       "substeps": [],
@@ -263,7 +255,7 @@
       "timers": []
     },
     {
-      "step_id": 28,
+      "step_id": 27,
       "title": "Heritability analysis",
       "instruction": "After conducting heritability analysis across 139 immune traits, we identified 10 immune traits with significant heritability (FDR p < 0.05), and 23 other traits with nominally significant heritability (p < 0.05) in at least one ancestry group. Within the European ancestry group, 28 traits had at least nominally significant heritability (see “Table S3”, (Sayaman et al., 2021)).",
       "substeps": [],
@@ -271,7 +263,7 @@
       "timers": []
     },
     {
-      "step_id": 29,
+      "step_id": 28,
       "title": "Epigenomic analysis",
       "instruction": "The output table includes all genome-wide and suggestively significant SNPs annotated with the mapped epigenetic state from the Roadmap Epigenomics Project Expanded 18-state model. Each epigenome ID/epigenome represent a column with entries designating the epigenetic state (numeric and descriptive value) at the SNP chromosome and base pair position (see “Table S4”, (Sayaman et al., 2021)).",
       "substeps": [],
@@ -279,7 +271,7 @@
       "timers": []
     },
     {
-      "step_id": 30,
+      "step_id": 29,
       "title": "Expression and splicing quantitative trait locus analysis (eQTLs and sQTL)",
       "instruction": "Output files for eQTL will have the following: chromosome, position, gene name, distance from gene, pan-cancer sample size, pan-cancer effect size, pan-cancer p-value, and then the same information repeated for each cancer type.",
       "substeps": [],
@@ -287,7 +279,7 @@
       "timers": []
     },
     {
-      "step_id": 31,
+      "step_id": 30,
       "title": "Expression and splicing quantitative trait locus analysis (eQTLs and sQTL)",
       "instruction": "Output file for sQTL will contain association results as follows: chromosome, position, ensemble ID, gene name, splicing event ID.",
       "substeps": [],
@@ -295,7 +287,7 @@
       "timers": []
     },
     {
-      "step_id": 32,
+      "step_id": 31,
       "title": "Rare variant analysis",
       "instruction": "Exome files related to samples for which all the covariates and at least one immune trait was available should result in a master file of N = 9,138 samples. There will be 832 pathogenic/likely pathogenic SNPs/Indels events with at least one copy of rare allele in the whole exome sequencing data, corresponding to 586 distinct pathogenic SNPs/Indels mapping to 99 genes. The regression analysis provides p-values and beta coefficients of the association with immune traits (see “Table S6”, (Sayaman et al., 2021)).",
       "substeps": [],
@@ -305,5 +297,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T01:38:30.496170Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "These protocols describe specific bioinformatic workflows for the analyses of The Cancer Genome Atlas (TCGA) genomic datasets and well-characterized immune traits (Thorsson et al., 2018). However, these methodologies can also be applied to other datasets with similar structures. The majority of analyzed immune traits are derived from gene expression data and can be adapted to other studies."
 }

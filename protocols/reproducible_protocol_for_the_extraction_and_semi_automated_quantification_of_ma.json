@@ -54,20 +54,317 @@
     },
     {
       "step_id": 3,
-      "title": "Counting and measurement 6",
-      "instruction": "Counting and measurement 6.A. Download ImageJ from https://imagej.net/ij/download.html . ImageJ is an open source and multi-platform software that runs on Microsoft Windows, macOS, and Linux. 6.B. Copy the macro code from below and save it as a text file (i.e., with extension .txt). The macro allows the user to automatically isolate charcoal fragments from a group of images by means of global threshold segmentation (i.e., classification of pixels into two classes using a certain cut-off value), count and measure them (area, length, and width), and export the results. The output files consist of 1) a CSV file with the parameters set for analysis (see 6.C), date of analysis, and software versions; 2) a CSV file containing the counting and measurement data; and 3) outline image(s) in JPEG or TIFF format. The macro has been written and tested using ImageJ version 1.54d for Microsoft Windows with Java version 1.8.0_345. 6.C. Start ImageJ, go to Plugins -&gt; Macros -&gt; Run... , and open the macro saved in step 6.B. A parameters window will open and the following settings can be entered: Folder containing the images to be analyzed and the destination folder to save the output files. Scale unit of the images, known distance in original unit, and its equivalent in pixels. To obtain the scale values in ImageJ, 1) open an image with a reference scale such a scale bar ( File -&gt; Open... ); 2) select the tool Straight Line (i.e., fifth tool from the left on the ImageJ toolbar); 3) draw a line along the length of the scale bar while holding the Shift key in the keyboard; and 4) go to Analyze -&gt; Set Scale... and record the distance in pixels and the known distance values. Thresholding method and, if Manual method is selected, minimum and maximum pixel values (from 0 to 255) to discriminate the charcoal fragments against the background and non-charcoal particles. Automatic thresholding methods are described at https://imagej.net/plugins/auto-threshold#available-methods . Manual threshold values can be explored in ImageJ by 1) opening an image ( File -&gt; Open... ); 2) transforming the image to grayscale ( Image -&gt; Type -&gt; 8-bit ); and 3) directly adjusting threshold values with the Threshold tool ( Image -&gt; Adjust -&gt; Threshold... ). Note that, when manual thresholding is selected, the macro applies the same minimum and maximum threshold values entered in the dialogue box to all images; in contrast, when an automatic threshold method is selected, it will calculate new threshold values for each image. To learn more about the threshold tool, visit https://imagej.net/ij/docs/guide/146-28.html#sub:Threshold...[T] . Size range (in the set unit, from 0 to Infinity) of the fragments to be counted and measured. Note that fragments touching the edges of the images are excluded from analysis. Watershed segmentation to automatically separate fragments in contact ( https://imagej.net/ij/docs/menus/process.html#watershed ). Holes filling to fill holes within charcoal. Outline images format as JPEG or TIFF. // 1. TITLE // Macro to automatically detect, count, and measure charcoal fragments from a batch of images in ImageJ // 2. AUTHORS, DATE, AND LICENSE // Javier Ruiz-Pérez (jruizperez@tamu.edu, javier.ruizperez.academic@gmail.com) - Department of Ecology and Conservation Biology, Texas A&amp;M University; Julie C. Aleman - Centre Européen de Recherche et d’Enseignement des Géosciences de l’Environnement, Centre National de la Recherche Scientifique; Joseph W. Veldman - Department of Ecology and Conservation Biology, Texas A&amp;M University // 2024 // This macro is distributed under the terms of a CC BY 4.0 license // 3. DESCRIPTION // Macro to automatically detect, count, and measure (i.e., area, length, and width) charcoal fragments in a set of images via global thresholding (i.e., classification of pixels into two classes using a cut-off value) and export the results. The output files consist of 1) a CSV file with the parameters set for analysis, date of analysis, and software versions; 2) a CSV file containing the counting and measurement data; and 3) outline image(s) in JPEG or TIFF format. This macro has been written and tested using ImageJ version 1.54d for Microsoft Windows with Java version 1.8.0_345. To use it, download ImageJ from https://imagej.net/ij/download.html, open it, go to Plugins -&gt; Macros -&gt; Run..., and open this macro as a .txt file // 4. SCRIPT // The script has two sections: definition of parameters (section 4.1) and batch analysis (section 4.2). The following parameters are entered in a dialog box: //1) Folder containing the images to be analyzed (input) and destination folder to save the output files (output) //2) Scale unit of the images (unit), known distance in original unit (distanceUnit), and its equivalent in pixels (distancePixels). To obtain the scale values in ImageJ, 1) open an image with a reference scale such a scale bar (File -&gt; Open...); 2) select the tool Straight Line (i.e., fifth tool from the left on the ImageJ toolbar); 3) draw a line along the length of the scale bar while holding the Shift key in the keyboard; and 4) go to Analyze -&gt; Set Scale... and record the distance in pixels and the known distance values //3) Thresholding method (thresholdMethod) and, if Manual method is selected, minimum and maximum pixel values (thresholdMin, thresholdMax, respectively, from 0 to 255) to discriminate the charcoal fragments against the background and non-charcoal particles. Automatic thresholding methods are described at https://imagej.net/plugins/auto-threshold#available-methods. Manual threshold values can be explored in ImageJ by 1) opening an image (File -&gt; Open...); 2) transforming the image to grayscale (Image -&gt; Type -&gt; 8-bit); and 3) directly adjusting threshold values with the Threshold tool (Image -&gt; Adjust -&gt; Threshold...). Note that, when manual thresholding is selected, the macro applies the same minimum and maximum threshold values entered in the dialogue box to all images; in contrast, when an automatic threshold method is selected, it will calculate new threshold values for each image. To learn more about the threshold tool, visit https://imagej.net/ij/docs/guide/146-28.html#sub:Threshold...[T] //4) Size range (in the set unit, from 0 to Infinity) of the fragments to be counted and measured (sizeMin, sizeMax). Note that fragments touching the edges of the images are excluded from analysis //5) Watershed segmentation (separation) to automatically separate fragments in contact ( https://imagej.net/ij/docs/menus/process.html#watershed) //6) Holes filling (holes) to fill holes within charcoal //7) Outline images format as JPEG or TIFF (format) // 4.1. Parameters dialog // List of parameters and default values input = &#34;Input folder&#34;; output = &#34;Output folder&#34;; unit = newArray(&#34;micron&#34;, &#34;mm&#34;, &#34;cm&#34;); distanceUnit = 1000; distancePixels = 185.75; thresholdAutoMethods = getList(&#34;threshold.methods&#34;); thresholdMethod = Array.concat(&#34;Manual&#34;, thresholdAutoMethods); thresholdMin = 0; thresholdMax = 116; sizeMin = 500; sizeMax = &#34;Infinity&#34;; separation = newArray(&#34;No&#34;, &#34;Yes&#34;); holes = newArray(&#34;No&#34;, &#34;Yes&#34;); format = newArray(&#34;Jpeg&#34;, &#34;Tiff&#34;); // Parameters dialog box Dialog.create(&#34;Select parameters&#34;); Dialog.addDirectory(&#34;Folder containing the images to be analyzed:&#34;, input); Dialog.addDirectory(&#34;Folder where to save the results:&#34;, output); Dialog.addChoice(&#34;Scale unit:&#34;, unit); Dialog.addNumber(&#34;Scale distance in original unit:&#34;, distanceUnit); Dialog.addNumber(&#34;Scale distance in pixels:&#34;, distancePixels); Dialog.addChoice(&#34;Thresholding method:&#34;, thresholdMethod); Dialog.addNumber(&#34;Minimum manual threshold (0 to 255):&#34;, thresholdMin); Dialog.addNumber(&#34;Maximum manual threshold (0 to 255):&#34;, thresholdMax); Dialog.addNumber(&#34;Minimum charcoal size in set unit:&#34;, sizeMin); Dialog.addNumber(&#34;Maximum charcoal size in set unit:&#34;, sizeMax); Dialog.addChoice(&#34;Watershed separation:&#34;, separation); Dialog.addChoice(&#34;Fill holes:&#34;, holes); Dialog.addChoice(&#34;Outline image(s) format:&#34;, format); Dialog.show(); // List of parameters, entered values, date of analysis, and software versions input = Dialog.getString(); output = Dialog.getString(); unit = Dialog.getChoice(); distanceUnit = Dialog.getNumber(); distancePixels = Dialog.getNumber(); thresholdMethod = Dialog.getChoice(); thresholdMin = Dialog.getNumber(); thresholdMax = Dialog.getNumber(); sizeMin = Dialog.getNumber(); sizeMin2 = Math.pow(sizeMin, 2); sizeMax = Dialog.getNumber(); sizeMax2 = Math.pow(sizeMax, 2); separation = Dialog.getChoice(); holes = Dialog.getChoice(); format = Dialog.getChoice(); monthNames = newArray(&#34;Jan&#34;, &#34;Feb&#34;, &#34;Mar&#34;, &#34;Apr&#34;, &#34;May&#34;, &#34;Jun&#34;, &#34;Jul&#34;, &#34;Aug&#34;, &#34;Sep&#34;, &#34;Oct&#34;, &#34;Nov&#34;, &#34;Dec&#34;); getDateAndTime(year, month, week, day, hour, min, sec, msec); dateTime = &#34;&#34;+day+&#34;/&#34;+monthNames[month]+&#34;/&#34;+year+&#34; &#34;+hour+&#34;:&#34;+min+&#34;:&#34;+sec; versionIJ = getVersion(); versionJava = getInfo(&#34;java.version&#34;); // Export parameters, values, date, and versions list Table.create(&#34;Parameters&#34;); selectWindow(&#34;Parameters&#34;); listParameters = Array.concat(&#34;Folder containing the charcoal images&#34;, &#34;Folder containing the results&#34;, &#34;Scale unit&#34;, &#34;Scale distance in original unit&#34;, &#34;Scale distance in pixels&#34;, &#34;Thresholding method&#34;, &#34;Minimum manual threshold&#34;, &#34;Maximum manual threshold&#34;, &#34;Minimum charcoal size&#34;, &#34;Maximum charcoal size&#34;, &#34;Watershed separation&#34;, &#34;Fill holes&#34;, &#34;Outline image(s) format&#34;, &#34;Date and time&#34;, &#34;ImageJ version&#34;, &#34;Java version&#34;); listParametersSelected = Array.concat(input, output, unit, distanceUnit, distancePixels, thresholdMethod, thresholdMin, thresholdMax, sizeMin, sizeMax, separation, holes, format, dateTime, versionIJ, versionJava); for (i = 0; i &lt; 16; i++) { Table.set(&#34;Parameter&#34;, i, listParameters[i]); Table.set(&#34;Value&#34;, i, listParametersSelected[i]) } Table.save(output + &#34;Parameters&#34; + &#34;.csv&#34;); run(&#34;Close&#34;); // 4.2. Batch to process every image from the input folder and export the results // Names list from the images in the input folder setBatchMode(true); listNames = getFileList(input); listNamesOutput = getFileList(input); for (i = 0; i &lt; listNamesOutput.length; i++) { dotIndex = indexOf(listNamesOutput[i], &#34;.&#34;); listNamesOutput[i] = substring(listNamesOutput[i], 0, dotIndex); } // Batch analysis Table.create(&#34;Table of results&#34;); for (i = 0; i &lt; listNames.length; i++) { open(input + listNames[i]); run(&#34;8-bit&#34;); run(&#34;Set Scale...&#34;, &#34;distance=distancePixels known=distanceUnit unit=unit&#34;); if (thresholdMethod == &#34;Manual&#34;) { setThreshold(thresholdMin, thresholdMax); setOption(&#34;BlackBackground&#34;, false); run(&#34;Convert to Mask&#34;); } else { setAutoThreshold(thresholdMethod); setOption(&#34;BlackBackground&#34;, false); run(&#34;Convert to Mask&#34;); } if (separation == &#34;Yes&#34;){ run(&#34;Watershed&#34;); } if (holes == &#34;Yes&#34;){ run(&#34;Fill Holes&#34;); } run(&#34;Set Measurements...&#34;, &#34;area feret&#39;s redirect=None&#34;); run(&#34;Analyze Particles...&#34;, &#34;size=sizeMin2-sizeMax2 show=Outlines display exclude clear&#34;); if (nResults &gt; 0) { saveAs(format, output + listNamesOutput[i]); selectWindow(&#34;Results&#34;); count = nResults; area = Table.getColumn(&#34;Area&#34;); length = Table.getColumn(&#34;Feret&#34;); width = Table.getColumn(&#34;MinFeret&#34;); run(&#34;Close&#34;); selectWindow(&#34;Table of results&#34;); totalCount = Table.size; for (j = 0; j &lt; count; j++) { Table.set(&#34;Image&#34;, totalCount+j, listNamesOutput[i]); Table.set(&#34;Charcoal&#34;, totalCount+j, j+1); Table.set(&#34;Area&#34;, totalCount+j, area[j]); Table.set(&#34;Length&#34;, totalCount+j, length[j]); Table.set(&#34;Width&#34;, totalCount+j, width[j]); } Table.setLocationAndSize(100, 100, 750, 750); Table.update; close(); } else { selectWindow(&#34;Table of results&#34;); totalCount = Table.size; Table.set(&#34;Image&#34;, totalCount, listNamesOutput[i]); Table.set(&#34;Charcoal&#34;, totalCount, 0); Table.set(&#34;Area&#34;, totalCount, 0); Table.set(&#34;Length&#34;, totalCount, 0); Table.set(&#34;Width&#34;, totalCount, 0); Table.setLocationAndSize(100, 100, 750, 750); Table.update; close(); } } Table.save(output + &#34;Results&#34; + &#34;.csv&#34;); // Message of completion/error if (File.exists(output + &#34;Results&#34; + &#34;.csv&#34;) == true) { showMessage(&#34;Analysis completed.&#34;); } else { showMessage(&#34;An error has occurred.&#34;); } Parameters window in ImageJ after running the macro. Example of a table of parameters generated after running the analysis. Example of a table of results generated after running the analysis. Example of charcoal fragments under the light stereo microscope in transmitted light at 12x magnification (left) and the resulting outline image after the analysis (right).",
+      "title": "a CSV file with the parameters...",
+      "instruction": "a CSV file with the parameters set for analysis (see 6.C), date of analysis, and software versions;",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
+      "title": "a CSV file containing the counting and measurement data; and",
+      "instruction": "a CSV file containing the counting and measurement data; and",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "outline image(s) in JPEG or TIFF format",
+      "instruction": "outline image(s) in JPEG or TIFF format. The macro has been written and tested using ImageJ version 1.54d for Microsoft Windows with Java version 1.8.0_",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "6",
+      "instruction": "6.C. Start ImageJ, go to Plugins -&gt; Macros -&gt; Run... , and open the macro saved in step 6.B. A parameters window will open and the following settings can be entered: Folder containing the images to be analyzed and the destination folder to save the output files. Scale unit of the images, known distance in original unit, and its equivalent in pixels. To obtain the scale values in ImageJ,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "open an image with a reference...",
+      "instruction": "open an image with a reference scale such a scale bar ( File -&gt; Open... );",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "select the tool Straight Line (i",
+      "instruction": "select the tool Straight Line (i.e., fifth tool from the left on the ImageJ toolbar);",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "draw a line along the length...",
+      "instruction": "draw a line along the length of the scale bar while holding the Shift key in the keyboard; and",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "go to Analyze -&gt; Set Scale",
+      "instruction": "go to Analyze -&gt; Set Scale... and record the distance in pixels and the known distance values. Thresholding method and, if Manual method is selected, minimum and maximum pixel values (from 0 to",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "to discriminate the charcoal fragments against...",
+      "instruction": "to discriminate the charcoal fragments against the background and non-charcoal particles. Automatic thresholding methods are described at https://imagej.net/plugins/auto-threshold#available-methods . Manual threshold values can be explored in ImageJ by",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "opening an image ( File -&gt; Open",
+      "instruction": "opening an image ( File -&gt; Open... );",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "transforming the image to grayscale (...",
+      "instruction": "transforming the image to grayscale ( Image -&gt; Type -&gt; 8-bit ); and",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "directly adjusting threshold values with the...",
+      "instruction": "directly adjusting threshold values with the Threshold tool ( Image -&gt; Adjust -&gt; Threshold... ). Note that, when manual thresholding is selected, the macro applies the same minimum and maximum threshold values entered in the dialogue box to all images; in contrast, when an automatic threshold method is selected, it will calculate new threshold values for each image. To learn more about the threshold tool, visit https://imagej.net/ij/docs/guide/146-28.html#sub:Threshold...[T] . Size range (in the set unit, from 0 to Infinity) of the fragments to be counted and measured. Note that fragments touching the edges of the images are excluded from analysis. Watershed segmentation to automatically separate fragments in contact ( https://imagej.net/ij/docs/menus/process.html#watershed ). Holes filling to fill holes within charcoal. Outline images format as JPEG or TIFF. //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "TITLE // Macro to automatically detect,...",
+      "instruction": "TITLE // Macro to automatically detect, count, and measure charcoal fragments from a batch of images in ImageJ //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "AUTHORS, DATE, AND LICENSE // Javier Ruiz-Pérez (jruizperez@tamu",
+      "instruction": "AUTHORS, DATE, AND LICENSE // Javier Ruiz-Pérez (jruizperez@tamu.edu, javier.ruizperez.academic@gmail.com) - Department of Ecology and Conservation Biology, Texas A&amp;M University; Julie C. Aleman - Centre Européen de Recherche et d’Enseignement des Géosciences de l’Environnement, Centre National de la Recherche Scientifique; Joseph W. Veldman - Department of Ecology and Conservation Biology, Texas A&amp;M University // 2024 // This macro is distributed under the terms of a CC BY 4.0 license //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "DESCRIPTION // Macro to automatically detect, count, and measure (i",
+      "instruction": "DESCRIPTION // Macro to automatically detect, count, and measure (i.e., area, length, and width) charcoal fragments in a set of images via global thresholding (i.e., classification of pixels into two classes using a cut-off value) and export the results. The output files consist of",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "a CSV file with the parameters...",
+      "instruction": "a CSV file with the parameters set for analysis, date of analysis, and software versions;",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "a CSV file containing the counting and measurement data; and",
+      "instruction": "a CSV file containing the counting and measurement data; and",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "outline image(s) in JPEG or TIFF format",
+      "instruction": "outline image(s) in JPEG or TIFF format. This macro has been written and tested using ImageJ version 1.54d for Microsoft Windows with Java version 1.8.0_",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "To use it, download ImageJ from https://imagej",
+      "instruction": "To use it, download ImageJ from https://imagej.net/ij/download.html, open it, go to Plugins -&gt; Macros -&gt; Run..., and open this macro as a .txt file //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "SCRIPT // The script has two sections",
+      "instruction": "SCRIPT // The script has two sections: definition of parameters (section 4.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "and batch analysis (section 4",
+      "instruction": "and batch analysis (section 4.2). The following parameters are entered in a dialog box: //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Folder containing the images to be...",
+      "instruction": "Folder containing the images to be analyzed (input) and destination folder to save the output files (output) //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Scale unit of the images (unit),...",
+      "instruction": "Scale unit of the images (unit), known distance in original unit (distanceUnit), and its equivalent in pixels (distancePixels). To obtain the scale values in ImageJ,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "open an image with a reference...",
+      "instruction": "open an image with a reference scale such a scale bar (File -&gt; Open...);",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "select the tool Straight Line (i",
+      "instruction": "select the tool Straight Line (i.e., fifth tool from the left on the ImageJ toolbar);",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "draw a line along the length...",
+      "instruction": "draw a line along the length of the scale bar while holding the Shift key in the keyboard; and",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 29,
+      "title": "go to Analyze -&gt; Set Scale",
+      "instruction": "go to Analyze -&gt; Set Scale... and record the distance in pixels and the known distance values //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 30,
+      "title": "Thresholding method (thresholdMethod) and, if Manual...",
+      "instruction": "Thresholding method (thresholdMethod) and, if Manual method is selected, minimum and maximum pixel values (thresholdMin, thresholdMax, respectively, from 0 to",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 31,
+      "title": "to discriminate the charcoal fragments against...",
+      "instruction": "to discriminate the charcoal fragments against the background and non-charcoal particles. Automatic thresholding methods are described at https://imagej.net/plugins/auto-threshold#available-methods. Manual threshold values can be explored in ImageJ by",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 32,
+      "title": "opening an image (File -&gt; Open",
+      "instruction": "opening an image (File -&gt; Open...);",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 33,
+      "title": "transforming the image to grayscale (Image...",
+      "instruction": "transforming the image to grayscale (Image -&gt; Type -&gt; 8-bit); and",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 34,
+      "title": "directly adjusting threshold values with the...",
+      "instruction": "directly adjusting threshold values with the Threshold tool (Image -&gt; Adjust -&gt; Threshold...). Note that, when manual thresholding is selected, the macro applies the same minimum and maximum threshold values entered in the dialogue box to all images; in contrast, when an automatic threshold method is selected, it will calculate new threshold values for each image. To learn more about the threshold tool, visit https://imagej.net/ij/docs/guide/146-28.html#sub:Threshold...[T] //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 35,
+      "title": "Size range (in the set unit,...",
+      "instruction": "Size range (in the set unit, from 0 to Infinity) of the fragments to be counted and measured (sizeMin, sizeMax). Note that fragments touching the edges of the images are excluded from analysis //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 36,
+      "title": "Watershed segmentation (separation) to automatically separate...",
+      "instruction": "Watershed segmentation (separation) to automatically separate fragments in contact ( https://imagej.net/ij/docs/menus/process.html#watershed) //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 37,
+      "title": "Holes filling (holes) to fill holes within charcoal //",
+      "instruction": "Holes filling (holes) to fill holes within charcoal //",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 38,
+      "title": "Outline images format as JPEG or TIFF (format) // 4",
+      "instruction": "Outline images format as JPEG or TIFF (format) // 4.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 39,
+      "title": "Parameters dialog // List of parameters...",
+      "instruction": "Parameters dialog // List of parameters and default values input = &#34;Input folder&#34;; output = &#34;Output folder&#34;; unit = newArray(&#34;micron&#34;, &#34;mm&#34;, &#34;cm&#34;); distanceUnit = 1000; distancePixels = 185.75; thresholdAutoMethods = getList(&#34;threshold.methods&#34;); thresholdMethod = Array.concat(&#34;Manual&#34;, thresholdAutoMethods); thresholdMin = 0; thresholdMax = 116; sizeMin = 500; sizeMax = &#34;Infinity&#34;; separation = newArray(&#34;No&#34;, &#34;Yes&#34;); holes = newArray(&#34;No&#34;, &#34;Yes&#34;); format = newArray(&#34;Jpeg&#34;, &#34;Tiff&#34;); // Parameters dialog box Dialog.create(&#34;Select parameters&#34;); Dialog.addDirectory(&#34;Folder containing the images to be analyzed:&#34;, input); Dialog.addDirectory(&#34;Folder where to save the results:&#34;, output); Dialog.addChoice(&#34;Scale unit:&#34;, unit); Dialog.addNumber(&#34;Scale distance in original unit:&#34;, distanceUnit); Dialog.addNumber(&#34;Scale distance in pixels:&#34;, distancePixels); Dialog.addChoice(&#34;Thresholding method:&#34;, thresholdMethod); Dialog.addNumber(&#34;Minimum manual threshold (0 to 255):&#34;, thresholdMin); Dialog.addNumber(&#34;Maximum manual threshold (0 to 255):&#34;, thresholdMax); Dialog.addNumber(&#34;Minimum charcoal size in set unit:&#34;, sizeMin); Dialog.addNumber(&#34;Maximum charcoal size in set unit:&#34;, sizeMax); Dialog.addChoice(&#34;Watershed separation:&#34;, separation); Dialog.addChoice(&#34;Fill holes:&#34;, holes); Dialog.addChoice(&#34;Outline image(s) format:&#34;, format); Dialog.show(); // List of parameters, entered values, date of analysis, and software versions input = Dialog.getString(); output = Dialog.getString(); unit = Dialog.getChoice(); distanceUnit = Dialog.getNumber(); distancePixels = Dialog.getNumber(); thresholdMethod = Dialog.getChoice(); thresholdMin = Dialog.getNumber(); thresholdMax = Dialog.getNumber(); sizeMin = Dialog.getNumber(); sizeMin2 = Math.pow(sizeMin, 2); sizeMax = Dialog.getNumber(); sizeMax2 = Math.pow(sizeMax, 2); separation = Dialog.getChoice(); holes = Dialog.getChoice(); format = Dialog.getChoice(); monthNames = newArray(&#34;Jan&#34;, &#34;Feb&#34;, &#34;Mar&#34;, &#34;Apr&#34;, &#34;May&#34;, &#34;Jun&#34;, &#34;Jul&#34;, &#34;Aug&#34;, &#34;Sep&#34;, &#34;Oct&#34;, &#34;Nov&#34;, &#34;Dec&#34;); getDateAndTime(year, month, week, day, hour, min, sec, msec); dateTime = &#34;&#34;+day+&#34;/&#34;+monthNames[month]+&#34;/&#34;+year+&#34; &#34;+hour+&#34;:&#34;+min+&#34;:&#34;+sec; versionIJ = getVersion(); versionJava = getInfo(&#34;java.version&#34;); // Export parameters, values, date, and versions list Table.create(&#34;Parameters&#34;); selectWindow(&#34;Parameters&#34;); listParameters = Array.concat(&#34;Folder containing the charcoal images&#34;, &#34;Folder containing the results&#34;, &#34;Scale unit&#34;, &#34;Scale distance in original unit&#34;, &#34;Scale distance in pixels&#34;, &#34;Thresholding method&#34;, &#34;Minimum manual threshold&#34;, &#34;Maximum manual threshold&#34;, &#34;Minimum charcoal size&#34;, &#34;Maximum charcoal size&#34;, &#34;Watershed separation&#34;, &#34;Fill holes&#34;, &#34;Outline image(s) format&#34;, &#34;Date and time&#34;, &#34;ImageJ version&#34;, &#34;Java version&#34;); listParametersSelected = Array.concat(input, output, unit, distanceUnit, distancePixels, thresholdMethod, thresholdMin, thresholdMax, sizeMin, sizeMax, separation, holes, format, dateTime, versionIJ, versionJava); for (i = 0; i &lt; 16; i++) { Table.set(&#34;Parameter&#34;, i, listParameters[i]); Table.set(&#34;Value&#34;, i, listParametersSelected[i]) } Table.save(output + &#34;Parameters&#34; + &#34;.csv&#34;); run(&#34;Close&#34;); // 4.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 40,
+      "title": "Batch to process every image from...",
+      "instruction": "Batch to process every image from the input folder and export the results // Names list from the images in the input folder setBatchMode(true); listNames = getFileList(input); listNamesOutput = getFileList(input); for (i = 0; i &lt; listNamesOutput.length; i++) { dotIndex = indexOf(listNamesOutput[i], &#34;.&#34;); listNamesOutput[i] = substring(listNamesOutput[i], 0, dotIndex); } // Batch analysis Table.create(&#34;Table of results&#34;); for (i = 0; i &lt; listNames.length; i++) { open(input + listNames[i]); run(&#34;8-bit&#34;); run(&#34;Set Scale...&#34;, &#34;distance=distancePixels known=distanceUnit unit=unit&#34;); if (thresholdMethod == &#34;Manual&#34;) { setThreshold(thresholdMin, thresholdMax); setOption(&#34;BlackBackground&#34;, false); run(&#34;Convert to Mask&#34;); } else { setAutoThreshold(thresholdMethod); setOption(&#34;BlackBackground&#34;, false); run(&#34;Convert to Mask&#34;); } if (separation == &#34;Yes&#34;){ run(&#34;Watershed&#34;); } if (holes == &#34;Yes&#34;){ run(&#34;Fill Holes&#34;); } run(&#34;Set Measurements...&#34;, &#34;area feret&#39;s redirect=None&#34;); run(&#34;Analyze Particles...&#34;, &#34;size=sizeMin2-sizeMax2 show=Outlines display exclude clear&#34;); if (nResults &gt; 0) { saveAs(format, output + listNamesOutput[i]); selectWindow(&#34;Results&#34;); count = nResults; area = Table.getColumn(&#34;Area&#34;); length = Table.getColumn(&#34;Feret&#34;); width = Table.getColumn(&#34;MinFeret&#34;); run(&#34;Close&#34;); selectWindow(&#34;Table of results&#34;); totalCount = Table.size; for (j = 0; j &lt; count; j++) { Table.set(&#34;Image&#34;, totalCount+j, listNamesOutput[i]); Table.set(&#34;Charcoal&#34;, totalCount+j, j+1); Table.set(&#34;Area&#34;, totalCount+j, area[j]); Table.set(&#34;Length&#34;, totalCount+j, length[j]); Table.set(&#34;Width&#34;, totalCount+j, width[j]); } Table.setLocationAndSize(100, 100, 750, 750); Table.update; close(); } else { selectWindow(&#34;Table of results&#34;); totalCount = Table.size; Table.set(&#34;Image&#34;, totalCount, listNamesOutput[i]); Table.set(&#34;Charcoal&#34;, totalCount, 0); Table.set(&#34;Area&#34;, totalCount, 0); Table.set(&#34;Length&#34;, totalCount, 0); Table.set(&#34;Width&#34;, totalCount, 0); Table.setLocationAndSize(100, 100, 750, 750); Table.update; close(); } } Table.save(output + &#34;Results&#34; + &#34;.csv&#34;); // Message of completion/error if (File.exists(output + &#34;Results&#34; + &#34;.csv&#34;) == true) { showMessage(&#34;Analysis completed.&#34;); } else { showMessage(&#34;An error has occurred.&#34;); } Parameters window in ImageJ after running the macro. Example of a table of parameters generated after running the analysis. Example of a table of results generated after running the analysis. Example of charcoal fragments under the light stereo microscope in transmitted light at 12x magnification (left) and the resulting outline image after the analysis (right).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 41,
       "title": "Sieving of samples 3",
       "instruction": "Sieving of samples 3.A. Place a sieve with a 500-micron mesh over a container or sink and gently pour each sample (i.e., the soil sample with the solution) from the beaker into the sieve using a wash bottle with purified water. 3.B. Carefully rinse each sample with purified water, utilizing either a wash bottle or running water from a faucet, until only particles ≥500 microns are retained, separated from each other, and charcoal fragments are clean. 3.A. To recover charcoal with sizes other than ≥500 microns, change the mesh size or add nested sieves of different mesh sizes (where top sieve is the largest size and bottom sieve the smallest). Charcoal fragments and sand grains captured in a 500-micron mesh sieve after being rinsed with purified water.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 42,
       "title": "Collection of macroscopic charcoal and storage 4",
       "instruction": "Collection of macroscopic charcoal and storage 4.A. Label sample containers (e.g., vials), weigh them, and record weight. Carefully collect the charcoal fragments from the sieve using tweezers and transfer them to the containers. Discard all non-charcoal material. 4.B. To remove moisture from the charcoal fragments, oven-dry the containers while open at 40 ºC. 4.C. Visually inspect the extracted material in the containers, with the naked eye or under magnification, to remove non-charcoal bodies (i.e., extraneous material, like plant parts or sand grains, may attach to the charcoal fragments or be mistaken for charcoal while the samples are wet in step 4.A). Weigh the containers with the extracted charcoal and record weight. Store the containers with their lids closed in a dry environment; the samples are ready for analysis. 4.A. If the fragments are very fragile or if a sieve with openings smaller than 500 microns was used in step 3.A, we suggest using a wash bottle with purified water and a Chattaway spatula to carefully transfer the extract (i.e., charcoal fragments and soil particles) to the containers. 4.A, 4.C. If data on the concentration of charcoal by mass is not needed, weighing the containers and samples in steps 4.A and 4.C may be omitted. 4.B. Temperatures above 40 ºC should be avoided to prevent potential charcoal breakage. Charcoal samples in labelled plastic containers.",
       "is_critical": false,

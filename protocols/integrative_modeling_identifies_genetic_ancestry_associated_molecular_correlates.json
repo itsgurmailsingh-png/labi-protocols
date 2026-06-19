@@ -40,22 +40,38 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "Timing: 0.5–1 h1.Download ancestry assignments from Table S1 of (Carrot-Zhang et al., 2020) (see key resources table, raw ancestry calls and admixture estimates are available at the GDC publication page https://gdc.cancer.gov/node/1248) . The ancestry calls include patient classification into European (EUR), East Asian (EAS), African (AFR), Native/Latin American, and (South) Asian, using genotyping calls from SNP6.0 array and exome sequencing data (see the companion protocol Carrot-Zhang et al., 2020 for details). This file also indicates admixed individuals and their level of admixture.2.Prepare cancer types and subtypes by downloading Table S1 of Sanchez Vera et al. 2018 (Sanchez-Vega et al., 2018) (see key resources table). Obtain bladder cancer mRNA subtypes from Table S1 of Robertson et al., 2018, \"mRNA_cluster\" column (Robertson et al., 2018) (see key resources table). Consolidate the two into a single subtype table.3.Download age and gender information from the \"clinical with follow up\" file from https://gdc.cancer.gov/about-data/publications/pancanatlas (see key resources table). Use \"age_at_initial_pathologic_diagnosis\" for age.4.Download the sample quality whitelist from Genomic Data Commons (see key resources table)CRITICAL: Certain cancer types are heterogeneous, and one can further classify those cancer types into various subtypes. This heterogeneity can significantly confound ancestry association when specific ancestries are overrepresented in certain subtypes. For example, for bladder cancer, East Asian ancestry is enriched in the luminal papillary subtype (Robertson et al., 2018). Targeting the ancestry association of bladder cancer without resolving subtypes often leads to detection of molecular correlates that are associated with different subtypes rather than ancestry alone (see expected outcomes).Alternatives: This protocol uses TCGA subtype information, which exists for only 12 of the 33 cancer types. Alternatively, one can also use iCluster classification (Hoadley et al., 2018) which also classifies cancers based on molecular characteristics and captures shared features across cancer types.",
+      "title": "Code the somatic alteration status into...",
+      "instruction": "Code the somatic alteration status into a binary variable that represents Tumor Mutation Burden (TMB). Samples with one or more mutations have TMB 1, otherwise",
       "substeps": [],
-      "is_critical": true,
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Association of ancestry with somatic alterations: Pan-cancer analysis",
-      "instruction": "Timing: 2 h1.Download significantly mutated gene lists for each cancer type defined by MutSig2 (see MC3 mutation call file in key resources table) (Bailey et al., 2018). Merge them to create a list of significantly mutated genes across cancers.2.Create a mutation frequency file for each significantly mutated gene by counting the number of samples with one or more single nucleotide variants (SNVs) or small indels (use the MC3 mutation call file, see key resources table) and focal copy number amplifications in that gene (use the pan-cancer GISTIC copy number calls, see key resources table) across all cancer types.Note: we include different somatic mutation types, including SNVs, indels, and focal amplification (defined as log2 copy number ratio >1)3.Exclude ancestry-admixed samples (20%<non-EUR ancestry<80%) and genes with less than 30 altered samples in the AFR group.Note: We chose the threshold for ancestry-admixed samples to ensure we have enough non-European ancestry samples while excluding samples with a high-degree of ancestry mixture to allow a clear comparison between populations. We found two samples with more than 20% ancestry in more than two ancestry groups (three-way admixed individuals) in TCGA. We included those two samples by associating the percentage of each ancestry with genomic alterations.4.Combine the above file with the TCGA ancestry assignments, clinical data, subtype annotation (key resources table)5.Code EUR ancestry as 0 and AFR ancestry as 1. Code the somatic alteration status into a binary variable that represents Tumor Mutation Burden (TMB). Samples with one or more mutations have TMB 1, otherwise 0. Perform logistic regression of somatic alteration status on ancestry, controlling for age, gender, and subtype. One could use the following model in R:[TMB] ~ [ancestry] + [age] + [gender] + [subtype]6.Apply Benjamini-Hochberg FDR correction to all the p-values7.Repeat steps 3–6 to analyze somatic alterations between EUR and EAS by coding EUR as 0 and EAS as 1.8.Visualize ancestry-associated genes using a Q-Q plot (see Figure 2A in (Carrot-Zhang et al., 2020))9.Repeat steps 3–8 for each cancer type and perform cancer-type-specific analysisNote: Ancestry-specific somatic alterations can be tissue-type specific. For certain cancer types, a large set of sample size for non-European samples is needed to reach sufficient detection power (see Problem 1 and power analysis in the quantification and statistical analysis section below).10.Validate genes identified as ancestry-associated using the admixed individuals excluded from the prior analysis (20%<AFR ancestry<80%). Calculate the Spearman’s correlation between their mutation frequencies and the fraction of AFR or EAS ancestry per individual obtained from ADMIXTURE (Alexander et al., 2009) (see ancestry call file in the key resources table). Use the Wilcoxon rank-sum test to assess statistical significance.11.Download the mutational signature file (see key resources table). Correlate each mutational signature (SBS1-SBS50) with ancestry, controlling for age, gender, Tumor Mutation Burden (TMB), and subtype, i.e.,[mutational signature] ~ [ancestry] + [age] + [gender] + [subtype] + [TMB]12.Apply the Benjamini-Hochberg FDR correction to all the p-values from the mutation signature correlations.13.Download TCGA arm-level somatic copy number alteration calls (SCNAs), genome doubling, aneuploidy scores, and leukocyte fraction or immune infiltration scores (IMS) calculated based on methylation (see key resources table). Correlate ancestry with each of these, controlling for age, gender, and cancer subtype, using the following logistic regression model in Python:[ancestry] ~ [arm-level SCNA] + [aneuploidy] + [genome doubling] + [age] + [gender] + [subtype]14.Apply the Benjamini-Hochberg FDR correction to all these p-values.15.Validate genes with ancestry-specific somatic alterations identified from cancer-type-specific analysis (FDR < 0.1) by comparing alteration frequencies in AFR vs. EUR and EAS vs. EUR using Fisher’s exact test, in an independent cancer cohort (e.g., the Foundation Medicine, FMI Cohort as used in (Carrot-Zhang et al., 2020))CRITICAL: Inclusion of cancer subtype in the TCGA pan-cancer analysis is necessary to eliminate mutations enriched in specific subtypes due to uneven distribution of ancestry in the subtypes (e.g., breast cancer). Other clinical characteristics may also be considered potential confounders in the somatic mutation-ancestry correlations, e.g., disease stage and smoking history.Note: For validation using external data sets, it is crucial to ensure that the disease ontology terms are harmonized with TCGA data sets. In some cases, external datasets will not have as detailed subtype information. The correlation between somatic alteration frequency and the fraction of AFR or EUR ancestry per individual is performed using binomial logistic regression. It is also important to use the same procedure of ancestry calling for independent cancer cohorts. See our companion protocol Carrot-Zhang et al., 2020, for how to generate ancestry calling from genotyping data.",
+      "title": "Perform logistic regression of somatic alteration...",
+      "instruction": "Perform logistic regression of somatic alteration status on ancestry, controlling for age, gender, and subtype. One could use the following model in R:[TMB] ~ [ancestry] + [age] + [gender] + [subtype]6.Apply Benjamini-Hochberg FDR correction to all the p-values7.Repeat steps 3–6 to analyze somatic alterations between EUR and EAS by coding EUR as 0 and EAS as 1.8.Visualize ancestry-associated genes using a Q-Q plot (see Figure 2A in (Carrot-Zhang et al., 2020))9.Repeat steps 3–8 for each cancer type and perform cancer-type-specific analysisNote: Ancestry-specific somatic alterations can be tissue-type specific. For certain cancer types, a large set of sample size for non-European samples is needed to reach sufficient detection power (see Problem 1 and power analysis in the quantification and statistical analysis section below).10.Validate genes identified as ancestry-associated using the admixed individuals excluded from the prior analysis (20%<AFR ancestry<80%). Calculate the Spearman’s correlation between their mutation frequencies and the fraction of AFR or EAS ancestry per individual obtained from ADMIXTURE (Alexander et al., 2009) (see ancestry call file in the key resources table). Use the Wilcoxon rank-sum test to assess statistical significance.11.Download the mutational signature file (see key resources table). Correlate each mutational signature (SBS1-SBS",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "with ancestry, controlling for age, gender,...",
+      "instruction": "with ancestry, controlling for age, gender, Tumor Mutation Burden (TMB), and subtype, i.e.,[mutational signature] ~ [ancestry] + [age] + [gender] + [subtype] + [TMB]12.Apply the Benjamini-Hochberg FDR correction to all the p-values from the mutation signature correlations.13.Download TCGA arm-level somatic copy number alteration calls (SCNAs), genome doubling, aneuploidy scores, and leukocyte fraction or immune infiltration scores (IMS) calculated based on methylation (see key resources table). Correlate ancestry with each of these, controlling for age, gender, and cancer subtype, using the following logistic regression model in Python:[ancestry] ~ [arm-level SCNA] + [aneuploidy] + [genome doubling] + [age] + [gender] + [subtype]14.Apply the Benjamini-Hochberg FDR correction to all these p-values.15.Validate genes with ancestry-specific somatic alterations identified from cancer-type-specific analysis (FDR < 0.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "by comparing alteration frequencies in AFR vs",
+      "instruction": "by comparing alteration frequencies in AFR vs. EUR and EAS vs. EUR using Fisher’s exact test, in an independent cancer cohort (e.g., the Foundation Medicine, FMI Cohort as used in (Carrot-Zhang et al., 2020))CRITICAL: Inclusion of cancer subtype in the TCGA pan-cancer analysis is necessary to eliminate mutations enriched in specific subtypes due to uneven distribution of ancestry in the subtypes (e.g., breast cancer). Other clinical characteristics may also be considered potential confounders in the somatic mutation-ancestry correlations, e.g., disease stage and smoking history.Note: For validation using external data sets, it is crucial to ensure that the disease ontology terms are harmonized with TCGA data sets. In some cases, external datasets will not have as detailed subtype information. The correlation between somatic alteration frequency and the fraction of AFR or EUR ancestry per individual is performed using binomial logistic regression. It is also important to use the same procedure of ancestry calling for independent cancer cohorts. See our companion protocol Carrot-Zhang et al., 2020, for how to generate ancestry calling from genotyping data.",
       "substeps": [],
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 4,
       "title": "Ancestry-associated mRNA analysis",
       "instruction": "See (Carrot-Zhang et al., 2020) Figure 4 for expected outcomes of the ancestry-associated mRNA expression analysis.",
       "substeps": [],
@@ -63,7 +79,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 5,
       "title": "Ancestry-associated miRNA analysis",
       "instruction": "See (Carrot-Zhang et al., 2020) Figure 5 for expected outcomes of the ancestry-associated miRNA expression analysis.",
       "substeps": [],
@@ -71,15 +87,31 @@
       "timers": []
     },
     {
-      "step_id": 4,
-      "title": "Ancestry-associated miRNA analysis",
-      "instruction": "Figure 5D of (Carrot-Zhang et al., 2020) is a UCSC screenshot of Marsico et al., 2013 TSSs for hsa-mir-628, hosted by CCPG1. The figure also shows a miRBase v22.1 read pileup profile, which indicates that, for this miRNA, we expect the 5p strand to be more highly expressed than the 3p strand. miRBase read pileups also suggest the level of 5′ and 3′ isomiR variation to expect for each mature strand. Figure S6H-J of (Carrot-Zhang et al., 2020) shows similar information for the three members of the miR-9 family, miR-9-1, -2, and -3, for which the 5p strand and 3p strand have identical reference sequences in all three locations.",
+      "step_id": 6,
+      "title": "is a UCSC screenshot of Marsico et al",
+      "instruction": "is a UCSC screenshot of Marsico et al., 2013 TSSs for hsa-mir-628, hosted by CCPG",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 7,
+      "title": "The figure also shows a miRBase v22",
+      "instruction": "The figure also shows a miRBase v22.1 read pileup profile, which indicates that, for this miRNA, we expect the 5p strand to be more highly expressed than the 3p strand. miRBase read pileups also suggest the level of 5′ and 3′ isomiR variation to expect for each mature strand. Figure S6H-J of (Carrot-Zhang et al.,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "shows similar information for the three...",
+      "instruction": "shows similar information for the three members of the miR-9 family, miR-9-1, -2, and -3, for which the 5p strand and 3p strand have identical reference sequences in all three locations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
       "title": "Ancestry-associated miRNA analysis",
       "instruction": "In compiling the data resource, we sought to support calculating miR-host gene correlations and offer contextual information to a researcher who has identified one or more miRs associated with ancestry in a disease. Such a researcher may want to infer how a miR may influence the disease biology and prioritize miRs for additional work. The data resource we compiled lists factors that may be useful to consider in interpreting and prioritizing ((Carrot-Zhang et al., 2020) Figure S6B). Below, we briefly discuss several such factors:",
       "substeps": [],
@@ -87,7 +119,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 10,
       "title": "Ancestry-associated miRNA analysis",
       "instruction": "Current miRNA annotations: For the ancestry-associated mature strands in ((Carrot-Zhang et al., 2020) Figure S6A), the table in that panel notes that miR-3607-3p and 3653 have been removed from miRBase. Such removals are more likely to occur for miRNAs with large-number names (say, larger than 800, e.g., “3607”) because their mature strands will tend to be weakly expressed. Such miRNAs were added to miRBase more recently. Given this, it is useful to check whether miRNAs and mature strands that appear interesting are still considered by miRBase to be valid miRNAs. A simple way to do this is to search for a miRNA name (e.g., “hsa-mir-3607”) at miRBase; if the miRNA has been removed, miRBase will return a “Dead miRNA entry” page. An alternative resource is ‘miRNA.dead’. For brief discussions of many miRNA issues, including seed types, see TargetScan’s FAQs (http://www.targetscan.org/faqs.Release_7.html).",
       "substeps": [],
@@ -95,7 +127,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 11,
       "title": "Ancestry-associated miRNA analysis",
       "instruction": "miRNA transcriptional start sites (TSSs): In TCGA marker papers, for location-specific calculations of the relationship between DNA methylation and miRNA expression, we used DNA methylation probes that were close to miRNA TSS’s reported from FANTOM deep CAGE sequencing, e.g., Table S2 from (Marsico et al., 2013), and (Carrot-Zhang et al., 2020) Figure S6H-J. For example, TSS predictions were helpful when a miRNA was expressed from a long poly-cistron whose TSS was some distance upstream, and in distinguishing cases in which a hosted miRNA had (or lacked) one or more TSSs that were independent of the host gene’s TSS. Alternative and updated sets of miRNA TSSs are available from more recent work (Consortium et al., 2017; Wang et al., 2020), and, for location-specific calculations, these and other resources should be carefully assessed so that an appropriate resource is used.",
       "substeps": [],
@@ -103,7 +135,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 12,
       "title": "Ancestry-associated miRNA analysis",
       "instruction": "Polycistrons and miRNA clusters: Some miRNAs are expressed from longer noncoding polycistronic transcripts ((Carrot-Zhang et al., 2020) Figure S6B, also see (Donayo et al., 2019; Ichiyama and Dong, 2019)). Mutations within a polycistron can upset the polycistron’s bioprocessing, changing the relative abundance of the miRNAs expressed from that polycistron (Chakraborty et al., 2012). For work with polycistrons, it is helpful to use up-to-date information on transcripts.",
       "substeps": [],
@@ -111,7 +143,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 13,
       "title": "Power Analysis",
       "instruction": "Timing: 1 h",
       "substeps": [],
@@ -119,15 +151,31 @@
       "timers": []
     },
     {
-      "step_id": 10,
-      "title": "Power Analysis",
-      "instruction": "To explore the extent of false negatives, we performed a power analysis for all molecular correlates. The following protocol details the simulation procedure to estimate the power to detect ancestry-associated somatic mutations.1.Read in TCGA ancestry assignment and cancer subtype (key resources table).2.Assign the frequency of somatic mutation (intercept) and the odds ratio (slopes).3.For each mutation with a specific frequency at a different odds ratio, simulate 1000 times generalized linear regression between somatic mutation and ancestry assignment, controlling for the subtype. Power is defined as the percentage of tests returned with a p-value less than 5e-05 (assuming testing 20,000 genes followed by Bonferroni correction).4.Plot mutation frequency with different odds ratio against power.5.The following protocol details the simulation procedure to estimate the power to detect ancestry-associated differential DNA methylation.a.Simulate DNA methylation levels for each CpG included on the HM450 platform using a beta distribution Beta(1,5) for gender-specific methylation differences and a normal distribution of N(0.1,0.2) (capped at 0, and 1) for subtype-specific methylation differences.b.For each given methylation level, compute the DNA methylation readout as a binomial distribution Binom(N=40), modeling the average bead number for each probe in the HM450 microarray.c.Simulate methylation readouts for all HM450 CpGs 1000 timesd.Perform the same regression analysis for each simulation using the real ancestry annotation.e.Compute the statistical power as the fraction of inferred significant ancestry-specific differences over all the simulated methylation differences. Plot power against simulated methylation differences.f.Repeat that process for pan-cancer and each cancer type.CRITICAL: The TCGA dataset is not balanced with equal representation of patients of different gender, subtype, and ancestry backgrounds. To faithfully reflect the dataset's limitations, power analyses should maintain the population structure and only permutate the ancestry label. It is expected that greater simulated methylation differences and more samples, especially of the less-represented ancestry, will result in greater power to detecting ancestry-associated differential methylation. For example, EAS-EUR differences are better captured in LIHC, where Asians are well-represented, than in BRCA, where they are not. Conversely, AFR-EUR differences show the opposite effect because African ancestry is better represented in the TCGA BRCA cohort (Carrot-Zhang et al. (Carrot-Zhang et al., 2020) Figure S1).Note: The power calculation for DNA methylation can be adapted to analyze the statistical power of detecting other continuous ancestry-associated molecular correlates including mRNA and miRNA.",
+      "step_id": 14,
+      "title": "for gender-specific methylation differences and a normal distribution of N(0",
+      "instruction": "for gender-specific methylation differences and a normal distribution of N(0.1,0.2) (capped at 0, and",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "for subtype-specific methylation differences",
+      "instruction": "for subtype-specific methylation differences.b.For each given methylation level, compute the DNA methylation readout as a binomial distribution Binom(N=40), modeling the average bead number for each probe in the HM450 microarray.c.Simulate methylation readouts for all HM450 CpGs 1000 timesd.Perform the same regression analysis for each simulation using the real ancestry annotation.e.Compute the statistical power as the fraction of inferred significant ancestry-specific differences over all the simulated methylation differences. Plot power against simulated methylation differences.f.Repeat that process for pan-cancer and each cancer type.CRITICAL: The TCGA dataset is not balanced with equal representation of patients of different gender, subtype, and ancestry backgrounds. To faithfully reflect the dataset's limitations, power analyses should maintain the population structure and only permutate the ancestry label. It is expected that greater simulated methylation differences and more samples, especially of the less-represented ancestry, will result in greater power to detecting ancestry-associated differential methylation. For example, EAS-EUR differences are better captured in LIHC, where Asians are well-represented, than in BRCA, where they are not. Conversely, AFR-EUR differences show the opposite effect because African ancestry is better represented in the TCGA BRCA cohort (Carrot-Zhang et al. (Carrot-Zhang et al.,",
       "substeps": [],
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 16,
+      "title": "Figure S1).Note",
+      "instruction": "Figure S1).Note: The power calculation for DNA methylation can be adapted to analyze the statistical power of detecting other continuous ancestry-associated molecular correlates including mRNA and miRNA.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
       "title": "Problem 1 (step 9)",
       "instruction": "Lack of ancestry association in cancer types with non-European ancestry underrepresented",
       "substeps": [],
@@ -135,7 +183,7 @@
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 18,
       "title": "Problem 2 (steps 17d and 20)",
       "instruction": "One may discover many ancestry associations with small effect sizes (Figure 2I). Small effect size can indicate minor ancestry association or residual heterogeneity in cancer types and subtypes. The biological significance of the small change in molecular correlates is not clear. For example, DNA methylation is categorical, taking 0, 0.5, and 1 in methylation fraction for each diploid cell. An ancestry-associated difference of a small fraction (e.g., <0.1) can suggest high heterogeneity within each ancestry group.",
       "substeps": [],
@@ -143,7 +191,7 @@
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 19,
       "title": "Problem 3 (step 18d)",
       "instruction": "A low overlap between ancestry-associated differential methylation and differential expression (Figure S7F in (Carrot-Zhang et al., 2020)).",
       "substeps": [],
@@ -151,7 +199,7 @@
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 20,
       "title": "Problem 4 (step 23c)",
       "instruction": "Ancestry-associated miRNA has too many target genes. It is hard to prioritize the most disease-relevant targets.",
       "substeps": [],
@@ -159,7 +207,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 21,
       "title": "Problem 5 (step 24b)",
       "instruction": "A lack of correlation between ancestry-associated miRNA transcription and host gene expression (Figure 5E in (Carrot-Zhang et al., 2020)).",
       "substeps": [],
@@ -169,5 +217,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T01:15:18.631301Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Timing: 0.5–1 h1.Download ancestry assignments from Table S1 of (Carrot-Zhang et al., 2020) (see key resources table, raw ancestry calls and admixture estimates are available at the GDC publication page https://gdc.cancer.gov/node/1248) . The ancestry calls include patient classification into European (EUR), East Asian (EAS), African (AFR), Native/Latin American, and (South) Asian, using genotyping calls from SNP6.0 array and exome sequencing data (see the companion protocol Carrot-Zhang et al., 2020 for details). This file also indicates admixed individuals and their level of admixture.2.Prepare cancer types and subtypes by downloading Table S1 of Sanchez Vera et al. 2018 (Sanchez-Vega et al., 2018) (see key resources table). Obtain bladder cancer mRNA subtypes from Table S1 of Robertson et al., 2018, \"mRNA_cluster\" column (Robertson et al., 2018) (see key resources table). Consolidate the two into a single subtype table.3.Download age and gender information from the \"clinical with follow up\" file from https://gdc.cancer.gov/about-data/publications/pancanatlas (see key resources table). Use \"age_at_initial_pathologic_diagnosis\" for age.4.Download the sample quality whitelist from Genomic Data Commons (see key resources table)CRITICAL: Certain cancer types are heterogeneous, and one can further classify those cancer types into various subtypes. This heterogeneity can significantly confound ancestry association when specific ancestries are overrepresented in certain subtypes. For example, for bladder cancer, East Asian ancestry is enriched in the luminal papillary subtype (Robertson et al., 2018). Targeting the ancestry association of bladder cancer without resolving subtypes often leads to detection of molecular correlates that are associated with different subtypes rather than ancestry alone (see expected outcomes).Alternatives: This protocol uses TCGA subtype information, which exists for only 12 of the 33 cancer types. Alternatively, one can also use iCluster cla"
 }

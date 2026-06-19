@@ -26,125 +26,167 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Make sure you have the correct...",
-      "instruction": "Make sure you have the correct environment configuration for conda by typing &#34;which conda&#34; in your terminal. It should output &#34;/home/anaconda/miniconda2/bin/conda&#34;. If not, please refer to Guidelines and Warnings to get set up properly, or install on your own environment if you so desire. Make a folder with an informative name (hereafter referred to as the &#34;base directory&#34;). Make a README inside the folder with information for posterity (at the same level of detail you&#39;d put in your lab notebook). Put your raw, demultiplexed files in a folder called &#34;00-raw&#34; within your base directory. Format should be: forward = &#34;00-raw/*.R1.fastq.gz&#34; reverse = &#34;00-raw/*.R2.fastq.gz&#34;, rename/gzip as necessary. Don&#39;t just rename to gz, otherwise you will have problems later. Running &#34;gzip *&#34; in your directory will do the trick. Use &#34;pigz&#34; (parallel gzip) if you&#39;re in a hurry. FYI you can always check if a file is gzipped for real by going &#34; head yourfile &#34;. If it&#39;s just named .gz but not gzipped, it will appear as plaintext. Otherwise it will look like gibberish. Make sure you have access to the necessary scripts, clone from github as follows (The pipeline may be improved/modified occasionally, so it might be wise to do this every time you start a new analysis. I would also keep copies of the scripts after running them in your working directory, that way you&#39;ll be able to exactly reproduce your analysis later if need be or understand what you did later.): git clone https://github.com/jcmcnch/eASV-pipeline-for-515Y-926R.git The github repository is now structured into a single &#34;master&#34; branch that contains 3 variants of the pipeline, each in its own folder (with subfolders for the different parts of the pipeline). 7. You&#39;ll be using the scripts in the &#34;DADA2-pipeline&#34; subfolder. Make scripts executable (you can just do this: &#34;chmod a+x ./*&#34; in the cloned directory) 8. Confirm they&#39;re executable (check by doing &#34;ls -la&#34;) 9. If desired, add the scripts to your $PATH variable so they will be accessible everywhere when you login (see example below): #add the following line to your ~/.bashrc (can do it in the terminal with &#34;vi&#34; or with a GUI editor as you prefer) export PATH=&#34;/path/to/dir:$PATH&#34; #now &#34;refresh&#34; your ~/.bashrc so the changes take effect (do this in the terminal) source ~/.bashrc export PATH=&#34;/path/to/dir:$PATH&#34;",
+      "title": "You&#39;ll be using the scripts in the &#34;DADA2-pipeline&#34; subfolder",
+      "instruction": "You&#39;ll be using the scripts in the &#34;DADA2-pipeline&#34; subfolder. Make scripts executable (you can just do this: &#34;chmod a+x ./*&#34; in the cloned directory)",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
+      "title": "Confirm they&#39;re executable (check by doing &#34;ls -la&#34;)",
+      "instruction": "Confirm they&#39;re executable (check by doing &#34;ls -la&#34;)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "If desired, add the scripts to...",
+      "instruction": "If desired, add the scripts to your $PATH variable so they will be accessible everywhere when you login (see example below): #add the following line to your ~/.bashrc (can do it in the terminal with &#34;vi&#34; or with a GUI editor as you prefer) export PATH=&#34;/path/to/dir:$PATH&#34; #now &#34;refresh&#34; your ~/.bashrc so the changes take effect (do this in the terminal) source ~/.bashrc export PATH=&#34;/path/to/dir:$PATH&#34;",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
       "title": "Run the script &#34; 00-run-cutadapt",
       "instruction": "Run the script &#34; 00-run-cutadapt.sh &#34; (found in the &#34;00-trimming-sorting-scripts&#34; subdirectory). The script itself can be anywhere, but it must be called from the directory containing the folder &#34; 00-raw &#34; Check logs to make sure the number of reads with primers being identified is very high (close to 100%) Look at the output files, make sure the sizes are reasonable If script fails, make sure the naming format is correct as specified above and the script is executable",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 4,
       "title": "Run the script &#34; 01-sort-16S-18S-bbsplit",
       "instruction": "Run the script &#34; 01-sort-16S-18S-bbsplit.sh &#34; from your base directory. This will split your mixed reads into 16s and 18s. It also copies some &#34;in-silico mocks&#34; that Liv generated into the analysis. These will come in handy later when you&#39;re QC&#39;ing your pipeline. Check the logs, make sure a very high proportion of reads are sorted (close to 100%, should be 100% for the mocks). Proceed to individual procedures for each fraction (PROK and EUK)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 3,
-      "title": "1",
-      "instruction": "1. Go into your &#34; 02-PROKs &#34; directory. All scripts for the PROK part of the pipeline (prefaced with &#34;P&#34;) should be run from here from now on (they can be found in the &#34;01-prok-scripts&#34; subfolder). One thing I like to do is create a &#34;scripts&#34; folder in this directory and then copy the P* scripts here. That way you can just run &#34;./scripts/your-step.sh&#34;. 2. Look at the files in 02-PROKs/00-fastq . Make sure they are a reasonable size. If there are mostly 0 size files, then something must have gone wrong with the sorting. Check to make sure you are sorting the correct things. In the PROK sequences, you will have some 0-sized files but they should be rare (i.e. pure EUK mocks). 3. Make your manifest. You can do this manually, but I&#39;ve got a shell script that does the job, which also removes empty files in the process: &#34; P00-create-manifest.sh &#34;. Just run it from your 02-PROKs folder and double-check the resulting csv file in libreoffice/excel/gnumeric to make sure it looks right. Any mistakes in your manifest will be carried throughout the rest of the analysis pipeline, so make sure the sample names are all correct! NOTE: Sample ID names should be less than 32 characters. [Why? The sample-metadata file used to make interactive barplots (Step 11) requires sample ID names less than 32 characters. The Sample ID of the sample-metadata file and the Sample ID of this manifest file must match, so might as well shorten the ID names of the manifest file at this current step. The sample ID names will be used as labels on the barplots].",
+      "step_id": 5,
+      "title": "Go into your &#34; 02-PROKs &#34; directory",
+      "instruction": "Go into your &#34; 02-PROKs &#34; directory. All scripts for the PROK part of the pipeline (prefaced with &#34;P&#34;) should be run from here from now on (they can be found in the &#34;01-prok-scripts&#34; subfolder). One thing I like to do is create a &#34;scripts&#34; folder in this directory and then copy the P* scripts here. That way you can just run &#34;./scripts/your-step.sh&#34;.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 6,
+      "title": "Look at the files in 02-PROKs/00-fastq",
+      "instruction": "Look at the files in 02-PROKs/00-fastq . Make sure they are a reasonable size. If there are mostly 0 size files, then something must have gone wrong with the sorting. Check to make sure you are sorting the correct things. In the PROK sequences, you will have some 0-sized files but they should be rare (i.e. pure EUK mocks).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Make your manifest",
+      "instruction": "Make your manifest. You can do this manually, but I&#39;ve got a shell script that does the job, which also removes empty files in the process: &#34; P00-create-manifest.sh &#34;. Just run it from your 02-PROKs folder and double-check the resulting csv file in libreoffice/excel/gnumeric to make sure it looks right. Any mistakes in your manifest will be carried throughout the rest of the analysis pipeline, so make sure the sample names are all correct! NOTE: Sample ID names should be less than 32 characters. [Why? The sample-metadata file used to make interactive barplots (",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "requires sample ID names less than 32 characters",
+      "instruction": "requires sample ID names less than 32 characters. The Sample ID of the sample-metadata file and the Sample ID of this manifest file must match, so might as well shorten the ID names of the manifest file at this current step. The sample ID names will be used as labels on the barplots].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
       "title": "Run the script &#34; P01-import",
       "instruction": "Run the script &#34; P01-import.sh &#34; to import your sequences into an &#34;artifact&#34; which is basically an archive file that wraps up all of your raw sequence files and contains information about your analysis (i.e. version of qiime2, commands run etc). On Ubuntu, you can just double-click on it and it opens in archive viewer, but there&#39;s not much exciting inside this one except for your raw data.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 10,
       "title": "Run the script &#34; P02-visualize-quality_R1-R2",
       "instruction": "Run the script &#34; P02-visualize-quality_R1-R2.sh &#34;. This creates another artifact, this time of the visualization flavor. Now, visualize by opening up the folder on kraken containing the artifact (if this is not possible, you can always scp the file onto your desktop) You will be using this visualization to decide how much of your R1 and R2 sequences to keep.This is a balancing act between keeping enough of the R2 read (which decreases in quality quite rapidly) to allow merging but not so much that DADA2 will start calling spurious things or discarding your sequences because of with poor-quality data. In my experience, keeping some of the R2 where the quality starts to spread a lot is OK, but keep the average sequence quality (i.e. the line in the middle of the box plot) above 30 . You also need at least 20 nt overlap for the merging step. Don&#39;t fret too much though, as you can check later with the DADA2 output &amp; mocks to know whether or not your trim length is appropriate. Make a note of these values in your computational notebook for the next step.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 11,
       "title": "Run the script &#34; P04-export-DADA2-results",
       "instruction": "Run the script &#34; P04-export-DADA2-results.sh &#34;. This exports various things from the artifacts into human-readable files. Don&#39;t use these for downstream processing, they&#39;re just being exported to look at them and make sure everything went well. First, check the &#34;stats.tsv&#34; file found in 03-DADA2d and make sure most of your sequences make it through the pipeline. If not, you may have over-trimmed and may have to readjust your trim lengths.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 12,
       "title": "Once you&#39;re confident that your mocks...",
       "instruction": "Once you&#39;re confident that your mocks look good, and that you don&#39;t have any major issues with your denoising, run the script &#34; P05-classify-eASVs.sh &#34;. This assigns taxonomy to your reads based on a classifier derived from the SILVA 132 database (sliced to the region between our default primers). You can read more about it here . As far as I can tell, it relies on k-mer based classification and so should be appropriate for both prokaryotic and eukaryotic sequences.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 13,
       "title": "You first need to make a...",
       "instruction": "You first need to make a sample metadata file, which contains any relevant information about your samples that might be useful in plotting. e.g. date, size fraction, etc. Run the following command &#34; P06-make-sample-metadata-file.py manifest.csv &gt; sample-metadata.tsv &#34;. This will create a template sample metadata file for you. Open it up in your favourite editor and paste in the metadata. Make sure you save it afterwards in the plaintext tab-separated format. Be careful that you&#39;ve put your metadata in correctly (this is one of those manual steps that is prone to human error). Now run &#34; P07-make-barplot.sh &#34;, which will take your abundance information, metadata, and taxonomy and plot it out nicely. Visualize as before, making sure the results look reasonable. Make sure the top taxa are what you expect. Look for potential contaminants or things that do not belong. Spend some time fussing around with it, sorting by metadata etc:",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 14,
       "title": "In many cases, you will want...",
       "instruction": "In many cases, you will want to export the data for further analysis or plotting. I like to ouptut the data in a plaintext format (i.e. tab-separated spreadsheet), which can be easily visualized in a spreasheet program or imported into other software like R/matlab etc. It&#39;s also helpful to split the tables into various functional categories (e.g. algae only, heterotrophic prokaryotes only without mitochondria/chloroplasts). These splitting and exporting steps are a little convoluted with qiime2, so I&#39;ve written some scripts to automate this. First, run &#34; P09-split-mito-chloro-PhytoRef-reclassify.sh&#34; which will split out your Chloroplast sequences (based off of initial classifications by SILVA132), reclassify them with PhytoRef, and then generate a merged taxonomy that has SILVA132 classifications for all 16S sequences except for PhytoRef classifications for chloroplasts. NB-The PhytoRef default Chloroplast taxonomy starts with &#34;Kingdom:Eukaryota&#34; so be aware of that when you look at your exported tables/plots. Next, run &#34; P10-generate-tsv-biom-tables-with-taxonomy.sh &#34;, which will export your biom table from the artifact, add the taxonomy information, and then export the whole thing as a .tsv file. It will do this export for every folder in which it finds a feature-table.qza, so it works in batch if you have clustered your eASVs to make OTUs. Check the output in 10-exports/ to make sure everything looks reasonable. Look at the mock community if you have it. Now, the tab-separated file that has been output is in the format of counts. Proportions are typically more informative, so you can run the script &#34; P10-transform-tsv-to-proportions.sh &#34; which runs a python script (which needs to be in your $PATH or in the working directory) that converts your table to proportions and optionally filters out low-abundance eASVs (as with OTUs, there is a long tail of not-very-abundant things). You can get more information about how it works by running &#34; transform-ESV-tsv-to-proportions.py -h &#34;. By default, the settings I&#39;ve provided in the shell script (that runs this python script) will filter out eASVs that are always less than 0.01 % and also keep only the set of eASVs that allow for 99% of the abundance to be recovered in all samples (all of these produce different spreadsheet outputs). Next, you can run &#34; P12-make-subsetted-barplots.sh &#34; which will generate barplots with the updated PhytoRef-containing taxonomy (the first barplot in the P07 step above is only SILVA132), and all of the different subsets that you might want to look at. For example, you could look at the community without any chloroplasts or mitochondria, or just the chloroplasts, or just the mitochondria (among other options that you can see in the &#34;10-exports&#34; folder). Finally, if there are certain samples that you would like to exclude from your newly subsetted barplots, like mocks or replicates for example, run &#34; P13-exclude-samples-from-barplots.sh&#34;. You must first manually generate a sample-to-keep.tsv file which lists the sample IDs that you want to include in all of your barplots. Once generated, the P13 script will continue.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 15,
       "title": "You might want to do some...",
       "instruction": "You might want to do some OTU clustering with your eASVs but this is strictly optional. qiime2 has a nice way of handling this functionality (with VSEARCH) this and I suggest doing it after the barplot step if you&#39;re going to do it. This way, the subsequent scripts will take the information from the clustering and output them as tables along with the original (unclustered spreadsheet). NB: One of the pieces of information we may wish to have later on is the membership of each cluster. For example, if you want to know how many close relatives a particular eASV has, you would have to know which cluster it is in. By default, this information is not retained in qiime2 but I found a workaround with help from the qiime2 peeps. So it is now possible to do this with the scripts I provide (but it depends on a qiime2 conda environment I&#39;ve hacked - available on kraken). Run the script &#34; P08-optionally-cluster-eASVs.sh &lt;desired cluster level in percent&gt; &#34;. e.g. &#34; P08-optionally-cluster-eASVs.sh 99 &#34; for 99% clustering. You can run this as many times as you want, it will create a new output folder as long as you supply a different clustering level. Capture the uc file (if desired) as shown in the image below. You can later parse this .uc file with the script &#34; parse_VSEARCH_cluster_membership_from_UC_file.py &#34; when you need the membership information. See the help function for this script for more info.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 16,
       "title": "Since we cannot rely on the...",
       "instruction": "Since we cannot rely on the read overlapping step to correct errors (as in the PROK analysis), we must make a judgement call on which part of the read is too ugly to keep. We&#39;ll use qiime2&#39;s beautiful interactive visualization for this (which means we have to import into an artifact first). As with the PROK analysis, go into your 02-EUKs folder, and run the remaining scripts from here. First, create your manifest as before by running &#34; E00-create-manifest-viz.sh &#34; Next, import by running &#34; E01-import.sh &#34; Visualize by running &#34; E02-visualize-quality_R1-R2.sh &#34;. Now, visualize as before and pick what you think is a reasonable trim length (see gif below for a reminder). This, of course, is somewhat arbitrary. In this gif, I&#39;ve picked 221 (basically all of the forward read) and 192 (as much of the reverse read as looks reasonable. However, this may vary from dataset to dataset. In some more recent work, I&#39;ve seen that a shorter R2 trim length may be necessary (i.e. 120), otherwise your mocks are not recovered. Whichever trim length you choose, make sure it is consistent within any set of samples that you want to cross-compare and pay close attention to the QC steps where problems may present themselves!",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 17,
       "title": "Run the script &#34;P03-DADA2.sh&#34; as follows",
       "instruction": "Run the script &#34;P03-DADA2.sh&#34; as follows: P03-DADA2.sh trimleft trimright e.g. $ P03-DAD2.sh 214 187 The script will not work unless you put in your trim lengths, and will print them to a file for your future reference. The q2-dada2 plugin is really wrapping a number of separate steps called in the DADA2 pipeline, but is greatly simplified in qiime2 (lucky for us). Liv has tested it inside qiime2 and compared with results from the latest R version of DADA2 and has not noticed any differences. Remember that DADA2 constructs a run-specific error model, and so we should analyze runs separately!",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 18,
       "title": "This step requires you to look...",
       "instruction": "This step requires you to look carefully at your eASV/OTU table: Open up your &#34;feature-table.biom.tsv&#34; file (found in 03-DADA2d ) in a spreadsheet program so you can see it better. I usually delete the top row, as it&#39;s meaningless. Then find your in-silico staggered mock, and sort the whole spreadsheet in descending order according to that column. Now, compare your real staggered mock with your in-silico mock. Each row is a distinct eASV, and so you should have the same number of rows (or less) in your real mock as the in-silico mock (which is your &#34;positive control&#34; as they are the exact sequences with perfect quality). Some of the low-abundance eASVs may not be detectable depending on your sequencing depth so that&#39;s nothing to worry about. If some of the abundant mocks are missing, this is however a red flag. Now, you may discover that there are some eASVs in your mocks that don&#39;t match up with the in-silico mocks. Don&#39;t panic! These can be usually accounted for by sample bleedthrough, but could also be an indication of spurious eASVs being produced by DADA2. We are considering that an eASV is spurious if it has 1-mismatch from the reference sequence across the whole length (we have seen this happen before). In any case, better check. Copy the names of the eASVs into a plaintext file in your 03-DADA2d folder. Now grab those sequences. I usually use the command &#34; seqtk subseq dna-sequences.fasta &lt;your file containing questionable eASVs&gt; &gt; questionable-eASVs.fasta &#34;. FYI dna-sequences.fasta containts the exact sequences of your eASVs and this command just takes a subset of them based on their fasta identifiers. Next, blast those eASVs against your mocks. I have a simple wrapper script for this, &#34; 16s-mock-blast.sh&#34; . Run as follows: &#34;16s-mock-blast.sh questionable-eASVs.fasta ouptut.tsv&#34; Open the output file, and sort by the column &#34;mismatches&#34;. Look for ones that have only 1 mismatch. These might be spurious eASVs. If these are not present, that indicates that DADA2 is doing what it&#39;s supposed to (at least as far as we can tell from the mocks). Now, if there are some eASVs present that should not be there but are not a close relative of the mock, then it has to have come from somewhere. There are two possibilities - internal sample bleedthrough or external contamination. The latter seems to be quite rare (although it has apparently happened - saw hydrothermal sequences in SPOT samples once), but the former is fairly common. Bleedthrough can be spotted by scrolling across an eASV row. If the questionable eASV is present in high abundance in other real or mock samples, it&#39;s a dead ringer for sample bleedthrough. We don&#39;t have a clear recommendation to deal with such sequences at this point, but they seem mercifully rare. Contamination by contrast would be those questionable sequences that could not be accounted for by bleedthrough. These may need to be removed.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 19,
       "title": "In this step, you are cutting...",
       "instruction": "In this step, you are cutting your reads to your chosen trim length and then artificially concatenating them. Run &#34; E03-bbduk-cut-reads.sh &lt;fwd trim length&gt; &lt;rev trim length&gt; &#34; to cut your reads. Run &#34; E04-fuse-EUKs-withoutNs.sh &#34; to fuse them together into one read. This differs from what David et al have done previously where an N was added in the middle of the sequence. Remember that when submitting data for publication, something should be added to indicate that these are artificially-fused sequences. It will not cause issues with denoising or taxonomy assignment with the steps outlined in this protocol, but would cause problems if you were using an alignment-based taxonomic assignment algorithm.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 20,
       "title": "Because the last few steps were...",
       "instruction": "Because the last few steps were done outside the qiime2 environment (we only imported at the beginning for visualization), we now have to import as before: Run &#34; E05-create-manifest-concat.sh &#34; to automatically create your manifest. Run &#34; E06-import-concat.sh &#34; to import your sequences. Run &#34; E07-visualize-quality-single-seqs.sh &#34; to get a visualization artifact for your merged sequences. Take a look as before, you should see a drop-off in the middle (corresponding to the end of the R2) with higher qualities at both ends. If it doesn&#39;t look like this, something is wrong. Run &#34; E08-DADA2.sh &#34;. There is no need to supply any arguments, as the sequences are all the same length now and so do not require trimming as with the PROKs. For your interest, we&#39;re running the &#34; qiime dada2 denoise-single &#34; command here.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 16,
+      "step_id": 21,
       "title": "Now, let&#39;s take a look at...",
       "instruction": "Now, let&#39;s take a look at the results, paying close attention as above to the position of the eASVs compared to the in-silico mocks. Run &#34; E09-export-DADA2-results.sh &#34; to export as before. Take a look at your stats.tsv first to make sure most sequences make it through to the end. We&#39;ve been getting a healthy ~80% so far. This is much better than deblur, which only retains ~10% unless you cut off most of the R2. Now, check the eASV table as before. You could have two potential issues here if the rows from the real mocks don&#39;t match up with the in-silico mocks. One is that you have spurious eASVs as above. The other is that DADA2 might truncate the reads in the middle where the tail of the R2 is. This can result in basically a R1-only eASV. Both can be identified as described above in the PROK protocol except using the &#34; 18s-mock-blast.sh &#34; script instead of the 16s version of that script (it&#39;s the same script, just blasting different databases).",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 22,
       "title": "The remaining steps are essentially the...",
       "instruction": "The remaining steps are essentially the same as for the PROK pipeline, so just follow the numbering in the scripts to guide you through the rest!",
       "is_critical": false,

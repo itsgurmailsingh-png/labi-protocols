@@ -219,8 +219,8 @@ def _extract_substeps(instruction: str) -> list | None:
         if len(subs) >= 3:
             return subs
 
-    # Sub-numbered: 1a. 1b. 1c. or 1.1 1.2 1.3
-    subnumbered = re.split(r"(?:^|\n)\s*\d+[a-z][\.\)]\s+|\s*\d+\.\d+\.?\s+", instruction, flags=re.MULTILINE)
+    # Sub-numbered: 1a. 1b. 1c. (NOT decimal numbers like 1.5)
+    subnumbered = re.split(r"(?:^|\n)\s*\d+[a-z][\.\)]\s+", instruction, flags=re.MULTILINE)
     if len(subnumbered) >= 4:
         subs = [s.strip() for s in subnumbered if s.strip() and len(s.strip()) > 10]
         if len(subs) >= 3:

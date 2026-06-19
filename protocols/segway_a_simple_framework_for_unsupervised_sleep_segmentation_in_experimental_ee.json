@@ -42,14 +42,30 @@
     },
     {
       "step_id": 3,
-      "title": "Step 2. Selection and extraction of EEG/EMG signal features",
-      "instruction": "All analysis from this step onward was performed on Matlab™ (Mathworks, Natick, Massachusetts). Three features were extracted in each recording: 1. The r.m.s. power of the EMG after bandpass-filtering from 80 to 100 Hz, which expresses muscle tone and differentiates sleep from wakefulness; 2. The ratio of the mean-squared signal power of the frontal EEG after bandpass-filtering in the delta (0.5–4 Hz) and theta (6–9 Hz) bands, respectively, which helps differentiate REM from NREM; and 3. The ratio of mean-squared frontal EEG power in high frequency (9–45 Hz) and low frequency (0.5–9 Hz) bands, respectively, which further distinguishes REM. A 3rd order Butterworth filter was used in each case. These signal features were estimated in each 4-s epoch of the recording and used as inputs for classification of the three vigilance states. As a preprocessing step, each feature time series was smoothed using a four-point (16 s) moving average and scaled logarithmically to reduce noise and skewness in the distribution, which is a common feature of signal power estimates.",
+      "title": "The r",
+      "instruction": "The r.m.s. power of the EMG after bandpass-filtering from 80 to 100 Hz, which expresses muscle tone and differentiates sleep from wakefulness;",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
+      "title": "The ratio of the mean-squared signal...",
+      "instruction": "The ratio of the mean-squared signal power of the frontal EEG after bandpass-filtering in the delta (0.5–4 Hz) and theta (6–9 Hz) bands, respectively, which helps differentiate REM from NREM; and",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "The ratio of mean-squared frontal EEG...",
+      "instruction": "The ratio of mean-squared frontal EEG power in high frequency (9–45 Hz) and low frequency (0.5–9 Hz) bands, respectively, which further distinguishes REM. A 3rd order Butterworth filter was used in each case. These signal features were estimated in each 4-s epoch of the recording and used as inputs for classification of the three vigilance states. As a preprocessing step, each feature time series was smoothed using a four-point (16 s) moving average and scaled logarithmically to reduce noise and skewness in the distribution, which is a common feature of signal power estimates.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
       "title": "Step 2. Selection and extraction of EEG/EMG signal features",
       "instruction": "Comments: Various other signal feature sets that separate Wake, NREM, and REM are described in the literature on sleep scoring in rodents (reviewed in [4]), but an EMG power estimate is frequently used to differentiate Wake from sleep, and one or more EEG features to separate REM from NREM on the basis of delta, theta, alpha, and other commonly observed cortical rhythms. These features can be substituted for the ones presented here, which we have found useful, and are expected to work in a more or less similar manner with little or no modification required.",
       "substeps": [],
@@ -57,7 +73,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 7,
       "title": "Step 3. Clustering of unlabeled signal features into vigilance states",
       "instruction": "Fig. 1 shows sample feature data extracted from one animal's EEG/EMG recording. The samples are scattered over the feature space, but distinct clouds or clusters of points are visible that are found to correspond to each vigilance state. Here we use the k-means algorithm [5] to segregate feature samples in the Light period into three clusters. This is done in two stages as described below: the first to segregate sleep from wakefulness, and the second to partition REM and NREM within sleep. The algorithm's goal is to identify prototypes or centroids for each of several clusters so as to minimize the ratio of the within-cluster distance of each sample from its cluster centroid relative to the mean distance between all the centroids: i.e., a variance criterion (VC). It starts with the user specifying the number of desired clusters. Seeds are then selected for the centroid of each cluster (by a k-means++ algorithm) and its members determined from their distance relative to all the centroids. The VC is computed and the centroids updated based on their members in the current iteration. When the VC converges to an optimum and does not improve with further iteration, the algorithm returns the final cluster centroids and their members.",
       "substeps": [],
@@ -65,7 +81,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 8,
       "title": "Step 3. Clustering of unlabeled signal features into vigilance states",
       "instruction": "In order to increase the likelihood of a favorable partition (i.e., one that best separates samples by vigilance state) we first use the k-means algorithm to partition the r.m.s. EMG feature values into two clusters, sleep and Wake, and then apply it again to separate the sleep cluster into two sub-clusters corresponding to REM and NREM based on the delta-theta power ratio feature alone. The clusters in Fig. 1 are colored by their final membership after application of the k-means algorithm.",
       "substeps": [],
@@ -73,7 +89,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 9,
       "title": "Step 3. Clustering of unlabeled signal features into vigilance states",
       "instruction": "We find that this simple unsupervised clustering procedure labels EEG/EMG features in a way that agrees substantially with manual scores. It should be noted that even expert human raters can disagree by 5–10% or more [6], [7], so this limits the performance to be expected when comparing the algorithm with any one rater. Perfect agreement with manual scoring is neither feasible nor desirable, since the model may be overfitting the data. For the sample animal's Light data (Fig. 1A), overall agreement was 91.6% with >90% high sensitivity and specificity for each state. The k-means model built from the Light period data was then used to classify data from the Dark period by assigning labels to each epoch based on which of the three centroids is nearest to it in the feature space and found to perform just as well (Fig. 1B): overall accuracy was 93.5%; sensitivity and specificity for Wake and NREM were similarly high but REM sensitivity was low (60%) and specificity was moderate (85%).",
       "substeps": [],
@@ -81,7 +97,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 10,
       "title": "Step 3. Clustering of unlabeled signal features into vigilance states",
       "instruction": "Comments: Many unsupervised algorithms, for instance Gaussian mixture models and linkage trees, are available for clustering unlabeled sample data, and may work just as well as the k-means. The clustering approach presented above offers a quick way to predict vigilance state in unlabeled data. The only assumption made is that all three states are reasonably well-represented in the sample data to be modeled (but not necessarily in future samples) since this affects the accuracy of the estimated centroid locations. The proportion of each vigilance state in the sample was assayed fairly well: 34, 55, and 10% versus 37, 55, and 8% from manual scores for Wake, NREM, and REM respectively in the Light period (similar high accuracy in the Dark period).",
       "substeps": [],
@@ -89,7 +105,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 11,
       "title": "Step 3. Clustering of unlabeled signal features into vigilance states",
       "instruction": "But a closer look at the hypnograms—i.e., the sequences of epoch state labels (manual and predicted) for the recording—reveals a serious limitation (Fig. 2). Even as the predictions appear to track the most likely state (per manual scoring) fairly closely over time, there are frequent errors—particularly arousal and REM transitions that are not recognized in the human scores—that could be attributed to noise or variability in the feature values within a state. These errors may be for a small fraction of all epochs, but they may cause the classifier to miss important state transitions or introduce false transitions where there are none, thus introducing large errors in estimates of bout number or duration.",
       "substeps": [],
@@ -97,7 +113,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 12,
       "title": "Step 3. Clustering of unlabeled signal features into vigilance states",
       "instruction": "The number of bouts or their durations for each vigilance state are important metrics that characterize sleep dynamics in experimental investigations (e.g., [2]) but sleep scoring methods do not report how accurately they are estimated by computer algorithms [7], [8], [9], [10] with some exceptions [11]. Here we find that k-means clustering of the vigilance states injects brief episodes of NREM into prolonged Wake bouts and spurious episodes of REM or brief arousal during sleep (Fig. 2). We speculate that such errors will occur with most published algorithms even if the reported accuracy is significantly greater than 90%.",
       "substeps": [],
@@ -105,7 +121,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 13,
       "title": "Step 4. Modeling vigilance dynamics from signal features using HMMs",
       "instruction": "In order to improve the estimation of bout number and duration, it is necessary to model the dynamics of vigilance state across transitions in a way that allows state scores to be predicted for sequences of observed EEG/EMG features rather than individual samples. A hidden Markov model (HMM) is capable of doing just this [1].",
       "substeps": [],
@@ -113,7 +129,7 @@
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 14,
       "title": "Step 4. Modeling vigilance dynamics from signal features using HMMs",
       "instruction": "The HMM is based on the concept of a Markov chain, i.e., a graphical model in which each node is a discrete state that can make transitions—identified by the edges—at random times to other states with probabilities that depend only on the current state (known as the Markov property). When the states of the Markov chain correspond to the vigilance states, such a model would describe the dynamics of transitions between Wake, NREM, and REM in the form of a matrix of state transition probabilities. But since the state is not directly observable, it must be inferred from measurements such as the EEG/EMG signal features. An HMM specifies the distribution of feature values conditioned on each state of the Markov chain, or the conditional. Elementary rules of probability (Bayes theorem and the chain rule) are combined in the form of a simple but powerful technique, known as the Viterbi algorithm [1], to decode the sequence of HMM states—assuming the HMM's parameters (transition matrix and conditional distributions)—that are most likely to have generated a sequence of observed feature values.",
       "substeps": [],
@@ -121,7 +137,7 @@
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 15,
       "title": "Step 4. Modeling vigilance dynamics from signal features using HMMs",
       "instruction": "First, we need to fit the HMM to the available feature data. To do this, we model the distribution of sample data in the feature space, again using the k-means algorithm, but this time with a larger number of clusters (between 3 and 15). The algorithm selects the partition with the least number of clusters M needed for a variance criterion (similar to the F statistic) to exceed 90%. This is one way to select a parsimonious number of centroids that adequately represent the scatter of data observed in the feature space, so that any sample point observed in the future is likely to be close enough to a centroid and belong to that cluster.",
       "substeps": [],
@@ -129,7 +145,7 @@
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 16,
       "title": "Step 4. Modeling vigilance dynamics from signal features using HMMs",
       "instruction": "The partitioning or mapping of feature values to clusters described above becomes a discretized observation space with a relatively small number, M, of centroids. Each cluster acts as a bin, akin to that used in a discrete observation HMM, except that any point in the feature space is now mapped to the cluster of the nearest centroid. The member samples of each cluster are then used to compute the discrete conditional probability distribution of the samples for each of the three vigilance states (Fig. 3). Then we take the original output of the k-means algorithm, which clusters the data into three vigilance states, and estimate the relative frequencies of transitions between the states to make up the 3 × 3 state transition matrix. The combination of conditional distribution and state transition matrix comprise the parameters of an HMM with discretized observations that captures the dynamics of vigilance state transitions. This initial guess of the parameters is refined by applying the Baum–Welch algorithm, which is an E–M procedure for performing maximum-likelihood estimation [1] that converges to a local optimum. In our code, the user has the option of applying the Baum–Welch optimization or using the initial guess HMM to compare the two. We have found that the two-stage k-means procedure for deriving the initial guess produces better results with the Baum–Welch algorithm than starting with multiple random initial guesses and choosing the solution with greatest log-likelihood. We demonstrated a similar approach for segmentation of human sleep recordings in a previous study [12].",
       "substeps": [],
@@ -137,7 +153,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 17,
       "title": "Step 4. Modeling vigilance dynamics from signal features using HMMs",
       "instruction": "Comments: There are well-documented approaches in the literature for modeling observations using HMMs that either: 1. Assume a model for the conditional distribution—usually a multivariate Gaussian or mixture-of-Gaussians—in each state [13]; or 2. Separate the feature space into bins of equal volume, and model the conditional as a discrete probability distribution for each state [14]. While the first approach assumes a continuous distribution over the feature space and can assign a probability density to any point in it, a sparse sample of observations can lead to poor estimates of parameters (e.g., ill-defined covariance matrices) for the conditional density functions. The latter discrete approach has its own drawbacks: fine-grained bins may be needed to better estimate the conditional, but this leads to many empty bins for sparsely sampled data and a prohibitively large parameter space, whose size is proportional to the number of bins. Our implementation is a hybrid of both approaches: firstly, observations of features are discretized, but by mapping them to clusters based on a statistical criterion and not by binning the feature space; and secondly, the conditional of the HMM is a discrete probability distribution of the symbolic clusters to which observations are mapped rather than parametric density functions of the continuous-valued observations. These features make it a discretized observation HMM rather than a discrete or continuous observation HMM.",
       "substeps": [],
@@ -145,7 +161,7 @@
       "timers": []
     },
     {
-      "step_id": 16,
+      "step_id": 18,
       "title": "Step 5. Decoding the state sequence from EEG/EMG feature time series",
       "instruction": "After estimating the HMM, the popular Viterbi algorithm [1] is used to decode the state sequence from the time series of features. The Viterbi algorithm finds the state path, within the constraints imposed by the model parameters, that is most likely to have generated the entire sequence of observed features in the unlabeled data. This is essentially different from classification methods that only model differences between states in the feature space, which means that they optimize the separation based on the conditional distribution of features and not on dynamical changes in vigilance state. Application of the Viterbi algorithm to the Light data set shows that although the accuracy has barely increased (90%) and is actually lower than that of k-means for the Dark period (91% vs. 93%), prediction noise in the time sequence of states is visibly reduced (Fig. 4, Fig. 5). There are only rare instances of false NREM during prolonged Wake, and few false REM episodes or brief arousals during sleep.",
       "substeps": [],
@@ -153,7 +169,7 @@
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 19,
       "title": "Step 5. Decoding the state sequence from EEG/EMG feature time series",
       "instruction": "Comments: One limitation found here in using HMMs is that while they avoided generating false arousals in sleep, they also missed several genuine arousals marked by the human rater. This is attributed to the fact that both brief arousals in sleep and prolonged bouts of Wake are modeled as a single state when in reality they are dynamically distinct and operate on different timescales. In a future implementation, we hope to alleviate this behavior using a hierarchical HMM that first differentiates between prolonged sleep and wake bouts, and then models transitions between NREM, REM, and arousal within sleep. Another way to address this problem is to use a generalized Markov model framework, in which dwell time distributions for each state are explicitly modeled, and further assuming a form for the distribution flexible enough to accommodate (and test for) significant deviations from a geometric distribution [15].",
       "substeps": [],

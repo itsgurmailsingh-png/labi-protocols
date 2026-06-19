@@ -36,14 +36,6 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "This protocol leverages publicly available soybean resequencing data collected from multiple studies deposited in NCBI and the National Genomics Data Center of China. To ensure reliable detection of selected genes and accurate haplotype analysis, raw sequencing data must meet strict quality standards (e.g., high-quality genome resequencing data with sufficient sequencing depth, uniform coverage, and minimal missing sites to ensure completeness and accuracy). Detailed sample information, including accession identifiers, geographic origin, and population metadata, should be verified and curated prior to downstream analysis.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "Preparation 1: Data access and quality control",
       "instruction": "Timing: Variable (affected by dataset size, internet speed, and computational resources)\n1.Obtain raw resequencing data:a.Collect published data or newly generated soybean whole-genome DNA sequencing data in FASTQ format from the sequencing facility.b.Confirm that metadata (sample identifiers, population origin, and experimental design) are provided together with the raw data.c.Ensure that sequencing was performed with sufficient coverage (average depth ≥ 5×) for downstream variant calling and haplotype analysis.\nCRITICAL: Verify that the sequencing facility provides complete documentation on library preparation, sequencing platform, and read length, as inconsistencies can affect data comparability.\n2.Verify data integrity:a.Check file completeness and integrity using checksum files (e.g., MD5).b.Ensure that all samples are accounted for and properly named according to the metadata sheet.c.Inspect a subset of FASTQ files with tools such as FastQC to confirm overall quality (base quality distribution, adapter contamination, and read length).\nCRITICAL: Exclude or request replacement for samples that fail integrity or quality checks before proceeding to downstream processing.",
       "substeps": [],
@@ -51,7 +43,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 1,
       "title": "Preparation 2: Setting up the software environment",
       "instruction": "Timing: 1 h\n3.Install all required software in a Linux environment, preferably using Conda. We applied multiple complementary population genetic metrics to ensure robust detection of selective signals:a.Weir and Cockerham’s FST, calculated using VCFtools, to measure pairwise population differentiation.b.π ratio, computed with VCFtools, to identify regions exhibiting reduced nucleotide diversity indicative of selective sweeps.c.XP-CLR (Cross-Population Composite Likelihood Ratio) analysis, performed using the XP-CLR software, to detect cross-population selection based on allele frequency differentiation.d.RAiSD (Raised Accuracy in Sweep Detection), used to capture signatures of selective sweeps by modeling local distortions in the site frequency spectrum and linkage disequilibrium. # environment.yml name: python_env channels: - bioconda - conda-forge - defaults dependencies: - python=3.7 - bwa=0.7.18 - trimmomatic=0.39 - samtools=1.20 - gatk4=4.2 - vcftools=0.1.16 - xpclr - beagle=5.4 # Utilities - wget - unzip # Note: RAiSD is NOT available through conda. # mkdir RAiSD && cd RAiSD # wget https://github.com/alachins/raisd/archive/master.zip # unzip master.zip # cd raisd-master # chmod +x install-RAiSD.sh # ./install-RAiSD.sh CRITICAL: Ensure that the following software versions are compatible to prevent conflicts during analysis. When version mismatches occur or dependencies cannot be resolved, install individual tools in separate Conda environments.",
       "substeps": [
@@ -84,7 +76,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 2,
       "title": "Nucleotide diversity (π) analysis and π-ratio-based sweep detection",
       "instruction": "Timing: 3 h",
       "substeps": [],
@@ -92,7 +84,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 3,
       "title": "Nucleotide diversity (π) analysis and π-ratio-based sweep detection",
       "instruction": "This section computes windowed nucleotide diversity (π) for two populations, derives the π ratio (popA/popB) on common windows, standardizes scores, and maps outlier intervals to genes.18.Inputs and population files.a.Filtered cohort VCF: input.filtered.vcf (biallelic SNPs; recommended MAF/missingness filters).b.Two population lists with sample IDs: popA.list, popB.list (one ID per line).c.Gene annotation: reference.gff.d.Utility scripts: zscore.py for Z-score standardization; GetGeneFromGFF.py for interval to gene mapping.19.Prepare per-population π jobs (windowed).",
       "substeps": [],
@@ -100,7 +92,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 4,
       "title": "Nucleotide diversity (π) analysis and π-ratio-based sweep detection",
       "instruction": "Create a shell script to run windowed π for each population list (100 kb windows; 100 kb steps shown as example).# Generate per-population π calculation commands and save them into run_pi.shls ∗.list | while read plistdo echo \"nohup vcftools \\ --vcf input.filtered.vcf \\ --keep ${plist} \\ --window-pi 100000 \\ --window-pi-step 100000 \\ --out ${plist%.list} &\" done > run_pi.sh && sh run_pi.sh20.Extract window keys and intersect common windows.# Extract common genomic windows shared between two populations (popA and popB)grep -v BIN popA.windowed.pi \\ | awk -F ' ' '$1 && $2 && $3 {print $1\"_\"$2\"_\"$3}' \\ | sort \\ > A.keysgrep -v BIN popB.windowed.pi \\ | awk -F ' ' '$1 && $2 && $3 {print $1\"_\"$2\"_\"$3}' \\ | sort \\ > B.keyscomm -12 A.keys B.keys > common.keys21.Prefix π tables with window keys for joining.# Tag each row with a composite window keyawk '{print $1\"_\"$2\"_\"$3, $0}' popA.windowed.pi > A.tagawk '{print $1\"_\"$2\"_\"$3, $0}' popB.windowed.pi > B.tag# Pull rows for common windowswhile read k; do grep -w \"$k\" A.tag; done A.commonwhile read k; do grep -w \"$k\" B.tag; done B.common22.Join tables, compute π ratio, and tidy.Note: In VCFtools windowed.pi, π is typically in column 4 (PI). Adjust field indices if your format differs.# Compute π ratio per common windowpaste A.common B.common \\ | awk '{print $2, $3, $4, $6, $12, $6/$12}' \\ > popA_vs_popB.piratio # CHR START END PI_A PI_B PIratio# Sort by chromosome and start, then keep CHR START END PIratiogrep -v BIN popA_vs_popB.piratio \\ | sort -k1,1n -k2,2n \\ | awk '{print $1, $2, $3, $6}' \\ > popA_vs_popB.piratio.in23.Z-score standardization and outlier selection.# Calculate Z-scores for π ratio valuespython zscore.py \\ popA_vs_popB.piratio.in \\ popA_vs_popB.piratio.in.zscore# Extract genomic windows with significant Z-scores (Z ≥ 1.96)awk '$5 >= 1.96 {print $1, $2, $3}' \\ popA_vs_popB.piratio.in.zscore \\ > popA_vs_popB.piratio.in.zscore.pos24.Normalize chromosome labels to match the GFF (if needed).# Normalize chromosome naming (add leading zeros, e.g., Chr01-Chr09)awk '$1 = 10 {printf(\"Chr%s %s %s\\n\", $1, $2, $3)}' \\ popA_vs_popB.piratio.in.zscore.pos \\ > popA_vs_popB.piratio.in.zscore.pos.norm25.Map outlier intervals to genes.# Extract overlapping genes from GFF for candidate selective regionspython GetGeneFromGFF.py \\ reference.gff \\ popA_vs_popB.piratio.in.zscore.pos.norm \\ popA_vs_popB.piratio.in.zscore.pos.genes# Extract and clean unique gene IDs from the GFF-derived tableawk '{print $9}' popA_vs_popB.piratio.in.zscore.pos.genes | grep -v attr \\ | sed 's/ID=//g' \\ | sed 's/;//g' \\ | sort -u \\ > popA_vs_popB.piratio.in.zscore.pos.genes.cleanNote: Use identical window size and step for both populations; π ratios are meaningful only on common windows. Ensure consistent reference build and contig naming across VCF and GFF; normalize labels before overlap.",
       "substeps": [],
@@ -108,7 +100,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 5,
       "title": "Consensus integration of candidate genes across methods",
       "instruction": "Timing: 5 min",
       "substeps": [],
@@ -116,7 +108,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 6,
       "title": "Consensus integration of candidate genes across methods",
       "instruction": "This section merges candidate gene lists from multiple detection approaches (e.g., FST, π-ratio, XP-CLR, RAiSD). It supports flexible thresholds such as “identified by ≥1 method”, “≥2 methods”, or “≥3 methods”.39.Inputs (one gene ID per line):",
       "substeps": [],
@@ -124,7 +116,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "Consensus integration of candidate genes across methods",
       "instruction": "Make sure each file contains a single column of standardized gene IDs (no headers). If your IDs include attributes (e.g., ID=...;), clean them first as shown in earlier steps.40.Streamlined code for merging gene lists.# Set threshold K (e.g., 1, 2, 3...)K=2# Merge all gene lists and compute support countscat ∗.outlier.genes.clean \\ | sort \\ | uniq -c \\ > gene.counts.tmp# Genes supported by ≥K methodsawk -v k=$K '{if ($1 >= k) print $2}' gene.counts.tmp \\ > consensus.k${K}.genes# Genes supported by exactly K methods (optional)awk -v k=$K '{if ($1 == k) print $2}' gene.counts.tmp \\ > consensus.eqk${K}.genesNote: This code concatenates all input lists, counts the number of methods supporting each gene, and outputs two files:a.consensus.kK.genes: genes detected by at least K methods.b.consensus.eqkK.genes: genes detected by exactly K methods.Ensure all lists use the same gene ID namespace (e.g., ZH13). If needed, map aliases to a canonical ID before merging. Record software versions and thresholds (window sizes, Z cutoffs). Store the exact shell commands in your workflow log or Makefile/Snakemake.",
       "substeps": [
@@ -145,7 +137,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 8,
       "title": "Haplotype extraction and statistics",
       "instruction": "Timing: 5 min",
       "substeps": [],
@@ -153,7 +145,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 9,
       "title": "Haplotype extraction and statistics",
       "instruction": "This section extracts a target genomic interval from cohort VCFs, phases/genotypes (if needed), enumerates unique haplotypes per sample, and summarizes haplotype counts by geographic/population groups.41.Inputs.a.Per-chromosome, bgzipped + tabix-indexed VCFs: .../vcf/soybean.∗.Chr∗.vcf.gz.b.Target interval: for example Chr2:50394718-50402312.c.Sample group lists (one sample ID per line), e.g., regionA.list, regionB.list, …d.Gene annotation (optional, for downstream mapping).e.haplo.py (the provided pysam script that prints per-sample haplotypes and labels them Haplotype1/2/...).# haplo.pyimport pysamimport sysfrom collections import defaultdictvcf = pysam.VariantFile(vcf_path)haplotypes = defaultdict(lambda: [])valid_positions = set()for record in vcf: if all(record.samples[sample]['GT'] is not None for sample in record.samples): valid_positions.add(record.pos)for record in vcf: if record.pos in valid_positions: for sample in record.samples: gt = record.samples[sample]['GT'] haplotypes[sample].append(gt)haplotypes_str = {sample: str(gt_list) for sample, gt_list in haplotypes.items()}unique_haplotypes = defaultdict(lambda: [])for sample, haplotype in haplotypes_str.items():unique_haplotypes[haplotype].append(sample)filtered_haplotypes = {k: v for k, v in unique_haplotypes.items() if len(v) >= 1}sorted_haplotypes = sorted(filtered_haplotypes.items(), key=lambda x: len(x[1]), reverse=True)for idx, (haplotype, samples) in enumerate(sorted_haplotypes, start=1): print(f\"Haplotype{idx}: {haplotype}, Count: {len(samples)}\") for sample in samples: print(f\" Haplo{idx}: {sample}\")vcf.close()42.Extract the interval across all per-chromosome VCFs.# Pull the interval from every per-chromosome VCF and merge, then sort by POSls ../vcf/soybean.∗.Chr∗vcf.gz | while read v; do tabix \"$v\" Chr2:50394718-50402312done | sort -k2,2n > interval.recordsNote: If you also need a VCF header, capture it once from any matching VCF.zcat ../vcf/soybean.X.Chr2.vcf.gz | grep \\# > header.vcf43.Assemble a minimal interval VCF:cat header.vcf interval.records > interval.raw.vcf44.Phase/impute (recommended).",
       "substeps": [],
@@ -161,15 +153,31 @@
       "timers": []
     },
     {
+      "step_id": 10,
+      "title": "SAMPLE_A01 Haplo",
+      "instruction": "SAMPLE_A01 Haplo",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
       "step_id": 11,
-      "title": "Haplotype extraction and statistics",
-      "instruction": "If your cohort isn’t fully phased or has sporadic missing genotypes, phase with Beagle on the interval.beagle gt=interval.vcf out=interval_beagle# Output: interval_beagle.vcf.gz45.Call haplotypes per sample (across valid sites).python haplo.py interval_beagle.vcf.gz > interval.haploThe script.a.Loads all biallelic sites with complete genotypes across samples (“valid positions”).b.Builds a per-sample haplotype string over the valid sites.c.Prints unique haplotypes as Haplotype1, Haplotype2, … with member sample IDs.Example output (abridged).Haplotype1: [...] , Count: 4223 Haplo1: SAMPLE_A01 Haplo1: SAMPLE_A02 ...Haplotype2: [...] , Count: 1786 Haplo2: SAMPLE_B03 ...46.Count haplotypes by region/population.",
+      "title": "SAMPLE_A02 ...Haplotype2",
+      "instruction": "SAMPLE_A02 ...Haplotype2: [...] , Count: 1786 Haplo",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
+      "title": "SAMPLE_B03",
+      "instruction": "SAMPLE_B03 ...46.Count haplotypes by region/population.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
       "title": "Haplotype extraction and statistics",
       "instruction": "For each region list (e.g., regionA.list), count how many listed samples fall into each haplotype.# Count members of Haplotype1..Haplotype5 in regionAfor k in 1 2 3 4 5; do cat regionA.list \\ | while read sid; do grep -w \"$sid\" interval.haplo; done \\ | grep -w \"Haplo${k}\" \\ | wc -ldoneNote: Phasing & missingness: Haplotype inference is sensitive to missing calls and phasing. Use Beagle (or comparable) and require consistent sample sets per locus. Ensure sample IDs and their case match exactly across VCF and region lists.",
       "substeps": [],
@@ -179,5 +187,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T01:03:24.409705Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "This protocol leverages publicly available soybean resequencing data collected from multiple studies deposited in NCBI and the National Genomics Data Center of China. To ensure reliable detection of selected genes and accurate haplotype analysis, raw sequencing data must meet strict quality standards (e.g., high-quality genome resequencing data with sufficient sequencing depth, uniform coverage, and minimal missing sites to ensure completeness and accuracy). Detailed sample information, including accession identifiers, geographic origin, and population metadata, should be verified and curated prior to downstream analysis."
 }

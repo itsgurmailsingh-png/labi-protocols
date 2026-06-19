@@ -34,14 +34,6 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "This protocol outlines biologically-informed computational steps for determining the effect of genetic and physiological perturbations on the quiescent states of adult mouse hippocampal neural stem cells (NSCs) via single-cell RNA-sequencing (scRNA-seq). The example dataset features a genetic mouse mutant, in which the Mycn gene was deleted from Glast expressing cells, including adult hippocampal NSCs at 1-month of age, causing cells to stall between deep and shallow states of quiescence. The cells sequenced in this study were derived from dissection and enzymatic dissociation of the dentate gyrus and isolation of Nestin-GFP+ cells by flow sorting. These cells were then processed by 10× Genomics 3′ scRNA-seq.1 However, the protocol can be adapted for use with other methods of enriching hippocampal neural stem and progenitor cells (e.g., Glast-creERT2; Rosa-YFP) and with other genetic or experimental conditions affecting quiescence, such as aging.2,3 Likewise, similar analytical principles can be applied to scRNA-seq data from the subventricular zone (SVZ), although marker genes may differ, for example Hopx is expressed only by hippocampal NSCs.4 The approach can also be applied to single-nucleus RNA-sequencing data without significant modifications.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "Hardware preparation",
       "instruction": "1.Perform the analysis in R, ideally using RStudio, on Linux, macOS, or Windows operating systems.\nNote: We recommend a system with at least 32 GB of RAM and 4 CPU cores. On a high-performance computing cluster, request equivalent resources.",
       "substeps": [],
@@ -49,7 +41,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 1,
       "title": "Software preparation",
       "instruction": "2.Install the key software packages listed in the key resources table. For example: > install.packages(\"Seurat\") Note: Although using different software versions (e.g., Seurat) and computational environments will alter data visualization, the fundamental analytical approaches remain stable. The goal of this protocols paper is to demonstrate the key principles we have employed to isolate hippocampal NSCs from scRNA-seq data. Therefore, when implementing this protocol, especially for different datasets, follow the biologically-informed guidance and alter code accordingly (e.g., the clusters to isolate).",
       "substeps": [],
@@ -57,7 +49,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 2,
       "title": "Setting up the computational environment",
       "instruction": "Timing:10–15 min\n3.Launch RStudio and create a new project named ‘Mycn_NSC_analysis’. Install the necessary packages listed in the key resources table.4.Download count matrices from GEO (accession GSE280296). Obtain the following samples: Mycn control replicate 1 (GSM8594261), Mycn control replicate 2 (GSM8594263), Mycn conditional knockout (cKO) replicate 1 (GSM8594260), and Mycn cKO replicate 2 (GSM8594262). Create a folder named \"data” within your RStudio project directory and move the downloaded count matrices into this folder.",
       "substeps": [],
@@ -65,15 +57,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
-      "title": "Step-by-step method details",
-      "instruction": "Note: All scripts used in this analysis are available on Zenodo (see Data and code availability). At the end of each script, the Seurat object is saved. It is then read in at the start of the next script. This was designed so that researchers can pause at each step, if needed.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
+      "step_id": 3,
       "title": "Isolation of neurogenic clusters",
       "instruction": "Timing:30 min–2 h\n1.Read the four scRNA-seq samples and merge them into a single Seurat object.a.Go to the tutorials folder and open the “01_read_merge.R” script.b.Run the code in the R script.\nNote: In this script, the workflow reads and merges scRNA-seq data from four Mycn datasets (2 control and 2 knockout replicates) from GEO, merges them into a single Seurat object, performs quality control filtering and adds metadata, including experimental batch and mouse genotype.\n2.Normalize and integrate the four experimental samples according to experimental replicate (batch).a.Go to the tutorials folder and open the “02_normalise_integrate_neurogenic.R” script.b.Run the code in the R script.\nNote: SCTransform is one of two main data normalization workflows in Seurat.5 This script performs batch-corrected integration on all cells from the preprocessed Mycn dataset and visualizes marker genes to isolate cell clusters belonging to the neurogenic lineage.\nCRITICAL: Batch effects are typically strong in scRNA-seq data. Providing the replicates are balanced, which is to say in each replicate a control and experimental condition is present, replicates can be “integrated” according to their batch of origin. With this experimental design, this can remove technical effects that are batch-dependent, while preserving the biological effect.8 If integration does not sufficiently overcome batch effects, consider if it is appropriate to independently perform quality control in a batch-dependent manner. Between Seurat v4 and v5 the integration workflow changes: in v5 PCA (on unintegrated data) is run before integration, though the downstream results are broadly similar, be sure to use the workflow that suits your Seurat version.\n3.Isolate three neurogenic clusters from the resulting Seurat object (i.e., quiescent NSCs, proliferating NSCs/IPCs and immature neurons).a.Visualize gene expression of key genes to isolate a quiescent NSC cluster, a combined proliferating NSC and IPC cluster and non-cycling immature neuron cluster.\nNote: The quiescent NSC cluster (Hopx-high; S100b-low)9 is distinguished from astrocytes that are Hopx-low; S100b-high.10,11 See limitations section for discussion. The combined proliferating NSCs and IPC cluster has a circular topology and appears predominantly as Eomes-high, though is a mixed population.12 Due to major transcriptional changes that occur upon cell-cycle entry, proliferating NSCs end up clustering with IPCs and away from quiescent NSCs. These proliferating NSCs are recovered in the next stage of the protocol. The non-cycling immature neuron cluster is Dcx-high; Eomes-low. In the example below, cells to isolate belong to clusters “0”, “1”, and “7” (Figure 1). Other types of cells found in the dataset include microglia and immature and mature oligodendrocytes.",
       "substeps": [],
@@ -81,7 +65,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 4,
       "title": "Isolation of neurogenic clusters",
       "instruction": "# Define the key genes for visualisation ngenic_ident <- c(\"Hopx\", \"S100b\", \"Eomes\", \"Dcx\")\n# Generate feature plots for each of the key genes\nfinal.integrated <- NormalizeData(final.integrated, assay = \"RNA\") DefaultAssay(final.integrated) <- \"RNA\" feature_plots <- FeaturePlot(object = final.integrated, features = ngenic_ident, reduction = \"umap\", dims = c(2, 1), pt.size = 1) Fig1B <- feature_plots ggsave(\"plots/Figure_1B.png\", plot = Fig1B, dpi = 300, height = 7, width = 10) # Generate the dimensionality reduction plot with cluster labels dim_plot <- DimPlot(final.integrated, label = TRUE, reduction = \"umap\", dims = c(2, 1), pt.size = 1) # Compare plots side-by-side dim_plot + feature_plots # Subset the populations to a new Seurat Object named final.integrated final.integrated <- subset(final.integrated, idents = c(\"0\", \"1\", \"7\")) Figure 1Isolation of neurogenic clusters derived from mouse hippocampus(A) UMAP of Nestin-GFP+ cells isolated from the mouse dentate gyrus of Mycn control and Mycn cKO mice and processed for scRNA-seq.(B) Gene expression patterns for Hopx, S100b, Eomes and Dcx enable the identification of neurogenic cells in clusters 0 (quiescent NSCs), 1 (immature neurons/neuroblasts) and 7 (proliferating NSCs and IPCs).",
       "substeps": [],
@@ -89,7 +73,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 5,
       "title": "Isolation of neural stem cells",
       "instruction": "Timing:30 min–1 h\n4.Renormalize and integrate the four experimental samples, now containing only cells in the neurogenic lineage.a.Go to the tutorials folder and open the “03_normalise_integrate_neuralstemcells.R” script.b.Run the code in the R script.\nNote: This script performs batch-corrected integration on all neurogenic cells, removes contaminating clusters and isolates NSCs by selecting cells with expression of Hopx or Apoe.\n5.Isolate NSCs from the resulting Seurat object. Quiescent NSCs already cluster separately, but proliferating NSCs are intermingled with IPCs.a.Visualize gene expression of key markers such as Hopx, Apoe, Eomes, Dcx and S100b to identify proliferating NSCs and distinguish them from IPCs.\nNote: Proliferating NSCs form an inner ring characterized by Hopx and absent Eomes expression (Figure 2); IPCs show low Hopx and high Eomes expression. In the example below, to isolate all NSCs, we isolate cells with high Hopx or high Apoe expression. Thresholds for gene expression selection are explicitly defined in the script “03_normalise_integrate_neuralstemcells.R” but should be adjusted according to the dataset being used, as appropriate. The thresholds are not strictly quantitative; rather, they are tuned to achieve the cleanest isolation of the inner ring of proliferating NSCs and exclusion of the outer ring of Eomes-expressing IPCs.",
       "substeps": [],
@@ -97,15 +81,87 @@
       "timers": []
     },
     {
+      "step_id": 6,
+      "title": "hopx_plot_full <- FeaturePlot(final",
+      "instruction": "hopx_plot_full <- FeaturePlot(final.integrated, features = \"Hopx\", reduction = \"umap\", max.cutoff = 3, pt.size =",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "eomes_plot_full <- FeaturePlot(final",
+      "instruction": "eomes_plot_full <- FeaturePlot(final.integrated, features = \"Eomes\", reduction = \"umap\", max.cutoff = 1, pt.size =",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
       "step_id": 8,
-      "title": "Isolation of neural stem cells",
-      "instruction": "# Generate full DimPlot and FeaturePlots DefaultAssay(final.integrated) <- \"RNA\" dim_plot_full <- DimPlot(final.integrated, label = TRUE, reduction = \"umap\", pt.size = 1) + NoLegend() apoe_plot_full <- FeaturePlot(final.integrated, features = \"Apoe\", reduction = \"umap\", max.cutoff = 3, pt.size = 1) hopx_plot_full <- FeaturePlot(final.integrated, features = \"Hopx\", reduction = \"umap\", max.cutoff = 3, pt.size = 1) eomes_plot_full <- FeaturePlot(final.integrated, features = \"Eomes\", reduction = \"umap\", max.cutoff = 1, pt.size = 1) dcx_plot_full <- FeaturePlot(final.integrated, features = \"Dcx\", reduction = \"umap\", max.cutoff = 1, pt.size = 1) s100b_plot_full <- FeaturePlot(final.integrated, features = \"S100b\", reduction = \"umap\", max.cutoff = 1, pt.size = 1) # Generate cropped DimPlot and FeaturePlots # Note you may need to adjust the co-ordinates depending on your plot dim_plot_crop <- dim_plot_full + xlim(-6, 0.8) + ylim(-9, 4) apoe_plot_crop <- apoe_plot_full + xlim(-6, 0.8) + ylim(-9, 4) hopx_plot_crop <- hopx_plot_full + xlim(-6, 0.8) + ylim(-9, 4) eomes_plot_crop <- eomes_plot_full + xlim(-6, 0.8) + ylim(-9, 4) dcx_plot_crop <- dcx_plot_full + xlim(-6, 0.8) + ylim(-9, 4) s100b_plot_crop <- s100b_plot_full + xlim(-6, 0.8) + ylim(-9, 4) # Arrange full and cropped plots side-by-side for comparison of gene expression levels Fig2 <- (dim_plot_full | apoe_plot_full | hopx_plot_full | eomes_plot_full | dcx_plot_full | s100b_plot_full) / (dim_plot_crop | apoe_plot_crop | hopx_plot_crop | eomes_plot_crop | dcx_plot_crop | s100b_plot_crop) Fig2 ggsave(\"plots/Figure_2.png\", plot = Fig2, dpi = 300, height = 8, width = 20) Figure 2Isolation of quiescent and proliferating NSCs(A) UMAP of neurogenic populations after reclustering. Quiescent NSCs belong to clusters 0 and 1; proliferating NSCs are clustered with IPCs within clusters 4 and 5.(B) UMAP of boxed region in (A).(C) Proliferating NSCs form an inner ring of Apoe/Hopx-expressing cells.(D) Zoomed-in region from panel C. Arrow indicates inner ring of proliferating NSCs.(E) IPCs form an outer ring of Eomes and Dcx-expressing cells.(F) Zoomed in region from panel E. Arrow indicates outer ring of IPCs.(G) UMAP showing S100b expression, with arrow indicating likely multiplet cluster expressing S100b and Dcx.(H) Zoomed-in region from panel G.",
+      "title": "dcx_plot_full <- FeaturePlot(final",
+      "instruction": "dcx_plot_full <- FeaturePlot(final.integrated, features = \"Dcx\", reduction = \"umap\", max.cutoff = 1, pt.size =",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
+      "title": "s100b_plot_full <- FeaturePlot(final",
+      "instruction": "s100b_plot_full <- FeaturePlot(final.integrated, features = \"S100b\", reduction = \"umap\", max.cutoff = 1, pt.size = 1) # Generate cropped DimPlot and FeaturePlots # Note you may need to adjust the co-ordinates depending on your plot dim_plot_crop <- dim_plot_full + xlim(-6, 0.8) + ylim(-9,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "apoe_plot_crop <- apoe_plot_full + xlim(-6, 0",
+      "instruction": "apoe_plot_crop <- apoe_plot_full + xlim(-6, 0.8) + ylim(-9,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "hopx_plot_crop <- hopx_plot_full + xlim(-6, 0",
+      "instruction": "hopx_plot_crop <- hopx_plot_full + xlim(-6, 0.8) + ylim(-9,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "eomes_plot_crop <- eomes_plot_full + xlim(-6, 0",
+      "instruction": "eomes_plot_crop <- eomes_plot_full + xlim(-6, 0.8) + ylim(-9,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "dcx_plot_crop <- dcx_plot_full + xlim(-6, 0",
+      "instruction": "dcx_plot_crop <- dcx_plot_full + xlim(-6, 0.8) + ylim(-9,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "s100b_plot_crop <- s100b_plot_full + xlim(-6, 0",
+      "instruction": "s100b_plot_crop <- s100b_plot_full + xlim(-6, 0.8) + ylim(-9, 4) # Arrange full and cropped plots side-by-side for comparison of gene expression levels Fig2 <- (dim_plot_full | apoe_plot_full | hopx_plot_full | eomes_plot_full | dcx_plot_full | s100b_plot_full) / (dim_plot_crop | apoe_plot_crop | hopx_plot_crop | eomes_plot_crop | dcx_plot_crop | s100b_plot_crop) Fig2 ggsave(\"plots/Figure_2.png\", plot = Fig2, dpi = 300, height = 8, width =",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Figure 2Isolation of quiescent and proliferating...",
+      "instruction": "Figure 2Isolation of quiescent and proliferating NSCs(A) UMAP of neurogenic populations after reclustering. Quiescent NSCs belong to clusters 0 and 1; proliferating NSCs are clustered with IPCs within clusters 4 and 5.(B) UMAP of boxed region in (A).(C) Proliferating NSCs form an inner ring of Apoe/Hopx-expressing cells.(D) Zoomed-in region from panel C. Arrow indicates inner ring of proliferating NSCs.(E) IPCs form an outer ring of Eomes and Dcx-expressing cells.(F) Zoomed in region from panel E. Arrow indicates outer ring of IPCs.(G) UMAP showing S100b expression, with arrow indicating likely multiplet cluster expressing S100b and Dcx.(H) Zoomed-in region from panel G.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
       "title": "Isolation of quiescent neural stem cells",
       "instruction": "Timing:15 min–1 h\n6.Renormalize and integrate the four experimental samples, now containing only quiescent and proliferating NSCs.a.Go to the tutorials folder and open the “04_normalise_integrate_quiescentneuralstemcells.R” script.b.Run the code in the R script.\nNote: This script performs a third round of batch-corrected integration on the NSC population and removes proliferating NSCs, to isolate only the quiescent NSCs.\n7.Isolate quiescent NSCs by excluding the cluster with circular topology expressing high levels of Mki67 and other proliferation markers (Figure 3).Figure 3Isolation of quiescent NSCs(A) UMAP of NSCs showing predominantly quiescent cells with a small proliferating population in cluster 5, which exhibits a circular topology. Dashed box highlights contaminating cells expressing neuroblast markers that require removal.(B) UMAP of quiescent NSCs after removal of proliferating NSCs and contaminating neuroblasts.(C) Expression of proliferation markers (Mki67, Mcm2 and Pcna), confirming the proliferating state of cluster 5 cells. # Remove final erroneous cluster of cells # comprising cluster of scattered cells that do not cluster with remainder of NSCs and have high neuroblast gene expression p1 <- DimPlot(final.integrated) cells_to_remove <- CellSelector(p1) final.integrated <- subset(final.integrated, cells = setdiff(Cells(final.integrated), cells_to_remove)) ############################################ # To visualise which clusters to subset ############################################ p2 <- FeaturePlot(final.integrated, features = c(\"Mki67\", \"Mcm2\", \"Pcna\"), ncol = 3) # There are other proliferation markers # Remove proliferating NSCs final.integrated <- subset(final.integrated, idents = \"5\", invert = TRUE) p3 <- DimPlot(final.integrated, reduction = \"umap\", group.by = \"seurat_clusters\", label = FALSE, pt.size = 1) + ggtitle(\"UMAP of Clusters\") # Combine side by side p1 + p3 p2",
       "substeps": [],
@@ -113,7 +169,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 17,
       "title": "Quantification and statistical analysis",
       "instruction": "A ks.test is used to determine if the pseudotime distributions between conditions are different, even if their means are unchanged. This is the most appropriate choice for the phenotype of the Mycn cKO mice, in which cells accumulate at approximately the median position of pseudotime observed in control mice. However, depending on the specific data distribution, it is recommended that researchers evaluate the assumptions of each test and choose the most suitable statistical test accordingly.",
       "substeps": [],
@@ -121,7 +177,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 18,
       "title": "Problem 1 (related to numerous steps for cluster visualization)",
       "instruction": "Insufficient cluster resolution used to identify cell populations.",
       "substeps": [],
@@ -129,7 +185,7 @@
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 19,
       "title": "Problem 2 (related to step 5)",
       "instruction": "Inability to distinguish proliferating NSCs from IPCs.",
       "substeps": [],
@@ -137,7 +193,7 @@
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 20,
       "title": "Problem 3 (related to step 7)",
       "instruction": "Impaired visualization of cell cycle activity due to cell-cycle regression.",
       "substeps": [],
@@ -145,17 +201,9 @@
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 21,
       "title": "Problem 4 (related to numerous steps including data subsets)",
       "instruction": "Clear batch or replicate effects in sequencing data.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 15,
-      "title": "Problem 5 (related to before you begin: Step 1)",
-      "instruction": "Insufficient computing resources requested.",
       "substeps": [],
       "is_critical": false,
       "timers": []
@@ -163,5 +211,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T01:00:49.391581Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "This protocol outlines biologically-informed computational steps for determining the effect of genetic and physiological perturbations on the quiescent states of adult mouse hippocampal neural stem cells (NSCs) via single-cell RNA-sequencing (scRNA-seq). The example dataset features a genetic mouse mutant, in which the Mycn gene was deleted from Glast expressing cells, including adult hippocampal NSCs at 1-month of age, causing cells to stall between deep and shallow states of quiescence. The cells sequenced in this study were derived from dissection and enzymatic dissociation of the dentate gyrus and isolation of Nestin-GFP+ cells by flow sorting. These cells were then processed by 10× Genomics 3′ scRNA-seq.1 However, the protocol can be adapted for use with other methods of enriching hippocampal neural stem and progenitor cells (e.g., Glast-creERT2; Rosa-YFP) and with other genetic or experimental conditions affecting quiescence, such as aging.2,3 Likewise, similar analytical principles can be applied to scRNA-seq data from the subventricular zone (SVZ), although marker genes may differ, for example Hopx is expressed only by hippocampal NSCs.4 The approach can also be applied to single-nucleus RNA-sequencing data without significant modifications. Note: All scripts used in this analysis are available on Zenodo (see Data and code availability). At the end of each script, the Seurat object is saved. It is then read in at the start of the next script. This was designed so that researchers can pause at each step, if needed. Insufficient computing resources requested."
 }

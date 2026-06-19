@@ -115,55 +115,41 @@
     },
     {
       "step_id": 12,
-      "title": "Chamber Selection and Background Removal Chambers...",
-      "instruction": "Chamber Selection and Background Removal Chambers were selected from the respective video frame between the determined chamber edges (according to Fig. 2.1-D). In order to exclude the chamber edge itself, a safety distance of 5 pixels in X-direction is applied. Also, a background removal was performed by subtracting the median intensity of the reference space resolved in Y-direction. Reference was selected as a 100 pixel wide strip next to cluster 1 (Fig. 2.1-D).",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 13,
       "title": "Import of the required packages",
       "instruction": "Import of the required packages. import numpy as np import pandas as pd import skimage from skimage import img_as_uint import cv2",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 13,
       "title": "Example code of image rotation and chamber cutting execution",
       "instruction": "Example code of image rotation and chamber cutting execution. # load meta data frame from file data = pd.read_pickle((data_path + &#39;data.pkl&#39;)) # loop over all images for i in range(len(data)): clear_output() print(&#39;processing file &#39;,i+1,&#39; of &#39;,len(data)) # read respective image img = skimage.io.imread((source_path + &#39;frame_%s.TIFF&#39;%i)) # rotate image img = skimage.transform.rotate(img,data.angle.median(),resize=False) # cut image into desired cambers # applying 10 pixels as safety distance in x-direction img_cham_A = img[data.line1[i]:data.line2[i], 10:len(img[0])-10] img_cham_B = img[data.line5[i]:data.line6[i], 10:len(img[0])-10] # save images to folder skimage.io.imsave((target_path + &#39;00_WT/frame_%s_WT.TIFF&#39;%i), \\ img_as_uint(img_cham_A)) skimage.io.imsave((target_path + &#39;01_MT/frame_%s_MT.TIFF&#39;%i), \\ img_as_uint(img_cham_B))",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 15,
-      "title": "Example code of background removal execution",
-      "instruction": "Example code of background removal execution. # load meta data frame from file data = pd.read_pickle((data_path + &#39;data.pkl&#39;)) # loop over all images for i in range(len(data)): clear_output() print(&#39;sample&#39;,k+1,&#39;processing file &#39;,i+1,&#39; of &#39;,len(data)) # read respective image # read + rotate original image img = cv2.imread((source_path + &#39;frame_%s.TIFF&#39;%i),0) img = skimage.transform.rotate(img,data.angle.median(),resize=False) img = img_as_ubyte(img) # invert image img = 255 - img # read chamber images img_cham_A = cv2.imread((source_path + &#39;00_WT/frame_%s_WT.TIFF&#39;%i),0) img_cham_B = cv2.imread((source_path + &#39;01_MT/frame_%s_MT.TIFF&#39;%i),0) # invert chamber images img_cham_A = 255 - img_cham_A img_cham_B = 255 - img_cham_B # rotate chamber images 90° img_cham_A = np.array([list(i) for i in zip(*img_cham_A)], dtype=np.int16) img_cham_B = np.array([list(i) for i in zip(*img_cham_B)], dtype=np.int16) # cut reference space (+ invert) refspace = img[data.line3[i]:data.line3[i]+100, 10:len(img[0])-10] # rotate refspace 90° refspace90 = np.array([list(i) for i in zip(*refspace)], dtype=np.int16) # calculate median intensity of background background = np.zeros(len(refspace90)) for j in range(len(refspace90)): background[j] = np.median(refspace90[j]) background = np.array(background,dtype=np.int16) # create new empty image cham_A_new = np.zeros(img_cham_A.shape, dtype=np.int16) cham_B_new = np.zeros(img_cham_B.shape, dtype=np.int16) # subtract background for l in range(len(background)): cham_A_new[l] = img_cham_A[l] - background[l] cham_B_new[l] = img_cham_B[l] - background[l] # rotate and invert new images back to 0° cham_A_new = 255 - np.array([list(i) for i in zip(*cham_A_new)], \\ dtype=np.int16).clip(0, 255) cham_B_new = 255 - np.array([list(i) for i in zip(*cham_B_new)], \\ dtype=np.int16).clip(0, 255) # save images to folder cv2.imwrite((target_path[k] + &#39;00_WT/frame_%s_WT.TIFF&#39;%i),cham_A_new) cv2.imwrite((target_path[k] + &#39;01_MT/frame_%s_MT.TIFF&#39;%i),cham_B_new)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
+      "step_id": 14,
       "title": "The mean pixel intensity I pix (i",
       "instruction": "The mean pixel intensity I pix (i. e. gray scale value; reflecting cell density) for each of the two chambers is calculated. The values are added into the respective data frame. Growth rates µ are derived from I pix using the central difference approximation below. \\mu(t_{\\rm i}) = \\frac{I_{\\rm pix}(t_{\\rm i+1}) - I_{\\rm pix}(t_{\\rm i-1})}{\\left(t_{\\rm i+1}-t_{\\rm i-1}\\right)\\cdot I_{\\rm pix}(t_{\\rm i})} Legend: µ(t i ) - growth rate µ at time point t i, I pix (t i ) - mean pixel intensity at time point t i , i - i th measurement",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 15,
       "title": "Import of the required packages",
       "instruction": "Import of the required packages. import numpy as np import pandas as pd import skimage from skimage import img_as_float",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 18,
+      "step_id": 16,
       "title": "Example code of Mean Pixel Intensity Calculation",
       "instruction": "Example code of Mean Pixel Intensity Calculation. data = pd.read_pickle((data_path + &#39;data.pkl&#39;)) # create time column (within this batch: measurements every 20min -&gt; index / 3) data[&#39;time&#39;] = data.index / 3 # [h] meanGrayWT, meanGrayMT, \\ varGrayWT, varGrayMT = [np.zeros(len(data)) for i in range(4)] for k in range(len(data)): imgWT = 1 - img_as_float(skimage.io.imread((source_path + \\ &#39;00_WT/frame_%s_WT.TIF&#39;%k))) imgMT = 1 - img_as_float(skimage.io.imread((source_path + \\ &#39;01_MT/frame_%s_MT.TIF&#39;%k))) meanGrayWT[k] = np.mean(imgWT) meanGrayMT[k] = np.mean(imgMT) data[&#39;greyWTint&#39;] = meanGrayWT data[&#39;greyMTint&#39;] = meanGrayMT data[&#39;greyWTmu&#39;] = np.gradient(data.greyWTint) / data.greyWTint * 3 data[&#39;greyMTmu&#39;] = np.gradient(data.greyMTint) / data.greyMTint * 3 data.to_pickle((data_path + &#39;data.pkl&#39;))",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 19,
+      "step_id": 17,
       "title": "Visualisation of the calculated data",
       "instruction": "Visualisation of the calculated data. Fig. 3.1 Visualisation of the data calculated for wild type strain (black) and mutant strains (red/blue) from the individual images; A: calculated mean pixel intensities I pix ; B: calculated growth rate µ.",
       "is_critical": false,
@@ -171,5 +157,6 @@
     }
   ],
   "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "merged_at": "2026-06-18",
+  "description": "Chamber Selection and Background Removal Chambers were selected from the respective video frame between the determined chamber edges (according to Fig. 2.1-D). In order to exclude the chamber edge itself, a safety distance of 5 pixels in X-direction is applied. Also, a background removal was performed by subtracting the median intensity of the reference space resolved in Y-direction. Reference was selected as a 100 pixel wide strip next to cluster 1 (Fig. 2.1-D). Example code of background removal execution. # load meta data frame from file data = pd.read_pickle((data_path + &#39;data.pkl&#39;)) # loop over all images for i in range(len(data)): clear_output() print(&#39;sample&#39;,k+1,&#39;processing file &#39;,i+1,&#39; of &#39;,len(data)) # read respective image # read + rotate original image img = cv2.imread((source_path + &#39;frame_%s.TIFF&#39;%i),0) img = skimage.transform.rotate(img,data.angle.median(),resize=False) img = img_as_ubyte(img) # invert image img = 255 - img # read chamber images img_cham_A = cv2.imread((source_path + &#39;00_WT/frame_%s_WT.TIFF&#39;%i),0) img_cham_B = cv2.imread((source_path + &#39;01_MT/frame_%s_MT.TIFF&#39;%i),0) # invert chamber images img_cham_A = 255 - img_cham_A img_cham_B = 255 - img_cham_B # rotate chamber images 90° img_cham_A = np.array([list(i) for i in zip(*img_cham_A)], dtype=np.int16) img_cham_B = np.array([list(i) for i in zip(*img_cham_B)], dtype=np.int16) # cut reference space (+ invert) refspace = img[data.line3[i]:data.line3[i]+100, 10:len(img[0])-10] # rotate refspace 90° refspace90 = np.array([list(i) for i in zip(*refspace)], dtype=np.int16) # calculate median intensity of background background = np.zeros(len(refspace90)) for j in range(len(refspace90)): background[j] = np.median(refspace90[j]) background = np.array(background,dtype=np.int16) # create new empty image cham_A_new = np.zeros(img_cham_A.shape, dtype=np.int16) cham_B_new = np.zeros(img_cham_B.shape, dtype=np.int16) # subtract background for l in"
 }

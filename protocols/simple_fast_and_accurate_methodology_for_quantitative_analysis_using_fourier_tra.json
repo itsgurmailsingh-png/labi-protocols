@@ -18,30 +18,6 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "Fourier transform infrared (FTIR) spectrometers have become a common feature of most laboratories, and are used in a wide variety of research [1], [2], [3], [4], [5], [6], [7], [8], [9], [10]. Over the last 50 years, quantitative analysis (QA) of mixtures using FTIR has progressed from matching peaks at a few wavenumbers to matching entire spectra. In the process, FTIR QA has become conjoined with specialized chemometrics software (usually commercial) that employs sophisticated linear systems theory to direct the entire course of experiments. The software first prescribes known mixtures to measure, based upon the concentration ranges of the known substances in the samples (i.e., unknown mixtures) to be tested. The software uses the spectra of the specified mixtures to construct a QA model. It can then use the QA model to analyze many samples, quickly and accurately (for samples that conform to the limits of the QA model).",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
-      "title": "Method details",
-      "instruction": "While this standard methodology for FTIR QA works quite well under many circumstances, it has some serious drawbacks. For occasional users, the QA software may not be available. Even if available, it can be a mysterious black box to the uninitiated. The standard linear systems methodology is needlessly complicated for many analyses. Lastly, extra QA models may be required for mixtures in which the concentrations of components vary widely, or if another component must be added to the mixture. Each change in the experiment often requires another QA model (or several more). These drawbacks may deter users, reducing adoption of FTIR QA as a standard cross-disciplinary laboratory technique.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
-      "title": "Method details",
-      "instruction": "We present a much simpler FTIR QA methodology, which we have developed to analyze the component percentages in mixtures of known substances. (We have tested mixtures with up to nine components.) The algorithm is straightforward and intuitive, yet it is also fast and accurate.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
       "title": "Explanation of methodology",
       "instruction": "As usual in FTIR spectroscopy, we start with Beer's Law, which states that the absorbance spectrum of a mixture, AmMixture, is the linear sum of the absorbance spectra of the N components, An,mComponent, weighted by the component concentrations, Cn:(1)AmMixture=∑n=1NCnAn,mComponentwhere the m index runs over the M measured wavenumbers, the n index runs over the N components of the mixture, and M ≫ N. Strictly speaking, this law is only valid in the limit as the absorbance goes to zero. However, it has been found to be a very good approximation over a wide range of absorbances. In practice, one can usually dilute a highly-absorbing mixture until Beer's Law applies (or use a thinner sample, for transmission FTIR).",
       "substeps": [],
@@ -49,7 +25,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 1,
       "title": "Explanation of methodology",
       "instruction": "The challenge is to find Cn which satisfy (1). More realistically, since there is always noise in the measurements of An,mComponent and (even more so) AmMixture, one seeks to find Cn which satisfy (1) as nearly as possible. Thus, one seeks to minimize the root-mean-square error, ɛRMS, with respect to the Cn, where:(2)εRMS=1M∑m=1MAmMixture−∑n=1NCnAn,mComponent2",
       "substeps": [],
@@ -57,7 +33,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 2,
       "title": "Explanation of methodology",
       "instruction": "The current standard treatment would at this point take the partial derivatives of (2) with respect to the Cn, obtaining a set of M equations over-determined for the Cn, which would then be solved through singular value decomposition (SVD). Alternative sophisticated methodologies might be used instead (or in addition), such as principal components analysis (PCA) or partial least squares (PLS). However, given current computing speeds (even for inexpensive laptop computers), one can profitably go all the way back to the “stone age” of chemometrics (c. 1900 A.D.) and apply the simple, brute force, methodology that was used when only a few peak heights were measured. That is, one can directly calculate ɛRMS using (2) for every possible combination of Cn, to whatever precision is desired. We will refer to this as the “single mesh method” (SMM).",
       "substeps": [],
@@ -65,7 +41,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 3,
       "title": "Explanation of methodology",
       "instruction": "For mixtures of only 2 components, we have found the SMM quite satisfactory, giving accurate results to precisions of 0.1% in about 15 min. All calculations were done with (non-compiled) Microsoft Visual Basic 2010, on a laptop with a 2.66 GHz Intel Core2 Duo CPU and 4 GB RAM, running under 64-bit Windows 7. The SMM calculation time can be significantly reduced if a priori knowledge is available for rough estimates (as is often the case). Nevertheless, the solution time for the SMM increases quickly as one increases N. Therefore we developed a multi-pass method, one step up in sophistication from the brute force SMM. It was inspired by the local adaptive mesh refinement (LAMR) algorithms of partial differential equations solvers [11].",
       "substeps": [],
@@ -73,7 +49,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 4,
       "title": "Explanation of methodology",
       "instruction": "Our multi-pass “LAMR” method (MPLM) starts out as the SMM, except with a coarse Cn mesh. The key principle behind the MPLM is as follows: At each pass, the mesh step-size only needs to be sufficient to ensure that the resulting Cn values (i.e., the mesh values which minimize ɛRMS in that pass) are in the vicinities of the Cn values which will globally minimize ɛRMS. Our experience has been that we can set the first-pass mesh step-size, s1, to 10% (bounded from 0% to 50%) and not miss the global minimum. Even for mixtures of 9 components, plus a background component, this initial coarse calculation proceeds quickly (<5 min).",
       "substeps": [],
@@ -81,7 +57,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 5,
       "title": "Explanation of methodology",
       "instruction": "In subsequent passes, new upper and lower boundaries are set based upon the previous pass, and the mesh step-size, si, is reduced appropriately. This is shown schematically in Fig. 1. For simplicity, Fig. 1 shows each pass's boundaries “backed off” from the previous pass's result by one entire step-size (in every direction) of the previous pass's mesh. In our program, the user can actually choose the amount of “backing off,” B. In the results presented here, we used B = 0.8 steps, in every direction. Also, Fig. 1 shows the step-size reduced by a factor of 2 for simplicity, but our program allows the user to choose the step-size reduction. In the results presented here, the mesh step-size reduction, r, was chosen to be 4, so that si+1 = si*B/r = si/5. Lastly, Fig. 1 shows the same mesh step-sizes used for both components, but our program does not have that limitation.",
       "substeps": [],
@@ -89,7 +65,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 6,
       "title": "Explanation of methodology",
       "instruction": "To accommodate a variety of choices for s1, B, and r, our MPLM program is coded for up to 9 passes. For our chosen parameters, 9 passes yields a potential step-size reduction from 10% (at most) for pass 1 to 10%/58 = 0.000026% for step 9. Since such accuracy is unnecessary (and not merited by our measurements), our MPLM program saves time by not looping on components once the step-size < 0.01%.",
       "substeps": [],
@@ -97,7 +73,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 7,
       "title": "Explanation of methodology",
       "instruction": "In principle, the MPLM is more prone than the SMM to finding a local minimum rather than a global minimum. This was especially a concern with many components, since the convergence of many-variable minimizations has been an active area of study for at least 50 years. However, in practice we have not found this to be a problem with our MPLM. Probably this is because our component FTIR spectra are effectively orthogonal. On the occasions when we had similar component spectra, and we wanted to ensure precise final results for the Cn values, we simply re-ran the MPLM calculations, using a smaller value for s1. For those re-calculations, in the spirit of MPLM, we also restricted first-pass Cn boundaries somewhat, based on the first MPLM calculation's result, to save time on the re-calculation.",
       "substeps": [],
@@ -105,7 +81,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 8,
       "title": "Explanation of methodology",
       "instruction": "The MPLM is no more accurate than the SMM, but is much faster. For N components, and using the typical mesh and program parameters just mentioned, the number of computations of ɛRMS using (2) is reduced by η for the same final precision, where(3)η=(100/0.01)N9×10N≈105N10×10N=104N−1",
       "substeps": [],
@@ -113,7 +89,7 @@
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 9,
       "title": "Explanation of methodology",
       "instruction": "For 9 components, the reduction in computations of ɛRMS for MPLM compared to SMM can be a factor of 1035. Having only a few components and good a priori knowledge of concentrations can reduce this extraordinary advantage of MPLM over SMM. For most cases of interest, though, MPLM will be much faster than SMM, for the same desired final precision.",
       "substeps": [],
@@ -121,7 +97,7 @@
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 10,
       "title": "Explanation of methodology",
       "instruction": "The main part of our program, containing the core algorithms, is available in the Supplemental Materials, along with screen shots of the interface. The full Visual Basic project files are rather large, and can quickly go out of date. The latest project files will be made available by the corresponding author, upon request.",
       "substeps": [],
@@ -129,7 +105,7 @@
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 11,
       "title": "Explanation of methodology",
       "instruction": "For the measurements discussed here, because our samples were all aqueous, three additional steps were taken that are not generally necessary for fitting FTIR spectra using the MPLM. First, we used water (rather than air) as the background. This eliminated the water component from every mixture (while implicitly accounting for it). Second, we re-measured the water background just before each component and sample measurement. This increased the signal to noise of the spectra. Third, we measured component spectra at various concentrations. Then, we fit the sample spectra using component spectra measured at concentrations roughly matching those expected in the sample, to compensate for slight deviations from Beer's law due to water-component interactions and detector saturation. If any of our initial guesses for component concentrations were far (>15%) from the results of the fit, we re-fit using more-appropriate component spectra. Except in extreme cases this refitting did not change the fit results significantly, but it did increase the accuracy in test samples, so we retained this technique in our methodology.",
       "substeps": [],
@@ -137,7 +113,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 12,
       "title": "Verifications of methodology",
       "instruction": "Here we show that our methodology is robust under challenging experimental conditions such as components with similar spectra, component percentages differing by orders of magnitude, and imperfect (noisy) spectra. We also show that it provides a warning if a mixture contains unknown components.",
       "substeps": [],
@@ -145,7 +121,7 @@
       "timers": []
     },
     {
-      "step_id": 16,
+      "step_id": 13,
       "title": "Example applications of the methodology to bio-hybrid fuel cell research",
       "instruction": "We now briefly present several ways we have applied the MPLM for FTIR in our bio-hybrid fuel cell research, as illustrative examples of its utility and sensitivity.",
       "substeps": [],
@@ -155,5 +131,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T06:45:31.390015Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "Fourier transform infrared (FTIR) spectrometers have become a common feature of most laboratories, and are used in a wide variety of research [1], [2], [3], [4], [5], [6], [7], [8], [9], [10]. Over the last 50 years, quantitative analysis (QA) of mixtures using FTIR has progressed from matching peaks at a few wavenumbers to matching entire spectra. In the process, FTIR QA has become conjoined with specialized chemometrics software (usually commercial) that employs sophisticated linear systems theory to direct the entire course of experiments. The software first prescribes known mixtures to measure, based upon the concentration ranges of the known substances in the samples (i.e., unknown mixtures) to be tested. The software uses the spectra of the specified mixtures to construct a QA model. It can then use the QA model to analyze many samples, quickly and accurately (for samples that conform to the limits of the QA model). While this standard methodology for FTIR QA works quite well under many circumstances, it has some serious drawbacks. For occasional users, the QA software may not be available. Even if available, it can be a mysterious black box to the uninitiated. The standard linear systems methodology is needlessly complicated for many analyses. Lastly, extra QA models may be required for mixtures in which the concentrations of components vary widely, or if another component must be added to the mixture. Each change in the experiment often requires another QA model (or several more). These drawbacks may deter users, reducing adoption of FTIR QA as a standard cross-disciplinary laboratory technique. We present a much simpler FTIR QA methodology, which we have developed to analyze the component percentages in mixtures of known substances. (We have tested mixtures with up to nine components.) The algorithm is straightforward and intuitive, yet it is also fast and accurate."
 }

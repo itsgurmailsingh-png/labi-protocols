@@ -38,22 +38,6 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "In this protocol, we merge two drug discovery approaches to reliably predict candidate genes that suppress cancer cell death pathways. In the first approach, we use a set of cell death inducers to define vulnerabilities across multiple cancer cell lines, and then correlate the vulnerabilities to public datasets of gene expression and gene essentiality in cancer cell lines. High correlations highlight genes whose targeting may increase vulnerability to the death pathway. In the second approach, we profile the transcriptomic response of the death inducers by RNA sequencing in several breast cancer cell lines. We then compare these transcriptomic responses to the transcriptomic response signatures induced by gene silencing using public datasets of thousands of transcriptomic signatures (Connectivity Map; CMAP, Broad Inst.). We quantify the transcriptomic similarity and rank the genes according to their similarity scores. Subsequently, we merge the two approaches and generate a single metric that measures the potential of each gene to be a death repressor and consequently a possible target for cancer therapy. Two methods have been used for merging: (i) aggregating the scores of the two approaches into a single metric, and (ii) using a dimension reduction method to project all the scores on a 2D plane and measure the distances between the genes and a central key gene of the pathway. Throughout this protocol, we employed several computational validation approaches, and subsequently experimentally validate the selected genes.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "This protocol could be powerful for any drug that induce cell death. The inputs are (i) the vulnerability of the cell lines to the drug which can be measured by dose response curves, and (ii) the transcriptomic response profile of the drug based on RNA-seq data. The described computational pipeline looks for genes whose targeting would mimic the vulnerability and the transcriptomic responses of the death inducing drugs in the cancer cell lines. This can offer alternative druggable targets for drugs which are very effective in vitro but somehow not effective and/or are highly toxic in vivo. It may also improve the efficacy of a given drug and even overcome resistance by targeting a bypassed pathway that eventually leads to the same death response.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
       "title": "Preparation one: Generate dose response curves",
       "instruction": "Timing: 5 days\n1.In 96-well plates, seed the cells one day before treatment. Count the number of cells and maintain constant conditions in all experiments.\nCRITICAL: The confluency of the cells greatly affects their response to the drugs and should not exceed 50% on the day of treatment. The number of cells to seed per well should be determined for each cell line, depending on their growth rate and relative size.\n2.24 h later, replace the medium with medium containing increasing doses of the drug(s) to generate a dose response curve.\nNote: The concentrations range should be experimentally determined for each drug and might be varied between different drugs suppliers. This range should be suitable for most of the cell lines with close to 100% viability at the lowest concentration tested and below 25% viability in the highest concentration tested. A preliminary experiment can be useful to determine this range. The experiment should be done in triplicates.\nCRITICAL: If the drug is soluble in DMSO (or any other solvent), it is important to maintain identical volumes of DMSO in all drug concentrations. Wells with untreated cells (which include the same volume of DMSO but without drug) should also be included. DMSO concentrations should not exceed 0.1% (v/v) of the total media volume to ensure minimal interference with cell growth and viability.\n3.Incubate the cells in their optimal growth conditions (usually in a 37°C humidified incubator of 5% CO2).4.72 h post-treatment, perform MTT assay (or a similar method2) to determine cell viability.",
       "substeps": [],
@@ -61,7 +45,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 1,
       "title": "Preparation one: Generate dose response curves",
       "instruction": "For each concentration, calculate the average cell viability of the repeats, and compare this average to the viability of the control non-treated cells. Results should be given in % viability vs. the control cells.",
       "substeps": [],
@@ -69,7 +53,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 2,
       "title": "Preparation two: Generate transcriptomic response data",
       "instruction": "Timing: 2 weeks\n5.Use the dose response curves performed in Preparation one to determine the IC50 values for each drug in each cell line. To that end, use the code provided in step 1b below.6.Seed the cell lines in 6 well plates (adjust cell number to accommodate 50% confluency at the day of treatment).\nCRITICAL: The confluency of the cells is critical and greatly affects the results.\n7.24 h later, replace the medium with medium containing the drugs, using the IC50 concentration as determined in step 5. Further, prepare vehicle control by adding the same volume of the solvent (such as DMSO) to untreated cells.\nCRITICAL: At least 3 repeats are needed.\n8.4–24 h later, extract RNA using standard methods (such as Trizol) and then perform RNA sequencing.\nNote: The exact time point should be determined in a preliminary time points experiment to ensure a broad capturing of the transcriptomic response. A qRT-PCR analysis of typical biomarkers of the induced death pathway can help to determine the optimal time point. Example of time dependence transcriptomic response can be seen in Figure S3C in Vinik et al.3\nNote: The output of this step should be a count matrix, consisting of genes in rows and treatments in columns.",
       "substeps": [],
@@ -77,7 +61,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 3,
       "title": "Preparation three: Install R and associated packages",
       "instruction": "Timing: 1 h\n9.Download and install R 4.4.0 (https://cran.r-project.org/).10.Download and install RStudio (https://www.rstudio.com/).11.Install the required packages from CRAN (https://cran.r-project.org/) or Bioconductor (https://bioconductor.org/) in RStudio using this code: #install and load libraries install.packages(tidyverse, drc, cmapR, umap, rentrez, ggrepel) if (!require(\"BiocManager\", quietly = TRUE)) install.packages(\"BiocManager\") BiocManager::install(\"PharmacoGx\") BiocManager::install(\"limma\") BiocManager::install(\"cogena\") BiocManager::install(\"fgsea\") library(tidyverse) library(drc) library(PharmacoGx) library(cmapR) library(umap) library(rentrez) library(limma) library(cogena) library(fgsea) library(ggrepel)",
       "substeps": [],
@@ -85,15 +69,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
-      "title": "Step-by-step method details",
-      "instruction": "The following steps include code snippets relevant for each step. To view the entire code, with working example (in which we search for ferroptosis related drug targets), please see our code in GitHub (https://github.com/SimaLevLab/Pipeline-for-discovery-of-ferroptosis-targets) or Zenodo (https://doi.org/10.5281/zenodo.13370886).",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 7,
+      "step_id": 4,
       "title": "Ranking potential targets by “best predictors” method",
       "instruction": "Timing: 1 h",
       "substeps": [],
@@ -101,9 +77,33 @@
       "timers": []
     },
     {
+      "step_id": 5,
+      "title": "or in the next section (Steps 14–15)",
+      "instruction": "or in the next section (Steps 14–15). In this section, the genes are ranked by their predictor values. This procedure doesn’t require pre-existing knowledge concerning the pathway in question.11.Combine the correlation predictors (",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "and transcriptomic similarity predictors (",
+      "instruction": "and transcriptomic similarity predictors (",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "into one data frame and present...",
+      "instruction": "into one data frame and present all the predictors for each gene as shown in Table 3.Table 3An example of how to organize the predictors dataGeneInducer 1 AUC cor to expressionInducer 2 AUC cor to expressionInducer 1 AUC cor to depscoreInducer 2 AUC cor to depscoreTranscriptomic similarity to HCC70 treated with inducer 1Transcriptomic similarity to HCC70 treated with inducer 2Transcriptomic similarity to BT549 treated with inducer 1Transcriptomic similarity to BT549 treated with inducer 2CYP1B1−0.279−0.234−0.049−0.102−37831074−35−1640ZNF1800.014−0.178−0.444−0.535−3700959114−1210CLK1−0.222−0.355−0.307−0.318−3652−1115−393−2012SLC25A46−0.565−0.615−0.457−0.398−3621−2850−2886−876RPTOR−0.0740.0630.0120.028−34414246293020PDLIM1−0.418−0.445−0.330−0.275−3417−1830−198−118BAZ1B−0.316−0.1080.0970.010−33871970189674312.Aggregate all the predictor scores into one score for each gene. This is one method to do it (implemented in the code snippet shown below):a.Calculate the average of all correlations between the inducers AUCs and gene expression. Rank these averages.b.Calculate the average of all correlations between the inducers AUCs and gene effect (essentiality). Rank these averages.c.For each gene, take the maximum value of its ranks calculated in steps a and b.d.Calculate the average of all transcriptomic similarity scores for each gene. Rank these averages.e.For each gene, calculate the average of the rank from step c and the rank from step d.f.Rank the average of the scores calculated in e.#Corrlation - hold the correlation predictors for each gene#CMAP - contains the transcriptomic similarity scores per geneGeneList % mutate(mean_r_expression = rowMeans(across(contains(\"AUC cor to expression\"))), mean_r_depscore = rowMeans(across(contains(\"AUC cor to depscore\"))), biggest_r = pmax(mean_r_expression, mean_r_depscore, na.rm = TRUE), mean_CMAP_scores = rowMeans(across(contains(\"transcriptomic similarity\")))) %>%dplyr::select(gene, mean_r_expression, mean_r_depscore, biggest_r, mean_CMAP_scores) %>%filter(!is.na(mean_CMAP_scores)) %>%mutate(rank_corr_expression = min_rank(mean_r_expression), rank_corr_depscore= min_rank(mean_r_depscore), rank_corr = pmax(rank_corr_expression, rank_corr_depscore, na.rm = TRUE), rank_CMAP_score = min_rank(mean_CMAP_scores), mean_rank = (rank_corr + rank_CMAP_score) / 2, rank_total = min_rank(mean_rank))13.Observe the top-ranking genes (genes with the highest “rank_total”, if using the code above). These genes should be populated with potential target genes.Figure 2Methods for ranking genes based on their potential to be suppressors of death pathwaysTwo methods were developed. In the “Best predictors” method (described in steps 11–13), the correlation and transcriptomic similarity scores are aggregated into one score. The scatterplot (A) shows two intermediate scores, summarizing all the correlation scores (measured in step 12c, shown in the y-axis) and the transcriptomic similarity scores (measured in step 12d, shown in the x-axis). The top left corner should include the genes with the best predictor values (A). In the “Nearest neighbors” method (described in steps 14-15), UMAP is used to generate a 2D map of all genes, in which proximity between genes represents proximity in the predictor values (B). The genes are then ranked by their distance from important nodes (in this example, GCH1, which is a major anti-ferroptosis gene). Automated PubMed searches are then performed using the gene names and pathway specific terms, in order to identify genes which were not previously published with those terms. The panels in this figure are based on figures published in our previous paper (Vinik et al.1).Note: An example for the outcome of this section is shown in Figure 2A (taken from Vinik et al.1). This plot highlights the genes with the highest ranks as calculated in step 12c (in the y-axis) and 12d (in the x-axis), revealing several high-scoring genes related to ferroptosis in the top-right corner.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
       "step_id": 8,
-      "title": "Ranking potential targets by “best predictors” method",
-      "instruction": "Following the previous two sections, each gene should have a set of correlation predictors and transcriptomic similarity predictors. To rank the genes by their potential to induce the death pathway upon targeting, two methods can be applied, the method described below (Steps 11–13) or in the next section (Steps 14–15). In this section, the genes are ranked by their predictor values. This procedure doesn’t require pre-existing knowledge concerning the pathway in question.11.Combine the correlation predictors (Step 4) and transcriptomic similarity predictors (Step 9) into one data frame and present all the predictors for each gene as shown in Table 3.Table 3An example of how to organize the predictors dataGeneInducer 1 AUC cor to expressionInducer 2 AUC cor to expressionInducer 1 AUC cor to depscoreInducer 2 AUC cor to depscoreTranscriptomic similarity to HCC70 treated with inducer 1Transcriptomic similarity to HCC70 treated with inducer 2Transcriptomic similarity to BT549 treated with inducer 1Transcriptomic similarity to BT549 treated with inducer 2CYP1B1−0.279−0.234−0.049−0.102−37831074−35−1640ZNF1800.014−0.178−0.444−0.535−3700959114−1210CLK1−0.222−0.355−0.307−0.318−3652−1115−393−2012SLC25A46−0.565−0.615−0.457−0.398−3621−2850−2886−876RPTOR−0.0740.0630.0120.028−34414246293020PDLIM1−0.418−0.445−0.330−0.275−3417−1830−198−118BAZ1B−0.316−0.1080.0970.010−33871970189674312.Aggregate all the predictor scores into one score for each gene. This is one method to do it (implemented in the code snippet shown below):a.Calculate the average of all correlations between the inducers AUCs and gene expression. Rank these averages.b.Calculate the average of all correlations between the inducers AUCs and gene effect (essentiality). Rank these averages.c.For each gene, take the maximum value of its ranks calculated in steps a and b.d.Calculate the average of all transcriptomic similarity scores for each gene. Rank these averages.e.For each gene, calculate the average of the rank from step c and the rank from step d.f.Rank the average of the scores calculated in e.#Corrlation - hold the correlation predictors for each gene#CMAP - contains the transcriptomic similarity scores per geneGeneList % mutate(mean_r_expression = rowMeans(across(contains(\"AUC cor to expression\"))), mean_r_depscore = rowMeans(across(contains(\"AUC cor to depscore\"))), biggest_r = pmax(mean_r_expression, mean_r_depscore, na.rm = TRUE), mean_CMAP_scores = rowMeans(across(contains(\"transcriptomic similarity\")))) %>%dplyr::select(gene, mean_r_expression, mean_r_depscore, biggest_r, mean_CMAP_scores) %>%filter(!is.na(mean_CMAP_scores)) %>%mutate(rank_corr_expression = min_rank(mean_r_expression), rank_corr_depscore= min_rank(mean_r_depscore), rank_corr = pmax(rank_corr_expression, rank_corr_depscore, na.rm = TRUE), rank_CMAP_score = min_rank(mean_CMAP_scores), mean_rank = (rank_corr + rank_CMAP_score) / 2, rank_total = min_rank(mean_rank))13.Observe the top-ranking genes (genes with the highest “rank_total”, if using the code above). These genes should be populated with potential target genes.Figure 2Methods for ranking genes based on their potential to be suppressors of death pathwaysTwo methods were developed. In the “Best predictors” method (described in steps 11–13), the correlation and transcriptomic similarity scores are aggregated into one score. The scatterplot (A) shows two intermediate scores, summarizing all the correlation scores (measured in step 12c, shown in the y-axis) and the transcriptomic similarity scores (measured in step 12d, shown in the x-axis). The top left corner should include the genes with the best predictor values (A). In the “Nearest neighbors” method (described in steps 14-15), UMAP is used to generate a 2D map of all genes, in which proximity between genes represents proximity in the predictor values (B). The genes are then ranked by their distance from important nodes (in this example, GCH1, which is a major anti-ferroptosis gene). Automated PubMed searches are then performed using the gene names and pathway specific terms, in order to identify genes which were not previously published with those terms. The panels in this figure are based on figures published in our previous paper (Vinik et al.1).Note: An example for the outcome of this section is shown in Figure 2A (taken from Vinik et al.1). This plot highlights the genes with the highest ranks as calculated in step 12c (in the y-axis) and 12d (in the x-axis), revealing several high-scoring genes related to ferroptosis in the top-right corner.",
+      "title": "Ranking potential targets by nearest neighbors method",
+      "instruction": "Timing: 1 h",
       "substeps": [],
       "is_critical": false,
       "timers": []
@@ -111,21 +111,13 @@
     {
       "step_id": 9,
       "title": "Ranking potential targets by nearest neighbors method",
-      "instruction": "Timing: 1 h",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "Ranking potential targets by nearest neighbors method",
       "instruction": "This step involves projecting all predictors on a 2D plane using dimension reduction methods, identifying a key gene in the pathway, and ranking all other genes based on their distance to that gene on the plane.14.Combine all predictors to a single data frame, as done in step 11, and perform a dimension reduction by the UMAP method using the code below.Note: The outcome of this step is shown in Figure 2B.#clustering by UMAP#Corrlation - hold the correlation predictors for each gene#CMAP - contains the transcriptomic similarity scores per geneset.seed(42)GeneList % arrange(gene) %>% na.omit() %>% mutate(across(where(is.numeric), scale))thisDF.data % select(where(is.numeric))thisDF.labels % select(gene)thisDF.map % filter(gene %in% selected_labels), aes(label = gene), size = 4, color = \"black\", fill = \"gray90\", fontface = \"bold\") + labs(x = \"\", y = \"\") + theme_bw() + theme(legend.position = \"none\", panel.grid = element_blank())15.Identify a key gene(s) in the inquired pathway and measure the Euclidean distances of all genes from that node. Then, rank all genes based on this distance. The following function performs this analysis.Note: An example of the output of this code is shown in Figure 2B (inset table).#\"result\" – the UMAP result from the previous code snippet.nodes_nearest_neighbors % mutate(distance = sqrt((`1` - coord.x)ˆ2 + (`2` - coord.y)ˆ2)) %>% select(gene, distance) %>% arrange(distance) %>% slice_min(distance, n = 75) %>% left_join(GeneList, by = \"gene\")}",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 10,
       "title": "Select genes from the potential target list for further analysis",
       "instruction": "Timing: a few hours",
       "substeps": [],
@@ -133,7 +125,7 @@
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 11,
       "title": "Select genes from the potential target list for further analysis",
       "instruction": "In step 13 or step 15, a ranking of the genes is made based on their predictor values. In this step, the selection of the genes for further analysis will be carried out based on several factors.16.Observe the ranked list of genes achieved in steps 13 or step 15. Select potential targets for experimental validation using the following criteria:a.The ranking in the list should be the most important criteria. Consider the top 75 ranked genes.b.Target novelty: an automated PubMed search can be used to filter out genes that already have citations related to the pathway. The following function receives a list of genes (for example, the top 75 most ranked genes from steps 13 and 15), and a list of terms related to the pathway in question.Note: The outcome of this step is shown in the table in Figure 2B (inset table).#pubmed search#Pubmed_terms should include terms related to the pathway in questionPubmed_terms <- c(\"Ferroptosis\", \"Lipid peroxidation\", \"Iron\", \"Glutathione\", \"GPX4\", \"SLC7A11\")#In the next line, replace \"PUBMED_KEY\" with your personal pubmed access key,#Which can be received in the NCBI siteset_entrez_key(\"PUBMED_KEY\")get_pubmed_info <- function(genes, Pubmed_terms) { pubmed_search <- list() for(i in seq_along(genes)) { print(genes[i]) for(j in seq_along(Pubmed_terms)) { print(str_c(\"---\", Pubmed_terms[j])) search_term <- paste0(genes[i], \" AND \", Pubmed_terms[j]) pubmed_result <- entrez_search(db = \"pubmed\", term = search_term) pubmed_search[[i∗10 + j]] <- tibble(\"gene\" = genes[i], \"term\" = Pubmed_terms[j], \"count\" = pubmed_result$count) } Sys.sleep(0.1) } pubmed_search_tib <- purrr::reduce(pubmed_search, bind_rows)}#In the line below, \"genelist\" is a vector with the gene names that will be inquired for in#PubMed. This could be a result of steps 13 or 15 in this protocol.pubmed_data <- get_pubmed_info(as.vector(genelist), Pubmed_terms)save(pubmed_data, file = \"Pubmed search for ranked list.RData\")Optional: To focus only on druggable targets, the list of genes can be filtered for druggability and toxicity using the information from the DepMap site (https://depmap.org/portal/). Druggability information is given for each gene in the “overview” page. Toxicity can be considered for genes which are “common essential”, also shown in the “overview” page.17.Validate experimentally the selected genes, using gene targeting (for example, by shRNA, siRNA, sgRNA) and examine the hallmarks of the relevant pathway.Note: This step depends on the relevant pathway. As an example, see Figure 5 in our previous publication (Vinik et al.1).",
       "substeps": [],
@@ -141,7 +133,7 @@
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 12,
       "title": "Quantification and statistical analysis",
       "instruction": "The ranked list of genes achieved in steps 13 and 15 are supposed to be populated by genes whose targeting should induce the desired phenotype. Statistical examination of this statement is challenging, but can be addressed using the following approach: we downloaded the pan-cancer public data of gene expression (CCLE, taken from the DepMap site) and drug sensitivity data (such as CTRP, also from the DepMap site), and calculated the correlations between the expression of each gene and the sensitivity of the cells to the drugs in question. Then, the correlations of the top-ranking genes are examined against the backdrop of all genes using GSEA. In the following code, “gene_list” is an example of 75 genes which were ranked high as potential ferroptosis targets. The enrichment of the correlations between their expression and ferroptosis drug sensitivity is measured and is then compared to the correlations of all other genes. See problem 2 in the troubleshooting section if such enrichment cannot be found.#GSEA validationgene_list % separate(CCLE_Name, into = c(\"ID\", \"Lineage\", sep = \"_\"))# Define a vector of ferroptosis-inducing drugs that can be found in CTRPDrugs % select(ID, any_of(Drugs)), by = \"ID\") %>% na.omit() %>% select(-ID, -Lineage, -CCLE_Name) %>% cor() %>% as_tibble(rownames = \"gene\") %>% select(gene, any_of(Drugs)) %>% filter(!(gene %in% Drugs))cor_analysis % mutate(r_AUCs = (erastin + ML210 + ML162) / 3) %>% mutate(group = ifelse(gene %in% gene_list[[\"Top_ranking_genes\"]], \"Top Ranking\", \"All genes\")) rowwise() %>% mutate(x = runif(n = 1)) %>% ungroup()#Visualization of correlation analysisggplot(cor_analysis, aes(y = r_AUCs, x = x)) + geom_point(data = thisFig %>% filter(group == \"All genes\"), aes(color = group, alpha = group)) + geom_point(data = thisFig %>% filter(group != \"All genes\"), aes(color = group, alpha = group)) + scale_color_manual(values = c(\"gray\", \"red\")) + scale_alpha_manual(values = c(0.2, 0.8)) + geom_violin(data = thisFig %>% filter(gene %in% gene_list[[\"Top_ranking_genes\"]]), fill = \"salmon\", alpha = 0.2) + geom_hline(yintercept = 0, linetype = \"dashed\") + labs(x = \"\", y = \"Correlation to mean FIN AUCs\") + theme_classic(base_size = 18) + theme(legend.position = \"none\", axis.text = element_text(color = \"black\"), axis.ticks.x = element_blank(), axis.text.x = element_blank())#Calculate enrichment scores and p-values using FGSEAranks_CTRP <- setNames(cor_analysis$r_AUCs, cor_analysis$gene)FGSEA_CTRP <- fgsea(pathways = gene_list, stats = ranks_CTRP, maxSize = 1000, nproc = 0, scoreType = \"std\")#Plot enrichment for the top-ranking genesplotEnrichment(gene_list[[\"Top_ranking_genes\"]], ranks_CTRP)",
       "substeps": [],
@@ -151,5 +143,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T00:49:28.238789Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "In this protocol, we merge two drug discovery approaches to reliably predict candidate genes that suppress cancer cell death pathways. In the first approach, we use a set of cell death inducers to define vulnerabilities across multiple cancer cell lines, and then correlate the vulnerabilities to public datasets of gene expression and gene essentiality in cancer cell lines. High correlations highlight genes whose targeting may increase vulnerability to the death pathway. In the second approach, we profile the transcriptomic response of the death inducers by RNA sequencing in several breast cancer cell lines. We then compare these transcriptomic responses to the transcriptomic response signatures induced by gene silencing using public datasets of thousands of transcriptomic signatures (Connectivity Map; CMAP, Broad Inst.). We quantify the transcriptomic similarity and rank the genes according to their similarity scores. Subsequently, we merge the two approaches and generate a single metric that measures the potential of each gene to be a death repressor and consequently a possible target for cancer therapy. Two methods have been used for merging: (i) aggregating the scores of the two approaches into a single metric, and (ii) using a dimension reduction method to project all the scores on a 2D plane and measure the distances between the genes and a central key gene of the pathway. Throughout this protocol, we employed several computational validation approaches, and subsequently experimentally validate the selected genes. This protocol could be powerful for any drug that induce cell death. The inputs are (i) the vulnerability of the cell lines to the drug which can be measured by dose response curves, and (ii) the transcriptomic response profile of the drug based on RNA-seq data. The described computational pipeline looks for genes whose targeting would mimic the vulnerability and the transcriptomic responses of the death inducing drugs in the cancer cell lines. This c"
 }

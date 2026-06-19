@@ -35,38 +35,6 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "This protocol describes a method for analyzing single-cell RNA sequencing (scRNA-seq) datasets using an R package called SingCellaR. In addition to standard functions (e.g., reading gene expression matrices, data filtering, doublet removal, dimensionality reduction, data integration, clustering and marker gene identification, and differential gene expression analysis), similar to those performed by available R and Python analysis tools like Seurat (Hao et al., 2021; Stuart et al., 2019), Monocle (Trapnell et al., 2014), and Scanpy (Wolf et al., 2018), SingCellaR supports multiple data integration methods within a single platform. It also incorporates objective benchmarking of the integrative results, facilitating the comparison and choice of the most appropriate integration. To complement existing integration packages, SingCellaR includes a novel integration method - Supervised Harmony (Roy et al., 2021), which showed a better integrative result than available methods for integrating multiple scRNA-seq datasets generated from different hematopoietic tissues.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "SingCellaR supports multiple modalities for visualization, including tSNE, UMAP, force-directed graph (FDG) in two- or three-dimensional embeddings, diffusion maps, violin and bubble plots, and heatmaps. Cells can be identified on these plots according to user-defined parameters, such as cluster, donor, tissue of origin, disease state, etc., by accessing relevant information from the SingCellaR object. Multiple signature gene scores can also be superimposed on the same embeddings. For example, visualization of sets of canonical genes used to distinguish different blood cell lineages can help exploration of the cell types contained within a dataset independently of cell clustering algorithms. To annotate cell types and states, SingCellaR uses gene set enrichment analysis to calculate enrichment scores for user-defined, curated gene sets. This system can be used alongside manual inspection for canonical marker genes, or other existing algorithms (Aran et al., 2019; Pliner et al., 2019; Shao et al., 2020; Zhang et al., 2019).",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
-      "title": "Before you begin",
-      "instruction": "We recently demonstrated the utility of the SingCellaR pipeline in a study of human hematopoiesis. Studying the site- and stage-specific changes of normal hematopoiesis over human development is crucial to understanding the origin of disorders that tend to emerge at specific ages. We analyzed scRNA-seq datasets from hematopoietic stem and progenitor cells (HSPCs) from five different tissues sampled across four stages of the human lifetime (Roy et al., 2021). This study aimed to explore dynamic changes in the cellular compositions of lineage-specific HSPCs and identify the site and developmental stage-specific transitions in gene regulatory networks across human developmental stages.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
-      "title": "Before you begin",
-      "instruction": "Here we present a comprehensive protocol for the analytical pipeline demonstrating step-by-step data analysis and visualization as employed in the recent publication (Roy et al., 2021). We cover the software installation, processing of an individual sample and integrating multiple samples with benchmarking of multiple integration methods, cell clustering, cell type annotation, implementation of AUCell, differential abundance, and trajectory analyses. We also provide R functions for single-cell data visualization useful for interpreting results. Finally, limitations, problems, and potential solutions are discussed. All processed datasets, R objects, and codes are available and maintained on the published data repositories.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 4,
       "title": "AUCell analysis",
       "instruction": "Timing: 2–3 h",
       "substeps": [],
@@ -74,15 +42,31 @@
       "timers": []
     },
     {
-      "step_id": 5,
-      "title": "AUCell analysis",
-      "instruction": "The user can calculate the enrichment of specific gene sets (e.g., lineage signature and cell cycle genes) assigned for an individual cell. We incorporated AUCell score analysis (Aibar et al., 2017) into SingCellaR to assign and define high-confident lineage-specific cells. This cell-level enrichment analysis enables us to validate our cell type annotation and check for the presence of heterogeneous cell populations within a given cluster. This can be further used to compare differential abundance of different cell lineages across developmental stages.62.Load SingCellaR and required R packages. Here, the user can load the integrated R object saved from step 52.> library(SingCellaR)> library(AUCell)> library(ggplot2)> library(DAseq)> source('./utilis.R')63.Load the integrated R object generated from step 52.> load(file = \"./Human_HSPC_All.SingCellaR.rdata\")64.Build AUCell gene rankings. The user will have to create the ranked gene list using the function ‘AUCell_buildRankings’ implemented in AUCell package.> set.seed(2021)> exprMatrix human_HSPCs_cells_rankings save(human_HSPCs_cells_rankings, + file=\"./Human_HSPC_rankings.AUCells.rdata\")65.Calculate AUCell scores. AUCell scores for each cell will be computed using the ranked genes from the previous step for the provided hematopoietic gene sets.> set.seed(2021)> human_HSPCs.AUCells.score save(human_HSPCs.AUCells.score, file=\"./human_HSPCs.AUCells.score.rdata\")66.Visualize AUCell scores. The user can visualize AUCell scores for a given gene signature on specific clusters on the UMAP embedding. Here, we will use HSC/MPP gene signature on cluster 1 as an example (Figure 7A). We observe HSC/MPP gene signature to be uniformly enriched across majority of cells from this cluster. This is consistent with our cluster-level GSEA results that indicate cluster 1 is enriched for several HSC and MPP gene sets.> plot_umap_label_by_AUCell_score(Human_HSPC, AUCell_gene_set_name = \"HSPC_MPP\", AUCell_score = human_HSPCs.AUCells.score, selected.limited.clusters = \"cl1\", IsLimitedAUCscoreByClusters = T, AUCell_cutoff = 0.15)The following parameters are required:a.AUCell_gene_set_name: The name of the gene signature to plot. The signature name specified here must be the same as the gene signature name in the GMT file provided in step 65.b.AUCell_score: The R object created from computing AUCell scores in step 65.c.selected.limited.clusters: Cells in selected cluster IDs will be displayed with the AUCell scores.d.IsLimitedAUCscoreByClusters: If set to TRUE, the AUCell scores will only be displayed for selected clusters as specified using the ‘selected.limited.clusters’ argument. Default is FALSE.e.AUCell_cutoff: The AUCell score threshold, above which, the scores will be displayed. The higher the score threshold, the more stringent the threshold. Default is 0.Note: AUCell cutoff score is arbitrary. To explore the AUCell cutoff score for each gene signature, the user can plot the score distribution using ggplot2 and manually explore the suitable threshold.67.Differential abundance testing. We use DAseq (Zhao et al., 2021) to perform pairwise comparisons for cellular abundance in different tissues across developmental stages. We have incorporated the DAseq analysis into the ‘run_DAseq_comparison’ function. Here, we will show the differential abundance of cell populations between eFL and FL (Figure 7B) as an example. Erythroid progenitors are enriched in FL, whereas lymphoid and myeloid progenitors are predominantly derived from BM samples. Marked differences are also observed for megakaryocytic progenitors whereby these cells are mainly from eFL.> run_DAseq_comparison(Human_HSPC, groupA = \"eFL\", groupB = \"FL\", labels.1 = c(\"eFL_1\",\"eFL_2\"), labels.2 = c(\"FL_1\",\"FL_2\"), path = \"./\", outputname = \"eFL_vs_FL.pdf\")The following parameters are required:a.groupA and groupB: The group names for integrated samples (e.g., eFL, FL, FBM, and PBM) or an individual sample name.b.labels.1 and labels.2: The sample IDs of groupA and groupB, respectively.c.path: The folder path to save the output file.d.outputname: The output file name.",
+      "step_id": 1,
+      "title": "into SingCellaR to assign and define high-confident lineage-specific cells",
+      "instruction": "into SingCellaR to assign and define high-confident lineage-specific cells. This cell-level enrichment analysis enables us to validate our cell type annotation and check for the presence of heterogeneous cell populations within a given cluster. This can be further used to compare differential abundance of different cell lineages across developmental stages.62.Load SingCellaR and required R packages. Here, the user can load the integrated R object saved from step 52.> library(SingCellaR)> library(AUCell)> library(ggplot2)> library(DAseq)> source('./utilis.R')63.Load the integrated R object generated from step 52.> load(file = \"./Human_HSPC_All.SingCellaR.rdata\")64.Build AUCell gene rankings. The user will have to create the ranked gene list using the function ‘AUCell_buildRankings’ implemented in AUCell package.> set.seed(2021)> exprMatrix human_HSPCs_cells_rankings save(human_HSPCs_cells_rankings, + file=\"./Human_HSPC_rankings.AUCells.rdata\")65.Calculate AUCell scores. AUCell scores for each cell will be computed using the ranked genes from the previous step for the provided hematopoietic gene sets.> set.seed(2021)> human_HSPCs.AUCells.score save(human_HSPCs.AUCells.score, file=\"./human_HSPCs.AUCells.score.rdata\")66.Visualize AUCell scores. The user can visualize AUCell scores for a given gene signature on specific clusters on the UMAP embedding. Here, we will use HSC/MPP gene signature on cluster 1 as an example (Figure 7A). We observe HSC/MPP gene signature to be uniformly enriched across majority of cells from this cluster. This is consistent with our cluster-level GSEA results that indicate cluster 1 is enriched for several HSC and MPP gene sets.> plot_umap_label_by_AUCell_score(Human_HSPC, AUCell_gene_set_name = \"HSPC_MPP\", AUCell_score = human_HSPCs.AUCells.score, selected.limited.clusters = \"cl1\", IsLimitedAUCscoreByClusters = T, AUCell_cutoff = 0.15)The following parameters are required:a.AUCell_gene_set_name: The name of the gene signature to plot. The signature name specified here must be the same as the gene signature name in the GMT file provided in step 65.b.AUCell_score: The R object created from computing AUCell scores in step 65.c.selected.limited.clusters: Cells in selected cluster IDs will be displayed with the AUCell scores.d.IsLimitedAUCscoreByClusters: If set to TRUE, the AUCell scores will only be displayed for selected clusters as specified using the ‘selected.limited.clusters’ argument. Default is FALSE.e.AUCell_cutoff: The AUCell score threshold, above which, the scores will be displayed. The higher the score threshold, the more stringent the threshold. Default is 0.Note: AUCell cutoff score is arbitrary. To explore the AUCell cutoff score for each gene signature, the user can plot the score distribution using ggplot2 and manually explore the suitable threshold.67.Differential abundance testing. We use DAseq (Zhao et al.,",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 2,
+      "title": "to perform pairwise comparisons for cellular...",
+      "instruction": "to perform pairwise comparisons for cellular abundance in different tissues across developmental stages. We have incorporated the DAseq analysis into the ‘run_DAseq_comparison’ function. Here, we will show the differential abundance of cell populations between eFL and FL (Figure 7B) as an example. Erythroid progenitors are enriched in FL, whereas lymphoid and myeloid progenitors are predominantly derived from BM samples. Marked differences are also observed for megakaryocytic progenitors whereby these cells are mainly from eFL.> run_DAseq_comparison(Human_HSPC, groupA = \"eFL\", groupB = \"FL\", labels.1 = c(\"eFL_1\",\"eFL_2\"), labels.2 = c(\"FL_1\",\"FL_2\"), path = \"./\", outputname = \"eFL_vs_FL.pdf\")The following parameters are required:a.groupA and groupB: The group names for integrated samples (e.g., eFL, FL, FBM, and PBM) or an individual sample name.b.labels.1 and labels.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "The sample IDs of groupA and groupB, respectively.c.path",
+      "instruction": "The sample IDs of groupA and groupB, respectively.c.path: The folder path to save the output file.d.outputname: The output file name.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
       "title": "AUCell analysis",
       "instruction": "Figure 7UMAP plots overlaid with computed scores from AUCell and differential abundance analyses(A) The UMAP plot shows AUCell scores of the cells calculated using the HSC/MPP signature genes. Cells with the AUCcell score greater than 0.15 within cluster 1 are highlighted with gradient colors from low (black) to high (red) scores.(B) The UMAP plot shows the differential abundance scores from the logistic classifier prediction calculated from DAseq analysis of pairwise comparison between eFL vs. FL. Cells in red are predicted to be more abundant in eFL, whereas cells in blue indicate higher abundance in FL. Cells in gray do not have substantially different abundance score.",
       "substeps": [],
@@ -90,7 +74,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 5,
       "title": "Trajectory analysis",
       "instruction": "Timing: 1–1.5 h",
       "substeps": [],
@@ -98,7 +82,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 6,
       "title": "Trajectory analysis",
       "instruction": "From the annotation of cell types assigned in the cell type annotation steps, the user can further investigate the direction of cellular differentiation trajectories. The user can trace immature to more differentiated cell populations and understand the functional relationship between different cell populations in terms of cellular maturity. It is noteworthy that current trajectory analysis requires the user to identify the starting point (immature cell state), in this case, HSC/MPP. Hence, the cell annotations inferred from previous steps will be helpful to infer the primitive cell clusters. SingCellaR supports two approaches of trajectory analysis, namely force-directed graph (FDG) (Jacomy et al., 2014) and diffusion map (Haghverdi et al., 2015). We will also perform Monocle3 analysis (Trapnell et al., 2014), a pseudotime-based method (Haghverdi et al., 2015) to infer cellular trajectories.",
       "substeps": [],
@@ -106,9 +90,25 @@
       "timers": []
     },
     {
+      "step_id": 7,
+      "title": "Load SingCellaR package",
+      "instruction": "Load SingCellaR package. > library(SingCellaR)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Load the integrated R object generated from step 52",
+      "instruction": "Load the integrated R object generated from step 52. > load(file = \"./Human_HSPC_All.SingCellaR.rdata\") 70.Run force-directed graph analysis. The user can use the ‘runFA2_ForceDirectedGraph’ function to build the force-directed graph layout (embeddings). The layout can be annotated using various features, including cell lineage signature genes. Here, we use the Supervised harmony embeddings to generate force-directed graph layout.> runFA2_ForceDirectedGraph(Human_HSPC, useIntegrativeEmbeddings = T, integrative_method = \"supervised_harmony\", knn.metric = \"euclidean\", n.dims.use = 40, n.neighbors = 5, n.seed = 35, fa2_n_iter = 1000)The following parameters are required:a.useIntegrativeEmbeddings: If set to TRUE, the data integration or batch correction embeddings will be used in conjunction with ‘integrative_method’ argument. Default is FALSE.b.integrative_method: The data integration or batch correction method name.c.knn.metric: The distance metric.d.n.dims.use: The number of PCs from ‘integrative_method’. If ‘useIntegrativeEmbedding’ is set to FALSE, the PCA analysis result is used. Default value is 30.e.n.neighbors: The number of neighboring cells.f.n.seed: The random number generator. Default value is 1.g.fa2_n_iter: The number of iterations for analyzing the ‘networkx’ graph. Default value is 1,",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
       "step_id": 9,
-      "title": "Method 1: Force-directed graph analysis",
-      "instruction": "68.\nLoad SingCellaR package. > library(SingCellaR) 69.\nLoad the integrated R object generated from step 52. > load(file = \"./Human_HSPC_All.SingCellaR.rdata\") 70.Run force-directed graph analysis. The user can use the ‘runFA2_ForceDirectedGraph’ function to build the force-directed graph layout (embeddings). The layout can be annotated using various features, including cell lineage signature genes. Here, we use the Supervised harmony embeddings to generate force-directed graph layout.> runFA2_ForceDirectedGraph(Human_HSPC, useIntegrativeEmbeddings = T, integrative_method = \"supervised_harmony\", knn.metric = \"euclidean\", n.dims.use = 40, n.neighbors = 5, n.seed = 35, fa2_n_iter = 1000)The following parameters are required:a.useIntegrativeEmbeddings: If set to TRUE, the data integration or batch correction embeddings will be used in conjunction with ‘integrative_method’ argument. Default is FALSE.b.integrative_method: The data integration or batch correction method name.c.knn.metric: The distance metric.d.n.dims.use: The number of PCs from ‘integrative_method’. If ‘useIntegrativeEmbedding’ is set to FALSE, the PCA analysis result is used. Default value is 30.e.n.neighbors: The number of neighboring cells.f.n.seed: The random number generator. Default value is 1.g.fa2_n_iter: The number of iterations for analyzing the ‘networkx’ graph. Default value is 1,000.\n71.Visualize trajectories by Louvain clustering (Figure 8A).> plot_forceDirectedGraph_label_by_clusters(Human_HSPC, show_method =\"louvain\")The following parameter is required:a.show_method: The clustering method name.",
+      "title": "71",
+      "instruction": "71.Visualize trajectories by Louvain clustering (Figure 8A).> plot_forceDirectedGraph_label_by_clusters(Human_HSPC, show_method =\"louvain\")The following parameter is required:a.show_method: The clustering method name.",
       "substeps": [],
       "is_critical": false,
       "timers": []
@@ -140,5 +140,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T01:28:40.668163Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "This protocol describes a method for analyzing single-cell RNA sequencing (scRNA-seq) datasets using an R package called SingCellaR. In addition to standard functions (e.g., reading gene expression matrices, data filtering, doublet removal, dimensionality reduction, data integration, clustering and marker gene identification, and differential gene expression analysis), similar to those performed by available R and Python analysis tools like Seurat (Hao et al., 2021; Stuart et al., 2019), Monocle (Trapnell et al., 2014), and Scanpy (Wolf et al., 2018), SingCellaR supports multiple data integration methods within a single platform. It also incorporates objective benchmarking of the integrative results, facilitating the comparison and choice of the most appropriate integration. To complement existing integration packages, SingCellaR includes a novel integration method - Supervised Harmony (Roy et al., 2021), which showed a better integrative result than available methods for integrating multiple scRNA-seq datasets generated from different hematopoietic tissues. SingCellaR supports multiple modalities for visualization, including tSNE, UMAP, force-directed graph (FDG) in two- or three-dimensional embeddings, diffusion maps, violin and bubble plots, and heatmaps. Cells can be identified on these plots according to user-defined parameters, such as cluster, donor, tissue of origin, disease state, etc., by accessing relevant information from the SingCellaR object. Multiple signature gene scores can also be superimposed on the same embeddings. For example, visualization of sets of canonical genes used to distinguish different blood cell lineages can help exploration of the cell types contained within a dataset independently of cell clustering algorithms. To annotate cell types and states, SingCellaR uses gene set enrichment analysis to calculate enrichment scores for user-defined, curated gene sets. This system can be used alongside manual inspection for canonical marker gen"
 }

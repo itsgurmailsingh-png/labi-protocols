@@ -39,14 +39,6 @@
     },
     {
       "step_id": 2,
-      "title": "Overview of proposed method",
-      "instruction": "Our approach focuses on the subjective estimation of location quality, with the obtained estimates being incorporated into a hedonic model to assess their impact on the property price. In a separate experimental stage, the estimates are learned from a neural network to automatically replicate resp. synthetically generate human estimates and use them in an automated valuation model. To better clarify the applied approach, we have summarized its theoretical basis in the following Section. Fig. 2 shows the methodological steps in proposed order.Fig. 2Methodical steps illustrated in the proposed order. (A: Human judgements using voting & AFC; B: Data partition; C: Inference of human judgements; D: Generation of synthetic data; E: ConvNet inference.Fig 2",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
       "title": "Elo rating (method steps A & B)",
       "instruction": "In a qualitative assessment based on the classification, the main problem lies in the unavoidable fuzziness of the decision boundaries between individual classes. Consequently, the implementation of subjectively estimated quality classes in the price prediction of a real estate can have a significant impact on the estimated sales or rental price. This is problematic, because it implies that detailed description lists and a lot of experience on the part of the judging person are required to adequately estimate the quality of a real estate characteristic. To overcome this problem, we apply a system in which probands are shown successively pairs of randomly selected image montages from a pool with N representative images and have to decide which of the two montages has the higher quality of the immediate environment of the apartment building (each montage references to the immediate environment of an apartment; see example image montages in the Fig. 1 in Section 2).",
       "substeps": [],
@@ -54,7 +46,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 3,
       "title": "Elo rating (method steps A & B)",
       "instruction": "By using such subjective serial pairwise comparisons of image features, we can estimate a perceptual counterpart of the features as a scaled collection of stimuli (expressed by a metric score and not a class!) that includes simultaneous as well as successive contrasts due to application of repeated trials. To this end, we perform Alternative Forced Choice [17] and thus force probands to choose between three alternatives whereby the responses are recorded by an automatic backend scoring system. The proposed approach is expandable and requires sufficient number of probands, representative images as well as repeating of trials in order to decrease the error variance continuously and thus gain usable data. To measure the quality of two directly compared images in a continuous manner, assuming that their estimated values will vary adequately in the data distribution, we apply the Elo formula. The Elo rating system is used in practice to quantify the relative abilities of chess players [16]. At Elo rating, each player starts with an initial score and depending on how he/she plays against players with higher or lower Elo his/her score is being updated according to Eqs. (1) and (3). Definition for expected Elo value of a win for the problem at hand: If image A has rating RA and image B has rating RB, then the expected value of image A beating image B is given by [76]:(1)Pr(A>B)=EAB=11+10RA−RB400where the initial value for R is set to 1500. Hence, note the logistic property:(2)EAB+EBA=1",
       "substeps": [],
@@ -62,7 +54,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 4,
       "title": "Elo rating (method steps A & B)",
       "instruction": "The parameter 400 in the 2nd equation controls the different probabilities of the possible outcome for the higher and lower rated image. Having an expected score for image A when voting against image B and three possible outcomes for A, namely win, lose, or draw, which correspond to values of 1, 0, and 0.5, we calculate Elo score as follows:(3)RA′={RA+KA(1−EAB),ifAwinsRA+KA(12−EAB),ifAdrawsRA+KA(0−EAB),ifAloses",
       "substeps": [],
@@ -70,7 +62,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 5,
       "title": "Elo rating (method steps A & B)",
       "instruction": "The constant K (K = 10) is used to adjust the weighting sensitivity of the scores update. Based on [77], the Elo algorithm is assumed to be sufficiently robust to represent the rating results with reasonable proportionality",
       "substeps": [],
@@ -78,7 +70,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 6,
       "title": "Hedonic regression (method steps C & E)",
       "instruction": "To evaluate the effect of estimated Elo scores on the real estate price, we use Hedonic Price Method. HPM is also known as Hedonic Regression and is commonly used method to predict real estate prices by estimating the marginal contribution of real estate characteristics to the price. In general, the hedonic price function has the form(4)Pi=f(Zi)where P is the price of the real estate and f is a function of the vectorized characteristics Z of the real estate. The basic assumption in HPM is that the relevant determinants of the dependent variable (price or index) are known in advance. In practice, different variables are used depending on the research question, the preference of the researchers or the availability of data [51]. If we divide the property characteristics Z into three main subcategories then the price function has the form:(5)Pi=f(Si;Li;Ni;Ei)where Si is a vector of structural real estate characteristics, Li is a vector of location variables, Ni represents neighborhood characteristics and Ei represents characteristics of immediate building environment [1]. A prior perceptible effect of the estimated location scores on the price is also the main criterion for generating synthetic data (See next subchapter).",
       "substeps": [],
@@ -86,7 +78,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "ConvNet regression (method steps D & E)",
       "instruction": "It is essential to verify whether human estimated scores can be learned from a ConvNet and be generalized to new images unknown to the trained network. For the replication, we use the EfficientNet neural network [78] for the regression task. EfficientNet is able to uniformly scale width, depth, and resolution of the network allowing for adaptive scaling and thus for models with different input sizes and floating-point operations (FLOPS). The structure of the base model EfficentNet-B0 (see Fig. 3) consists of seven building blocks with inverted residual blocks - also called Mobile Inverted Bottleneck (MBConv) and stem layers. Stem layers have the function of a compression mechanism that leads to a fast reduction in the spatial size of activations, and therefore reduce storage and computational costs. MBConv blocks use inverted residual blocks with depthwise separable convolution, which on the other side significantly reduces the number of parameters. Each MBConv includes a Squeeze and Excitation (SE) sub-block which dynamically assign high weights for more important channels and so map channel dependence while also providing access to global spatial information of the input signal. With the EfficentNet, it is possible to control and optimize the trade-off between accuracy and FLOPS.Fig. 3Simplified representation of EfficentNet-B0 architecture with modified top layers for regression task (layers on the far right).Fig 3",
       "substeps": [],
@@ -94,7 +86,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 8,
       "title": "Method discussion",
       "instruction": "The integration of alternative data extraction methods, as well as the ability to handle alternative data using Machine Learning, can significantly mitigate the difficulties in modeling and provide information from new sources and modalities [56]. Regarding the problem at hand, the benefit of generating human-based estimates and transferring the estimates to a Machine Learning model to produce synthetic data is understandable if an effect of the estimates and predictions on the property price can be confirmed within a potentially applicable model. It is generally accepted that humans, especially those with domain expertise, can perceive complex visual semantics better than ConvNet AI algorithms. The effort for such manual annotations of ground truth justifies, however, the generation of synthetic data in view of the necessary data quantity needed for automated valuation models. Our goal was to show how cohesively the presented methods work on the existing dataset in the presented scenario, without further optimizing them and thereby potentially overfitting them to the data. Hence, we aimed to quantify the degree of generation of additional data that can be achieved, understanding that the effect of additional training data is important in practice to balance the cost of creating additional labeled training data and the expected benefit, i.e., if the expected benefit of additional training data is low, it may not justify the cost of generating annotations and thus additional synthetic data.",
       "substeps": [],
@@ -104,5 +96,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T01:52:00.952303Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Our approach focuses on the subjective estimation of location quality, with the obtained estimates being incorporated into a hedonic model to assess their impact on the property price. In a separate experimental stage, the estimates are learned from a neural network to automatically replicate resp. synthetically generate human estimates and use them in an automated valuation model. To better clarify the applied approach, we have summarized its theoretical basis in the following Section. Fig. 2 shows the methodological steps in proposed order.Fig. 2Methodical steps illustrated in the proposed order. (A: Human judgements using voting & AFC; B: Data partition; C: Inference of human judgements; D: Generation of synthetic data; E: ConvNet inference.Fig 2"
 }

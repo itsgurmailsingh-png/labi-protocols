@@ -18,14 +18,6 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "Following this introduction, we present the code and workflow used in our case study. The code, written in the R programming language, outlines the essential steps required to generate the outputs and is accompanied by a brief explanation of the results and their implications. All dormancy-related metrics, including the PLS regression analysis and the calculation of CR using the three most common chill models, are implemented in the chillR package (version 0.76) [11]. The complete code and dataset used in the analyses described below are freely available in the following GitHub repository (https://github.com/CEBASFruitBreed/R-workflow-ChillPLS).",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "PLS-based workflow for chilling requirement analysis",
       "instruction": "This section describes the automated processing of multiple Excel files containing flowering data to perform a PLS regression analysis. It begins by generating a list of files located in the “Genotypes/” directory that match a specific naming pattern. Each file is read iteratively, extracting its content and base name while removing unnecessary columns (group1 and group2) and adjusting key data types (e.g., converting Year to integer and pheno to factor). The PLS_chill_force function is then applied to each dataset, using preprocessed climate data and setting the start of the dormant season to November (split_month = 11). This starting month was selected based on previous regional studies showing that chill accumulation typically begins in November [15,16]. Across three consecutive seasons in these studies, the first chill portion was observed between November 4th and November 8th. The output of each analysis is saved as a new Excel file (see Fig. 1) in the “Genotypes/Results_PLS_Genotypes/” directory, with filenames corresponding to their source files to ensure organized tracking and easy retrieval. For each genotype, the function extracts group identifiers from the Cultivar column, splits the dataset into subsets based on unique group combinations, and exports each subset as a separate Excel file. This approach ensures that subsets are well-organized and readily accessible for further analysis. Chilling accumulation is calculated using three widely applied models in horticultural research: the Chilling Hours Model, the Utah Model, and the Dynamic Model. We strongly recommend using the Dynamic Model [17,18], as it has been shown to produce more reliable results in regions characterized by mild winter conditions [19,20].Fig. 1Results of the chilling phase obtained by applying PLS regression. The third column indicates the day of the year (DOY) within the growing season, with negative values representing the number of days remaining until the end of the year. Columns 4 and 5 show the Variable Importance in the Projection (VIP) scores and the corresponding model coefficients, respectively. Columns 6 and 7 represent the daily mean and standard deviation of the selected chilling metric (Chill Portions in our study case).Fig. 1",
       "substeps": [],
@@ -33,7 +25,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 1,
       "title": "PLS-based workflow for chilling requirement analysis",
       "instruction": "The process_PLS_file function is designed to handle multiple datasets containing daily chill values (e.g., Chill Portions) and extract key information on the chilling period associated with each genotype’s entrance and release from endodormancy. This function applies to the PLS regression approach, which determines the chill accumulation window based on two primary outputs: the Variable Importance in Projection (VIP) scores and the model coefficients.",
       "substeps": [],
@@ -41,7 +33,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 2,
       "title": "PLS-based workflow for chilling requirement analysis",
       "instruction": "Following the criteria established by [21], the endodormancy phase is identified by a series of consecutive days with negative model coefficients and VIP scores equal to or greater than 0.8. For each dataset, the genotype identifier is retrieved, and rows are filtered to retain only those that meet both conditions. The function then defines the chilling period for each genotype by identifying the first and last day within this filtered range. Because the PLS approach accounts for the overlap between chilling and heat accumulation phases, and the current consensus among dormancy-related researchers [22], the code restricts chill accumulation to end maximum one day before the genotype’s median bloom date. The resulting data is then compiled into a single data frame and exported as an Excel file, facilitating the integration of climatic and phenological data for subsequent analyses.",
       "substeps": [],
@@ -49,7 +41,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 3,
       "title": "PLS-based workflow for chilling requirement analysis",
       "instruction": "The code below integrates phenological and climatic data for two apricot progenies, ‘BxC’ and ‘GxC’, using the process_PLS_file function. It begins by retrieving lists of Excel files containing Chill Portions data for each genotype from their respective directories. The function is then applied to both datasets, extracting the chilling period information for each genotype and saving the results into separate Excel files for streamlined analyses.",
       "substeps": [],
@@ -57,7 +49,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 4,
       "title": "PLS-based workflow for chilling requirement analysis",
       "instruction": "The process_Jday function calculates temperature-based metrics for each genotype in a dataset, with a primary focus on chill accumulation. For every genotype, the function determines the starting Julian day (Start_JDay) based on the provided daily values and processes the corresponding hourly temperature data using the stack_hourly_temps function. It then applies the tempResponse function to estimate chilling responses according to several chill models. The results for each genotype are stored in a structured list and exported as individual Excel files, named using the corresponding genotype and group ID. This approach enables a detailed, genotype-specific assessment of chilling requirements across multiple genotypes.",
       "substeps": [],
@@ -65,7 +57,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 5,
       "title": "PLS-based workflow for chilling requirement analysis",
       "instruction": "The process_final_file function processes multiple Excel files containing phenological data and extracts chilling metrics for selected seasons. It begins by filtering the data to retain only the predefined seasons of interest. Next, a year-based suffix is then extracted to identify each season, and the corresponding genotype is assigned based on the file name. The function dynamically reshapes the data using pivot tables, generating separate columns for each season, each containing the three chill metrics used in the analysis: Chill Hours, Chill Units and Chill Portions. Finally, the results from all files are compiled and saved into a single Excel file, which serves as the final output of the workflow.",
       "substeps": [],
@@ -73,7 +65,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 6,
       "title": "PLS-based workflow for chilling requirement analysis",
       "instruction": "In the final step of the workflow, all Excel files from the specified directories are read, relevant data are filtered, and seasonal chilling metrics are extracted. The processed results are then compiled to generate a final output file for each genotype. This step ensures a standardized, automated, and reproducible process for summarizing seasonal chill metrics across all genotypes (Fig. 2).Fig. 2Final output summarizing chilling accumulation for each apricot genotype in the BxC population across multiple seasons. The table presents values from three chilling models—Chill Hours, Chill Units, and Chill Portions—for each genotype and growing season. This standardized output facilitates the comparison of chilling requirements across years and genotypes, supporting downstream genetic and phenological analyses.Fig. 2",
       "substeps": [],
@@ -81,7 +73,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "Method validation",
       "instruction": "In fruit tree breeding, phenotyping is often a major bottleneck, especially for traits linked to dormancy release and flowering. Determining cultivar-specific CR is particularly important, since this trait defines cultivar adaptability to specific climates under current and future conditions. Traditionally, CRs are estimated using the forcing shoots method, which involves collecting dormant shoots during winter and placing them under controlled conditions (20–25 °C) to induce bud break. Although widely used, this approach is labor-intensive, time-consuming, and unsuitable for large breeding populations. The methodology presented here provides an efficient alternative, allowing breeders to rapidly process and analyze extensive phenological datasets and generate standardized CR values for downstream applications (Fig. 3).Fig. 3Graphical summary of the workflow, showing input files (flowering and climate data in Excel files), intermediate steps (preprocessing and PLS regression analysis), and the final outputs (genotype-specific chilling requirement estimates).Fig. 3",
       "substeps": [],
@@ -89,7 +81,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 8,
       "title": "Method validation",
       "instruction": "The outputs generated in this study have several potential applications, including QTL mapping, which relies on precise phenotypic data across segregating populations such as those evaluated in this study (BxC’ and ‘GxC’). Additionally, it facilitates the development of cultivar portfolios to guide growers in selecting varieties best suited to specific growing regions. As part of the validation, we present scatter plots showing the distribution of CR across numerous genotypes from both populations (Fig. 4, Fig. 5). These visualizations provide a valuable reference for future studies investigating the genetic basis of CR through integrated phenotypic and genotypic analyses, ultimately facilitating marker-trait association studies aimed at developing climate-resilient cultivars.Fig. 4Distribution of flowering dates values and chilling requirement estimates (CH: Chill Hours, UCU: Utah Chill Units, and CP: Chill Portions) in the ‘BxC’ P. armeniaca population across multiple years. Each point represents an individual genotype, and the violin plots illustrate the density distribution for each season.Fig. 4Fig. 5Distribution of flowering dates values and chilling requirement estimates (CH: Chill Hours, UCU: Utah Chill Units, and CP: Chill Portions) in the ‘GxC’ P. armeniaca population across multiple years. Each point represents an individual genotype, and the violin plots illustrate the density distribution for each season.Fig. 5",
       "substeps": [],
@@ -99,5 +91,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T04:41:18.355939Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "Following this introduction, we present the code and workflow used in our case study. The code, written in the R programming language, outlines the essential steps required to generate the outputs and is accompanied by a brief explanation of the results and their implications. All dormancy-related metrics, including the PLS regression analysis and the calculation of CR using the three most common chill models, are implemented in the chillR package (version 0.76) [11]. The complete code and dataset used in the analyses described below are freely available in the following GitHub repository (https://github.com/CEBASFruitBreed/R-workflow-ChillPLS)."
 }

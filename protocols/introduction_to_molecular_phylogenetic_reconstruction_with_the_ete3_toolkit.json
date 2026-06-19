@@ -47,13 +47,30 @@
     },
     {
       "step_id": 3,
-      "title": "The mean and max protein lengths...",
-      "instruction": "The mean and max protein lengths are not that different, but there do seem to be some shorter proteins present. We may wish to filter those proteins out, since shorter proteins will complicate sequence alignment and phylogenetic inference. Let&#39;s try filtering out all proteins that are more than two standard deviations shorter than the mean (so 1177 - 2 X 211 = 755). For this we can use the seqtk subseq command, which will allow us to specify a list of sequences that we wish to sub-sample from the full FASTA file. To do this we first need a file with the lengths of all of the proteins that we wish to retain, listed one after the other in a plain-text file. Let&#39;s use some pipes and AWK, which is a handy Unix-provided language that can be used for simple computations like this: seqtk comp narg.faa | awk &#39;$2&gt;755&#39; | cut -f 1 &gt; narg.long_proteins.list This command does the following: 1) It takes the proteins in the narg.faa file and gets their general stats with seqtk, 2) uses an AWK command to filters through the seqtk comp output and provide only those lines where the second column value is &gt; 755, and 3) then cuts out the first column and puts that in a file called narg.long_proteins.list. Now we can use &#39;seqtk subseq&#39; to get a FASTA file of only the proteins longer than 755 amino acids: seqtk subseq narg.faa narg.long_proteins.list &gt; narg.long_proteins.faa How many proteins did we filter out with our length cutoff? We can check with: grep -c &#39;^&gt;&#39; narg.faa grep -c &#39;^&gt;&#39; narg.long_proteins.faa I got 393 and 367, so we removed 26 of the shortest proteins with our length cutoff. a",
+      "title": "It takes the proteins in the narg",
+      "instruction": "It takes the proteins in the narg.faa file and gets their general stats with seqtk,",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
+      "title": "uses an AWK command to filters...",
+      "instruction": "uses an AWK command to filters through the seqtk comp output and provide only those lines where the second column value is &gt; 755, and",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "then cuts out the first column...",
+      "instruction": "then cuts out the first column and puts that in a file called narg.long_proteins.list. Now we can use &#39;seqtk subseq&#39; to get a FASTA file of only the proteins longer than 755 amino acids: seqtk subseq narg.faa narg.long_proteins.list &gt; narg.long_proteins.faa How many proteins did we filter out with our length cutoff? We can check with: grep -c &#39;^&gt;&#39; narg.faa grep -c &#39;^&gt;&#39; narg.long_proteins.faa I got 393 and 367, so we removed 26 of the shortest proteins with our length cutoff. a",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
       "title": "Sometimes you will find that the...",
       "instruction": "Sometimes you will find that the reference sequences are highly redundant, meaning that a large number of sequences in the file are identical or nearly identical. Usually we are interested in getting a pretty broad view of phylogenetic relationships at this stage, so it may be worth while to de-replicate the reference sequences rather than spend a lot of time later computing phylogenies of sequences that are 99% identical. For sequence-based dereplication a handy tool is CD-HIT. You should be able to install this tool fairly easily using: sudo apt install cd-hit And if you just type cd-hit into the command line afterwards you should be able to view the many different options that this tool provides. Be default cd-hit will take a FASTA file of proteins and identify clusters that are 90% or more identical over 90% the length of the shorter protein. These sequences are then grouped together, and one (usually the longest protein) is chosen as a &#39;representative&#39;. This way we can just use cluster representatives in our final analysis rather than using every single sequence. Note that the % identity and % overlap thresholds can be modified using various flags in the help menu, so you could opt to remove redundancy only at the 99% amino acid identity level if you were interested in removing only the very very similar sequences, for example. Let&#39;s try a simple command with the default parameters: cdhit -i narg.long_proteins.faa -o narg.nr.faa CD-HIT will print out some general log of what it&#39;s doing before finishing. You can check out the files that were created with &#39;ls -l&#39;: You should see the output file we specified &#39;all_narg.nr.faa&#39;, which will have the cluster representatives, as well as a .clstr file which contains information about what sequences were clustered together. We will work mainly with the .nr.faa file. Now let&#39;s check to see how many sequences were in the original file, and how many fewer are in new .nr.faa file (i.e, how many cluster representatives there are compared to raw sequences). grep -c &#39;^&gt;&#39; narg.long_proteins.faa grep -c &#39;^&gt;&#39; narg.nr.faa I got 367 and 226, which indicates we removed 141 sequences. This will save us some time when we generate the phylogeny in the next steps. Before we proceed, let&#39;s combined our non-redundant reference sequences with our mystery sequence so that we have one consolidated FASTA file to use for phylogenetic reconstruction: cat mystery_protein.faa narg.nr.faa &gt; all_narg.faa Overall the commands should look something like this: a",
       "is_critical": false,

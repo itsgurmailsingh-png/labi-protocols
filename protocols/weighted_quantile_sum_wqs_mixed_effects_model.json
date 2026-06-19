@@ -18,54 +18,6 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "We have developed a novel mixed-effects WQS regression model and we demonstrate it herein using the WQS stratified interaction regression model which results in empirically estimated intra-strata weighted indices and beta coefficients. As shown in the schematic in Fig. 1, the first step in WQS regression is to quantile score the values of the components to be used in the weighted index and then to randomly split the data into training and holdout sets. We generally use 40 % of the data in the training set and 60 % in the holdout set with the increased sample size in the step involving hypothesis testing. Using nonlinear regression, in the training set, we estimate the weights for each component in a weighted quantile (e.g., decile-scored components) sum, averaged across either bootstrap samples or random subsets of components. In the schematic, component weights are estimated from 100 bootstrap samples. We generally split the data multiple times to obtain repeated holdout datasets to improve generalizability[2] (graphical abstract step 1).Fig. 1Weighted Quantile Sum regression is a model designed to evaluate the mixture effect of components with complex correlation patterns. Based on the measured concentration levels from each participant, the concentrations are first ranked into quantiles (here, deciles). The model splits the data into training (40 %) and validation (60 %) sets. In the training set, the mean weight of each chemical is estimated across 100 bootstrap samples. A weighted index, WQS, is then derived by multiplying the mean weight by the quantile of each component per subject. The higher the weights the higher the contribution to the weighted index. The weighted index can be derived in a positive or negative direction associated with the outcome of interest. Finally, the weighted index is tested in the validation set of the data in a generalized linear model.Fig 1:",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
-      "title": "Method details",
-      "instruction": "The first step focuses on the estimation of weights and not hypothesis testing, so a misspecified covariance structure is of less concern. Following the logic of nonlinear estimation in a quasi-likelihood framework and GEE modeling for large samples, assuming the model is correctly specified, the mean model parameters are accurate even when the covariance assumption is incorrect, here assuming independence [17,18]. This step is illustrated in the graphical abstract step 1 where the assumed intra-subject covariance structure is that of independence.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
-      "title": "Method details",
-      "instruction": "In a WQS stratified-interaction model, we estimate strata-specific weights and beta coefficients using a nonlinear estimation algorithm. For two strata (e.g., sex) and c components in the mixture, there are 2c weights to be empirically estimated. Typically, for two strata, we estimate the slope for the reference group (say, b1) and an interaction parameter for the difference in slopes between the two groups (say, b12). The slope for the other strata (other than the reference group) is b2=b1+b12. (graphical abstract, bottom figure in middle column) When the number of parameters is large relative to the sample size, we use the random subset ensemble step instead of bootstrap sampling.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
-      "title": "Method details",
-      "instruction": "The second step in WQS regression is to test for the significance of the beta coefficient(s) in the holdout dataset, conditioning on the estimated weights from the first step. To improve generalizability, we conduct a repeated holdout strategy using many (e.g., rh=30or more) splits and holdout datasets. We augment the standard WQS model with the repeated holdouts using a generalized linear mixed-effects model that accommodates the intra-subject correlated strata-specific scores. (graphical abstract, 2nd step, right panel) All models are adjusted by covariates and confounders. The gwqs R package is thus augmented with the nlme package, which adds random effects to the linear model with the constructed weighted index and covariates. The following outline sets further details.A.Randomly split the data (N observations with c components for the mixture) into a training (e.g., 40 %) and holdout (60 %) set with complete data for covariates and mixture components.B.Ensemble step: Use a nonlinear regression model to estimate weights and beta coefficients, adjusted by covariates. Repeat many times by either resampling the observations in a bootstrap sample (e.g., b=100) or randomly selecting subsets of the c components (e.g., c) a large number of times (e.g., b=1000) and average across the resulting weight estimates to construct the final weights and corresponding WQS index.C.Repeated holdout step: Repeat steps A and B many times (e.g., rh=100) and evaluate the distribution of weights. The gWQS R package creates a vector called vindex which denotes the row numbers of the dataset included in each repeated holdout dataset. Merge the ID variable with each of the rh datasets denoted as lists.D.Mixed-effects estimation: Estimate a mixed-effects model using each of the holdout datasets specified in the vindex in the gWQS package parameterized to include the wqs, strata, interaction terms, and covariates. For each analysis, specify the random-effect model using the ID. Create the estimated intra-subject correlation matrix. Summarize the resulting beta coefficients and working correlation matrices from the mixed-effects model.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 4,
-      "title": "Method details",
-      "instruction": "As noted, the first step of our method focuses on the estimation of weights in the ensemble step and not hypothesis testing. The nonlinear estimation is conducted under the assumption of independence, and for large samples, the mean parameters are consistent, assuming the model is correct. A sensitivity analysis can be performed similar to Penalized GEE (PGEE)[19] using a lasso-type penalty term. Simulation studies of PGEE vs GEE indicate the former improves estimation accuracy over unpenalized GEE when the number of covariates in the model is the same order of magnitude as the sample size. An important feature of PGEE is that the consistency of model selection holds even if the working correlatin structure is misspecified.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
-      "title": "Method details",
-      "instruction": "The mixed-effects estimation step conditions on the estimated weights, and their average, from the training datasets to conduct the repeated application of a mixed-effects model in the repeated holdout datasets. Standard WQS regression also conditions on the weights from the training set, but herein, we also assume estimation of the weights under the potentially incorrect assumption of independence and assume the weights are at least approximately accurate.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 6,
       "title": "Method illustration",
       "instruction": "Our example dataset is from a pilot study of the impact of environmental conditions on runners. As such, the results are a demonstration of the method and require validation with a larger sample size for generalizable conclusions.",
       "substeps": [],
@@ -73,7 +25,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 1,
       "title": "Method illustration",
       "instruction": "Study participants (N = 14, 7 men and 7 women) were evaluated during 3 separate long-distance runs in the summer of 2023 in New York City, starting and ending in Central Park. Runners were strapped with monitors of exposures (heat, humidity), speed and power, and biomonitoring of heart rate and core body temperature. Outcome measures included pre and post-measures of kidney function. The running route was broken into 5 regions (Central Park, Harlem, Washington Heights, West Side Highway, and Central Park).",
       "substeps": [],
@@ -81,7 +33,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 2,
       "title": "Method illustration",
       "instruction": "In an initial analysis, we considered percent change in creatinine from pre- and post-race measures (i.e., (post-pre)/pre). Models were adjusted by sex and age. With 30 components (average speed, power, heart rate, core temperature, wet bulb temperature, atmospheric temperature within each of the 5 route regions) we used a random subset ensemble step (200 random sets of size 10) and 30 repeated holdouts. As we anticipated differences between men and women, we conducted a WQS stratified interaction model that allows for different weights and beta coefficients per sex. The final step is to estimate a mixed-effects model with stratified interaction parameterization. To conduct the ensemble step of the proposed method, we inflate the sample size by the number of intra-subject outcome variables (here, the number of runs per subject, i.e., from 14 subjects to 42=14 × 3) by constructing the data structure into a long format. And in the stratified interaction model, we also increase the number of parameters (component weights) by the number of strata (i.e., 30 components to 60), thereby allowing strata-specific weights. We used the random subset ensemble step as the number of parameters exceeded the sample size. We used random subsets of size 10 which is roughly the number of strata times the square root of the number of components. We pulled 200 random subsets per repeated holdout analysis. The boxplots for the weights indicated non-zero estimates for all repeated analyses providing evidence that the number of random subsets was adequate to sample from all parameters. We used 30 repeated holdouts – a minimum number which seemed adequate for a pilot study.",
       "substeps": [],
@@ -89,15 +41,39 @@
       "timers": []
     },
     {
-      "step_id": 9,
-      "title": "Method illustration",
-      "instruction": "With 30 repeated holdouts, we evaluate the distribution of the estimated beta coefficients where b1 is the beta for the reference group (females). The interaction term, b12, is the difference in the wqs slopes between sexes. Using the distribution of the interaction terms (e.g., b12), the WQS slope for the males is b2=b1+b12. The interaction is not significant (Table 1), indicating there is no significant difference in the slopes between men and women relating the WQS index with percent change in creatinine. The slopes are both positive and borderline significant in females (median b1=0.104) and males (median b2=0.196) (Table 1). However, the median slope for males was roughly twice that of females (Table 1). The estimated intra-subject correlations between runs were all above 0.85 (Table 1). Interestingly, even though the slopes are not significantly different between females and males, the average estimated weights are different (Fig. 1). Creatinine changes in females are most associated with late-race heart rate (R4 and R5) and humidity (i.e., wet bulb temperature). In contrast, changes in males are most associated with heart rate in race region R1, and early (R1 and R2) and late (R5) measures of speed and power.Table 1Results from WQS stratified interaction mixed-effects model of percent change in creatinine using a random subset ensemble step with 200 random subsets of size 10 where components are decile scaled. The slopes are medians across 30 repeated holdouts from the linear mixed effects models.Table 1:CoefficientMedian95 % CI from linear mixed modelWQS: Female0.104(−0.008, 0.203)WQS: Male0.196(−0.074, 0.305)WQS*Sex Interaction0.098(−0.174, 0.263)Gender: M−0.027(−0.269, 0.398)Age (scaled)0.046(0.007, 0.087)Median Intra-subject Correlation EstimatesR01R02R03R011R020.881R030.930.931",
+      "step_id": 3,
+      "title": "The interaction is not significant (Table...",
+      "instruction": "The interaction is not significant (Table 1), indicating there is no significant difference in the slopes between men and women relating the WQS index with percent change in creatinine. The slopes are both positive and borderline significant in females (median b1=0.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 4,
+      "title": "and males (median b2=0",
+      "instruction": "and males (median b2=0.196) (Table 1). However, the median slope for males was roughly twice that of females (Table 1). The estimated intra-subject correlations between runs were all above 0.85 (Table 1). Interestingly, even though the slopes are not significantly different between females and males, the average estimated weights are different (Fig. 1). Creatinine changes in females are most associated with late-race heart rate (R4 and R",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "and humidity (i",
+      "instruction": "and humidity (i.e., wet bulb temperature). In contrast, changes in males are most associated with heart rate in race region R1, and early (R1 and R",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "measures of speed and power",
+      "instruction": "measures of speed and power.Table 1Results from WQS stratified interaction mixed-effects model of percent change in creatinine using a random subset ensemble step with 200 random subsets of size 10 where components are decile scaled. The slopes are medians across 30 repeated holdouts from the linear mixed effects models.Table 1:CoefficientMedian95 % CI from linear mixed modelWQS: Female0.104(−0.008, 0.203)WQS: Male0.196(−0.074, 0.305)WQS*Sex Interaction0.098(−0.174, 0.263)Gender: M−0.027(−0.269, 0.398)Age (scaled)0.046(0.007, 0.087)Median Intra-subject Correlation EstimatesR01R02R03R011R020.881R030.930.931",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
       "title": "Method illustration",
       "instruction": "Finally, the adjusted models indicated that older runners had significantly increased changes in creatinine.",
       "substeps": [],
@@ -105,7 +81,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 8,
       "title": "Method illustration",
       "instruction": "Finding differences between men and women runners is as anticipated due to physiological/biological differences in muscular strength and aerobic capacity [20].",
       "substeps": [],
@@ -115,5 +91,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T04:17:19.035206Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "We have developed a novel mixed-effects WQS regression model and we demonstrate it herein using the WQS stratified interaction regression model which results in empirically estimated intra-strata weighted indices and beta coefficients. As shown in the schematic in Fig. 1, the first step in WQS regression is to quantile score the values of the components to be used in the weighted index and then to randomly split the data into training and holdout sets. We generally use 40 % of the data in the training set and 60 % in the holdout set with the increased sample size in the step involving hypothesis testing. Using nonlinear regression, in the training set, we estimate the weights for each component in a weighted quantile (e.g., decile-scored components) sum, averaged across either bootstrap samples or random subsets of components. In the schematic, component weights are estimated from 100 bootstrap samples. We generally split the data multiple times to obtain repeated holdout datasets to improve generalizability[2] (graphical abstract step 1).Fig. 1Weighted Quantile Sum regression is a model designed to evaluate the mixture effect of components with complex correlation patterns. Based on the measured concentration levels from each participant, the concentrations are first ranked into quantiles (here, deciles). The model splits the data into training (40 %) and validation (60 %) sets. In the training set, the mean weight of each chemical is estimated across 100 bootstrap samples. A weighted index, WQS, is then derived by multiplying the mean weight by the quantile of each component per subject. The higher the weights the higher the contribution to the weighted index. The weighted index can be derived in a positive or negative direction associated with the outcome of interest. Finally, the weighted index is tested in the validation set of the data in a generalized linear model.Fig 1: The first step focuses on the estimation of weights and not hypothesis testing, so a miss"
 }

@@ -26,46 +26,6 @@
     },
     {
       "step_id": 1,
-      "title": "Method details",
-      "instruction": "The proposed methodology Anatomical Segmentation and Color-Based Enhancement (ASCE) begins with data preparation, The dataset was collected from publicly available data sources [22] and organized into three folders: one for chest X-ray images, another for annotations, and a third for lung masks. Each folder contains data categorized into 3 classes: normal (916 images), virus (1401 images), bacteria (2587 images). To guarantee data integrity and consistency, each sample undergoes validation to check the presence of all required components: images, annotations, and masks. We used 80 % for training, 10 % for validation, and 10 % for testing. The ASCE algorithm (Algorithm 1 and Fig. 3) presents the process followed in detection of lung abnormalities by combining segmentation, enhancement, feature extraction and statistical analysis.Algorithm 1Lung Abnormality Classification using Anatomical Segmentation and Color-Based Enhancement (ASCE) Technique.Algorithm 11: Input: Chest X-ray images, masks, annotations2: Output: Classification of lung abnormalities (normal, pneumonia, then virus, bacteria)3: Step 1: Data Preparation4: Organize chest X-ray images, segmentation masks, and annotations.5: Load image files, masks, and annotation files.6: Verify that all files (image, mask, annotation) are present for each sample.7: Step 2: Anatomical Segmentation and Color-Based Enhancement8: Perform lung segmentation by applying the lung mask to each X-ray image.9: Perform tissue segmentation by thresholding the segmented lung region.10: Apply color-based enhancement to improve the visibility of abnormalities in the segmented image.11: Generate an enhanced image using the method.12: Step 3: Feature Extraction with ResNet5013: Pass the enhanced images through a pre-trained ResNet50 model to extract features F.14: Calculate the KL Divergence between the original and enhanced healthy references vector (Q):DKL(P|Q)=∑iP(i)log(P(i)Q(i))15: Append KL to Feature Vector F’: features = np.append(F, KL)16: Step 4: Classification: Pass F' to Voting_Classifier (RF + XGBoost)17: Predict class based on soft-voting scores18: Step 5: Evaluation and Visualization23: Evaluate the model using accuracy, recall, precision, F1-score, BA, MCC and Cohen’s Kappa.25: Analyze the confusion matrix for misclassification patterns.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
-      "title": "Method details",
-      "instruction": "The core of the method lies in the ASCE (Anatomical Segmentation and Color-Based Enhancement). the work flow from preprocessing to classification is presented in Fig. 1, lung segmentation is performed by applying the segmentation mask to the X-ray images to isolate the lung region. Then, tissue segmentation is carried out using thresholding, which highlights the abnormal tissues. To further enhance the image, color-based brightness and contrast adjustments are applied. The final result is a lung-only, tissue-enhanced color X-ray, then followed by feature extraction, where each enhanced image is passed through a pretrained ResNet-50 (with the classification head removed), extracting feature vectors from the final convolutional layer. These deep features characterize the global and local patterns retained after ASCE processing. SMOTE algorithm is employed to synthetically balance the training data before classification. A two-stage approach is used for classification:•Stage 1: A soft-voting ensemble of Random Forest and XGBoost classifiers distinguishes between normal and Pnemonia cases.•Stage 2: On images identified as Pnemonia, a second XGBoost classifier determines the specific pathology — viral or bacterial pneumonia.Fig. 1Comprehensive Workflow for Chest X-Ray Analysis from Preprocessing to Classification. This diagram illustrates the sequence of steps applied to chest X-ray datasets, including lung and tissue segmentation, colour mapping, and texture preservation, followed by feature extraction using the ResNet50 architecture, concluding in the classification of images into categories such as Pneumonia, and Normal and then Viru vs Bacteria.Fig. 1",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
-      "title": "Method details",
-      "instruction": "Furthermore, Kullback–Leibler (KL) divergence is calculated between the class probability distributions of the RF and XGB models to estimate classifier disagreement. A low KL value shows model confidence and higher is treated as a signal for indeterminate or borderline cases.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 4,
-      "title": "Method details",
-      "instruction": "The final model is assessed using a comprehensive set of metrics including accuracy, precision, recall, F1-score, AUC, balanced accuracy, MCC, and Cohen’s kappa. Confusion matrix plots, ROC and PR curves, and KL divergence analysis additional support interpretability and error analysis.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
-      "title": "Method details",
-      "instruction": "Fig. 1illustrates the full ASCE method pipeline, representing how raw input (chest X-rays) undergoes transformation through preprocessing, segmentation, color-based enhancement, and classification steps. This structured frame work emphasizes the method’s uniqueness and completeness by merging deep learning, statistical confidence (KL divergence), and conventional ensemble classifier.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 6,
       "title": "Performance evaluation and analysis of the proposed model",
       "instruction": "Table 2 presents results of our iterative refinements at each stage of the pipeline led to consistent improvements in classification performance across all abnormality classes.1.Segmentation Upgrade:Switching from Otsu thresholding to gradient-based segmentation notably improved feature quality, mostly for complex pathological structures such as bacterial infections. The F1-score for the bacteria class enhanced from 0.46 to 0.78, validating that gradient-based methods preserved finer anatomical details, which are often critical for distinguishing overlapping lung abnormalities.2.Feature Extraction Advancement:The transition from hand-crafted Local Binary Patterns (LBP) to deep feature extraction using ResNet50 substantially improved performance for virus and bacteria classes. The virus F1-score improved from 0.75 to 0.81, and bacteria from 0.77 to 0.81, due to ResNet50’s ability to capture hierarchical features that account for both structural texture and intensity variations.3.Class Balancing via SMOTE:Application of SMOTE to mitigate class imbalance had a marked impact on minority class performance. Both virus and bacteria F1-scores improved from 0.77 to 0.83 and 0.78 to 0.83, respectively, by enabling the classifier to absorb more representative decision boundaries for imbalanced classes.4.Hyperparameter Optimization Gains:Optimization using Bayesian search surpassed grid search, especially for the virus class where the F1-score rose from 0.58 to 0.82. Bayesian optimization effectively explored better parameter regions, resulting in higher recall and more stable predictions.Table 2Performance comparison of classification models with different preprocessing and feature extraction methods for lung abnormality detection.Table 2:ModelSegmentationFeature extractionAbnormality ClassAccuracyPrecisionRecallF1-ScoreSupportRandom ForestASCE with Otsu ThresholdingResNet50Normal0.760.991.01.0354Virus1.00.390.5628Bacteria0.630.240.35302XGBoostASCE with Otsu ThresholdingResNet50Normal0.831.01.01.0532Virus0.980.920.95148Bacteria0.640.360.46286XGBoost (with Augmentation)ASCE with Otsu ThresholdingResNet50Normal0.830.970.960.961102Virus1.00.320.4928Bacteria0.620.360.45285Random ForestASCE with Gradient ThresholdingLBPNormal0.860.930.910.92531Virus0.790.70.75506Bacteria0.730.810.77518XGBoostASCE with Gradient ThresholdingLBPNormal0.870.920.940.93531Virus0.840.710.77506Bacteria0.730.830.78518Random Forest (with SMOTE)ASCE with Gradient ThresholdingResNet50Normal0.890.930.960.94517Virus0.830.80.81518Bacteria0.810.810.81517XGBoost (with SMOTE)ASCE with Gradient ThresholdingResNet50Normal0.900.950.950.95517Virus0.850.80.83518Bacteria0.80.850.83517Random Forest (Grid Search)ASCE with Gradient ThresholdingResNet50Normal0.870.940.950.95517Virus0.830.820.83518Bacteria0.830.830.83518XGBoost (Grid Search)ASCE with Gradient ThresholdingResNet50Normal0.750.790.820.8183Virus0.690.510.58280Bacteria0.750.850.8518Random Forest (Bayesian Optimization)ASCE with Gradient ThresholdingResNet50Normal0.900.930.960.95517Virus0.860.770.81518Bacteria0.810.870.84517XGBoost (Bayesian Optimization)ASCE with Gradient ThresholdingResNet50Normal0.900.960.960.96517Virus0.840.80.82518Bacteria0.80.840.82517Ensemble ModelASCE with Gradient ThresholdingResNet50Normal0.910.960.960.96517Virus0.870.820.84518Bacteria0.820.860.84517Proposed (2-Stage Ensemble + SMOTE)ASCE with Gradient ThresholdingResNet50Normal0.950.860.870.86183Pneumonia0.970.970.97798Virus1.001.001.001.00257Bacteria1.001.001.00539",
       "substeps": [
@@ -98,7 +58,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 2,
       "title": "Performance evaluation and analysis of the proposed model",
       "instruction": "The effectiveness of the ASCE framework with two-stage classification was assessed through rigorous experimentation, measuring both classification performance and computational efficiency. The evaluation included a range of metrics such as accuracy, precision, recall, F1-score, confusion matrix, AUC, MCC, Balanced Accuracy, and Cohen’s Kappa.",
       "substeps": [],
@@ -106,7 +66,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 3,
       "title": "Performance evaluation and analysis of the proposed model",
       "instruction": "Overall classification performance of the proposed two stage framework is as follows:",
       "substeps": [],
@@ -114,7 +74,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 4,
       "title": "Performance evaluation and analysis of the proposed model",
       "instruction": "Stage 1 – Normal vs Pneumonia Classification is highlighted in Table 3. The first stage employed a SMOTE-balanced ensemble classifier (Random Forest + XGBoost) to differentiate between normal and pneumonia lung X-rays. The model achieved 95 % accuracy, with macro-averaged precision, recall, and F1-score above 0.91, reflecting balanced performance across both classes.Table 3Performance Metrics for Stage 1: Binary Classification (Normal vs. Pneumonia).Table 3:MetricNormalPneumoniaMacro AvgWeighted AvgPrecision0.860.970.910.95Recall0.870.970.920.95F1-Score0.860.970.920.95Accuracy0.95AUC0.9801MCC0.8328Balanced Accuracy0.9181Training Time58.47 sInference Time0.06 sec",
       "substeps": [],
@@ -122,17 +82,89 @@
       "timers": []
     },
     {
+      "step_id": 5,
+      "title": "and Balanced Accuracy (0",
+      "instruction": "and Balanced Accuracy (0.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "confirm that the model is robust...",
+      "instruction": "confirm that the model is robust against class imbalance, while a strong Matthews Correlation Coefficient (MCC = 0.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "affirms its reliability",
+      "instruction": "affirms its reliability.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "The second stage polished the classification...",
+      "instruction": "The second stage polished the classification of Pneumonia cases into viral and bacterial pneumonia using a dedicated XGBoost classifier. The model achieved 100% accuracy, perfectly classifying all 796 pneumonia cases. Furthermore, the confusion matrix in Fig. 4a and b confirms that the two-stage ensemble model minimizes class overlap between virus and bacterial infections. See Fig. 5a–5d for ROC and PR curvesTable 4Performance Metrics for Stage",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Multi-Class Classification (Virus vs",
+      "instruction": "Multi-Class Classification (Virus vs. Bacteria).Table 4:ClassPrecisionRecallF1-ScoreSupportVirus1.001.001.00257Bacteria1.001.001.00539Macro Avg1.001.001.00796Cohen’s Kappa1.0000Accuracy1.0000Training Time5.34 secInference Time0.01 secFig. 4a. Confusion Matrix for Stage",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
       "step_id": 10,
-      "title": "Performance evaluation and analysis of the proposed model",
-      "instruction": "The high AUC (0.9801) and Balanced Accuracy (0.9181) confirm that the model is robust against class imbalance, while a strong Matthews Correlation Coefficient (MCC = 0.8328) affirms its reliability.",
+      "title": "Normal vs",
+      "instruction": "Normal vs. Pneumonia, b. Confusion Matrix for Stage",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "Performance evaluation and analysis of the proposed model",
-      "instruction": "Stage 2 – Virus vs Bacteria Classification is highlighted in Table 4. The second stage polished the classification of Pneumonia cases into viral and bacterial pneumonia using a dedicated XGBoost classifier. The model achieved 100% accuracy, perfectly classifying all 796 pneumonia cases. Furthermore, the confusion matrix in Fig. 4a and b confirms that the two-stage ensemble model minimizes class overlap between virus and bacterial infections. See Fig. 5a–5d for ROC and PR curvesTable 4Performance Metrics for Stage 2: Multi-Class Classification (Virus vs. Bacteria).Table 4:ClassPrecisionRecallF1-ScoreSupportVirus1.001.001.00257Bacteria1.001.001.00539Macro Avg1.001.001.00796Cohen’s Kappa1.0000Accuracy1.0000Training Time5.34 secInference Time0.01 secFig. 4a. Confusion Matrix for Stage 1: Normal vs. Pneumonia, b. Confusion Matrix for Stage 2: Virus vs. Bacteria.Fig. 4:Fig. 5a. ROC Curve for Stage 1: Binary Classification, b. Precision-Recall Curve for Stage 1: Binary Classification, c. ROC Curve for Stage 2: Multi-Class Classification, d.Precision-Recall Curve for Stage 2: Multi-Class Classification.Fig. 5:",
+      "title": "Virus vs",
+      "instruction": "Virus vs. Bacteria.Fig. 4:Fig. 5a. ROC Curve for Stage",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Binary Classification, b",
+      "instruction": "Binary Classification, b. Precision-Recall Curve for Stage",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Binary Classification, c",
+      "instruction": "Binary Classification, c. ROC Curve for Stage",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Multi-Class Classification, d",
+      "instruction": "Multi-Class Classification, d.Precision-Recall Curve for Stage",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Multi-Class Classification",
+      "instruction": "Multi-Class Classification.Fig. 5:",
       "substeps": [],
       "is_critical": false,
       "timers": []
@@ -140,5 +172,6 @@
   ],
   "verification_status": "verified",
   "normalised_at": "2026-06-19T03:19:31.240695Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "The proposed methodology Anatomical Segmentation and Color-Based Enhancement (ASCE) begins with data preparation, The dataset was collected from publicly available data sources [22] and organized into three folders: one for chest X-ray images, another for annotations, and a third for lung masks. Each folder contains data categorized into 3 classes: normal (916 images), virus (1401 images), bacteria (2587 images). To guarantee data integrity and consistency, each sample undergoes validation to check the presence of all required components: images, annotations, and masks. We used 80 % for training, 10 % for validation, and 10 % for testing. The ASCE algorithm (Algorithm 1 and Fig. 3) presents the process followed in detection of lung abnormalities by combining segmentation, enhancement, feature extraction and statistical analysis.Algorithm 1Lung Abnormality Classification using Anatomical Segmentation and Color-Based Enhancement (ASCE) Technique.Algorithm 11: Input: Chest X-ray images, masks, annotations2: Output: Classification of lung abnormalities (normal, pneumonia, then virus, bacteria)3: Step 1: Data Preparation4: Organize chest X-ray images, segmentation masks, and annotations.5: Load image files, masks, and annotation files.6: Verify that all files (image, mask, annotation) are present for each sample.7: Step 2: Anatomical Segmentation and Color-Based Enhancement8: Perform lung segmentation by applying the lung mask to each X-ray image.9: Perform tissue segmentation by thresholding the segmented lung region.10: Apply color-based enhancement to improve the visibility of abnormalities in the segmented image.11: Generate an enhanced image using the method.12: Step 3: Feature Extraction with ResNet5013: Pass the enhanced images through a pre-trained ResNet50 model to extract features F.14: Calculate the KL Divergence between the original and enhanced healthy references vector (Q):DKL(P|Q)=∑iP(i)log(P(i)Q(i))15: Append KL to Feature Vector F’: features = np.append("
 }

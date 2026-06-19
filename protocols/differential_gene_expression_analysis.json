@@ -40,41 +40,66 @@
     },
     {
       "step_id": 2,
-      "title": "Differential expression with DESeq2",
-      "instruction": "Differential expression with DESeq2. DESeq2 models count data with a negative binomial distribution. Pre-filtering removes lowly expressed genes to reduce multiple testing burden. library(DESeq2) set.seed(42) counts_mat 3c- assay(se, &#34;unstranded&#34;) col_data 3c- colData(se) stopifnot(identical(colnames(counts_mat), rownames(col_data))) dds �3c- DESeqDataSetFromMatrix( countData = counts_mat, colData = col_data, design = ~ sample_type ) keep �3c- rowSums(counts(dds) = 10) = 5 dds �3c- dds[keep, ] dds$sample_type 3c- relevel(factor(dds$sample_type), ref = &#34;Solid Tissue Normal&#34;) dds �3c- DESeq(dds) res �3c- results(dds, name = &#34;sample_type_Primary.Tumor_vs_Solid.Tissue.Normal&#34;, alpha = 0.05) res_shrunk 3c- lfcShrink(dds, coef = &#34;sample_type_Primary.Tumor_vs_Solid.Tissue.Normal&#34;, type = &#34;apeglm&#34;) sig 3c- subset(as.data.frame(res_shrunk), padj 0.05 \u0016 abs(log2FoldChange) 1) sig �3c- sig[order(sig$padj), ] _EXPECTED_: 3,000-5,000 DEGs at padj 0.05 and |LFC| 1. ⚠️ CAUTION_: Verify reference level with levels(dds$sample_type). The first level is your reference. Swapped labels invert all fold changes. _Note_: For batch effects, use design = ~ batch + sample_type. Do not apply ComBat before DESeq2.",
-      "is_critical": true,
+      "title": "DESeq2 models count data with a negative binomial distribution",
+      "instruction": "DESeq2 models count data with a negative binomial distribution. Pre-filtering removes lowly expressed genes to reduce multiple testing burden. library(DESeq",
+      "substeps": [],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
+      "title": "counts_mat 3c- assay(se, &#34;unstranded&#34;) col_data 3c-...",
+      "instruction": "counts_mat 3c- assay(se, &#34;unstranded&#34;) col_data 3c- colData(se) stopifnot(identical(colnames(counts_mat), rownames(col_data))) dds �3c- DESeqDataSetFromMatrix( countData = counts_mat, colData = col_data, design = ~ sample_type ) keep �3c- rowSums(counts(dds) = 10) = 5 dds �3c- dds[keep, ] dds$sample_type 3c- relevel(factor(dds$sample_type), ref = &#34;Solid Tissue Normal&#34;) dds �3c- DESeq(dds) res �3c- results(dds, name = &#34;sample_type_Primary.Tumor_vs_Solid.Tissue.Normal&#34;, alpha = 0.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "res_shrunk 3c- lfcShrink(dds, coef = &#34;sample_type_Primary",
+      "instruction": "res_shrunk 3c- lfcShrink(dds, coef = &#34;sample_type_Primary.Tumor_vs_Solid.Tissue.Normal&#34;, type = &#34;apeglm&#34;) sig 3c- subset(as.data.frame(res_shrunk), padj 0.05 \u0016 abs(log2FoldChange)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "sig �3c- sig[order(sig$padj), ] _EXPECTED_",
+      "instruction": "sig �3c- sig[order(sig$padj), ] _EXPECTED_: 3,000-5,000 DEGs at padj 0.05 and |LFC| 1. ⚠️ CAUTION_: Verify reference level with levels(dds$sample_type). The first level is your reference. Swapped labels invert all fold changes. _Note_: For batch effects, use design = ~ batch + sample_type. Do not apply ComBat before DESeq2.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 6,
       "title": "Gene ID conversion",
       "instruction": "Gene ID conversion. TCGA uses Ensembl IDs; pathway tools need HGNC symbols. Strip version suffixes first. library(org.Hs.eg.db) gene_symbols 3c- mapIds(org.Hs.eg.db, keys = sub(&#34;\\\\..*&#34;, &#34;&#34;, rownames(res)), keytype = &#34;ENSEMBL&#34;, column = &#34;SYMBOL&#34;, multiVals = &#34;first&#34;) res$symbol 3c- gene_symbols[sub(&#34;\\\\..*&#34;, &#34;&#34;, rownames(res))] res �3c- res[!is.na(res$symbol) \u0016 !duplicated(res$symbol), ] ⚠️ CAUTION_: Failing to strip version suffixes (ENSG00000141510.18 - ENSG00000141510) causes silent mapping failure. All results will be NA.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 7,
       "title": "Over-Representation Analysis (ORA)",
       "instruction": "Over-Representation Analysis (ORA). ORA tests whether significant genes are enriched in specific pathways using the hypergeometric test. library(clusterProfiler) sig_genes 3c- res$symbol[res$padj 0.05 \u0016 abs(res$log2FoldChange) 1] ego 3c- enrichGO(gene = sig_genes, OrgDb = org.Hs.eg.db, keyType = &#34;SYMBOL&#34;, ont = &#34;BP&#34;, pAdjustMethod = &#34;BH&#34;, pvalueCutoff = 0.05)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 8,
       "title": "Gene Set Enrichment Analysis (GSEA)",
       "instruction": "Gene Set Enrichment Analysis (GSEA). Unlike ORA, GSEA uses the complete ranked gene list without any cutoff, making it sensitive to coordinated small changes across a pathway. gene_list 3c- res_shrunk$log2FoldChange names(gene_list) 3c- res_shrunk$symbol gene_list 3c- sort(gene_list[!is.na(names(gene_list))], decreasing = TRUE) gene_list 3c- gene_list[!duplicated(names(gene_list))] gsea_go 3c- gseGO(geneList = gene_list, OrgDb = org.Hs.eg.db, keyType = &#34;SYMBOL&#34;, ont = &#34;BP&#34;, minGSSize = 15, maxGSSize = 500, pvalueCutoff = 0.05, eps = 0, seed = TRUE) ⚠️ CAUTION_: Never pre-filter the gene list to significant genes before GSEA. The algorithm requires the full ranked list to work correctly.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 9,
       "title": "Sample-level pathway scoring (GSVA)",
       "instruction": "Sample-level pathway scoring (GSVA). GSVA assigns a pathway activity score per sample, enabling patient-level pathway analysis and subtype discovery. library(GSVA); library(msigdbr) h_sets 3c- msigdbr(species = &#34;Homo sapiens&#34;, category = &#34;H&#34;) h_list 3c- split(h_sets$gene_symbol, h_sets$gs_name) expr_mat 3c- assay(vst(dds, blind = FALSE)) gsva_scores 3c- gsva(gsvaParam(expr_mat, h_list), kcdf = &#34;Gaussian&#34;) _EXPECTED_: 50 Hallmark pathways x n_samples matrix. Use kcdf=&#39;Gaussian&#39; for continuous data.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 10,
       "title": "100 DEGs",
       "instruction": "100 DEGs: Check design formula and reference level. Verify labels with PCA on vst data. 10,000 DEGs: Likely batch effects or purity confounding. Add batch to design formula. Gene mapping returns NA: Strip Ensembl version suffixes: sub(&#39;\\\\..*&#39;, &#39;&#39;, ids). GSEA returns nothing: Verify list is sorted decreasingly and not pre-filtered.",
       "is_critical": false,
