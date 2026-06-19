@@ -84,6 +84,11 @@ def load_normalised() -> list[dict]:
                 if not title or len(title) < 5:
                     continue
 
+                # Require at least 3 usable steps
+                steps = item.get("steps") or item.get("steps_raw") or []
+                if len(steps) < 3:
+                    continue
+
                 # Simple title dedup
                 norm_title = re.sub(r"\s+", " ", title.lower())
                 if norm_title in seen_titles:
