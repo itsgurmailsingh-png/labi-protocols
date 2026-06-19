@@ -1,0 +1,94 @@
+{
+  "protocol_id": "microbial_eukaryotic_18s_tag_sequence_processingqc_v4_region_automating",
+  "parent_protocol_id": null,
+  "title": "Microbial eukaryotic 18S tag-sequence processing/QC - V4 region (automating)",
+  "author": "Sarah K Hu",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.j9bcr2n",
+  "source_name": "protocols_io",
+  "source_id": "8195",
+  "source_url": "https://www.protocols.io/view/microbial-eukaryotic-18s-tag-sequence-processing-q-j9bcr2n",
+  "doi": "dx.doi.org/10.17504/protocols.io.j9bcr2n",
+  "citation": "dx.doi.org/10.17504/protocols.io.j9bcr2n",
+  "category": "Genomics & Sequencing",
+  "tags": [
+    "18s rrna",
+    "microbial",
+    "qiime",
+    "sequence processing",
+    "bioinformatics"
+  ],
+  "estimated_time_mins": 36,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "",
+      "instruction": "Input raw fastq files that are already demultiplexed. This tutorial uses V4 primers (Stoeck et al. 2010) for microbial eukaryotes First create a text file with a list of file prefixes (prefix.txt). Example: Test01_L001_R1_001.fastq Test01_L001_R2_001.fastq Test02_L001_R1_001.fastq Test02_L001_R2_001.fastq Associated prefixes: Test01 Test02 Programs required: Database (preferrably with associated taxa list) to align sequences to. A version of the PR2 database formatted for QIIME can be found here QIIME - v.1.9.1 or higher. Note as of Jan 2018 QIIME1 will not be supported. Future iterations of this protocol will use QIIME2. fastqjoin - this should install with QIIME. Alternatively you can use PEAR to merge PE sequences. Trimmomatic - v.0.32 vsearch - v1.11.1 Make sure you know your primer sequences and generate a fasta file: 'trimPE_V4primer.fasta'. In the below example I'm using V4 Stoeck et al. 2010 primers Create a 'prefix.txt' file to index sample fastq files. Run 'create.map.pl' https://github.com/shu251/QC_steps_V4_tagsequencing git clone https://github.com/shu251/QC_steps_V4_tagsequencing Clone github repo",
+      "is_critical": false,
+      "timers": [],
+      "substeps": [
+        {
+          "instruction": "Input raw fastq files that are already demultiplexed. This tutorial uses V4 primers (Stoeck et al. 2010) for microbial eukaryotes First create a text file with a list of file prefixes (prefix.txt). Example: Test01_L001_R1_001.fastq Test01_L001_R2_001.fastq Test02_L001_R1_001.fastq Test02_L001_R2_001.fastq Associated prefixes: Test01 Test02 Programs required: Database (preferrably with associated taxa list) to align sequences to. A version of the PR2 database formatted for QIIME can be found here QIIME - v.1.",
+          "title": ""
+        },
+        {
+          "instruction": "or higher. Note as of Jan 2018 QIIME1 will not be supported. Future iterations of this protocol will use QIIME2. fastqjoin - this should install with QIIME. Alternatively you can use PEAR to merge PE sequences. Trimmomatic - v.",
+          "title": ""
+        },
+        {
+          "instruction": "vsearch - v1.",
+          "title": ""
+        },
+        {
+          "instruction": "Make sure you know your primer sequences and generate a fasta file: 'trimPE_V4primer.fasta'. In the below example I'm using V4 Stoeck et al. 2010 primers Create a 'prefix.txt' file to index sample fastq files. Run 'create.map.pl' https://github.com/shu251/QC_steps_V4_tagsequencing git clone https://github.com/shu251/QC_steps_V4_tagsequencing Clone github repo",
+          "title": ""
+        }
+      ]
+    },
+    {
+      "step_id": 1,
+      "title": "",
+      "instruction": "Map files in QIIME serve to de-multiplex reads (based on barcodes and indices) and are used in 'split_library' QIIME step. Here, I've split up the V4 forward primer to fulfill the necessary barcode / index space required in the QIIME mapping file. However, we aren't using this feature of the mapping file. Use this QIIME command to check mapping file: http://qiime.org/1.6.0/scripts/check_id_map.html #! /usr/bin/perl -wopen INFILE, ) { chomp; push(@prefix, $_); } close INFILE; #create map file for $i(@prefix) { $filename = $i.'_map.txt'; open OUTFILE, \">$filename\"; print OUTFILE '#',\"SampleID\\tBarcodeSequence\\tLinkerPrimerSequence\\tDescription\\n\"; $i =~ s/_//g; print OUTFILE $i, \"\\tCCAG\\tCASCYGCGGTAATTCC\\t\", $i, \"\\n\"; close OUTFILE; } ###seqlength_cutoff.pl #!/usr/bin/perl use warnings; use strict; use Bio::SeqIO; my $file = $ARGV[0]; my $min = $ARGV[1]; my $max = $ARGV[2]; my $out = $ARGV[3]; open (FILE, \">>$out\") or die (\"Error : Cannot open file $out for writing..!\\n\"); my $seq_in = Bio::SeqIO->new( -format => 'fasta',-file => $file); while( my $seq1 = $seq_in->next_seq() ) { my $id = $seq1->primary_id; chomp $id; my $seq = $seq1->seq; chomp $seq; my $lseq = length($seq); if($lseq>=$min && $lseq \",$id,\"\\n\",$seq,\"\\n\"; } }\" description=\"Perl script that creates a map file (QIIME-formatted) based on prefix.txt. Second script to perform sequence length cutoff\" os_version=\"\" os_name=\"\" guid=\"FCC144072EDA4E9EA4506B598CA68672\" > #! /usr/bin/perl -w open INFILE, \"prefix.txt\"; @prefix = (); while () { chomp; push(@prefix, $_); } close INFILE; #create map file for $i(@prefix) { $filename = $i.'_map.txt'; open OUTFILE, \">$filename\"; print OUTFILE '#',\"SampleID\\tBarcodeSequence\\tLinkerPrimerSequence\\tDescription\\n\"; $i =~ s/_//g; print OUTFILE $i, \"\\tCCAG\\tCASCYGCGGTAATTCC\\t\", $i, \"\\n\"; close OUTFILE; } ###seqlength_cutoff.pl #!/usr/bin/perl use warnings; use strict; use Bio::SeqIO; my $file = $ARGV[0]; my $min = $ARGV[1]; my $max = $ARGV[2]; my $out = $ARGV[3]; open (FILE, \">>$out\") or die (\"Error : Cannot open file $out for writing..!\\n\"); my $seq_in = Bio::SeqIO->new( -format => 'fasta',-file => $file); while( my $seq1 = $seq_in->next_seq() ) { my $id = $seq1->primary_id; chomp $id; my $seq = $seq1->seq; chomp $seq; my $lseq = length($seq); if($lseq>=$min && $lseq \",$id,\"\\n\",$seq,\"\\n\"; } } Perl script that creates a map file (QIIME-formatted) based on prefix.txt. Second script to perform sequence length cutoff #Required the prefix.txt file./create.map.pl #Required the prefix.txt file ./create.map.pl",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 2,
+      "title": "",
+      "instruction": "Steps of script noted here: (1) Import prefix file, named 'prefix.txt' and starting loop (2) Remove primers using Trimmomatic (3) Merge paired end (R1 and R2) reads with a 20 bp overlap (4) Perform split library command in QIIME, filter sequences with Q score 30 (-q 29) (5) Length filter: seqlength_cutoff.pl [input.fasta] [min] [max] [output.fasta] (6) Chimera check with vsearch (uchime) using a reference database - You will need to acquire reference database that is best for your sample type. I am using the PR2 database. You can download a QIIME formatted version here. - Alternatively, you can change the command to run vsearch chimera checking de novo. This will take longer. (7) Repeat and combine QCed reads together Required components: - Forward and reverse primer sequences, I'm using V4 Stoeck et al. 2010 primers - reference database - seqlength_cutoff.pl (see script abo) #! /usr/bin/perl -wopen INFILE, ) { chomp; push(@prefix, $_); } close INFILE; #Perl script to automate V4 tag sequence QC process #last updated 09-29-2017, Sarah K. Hu for $i(@prefix) { #(1) Trim primers with trimmomatic print \"java -jar /usr/local/bioinf/Trimmomatic-0.32/trimmomatic-0.32.jar PE \",$i,\"_L001_R1_001.fastq \",$i,\"_L001_R2_001.fastq \",$i,\"_trim_R1_PE.fastq \",$i,\"_trim_R1_orphan.fastq \",$i,\"_trim_R2_PE.fastq \",$i,\"_trim_R2_orphan.fastq LEADING:10 TRAILING:10 SLIDINGWINDOW:10:30 MINLEN:50 ILLUMINACLIP:trimPE_V4primer.fasta:2:30:10\\n\"; #(2) Merge paired end (R1 and R2) reads with a 20 bp overlap print \"join_paired_ends.py -f \",$i,\"_trim_R1_PE.fastq -r \",$i,\"_trim_R2_PE.fastq -o out_\",$i,\" -j 20\\n\"; print \"mv out_\",$i,\"/fastqjoin.join.fastq \",$i,\"_trim_merged.fastq\\n\"; #(3) Perform split library command in QIIME, filter sequences with Q score 30 (-q 29) print \"split_libraries_fastq.py -i \",$i,\"_trim_merged.fastq -m \",$i,\"_map.txt --barcode_type 'not-barcoded' --sample_ids \",$i,\" -q 29 -n 0 -o split_\",$i,\"\\n\"; print \"mv split_\",$i,\"/seqs.fna \",$i,\"_trim_merged_Q30.fasta\\n\"; print \"mv split_\",$i,\"/ out_\",$i,\"/ \\n\"; #(4) Length filter: seqlength_cutoff.pl [input.fasta] [min] [max] [output.fasta] print \"./seqlength_cutoff.pl \",$i,\"_trim_merged_Q30.fasta 150 500 \",$i,\"_trim_merged_Q30_len.fasta\\n\"; #(5) Chimera check with vsearch (uchime) using a reference database print \"vsearch --uchime_ref \",$i,\"_trim_merged_Q30_len.fasta --db /galadriel/sarah/PR2/pr2.qiime.fasta --uchimeout \",$i,\".uchimeinfo_ref --chimeras \",$i,\".chimeras_ref.fasta --strand plus --nonchimeras \",$i,\"_trim_merged_Q30_len_nc.fasta \\n\"; #(9) Move excess files (chimeras) to split directories print \"mv \",$i,\".chimeras_ref.fasta out_\",$i,\"/ \\n\"; print \"mv \",$i,\".uchimeinfo_ref out_\",$i,\"/ \\n\"; print \"mv \",$i,\"*orphan.fastq out_\",$i,\"/ \\n\"; #(10) Combine all reads together print \"cat \",$i,\"_trim_merged_Q30_len_nc.fasta >> allseqs_test.fasta\\n\"; } \" description=\"Perl script to automate running QC steps on paired end sequences. See step 4 directions for required components and programs.\" os_version=\"\" os_name=\"\" guid=\"D2D634B770CB41BAB796C152DC0390DA\" > #! /usr/bin/perl -w open INFILE, \"prefix.txt\"; @prefix = (); while () { chomp; push(@prefix, $_); } close INFILE; #Perl script to automate V4 tag sequence QC process #last updated 09-29-2017, Sarah K. Hu for $i(@prefix) { #(1) Trim primers with trimmomatic print \"java -jar /usr/local/bioinf/Trimmomatic-0.32/trimmomatic-0.32.jar PE \",$i,\"_L001_R1_001.fastq \",$i,\"_L001_R2_001.fastq \",$i,\"_trim_R1_PE.fastq \",$i,\"_trim_R1_orphan.fastq \",$i,\"_trim_R2_PE.fastq \",$i,\"_trim_R2_orphan.fastq LEADING:10 TRAILING:10 SLIDINGWINDOW:10:30 MINLEN:50 ILLUMINACLIP:trimPE_V4primer.fasta:2:30:10\\n\"; #(2) Merge paired end (R1 and R2) reads with a 20 bp overlap print \"join_paired_ends.py -f \",$i,\"_trim_R1_PE.fastq -r \",$i,\"_trim_R2_PE.fastq -o out_\",$i,\" -j 20\\n\"; print \"mv out_\",$i,\"/fastqjoin.join.fastq \",$i,\"_trim_merged.fastq\\n\"; #(3) Perform split library command in QIIME, filter sequences with Q score 30 (-q 29) print \"split_libraries_fastq.py -i \",$i,\"_trim_merged.fastq -m \",$i,\"_map.txt --barcode_type 'not-barcoded' --sample_ids \",$i,\" -q 29 -n 0 -o split_\",$i,\"\\n\"; print \"mv split_\",$i,\"/seqs.fna \",$i,\"_trim_merged_Q30.fasta\\n\"; print \"mv split_\",$i,\"/ out_\",$i,\"/ \\n\"; #(4) Length filter: seqlength_cutoff.pl [input.fasta] [min] [max] [output.fasta] print \"./seqlength_cutoff.pl \",$i,\"_trim_merged_Q30.fasta 150 500 \",$i,\"_trim_merged_Q30_len.fasta\\n\"; #(5) Chimera check with vsearch (uchime) using a reference database print \"vsearch --uchime_ref \",$i,\"_trim_merged_Q30_len.fasta --db /galadriel/sarah/PR2/pr2.qiime.fasta --uchimeout \",$i,\".uchimeinfo_ref --chimeras \",$i,\".chimeras_ref.fasta --strand plus --nonchimeras \",$i,\"_trim_merged_Q30_len_nc.fasta \\n\"; #(9) Move excess files (chimeras) to split directories print \"mv \",$i,\".chimeras_ref.fasta out_\",$i,\"/ \\n\"; print \"mv \",$i,\".uchimeinfo_ref out_\",$i,\"/ \\n\"; print \"mv \",$i,\"*orphan.fastq out_\",$i,\"/ \\n\"; #(10) Combine all reads together print \"cat \",$i,\"_trim_merged_Q30_len_nc.fasta >> allseqs_test.fasta\\n\"; } Perl script to automate running QC steps on paired end sequences. See step 4 directions for required components and programs.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 3,
+      "title": "",
+      "instruction": "Run command below. Output will generate a fasta file for each step of the QC process. This protocol (and my preferred method) is to perform as much quality checking on each individual sample before combining for downstream OTU clustering (or other analysis). This way, I can track any samples that may be not ideal for downstream analysis. Note: for our lab, I see between 20-50% sequences lost per sample (from raw reads to post-chimera check). As long as the final sequence count is > 10,000 I keep the sample. Our threshold of at least 10,000 sequences (typically more) is very conservative. Once this is done, you can clean up directory by removing any of these intermediate files. Explanation of output : After running the count_seqs command (below), the output will show you the number of sequences in each step. We started with 800 sequences, initial quality trimming and primer removal/QC removed almost 200 sequences. Merging and additional QC removed 224 sequences, while length filtration removed no additional sequences. Finally, the chimera checking step only removed 69 sequences. We only kept around 40% of the total sequences. count_seqs.py -i Test01_L001_R1_001.fastq,Test01_L001_R2_001.fastq,Test01_trim_R1_PE.fastq,Test01_trim_R2_PE.fastq,Test01_trim_merged.fastq,Test01_trim_merged_Q30.fasta,Test01_trim_merged_Q30_len.fasta,Test01_trim_merged_Q30_len_nc.fasta Example QIIME command to check number of sequences.",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 4,
+      "title": "",
+      "instruction": "Depending on the questions you want to ask your data, decide about what type of OTU clustering you want to do (both algorithm and percent similarity). QIIME is a great resource for tutorials on OTU clustering - http://qiime.org/tutorials/otu_picking.html#running-the-otu-picking-workflows #OTU clustering with uclust, will make a new directory (pick_open)pick_open_reference_otus.py -i allseqs_test.fasta -o pick_open -m uclust -r /galadriel/sarah/PR2/pr2.qiime.fasta --suppress_step4 --suppress_taxonomy_assignmentcd pick_open#assign taxonomy using PR2 database, creates a new directory (uclust_taxonomy)assign_taxonomy.py -i rep_set.fna -t /galadriel/db/PR2/ids.names.2.txt -r /galadriel/db/PR2/pr2.qiime.fasta -m uclust -o uclust_taxonomy#make an OTU table, and convert to txtmake_otu_table.py -i final_otu_map.txt -o V4_tagseq_test.biom -t uclust_taxonomy/rep_set_tax_assignments.txtbiom convert -i V4_tagseq_test.biom -o V4_tagseq_test.txt --to-tsv --header-key=taxonomy #OTU clustering with uclust, will make a new directory (pick_open) pick_open_reference_otus.py -i allseqs_test.fasta -o pick_open -m uclust -r /galadriel/sarah/PR2/pr2.qiime.fasta --suppress_step4 --suppress_taxonomy_assignment cd pick_open #assign taxonomy using PR2 database, creates a new directory (uclust_taxonomy) assign_taxonomy.py -i rep_set.fna -t /galadriel/db/PR2/ids.names.2.txt -r /galadriel/db/PR2/pr2.qiime.fasta -m uclust -o uclust_taxonomy #make an OTU table, and convert to txt make_otu_table.py -i final_otu_map.txt -o V4_tagseq_test.biom -t uclust_taxonomy/rep_set_tax_assignments.txt biom convert -i V4_tagseq_test.biom -o V4_tagseq_test.txt --to-tsv --header-key=taxonomy",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    },
+    {
+      "step_id": 5,
+      "title": "",
+      "instruction": "For examples of preliminary analyses and figure generation in R see: https://github.com/shu251/PreliminaryFigures_V4_tagseq",
+      "is_critical": false,
+      "timers": [],
+      "substeps": []
+    }
+  ],
+  "verification_status": "verified",
+  "normalised_at": "2026-06-18T21:32:58.532640Z",
+  "llm_normalised": true
+}
