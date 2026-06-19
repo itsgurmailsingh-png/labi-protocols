@@ -36,7 +36,9 @@
     "Hisat2 v2.2.1",
     "Samtools v1.20",
     "HTSeq v0.11.3",
-    "DESeq2"
+    "DESeq2",
+    "Timing: 1–2 h",
+    "Timing: 6 days"
   ],
   "steps": [
     {
@@ -50,21 +52,13 @@
     {
       "step_id": 1,
       "title": "Preparation 2: Setting up the software",
-      "instruction": "Timing: 1–2 h",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
-      "title": "Preparation 2: Setting up the software",
       "instruction": "In this protocol, all tests are conducted utilizing software, as detailed in the key resources table, with download links provided for access. It is recommended to store all software files in a designated folder. Additionally, software can be downloaded and installed either manually or through Conda using the default settings (Figure 1).2.Prior to the bioinformatics analysis, install all software specified in the key resources table.Note: Installation instructions for each program are available on their official websites.Figure 1Screenshot displaying the help message of GenomeAnalysisTKThe figure displays the help information for GATK4, including the version, background details, and usage instructions for the package.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 2,
       "title": "Preparation 3: Dataset",
       "instruction": "Timing: Variable (affected by dataset size and computational resources)\n3.Obtain raw resequencing data.",
       "substeps": [],
@@ -72,7 +66,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 3,
       "title": "Preparation 3: Dataset",
       "instruction": "To facilitate more efficient downloading and management of raw resequencing data, install the SRA Toolkit and organize the raw data files within a designated directory. This protocol utilizes Restriction Site-Associated DNA sequencing (RAD-seq) datasets from populations of Dendrobium catenatum and D. huoshanense, as well as transcriptomic data of D. catenatum subjected to various cadmium stress conditions, all obtained from publicly available sources. Details regarding the download of these data can be found in the key resources table.",
       "substeps": [],
@@ -80,15 +74,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
-      "title": "Prepare input genotype data for analysis",
-      "instruction": "Timing: 6 days",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 6,
+      "step_id": 4,
       "title": "Prepare input genotype data for analysis",
       "instruction": "This step involves SNP calling for all individuals studied and prepares a VCF file for downstream analysis.1.Variant calling with GATK HaplotypeCaller.Figure 2Screenshot displaying information about the SNP calling processThe figure displays the process and summary information of SNP calling for all twenty tested individuals using GATK4.>gatk4 HaplotypeCaller -R /home/[user name]/Workfiles/SNP_Calling/reference.fasta -O /home/[user name]/Workfiles/SNP_Calling/example.raw.vcf -I /home/[user name]/Workfiles/Raw_data/Sample01.realign.bam -I /home/[user name]/Workfiles/Raw_data/Sample02.realign.bam -I /home/[user name]/Workfiles/Raw_data/Sample03.realign.bam … -I /home/[user name]/Workfiles/Raw_data/SampleXX.realign.bamNote: This section identifies variants for each individual using the HaplotypeCaller module in GATK4 v4.6.2.0-114 (Figure 2). To conduct a preliminary evaluation of this protocol, we obtained and analyzed genotype data files from twenty samples across three species: D. catenatum (ten individuals), D. huoshanense (five individuals), and Flickingeria albopurpurea (five individuals). We selected the D. catenatum genome as the reference genome. Troubleshooting 1.2.Selecting SNP variations using GATK.>gatk4 SelectVariants -select-type SNP -V /home/[user name]/Workfiles/SNP_Calling/example.raw.vcf -O /home/[user name]/Workfiles/SNP_Calling/example.raw.SNP.vcf3.Variant filtering with GATK.Figure 3Screenshot displaying information about the SNP filtering processThe figure displays the process and summary information of SNP filtering for all twenty tested individuals using GATK4.>gatk4 VariantFiltration -R /home/[user name]/Workfiles/SNP_Calling/reference.fasta -V /home/[user name]/Workfiles/SNP_Calling/example.raw.SNP.vcf --filter-expression \"QD 60.0 || SOR > 3.0 || MQRankSum python parseVCF.py -i /home/[user name]/Workfiles/SNP_Calling/example.filtered.vcf.gz --minQual 30 --skipIndels --gtf flag=DP min=3 | gzip > /home/[user name]/Workfiles/SNP_Calling/output.example.filtered.vcf.geno.gz",
       "substeps": [],
@@ -96,7 +82,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 5,
       "title": "Geno-format file preparation",
       "instruction": "The script’s output file contains 22 columns, including the chromosome (CHROM), SNP position (POS), and unphased genotypes for each individual (Figure 10).15 Missing data are represented by ‘N’, while unphased genotypes are indicated by ‘/’.15Figure 10The formation and composition of the geno fileThe figure displays the loci information from the.geno file for all tested individuals, generated by parseVCF.py. The script’s output file contains 22 columns, including chromosome (CHROM), SNP position (POS), and unphased genotypes for each individual. Missing data are represented by ‘N’, while unphased genotypes are indicated by ‘/’.",
       "substeps": [],
@@ -104,7 +90,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 6,
       "title": "Differential expression analysis",
       "instruction": "The DESeq2 output file comprises eight columns, which include the mean of normalized counts across all samples (baseMean), the log2 fold change (log2FoldChange) representing the comparison groups under treated and untreated conditions, the standard error associated with the log2 fold change (lfcSE), the Wald test statistic (stat), the p-value derived from the Wald test (p-value), the Benjamini-Hochberg adjusted p-value for controlling the false discovery rate (padj), and an indicator denoting statistical significance (sig).25",
       "substeps": [],
@@ -112,7 +98,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 7,
       "title": "The limited application of D-statistic analysis",
       "instruction": "The D statistic is derived from a model comprising four species or populations, which incorporates an outgroup species.15 This method requires four species or populations: P1, P2, P3 and O. Importantly, it assumes that individuals sampled from the outgroup population have experienced negligible admixture from the archaic source.15 Moreover, the model designs limitations—typically confined to four taxa—make it unsuitable for identifying introgression across broader evolutionary scales, especially in large, complex phylogenies.",
       "substeps": [],

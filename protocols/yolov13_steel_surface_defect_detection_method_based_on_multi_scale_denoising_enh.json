@@ -22,7 +22,9 @@
   "quality_score": 8.5,
   "category": "Other",
   "estimated_time_mins": null,
-  "materials": [],
+  "materials": [
+    "Within this architecture, the Backbone serves as the feature extraction core of YOLOv13, responsible for progressively extracting shallow texture details and deep semantic features from the input image. The resulting P3 to P5 feature maps directly determine the upper bound of accuracy for subsequent Neck fusion and detection head recognition. The Backbone employs the DSC3k2 module, optimized with depthwise separable convolution (DSConv), and the A2C2f module as its core feature extraction units, utilizing hierarchical downsampling and residual connections to enhance feature representation capability while reducing parameter count. When the feature extraction capability of the backbone network is insufficient, the detailed features of tiny, low-contrast defects may severely attenuate or even vanish during progressive downsampling, thereby hindering the effective fusion of shallow geometric details and deep semantic features in the Neck stage. Furthermore, under complex industrial backgrounds, if the feature extraction module lacks discriminative feature weighting and noise suppression mechanisms, it becomes highly susceptible to confusion between actual defects and similar background textures. Both scenarios can lead to a significant degradation in the performance of deep detection models for steel surface defect detection tasks. Therefore, the improvement in this paper focuses on the A2C2f module within the Backbone, aiming to enhance feature extraction capability for tiny defects on steel surfaces, mitigate feature attenuation and background interference, and achieve accurate detection of small defect targets."
+  ],
   "steps": [
     {
       "step_id": 0,
@@ -33,111 +35,104 @@
     },
     {
       "step_id": 1,
-      "title": "Within this architecture, the Backbone serves...",
-      "instruction": "Within this architecture, the Backbone serves as the feature extraction core of YOLOv13, responsible for progressively extracting shallow texture details and deep semantic features from the input image. The resulting P3 to P5 feature maps directly determine the upper bound of accuracy for subsequent Neck fusion and detection head recognition. The Backbone employs the DSC3k2 module, optimized with depthwise separable convolution (DSConv), and the A2C2f module as its core feature extraction units, utilizing hierarchical downsampling and residual connections to enhance feature representation capability while reducing parameter count. When the feature extraction capability of the backbone network is insufficient, the detailed features of tiny, low-contrast defects may severely attenuate or even vanish during progressive downsampling, thereby hindering the effective fusion of shallow geometric details and deep semantic features in the Neck stage. Furthermore, under complex industrial backgrounds, if the feature extraction module lacks discriminative feature weighting and noise suppression mechanisms, it becomes highly susceptible to confusion between actual defects and similar background textures. Both scenarios can lead to a significant degradation in the performance of deep detection models for steel surface defect detection tasks. Therefore, the improvement in this paper focuses on the A2C2f module within the Backbone, aiming to enhance feature extraction capability for tiny defects on steel surfaces, mitigate feature attenuation and background interference, and achieve accurate detection of small defect targets.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
       "title": "In the backbone network of this...",
       "instruction": "In the backbone network of this model, the A2C2f module serves as the fundamental unit for core feature extraction. The A2C2f-MSDE module proposed in this paper can fully replace the original A2C2f module. To maximize the extraction of discriminative features from steel surface defects across different scales, the backbone network integrates two core optimization components:(1)Multi-scale denoising enhanced A2C2f cascade module: The cascaded A2C2f-MSDE modules form the core mechanism for achieving hierarchical feature extraction and enhancement in the model;(2)Optimized residual structure with dual learnable scaling coefficients: This structure connects residual layers both within and between modules, mitigating feature degradation while enhancing the stability of gradient propagation.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 2,
       "title": "Multi-scale denoising enhanced A2C2f cascade module",
       "instruction": "Multi-scale denoising enhanced A2C2f cascade module: The cascaded A2C2f-MSDE modules form the core mechanism for achieving hierarchical feature extraction and enhancement in the model;",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 3,
       "title": "Optimized residual structure with dual learnable...",
       "instruction": "Optimized residual structure with dual learnable scaling coefficients: This structure connects residual layers both within and between modules, mitigating feature degradation while enhancing the stability of gradient propagation.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 4,
       "title": "The original A2C2f module performs excellently...",
       "instruction": "The original A2C2f module performs excellently in general object detection tasks, but exhibits three major limitations in the specific industrial scenario of steel surface defect detection. First, the scale span of steel defects is enormous, ranging from micro-scale micro-cracks to millimeter-scale patches, making it difficult for the original module’s multi-scale feature extraction capability to simultaneously adapt to both extremes. Second, the coexistence of complex rolling background textures and low-contrast defect features, combined with the lack of dedicated noise suppression and edge enhancement mechanisms, makes the module susceptible to misclassifying background interference as defects. Third, as network depth increases, the vanishing gradient problem gradually emerges, affecting effective learning of deep features and the training convergence stability of the module. To address the above issues, this paper designs the A2C2f-MSDE module, whose structure is shown in Figure 1a. Through the synergistic effect of four major mechanisms—multi-scale fusion, attention weighting, denoising enhancement, and a residual optimization structure with dual learnable scaling coefficients—this module achieves efficient extraction and robust representation of steel defect features.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 5,
       "title": "In the first stage of the...",
       "instruction": "In the first stage of the A2C2f-MSDE module, input channel dimension transformation and preliminary multi-scale feature fusion are performed. The input feature map x first passes through a 1×1 convolution (cv1) to transform the channel dimension, producing a feature map x1 with a hidden channel dimension, as shown in Equation (1). Subsequently, x1 is fed into the MSKF multi-scale multi-kernel fusion branch, which fuses features from the 1×1 convolution branch and the 3×3 convolution branch via learnable adaptive weights, followed by feature enhancement through the lightweight SEL channel attention module, outputting a multi-scale enhanced feature map xmsf. A residual fusion of x1 and xmsf is then performed using the learnable scaling coefficient γmsf, as shown in Equation (2), which preserves the original feature information while enhancing the multi-scale feature representation.(1)x1=Conv1×1(x)(2)xmsf_out=x1+γmsf·MSKF(x1)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 6,
       "title": "In the second stage of the...",
       "instruction": "In the second stage of the module, deep feature extraction and denoising enhancement are performed on xmsf_out. The feature map is sequentially processed by n cascaded modules, each consisting of an ABlock region attention module followed by a DE denoising enhancement module in series. ABlock is a region attention mechanism natively introduced in YOLOv13. Its core idea is to divide the feature map into several groups along the channel dimension, with each group independently performing self-attention computation within a local window, thereby achieving global receptive field modeling at extremely low computational cost. ABlock effectively captures long-range dependencies and contextual information of defect targets, but lacks dedicated suppression mechanisms for high-frequency noise, such as rolling textures and reflections that widely exist in industrial images. To address this, this paper cascades the DE module after ABlock, forming a collaborative processing chain of “attention focusing—noise suppression—texture enhancement”: ABlock first completes attention focusing and contextual modeling of defect regions, and then the DE module performs denoising and edge texture enhancement on the attention-enhanced features, preserving the global modeling advantages of ABlock while compensating for its insufficient anti-interference capability in industrial scenarios. The outputs of each cascaded module are retained and channel-concatenated with the initial feature map xmsf_out, as shown in Equation (3). The concatenated feature map is then transformed by a 1×1 convolution (cv2) to match the output channel dimension, generating the feature map xout. Finally, a learnable scaling coefficient γ is used to perform residual fusion between the input feature map x and xout, as shown in Equation (4), which effectively preserves the integrity of gradient flow and alleviates the vanishing gradient problem in deep networks.(3)y=xmsfout∪{m(y[−1])|m∈M}(4)xfinal=x+γ·Conv1×1(Concatchannel(y))\nwhere M is a list of n cascaded ABlock-DE modules, y[−1] denotes the output of the previous module, and ∪ denotes the concatenation operation along the channel dimension.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "The MSKF multi-scale multi-kernel fusion branch...",
       "instruction": "The MSKF multi-scale multi-kernel fusion branch module adopts a parallel branch convolution structure, as shown in Figure 1b, to adapt to defect features of different scales. The 1×1 convolution (cv1) branch preserves the original detail information of the input features, focusing on capturing texture features of small-scale defects such as pixel-level elongated cracks and tiny pitting, avoiding the destruction of weak features by large convolution kernels. The 3×3 convolution (cv2) branch expands the receptive field, focusing on capturing global semantic features of large-scale defects such as patches and inclusions. The design of grouped convolution simultaneously reduces the computational cost of convolution, addressing the issues of incomplete large-defect feature extraction and high computational cost in the original module. To achieve adaptive fusion of features from different branches, the module introduces a learnable weight parameter ω, normalizes the weights via the Softmax function, enabling the model to automatically learn the optimal fusion weights for defects of different scales during training. The fused features are then fed into the SEL lightweight channel attention module to perform channel-wise feature enhancement. The computational process is shown in Equations (5)–(7). This design allows the module to dynamically adjust the fusion strategy according to the scale characteristics of the input defects: when the input is dominated by tiny defects, the 1×1 branch receives higher weight; when the input is dominated by large-scale defects, the weight of the 3×3 branch increases accordingly, thereby achieving adaptive balance of multi-scale features.(5)ω=Softmax(ω)(6)xfused=ω0·Conv1×1x+ω1·DSConv3×3x(7)MSFx=SEL(xfused)\nwhere ω ∈ R2 is a learnable weight parameter, and ω0 and ω1 are the normalized adaptive weights.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 8,
       "title": "For the SEL lightweight channel attention...",
       "instruction": "For the SEL lightweight channel attention module, global channel information is first obtained via adaptive average pooling, followed by two 1×1 convolutions, LayerNorm, SiLU activation, and a Sigmoid activation function to generate channel attention weights, as shown in Figure 1d. The complete computational flow of the module is presented in Equations (8)–(10). The SEL module incorporates two lightweight and stability optimization strategies in its design. First, it uses LayerNorm instead of BatchNorm, and the dimension on which LayerNorm operates is precisely specified in the code to match the feature dimension after global average pooling. This design addresses the issue of BatchNorm statistic shifts during small-batch training in industrial defect detection scenarios, because industrial datasets are often limited in size and distributed training strategies may lead to unstable estimation of BatchNorm mean and variance. The instance-level normalization property of LayerNorm effectively improves the stability of model training. Second, the bias parameters of the two 1×1 convolutional layers are removed (bias = False), which reduces the number of model parameters while avoiding interference from bias terms in channel weight learning, thereby enhancing the accuracy of attention weights.(8)xavg=AvgPool(x)(9)att=Sigmoid(Conv1×1(SiLU(LayerNorm(Conv1×1(xavg)))))(10)SELx=x·att",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 9,
       "title": "To address the poor robustness of...",
       "instruction": "To address the poor robustness of the original module against background noise on steel surfaces, this paper introduces a denoising and texture enhancement module (DE) after the ABlock module, which simultaneously suppresses background noise and enhances defect edge features following attention-based feature extraction. The design rationale for placing the DE module after ABlock is as follows: ABlock performs initial localization of defect regions and contextual modeling via the region attention mechanism, but the attention output features may still retain some background noise, and the fine texture of defect edges has not yet been strengthened. The DE module is specifically designed for post-processing these issues, forming a complete processing chain of “localization—denoising—enhancement”, so that features achieve a better signal-to-noise ratio and edge clarity before entering the next network layer.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 10,
       "title": "The module adopts lightweight depthwise separable...",
       "instruction": "The module adopts lightweight depthwise separable convolution (DSConv) as its core and performs feature optimization in two stages, as shown in Figure 1c. The first stage is denoising, where a 3×3 depthwise separable convolution performs spatial convolution on each channel independently, removing random noise such as rolling textures and reflections from steel surfaces while preserving the spatial location information of defects to the greatest extent. Compared with standard convolution, depthwise separable convolution decouples inter-channel fusion from spatial feature extraction, reducing the number of parameters and computational cost, while avoiding excessive smoothing of weak defect features caused by standard convolution. The second stage is texture enhancement, where a 1×1 pointwise convolution performs inter-channel fusion on the denoised features, strengthening the edge texture features of elongated cracks and improving the feature discriminability between defects and backgrounds, thus solving the problem of blurred defect edge features in the original module. The core computational process of the module is shown in Equation (11).(11)DE(x)=Conv1×1(DSConv3×3x)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 11,
       "title": "To ensure gradient flow integrity and...",
       "instruction": "To ensure gradient flow integrity and feature reuse capability during deep network training, two learnable residual scaling coefficients are introduced into the A2C2f-MSDE module, located at different positions within the module and undertaking distinct optimization functions.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 12,
       "title": "The first scaling coefficient γmsf is...",
       "instruction": "The first scaling coefficient γmsf is embedded in the residual connection of the MSKF branch, as shown in Equation (2). This coefficient controls the fusion ratio between the multi-scale fused features and the original features, allowing the network to adaptively balance the weights between “preserving original features” and “incorporating multi-scale enhanced features” during training. The initial value is set to a small number, so that the original features dominate at the early training stage, and the contribution of multi-scale features is gradually increased as training proceeds, avoiding the adverse impact of early random perturbations on feature learning.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 13,
       "title": "The second scaling coefficient γ is...",
       "instruction": "The second scaling coefficient γ is embedded in the global residual connection of the module, as shown in Equation (4). This coefficient controls the fusion ratio between the module output and the module input, forming a cross-module gradient highway. In deep networks, gradients need to back-propagate through multiple modules. If each module adopts an identity mapping residual connection, gradient attenuation will be significantly aggravated. By introducing a learnable γ, the network can dynamically adjust the contribution of the residual path during training, ensuring that gradients can be efficiently transmitted back to shallow layers and effectively alleviating the vanishing gradient problem.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 14,
       "title": "The proposed A2C2f-MSDE module possesses four core innovations",
       "instruction": "The proposed A2C2f-MSDE module possesses four core innovations. First, the MSKF multi-scale multi-kernel fusion branch with learnable adaptive weights dynamically balances the capture of local detail features of tiny defects and global semantic features of large-area defects, strengthening the multi-scale feature representation capability for steel surface defects. Second, the embedded lightweight SEL channel attention module achieves adaptive weighting of channel features, enhancing the response of effective defect features while suppressing the weights of background noise channels, effectively improving the signal-to-noise ratio of defect features. Third, the dedicated DE module further purifies defect features after the attention module, enhancing the edge and texture features of low-contrast defects, and significantly improving the model’s discriminative ability for irregular, low-contrast defects. Fourth, two learnable residual scaling coefficients are embedded in the multi-scale fusion branch and the main residual path, effectively preserving the integrity of gradient flow in deep networks, alleviating the vanishing gradient problem, and improving the training convergence stability and feature reuse capability of the model.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 16,
+      "step_id": 15,
       "title": "Compared with the original A2C2f module...",
       "instruction": "Compared with the original A2C2f module in terms of structure and function, this module innovatively achieves three major improvements based on the original A2C2f architecture: multi-scale dynamic feature fusion, dual-branch feature enhancement and denoising, and dual learnable residual optimization. This optimized design addresses the limitations of the original A2C2f module in steel surface defect detection, namely insufficient feature extraction for tiny defects, weak anti-interference capability, and training instability. While preserving gradient propagation integrity, it maximizes the extraction of discriminative features of multi-scale steel defects. The A2C2f-MSDE module achieves superior comprehensive feature extraction performance compared to the original module.",
       "is_critical": false,

@@ -26,7 +26,8 @@
     "Up-to-date web browser (e.g., Google Chrome, Firefox, Apple Safari) with WebGL support",
     "Python 3.9 or higher with pip or other Python package installer",
     "Text editor (e.g., Gedit, Notepad++) or integrated development environment (IDE, e.g., VSCode)",
-    "MolViewSpec Python package"
+    "MolViewSpec Python package",
+    "Create components of interest.\nAll steps to this point have prepared the visualization of 3D structure data. Next, the components need to be defined. Components are the result of selections of varying granularity. They can describe a whole protein structure, an individual chain, an individual amino acid residue via its sequence position, or even individual atoms.\nComponents are created by invoking the .component() method provided by the returned object of steps 7–8. This method has a single optional parameter, selector. If the selector parameter is not specified, the whole structure will be selected and represented as a single component. The same behavior can be achieved by calling .component(selector=‘all’). The following snippet selects polymer chains from both structures and groups them into a component. Furthermore, ligands are selected and grouped into a distinct component. polymer1 = structure1.component(selector=‘polymer’) ligand1 = structure1.component(selector=‘ligand’) polymer2 = structure2.component(selector=‘polymer’) ligand2 = structure2.component(selector=‘ligand’) Built-in selectors include: “all”, “polymer”, “protein”, “nucleic”, “branched” (for oligosaccharides), “ligand”, “ion”, and “water”."
   ],
   "steps": [
     {
@@ -96,7 +97,7 @@
     {
       "step_id": 8,
       "title": "BASIC PROTOCOL 1",
-      "instruction": "Create components of interest.\nAll steps to this point have prepared the visualization of 3D structure data. Next, the components need to be defined. Components are the result of selections of varying granularity. They can describe a whole protein structure, an individual chain, an individual amino acid residue via its sequence position, or even individual atoms.\nComponents are created by invoking the .component() method provided by the returned object of steps 7–8. This method has a single optional parameter, selector. If the selector parameter is not specified, the whole structure will be selected and represented as a single component. The same behavior can be achieved by calling .component(selector=‘all’). The following snippet selects polymer chains from both structures and groups them into a component. Furthermore, ligands are selected and grouped into a distinct component. polymer1 = structure1.component(selector=‘polymer’) ligand1 = structure1.component(selector=‘ligand’) polymer2 = structure2.component(selector=‘polymer’) ligand2 = structure2.component(selector=‘ligand’) Built-in selectors include: “all”, “polymer”, “protein”, “nucleic”, “branched” (for oligosaccharides), “ligand”, “ion”, and “water”.",
+      "instruction": "Create representations for components.\nComponents can then be used to create representations, which are things that will be rendered on the canvas. The following representations are supported: “cartoon”, “surface” (molecular surface), and “ball_and_stick”. Similar to the previous step, the method can be invoked without passing any arguments. In that case, the builder will default to a cartoon representation. In our example, polymeric components from both structures will be represented by a cartoon stylization, whereas ligands will be depicted as ball-and-stick. polymer_representation1 = polymer1.representation() # default: ‘cartoon’ ligand_representation1 = ligand1.representation(type=‘ball_and_stick’) polymer_representation2 = polymer2.representation(type=‘cartoon’) ligand_representation2 = ligand2.representation(type=‘ball_and_stick’)",
       "substeps": [],
       "is_critical": false,
       "timers": []
@@ -104,7 +105,7 @@
     {
       "step_id": 9,
       "title": "BASIC PROTOCOL 1",
-      "instruction": "Create representations for components.\nComponents can then be used to create representations, which are things that will be rendered on the canvas. The following representations are supported: “cartoon”, “surface” (molecular surface), and “ball_and_stick”. Similar to the previous step, the method can be invoked without passing any arguments. In that case, the builder will default to a cartoon representation. In our example, polymeric components from both structures will be represented by a cartoon stylization, whereas ligands will be depicted as ball-and-stick. polymer_representation1 = polymer1.representation() # default: ‘cartoon’ ligand_representation1 = ligand1.representation(type=‘ball_and_stick’) polymer_representation2 = polymer2.representation(type=‘cartoon’) ligand_representation2 = ligand2.representation(type=‘ball_and_stick’)",
+      "instruction": "Optional: Adjust color of representations.\nLastly, it is helpful in structure alignments to assign distinct colors to all structures to help distinguish them visually. The representation variables provide a .color() method, which has a single color parameter that sets the color. Colors should be provided in their hex representation. Any of the recognized SVG color names (https://www.w3.org/TR/SVG11/types.html#ColorKeywords) are supported as well. polymer_representation1.color(color=‘#e19039’) # orange ligand_representation1.color(color=‘#eec190’) # desaturated orange polymer_representation2.color(color=‘#4b7fcc’) # blue ligand_representation2.color(color=‘#9cb8e3’) # desaturated blue There is no need to store the result of these function calls in variables as this resembles the deepest level of nesting. No more fine-grained actions are supported.\nIn general, the .color() method returns a reference to the representation and can streamline the specification of multiple colors for different selections by chaining operations.",
       "substeps": [],
       "is_critical": false,
       "timers": []
@@ -112,7 +113,7 @@
     {
       "step_id": 10,
       "title": "BASIC PROTOCOL 1",
-      "instruction": "Optional: Adjust color of representations.\nLastly, it is helpful in structure alignments to assign distinct colors to all structures to help distinguish them visually. The representation variables provide a .color() method, which has a single color parameter that sets the color. Colors should be provided in their hex representation. Any of the recognized SVG color names (https://www.w3.org/TR/SVG11/types.html#ColorKeywords) are supported as well. polymer_representation1.color(color=‘#e19039’) # orange ligand_representation1.color(color=‘#eec190’) # desaturated orange polymer_representation2.color(color=‘#4b7fcc’) # blue ligand_representation2.color(color=‘#9cb8e3’) # desaturated blue There is no need to store the result of these function calls in variables as this resembles the deepest level of nesting. No more fine-grained actions are supported.\nIn general, the .color() method returns a reference to the representation and can streamline the specification of multiple colors for different selections by chaining operations.",
+      "instruction": "Export the builder state.\nAt this point, the builder instance is fully populated with all data sources, parsing information, and details on how to depict a structural alignment of both structures. In order to pass this information to a local file or a compatible 3D viewer, the .get_state() method of the builder variable can be used. The following statement acquires the state of the MolViewSpec builder in MVSJ format (which is a JSON representation of the state with additional metadata) and prints it to the console using the print() function. By default, the resulting JSON will be indented by two whitespaces, but this can be configured by passing an integer using the indent parameter. print(builder.get_state()) This console output can be stored in a file called “protocol1.mvsj” (see Supporting Information) and captures the complete builder state that was modularly composed by all previous steps. Save this file in your local file system to persist your results. We refer to this file as MolViewSpec state file.",
       "substeps": [],
       "is_critical": false,
       "timers": []
@@ -120,21 +121,13 @@
     {
       "step_id": 11,
       "title": "BASIC PROTOCOL 1",
-      "instruction": "Export the builder state.\nAt this point, the builder instance is fully populated with all data sources, parsing information, and details on how to depict a structural alignment of both structures. In order to pass this information to a local file or a compatible 3D viewer, the .get_state() method of the builder variable can be used. The following statement acquires the state of the MolViewSpec builder in MVSJ format (which is a JSON representation of the state with additional metadata) and prints it to the console using the print() function. By default, the resulting JSON will be indented by two whitespaces, but this can be configured by passing an integer using the indent parameter. print(builder.get_state()) This console output can be stored in a file called “protocol1.mvsj” (see Supporting Information) and captures the complete builder state that was modularly composed by all previous steps. Save this file in your local file system to persist your results. We refer to this file as MolViewSpec state file.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "BASIC PROTOCOL 1",
       "instruction": "Open MolViewSpec file in a compatible 3D viewer.\nDrag and drop the “protocol1.mvsj” file from step 12 into an instance of the Mol* 3D viewer (e.g., https://molstar.org/viewer/). Mol* will recognize the file format and create the scene described by the MVSJ file, as seen in Figure 1 and at this link. The resulting view shows chain A of PDB ID 1oj6 in orange superimposed with chain A from PDB ID 5mjd in blue.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 12,
       "title": "BASIC PROTOCOL 2",
       "instruction": "Install the MolViewSpec Python package, create a script, instantiate builder, and specify structural data.\nThe first few steps of this protocol are in essence the same as in Basic Protocol 1. Perform the setup and build the view description down to the structure level as described there (see Basic Protocol 1, steps 1–7). After performing these steps, our Python script “protocol2.py” (see Supporting Information) might look like this: import molviewspec as mvs builder = mvs.create_builder() structure = (builder .download(url=‘https://files.wwpdb.org/download/1h9t.cif’) .parse(format=‘mmcif’) .model_structure() )",
       "substeps": [],
@@ -142,7 +135,7 @@
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 13,
       "title": "BASIC PROTOCOL 2",
       "instruction": "Create components using MolViewSpec annotations. protein = structure.component_from_uri( uri=‘./annotations-1h9t.cif’, format=‘cif’, block_header=‘1h9t_annotations’, category_name=‘components’, field_name=‘component’, field_values=‘Protein’, schema=‘chain’) dna = structure.component_from_uri( uri=‘./annotations-1h9t.cif’, format=‘cif’, category_name=‘components’, field_values=‘DNA’, schema=‘chain’) ions = structure.component_from_uri( uri=‘./annotations-1h9t.cif’, format=‘cif’, category_name=‘components’, field_values=[‘Gold’, ‘Chloride’], schema=‘chain’) Data-driven structure components can be created using the .component_from_uri() method. Provide the location (uri) and format of the MolViewSpec annotation file in which the components are defined. This snippet uses a relative URI “./annotations.cif”, which will be resolved against the URI of the MVSJ file itself, e.g., if we serve the MVSJ file at “https://example.org/view.mvsj”, then the annotation file will have to be at “https://example.org/annotations-1h9t.cif”. The value of the format parameter can be “cif”, “bcif”, or “json”, depending on the format of the annotation file.\nParameters block_header and category_name are used to indicate a specific block and category in the annotation file (only applicable for annotation files in CIF or BinaryCIF format). These parameters can be omitted, indicating the first category of the first block.\nParameters field_name and field_values are used to specify a subset of annotation rows that should be included in the created component. Namely, field_name indicates one of the columns in the annotation table, and field_values indicates the values in that column to be included (field_name can be omitted if the column name is “component”). Omitting these parameters indicates that the whole table should be included in the component.\nFinally, the schema parameter defines the granularity of the created component. In our example, schema=‘chain’ means that we are selecting whole chains and the component is defined by columns “label_asym_id” and “label_entity_id” in the table (detailed information on mmCIF fields can be found at https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Index/). Use the schemas “entity”, “chain”, “residue”, “residue_range”, and “atom” to select components based on the mmCIF numbering (columns prefixed with “label_”); use “auth_chain”, “auth_residue”, “auth_residue_range”, and “auth_atom” to select components based on author-provided numbering (columns prefixed with “auth_”). The wildcard schema “all_atomic” can be used to take into account all columns present in the annotation table.",
       "substeps": [],
@@ -150,7 +143,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 14,
       "title": "BASIC PROTOCOL 2",
       "instruction": "Create representations. protein_repr = protein.representation(type=‘cartoon’) dna_repr = dna.representation(type=‘ball_and_stick’) ions_repr = ions.representation(type=‘surface’) Creating representations is achieved by the .representation() method, regardless of whether the component was created by .component() or .component_from_uri(). The result of this step is shown in Figure 2.",
       "substeps": [],
@@ -158,7 +151,7 @@
       "timers": []
     },
     {
-      "step_id": 16,
+      "step_id": 15,
       "title": "BASIC PROTOCOL 2",
       "instruction": "Apply coloring using MolViewSpec annotations. protein_repr.color_from_uri( uri=‘./annotations-1h9t.cif’, format=‘cif’, block_header=‘1h9t_annotations’, category_name=‘annotations’, field_name=‘color’, schema=‘residue_range’) dna_repr.color_from_uri( uri=‘./annotations-1h9t.cif’, format=‘cif’, category_name=‘annotations’, schema=‘residue_range’) ions_repr.color_from_uri( uri=‘./annotations-1h9t.cif’, format=‘cif’, category_name=‘annotations’, schema=‘residue_range’) Data-driven coloring can be added to a representation via the .color_from_uri() method.\nThe meaning of parameters uri, format, block_header, category_name, and schema is the same as for .component_from_uri().\nParameter field_name indicates the column that holds the color values (can be omitted if the column name is “color”). The color values in the annotation file should be in the same format as the colors used in the MolViewSpec state file (i.e., either a name like orange or a hex code like #e19039).\nIf multiple annotation rows apply to the same part of the structure, this part will in the end be colored by the last applied color. For instance, if the first row applies red to residues 1–100 and the second row applies blue to residues 100–120, then residue 100 will be blue. The same logic applies when multiple colors are applied to the same representation (e.g., protein_repr.color(color = ‘gray’). color_from_uri(…)). The result of this step is shown in Figure 3.",
       "substeps": [],
@@ -166,7 +159,7 @@
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 16,
       "title": "BASIC PROTOCOL 2",
       "instruction": "Add labels using MolViewSpec annotations. structure.label_from_uri( uri=‘./annotations-1h9t.cif’, format=‘cif’, block_header=‘1h9t_annotations’, category_name=‘annotations’, field_name=‘label’, schema=‘residue_range’) Data-driven labels can be added to a structure via the .label_from_uri() method.\nThe meaning of parameters uri, format, block_header, category_name, and schema is the same as for .component_from_uri().\nParameter field_name indicates the column that holds the label values (can be omitted if the column name is “label”).\nBy default, each annotation row results in one label in the 3D view. However, if the annotation table contains a column named “group_id”, this column will be used to group rows with the same group_id value and apply only one label per group. Rows with missing group_id (represented in CIF by the special value “.”) behave as separate groups. The result of this step is shown in Figure 4.",
       "substeps": [],
@@ -174,7 +167,7 @@
       "timers": []
     },
     {
-      "step_id": 18,
+      "step_id": 17,
       "title": "BASIC PROTOCOL 2",
       "instruction": "Add tooltips using MolViewSpec annotations. structure.tooltip_from_uri( uri=‘./annotations-1h9t.cif’, format=‘cif’, block_header=‘1h9t_annotations’, category_name=‘annotations’, field_name=‘label’, schema=‘residue_range’) A tooltip, as opposed to a label, refers to text that is not an integral part of the visualization but is presented to users when they interact with a structure component as shown in Figure 5. The exact behavior can vary between viewers, but typically the tooltip will be shown somewhere on the screen when the user hovers over the component. In some contexts (e.g., when rendering static images), tooltips do not apply at all.\nData-driven tooltips can be added to a structure via the .tooltip_from_uri() method.\nThe meaning of parameters uri, format, block_header, category_name, and schema is the same as for .component_from_uri().\nParameter field_name indicates the column that holds the tooltip values (can be omitted if the column name is “tooltip”). In our example, we take the tooltips from the same column as the labels.",
       "substeps": [],
@@ -182,7 +175,7 @@
       "timers": []
     },
     {
-      "step_id": 19,
+      "step_id": 18,
       "title": "BASIC PROTOCOL 2",
       "instruction": "Export the builder state. builder.save_state(destination=‘protocol2.mvsj’, title=‘An example with MVS annotations’, indent=2) The created state can be exported in JSON-based MVSJ format using the methods .get_state() (to get as a string) and .save_state() (to save into a file). The format can be customized by the optional indent parameter, and additional information can be saved with the state by the optional title, description, and description_format parameters.",
       "substeps": [],
@@ -190,7 +183,7 @@
       "timers": []
     },
     {
-      "step_id": 20,
+      "step_id": 19,
       "title": "BASIC PROTOCOL 2",
       "instruction": "Ensure availability of the annotation files.\nAt this stage, we must ensure that the referenced annotation files are available to the viewer. There are multiple scenarios, as the URI reference can be either absolute or relative and can use various protocols.\nThe annotation file URI uses “http(s)” scheme (or the annotation file URI reference is relative and the state file URI uses “http(s)” scheme, i.e., the state file is served from the web). To achieve this, you must host your annotation file on a server and make it publically available. Also make sure CORS is enabled for the hosted files.The annotation file URI uses “file” scheme (or the annotation file URI reference is relative and the state file URI uses “file” scheme, i.e., the state file is loaded from disk). This is applicable for desktop viewers and command-line applications that have access to the disk (such as the Mol* command-line utility mvs-render). It is not applicable for web viewers because, even when the state file is loaded from the disk (via either a menu or drag-and-drop), the browser does not allow access to other files on the disk for security reasons. Therefore, dragging and dropping the state file into an instance of the Mol* 3D viewer (see Basic Protocol 1, step 13) will not work in this case.The annotation file URI reference is relative and the state file with the annotation file are packed together in an MVSX archive. Technically, an MVSX archive is simply a ZIP archive containing the state file named as “index.mvsj” and any number of other files (can be MVS annotation files but also structure files). The extension .mvsx is used to distinguish it from a regular .zip archive, but the structure is the same. Therefore, it is very easy to create via a Python script: import zipfile with zipfile.ZipFile(‘protocol2.mvsx’, mode=‘w’) as z: z.write(‘protocol2.mvsj’, arcname=‘index.mvsj’) z.write(‘annotations-1h9t.cif’, arcname=‘annotations-1h9t.cif’) In this case, the relative URI reference in the state file will resolve to the other file stored in the archive. Thanks to this, the MVSX archive can simply be loaded into Mol* Viewer by dragging and dropping, and can also be served from the web.",
       "substeps": [],
@@ -198,7 +191,7 @@
       "timers": []
     },
     {
-      "step_id": 21,
+      "step_id": 20,
       "title": "BASIC PROTOCOL 2",
       "instruction": "Open MolViewSpec file in compatible 3D viewer.\nOpen the created state file, e.g., drag and drop the MVSX file into an instance of the Mol* 3D viewer or go to https://molstar.org/viewer/?mvs-format={FORMAT}&mvs-url={URL}, where {URL} specifies the URL where the state file is hosted and {FORMAT} specifies the format of the state file (mvsj/mvsx). The resulting view is shown in Figure 5 and at this link: https://molstar.org/viewer/?mvs-format=mvsj&mvs-url=https%3A%2F%2Fmolstar.org%2Fmol-view-spec%2Fexamples%2Fannotations%2Fstate.mvsj&hide-controls=1.\nNOTE: Thanks to the structure of the CIF (and BinaryCIF) format, a single file can accommodate both structural data and MolViewSpec annotations. To reference these annotations, you can use component_from_source, color_from_source, label_from_source, and tooltip_from_source methods, which behave in the same way as their _from_uri counterparts but load the annotation from the same CIF (or BinaryCIF) file from which the structural data are loaded. These methods also take the same parameters, except for uri and format, which are obviously not necessary.",
       "substeps": [],
@@ -206,7 +199,7 @@
       "timers": []
     },
     {
-      "step_id": 22,
+      "step_id": 21,
       "title": "BASIC PROTOCOL 3",
       "instruction": "Perform common MolViewSpec actions to create empty structure.\nCreate a standard MolViewSpec scene as described (see Basic Protocol 1, steps 1–7). The condensed “protocol3.py” Python code (see Supporting Information) will look like this: import molviewspec as mvs builder = mvs.create_builder() # note: updated CIF from PDBe provides explicit bond information to render nicely download = builder.download(url=‘ https://www.ebi.ac.uk/pdbe/entry-files/download/4hhb_updated.cif’) parse = download.parse(format=‘mmcif’) structure = parse.assembly_structure(assembly_id=‘1’) This will load PDB ID 4hhb and create a structure object for its first biological assembly.",
       "substeps": [],
@@ -214,7 +207,7 @@
       "timers": []
     },
     {
-      "step_id": 23,
+      "step_id": 22,
       "title": "BASIC PROTOCOL 3",
       "instruction": "Create a custom component expression.\nWhen selections will be reused, it can make sense to store them in a variable. Here, the iron atom (with “label_atom_id” = “FE”) from the first heme ligand (“label_asym_id” = “E”) is selected and assigned to the fe_selector variable. fe_selector = mvs.ComponentExpression(label_asym_id=‘E’, label_atom_id=‘FE’) The ComponentExpression class supports a plethora of properties that enable the selection of individual atoms, residues, chains, or entities.",
       "substeps": [],
@@ -222,7 +215,7 @@
       "timers": []
     },
     {
-      "step_id": 24,
+      "step_id": 23,
       "title": "BASIC PROTOCOL 3",
       "instruction": "Create a representation for the first heme ligand.\nIn this protocol, the first heme ligand of PDB ID 4hhb should be visualized. The ligand can be uniquely identified by its “label_asym_id” as defined in the mmCIF source file. ligand = structure.component(selector=mvs.ComponentExpression(label_asym_id=‘E’)) ligand.representation(type=‘ball_and_stick’).color(color=‘#ffffff’).color(selector=fe_ selector, color=‘#ff4500’) The ligand variable now holds a reference to a component describing the first heme ligand. In the second line, a ball-and-stick representation in white color is added. Lastly, the .color() method is used to change the color of the previously selected iron ion (referenced by the fe_selector variable) to an orange-red color.",
       "substeps": [],
@@ -230,7 +223,7 @@
       "timers": []
     },
     {
-      "step_id": 25,
+      "step_id": 24,
       "title": "BASIC PROTOCOL 3",
       "instruction": "Add labels and tooltips to components.\nCustom text labels can be defined and will appear close to the selected element in 3D. The fe_selector variable is used to create another component that captures only the FE atom of the first heme ligand. The .label() method adds a text label to components. Its content can be defined using the text parameter. Analogously, the .tooltip() method assigns custom tooltips to components. These tooltips appear in the bottom-right corner of the Mol* 3D viewer if hovering over the corresponding element, providing a way of showing more detailed information.\nNOTE: The selection mode must be changed to view the tooltip when hovering over the iron ion. In Mol*, this can be achieved by clicking the mouse cursor icon (labeled “Toggle Selection Mode”) located in the top-right corner of the canvas. Subsequently, adjust the value of the newly revealed “Picking Level” dropdown menu from “Residue” to “Atom/Coarse Element”. fe = structure.component(selector=fe_selector) fe.label(text=‘Iron Ion’).tooltip(text=‘Additional info that appears only on mouseover’)",
       "substeps": [],
@@ -238,7 +231,7 @@
       "timers": []
     },
     {
-      "step_id": 26,
+      "step_id": 25,
       "title": "BASIC PROTOCOL 3",
       "instruction": "Specify global properties: Background color.\nThe builder supports a global .canvas() action that enables setting the background color, e.g., to a light orange. builder.canvas(background_color=‘#ffcf6b’) Colors can be provided in hex representation or as SVG color names (https://www.w3.org/TR/SVG11/types.html#ColorKeywords).",
       "substeps": [],
@@ -246,7 +239,7 @@
       "timers": []
     },
     {
-      "step_id": 27,
+      "step_id": 26,
       "title": "BASIC PROTOCOL 3",
       "instruction": "Specify global properties: Camera position.\nThe builder supports another global action via the .camera() method. This method has two parameters: target and position, which are both 3D vectors. target supplies the coordinates of the object to be viewed, whereas position defines the location of the camera. A third optional parameter is up, another 3D vector that controls what appears in the upper part of the canvas. # camera to look at heme ligand, orthogonal to porphyrin group builder.camera(target=(18, 18, 24), position=(30 , 12, 25)) Viewers implementing MolViewSpec will use their own protocol to orient the camera relative to the visualized content. Truly reproducible views can only be defined by explicitly setting the camera position.\nAnother way of controlling the camera position is to use the .focus() method, which is exposed by all components. Invoking .focus() will position the camera so that all elements of that selection are visible.",
       "substeps": [],
@@ -254,7 +247,7 @@
       "timers": []
     },
     {
-      "step_id": 28,
+      "step_id": 27,
       "title": "BASIC PROTOCOL 3",
       "instruction": "Export this view and open it in a compatible 3D viewer.\nExport the state of the builder variable as JSON format with file name “protocol3.mvsj” (see Supporting Information) as described (see Basic Protocol 1, steps 12–13) and open it, e.g., by dragging and dropping it into an instance of the Mol* 3D viewer. The resulting view is shown in Figure 6 and at this link. It shows a single heme ligand of PDB ID 4hhb. The ligand is displayed in white, the coordinated iron ion is in orange-red and labeled with custom text, and the background color is set to orange. The camera is positioned so that it looks directly at the heme ligand from above, orthogonal to the porphyrin group.",
       "substeps": [],
@@ -262,7 +255,7 @@
       "timers": []
     },
     {
-      "step_id": 29,
+      "step_id": 28,
       "title": "SUPPORT PROTOCOL 1",
       "instruction": "Obtain alignment using the RCSB PDB Pairwise Structure Alignment application.\nNavigate to the application (https://www.rcsb.org/alignment) and specify the two inputs: “1OJ6” and “5MJD”. This will populate the inputs for “Chain ID” and “Begin” and “End” positions appropriately. Make sure to select the correct chain if chains other than the first one should be aligned. Click the “Compare” button to compute and visually validate the alignment.",
       "substeps": [],
@@ -270,7 +263,7 @@
       "timers": []
     },
     {
-      "step_id": 30,
+      "step_id": 29,
       "title": "SUPPORT PROTOCOL 1",
       "instruction": "Obtain a 4×4 transformation matrix from the alignment response.\nClick the “Alignment API” button in the top-right corner of the user interface to access the underlying application programming interface (API). This page will show the API request made to align both entries. You will also see the API response after clicking the play icon in the header bar of the user interface.\nThe API response contains a property called transformations, an array that contains the 4×4 transformation matrix that will move the atomic coordinates of an entry appropriately. The first matrix in the array is always the identity matrix because coordinates of the reference structure will be fixed. The second matrix contains the transformation that will superimpose the second structure onto the first. In this example, the 4×4 matrix looks like this: [-0.3965220392, 0.9180228028, 0.0020990366, 0, // values 1…4 0.9068461183, 0.3913367028, 0.1564790811, 0, // values 5…8 0.1428299346, 0.0639509075, -0.9876790426, 0, // values 9…12 -17.6360858967, 7.9707613147, 88.5461324803, 1] // values 13…16",
       "substeps": [],
@@ -278,7 +271,7 @@
       "timers": []
     },
     {
-      "step_id": 31,
+      "step_id": 30,
       "title": "SUPPORT PROTOCOL 1",
       "instruction": "Convert to rotation and translation vectors.\nThe rotation vector is captured by values 1, 2, 3, 5, 6, 7, 9, 10, and 11, whereas values 13, 14, and 15 describe the translation vector. Values in the fourth column can be ignored.\nThe obtained values can then be used in the following fashion: structure2 = structure2.transform(rotation=[-0.39652203922082313, 0.918022802798312, 0.002099036562725462, 0.9068461182538327, 0.39133670281585825, 0.1564790811487865, 0.14282993460796656, 0.06395090751149791, -0.9876790426086504], translation=[-17.636085896690037, 7.970761314734439, 88.54613248028247])",
       "substeps": [],
@@ -286,7 +279,7 @@
       "timers": []
     },
     {
-      "step_id": 32,
+      "step_id": 31,
       "title": "SUPPORT PROTOCOL 2",
       "instruction": "Create a CIF file.\nCreate an empty text file named “annotation-1h9t.cif”, which will hold the annotations. Open the file in a text editor or IDE.",
       "substeps": [],
@@ -294,7 +287,7 @@
       "timers": []
     },
     {
-      "step_id": 33,
+      "step_id": 32,
       "title": "SUPPORT PROTOCOL 2",
       "instruction": "Open a block.\nBlocks in a CIF file are marked by a data_ directive immediately followed by the name of the block (block header). In our case, the block header will be “1h9t_annotations”: data_1h9t_annotations",
       "substeps": [],
@@ -302,7 +295,7 @@
       "timers": []
     },
     {
-      "step_id": 34,
+      "step_id": 33,
       "title": "SUPPORT PROTOCOL 2",
       "instruction": "Open a category and define the columns.\nWithin the block, each category (annotation table) is typically marked by a loop_ directive followed by the list of column names in the format _{CATEGORY_NAME}.{COLUMN_NAME}: loop_ _components.label_asym_id _components.component This snippet opens a category named “components” with two columns named “label_asym_id” and “component”.\nMolViewSpec annotations distinguish two types of columns. Independent variable columns are used to select substructures; dependent variable columns assign values such as color or label to these substructures. There is a predefined list of independent variable columns (label_entity_id, label_asym_id, label_seq_id, beg_label_seq_id, end_label_seq_id, label_atom_id, auth_asym_id, auth_seq_id, pdbx_PDB_ins_code, beg_auth_seq_id, end_auth_seq_id, auth_atom_id, type_symbol, atom_id, atom_index, group_id). Dependent variable columns can have any name.\nIn our example, “label_asym_id” is an independent variable column (selects substructures based on the chain identifier) and “component” is a dependent variable column (assigns component name).",
       "substeps": [],
@@ -310,7 +303,7 @@
       "timers": []
     },
     {
-      "step_id": 35,
+      "step_id": 34,
       "title": "SUPPORT PROTOCOL 2",
       "instruction": "Add annotation rows into the category.\nAny number of annotation rows can be added. Each row must list values for each column separated by spaces. A Protein B Protein C DNA D DNA E Gold H Gold F Chloride G Chloride I Chloride This example defines four components: “Protein” consisting of chains A, B; “DNA” with chains C, D; “Gold” with chains E, H; and “Chloride” with chains F, G, I.",
       "substeps": [],
@@ -318,7 +311,7 @@
       "timers": []
     },
     {
-      "step_id": 36,
+      "step_id": 35,
       "title": "SUPPORT PROTOCOL 2",
       "instruction": "Optional: Add more categories.\nA new category can be opened by using a loop_ directive again and defining the column names and annotation rows for the new table. Category names must be unique within the block. loop_ _annotations.label_asym_id _annotations.beg_label_seq_id _annotations.end_label_seq_id _annotations.color _annotations.label _annotations.group_id A 9 83 ‘#dd6600’ ‘DNA-binding’ . A 84 231 ‘#008800’ ‘Acyl-CoA binding’ . B 9 83 ‘#cc8800’ ‘DNA-binding’ . B 84 231 ‘#008888’ ‘Acyl-CoA binding’ . C . . ‘#1100aa’ ‘DNA X’ . D . . ‘#dddddd’ ‘DNA Y’ . E . . ‘#ffff00’ ‘Gold’ . H . . ‘#ffff00’ ‘Gold’ . F . . ‘#00dd00’ ‘Chloride’ . G . . ‘#00dd00’ ‘Chloride’ . I . . ‘#00dd00’ ‘Chloride’ . A 57 57 ‘red’ ‘Ligand binding site’ 1 A 67 67 ‘red’ ‘Ligand binding site’ 1 A 121 121 ‘red’ ‘Ligand binding site’ 2 A 125 125 ‘red’ ‘Ligand binding site’ 2 A 129 129 ‘red’ ‘Ligand binding site’ 2 A 178 178 ‘red’ ‘Ligand binding site’ 3 A 203 205 ‘red’ ‘Ligand binding site’ 2 B 121 121 ‘red’ ‘Ligand binding site’ 4 B 125 125 ‘red’ ‘Ligand binding site’ 4 B 129 129 ‘red’ ‘Ligand binding site’ 4 B 203 205 ‘red’ ‘Ligand binding site’ 4 In this category, the independent variable columns (label_asym_id, beg_label_seq_id, end_label_seq_id) select substructures based on the chain identifier and residue range, while the dependent variable columns assign color and label. The special column “group_id” groups annotation rows together to create more complex selections for application of labels. For example, this annotation table creates three separate labels saying “Chloride” (one per row), but only four labels saying “Ligand binding site” (eleven rows are grouped into four groups).\nThis example also demonstrates how quotes can be used to include spaces and special characters within string values (e.g., ‘Ligand binding site’, ‘#dd6600’). A value can also be omitted using a period (.), e.g., the “DNA X” label is applied to the whole chain C because the residue numbers are omitted. Here use multiple spaces between values to align the columns, but this is just for visual clarity; using a single space is sufficient. More details about the CIF syntax can be found in its documentation (https://mmcif.wwpdb.org/).",
       "substeps": [],
@@ -326,7 +319,7 @@
       "timers": []
     },
     {
-      "step_id": 37,
+      "step_id": 36,
       "title": "SUPPORT PROTOCOL 2",
       "instruction": "Optional: Add more blocks.\nAt this point we can add more blocks, each started with a data_ directive and the block header. Block headers must be unique within the whole file.",
       "substeps": [],

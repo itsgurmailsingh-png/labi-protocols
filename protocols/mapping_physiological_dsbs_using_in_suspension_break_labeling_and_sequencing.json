@@ -36,7 +36,9 @@
     "Sodium acetate trihydrate",
     "Glycogen",
     "Agencourt AMPure XP beads",
-    "NEBNext Ultra II Q5 master mix"
+    "NEBNext Ultra II Q5 master mix",
+    "Timing: 3–4 h",
+    "Related to step 92."
   ],
   "steps": [
     {
@@ -82,21 +84,13 @@
     {
       "step_id": 5,
       "title": "Library prep VI: Double two-sided ampure bead purification of library",
-      "instruction": "Timing: 3–4 h",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 6,
-      "title": "Library prep VI: Double two-sided ampure bead purification of library",
       "instruction": "This final step of the protocol eliminates DNA fragments with sizes that are not compatible with the sequencer, meaning, removal of both fragments that are longer than 1000 bp and shorter than 200 bp. This step is one that requires much caution and concentration, to not accidently lose the sample and it is recommended to read more about size selection via bead purification to get a better sense of the following steps.90.Warm Ampure XP beads for 30 min to 22°C–25°C.91.Perform two-sided Ampure bead purification and concentration according to the following:a.Add 0.5× ratio of beads to the tubes containing DNA (100 μL beads for 200 μL sample, this ratio will bind the longer than desired fragments).b.Pipette approximately 10 times or until mixed well.c.Close tubes and incubate 15 min at 22°C–25°C.d.Place tubes on magnetic stand, wait 2 min for solution to clear and transfer sup to a fresh tube.e.Add 0.25× ratio of beads to the tubes containing DNA (50 μL beads for 300 μL sample+PEG, this ratio will complete the PEG ratio to 0.75× size selection, regardless of the number of beads in the solution, and will bind the desired fragments).f.Pipette approximately 10 times or until mixed well.g.Close tubes and incubate 15 min at 22°C–25°C.h.Place tubes on magnetic stand, wait 2 min for solution to clear and remove sup.i.Wash twice with 700 μL freshly prepared 80% ethanol, make sure ethanol sits for at least 30 s per wash.j.Remove sup and let beads dry on the magnetic stand for 5 min. Avoid cracking of the beads.k.Elute with H2O: remove tubes from the stand and resuspend beads in 50 μL H2O.l.Close tubes and incubate 15 min at 22°C–25°C.m.Place tubes on magnetic stand, wait 2 min for solution to clear and transfer sup to a fresh tube (50 μL H2O now contain the elution of the first two-sided cleanup).92.Repeat two-sided Ampure bead purification and concentration according to the following (same steps as first cleanup, with different volumes):a.Add 0.5× ratio of beads to the tubes containing DNA (25 μL beads for 50 μL sample).b.Pipette approximately 10 times or until mixed well.c.Close tubes and incubate 15 min at 22°C–25°C.d.Place tubes on magnetic stand, wait 2 min for solution to clear and transfer sup to a fresh tube.e.Add 0.25× ratio of beads to the tubes containing DNA (13 μL beads for 75 μL sample+PEG, completing ratio to 0.75× size selection).f.Pipette approximately 10 times or until mixed well.g.Close tubes and incubate 15 min at 22°C–25°C.h.Place tubes on magnetic stand, wait 2 min for solution to clear and remove sup.i.Wash twice with 500 μL freshly prepared 80% ethanol, make sure ethanol sits for at least 30 s per wash.j.Remove sup and let beads dry on the magnetic stand for 5 min. Avoid cracking of the beads.k.Elute with H2O: remove tubes from the stand and resuspend beads in 21 μL H2O.l.Close tubes and incubate 15 min at 22°C–25°C.m.Place tubes on magnetic stand, wait 2 min for solution to clear and transfer sup to a fresh tube (21 μL H2O now contain the final library).Note: Incubation times and volumes can be changed based on specific needs and experience.Note: Avoid low library concentrations.Note: The final libraries can now be analyzed via TapeStation and Qubit analyses. The results of size distribution and concentration will provide relevant data for pooling samples for sequencing (will vary based on sequencer and facility). Troubleshooting 3 + 4.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 6,
       "title": "Analysis of the sequencing data",
       "instruction": "Timing: 2–10 days depending on sample size\nNote: Analysis is performed within Linux environment unless stated otherwise. In all snippets, the format is a description of the variable rather than the variable itself.\nNote: The outcome of standard Illumina sequencing may be a set of FASTQ files with several samples multiplexed within each FASTQ file. The internal index distinguishing between multiplexed samples and the Unique Molecular Identifier (UMI) are both embedded within the FASTQ sequences.\n1.Use the following Python3-based snippet as a guideline for extracting the internal index and UMI. # Run through FASTQ entries. For each entry create four # FASTQ component lines: line1 (header), line2 (sequence), # line3 and line4 (base quality). > UMI = line2[:8] > Internal_Index = line2[8:16] > line1 = line1 + “+” + Internal_Index + “+” + UMI > line2=line2[16:] > line4=line4[16:] # Write these modified four-line FASTQ as an entry to the sample # which is identified by the Internal_Index. CRITICAL: Of particular importance is the separator “+” between UMI and left-hand-side of the header line (line1). This separator will be used in downstream analysis for de-duplicating breaks based on location and UMI.\nNote: Base errors may occur within the Internal index. Depending on the list of possible internal indices, one or two errors may be acceptable. Calculate the number of discrepancies between the actual index and a target index with the following Python3 command: > discrepancies=sum(x1!=x2 for x1,x2 in zip(actual,target))",
       "substeps": [],
@@ -104,7 +98,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "Analysis of the sequencing data",
       "instruction": "Apply steps 94–97 to evaluate, preprocess, filter, map and de-duplicate each of the FASTQ files.2.Use fastqc to assess base quality along the reads, sequencer tile quality, nucleotide content distribution, read length distribution, estimated duplication level and adapter contamination.> fastqc –outdir trim_galore -q 20 –length 20 --output_dir 4.Additionally, if required, enforce trimming of a specific adapter sequence with the “adapter” flag.> trim_galore -q 20 –length 20 --output_dir ∖--adapter Note: Optionally, perform post quality assessment with fastqc, either as a separate step or as part of trim_galore operation.5.Use hisat2 to map pre-processed sequencing reads to your reference genome. You can also use alternative genome aligners such as star, bowtie2 or BWA. Prior to mapping, prepare your assembly-specific index file. Preferably download the index file from https://daehwankimlab.github.io/hisat2/download/. For non-standard genomes, you can also prepare a custom index.> hisat2_build 6.Once index file is available, perform mapping to the genome and follow this step with the creation of a sorted and indexed BAM file. Use the following code snippet as a guideline.> hisat2 -x -U ∖--no-spliced-alignment --no-unal --new-summary ∖--summary-file > samtools view -bS | samtools sort -o > samtools index -b 7.Discard reads which are assumed to be artificial PCR duplicates (same position and same UMI) and create a deduplicated BAM file.> umi_tools dedup --output-stats= -I ∖-S --umi-separator=\"+\"",
       "substeps": [],
@@ -112,7 +106,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 8,
       "title": "Analysis of the sequencing data",
       "instruction": "Follow steps 100–101 to create other forms of BREAK files from the de-duplicated BAM file.8.Create A BED file from the de-duplicated BAM file.> bedtools bamtobed -i Note: The resulting BED file is “flat”, meaning each BAM line is reported separately irrespective of coordinates.9.The following R-based snippet performs four tasks:a.Creates a BREAK bed file of widths 1. This bed file is created from the start site of each entry (on the + strand) or from the end site (on the – strand).b.Aggregates all breaks falling at the same genomic location into a new score entry.c.Creates a new BREAK BED file.d.Aggregates breaks from both strands to create a new BREAK BEDGRAPH file.# bDF is a data frame holding the flat BED file with the# following columns: CHR, START, END, ID, SCORE, STRAND# BDF1 holds the final BED file and BDF2 holds the final# BEDGRAPH file.> bDF[bDF$STRAND==\"+\",]$END bDF[bDF$STRAND==\"-\",]$START bDF1 bDF2 bedGraphToBigWig Note: You may be required to pre-sort the BEDGRAPH file.> sort -k1,1 -k2,2n > CRITICAL: is two column table with the first column holding chromosome names and second column is the sizes per chromosome. For hg38 assembly, the table can be downloaded from: https://hgdownload.cse.ucsc.edu/goldenpath/hg38/bigZips/.11.Downstream analysis with BIGWIG files",
       "substeps": [],
@@ -120,7 +114,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 9,
       "title": "Analysis of the sequencing data",
       "instruction": "Two examples for downstream analysis in R-environment are now described.",
       "substeps": [],
@@ -128,7 +122,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 10,
       "title": "Analysis of the sequencing data",
       "instruction": "First, the extraction of unwanted genomic regions (for example a blacklist of regions).> library rtracklayer> smp ,format=”bigwig”)> bls ,format=”bed”)> Overlaps filtered_smp <- smp[-Overlaps]",
       "substeps": [],
@@ -136,7 +130,7 @@
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 11,
       "title": "Analysis of the sequencing data",
       "instruction": "Second, counting breaks in consecutive genomic tiles.> library rtracklayer> library(BRGenomics)> smp ,format=”bigwig”)> tiles ,tilewidth= )> counts Overlaps filtered_smp <- smp[-Overlaps]",
       "substeps": [],
@@ -144,15 +138,7 @@
       "timers": []
     },
     {
-      "step_id": 13,
-      "title": "Problem 4: No library appears at final analysis",
-      "instruction": "Related to step 92.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
+      "step_id": 12,
       "title": "Problem 4: No library appears at final analysis",
       "instruction": "As mentioned, final library should look like the above example (Figure 2). If the TapeStation analysis shows no result, the protocol failed to produce a library. Figure 4 for example.Figure 4TapeStation analysis of DNA fragment size of undetected sBLISS library",
       "substeps": [],
@@ -160,7 +146,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 13,
       "title": "Problem 4: No library appears at final analysis",
       "instruction": "This can be a result of problems at various steps, such as: unsuccessful ligation of BLISS adapter or mistakes during ampure bead cleanup. Usually, to distinguish which of the two is at fault, you can analyze the 2 μL of RNA leftover from step 68 (preforming the non-mandatory step 69). The expected RNA concentration should be around 100 ng/μL and at least higher than 50 ng/μL. If the RNA concentration is good, it means the problem was probably during PCR/cleanup. Otherwise, the problem occurred at the time of ligation. The other half of the cDNA left behind can be tested as well if desired. This will distinguish whether the problem occurred during PCR or cleanup.",
       "substeps": [],

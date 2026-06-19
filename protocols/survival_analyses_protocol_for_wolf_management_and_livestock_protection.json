@@ -24,7 +24,35 @@
   "estimated_time_mins": 480,
   "materials": [
     "STATA 14 software",
-    "computer"
+    "computer",
+    "1. VARIABLES USED (and description):",
+    "Interv_dich --&gt; intervention type (lethal, non-lethal)",
+    "wolves_killed --&gt; number of wolves killed",
+    "start_time --&gt; start time variable (all obs ‘0’)",
+    "year --&gt; year variable (1998-2014)",
+    "2. SAMPLE .DO FILE (Section scale)‡:",
+    "clear all",
+    "cd “/Location/Of/File”",
+    "log using &#34;Name.smcl&#34;, replace",
+    "use &#34;Data.dta&#34;, replace",
+    "************************************************",
+    "****Replacing intervention type if wolves_killed = 0§",
+    "replace Interv_dich=&#34;non-lethal&#34; if wolves_killed==0",
+    "replace Interv_dummy=0 if Interv_dich==&#34;non-lethal&#34;",
+    "***Set data as survival time for PWP-GT model",
+    "stset Delay_in_yrstop_time, failure(status_event) exit(time .) enter(start_time)",
+    "list ID_TRS_yr _t0 _t _d _st**",
+    "stdescribe",
+    "stsum",
+    "***Limiting analysis to # of Strata††",
+    "use “Data_Strata#.dta”",
+    "*Comparing survival functions by group",
+    "sts list, by(Interv_dich)",
+    "sts list, by(Interv_dich) compare",
+    "*Graphing survival functions by group",
+    "sts graph, by(Interv_dich)",
+    "sts graph, fail by(Interv_dich)",
+    "*Graphing smoothed hazard estimates (hazard ratio) by group"
   ],
   "steps": [
     {
@@ -43,547 +71,113 @@
     },
     {
       "step_id": 2,
-      "title": "1",
-      "instruction": "1. VARIABLES USED (and description):",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
       "title": "ID_TRS_yr --&gt; identifier for each area-year...",
       "instruction": "ID_TRS_yr --&gt; identifier for each area-year combination (please see study for more information)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 4,
-      "title": "Interv_dich --&gt; intervention type (lethal, non-lethal)",
-      "instruction": "Interv_dich --&gt; intervention type (lethal, non-lethal)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
-      "title": "wolves_killed --&gt; number of wolves killed",
-      "instruction": "wolves_killed --&gt; number of wolves killed",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 6,
+      "step_id": 3,
       "title": "Interv_dummy --&gt; dummy variable for intervention...",
       "instruction": "Interv_dummy --&gt; dummy variable for intervention type (0 if ‘non-lethal’, 1 if ‘lethal’)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 4,
       "title": "Delay_in_yrstop_time --&gt; time to recurrent event (in days) or censoring",
       "instruction": "Delay_in_yrstop_time --&gt; time to recurrent event (in days) or censoring",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 5,
       "title": "status_event --&gt; failure binary variable (1...",
       "instruction": "status_event --&gt; failure binary variable (1 if recurrent event; 0 if censored)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 9,
-      "title": "start_time --&gt; start time variable (all obs ‘0’)",
-      "instruction": "start_time --&gt; start time variable (all obs ‘0’)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
+      "step_id": 6,
       "title": "yr_stratum --&gt; order of recurrent events within a particular area-yr†",
       "instruction": "yr_stratum --&gt; order of recurrent events within a particular area-yr†",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 11,
-      "title": "year --&gt; year variable (1998-2014)",
-      "instruction": "year --&gt; year variable (1998-2014)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "2",
-      "instruction": "2. SAMPLE .DO FILE (Section scale)‡:",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 13,
-      "title": "clear all",
-      "instruction": "clear all",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
-      "title": "cd “/Location/Of/File”",
-      "instruction": "cd “/Location/Of/File”",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 15,
-      "title": "log using &#34;Name",
-      "instruction": "log using &#34;Name.smcl&#34;, replace",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
+      "step_id": 7,
       "title": "set mem 1g",
       "instruction": "set mem 1g",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 17,
-      "title": "use &#34;Data",
-      "instruction": "use &#34;Data.dta&#34;, replace",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 18,
+      "step_id": 8,
       "title": "set more off, permanently",
       "instruction": "set more off, permanently",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 19,
-      "title": "************************************************",
-      "instruction": "************************************************",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 20,
-      "title": "****Replacing intervention type if wolves_killed = 0§",
-      "instruction": "****Replacing intervention type if wolves_killed = 0§",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 21,
-      "title": "************************************************",
-      "instruction": "************************************************",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 22,
-      "title": "replace Interv_dich=&#34;non-lethal&#34; if wolves_killed==0",
-      "instruction": "replace Interv_dich=&#34;non-lethal&#34; if wolves_killed==0",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 23,
-      "title": "replace Interv_dummy=0 if Interv_dich==&#34;non-lethal&#34;",
-      "instruction": "replace Interv_dummy=0 if Interv_dich==&#34;non-lethal&#34;",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 24,
-      "title": "************************************************",
-      "instruction": "************************************************",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 25,
-      "title": "***Set data as survival time for PWP-GT model",
-      "instruction": "***Set data as survival time for PWP-GT model",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 26,
-      "title": "************************************************",
-      "instruction": "************************************************",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 27,
-      "title": "stset Delay_in_yrstop_time, failure(status_event) exit(time",
-      "instruction": "stset Delay_in_yrstop_time, failure(status_event) exit(time .) enter(start_time)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 28,
-      "title": "list ID_TRS_yr _t0 _t _d _st**",
-      "instruction": "list ID_TRS_yr _t0 _t _d _st**",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 29,
-      "title": "stdescribe",
-      "instruction": "stdescribe",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 30,
-      "title": "stsum",
-      "instruction": "stsum",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 31,
-      "title": "************************************************",
-      "instruction": "************************************************",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 32,
-      "title": "***Limiting analysis to # of Strata††",
-      "instruction": "***Limiting analysis to # of Strata††",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 33,
-      "title": "************************************************",
-      "instruction": "************************************************",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 34,
-      "title": "use “Data_Strata#",
-      "instruction": "use “Data_Strata#.dta”",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 35,
-      "title": "stset Delay_in_yrstop_time, failure(status_event) exit(time",
-      "instruction": "stset Delay_in_yrstop_time, failure(status_event) exit(time .) enter(start_time)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 36,
-      "title": "stdescribe",
-      "instruction": "stdescribe",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 37,
-      "title": "stsum",
-      "instruction": "stsum",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 38,
-      "title": "*Comparing survival functions by group",
-      "instruction": "*Comparing survival functions by group",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 39,
-      "title": "sts list, by(Interv_dich)",
-      "instruction": "sts list, by(Interv_dich)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 40,
-      "title": "sts list, by(Interv_dich) compare",
-      "instruction": "sts list, by(Interv_dich) compare",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 41,
-      "title": "*Graphing survival functions by group",
-      "instruction": "*Graphing survival functions by group",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 42,
-      "title": "sts graph, by(Interv_dich)",
-      "instruction": "sts graph, by(Interv_dich)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 43,
-      "title": "sts graph, fail by(Interv_dich)",
-      "instruction": "sts graph, fail by(Interv_dich)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 44,
-      "title": "*Graphing smoothed hazard estimates (hazard ratio) by group",
-      "instruction": "*Graphing smoothed hazard estimates (hazard ratio) by group",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 45,
-      "title": "sts graph, hazard by(Interv_dich)",
-      "instruction": "sts graph, hazard by(Interv_dich)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 46,
-      "title": "sts graph, cumhaz by(Interv_dich)",
-      "instruction": "sts graph, cumhaz by(Interv_dich)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 47,
+      "step_id": 9,
       "title": "*Testing equality of survival functions by group (Log-rank test)",
       "instruction": "*Testing equality of survival functions by group (Log-rank test)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 48,
-      "title": "sts test Interv_dich",
-      "instruction": "sts test Interv_dich",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 49,
-      "title": "sts test Interv_dich, strata(yr_stratum)",
-      "instruction": "sts test Interv_dich, strata(yr_stratum)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 50,
-      "title": "***COX MODELS (stcox)***",
-      "instruction": "***COX MODELS (stcox)***",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 51,
-      "title": "**STRATIFIED**",
-      "instruction": "**STRATIFIED**",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 52,
-      "title": "stcox Interv_dummy year, strata(yr_stratum) vce(cluster ID_TRS_yr)",
-      "instruction": "stcox Interv_dummy year, strata(yr_stratum) vce(cluster ID_TRS_yr)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 53,
-      "title": "stcox Interv_dummy year, nohr strata(yr_stratum) vce(cluster ID_TRS_yr)",
-      "instruction": "stcox Interv_dummy year, nohr strata(yr_stratum) vce(cluster ID_TRS_yr)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 54,
-      "title": "*Checking Proportional Hazard assumptions",
-      "instruction": "*Checking Proportional Hazard assumptions",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 55,
-      "title": "estat phtest, log detail",
-      "instruction": "estat phtest, log detail",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 56,
-      "title": "estat phtest, plot(Interv_dummy)",
-      "instruction": "estat phtest, plot(Interv_dummy)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 57,
-      "title": "stphplot, by(Interv_dummy)",
-      "instruction": "stphplot, by(Interv_dummy)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 58,
-      "title": "estat phtest, plot(year)",
-      "instruction": "estat phtest, plot(year)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 59,
-      "title": "stphplot, by(year)",
-      "instruction": "stphplot, by(year)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 60,
+      "step_id": 10,
       "title": "*Adding time-varying covariate to account for proportional hazard assumption violation",
       "instruction": "*Adding time-varying covariate to account for proportional hazard assumption violation",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 61,
-      "title": "stcox Interv_dummy year, tvc(Interv_dummy) texp(_t) strata(yr_stratum) vce(cluster ID_TRS_yr)",
-      "instruction": "stcox Interv_dummy year, tvc(Interv_dummy) texp(_t) strata(yr_stratum) vce(cluster ID_TRS_yr)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 62,
-      "title": "*FRAILTY (MIXED-EFFECTS) MODEL**",
-      "instruction": "*FRAILTY (MIXED-EFFECTS) MODEL**",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 63,
-      "title": "strmcure Interv_dummy year, shared(ID_TRS_yr) strata(yr_stratum)",
-      "instruction": "strmcure Interv_dummy year, shared(ID_TRS_yr) strata(yr_stratum)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 64,
-      "title": "************************************************",
-      "instruction": "************************************************",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 65,
+      "step_id": 11,
       "title": "***Correlation between delay between incidents and...",
       "instruction": "***Correlation between delay between incidents and wolves killed (for ‘Lethal’ only)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 66,
-      "title": "************************************************",
-      "instruction": "************************************************",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 67,
-      "title": "spearman Delay_in_yrstop_time wolves_killed if Interv_dich==&#34;Lethal&#34;",
-      "instruction": "spearman Delay_in_yrstop_time wolves_killed if Interv_dich==&#34;Lethal&#34;",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 68,
-      "title": "log close",
-      "instruction": "log close",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 69,
+      "step_id": 12,
       "title": "* This sample code does not...",
       "instruction": "* This sample code does not include code lines for dropping or adding observations, which we did for the alternate datasets used. However, this should only involve basic coding, and descriptions of observations included or dropped for each dataset can be found in the study.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 70,
+      "step_id": 13,
       "title": "† ‘Area’ refers to the section,...",
       "instruction": "† ‘Area’ refers to the section, neighborhood or neighborhood of township area scales.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 71,
+      "step_id": 14,
       "title": "‡ A similar procedure was used...",
       "instruction": "‡ A similar procedure was used for the township and neighborhood of township scales, using their respective spatial unit identifiers.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 72,
+      "step_id": 15,
       "title": "§ This section was used for our main dataset",
       "instruction": "§ This section was used for our main dataset. We removed this section of code for our alternate ‘traps-placed’ dataset, to include as ‘lethal’ those cases were attempts were made to trap wolves (please see study).",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 73,
+      "step_id": 16,
       "title": "** May need to break ties...",
       "instruction": "** May need to break ties in Delay_in_yrstop_time variable to retain observations (please see stset help in Stata)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 74,
+      "step_id": 17,
       "title": "†† A separate dataset was created...",
       "instruction": "†† A separate dataset was created including only those area-year records with strata (yr_stratum) values with enough observations to be properly modelled (please see study).",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 75,
-      "title": "---------------",
-      "instruction": "---------------",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 76,
-      "title": "----------------------------------------",
-      "instruction": "----------------------------------------",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 77,
-      "title": "---------------",
-      "instruction": "---------------",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 78,
-      "title": "----------------------------------------",
-      "instruction": "----------------------------------------",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 79,
-      "title": "Santiago-Ávila, Cornman &amp; Treves, 2017",
-      "instruction": "Santiago-Ávila, Cornman &amp; Treves, 2017",
       "is_critical": false,
       "timers": []
     }

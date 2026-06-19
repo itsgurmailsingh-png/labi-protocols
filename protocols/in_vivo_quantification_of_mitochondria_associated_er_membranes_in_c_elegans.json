@@ -36,7 +36,10 @@
     "Potassium dihydrogen phosphate",
     "Sodium chloride",
     "Streptomycin sulfate",
-    "Levamisole hydrochloride"
+    "Levamisole hydrochloride",
+    "Timing: Variable (dependent on image number and quality)",
+    "Timing: ∼5 min per sub-image",
+    "Timing: Variable (dependent on dataset size)"
   ],
   "steps": [
     {
@@ -50,29 +53,13 @@
     {
       "step_id": 1,
       "title": "Image pre-analysis",
-      "instruction": "Timing: Variable (dependent on image number and quality)",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
-      "title": "Image pre-analysis",
       "instruction": "The following steps provide a detailed guide for selecting appropriate regions of interest (ROIs) for quantifying the relative area of MAM-like domains in a single image using the Fiji software.31.Launch Fiji.32.Generate a reusable selection pattern:a.Create a new image via File→New (or press Ctrl+N)b.Set image type to 8-bit, dimensions to 125x125 pixels and click OK.c.Select the entire image via Edit→Selection→Select All (or press Ctrl+A)d.Add the selection to the ROI manager by pressing T and save it using More→Save in the ROI manager.Note: The dimensions of this image define the size of subregions to be analyzed. A size of 125x125 pixels is recommended but can be empirically adjusted. If images were acquired in a 16-bit format, set the new image type accordingly.33.Open an acquired image in Fiji by drag and drop or via File→Open.34.In the Bio-Formats Import Options pop-upa.Set color mode to Composite.b.Leave all other options unchecked.c.Click OK to proceed.35.Select ROIs and generate sub-images for analysis:a.Identify a well-focused region with clear signal in both channels and restrict sub-image selection to this region (Figure 2A) (troubleshooting 5).b.In the ROI manager, select the saved entry that corresponds to the selection pattern.Note: A saved selection pattern can be reloaded to the ROI manager at any time via More→Open or by simple drag and drop of the corresponding file.c.Transfer the selection to a representative region of the image (Figure 2A) and duplicate it via Image→Duplicate (or press Ctrl+Shift+D).CRITICAL: In the duplication pop-up, ensure that the “Duplicate hyperstack” is selected to preserve channel information.d.Save the duplicated image via File→Save (or press S)CRITICAL: Use a consistent and traceable nomenclature that links each sub-image to its original image and experimental condition.e.Repeat the duplication process for a second region of the image.Note: For relatively homogeneous images, two subregions are typically sufficient. For more heterogeneous images, select and duplicate three or more regions to ensure representative results in the analysis.CRITICAL: Manual ROI selection is necessary to ensure that only physiologically relevant regions are analyzed. However, it can introduce user-dependent bias if subregions enriched in or depleted of MAM-like domains are preferentially chosen. This risk can be minimized by selecting multiple ROIs per animal, applying consistent selection criteria and performing the analysis in a blinded manner whenever possible.",
       "substeps": [],
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 3,
-      "title": "Single-image analysis",
-      "instruction": "Timing: ∼5 min per sub-image",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 4,
+      "step_id": 2,
       "title": "Single-image analysis",
       "instruction": "This section provides step-by-step instructions for manually quantifying the relative area of MAM-like domains in each sub-image that was generated during pre-analysis using Fiji. While not practical for analyzing large image datasets, this workflow is essential for fine-tuning analysis parameters and should be performed on multiple representative images of each condition to ensure that the appropriate settings have been selected prior to batch processing.36.Launch Fiji.37.Open the subimage to be analyzed via File→Open (or by drag and drop).38.Reduce image noise:a.Navigate to Process→Subtract Background.b.In the pop-up window, set the rolling ball radius to 50.0 pixels and leave all other options unchecked.CRITICAL: The optimal rolling ball radius depends on image quality and should be empirically adjusted to reduce background noise without losing information. High-quality images typically require less background subtraction (i.e., higher rolling ball radius), while lower-quality images may benefit from more aggressive subtraction (i.e., lower radius). Use 50.0 pixels as a starting point and enable the Preview option on the Subtract Background pop-up to monitor changes in real time. Once selected, this value must remain constant across all images to ensure reproducibility.CRITICAL: The “Light background” option is enabled by default in some distributions of ImageJ. Ensure that this box is unchecked before pressing OK. Leaving this option checked will result in a uniform “pure color”, effectively destroying the data.39.Generate a colored duplicate image via Image→Type→RGB Color (hereafter referred to as the colocalization image (Figure 2B)).40.Split channelsa.Select the original image.b.Navigate to Image→Color→Split Channels.41.Create binary masks.a.Select the mOrange channel image.b.Convert it to a binary mask via Process→Binary→Convert to Mask.Note: This workflow uses the midpoint of fluorescence intensity in each image as a threshold for generating binary masks. Alternative thresholding algorithms can be used by navigating to Image→Adjust→Threshold and selecting the desired algorithm, before converting the image to a binary mask.c.Reduce noise via Process→Binary→Median, setting the radius to 0.5 pixels (Figure 2C).d.Select the GFP channel image and repeat steps 40 b and 40c.CRITICAL: The radius value for median filtering must be empirically optimized based on image quality for both channels. Once selected, it must remain constant across all images to avoid introducing of artifacts or user bias.42.Generate mitochondrial outlines.a.Select the binary GFP image.b.Navigate to Process→Binary→Outline to create mitochondria image (Figure 2D).43.Identify the fraction of mitochondrial outlines that colocalizes with the ER (MAMs fraction):a.Navigate to Process→Image Calculator.b.Set Image 1 to the mOrange binary image and Image 2 to the GFP binary image.c.Choose the AND operation.d.Ensure the “Create new window” option is checked.e.Click OK to generate the MAMs image (Figure 2E).44.Create a selection from the MAMs image via Edit→Selection→Create Selection.45.Validate the accuracy of MAMs identification:a.Select the colocalization image (generated in step 38).b.Transfer the selection from the MAMs image via Edit→Selection→Restore Selection (or press Shift+E).c.Confirm that the selection corresponds to the regions around GFP fluorescence that overlap with CemOrange signal.Note: If the LUTs for GFP and CemOrange are set to Green and Magenta, respectively, the selection should mark the grey areas of the RGB image.d.If the selection does not successfully represent colocalized pixels, revisit and adjust the rolling ball radius (step 37), the median filter radius (step 40) and lastly the thresholding algorithm (step 41), then repeat the process (troubleshooting 6).46.Measure mitochondrial surface (MS) area:a.Navigate to Analyze→Set Measurements.b.Ensure Area and Display Label are selected and leave all other options unchecked.c.Select the mitochondria image.d.Go to Edit→Selection→Create Selection.e.Quantify the area via Analyze→Measure (or by pressing M).47.Measure MAMs area:a.Select the MAMs image.b.Go to Edit→Selection→Create Selection.c.Quantify the via Analyze→Measure (or by pressing M).48.Calculate the percentage of mitochondrial surface involved in MAMs by applying the formula MAMsareaMSarea×100.49.Calculate the average MAMs fraction across all sub-images derived from a single original image. This value represents the portion of mitochondrial membranes that participate in MAM-like structures for that animal and will be used for downstream plotting and statistical analysis.",
       "substeps": [
@@ -97,15 +84,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
-      "title": "Automated batch-image analysis",
-      "instruction": "Timing: Variable (dependent on dataset size)",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 6,
+      "step_id": 3,
       "title": "Automated batch-image analysis",
       "instruction": "This section provides the Fiji macro code and detailed instructions for automated batch analysis of large image datasets. The macro replicates all steps of single image analysis to calculate the area of mitochondrial surface (MS) and MAM-like domains across input files. It is specifically designed to process sub-images generated during image pre-analysis and should only be executed after optimal analysis parameters have been selected and validated through single image analysis (see previous section).50.Launch Fiji and navigate to Plugins→New→Macro.51.Paste the following code:#@File(label = “Folder\", style = “directory\") dir#@File(label = “Save\", style = “directory\") dir2#@String(label = “File suffix\", value = “.tif\") suffixDialog.create(“Set Analysis Parameters\");Dialog.addNumber(“Rolling Ball Radius\", 50);Dialog.addNumber(“Median Filter Radius for Channel 1\", 0.5);Dialog.addNumber(“Median Filter Radius for Channel 2\", 0.5);Dialog.show();rbr = Dialog.getNumber();C1mr = Dialog.getNumber();C2mr = Dialog.getNumber();run(“Set Measurements.\", “area display redirect=None decimal=3\");processFolder(dir);function processFolder(dir) { list = getFileList(dir); for (i = 0; i 0) { roiManager(“Select\", 0); roiManager(“Set Fill Color\", “red\"); run(“Flatten\"); saveAs(“Tiff\", dir2 + File.separator + filename + “_OVRL\"); } roiManager(“reset\"); }selectWindow(“Results\");saveAs(dir2 + File.separator + “Results.txt\");close(“Results\");CRITICAL: Ensure the programming language is set to ImageJ Macro in the Language menu of the macro window.52.Save the macro via File→Save in the macro window.Note: In future uses, the macro can be opened via File→Open in the macro window, or by drag and drop.53.Run the macro and set the appropriate parameters:a.Click the Run button of the macro window.b.On the first pop-up, define:i.The path of the input folder that contains the sub-images to be analyzed (Folder).ii.The location for saving output files (Save).iii.The suffix of the input files (e.g., .tif).c.On the second pop-up define the following analysis parameters as determined during single image analysis:i.Rolling Ball Radius.ii.Median Filter Radius for Channel 1.iii.Median Filter Radius for Channel 2.Note: For each sub-image analyzed, the macro generates three.tif files suitable for data presentation: one depicting the total mitochondrial surface (MS), one showing the fraction that colocalizes with the ER and likely participates in MAMs and one that shows these MAM-like domains as an overlay on the MS. In addition, a.txt file is produced, containing the quantified areas of MS and MAMs for each sub-image (troubleshooting 7, 8 and 9). Further information on data analysis and presentation is provided in the expected outcomes section.",
       "substeps": [],
@@ -113,7 +92,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 4,
       "title": "Quantification and statistical analysis",
       "instruction": "The data in Results.txt file can be directly imported into spreadsheet software to calculate the percentage of mitochondrial surface involved in MAM-like structures, by applying the formula MAMsareaMSarea×100. Once calculated for each sub-image, these values can be averaged across sub-images stemming from a single original image (i.e., one animal) and be used for plotting and statistical analysis. Data visualization and analysis can follow two complementary approaches:1.Time point-specific comparison:",
       "substeps": [],
@@ -121,7 +100,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 5,
       "title": "Quantification and statistical analysis",
       "instruction": "For each condition and time point, plot the average MAMs fraction per animal in a grouped table. Statistical significance can be assessed using a two-way ANOVA. We recommend bar or box plots that display individual animal values as points, with standard deviation (SD) error bars (Figure 3B).2.Time course analysis with AUC:",
       "substeps": [],
@@ -129,7 +108,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 6,
       "title": "Quantification and statistical analysis",
       "instruction": "For each condition, plot the mean MAMs fraction across time points in an XY scatter plot with SD error bars. Assign X values to time points (e.g., days) and Y values to MAMs fractions. To quantify the overall behavior, calculate the area under the curve (AUC) for each condition (Figures 3C and 3D). AUC This provides an integrated measure of mitochondrial participation in MAMs formation over time, with higher values reflecting greater engagement. This approach enables robust comparison between treatments and can capture temporal trends that may be missed in pointwise analyses. AUC values from individual biological replicates can be used for downstream statistical testing with t-tests or one-way ANOVA.",
       "substeps": [],
@@ -137,7 +116,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 7,
       "title": "Quantification and statistical analysis",
       "instruction": "The first approach offers detailed resolution but is limited to pairwise comparisons. The second provides a holistic view of condition-specific trajectories and is particularly useful when integrating data from multiple biological replicates (expressed as different AUC values).",
       "substeps": [],

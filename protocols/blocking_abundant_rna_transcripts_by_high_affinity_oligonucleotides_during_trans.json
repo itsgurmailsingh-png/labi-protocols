@@ -30,19 +30,16 @@
     "Ficoll Paque Plus (Cytiva, Washington, D.C., USA, 17144002)",
     "Flongle Flow cell (Oxford Nanopore Technologies, UK, FLO-FLG001)",
     "Fragment Analyzer RNA Kit (Agilent, USA, DNF-471-0500)",
-    "GemCode Chip G (10x Genomics, Pleasonton, CA, USA, 2000177)"
+    "GemCode Chip G (10x Genomics, Pleasonton, CA, USA, 2000177)",
+    "Total RNA was isolated from platelet-free (PFP) and platelet-rich plasma (PRP) using the miRNeasy Serum/Plasma Kit (Qiagen, Hilden, Germany, 217,184). We used 200 μl of plasma as input. For the cancer patient experiment, 2 μl of 1x RC PFP spikes were added to the plasma during isolation. The elution volume was 14 μl, and we added 2 μl of 1x LP PFP spikes (Thermo Fisher). Detailed descriptions of the spike-in controls can be found in the exRNAQC study [50]. From this total volume, we used 5 μl for the library preparation. For the healthy donor experiment, the eluate of multiple parallel extractions was pooled according to the original biofluid type (PRP or PFP) and split into six aliquots of 5 μl to minimize extraction bias. We did not include a gDNA removal step after RNA isolation. The input is volume-based since the RNA concentrations of PFP and PRP are below the limit of quantification.",
+    "We used HEK293T cells that were grown in RPMI 1640 medium with GlutaMAX supplement (Thermo Fisher, Waltham, MA, USA) supplemented with 10% fetal calf serum (Merck, Germany) and were lysed with SingleShot lysis buffer (Bio-Rad, United States of America).",
+    "to investigate the quality of the reads.",
+    "We extracted RNA using the RNeasy Micro Kit (Qiagen, Hilden, Germany, 217,184) according to the manufacturer’s protocol. We checked the quality of the RNA (RQN = 10) using a Fragment Analyzer (Agilent, United States of America).",
+    "We collected whole blood in EDTA tubes. The blood was transferred to Leucosep filtered tubes (Greiner Bio-One) containing 15 ml of Ficoll Paque Plus (Cytiva, Washington, D.C., USA, 17144002) and diluted (1:2) with the same volume of 1X DPBS (Thermo Fisher, Waltham, MA, USA, 14190144). We centrifuged the samples at room temperature for 18 minutes at 800 rcf and extracted the PBMCs from the resulting buffy coat. The extracted PBMCs were centrifuged and washed twice with 1X DPBS (Thermo Fisher, Waltham, MA, USA, 14190144). We took a sample for counting, and assessed the cell viability and concentration with a Neubauer chamber, counting at least two different squares. PBMCs were then resuspended in freezing mix (complete medium (RPMI + 1% pen/strep + 10% FCS) + 10% DMSO) in cryovials with no more than 10 million cells. The vials were stored first at − 80 °C inside a freezing container for 24 h and then at − 150 °C. We thawed the vials just before live-death sorting."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "RNA Isolation and Spike-in Controls",
-      "instruction": "Total RNA was isolated from platelet-free (PFP) and platelet-rich plasma (PRP) using the miRNeasy Serum/Plasma Kit (Qiagen, Hilden, Germany, 217,184). We used 200 μl of plasma as input. For the cancer patient experiment, 2 μl of 1x RC PFP spikes were added to the plasma during isolation. The elution volume was 14 μl, and we added 2 μl of 1x LP PFP spikes (Thermo Fisher). Detailed descriptions of the spike-in controls can be found in the exRNAQC study [50]. From this total volume, we used 5 μl for the library preparation. For the healthy donor experiment, the eluate of multiple parallel extractions was pooled according to the original biofluid type (PRP or PFP) and split into six aliquots of 5 μl to minimize extraction bias. We did not include a gDNA removal step after RNA isolation. The input is volume-based since the RNA concentrations of PFP and PRP are below the limit of quantification.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "Quantification Analysis",
       "instruction": "We used a dedicated in-house small RNA-seq pipeline for the quantification of small RNAs. This pipeline starts with adaptor trimming using Cutadapt (v1.8.1) [51], which discards reads shorter than 15 nt, and those in which no adaptor was found. The reads with a low quality are discarded by using the FASTX-Toolkit (v0.0.14) [52] set at a minimum quality score of 20 in at least 80% of nucleotides. Next, we counted and filtered out reads belonging to our spike-in controls (both RC as LP). The spike reads are subtracted from the FASTA files, and reads are counted. For this comparison, the spike-in controls were not used for correction since the library preparation methods (adding LNA or not) differ. The spike-ins are, however, needed to correct for input concentration variation when all other parameters are equal, as the pooling is performed based on volume. Subsequently, we mapped the reads with Bowtie (v1.1.2) [53], allowing one mismatch. At the end of the pipeline, the mapped reads are annotated by matching the genomic coordinates of each read with genomic locations of miRNAs (obtained from miRBase, v20) and other small RNAs (obtained from UCSC GRCh37/hg19 and Ensembl v84). We submitted the original FASTQ-files and the count tables in EGA (EGAS00001006023). The samples are downsampled to the sequencing depth of the sample with the least number of reads per experiment, or respectively 13 M reads (concentration experiment), 6.5 M reads (modification experiment), and 7 M reads (cancer experiment).",
       "substeps": [],
@@ -50,7 +47,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 1,
       "title": "Computational Analysis",
       "instruction": "We used R (v3.6.0) [54] for further data processing, using the following packages: tidyverse (v1.2.1) [55], biomaRt (v2.40.4) [56, 57], broom (v0.5.2) [58]. For differential expression analysis limma-voom (v3.40.6) [59] was used on a filtered matrix with at least 10 reads per million (RPM) per miRNA over all samples.",
       "substeps": [],
@@ -58,15 +55,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
-      "title": "Cell Culture and RNA Extraction",
-      "instruction": "We used HEK293T cells that were grown in RPMI 1640 medium with GlutaMAX supplement (Thermo Fisher, Waltham, MA, USA) supplemented with 10% fetal calf serum (Merck, Germany) and were lysed with SingleShot lysis buffer (Bio-Rad, United States of America).",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 4,
+      "step_id": 2,
       "title": "Library Preparation",
       "instruction": "For the library preparation, we used the QuantSeq 3′ mRNA-Seq Library Prep Kit FWD for Illumina (Lexogen, Austria). We performed the ‘low input’ version of the protocol.",
       "substeps": [],
@@ -74,7 +63,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 3,
       "title": "to trim off the poly(A) tails...",
       "instruction": "to trim off the poly(A) tails and adapter sequences and to perform quality trimming. Next, all FASTQ files were subsampled to 2,000,000 reads with Seqtk (v1.",
       "substeps": [],
@@ -82,7 +71,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 4,
       "title": "and mapped to the hg38 genome using STAR (v2",
       "instruction": "and mapped to the hg38 genome using STAR (v2.6.0). We used SAMtools (v1.",
       "substeps": [],
@@ -90,7 +79,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 5,
       "title": "to count the reads mapping to the LNA-targeted genomic regions",
       "instruction": "to count the reads mapping to the LNA-targeted genomic regions. We used htseq-count (v0.11.0) [61] to generate the overall counts. Before initial trimming, before quality trimming, and after quality trimming, we used FastQC (v0.11.",
       "substeps": [],
@@ -98,15 +87,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
-      "title": "to investigate the quality of the reads",
-      "instruction": "to investigate the quality of the reads.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 9,
+      "step_id": 6,
       "title": "Computational Analysis",
       "instruction": "We used R (v4.1.0) [54] and tidyverse (v1.3.1) [55] and biomaRt (v2.48.3) [56, 57] to analyze and visualize the computationally generated data.",
       "substeps": [],
@@ -114,7 +95,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 7,
       "title": "Cell Culture and Harvesting",
       "instruction": "We cultured HEK293T cells in RPMI medium supplemented with 10% fetal calf serum to 80% confluence in a T75. The cells were washed with 2 ml versene and incubated with 2 ml of trypsin for 3 minutes at 37 °C. We neutralized the mixture with 8 ml fresh medium. We centrifuged for 5 minutes at 2000 rcf at 4 °C and removed the supernatants. We resuspended the cells in 1 ml of QIAzol and flash-froze the mixture in liquid nitrogen.",
       "substeps": [],
@@ -122,15 +103,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
-      "title": "RNA Extraction and Quality Control",
-      "instruction": "We extracted RNA using the RNeasy Micro Kit (Qiagen, Hilden, Germany, 217,184) according to the manufacturer’s protocol. We checked the quality of the RNA (RQN = 10) using a Fragment Analyzer (Agilent, United States of America).",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
+      "step_id": 8,
       "title": "Library Preparation",
       "instruction": "We prepared direct-cDNA libraries using the SQK-DCS109 Kit (Oxford Nanopore Technologies, United Kingdom). The exact protocol was followed except for the following changes: the RNA-bead binding steps were performed for 5 minutes on a Hula Mixer and 5 minutes on the bench at room temperature; the RNA elution steps were performed for 5 minutes at 37 °C and 5 minutes on a Hula Mixer at room temperature; and 300 μl of 80% ethanol was used for the beads wash steps.",
       "substeps": [],
@@ -138,7 +111,7 @@
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 9,
       "title": "Quantification Analysis",
       "instruction": "We basecalled the raw fast5 files using Guppy (v3.5.2) [62] on a GPU. We grouped reads per sample and used Pychopper (v2.3.1) [63] to identify full-length transcripts containing both primer sequences. We mapped the reads with Minimap2 (v2.11) [64] and extracted reads mapping to the target fragment location using SAMtools (v1.11) [65]. We then used NanoComp (v1.12.0) [66] to check the read length and quality of each sample.",
       "substeps": [],
@@ -146,7 +119,7 @@
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 10,
       "title": "Computational Analysis",
       "instruction": "We used R (v4.1.0) [54] and tidyverse (v1.3.1) [55] and biomaRt (v2.48.3) [56, 57] to analyze and visualize the computationally generated data.",
       "substeps": [],
@@ -154,15 +127,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
-      "title": "PBMCs Preparation",
-      "instruction": "We collected whole blood in EDTA tubes. The blood was transferred to Leucosep filtered tubes (Greiner Bio-One) containing 15 ml of Ficoll Paque Plus (Cytiva, Washington, D.C., USA, 17144002) and diluted (1:2) with the same volume of 1X DPBS (Thermo Fisher, Waltham, MA, USA, 14190144). We centrifuged the samples at room temperature for 18 minutes at 800 rcf and extracted the PBMCs from the resulting buffy coat. The extracted PBMCs were centrifuged and washed twice with 1X DPBS (Thermo Fisher, Waltham, MA, USA, 14190144). We took a sample for counting, and assessed the cell viability and concentration with a Neubauer chamber, counting at least two different squares. PBMCs were then resuspended in freezing mix (complete medium (RPMI + 1% pen/strep + 10% FCS) + 10% DMSO) in cryovials with no more than 10 million cells. The vials were stored first at − 80 °C inside a freezing container for 24 h and then at − 150 °C. We thawed the vials just before live-death sorting.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
+      "step_id": 11,
       "title": "Library Preparation",
       "instruction": "Sorted single-cell suspensions were resuspended in PBS + 0.04% BSA at an estimated final concentration of 1000 cells/μl and loaded on a Chromium GemCode Single Cell Instrument (10x Genomics, Pleasonton, CA, USA, 1000204), Chip G (10x Genomics, Pleasonton, CA, USA, #2000177) to generate single-cell gel beads-in-emulsion (GEM). We prepared the scRNA-seq libraries using the GemCode Single Cell 3′ Gel Bead and Library kit, version NextGEM 3.1 (10x Genomics, Pleasonton, CA, USA, PN-1000121) according to the manufacturer’s instructions.",
       "substeps": [],
@@ -170,7 +135,7 @@
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 12,
       "title": "Quantification Analysis",
       "instruction": "Demultiplexing of the bcl files was performed with cellranger mkfastq (v6.0.1), after which gene counts per cell were obtained with cellranger count (v6.0.1).",
       "substeps": [],
@@ -178,7 +143,7 @@
       "timers": []
     },
     {
-      "step_id": 18,
+      "step_id": 13,
       "title": "Computational Analysis",
       "instruction": "The count matrixes were loaded into R (v4.1.0) [54] and further processed, including the integration and annotation, with Seurat (v4.0.3) [67]. We did not filter the cells. We analyzed and visualized the data using tidyverse (v1.2.1) [55].",
       "substeps": [],
@@ -186,7 +151,7 @@
       "timers": []
     },
     {
-      "step_id": 19,
+      "step_id": 14,
       "title": "Quantification Analysis",
       "instruction": "We used BBMap (v38.26) to trim off the poly(A) tails and adapter sequences and to perform quality trimming. Next, we mapped the trimmed reads to the hg38 genome using STAR (v2.6.0). We used htseq-count (v0.11.0) [61] to quantify the uniquely mapped reads. We used FastQC (v0.11.9) to investigate the quality of the reads before quality trimming and after quality trimming.",
       "substeps": [],

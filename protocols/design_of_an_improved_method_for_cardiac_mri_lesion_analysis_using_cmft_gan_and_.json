@@ -14,7 +14,9 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": 210,
-  "materials": [],
+  "materials": [
+    "Lesion visibility is made poorer on cine-MRI, as both tissue contrast in infarction and edema is lacking; however, cine sequences were deliberately selected as the operational domain for the lesion-segmentation modules. This was to test possible pathology-aware transfer learning from high-contrast auxiliary modalities and LGE/T2-STIR references. The multi-modal alignment process allows the model training incorporated through dynamics with both anatomical motion cues and lesion priors. Furthermore, a clinically relevant situation in which lesion inference needs to be inferred by cine-MRI with cross-domain knowledge transfer has been taken into consideration by this selection, as not all patients would have LGE or T2-STIR available."
+  ],
   "steps": [
     {
       "step_id": 0,
@@ -145,21 +147,13 @@
     {
       "step_id": 11,
       "title": "Method validation analysis",
-      "instruction": "Lesion visibility is made poorer on cine-MRI, as both tissue contrast in infarction and edema is lacking; however, cine sequences were deliberately selected as the operational domain for the lesion-segmentation modules. This was to test possible pathology-aware transfer learning from high-contrast auxiliary modalities and LGE/T2-STIR references. The multi-modal alignment process allows the model training incorporated through dynamics with both anatomical motion cues and lesion priors. Furthermore, a clinically relevant situation in which lesion inference needs to be inferred by cine-MRI with cross-domain knowledge transfer has been taken into consideration by this selection, as not all patients would have LGE or T2-STIR available.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "Method validation analysis",
       "instruction": "Thus, the framework captures both lesion segmentations as well as diagnostic classification. Lesion segmentation will simply target infarction and edema masks translated into cine-MRI space, with diagnostic classification predicting the overall disease label from the five ACDC classes: normal, myocardial infarction, dilated cardiomyopathy, hypertrophic cardiomyopathy, and abnormal right ventricle. The pathway for classification employs a hierarchical ensemble with curriculum learning that progressively incorporates features aware of lesions, global morphology of the ventricle, and motion patterns. The combination of these two tasks, therefore, enables the delivery of localized lesion maps as well as holistic diagnostic predictions, the dual objectives being spatial pathology identification and patient-level diagnosis.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 12,
       "title": "Method validation analysis",
       "instruction": "Extensive assessment metrics are included in the effort to express different dimensions of the model. The peak signal-to-noise ratio and structural similarity were computed to assess the increase in qualities of cardiac MRIs after CMFT-GAN processing. Meanwhile, Dice Similarity coefficient, Intersection-over-Union, F1-score, lesion sensitivity and cluster entropy were also calculated for lesion classification and segmentation tasks. For cluster compactness, the percentage points in normalized entropy reduction were used, and the temporal splitting consistency anticipated that the spatio-temporal coherence score before and post-applying STC² clustering will be compared. The hybrid clustering used consisted of spectral clustering for its initialization with a neighborhood scale parameter σ=1.5 and DBSCAN clustering, with an epsilon value of 2.5 pixels, thus minimum sample size with 5 points. As a model of curriculum learning in HEC-CCNN, the learning schedule followed a cosine annealing curve, reducing the difficulty threshold δ from 0.5 linearly to 0.1 over 50 epochs. The topology-driven cluster regularization enforced consistency through Laplacian matching with λtopo=0.2 as a fixed penalty weight. This weight was set after empirical tuning on a held-out validation set. All experiments took place on a single NVIDIA RTX A6000 GPU with 48 GB memory ensuring the parallelization of training batches without gradient accumulation. This experimental set was meant to validate the contributions of each module to rigorous isolation from the overall influence of cross-modal transfer, augmentation by pathology, modeling of spatio-temporal consistency, enforcement through topology, and the curriculum learning strategies on the general performance in cardiac MRI lesion analysis.",
       "substeps": [
@@ -192,7 +186,7 @@
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 13,
       "title": "Method validation analysis",
       "instruction": "Experimental evaluation was multi-facetted in terms of multiple public datasets& samples. Ultimately, the ACDC dataset was primarily used, consisting of 150 patient studies, with manually annotated ground truth for the end-diastolic and end-systolic phases across normal cases and pathological categories like myocardial infarction, dilated cardiomyopathy, hypertrophic cardiomyopathy, and abnormal right ventricle. Each of the patient studies contains short-axis cine-MRI sequences, which were acquired using a 1.5T Siemens scanner and have slice thickness ranging from 5- to 8 mm and pixel spacings that ranged between 1.37 to 1.68 mm. To fully leverage cross-modal feature transfer potentially, high-resolution auxiliary domain datasets were adopted: for the BraTS 2021 dataset, 1251 brain MRI scans segmented for tumor regions across four MRI modalities; the LUNA16 lung CT dataset-from 888 CT scans annotated for pulmonary nodules with submillimeter isotropic resolutions. Each of these datasets was selected for high anatomical detail and rich soft-tissue contrast, which would best stimulate meaningful features for enhancing low-quality cardiac images. The pathology constraint maps for lesion augmentation were simulated using late gadolinium enhancement (LGE) images from ACDC patients to identify fibrosis regions and supplemented with introduced edema patterns to add lesion heterogeneity in the process. It is expected that with such datasets, a very rich and extensive cross-domain training would also be possible to provide various structural priors combined with variations in pathologies that would eventually be important to maximize generalization sets.",
       "substeps": [],
@@ -200,7 +194,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 14,
       "title": "Method validation analysis",
       "instruction": "The hyper-parameters were iteratively tuned to give the best possible training stability and model performance throughout the life of the framework. The GAN modules (CMFT-GAN and PAGAC) conditions use the Adam optimizer with a learning rate of 2 × 10e−4 and β1 equal to 0.5 and β2 equal to 0.999 such that adversarial convergence was smooth and without early mode collapse sets. The batch size was set to 8 to optimize computational efficiency and gradient noise regularization. The CNN training phases (LTCR and HEC-CCNN) started with low learning rates of 1 × 10e−4 with cosine annealing to decrease the learning rate to 1 × 10e−6 slowly to allow for fine-tuning of complex anatomical structures. Spectral clustering during STC² showed the use of Gaussian affinity matrix with σ= 1.5, and DBSCAN used 2.5 pixels ε-neighborhood with a minimum sample threshold of 5, which was chosen empirically by maximizing silhouette scores. The topology regularization penalty weight (λtopo) with a value of 0.2 was found by cross-validation, balancing maintenance of topology versus diversity of features for the clusters. Additionally, random rotation (±20°), random elastic deformations (sd 5 pixels), and random brightness variations (±10%) were dynamically applied during training to enhance robustness. These finely tuned hyper-parameters ensured that this framework achieved good spatial fidelity, temporal coherence, and lesion sensitivity in the analysis of heterogeneous cardiac and auxiliary imaging domains. To evaluate the effectiveness of the proposed framework, a wide range of experiments were performed on the ACDC, BraTS, and LUNA16 datasets concerning both enhancement and lesion analysis tasks, followed by evaluations against three benchmark techniques, termed Method [5], Method [8], and Method [25] in process.",
       "substeps": [
@@ -229,7 +223,7 @@
       "timers": []
     },
     {
-      "step_id": 16,
+      "step_id": 15,
       "title": "Method validation analysis",
       "instruction": "The results were reported across multiple standard metrics: PSNR, SSIM, DSC, IoU, F1-score, lesion sensitivity, and cluster compactness. The proposed method achieves substantial improvement on both PSNR and SSIM over all other comparison methods, as illustrated in Table 1. The method CMFT-GAN-based enhancement of the proposed system achieved a PSNR of 31.4 dB and an SSIM of 0.89, which shows a very huge enhancement of more or less all perceptual quality aspects required for precise downstream lesion analysis.Table 1PSNR and SSIM for enhanced cardiac MRI (ACDC dataset).Table 1MethodPSNR (dB)SSIMMethod [5]26.10.76Method [8]27.40.79Method [25]28.00.82Proposed31.40.89",
       "substeps": [],
@@ -237,7 +231,7 @@
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 16,
       "title": "Method validation analysis",
       "instruction": "Thus, Table 2 shows that the segmentations of lesions made by the proposed pipeline have higher characteristics than existing methods by a huge margin. In particular, PAGAC-augmented training and topology-based regularization greatly help with the faithful segmentation of anatomy, reaching a Dice Similarity Coefficient of 0.88 and an IoU of 0.79 in the process.Table 2Dice similarity coefficient (DSC) and IoU for lesion segmentation (ACDC + PAGAC).Table 2MethodDSCIoUMethod [5]0.680.51Method [8]0.710.55Method [25]0.750.60Proposed0.880.79",
       "substeps": [],
@@ -245,7 +239,7 @@
       "timers": []
     },
     {
-      "step_id": 18,
+      "step_id": 17,
       "title": "Method validation analysis",
       "instruction": "Table 3 affirms the proposed framework with the improved lesion sensitivity and F1-score. Pathology-aware augmentation plus curriculum learning enable models to detect small and ambiguous lesions areas properly, gaining a lesion sensitivity of 91.4% and the F1 score of 0.81 in process.Table 3Lesion sensitivity and F1-score for lesion detection (BraTS dataset auxiliary training).Table 3MethodSensitivity (%)F1-ScoreMethod [5]82.30.70Method [8]84.90.74Method [25]87.10.77Proposed91.40.81",
       "substeps": [],
@@ -253,7 +247,7 @@
       "timers": []
     },
     {
-      "step_id": 19,
+      "step_id": 18,
       "title": "Method validation analysis",
       "instruction": "In Table 4, STC² shows a significant decrease in cluster entropy to 0.82 while moving the compactness up to 87.5% in process. This means the lesion candidates are fairly internally consistent in time frames, a highly desirable quality to minimize the false positives in the lesion detection process.Table 4Cluster entropy and compactness for unsupervised clustering (STC² clustering on cine-MRI).Table 4MethodCluster EntropyCompactness (%)Method [5]1.3268.5Method [8]1.2172.0Method [25]1.1474.2Proposed0.8287.5",
       "substeps": [],
@@ -261,7 +255,7 @@
       "timers": []
     },
     {
-      "step_id": 20,
+      "step_id": 19,
       "title": "Method validation analysis",
       "instruction": "Fig. 3 presents the information on temporal segmentation consistency as to how consistently the model has been able to segment the lesion regions across motion cycles of the heart. The consistency score of 0.84 is a strong statement about this model segmenting lesions in a motion-coherent fashion far superior to any current methods.Fig. 3Temporal segmentation consistency.Fig 3",
       "substeps": [],
@@ -269,7 +263,7 @@
       "timers": []
     },
     {
-      "step_id": 21,
+      "step_id": 20,
       "title": "Method validation analysis",
       "instruction": "Lastly, Fig. 4 depicts the diagnostic classification performance sets. By employing the cluster-aligned curriculum learning in the HEC-CCNN module, the proposed method attains an outstanding classification accuracy of 93.2% across multiple cardiac conditions, thereby signaling strong generalization capability across clinical classification tasks. We now turn to an Iterative Validation use Case for the Proposed Model-it will help the reader to get better acquainted with the entire process.Fig. 4Classification accuracy.Fig 4",
       "substeps": [],
@@ -277,7 +271,7 @@
       "timers": []
     },
     {
-      "step_id": 22,
+      "step_id": 21,
       "title": "Extended result analysis",
       "instruction": "This comparative analysis uses three benchmark methods, namely Method [5], Method [8], and Method [25]. The selected benchmark Methods are widely used for lesion segmentation in cardiac MRI or other cardiac image analysis tasks. Method [5] is a conventional CNN-based segmentation pipeline with restricted temporal modeling, Method [8] contains innovative augmentation techniques but no explicit cross-domain transfer, while Method [25] is based on multi-task learning for segmentation and classification. All models have thus been reimplemented strictly according to original publications. Indeed, they used the same preprocessing, resolution normalization, and training schedules to score properly in the comparison. To maintain uniformity of exposure to samples, all models trained on and evaluated with the same training, validation, and test splits of the ACDC dataset samples.",
       "substeps": [],
@@ -285,7 +279,7 @@
       "timers": []
     },
     {
-      "step_id": 23,
+      "step_id": 22,
       "title": "Extended result analysis",
       "instruction": "Some of these evaluation measures, such as entropy reduction concerning cluster compactness, are identified, mostly being among the STC² clustering components. Although comparator models do not directly contain spatio-temporal clustering, applying the same optical-flow-driven clustering post-processing pipeline would eventually calculate these measures to their segmentation outputs. Hence, values reported from all methodologies are calculated from equivalent outputs, ensuring allowing meaningful comparisons despite architectural differences. Moreover, standardized measures such as Dice coefficient, IoU, F1, PSNR, and SSIM were included to offer performance baselines irrespective of components.",
       "substeps": [],
@@ -293,7 +287,7 @@
       "timers": []
     },
     {
-      "step_id": 24,
+      "step_id": 23,
       "title": "Extended result analysis",
       "instruction": "An evaluation of image enhancement quality and plausibility of lesion segmentation was made with two experienced cardiovascular radiologists using a 5-point Likert scale. An average quality rating of 4.6 ± 0.3 was assigned to improved images from the CMFT-GAN module, as opposed to 3.9 ± 0.4 for Method [25] and 3.7 ± 0.5 for Method [8]. Regarding the plausibility of lesion segmentation, 4.5 ± 0.4 was achieved for the proposed method, whereas Method [25] and Method [8] were scored 3.8 ± 0.5 and 3.6 ± 0.6, respectively. measurement of inter-rater reliability via Cohen's κ was 0.87, indicating a high level of agreement among the radiologists. These subjective scores match the objective metrics as further clarified by the quantitative improvements in metrics.",
       "substeps": [
@@ -326,7 +320,7 @@
       "timers": []
     },
     {
-      "step_id": 25,
+      "step_id": 24,
       "title": "Extended result analysis",
       "instruction": "Temporal segmentation consistency scores quantify temporal consistency of a lesion segmentation within cine-MRI frames, measuring the extent of overlap of segmented regions after performing motion compensation between two contiguous frames. For instance, the proposed method's score of 0.84 was considerably higher than those of Method [25] (0.74), Method [8] (0.69), and Method [5] (0.63). This improvement reflects the contribution of STC² clustering and topology-driven regularization in enforcing motion co-here localization of lesions over the cardiac cycle.",
       "substeps": [],
@@ -334,7 +328,7 @@
       "timers": []
     },
     {
-      "step_id": 26,
+      "step_id": 25,
       "title": "Extended result analysis",
       "instruction": "Statistical significance tests were performed using paired two-tailed t-tests to compare the proposed method with the best state of the baseline methods (Method [25]) on some vital metrics. Significant p values were observed in the following measures, with the p values stated as mention below: Dice coefficient improvement (0.88 vs. 0.75, p < 0.001); lesion sensitivity (91.4% vs. 87.1%, p = 0.004); PSNR (31.4 dB vs. 28.0 dB, p < 0.001); and temporal consistency (0.84 vs. 0.74, p < 0.001). All of these differences were significant at the 95% confidence interval. Thus, the line of proof confirms that any observed gains cannot possibly be attributable to chance but, rather, are due to the integrated contributions of proposed framework components.",
       "substeps": [

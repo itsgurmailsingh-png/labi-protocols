@@ -22,7 +22,18 @@
   "quality_score": 37.0,
   "category": "Other",
   "estimated_time_mins": null,
-  "materials": [],
+  "materials": [
+    "Automatic Waypoint Extraction",
+    "Adaptive error precision adjustment based on velocity variation",
+    "Parameter Settings and Algorithm Implementation",
+    "Smooth End-Effector Pose Control via Velocity Constraints",
+    "To ensure a stable and appropriate contact force between the ultrasound probe and the patient’s skin during the scanning process, an active compliance admittance control strategy is implemented along the probe’s normal vector (Z-axis of the tool coordinate system). To preserve the cross-instance universality of the framework, the normal force controller utilizes a simplified second-order dynamic model, directly mapping contact force errors to normal compensation velocities within the task space. The dynamic equilibrium equation is expressed as:(5)M x..normal+D x.normal=ΔF\nwhere M and D denote the desired inertia and damping parameters along the normal direction within the task space, respectively; x..normal and x.normal represent the normal compensation acceleration and velocity, respectively (the system integrates x..normal at each control cycle to yield the final commanded normal compensation velocity, denoted as vnormal). Furthermore, ΔF represents the contact force error of the ultrasound probe, defined as follows:(6)ΔF=Fe−Fd\nwhere Fe denotes the actual contact force of the probe measured by the force sensor, and Fd={0,0,fz,0,0,0}T signifies the desired force specified across various probe axes. Given that this study exclusively executes force control along the probe’s Z-axis, we define fz=12 N. This magnitude sits at the median of the typical 10–15 N pressure range applied during clinical expert manipulation. It achieves an optimal balance between ensuring high-quality acoustic windows and preventing excessive tissue compression. By achieving an orthogonal decoupled fusion of the velocity smoothing control strategy and the constant normal force control strategy within the task space, the system realizes safe, stable, and fine-grained autonomous kidney ultrasound scanning across different manipulator instances with objective physical parameter deviations.",
+    "This orthogonal decoupling strategy mathematically circumvents control conflicts between position servoing and force servoing on the same degree of freedom. It ensures that the probe, while scanning smoothly, can independently and compliantly adapt to normal displacements induced by human respiration. Furthermore, the synthesized total target velocity in the task space, vtotal, is fed directly into the Inverse Kinematics (IK) solver of the target manipulator, where it is converted into low-level joint velocity commands. This mechanism completely isolates the high-level task planning from interference caused by specific equipment base calibration and D-H parameter discrepancies, providing a robust foundational guarantee for the system’s cross-instance reusability.",
+    "To quantify these differences, Table 1 details the core physical kinematic offsets of the target domain relative to the source-domain instance. In summary, it is precisely because of these four categories of objective physical discrepancies—spanning from low-level kinematic deviations to macroscopic deployment shifts—that the inverse kinematics models of the two systems are completely incompatible. Under this “physical parameter barrier,” any traditional policy relying on joint-space representations will inevitably fail. This provides a rigorous and realistic testbed to verify that the waypoint representation method can effectively decouple low-level physical parameters. Furthermore, both systems are equipped with the identical Sonostar SS-6 ultrasound machine and host computer to ensure consistency in the imaging and computational environments.",
+    "Baseline Methods and 2 × 2 Cross-Comparative Design",
+    "Qualitative Metric (Expert Subjective Assessment)",
+    "Quantitative Geometric Metric"
+  ],
   "steps": [
     {
       "step_id": 0,
@@ -117,419 +128,349 @@
     },
     {
       "step_id": 13,
-      "title": "Automatic Waypoint Extraction",
-      "instruction": "Automatic Waypoint Extraction",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
       "title": "The core objective of automatic waypoint...",
       "instruction": "The core objective of automatic waypoint extraction is to divide the original demonstration trajectory into several key waypoints, thereby replacing the complete trajectory with a more compact waypoint sequence, reducing the length of the decision sequence, and mitigating the impact of error accumulation. For this purpose, this paper adopts a waypoint selection method based on a greedy strategy, selecting the waypoint with the minimum current error as the local optimal solution at each step. Compared with other trajectory simplification methods, the greedy algorithm is simple to implement with low computational overhead, and typically controls the compression result directly through an error threshold [16]; therefore, it is highly sensitive to threshold changes, enabling it to better adapt to the dynamic coupling relationship between speed and precision during the ultrasound scanning process.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 14,
       "title": "Based on the above ideas, the...",
       "instruction": "Based on the above ideas, the overall process of the adaptive waypoint extraction algorithm proposed in this paper is as follows: to formalize the automatic waypoint extraction process, we model it as an optimization problem solved step-by-step. For an expert demonstration trajectory X=x0,x1,…,xN our goal is to select the shortest subsequence W=w1,w2,…,wk,K≪T from it without human intervention to minimize the total error between the original trajectory and the interpolated trajectory. The objective is to select as few waypoints as possible while ensuring the trajectory approximates the original one.(1)minW∑i=1Nxi−Xinterp,i2 s.t. |W|→min,\nwhere Xinterp represents the trajectory point obtained by linear interpolation of the selected waypoints. λi is a weight coefficient used to control whether a given point is the selected waypoint, and if so λi=0.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 16,
+      "step_id": 15,
       "title": "Upon completing waypoint extraction, the model’s...",
       "instruction": "Upon completing waypoint extraction, the model’s training objective transitions from predicting the next proprioceptive state—as seen in traditional methods—to predicting the position of the subsequent key waypoint. This paradigm shift effectively reduces the trajectory length, compressing the original long-horizon sequence into a concise sequence of waypoints. Consequently, this diminishes training complexity and significantly mitigates error accumulation induced by long-horizon dependencies. Simultaneously, because waypoints are defined within the absolute task space rather than the hardware-coupled joint space, the model circumvents reliance on the demonstrator’s specific base calibration and low-level kinematic parameters. This endows the model with the capability for reliable reuse across physical instances. Through this global mapping mechanism from the current state to the next task-critical node, the model effectively overcomes the limitations when facing physical deployment discrepancies inherent in traditional point-by-point incremental control. Ultimately, this significantly enhances the system’s stability, reproducibility, and cross-instance adaptability when confronting objective physical parameter deviations across different equipment instances.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 17,
-      "title": "Adaptive error precision adjustment based on velocity variation",
-      "instruction": "Adaptive error precision adjustment based on velocity variation",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 18,
+      "step_id": 16,
       "title": "To enhance the adaptability and reproducibility...",
       "instruction": "To enhance the adaptability and reproducibility of the waypoint extraction algorithm across different scanning phases, this paper further details the algorithmic principles, implementation workflow, and parameter settings of the adaptive error precision adjustment module.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 19,
+      "step_id": 17,
       "title": "To address the mismatch between a...",
       "instruction": "To address the mismatch between a fixed error threshold and the phased operational characteristics during ultrasound scanning, this paper proposes an adaptive error precision adjustment method based on scanning speed variations. In actual clinical operations, physicians typically push the probe at a higher speed during the coarse localization phase to rapidly approach the target region; during this phase, the requirement for trajectory precision is relatively low. Conversely, during the fine adjustment phase, physicians perform delicate adjustments at a lower speed, necessitating higher trajectory precision to ensure the quality of the ultrasound image. Based on these clinical operational characteristics, this paper takes the end-effector’s moving speed in the expert demonstration trajectory as a key indicator reflecting the current operational precision requirement, and constructs a mapping relationship between the scanning speed and the waypoint extraction error threshold, thereby achieving dynamic adaptive adjustment of the error threshold. This process can be formalized as the following constrained optimization problem:",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 20,
+      "step_id": 18,
       "title": "Where ϵmin and ϵmax represent the...",
       "instruction": "Where ϵmin and ϵmax represent the lower and upper limits of the error threshold, respectively, which are used to restrict the variation range of the waypoint extraction precision.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 21,
+      "step_id": 19,
       "title": "νmid is the critical speed, which...",
       "instruction": "νmid is the critical speed, which controls the central position where the error threshold transitions from large to small.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 22,
+      "step_id": 20,
       "title": "α is the slope parameter, used...",
       "instruction": "α is the slope parameter, used to control the sensitivity of the error threshold to speed variations.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 23,
+      "step_id": 21,
       "title": "When the end-effector’s moving speed is...",
       "instruction": "When the end-effector’s moving speed is lower than νmid, ϵ(ν) gradually approaches ϵmin, and the waypoint extraction precision increases; when the speed is higher than νmid the error threshold is gradually relaxed, thereby reducing the number of waypoints to improve overall efficiency.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 24,
-      "title": "Parameter Settings and Algorithm Implementation",
-      "instruction": "Parameter Settings and Algorithm Implementation",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 25,
+      "step_id": 22,
       "title": "To ensure that the parameter settings...",
       "instruction": "To ensure that the parameter settings have a clear basis and are reproducible, this paper conducts a statistical analysis of the demonstration data. Specifically, prior to waypoint extraction, each scanning demonstration recorded during the data acquisition phase is analyzed to calculate the maximum and minimum values of the manipulator’s end-effector moving speed. The average of these two values is taken as the critical speed parameter in the error adjustment function, denoted as  νmid=3.43 mm/s. Meanwhile, according to the comprehensive requirements of the ultrasound scanning task for efficiency and precision, the upper and lower limits of the error threshold are set to ϵmax=0.008 and ϵmin=0.006 respectively. The slope parameter α is used to control the smoothness of the error threshold’s variation with speed. If the value of α is too large, the error threshold will undergo a nearly step-like change with speed, making the number of waypoints overly sensitive to speed noise; if the value of α is too small, the effect of error adjustment is not obvious, making it difficult to distinguish the precision requirements of different scanning phases. Comprehensively considering the variation range of the end-effector speed during the ultrasound scanning process and the stability of the algorithm, this paper uniformly sets α=1.0 across all experiments to strike a balance between precision adaptability and waypoint extraction stability.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 26,
+      "step_id": 23,
       "title": "In actual implementation, the end-effector’s moving...",
       "instruction": "In actual implementation, the end-effector’s moving speed between all time steps in the demonstration trajectory is first calculated, and the corresponding error threshold for each time step is adaptively calculated according to Formula (3). Subsequently, a waypoint extraction algorithm based on a greedy strategy is employed: the starting time step and the ending time step of the demonstration trajectory are fixed as waypoints. Starting from the initial waypoint, the trajectory reconstruction error between the current waypoint and candidate time steps is progressively evaluated. When this error exceeds the minimum value of the error thresholds corresponding to all time steps within this interval, the previous time step is determined as a new waypoint, which serves as a new starting point to continue the aforementioned process until the waypoint extraction for the entire trajectory is completed.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 27,
+      "step_id": 24,
       "title": "Through the aforementioned adaptive error precision...",
       "instruction": "Through the aforementioned adaptive error precision adjustment mechanism based on speed variation, the system can automatically adjust the waypoint extraction precision according to the physician’s operating speed at different scanning stages, achieving a dynamic balance between efficiency and precision in waypoint density. This method effectively overcomes the limitations of fixed error thresholds in complex scanning tasks, providing reliable support for the application of waypoint representation in high-precision, long-duration medical robot tasks such as autonomous ultrasound scanning.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 28,
-      "title": "Smooth End-Effector Pose Control via Velocity Constraints",
-      "instruction": "Smooth End-Effector Pose Control via Velocity Constraints",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 29,
+      "step_id": 25,
       "title": "In waypoint-based predictive control, the spatial...",
       "instruction": "In waypoint-based predictive control, the spatial distances between adjacent predicted poses can vary significantly. Directly computing joint or end-effector velocities from these pose differentials can induce abrupt velocity spikes. Such spikes not only degrade control precision but also risk triggering overspeed motions (i.e., kinematic limit violations) in the manipulator. Consequently, upon receiving each new waypoint command, this study executes a local online trajectory replanning based on a Trapezoidal Velocity Profile. This mechanism ensures that the end-effector first accelerates or decelerates to an optimal cruising speed, and subsequently approaches the target pose steadily at a constant velocity.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 30,
+      "step_id": 26,
       "title": "When a new target waypoint pd...",
       "instruction": "When a new target waypoint pd arrives, let the current position at the start of the segment be pt, and the Euclidean distance between the two points is:(2)D=pd−pt,",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 31,
+      "step_id": 27,
       "title": "The total execution time within the...",
       "instruction": "The total execution time within the segment is T = NTS, TS is the model prediction cycle, the current cruising speed at the start of each segment is v0, and the maximum allowable absolute acceleration is a. Within this segment, acceleration or deceleration is first performed to reach the cruising speed, and the target waypoint pd is reached at the cruising speed. The total displacement within the segment satisfies the following formula:(3)D=ν0+ν2ta⏟Acceleration phase+ν(T−ta)⏟Constant velocity phase,ta=ν−ν0a",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 32,
+      "step_id": 28,
       "title": "Therefore, the cruising speed for this segment is calculated as(4)v=aT+v0±(aT+v0)2−(v02+2aD)",
       "instruction": "Therefore, the cruising speed for this segment is calculated as(4)v=aT+v0±(aT+v0)2−(v02+2aD)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 33,
+      "step_id": 29,
       "title": "This achieves an adaptive adjustment of...",
       "instruction": "This achieves an adaptive adjustment of the maximum cruising speed within the segment based on the distance to the waypoint, and the acceleration/deceleration magnitude is subjected to the hard constraints of a and T, ensuring that velocity changes are smooth and controllable.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 34,
+      "step_id": 30,
       "title": "Unlike the general trajectory control of...",
       "instruction": "Unlike the general trajectory control of “automatic deceleration when approaching the target”, the velocity planning in this study directly derives from the operational patterns in the expert demonstration: the physician moves faster during the coarse localization phase, and the waypoints in the trajectory are sparsely distributed; during the fine adjustment phase, the movement slows down, and the waypoint distribution is more dense. Therefore, during the execution phase, the system performs trapezoidal velocity profile planning based on the pose difference between consecutive waypoints: a larger difference indicates that the task is in the fast scanning phase, and the system allocates a higher cruising speed; a smaller difference indicates entry into the fine adjustment phase, and the system lowers the cruising speed to enhance control precision. Consequently, the manipulator can authentically reproduce the physician’s scanning rhythm of “fast localization—low-speed fine adjustment” during operation—without the need for additional manual parameter tuning.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 35,
+      "step_id": 31,
       "title": "Probe normal constant force maintenance based on force control",
       "instruction": "Probe normal constant force maintenance based on force control",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 36,
-      "title": "To ensure a stable and appropriate...",
-      "instruction": "To ensure a stable and appropriate contact force between the ultrasound probe and the patient’s skin during the scanning process, an active compliance admittance control strategy is implemented along the probe’s normal vector (Z-axis of the tool coordinate system). To preserve the cross-instance universality of the framework, the normal force controller utilizes a simplified second-order dynamic model, directly mapping contact force errors to normal compensation velocities within the task space. The dynamic equilibrium equation is expressed as:(5)M x..normal+D x.normal=ΔF\nwhere M and D denote the desired inertia and damping parameters along the normal direction within the task space, respectively; x..normal and x.normal represent the normal compensation acceleration and velocity, respectively (the system integrates x..normal at each control cycle to yield the final commanded normal compensation velocity, denoted as vnormal). Furthermore, ΔF represents the contact force error of the ultrasound probe, defined as follows:(6)ΔF=Fe−Fd\nwhere Fe denotes the actual contact force of the probe measured by the force sensor, and Fd={0,0,fz,0,0,0}T signifies the desired force specified across various probe axes. Given that this study exclusively executes force control along the probe’s Z-axis, we define fz=12 N. This magnitude sits at the median of the typical 10–15 N pressure range applied during clinical expert manipulation. It achieves an optimal balance between ensuring high-quality acoustic windows and preventing excessive tissue compression. By achieving an orthogonal decoupled fusion of the velocity smoothing control strategy and the constant normal force control strategy within the task space, the system realizes safe, stable, and fine-grained autonomous kidney ultrasound scanning across different manipulator instances with objective physical parameter deviations.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 37,
+      "step_id": 32,
       "title": "Decoupled Fusion of Motion and Force alongside Safety Redundancy Mechanisms",
       "instruction": "Decoupled Fusion of Motion and Force alongside Safety Redundancy Mechanisms",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 38,
+      "step_id": 33,
       "title": "To address the complex interaction requirements...",
       "instruction": "To address the complex interaction requirements between motion trajectories and contact forces during clinical scanning, this study establishes an orthogonal decoupled fusion control architecture within the task space and designs multi-level redundant protection mechanisms to guarantee scanning safety.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 39,
+      "step_id": 34,
       "title": "The system establishes a local tool...",
       "instruction": "The system establishes a local tool coordinate frame at the probe’s end-effector, decoupling the scanning task within the spatial dimension: the trapezoidal velocity planning algorithm operates exclusively on the tangent plane where the probe slides along the body surface, generating smooth tangential velocity components between waypoints. Conversely, the constant-force admittance controller is strictly confined to the normal axis perpendicular to the body surface, calculating the normal compensation velocity based on real-time force errors.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 40,
+      "step_id": 35,
       "title": "During each real-time low-level control cycle,...",
       "instruction": "During each real-time low-level control cycle, the system performs an orthogonal vector synthesis of the tangential velocity planning component vtangent and the normal force compensation velocity component vnormal:(7)vtotal=vtangent+vnormal",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 41,
-      "title": "This orthogonal decoupling strategy mathematically circumvents...",
-      "instruction": "This orthogonal decoupling strategy mathematically circumvents control conflicts between position servoing and force servoing on the same degree of freedom. It ensures that the probe, while scanning smoothly, can independently and compliantly adapt to normal displacements induced by human respiration. Furthermore, the synthesized total target velocity in the task space, vtotal, is fed directly into the Inverse Kinematics (IK) solver of the target manipulator, where it is converted into low-level joint velocity commands. This mechanism completely isolates the high-level task planning from interference caused by specific equipment base calibration and D-H parameter discrepancies, providing a robust foundational guarantee for the system’s cross-instance reusability.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 42,
+      "step_id": 36,
       "title": "Given the stringent requirements for physical...",
       "instruction": "Given the stringent requirements for physical interaction safety in medical scenarios, coupled with the inherent inference latency (approximately 70 ms) stemming from the massive parameter scale of the high-level policy model (ACT model), the system’s constant-force control, inverse kinematics (IK) resolution, and safety monitoring loops operate entirely independently within the manipulator’s low-level real-time control kernel. Their closed-loop control cycle is strictly regulated at the 10 ms level. Even if the policy model experiences command update lags in highly dynamic scenarios, the low-level system can still perform real-time fine-tuning of contact forces and motion poses at a high-frequency cycle far exceeding human reaction speeds. This not only fundamentally isolates potential physical safety risks triggered by high-level algorithm latency but also effectively guarantees fine-grained trajectory tracking precision between adjacent waypoints at the foundational level. Additionally, the system introduces a triple protection mechanism, comprising:(1)Software-Level Velocity Saturation: Following vector synthesis, both the tangential trapezoidal velocity planning output and the normal admittance control compensation velocity undergo strict kinematic saturation before being dispatched to the joint controllers. This ensures that velocities never exceed predefined maximum thresholds, fundamentally preventing the manipulator from overspeeding or losing control due to abnormal high-level model outputs or abrupt trajectory mutations.(2)Real-Time 6-DOF Force Monitoring and Zero-Force Compliant Release: The low-level system monitors the six-dimensional force/torque data at high frequencies in real time. Upon detecting that the contact force or torque in any dimension exceeds predefined physical safety hard limits, the system forcefully interrupts the current trajectory tracking task and instantaneously switches the manipulator into a zero-force compliant dragging mode. In this highly compliant state, the probe yields to external forces; clinicians can swiftly detach the probe from the human body with a light, single-handed push, thereby maximizing the subject’s protection against crush injuries.(3)Real-Time Supervision and Emergency Stop: As the ultimate safety baseline, an independent physical emergency stop (E-stop) button is equipped at the hardware level. Throughout the entire autonomous scanning process, experienced professional operators are stationed nearby for real-time monitoring. Should they anticipate severe subject discomfort or detect abnormal system poses, operators can immediately depress the E-stop button, instantaneously cutting off the low-level servo power supply to ensure absolute physical safety.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 43,
+      "step_id": 37,
       "title": "Software-Level Velocity Saturation",
       "instruction": "Software-Level Velocity Saturation: Following vector synthesis, both the tangential trapezoidal velocity planning output and the normal admittance control compensation velocity undergo strict kinematic saturation before being dispatched to the joint controllers. This ensures that velocities never exceed predefined maximum thresholds, fundamentally preventing the manipulator from overspeeding or losing control due to abnormal high-level model outputs or abrupt trajectory mutations.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 44,
+      "step_id": 38,
       "title": "Real-Time 6-DOF Force Monitoring and Zero-Force...",
       "instruction": "Real-Time 6-DOF Force Monitoring and Zero-Force Compliant Release: The low-level system monitors the six-dimensional force/torque data at high frequencies in real time. Upon detecting that the contact force or torque in any dimension exceeds predefined physical safety hard limits, the system forcefully interrupts the current trajectory tracking task and instantaneously switches the manipulator into a zero-force compliant dragging mode. In this highly compliant state, the probe yields to external forces; clinicians can swiftly detach the probe from the human body with a light, single-handed push, thereby maximizing the subject’s protection against crush injuries.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 45,
+      "step_id": 39,
       "title": "Real-Time Supervision and Emergency Stop",
       "instruction": "Real-Time Supervision and Emergency Stop: As the ultimate safety baseline, an independent physical emergency stop (E-stop) button is equipped at the hardware level. Throughout the entire autonomous scanning process, experienced professional operators are stationed nearby for real-time monitoring. Should they anticipate severe subject discomfort or detect abnormal system poses, operators can immediately depress the E-stop button, instantaneously cutting off the low-level servo power supply to ensure absolute physical safety.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 46,
+      "step_id": 40,
       "title": "To comprehensively validate the effectiveness of...",
       "instruction": "To comprehensively validate the effectiveness of the proposed method and its zero-shot deployment capability across different equipment instances with objective physical parameter deviations, this study designed an autonomous scanning experiment targeting the human kidney long-axis standard plane. The experimental protocol comprises two phases: initially, model training is executed on the source-domain manipulator (i.e., the data acquisition platform); subsequently, the trained model is deployed and evaluated on both the source-domain manipulator and the target-domain manipulator (i.e., the skill reproduction platform) to rigorously assess its kinematic-level cross-instance generalization performance.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 47,
+      "step_id": 41,
       "title": "Setup of the Experimental Platform with Physical Discrepancies",
       "instruction": "Setup of the Experimental Platform with Physical Discrepancies",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 48,
+      "step_id": 42,
       "title": "The hardware environment is illustrated in Figure 6",
       "instruction": "The hardware environment is illustrated in Figure 6. Although both the data acquisition and skill reproduction platforms utilize the same HEBIN-RUS-T7 collaborative manipulator series, to simulate objective physical deviations in real-world clinical deployment and construct a rigorous testing environment, the two systems exhibit significant inconsistencies across the following four dimensions in their low-level configurations.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 49,
+      "step_id": 43,
       "title": "Tool Offset Discrepancies (highlighted in yellow...",
       "instruction": "Tool Offset Discrepancies (highlighted in yellow at the top of Figure 6): The source-domain manipulator employs a standard probe holder, whereas the target domain utilizes a custom 3D-printed fixture. Consequently, their Tool Center Point (TCP) offset matrices are entirely distinct.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 50,
+      "step_id": 44,
       "title": "Initial Kinematic Configuration Discrepancies (highlighted in...",
       "instruction": "Initial Kinematic Configuration Discrepancies (highlighted in blue in the middle of Figure 6): The two manipulators are initialized with different scanning poses. This implies that even when targeting the identical task-space objective, their Inverse Kinematics (IK) generated joint motion trajectories are completely different. This effectively eliminates the risk of the model degrading into merely memorizing the joint state features of a single equipment instance.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 51,
+      "step_id": 45,
       "title": "Physical D-H Parameter Deviations (highlighted in...",
       "instruction": "Physical D-H Parameter Deviations (highlighted in orange in the middle of Figure 6): Constrained by manufacturing and assembly tolerances, as well as mechanical wear from long-term service, the actual link lengths and joint offsets of the two manipulators are inconsistent. This leads to fundamental divergences in their low-level kinematic models.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 52,
+      "step_id": 46,
       "title": "Base Frame Spatial Mapping Discrepancies (highlighted...",
       "instruction": "Base Frame Spatial Mapping Discrepancies (highlighted in green at the bottom of Figure 6): Due to different manipulator mounting positions, massive translational and rotational deviations exist between the base coordinate frames of the source and target instance relative to the subject.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 53,
-      "title": "To quantify these differences, Table 1...",
-      "instruction": "To quantify these differences, Table 1 details the core physical kinematic offsets of the target domain relative to the source-domain instance. In summary, it is precisely because of these four categories of objective physical discrepancies—spanning from low-level kinematic deviations to macroscopic deployment shifts—that the inverse kinematics models of the two systems are completely incompatible. Under this “physical parameter barrier,” any traditional policy relying on joint-space representations will inevitably fail. This provides a rigorous and realistic testbed to verify that the waypoint representation method can effectively decouple low-level physical parameters. Furthermore, both systems are equipped with the identical Sonostar SS-6 ultrasound machine and host computer to ensure consistency in the imaging and computational environments.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 54,
-      "title": "Baseline Methods and 2 × 2 Cross-Comparative Design",
-      "instruction": "Baseline Methods and 2 × 2 Cross-Comparative Design",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 55,
+      "step_id": 47,
       "title": "To rigorously evaluate the superiority of...",
       "instruction": "To rigorously evaluate the superiority of the proposed waypoint representation strategy in executing long-horizon fine-grained manipulation tasks concerning temporal error suppression, alongside its cross-architecture universality (i.e., plug-and-play capability) as a task-space representation, this study transcends the constraints of a single backbone network and designs a 2 × 2 cross-comparative experiment.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 56,
+      "step_id": 48,
       "title": "First, regarding the selection of the...",
       "instruction": "First, regarding the selection of the foundational backbone network, in addition to the Action Chunking Transformer (ACT) [15] employed by our complete framework, the experiment specifically introduces the current state-of-the-art Diffusion Policy (DP) [17] from the imitation learning domain as an external baseline.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 57,
+      "step_id": 49,
       "title": "Second, concerning the action space representation,...",
       "instruction": "Second, concerning the action space representation, the following two strategies are configured for the aforementioned backbone networks to formulate cross-combinations:Incremental Representation (Traditional Baseline): This adopts a strategy of “predicting the continuous pose increment for the subsequent timestep based on the current state”. While this approach reflects the mainstream paradigm for executing continuous tasks—as exemplified by prior works such as [9]—its intrinsic reliance on high-frequency relative positional updates renders it highly susceptible to severe error accumulation during long-horizon tasks.Waypoint Representation (Proposed Herein): The model directly predicts a sequence of key waypoints endowed with global reference coordinates within the task space. The waypoints extracted via our adaptive algorithm can learn trajectory distributions possessing global geometric constraints. This aims to utilize sparse yet critical absolute pose points to guide manipulator motion, thereby mechanistically mitigating error drift in long sequences.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 58,
+      "step_id": 50,
       "title": "Incremental Representation (Traditional Baseline)",
       "instruction": "Incremental Representation (Traditional Baseline): This adopts a strategy of “predicting the continuous pose increment for the subsequent timestep based on the current state”. While this approach reflects the mainstream paradigm for executing continuous tasks—as exemplified by prior works such as [9]—its intrinsic reliance on high-frequency relative positional updates renders it highly susceptible to severe error accumulation during long-horizon tasks.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 59,
+      "step_id": 51,
       "title": "Waypoint Representation (Proposed Herein)",
       "instruction": "Waypoint Representation (Proposed Herein): The model directly predicts a sequence of key waypoints endowed with global reference coordinates within the task space. The waypoints extracted via our adaptive algorithm can learn trajectory distributions possessing global geometric constraints. This aims to utilize sparse yet critical absolute pose points to guide manipulator motion, thereby mechanistically mitigating error drift in long sequences.",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 60,
+      "step_id": 52,
       "title": "Through these configurations, the experiment establishes...",
       "instruction": "Through these configurations, the experiment establishes four comparative models: ACT-Incremental, ACT-Waypoint, DP-Incremental, and DP-Waypoint.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 61,
+      "step_id": 53,
       "title": "Safety and Evaluation Declaration",
       "instruction": "Safety and Evaluation Declaration: Given the stringent physical safety requirements inherent to in vivo medical robotic ultrasound interactions, it is imperative to absolutely circumvent the risks of uncontrollable trajectory divergence and potential crush injuries that exploratory baseline models (e.g., the raw incremental model) might trigger in complex dynamic environments. Consequently, the aforementioned cross-validation and quantitative comparisons regarding network architectures and action representations are strictly conducted on offline datasets. Only the complete proposed framework (ACT-Waypoint)—which is safeguarded by the high-frequency 10 ms low-level admittance force control and triple safety redundancies—is approved for subsequent real-world in vivo human scanning validation. This ensures absolute physical safety during the cross-instance deployment process.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 62,
+      "step_id": 54,
       "title": "To concurrently ensure the clinical usability...",
       "instruction": "To concurrently ensure the clinical usability of the medical images and the experimental reproducibility of the robotic task, this study establishes a comprehensive evaluation framework encompassing two dimensions: qualitative expert assessment and quantitative geometric image evaluation.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 63,
-      "title": "Qualitative Metric (Expert Subjective Assessment)",
-      "instruction": "Qualitative Metric (Expert Subjective Assessment)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 64,
+      "step_id": 55,
       "title": "To guarantee that the acquired ultrasound...",
       "instruction": "To guarantee that the acquired ultrasound images satisfy the stringent diagnostic requirements of clinical practice, this study invited two senior sonographers with extensive clinical experience (>5 years) to conduct an independent blinded evaluation of all scanning results. A successful, clinically viable autonomous scan requires a consensus between both sonographers and must simultaneously satisfy the following two critical criteria:Anatomical Structural Integrity: The ultrasound image must distinctly visualize the complete contour of the renal cortex and clearly resolve the renal medulla [18] (as illustrated in Figure 7A). This satisfies the sonographers’ fundamental acoustic window requirements for lesion localization.Standard Plane Accuracy: The imaging plane must precisely align with the maximum coronal plane of the kidney’s long axis, devoid of significant deviations or off-axis truncations. This ensures the precision of subsequent morphological parameter measurements (e.g., maximum renal length).",
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 65,
+      "step_id": 56,
       "title": "Anatomical Structural Integrity",
       "instruction": "Anatomical Structural Integrity: The ultrasound image must distinctly visualize the complete contour of the renal cortex and clearly resolve the renal medulla [18] (as illustrated in Figure 7A). This satisfies the sonographers’ fundamental acoustic window requirements for lesion localization.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 66,
+      "step_id": 57,
       "title": "Standard Plane Accuracy",
       "instruction": "Standard Plane Accuracy: The imaging plane must precisely align with the maximum coronal plane of the kidney’s long axis, devoid of significant deviations or off-axis truncations. This ensures the precision of subsequent morphological parameter measurements (e.g., maximum renal length).",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 67,
-      "title": "Quantitative Geometric Metric",
-      "instruction": "Quantitative Geometric Metric",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 68,
+      "step_id": 58,
       "title": "Building upon the expert evaluation, an...",
       "instruction": "Building upon the expert evaluation, an objective metric derived from image geometric information is introduced to quantify the degree of task completion. Given that the kidney long-axis standard plane occupies a specific angular range within the sector-shaped ultrasound Field of View (FoV), the degree of task completion is defined as the ratio of the subtended angle of the renal anatomical structure to the total imaging FoV angle of the probe:(8)P=βC\nwhere β denotes the subtended angle corresponding to the identified kidney long-axis standard plane in the ultrasound image at the termination of the scan; C represents the physical imaging Field of View (FoV) angle of the ultrasound probe (as illustrated in Figure 7B). Based on the statistical analysis of extensive clinical data and prior expert knowledge, this study establishes p ≥ 0.85 as the quantitative threshold for task success. Specifically, the autonomous scanning task is deemed successful when the renal structure occupies more than 85% of the image; otherwise, it is considered a failure. The ultimate success rate reported in this study synthesizes both subjective and objective metrics; a trial is counted as a successful validation of cross-instance skill transfer only when both criteria are simultaneously fulfilled.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 69,
+      "step_id": 59,
       "title": "To objectively position the contributions of...",
       "instruction": "To objectively position the contributions of this study within the field of autonomous medical robotics, Table 7 benchmarks the proposed waypoint-based model against representative autonomous scanning systems developed for various internal organs (spine, heart, and kidney) in recent years.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 70,
+      "step_id": 60,
       "title": "The data indicates that in the...",
       "instruction": "The data indicates that in the highly challenging in vivo kidney scanning task, the proposed method achieved a mean position error of 3.3 mm and a task success rate of 92%. Its comprehensive performance is significantly superior to the spine lumbar scanning model in [19] (error: 7.90 ± 6.87 mm, success rate: 79.0%) and the heart scanning model in [20] (success rate: 72%). This performance enhancement can be primarily attributed to the following two technical breakthroughs:",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 71,
+      "step_id": 61,
       "title": "Active compensation for soft tissue dynamic characteristics",
       "instruction": "Active compensation for soft tissue dynamic characteristics: Unlike rigid skeletal structures such as the spine, the kidney, as a soft tissue organ in the abdominal cavity, is significantly affected by respiratory motion (displacement amplitude can reach 10–40 mm [22]). The methods in references [19,21] mostly focus on the visual servoing of static anatomical structures and lack active adjustment of dynamic contact force. In particular, although ref. [21] achieved a high success rate (96.7%) in phantom experiments, because the phantom is a static rigid body and lacks the complex respiratory motion and tissue deformation characteristics in a real human body, its method is difficult to generalize directly to a clinical in vivo environment. By contrast, our study maintained a high success rate of 92% in genuine in vivo experiments subjected to human respiratory perturbations and successfully achieved zero-shot deployment across physical instances. This is primarily attributable to the admittance model-based constant normal force control strategy in the task space introduced in this study (as detailed in Section 2.3). This strategy enables real-time compliant compensation for respiration-induced tissue deformation, effectively maintaining a stable physical coupling between the probe and the body surface. This drastically reduces the image loss rate caused by contact instability.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 72,
+      "step_id": 62,
       "title": "Global optimization capability of the end-to-end strategy",
       "instruction": "Global optimization capability of the end-to-end strategy: Ref. [20] adopts a hierarchical control architecture (visual recognition + independent motion planning), where cascading errors between independent modules are prone to trigger severe error accumulation. In contrast, the Transformer-based end-to-end model for waypoint prediction proposed herein can directly map from the original ultrasound images to the optimal trajectory in the task space. By utilizing attention mechanisms to capture long-term dependencies, the model exhibits higher precision and robustness in global path planning.",
       "is_critical": false,

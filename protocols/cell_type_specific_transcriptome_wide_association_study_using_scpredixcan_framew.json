@@ -25,19 +25,13 @@
     "example data",
     "genotype data",
     "GWAS summary statistics",
-    "scRNA-seq count matrix"
+    "scRNA-seq count matrix",
+    "Timing: 10–20 min",
+    "Timing: 5 min to 4 h"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Software preparation",
-      "instruction": "Timing: 10–20 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "Software preparation",
       "instruction": "scPrediXcan requires a Linux or MacOS system with a minimum 16 RAM available; for full training, 64 RAM is suggested. It also requires Conda, Python, Nextflow, and the deep learning package Pytorch. This step outlines how to create a Conda environment (named scPrediXcan) and install the software packages needed (above) on Linux or MacOS. The user must install and initialize Conda before the first step.1.For Linux: Run the following code in the terminal to create a parent folder named scTWAS for all downloaded data and generated results. It will also create a new environment in Conda with the and activate the environment for running scPrediXcan.# Make project parent filemkdir scTWAScd scTWAS# Clone repositories for ctPred traininggit clone https://github.com/hakyimlab/scPrediXcan.git# Create and activate conda environment for Linuxconda env create -f scPrediXcan/scPrediXcan_env.ymlconda activate scPrediXcanAlternatives: For MacOS, use -f scPrediXcan/scPrediXcan_mac_env.yml for conda environment creation.# Make project parent filemkdir scTWAScd scTWAS# Clone repositories for ctPred traininggit clone https://github.com/hakyimlab/scPrediXcan.git# Create and activate conda environment for MacOSconda env create -f scPrediXcan/scPrediXcan_mac_env.ymlconda activate scPrediXcan2.Clone the PredictDb-nextflow and S-PrediXcan3 repositories and create a folder to store the results.# Clone repositories for l-ctPred training and S-PrediXcangit clone https://github.com/hakyimlab/PredictDb-nextflow.gitgit clone https://github.com/hakyimlab/MetaXcanmkdir ResultsNote: At the end of Software preparation, you should have a parent folder named scTWAS on your local hard drive that contains four subfolders: scPrediXcan, PredictDb-nextflow, MetaXcan, and Results.",
       "substeps": [],
@@ -45,15 +39,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
-      "title": "Dataset preparation",
-      "instruction": "Timing: 5 min to 4 h",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
+      "step_id": 1,
       "title": "Dataset preparation",
       "instruction": "The data and software described below will be needed for training cell-type–specific ctPred models that predict gene expression levels from Enformer-derived epigenomic features. Enformer is a preexisting deep learning model that predicts epigenomic features from a reference genome. The Enformer-derived epigenomic features are used to train ctPred models. Users can use toy or real example data (see key resources table) to test the training steps. The toy example data is limited to one cell type (Acinar), ∼20,000 genes and 6 individuals (ct-Pred training) or 224 genes and 20 individuals (ℓ -ctPred training) to provide users with an end-to-end tutorial that can be completed in 10 hours, not including data downloads, and requires 32GB RAM.3.If using toy example data, use the following code to download the data from Zenodo. Using this data, users can run all components of the pipeline with minimal computational burden.# Download the all the data from Zenodozenodo_get 18124207tar -xzf Download_dataset.tar.gz && rm Download_dataset.tar.gzNote: This step creates a folder scTWAS/Download_dataset containing the example files. This process may take several hours. If the download fails, download and extract the data manually here: scPrediXcan toy example data: https://zenodo.org/records/18124207. The default file path is /scTWAS/Download_dataset.4.If using user-provided single-cell RNA-seq (scRNA-seq) data or the example real data (see key resources table), process the count cell-by-gene count matrix into pseudobulk individual-by-gene format for each cell type by aggregating the cells from the same cell type.a.For quality control, filter the count matrix to include only cells expressing more than 200 gene features, with each included gene feature present in at least three cells.b.Remove doublets and triplets using DoubletDecon.4c.Remove non-coding sequences by filtering out genes that are absent in the Enformer-derived epigenomic features file we provide (see key resources table).d.Split the matrix by cell types using cell-type labels, generating one individual-by-gene matrix per cell type.e.Aggregate counts across all cells belonging to the same individual for each cell type, converting the cell-by-gene count matrix into an individual-by-gene count matrix.Note: The epigenomic predictions provided were derived by Enformer2 for protein-coding genes available in BioMart. The gene identifiers must be consistent across the scRNA-seq matrix and Enformer feature file. Users can use the gene names to align the files if gene IDs are from different versions.Note: Removing doublets and triplets is a standard quality control procedure for scRNA-seq data to avoid artificial expression profiles that can distort downstream analyses. Tools such as DoubletDecon detect and remove these multiplets by identifying expression profiles that appear as mixtures of distinct cell types, thereby preserving the integrity and biological interpretability of downstream analyses in scPrediXcan.5.Load the count matrix prepared above and the Enformer-derived epigenomics features file. Make sure that the column name for gene names is ‘gene_name’ for both files, so that they can be merged according to this column.6.Run the following Python script. The code will complete the following steps:a.Calculate mean expression across individuals.b.Convert mean expression to rank-based percentiles.c.Merge mean expression percentiles with the epigenomics file to create a single .csv file (genes as rows and 5316 columns: generic index ID, gene name, 5313 columns for epigenomic features, and expression percentile).d.The output file will be saved in scTWAS folder and will serve as the training file for ctPred.CRITICAL: All code beyond this point is given using file paths created using the example data. Users training with user-provided data should replace the file paths as appropriate.python scPrediXcan/Scripts/ctPred/data_prep.py ∖ --exp './Download_dataset/Acinar_normcounts.csv' ∖ --epi './Download_dataset/Gene_epigenomics_v0.csv' ∖ --output './Download_dataset/training_cell.csv'Note: The saved training_cell object is a .csv file in the ./Download_dataset folder. This file will serve as the input data for ctPred training. ctPred is trained to predict expression percentiles rather than raw counts because the distribution of gene expression across individuals is highly skewed; using quantiles stabilizes training.",
       "substeps": [],

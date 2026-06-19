@@ -36,7 +36,8 @@
     "Dimethyl sulfoxide (DMSO)",
     "Matrigel",
     "Y-27632 Dihydrochloride",
-    "Micropipette set"
+    "Micropipette set",
+    "Timing: ∼2 h"
   ],
   "steps": [
     {
@@ -58,21 +59,13 @@
     {
       "step_id": 2,
       "title": "Microscopy and data analysis",
-      "instruction": "Timing: ∼2 h",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
-      "title": "Microscopy and data analysis",
       "instruction": "This section entails the acquisition of light microscope images of the organoids and their analysis with OrganoSeg and OrganoAna.15.Preparations.a.Download and install OrganoSeg from https://github.com/JanesLab/OrganoSeg.b.Download the data analysis Excel tool OrganoAna from https://github.com/B-P-R-C/Lorenowicz/blob/main/OrganoAna%20-%20ExpectedResults.xlsm.16.Image acquisition.a.Place the organoid plate under a microscope and select 1.25x objective.b.Adjust focus level until most organoids are in focus and take bright-field images of each droplet.c.Include a scalebar in the image so that you can correlate pixels to micrometers in OrganoSeg.Note: This needs to be done only once per objective.d.Open the image with the scalebar in e.g., Fiji and measure the scale. For example when using EVOS M5000 microscope, for the 1.25x objective this is 346 pixels/2000 μm and for the 4x objective the scale is 358 pixels/550 μm.17.Organoid segmentation and extraction of metrics with OrganoSeg.a.Launch OrganoSeg (Figure 3).Figure 3Overview of important parameters in OrganoSegGood starting values for Intensity threshold, Window size and Size threshold are 0.2, 20 and 80, respectively.b.Go to File -> Open -> New Image Set and select a maximum of 72 images for analysis and click “Open”.Note: Ensure the order of the files loaded is known as the filenames will not be present in the OrganoSeg output file, only their order.c.Check the “Out-of-Focus Correction” checkbox.d.In the Spheroid Editing Toolbar, click “Split”.e.Go to Preferences -> Calibration and type how many pixels correspond to how many micrometers.f.Go to Preferences -> Metrics and check all the checkboxes for different parameters (from Area to Homogeneity).Note: This will ensure that the data columns in the OrganoSeg output file are always in the same order. Not doing this will result in failed or erroneous analysis, because OrganoAna reading the output file assumes the columns are in a certain position.g.Select the first image from the list on the left and set “Intensity Threshold” to 0.2, “Window Size” to 20 and “Size Threshold” to 80. We have empirically concluded these to be a good starting point but exact settings will depend on the culture and images taken. Adjust the values until all or most organoids are properly detected. If an organoid is incorrectly split into several parts, use the combine tool to segment these into one organoid.Note: At this point it does not matter if excessive background objects are detected as well, these will be filtered from the data downstream based on their non-organoid geometry (such as lack of roundness). However, the total number of objects detected per image should not exceed 2000 (see limitations).h.Click “Apply Settings to All” to segment all images.i.Browse the images to confirm the settings work for all images. Adjust the settings on individual images if necessary.j.To save the segmented images, select File -> Save -> Image Set.k.Export the data by clicking “Image Set” in the “Export Signature” box in the lower left corner. Name the file and save as an Excel file.18.Data quantitation and visualization with OrganoAna.a.Open the OrganoSeg output file and OrganoAna (Figure 4).Figure 4Overview of important parameters in OrganoAnaType the name of the export file from OrganoSeg into the Input file name and click Load data. Place the data replicates into groups and select the group to normalize to. For easy export into graphics editor programs, a black & white skeleton of the graph without any markings is available on the Fig sheet.b.Enter the parameters used in steps 9 and 11 to “OrganoSeg values used to obtain dataset”. These are Intensity Threshold, Window Size, Size Threshold and Scale. This is only for record keeping and they are not needed for the analysis.c.Type the name of the output file into “Input file name”.d.Click “Load Data” button. This will transfer the values from the OrganoSeg output file to OrganoAna sheets 1–72. Clearing and loading data takes about 8 minutes on a desktop PC with 8 CPU cores at 4 GHz and Excel will be unresponsive during this time.Note: If clicking the button immediately causes “Run time error ‘9’: Subscript out of range”, ensure the typed file name is correct and both OrganoAna and the OrganoSeg output file are simultaneously open in Excel. If the OrganoSeg output file contains less than 72 sheets (i.e. images) as is most often the case, there will be the same error in the end. In this case, just click “End” button on the error window, all the data was nonetheless successfully copied.e.The names for up to 8 different conditions can be set on the left (Group1name-Group8name).f.Place each image dataset into its corresponding condition using the dropdown menus.Note: Since OrganoAna contains a lot of data and links, the user experience may become slow at times. For example, there may be a delay of several seconds every time something is selected from a dropdown menu. To mitigate this, it is advisable to set Excel not to recalculate everything after every step. This can be set from Formulas -> Calculation Options -> Manual. Do not forget to turn it back on to Automatic when you want to see the results!g.Select your “Parameter of Interest” from the dropdown menu, average area is the default.h.In order to easily compare different conditions, select the group used for normalization at the bar graph.Note: An easily exportable version of this graph without any labels can be found on sheet “Fig” for further downstream editing. This tab also contains the raw data of each group.i.Bonferroni corrected Student’s t-tests, One-way ANOVA and Dunnett’s post-hoc analysis for statistical significance between different conditions can be found on the right.Note: Additional settings can be found in the QA box. By default, only Size, Circularity and Perimeter vs. Area ratio are used to filter out background objects, which are not round. A breakdown of objects in each dataset can be found in the QA tab.",
       "substeps": [],
       "is_critical": true,
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 3,
       "title": "Quantification and statistical analysis",
       "instruction": "The numbers provided by OrganoSeg are read by OrganoAna and then each detected object passes through a number of checkpoints designed to filter background noise and other non-organoid objects detected by the OrganoSeg algorithm. Minimizing the background with the settings usually also means leaving organoids undetected. Thus, it is better to err on the side of detecting too many objects, because the non-organoid objects can be filtered out. This takes place using the following parameters (the default values have been acquired experimentally).1.Circularity of the object is calculated by dividing two values provided by OrganoSeg, MajorAxisLength with MinorAxisLength. This results in values greater than 1 and with the default settings, values below 0.5 and greater than 1.6 are filtered out.2.Eccentricity is given by OrganoSeg but not currently used for filtering. The default accepted values are 0.1–1 i.e., everything.3.MeanPixelInt is similarly not used. These values are the lower and upper limit of the pixel intensities for objects that are included in the dataset and since 8-bit image data has values from 0 to 255, the default values 0.1–255 are meant to not filter out anything.4.Perimeter/A ratio is something that decreases as organoid size increases. This parameter is useful for detecting and filtering longitudal, thin non-spherical objects typically found in the background. The default accepted range is 0.05–0.6 i.e., the filtering happens on the “upper end” of the scale where such objects reside.5.Finally, the size is used to exclude miniscule objects, which are typically optical aberrations or false positives of the detection algorithm. We have decided to exclude objects smaller than 300 μm2.",
       "substeps": [
@@ -97,7 +90,7 @@
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 4,
       "title": "Quantification and statistical analysis",
       "instruction": "Failure to pass any of these tests will result in the exclusion of that object from the dataset.",
       "substeps": [],
@@ -105,7 +98,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 5,
       "title": "Quantification and statistical analysis",
       "instruction": "The Student’s t-tests between different data groups are calculated with two-tailed distribution and two-sample unequal variance (Excel function TTEST(Array1;Array2;2;3). Subsequently, the P-values are corrected with the Bonferroni method. In Dunnett’s test, we used two-tailed comparison assuming unequal group sizes.",
       "substeps": [],
@@ -113,7 +106,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 6,
       "title": "Data analysis",
       "instruction": "Overseeding the matrigel droplets with cells will result in more overlapping organoids, which may decrease the quality of the image analysis. In general, the number of cells per matrigel and the end date of the experiment can be modified to yield a density most optimal for segmenting the organoids.",
       "substeps": [],
@@ -121,7 +114,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "Data analysis",
       "instruction": "OrganoAna is a simple Excel file and therefore comes with certain technical limitations.",
       "substeps": [],
@@ -129,7 +122,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 8,
       "title": "Data analysis",
       "instruction": "First, OrganoAna is currently limited to analyzing 72 images simultaneously. This is due to the number of sheets inside the Excel file as each image data is saved on its own sheet. We chose to include 72 sheets for the data, because this allows the analysis of a full 24-well plate with 3 matrigel droplets per well.",
       "substeps": [],
@@ -137,7 +130,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 9,
       "title": "Data analysis",
       "instruction": "Second, the number of objects per sheet that OrganoAna reads from the OrganoSeg output file is 2000. In theory, each analyzed image contains at least 500 objects, because we seed 500 cells. However, in practice the number of objects detected is much greater, because all images contain background objects/shadows/artefacts, which will be detected as well. At best, we have observed a bit more than 1000 objects per image. In order to minimize the possibility of excluding organoids from the analysis, we chose 2000 as the maximum number of objects as it is about double what we have seen in practice. Thus, the probability of missing an organoid is exceedingly low. If there is a lot of clutter on the screen, confirm the number of objects by scrolling down the “Selected Spheroid” list on the lower right side of the screen in OrganoSeg. These 2000 objects are then processed and non-organoid looking geometry is filtered out according to the settings in the QA-box of in OrganoAna. Of the remaining objects, a maximum of 500 objects per sheet are transferred to “Analysis” sheet for calculations. Finally, the data can be grouped into a maximum of 8 conditions.",
       "substeps": [],
@@ -145,7 +138,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 10,
       "title": "Data analysis",
       "instruction": "It can be argued that imaging only one X-Y plane of the organoid droplet leaves some organoids out and introduces a source of inaccuracy to the experiment. However, a mitigating factor to this is the fact that the seeded cells still tend to sink down after pipetting the droplet and before it has solidified enough and accordingly, most of the organoids are indeed found in the bottom of the droplet. Also to mitigate this, it is important to keep the droplet size small enough, thus 10 μl was deemed suitable for the assay.",
       "substeps": [],

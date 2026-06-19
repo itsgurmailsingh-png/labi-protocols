@@ -34,7 +34,8 @@
     "survminer",
     "tableone",
     "car",
-    "dplyr"
+    "dplyr",
+    "Timing: < 10 min"
   ],
   "steps": [
     {
@@ -56,29 +57,13 @@
     {
       "step_id": 2,
       "title": "AutoScore step (ii): Select the best model with a parsimony plot",
-      "instruction": "Timing: < 10 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
-      "title": "AutoScore step (ii): Select the best model with a parsimony plot",
       "instruction": "The second step of the AutoScore workflow helps users select a parsimonious list of variables for the final scoring model using a parsimony plot. Variable selection is flexible and can incorporate clinical knowledge and user preference in addition to model performance.9.To generate the parsimony plot based on the variable ranking (“ranking”) from step 8, simply run the following:> AUC write.csv(data.frame(AUC), file = \"AUC.csv\")Note: For survival data, please use “AutoScore_parsimony_Survival()” instead (see Figure 2B). To obtain a single overall performance metric in the parsimony plot, we use the integrated AUC (iAUC), a weighted average of AUC(t) over the follow-up period (the range of “label_time”).Note: For ordinal data, please use “AutoScore_parsimony_Ordinal()” instead (see Figure 3B, where performance is measured using mean AUC (mAUC) across dichotomized comparisons. Users have the additional option to choose the link function in the ordinal regression using the parameter “link”, which affects predictive performance. The default is link=“logit” corresponding to the commonly used proportional odds model, and users may consider “cloglog” or “probit”. The same “link” parameter must be used throughout all AutoScore functions.10.Determine the optimal number of variables (“num_var”) based on the parsimony plot obtained in step 9. The final list of variables can be the first “num_var” (e.g., the first 6) variables:> num_var final_variables num_var final_variables <- names(ranking[c(1:num_var, 9, 10)])",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 4,
-      "title": "AutoScore step (iii): Generate initial scores with the final list of variables",
-      "instruction": "Timing: < 10 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
+      "step_id": 3,
       "title": "AutoScore step (iii): Generate initial scores with the final list of variables",
       "instruction": "This is the third step of the AutoScore workflow, which generates initial scores with the final list of variables selected in step 10.11.Generate initial cutoff values (“cut_vec”) for all continuous variables in the list of variables from step 10 (“final_variables”), which can be fine-tuned in step 12:> cut_vec <- AutoScore_weighting( train_set = train_set, validation_set = validation_set, final_variables = final_variables, max_score = 100, categorize = \"quantile\", quantiles = c(0, 0.05, 0.2, 0.8, 0.95, 1))",
       "substeps": [],
@@ -86,7 +71,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 4,
       "title": "AutoScore step (iii): Generate initial scores with the final list of variables",
       "instruction": "The initial scoring table corresponding to the cutoff values above and the resulting intermediate performance evaluation (based on ROC evaluation for binary outcomes) will be displayed (see Figure 4A). Users can proceed to the next steps if the intermediate evaluation results are satisfactory. Otherwise, they may repeat steps 10–11 to adjust the final variable list and assess performance measures with the updated scoring table until satisfactory performance is reached. Troubleshooting 5 elaborates on suggested solutions for debugging when facing some unexpected errors.Note: For survival data, please use “AutoScore_weighting_Survival()” instead (see Figure 2C). This function requires an additional argument, “time_point”, to specify the time points at which time-dependent AUC (t) is to be evaluated.Note: For ordinal data, please use “AutoScore_weighting_Ordinal()” instead (see Figure 3C). Users have the additional option to choose the link function for the ordinal regression (see Note of step 10 for detail). Performance is measured using mAUC.Figure 4AutoScore output for intermediate scoring table evaluation and fine-tuning(A) Initial scoring table and performance measures from step 11 and (B) fine-tuned scoring table and performance measures from step 13.",
       "substeps": [],
@@ -94,15 +79,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
-      "title": "AutoScore step (iv): Fine-tune the initial score",
-      "instruction": "Timing: < 10 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
+      "step_id": 5,
       "title": "AutoScore step (iv): Fine-tune the initial score",
       "instruction": "This step gives users an opportunity to revise the data-driven cutoff values for each continuous variable from step 11, by combining categories, rounding cutoff values up to meaningful values, or changing cutoffs according to clinical knowledge, user preference or implementation requirement.12.After checking the initial scores and their cutoff values, users may revise the cutoff values for each continuous variable using the codes as follow.> cut_vec$Age cut_vec$Lab_H cut_vec$Lab_K cut_vec$Lab_B cut_vec$Vital_A scoring_table <- AutoScore_fine_tuning( train_set = train_set, validation_set = validation_set, final_variables = final_variables, cut_vec = cut_vec, max_score = 100)",
       "substeps": [],
@@ -110,7 +87,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 6,
       "title": "AutoScore step (iv): Fine-tune the initial score",
       "instruction": "The updated scoring systems and performance based on the validation set are reported (see Figure 4B). For example, the cutoff values for age are updated from default quantile-based values to 50, 75 and 90, as specified in step 12 (indicated by blue rectangles in Figure 4), and the points for age categories are updated by retraining the model.",
       "substeps": [],
@@ -118,7 +95,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 7,
       "title": "AutoScore step (iv): Fine-tune the initial score",
       "instruction": "If the intermediate evaluation results for the current scoring system (i.e., cutoff values, score values, variables, etc.) are satisfactory, users may proceed with testing in the next step. Otherwise, users may repeat steps 12–13 to revise fine-tuning or steps 10–13 to refine not only cutoff values but also the variable list, until satisfactory performance is achieved.Note: For survival data, please use “AutoScore_fine_tuning_Survival()” instead (see Figure 2D), with an additional “time_point” argument for time points to evaluate the time-dependent AUC(t) at.Note: For ordinal, please use “AutoScore_fine_tuning_Ordinal()” instead (see Figure 3D), with an additional “link” argument to specify the link function for ordinal regression. Performance is evaluated using mAUC with 95% bootstrap CI (computed from “n_boot=100” bootstrap samples by default).",
       "substeps": [],
@@ -126,15 +103,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
-      "title": "AutoScore step (v): Evaluate final risk scores on the test dataset",
-      "instruction": "Timing: < 10 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
+      "step_id": 8,
       "title": "AutoScore step (v): Evaluate final risk scores on the test dataset",
       "instruction": "This step is to evaluate the final scoring system based on the unseen testing dataset.14.Using the scoring table (“scoring_table”) generated from step 13, run the following command to generate predicted scores (“pred_score”) for each subject in the testing set (“test_set”) and print out the performance indicators (and/or performance curves, including ROC curve). The testing performance is shown in Figure 5.Figure 5Performance measure of the final scoring model on the test set from step 14> pred_score print_roc_performance(pred_score$Label, pred_score$pred_score, threshold = 90)Note: For survival data, please use “AutoScore_testing_Survival()” instead (see Figure 2E), with an additional “time_point” argument for time points to evaluate the time-dependent AUC(t) at.Note: For ordinal, please use “AutoScore_testing_Ordinal()” instead (see Figure 3E), with an additional “link” argument to specify the link function for ordinal regression. In addition to mAUC, a generalized c-index is reported for the test set with 95% CI computed from “n_boot=100” bootstrap samples by default. Users can also apply “print_performance_ordinal()” to predictions to print mAUC with or without the generalized c-index (see Figure 3E).",
       "substeps": [],

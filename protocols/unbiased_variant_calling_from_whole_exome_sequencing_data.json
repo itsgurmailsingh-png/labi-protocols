@@ -25,19 +25,12 @@
     "Agilent SureSelect All Exon v2.0",
     "dbSNP151",
     "dbNSFP 2.9.3",
-    "gnomAD 2.1.1"
+    "gnomAD 2.1.1",
+    "Timing: 3 h"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Preparation of BAM files",
-      "instruction": "Timing: 3 h",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "Preparation of BAM files",
       "instruction": "In this section we describe the steps taken to prepare the BAM files for the subsequent variant calling and discovery. The output of this part comprises BAM files suitable for the subsequent variant calling. The vast majority of variant callers require these preparation steps and the major steps taken (in slightly different flavors according to the tools used to make them so) are the following:6.Merging of BAM files from different lanes. This is an optional step according to the instrument and sequencing protocol used (the files used in this protocol do not require this step).7.Then, if the sequencing is paired-end:a.Sort the reads in the BAM file according to their names so that pairs are placed one below the other.b.Fix mates so that they both have the same sets of attributes for the subsequent preprocessing.c.Re-sort the reads according to their genomic coordinates this time.d.Mark the duplicate reads as variant callers take this information into account.8.If the sequencing is single-end:a.Sort the reads according to their genomic coordinates.b.Mark the duplicate reads as variant callers take this information into account.",
       "substeps": [],
@@ -45,7 +38,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 1,
       "title": "Preparation of BAM files",
       "instruction": "In our case, we have paired-end sequencing, so we are following the first set of steps above.9.Sort the reads in the BAM file according to their names so that pairs are placed one below the other and fix read-mates so that they both have the same sets of attributes for the subsequent preprocessing.#!/bin/bashBAM_PATH=$HOME_PATH/bamCORES=16for FILE in `ls $BAM_PATH/∗.uns`do SAMPLE=`basename $FILE | sed s/\\.uns//` echo \"Processing $SAMPLE\" $SAMTOOLS_PATH/samtools sort -n -@ $CORES -m 4G \\ $BAM_PATH/$SAMPLE\".uns\" | \\ $SAMTOOLS_PATH/samtools fixmate -m - $BAM_PATH/$SAMPLE\"_fixmate.bam\"donerm $BAM_PATH/∗.uns10.Re-sort the reads according to their genomic coordinates and mark the duplicate reads as variant callers take this information into account.#!/bin/bashBAM_PATH=$HOME_PATH/bamCORES=16for FILE in `ls $BAM_PATH/∗_fixmate.bam`do SAMPLE=`basename $FILE | sed s/_fixmate\\.bam//` echo \"Processing $SAMPLE\" $SAMTOOLS_PATH/samtools sort -@ $CORES -m 4G \\ $BAM_PATH/$SAMPLE\"_fixmate.bam\" | \\ $SAMTOOLS_PATH/samtools markdup - $BAM_PATH/$SAMPLE\".bam\" echo \"Indexing $SAMPLE\" $SAMTOOLS_PATH/samtools index $BAM_PATH/$SAMPLE\".bam\"done",
       "substeps": [],

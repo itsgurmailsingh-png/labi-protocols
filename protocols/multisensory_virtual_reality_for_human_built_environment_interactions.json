@@ -21,7 +21,8 @@
   ],
   "estimated_time_mins": 54,
   "materials": [
-    "Image, application 1"
+    "Image, application 1",
+    "(1)Determine fan's location in relation to the user."
   ],
   "steps": [
     {
@@ -43,7 +44,7 @@
     {
       "step_id": 2,
       "title": "Step three: calibrate the fan and generate airflow commands",
-      "instruction": "(1)Determine fan's location in relation to the user.",
+      "instruction": "The relative position of the fan in relation to the VR user should be calibrated with an anemometer, matching the air velocity measured at the fan's highest and lowest operating levels with the maximum and minimum target airflow velocity (m/s). Note: Use the maximum air velocity to determine the distance of the fan to the user. If the minimum air velocity cannot be matched with the air velocity at the fan's lowest operating level, more fans are needed.(2)Generate airflow profile commands",
       "substeps": [],
       "is_critical": false,
       "timers": []
@@ -51,21 +52,13 @@
     {
       "step_id": 3,
       "title": "Step three: calibrate the fan and generate airflow commands",
-      "instruction": "The relative position of the fan in relation to the VR user should be calibrated with an anemometer, matching the air velocity measured at the fan's highest and lowest operating levels with the maximum and minimum target airflow velocity (m/s). Note: Use the maximum air velocity to determine the distance of the fan to the user. If the minimum air velocity cannot be matched with the air velocity at the fan's lowest operating level, more fans are needed.(2)Generate airflow profile commands",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 4,
-      "title": "Step three: calibrate the fan and generate airflow commands",
       "instruction": "The target airflow velocity should be converted to discrete air velocity levels, responding to different fan operating levels. The previous signal commands for increase and decrease fan speed were given variable names in the C# script in Unity: Inc () and Dec (). The discreate air velocity level sequence can be converted to a series of commands with Inc () and Dec (). For example, if air velocity level change from level 1 to 4 in a second, three Dec () commands will be used. Note: variable Inc () and Dec () will be defined in the C# script in step four.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 5,
+      "step_id": 4,
       "title": "Step four: integration into Unity",
       "instruction": "C# script can be executed during Unity VR runtime. A function Wind Script (see supplement files) in C# was created to be able to send commands to the programed Arduino UNO Rev3 directly from Unity (instead of from Arduino IDE). In this way, the commands for controlling the fan to change operating levels in order to simulate target airflow can be embedded in Unity's platform and this function can be called from other actions in VR. For example, Inc() and Dec() were defined to speed up and down the fan's operating levels. Note: In this case, if the user enters a wind zone in the VR environment, defined as the collision between the GameObject of the player and the GameObject of the wind zone, an event will be triggered to active the wind profile function in wind script. If the user exits that zone, CloseFan function will be executed. OnTriggerEnter and OnTriggerExit (Unity technology, 2022) were used to achieve this. Step-by-step procedures are listed below.(1)Create an empty GameObject wind in Unity and attach the script Wind Script to the GameObject. Fill in the empty fields under the Wind Script tab, including Serial Port Name and serial numbers for all the fan operation commands.(2)In Wind Script, copy the airflow profile commands from Step three (2) to the wind profile function. Note: If there are multiple airflow profiles, multiple wind profile functions should be created with the respective commands belonging to different airflow profiles.(3)Create microclimatic zones for different wind profiles. Depending on the shape of the microclimate zones, box collider or mesh collider can be used. Attach the wind zone script (see supplement files) onto this object. Relevant wind profiles can be activated in this script. Note: If the shape is irregular, a 3D geometric mesh model for that zone needs to be modelled and imported into Unity to create a GameObject. Mesh collider function can be attached to that GameObject.(4)Attach a Capsule Collider (its shape is two half-spheres joined together by a cylinder to represent virtual human body) and Rigidbody component to the VR user's avatar GameObject (using VR, this would be the XR Rig GameObject, see https://docs.unity3d.com/Manual/configuring-project-for-xr.html). Enable Collider.isTrigger and Rigidbody.isKinematic (Unity technology, 2022).",
       "substeps": [],
@@ -73,7 +66,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 5,
       "title": "Step one: hardware set-up",
       "instruction": "The Sunlight Control Module works as a digitally controlled power relay for the operation of the halogen lamps. Instead of using the Solderless Breadboard, prototyping shields were used to provide a permanent configuration of the circuit. In addition, the control module was mounted into a sealed polycarbonate box which has openings for connections to computer and power source. Therefore, the need for physical access to the circuit can be minimized for electrical safety (as direct current is controlled via this module). No resistor is added in the circuit because the power relay contains one. The capacity of the power relay (10Amp 250 Volts, capable of supporting 2500 W external device) to control the halogen lamps was checked (Fig. 5, Fig. 6).(1)Connect the power relay to the Arduino prototyping board shield with soldering. Note: Connect S to any of the digital pin in the prototyping shield (in the example, pin 12 was used), “+” to the 5 V pin, and “-” to the Ground pin.(2)Create openings in the Sealed Polycarbonate Enclosure for the power socket boards, power plug and USB connection. Fix the power socket boards on to the box.(3)Connect the power relay, power socket boards and power plug with electrical cable. Note: Connect the “C” (Common) end of power relay to the Active wire of the power plug, “NO” (Normally Open) end of the power relay to the Active Terminal of the power socket, the Earth wire of the power plug to the Earth Terminal of the power socket and the Neutral wire of the power plug to the Neutral Terminal of the power socket.(4)The Arduino prototyping board shield needs to be plugged onto the Arduino Uno Rev3.(5)The Arduino Uno Rev3 with the prototyping shield plugged should be mounted onto the base of the protection box.(6)Connect Sunlight Control Module to the PC via USB, to the halogen lamps and to Direct Current supply.(7)The location of the halogen lamps in relation to the VR user needs to be determined based on the specific requirements. Radiation flux density may be measured for this purpose.Fig. 5Schematic Diagram for Connections in Sunlight Control Module. Note: Components in this figure are not on the same scale. Elements are resized to show more details.Fig 5Fig. 6Sunlight Control Module Prototype.Fig 6",
       "substeps": [],
@@ -81,7 +74,7 @@
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 6,
       "title": "Step two: programming Arduino",
       "instruction": "Programming for the Sunlight Control Module consists of the functionality for receiving serial commands from the USB port in PC with the Serial.readBytesUntil\n[4] function and activate specific halogen lamp operation definitions. Note: Halogen lamp operation mode is defined using digitalWrite\n[3] which writes a HIGH or a LOW value to a digital pin connecting the power relay (HIGH will cause power relay to open the circuit whereas LOW will cause it to close the circuit). For example, when receiving a character value of “O”, digitalWrite will output HIGH (1 in digital signal) value to open the circuit for five halogen lamps. The script Heatlamp-arduino-script (see supplement files) needs to be uploaded to Arduino via Arduino IDE.",
       "substeps": [],
@@ -89,7 +82,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "Step three: integration into Unity",
       "instruction": "The hardware configuration can simulate three sunlight conditions: shaded (all halogen lamps off), partially shaded (five halogen lamps off) and sunlit (all halogen lamps on). These are defined as three functions in the script to control the operation of the halogen lamps by sending specific serial command to the Sunlight Control Modules, e.g., sending serial commands “C” to turn off power connection to two sets of halogen heat lamps. These functions can be called by event trigger in Unity, either by Unity's User Interface or by user enter/exit certain areas.(1)Create an empty GameObject named Sunlight. Attach the script Artificial Sun Script onto this GameObject, fill in port names for the USB port used, e.g., COM1. Note: the port names can be found in Device Manager function in Windows operating system.(2)Create microclimatic zones for different sunlight conditions. Depending on the shape of the microclimate zones, box collider or mesh collider can be used. Attach the TriggerSunlit, TriggerShade and TriggerPartialShade scripts (see supplement files) to the respective microclimate GameObjects. Note: If the shape is irregular, a 3D geometric mesh model for that zone needs to be modelled and imported into Unity to create a GameObject. Mesh collider function can be attached to that GameObject. Drag and place the Sunlight GameObject into the field Artificial Sun.(3)Attach a Capsule Collider (its shape is two half-spheres joined together by a cylinder to represent virtual human body) and Rigidbody component to the VR user's avatar GameObject (using VR, this would be the XR Rig GameObject, see https://docs.unity3d.com/Manual/configuring-project-for-xr.html). Enable Collider.isTrigger and Rigidbody.isKinematic (Unity technology, 2022).",
       "substeps": [],

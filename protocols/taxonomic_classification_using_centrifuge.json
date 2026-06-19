@@ -27,7 +27,9 @@
     "bash script",
     "fastq files",
     "quality control script",
-    "paired end script"
+    "paired end script",
+    "Go into the fastq direectory cd fastq",
+    "Execute cent_barplots.R $ ./cent_barplots.R"
   ],
   "steps": [
     {
@@ -60,118 +62,111 @@
     },
     {
       "step_id": 4,
-      "title": "Go into the fastq direectory cd fastq",
-      "instruction": "Go into the fastq direectory cd fastq",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
       "title": "Create a file called &#34;list&#34; with...",
       "instruction": "Create a file called &#34;list&#34; with all of your SRR file names. My file has the following: % cat list SRR1647045 SRR1647046 SRR1647047 SRR1647048 SRR1647049 SRR1647141 SRR1647142 SRR1647143 nano list",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 6,
+      "step_id": 5,
       "title": "Now we will download all of...",
       "instruction": "Now we will download all of the SRR files again from the SRA, but this time we will use a few new tricks to download the files as separate paired end read files (_1 and _2 files). Create the following script called get-fastq.sh: --clip removes adapter sequences --skip-technical Only output the biological, not technical reads --readids Gives a unique name for each read (for forward and reverse read ids), so they don&#39;t end up with the same read id in the R1 and R2 file and break downstream processes. --gzip compresses your files with gzip --dumpbase ensures the bases are A, T, G, C not in color space (as in SOLiD sequencing) --split-files outputs paired ends as _1 and _2 files for the forward and reverse read. #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=2:mem=4gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -l place=pack:shared#PBS -M netid@email.arizona.edu#PBS -m beamodule load sratoolsecho “my job_id is: ${PBS_JOBID}”FASTQ_DIR= #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=2:mem=4gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -l place=pack:shared #PBS -M netid@email.arizona.edu #PBS -m bea module load sratools echo “my job_id is: ${PBS_JOBID}” FASTQ_DIR=&#34;/rsgrps/bh_class/username/fastq&#34; cd $FASTQ_DIR for file in `cat list`; do fastq-dump --outdir $FASTQ_DIR --gzip --skip-technical --readids --dumpbase --split-files --clip $file; done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 7,
+      "step_id": 6,
       "title": "Run the script on the cluster...",
       "instruction": "Run the script on the cluster to get all of the fastq paired-end files mkdir std-err std-outchmod 755 get-fastq.shqsub -e std-err/ -o std-out/ get-fastq.sh mkdir std-err std-out chmod 755 get-fastq.sh qsub -e std-err/ -o std-out/ get-fastq.sh",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "You can look at the quality...",
       "instruction": "You can look at the quality of the read files using fastqc as you did before. But, because we already have an idea of the issues, we are going to run a streamlined QC process in the next step. module load fastqc/0.11.2fastqc ./*.fastq.gz module load fastqc/0.11.2 fastqc ./*.fastq.gz",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 8,
       "title": "To speed things up, we are...",
       "instruction": "To speed things up, we are going to apply a general set of quality control parameters. Create a script called run-qualityctrl.sh. make sure you don&#39;t split the lines in the script below, or you will get an error. #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=2:mem=4gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -l place=pack:shared#PBS -M netid@email.arizona.edu#PBS -m beamodule load fastx/0.0.14echo “my job_id is: ${PBS_JOBID}”FASTQ_DIR= $R1OUT gzip -dc $R2 | fastx_trimmer -f 12 | fastq_quality_filter -q 20 -p 80 | fastx_clipper -l 50 &gt; $R2OUT done&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;20467C558B514D9CB0FC00AA57424C6E&#34; &gt; #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=2:mem=4gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -l place=pack:shared #PBS -M netid@email.arizona.edu #PBS -m bea module load fastx/0.0.14 echo “my job_id is: ${PBS_JOBID}” FASTQ_DIR=&#34;/rsgrps/bh_class/userid/fastq&#34; export $FASTQ_DIR cd $FASTQ_DIR for file in `cat list`; do R1=$file&#34;_1.fastq.gz&#34; R2=$file&#34;_2.fastq.gz&#34; R1OUT=$file&#34;_1.fastq&#34; R2OUT=$file&#34;_2.fastq&#34; gzip -dc $R1 | fastx_trimmer -f 12 | fastq_quality_filter -q 20 -p 80 | fastx_clipper -l 50 &gt; $R1OUT gzip -dc $R2 | fastx_trimmer -f 12 | fastq_quality_filter -q 20 -p 80 | fastx_clipper -l 50 &gt; $R2OUT done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 9,
       "title": "Run the quality control script on the cluster",
       "instruction": "Run the quality control script on the cluster. chmod 755 run-qualityctrl.shqsub -e std-err/ -o std-err/ run-qualityctrl.sh chmod 755 run-qualityctrl.sh qsub -e std-err/ -o std-err/ run-qualityctrl.sh",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 10,
       "title": "After quality control, some of the...",
       "instruction": "After quality control, some of the paired-end sequences are lost and they become singletons. We need to create new files, where the pairs are in R1 (forward) and R2 (reverse), and singletons are in a separate file. We will create a perl script to do this. Please create a script called get-paired.pl and paste in the script from below. note that I am defining an explicit path here to the version of perl that has BioPerl installed. You can also &#34;module load perl&#34; and use the perl from your environment #! /uaopt/perl/5.14.2/bin/perluse strict;use Bio::SeqIO;my $file1 = shift @ARGV;my $file2 = shift @ARGV;my $out = shift @ARGV;my $seq_in1 = Bio::SeqIO->new( -format => 'fastq', -file => $file1, );my $seq_in2 = Bio::SeqIO->new( -format => 'fastq', -file => $file2, );my $seq_out1 = Bio::SeqIO->new( -format => 'fastq', -file => $out.R1.fastq&#34; ); my $seq_out2 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; &#34;&gt;$out.R2.fastq&#34; ); my $seq_out3 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; &#34;&gt;$out.singletons.fastq&#34; ); my %read_to_count; while ( my $seq1 = $seq_in1-&gt;next_seq() ) { my $id = $seq1-&gt;id(); my ($srr, $ct, $end) = split(/\\./, $id); my $read = $srr . &#34;.&#34; . $ct; $read_to_count{$read}++; } while ( my $seq2 = $seq_in2-&gt;next_seq() ) { my $id = $seq2-&gt;id(); my ($srr, $ct, $end) = split(/\\./, $id); my $read = $srr . &#34;.&#34; . $ct; $read_to_count{$read}++; } my $seq_in3 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; $file1, ); my $seq_in4 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; $file2, ); while ( my $seq1 = $seq_in3-&gt;next_seq() ) { my $id = $seq1-&gt;id(); my ($srr, $ct, $end) = split(/\\./, $id); my $read = $srr . &#34;.&#34; . $ct; if ($read_to_count{$read} == 2) { $seq_out1-&gt;write_seq($seq1); } else { $seq_out3-&gt;write_seq($seq1); } } while ( my $seq2 = $seq_in4-&gt;next_seq() ) { my $id = $seq2-&gt;id(); my ($srr, $ct, $end) = split(/\\./, $id); my $read = $srr . &#34;.&#34; . $ct; if ($read_to_count{$read} == 2) { $seq_out2-&gt;write_seq($seq2); } else { $seq_out3-&gt;write_seq($seq2); } }&#34; description=&#34;&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;B278840E1F1346D097224E84EB2122F0&#34; &gt; #! /uaopt/perl/5.14.2/bin/perl use strict; use Bio::SeqIO; my $file1 = shift @ARGV; my $file2 = shift @ARGV; my $out = shift @ARGV; my $seq_in1 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; $file1, ); my $seq_in2 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; $file2, ); my $seq_out1 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; &#34;&gt;$out.R1.fastq&#34; ); my $seq_out2 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; &#34;&gt;$out.R2.fastq&#34; ); my $seq_out3 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; &#34;&gt;$out.singletons.fastq&#34; ); my %read_to_count; while ( my $seq1 = $seq_in1-&gt;next_seq() ) { my $id = $seq1-&gt;id(); my ($srr, $ct, $end) = split(/\\./, $id); my $read = $srr . &#34;.&#34; . $ct; $read_to_count{$read}++; } while ( my $seq2 = $seq_in2-&gt;next_seq() ) { my $id = $seq2-&gt;id(); my ($srr, $ct, $end) = split(/\\./, $id); my $read = $srr . &#34;.&#34; . $ct; $read_to_count{$read}++; } my $seq_in3 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; $file1, ); my $seq_in4 = Bio::SeqIO-&gt;new( -format =&gt; &#39;fastq&#39;, -file =&gt; $file2, ); while ( my $seq1 = $seq_in3-&gt;next_seq() ) { my $id = $seq1-&gt;id(); my ($srr, $ct, $end) = split(/\\./, $id); my $read = $srr . &#34;.&#34; . $ct; if ($read_to_count{$read} == 2) { $seq_out1-&gt;write_seq($seq1); } else { $seq_out3-&gt;write_seq($seq1); } } while ( my $seq2 = $seq_in4-&gt;next_seq() ) { my $id = $seq2-&gt;id(); my ($srr, $ct, $end) = split(/\\./, $id); my $read = $srr . &#34;.&#34; . $ct; if ($read_to_count{$read} == 2) { $seq_out2-&gt;write_seq($seq2); } else { $seq_out3-&gt;write_seq($seq2); } }",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 12,
+      "step_id": 11,
       "title": "Now we need to create a...",
       "instruction": "Now we need to create a bash script to run the paired end script on the cluster. create a script called: run-pairedends.sh Be sure to replace the &#34;netid&#34; and &#34;username&#34; in this script with your own. #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=2:mem=4gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -l place=pack:shared#PBS -M netid@email.arizona.edu#PBS -m beamodule load perlecho “my job_id is: ${PBS_JOBID}”FASTQ_DIR= #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=2:mem=4gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -l place=pack:shared #PBS -M netid@email.arizona.edu #PBS -m bea module load perl echo “my job_id is: ${PBS_JOBID}” FASTQ_DIR=&#34;/rsgrps/bh_class/username/fastq&#34; export $FASTQ_DIR cd $FASTQ_DIR for file in `cat list`; do R1=$file&#34;_1.fastq&#34; R2=$file&#34;_2.fastq&#34; OUT=$file ./get-paired.pl $R1 $R2 $OUT done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 13,
+      "step_id": 12,
       "title": "Run the paired ends script on the cluster",
       "instruction": "Run the paired ends script on the cluster. qsub -e std-err/ -o std-out/ run-pairedends.sh chmod 755 get-paired.plchmod 755 run-pairedends.shqsub -e std-err/ -o std-out/ run-pairedends.sh chmod 755 get-paired.pl chmod 755 run-pairedends.sh qsub -e std-err/ -o std-out/ run-pairedends.sh",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 13,
       "title": "Now we are ready to run...",
       "instruction": "Now we are ready to run the comparison against the human genome to remove contaminants, and then run the remaining sequences through centrifuge to look at the taxonomy. change into the taxonomy directory. cd ../taxonomy",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 14,
       "title": "Copy the following into a new script named centrifuge_tax.sh",
       "instruction": "Copy the following into a new script named centrifuge_tax.sh: Important: For this to work you Fasta files must end with the extension .fasta #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=12:mem=23gb#PBS -l pvmem=22gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m bea#--------------EDIT THESE---------------FASTQ_DIR= #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=12:mem=23gb #PBS -l pvmem=22gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea #--------------EDIT THESE--------------- FASTQ_DIR=&#34;/rsgrps/bh_class/username/fastq&#34; OUT_DIR=&#34;/rsgrps/bh_class/username/taxonomy&#34; BT2_OUT_DIR=&#34;/rsgrps/bh_class/username/unmapped&#34; #--------------------------------------- CENT_DB=&#34;/rsgrps/bh_class/b_compressed+h+v/b_compressed+h+v&#34; BT2_INDEX=&#34;/rsgrps/bh_class/bowtie2_index/human_index&#34; module load bowtie2/2.2.5 cd $FASTQ_DIR for file in `cat list`; do # unfiltered R1=$FASTQ_DIR/$file&#34;.R1.fastq&#34; R2=$FASTQ_DIR/$file&#34;.R2.fastq&#34; S=$FASTQ_DIR/$file&#34;.singletons.fastq&#34; # no human NH_R1=$BT2_OUT_DIR/$file&#34;.paired.1.fastq&#34; NH_R2=$BT2_OUT_DIR/$file&#34;.paired.2.fastq&#34; NH_S=$BT2_OUT_DIR/$file&#34;.singletons.fastq&#34; bowtie2 -x $BT2_INDEX -1 $R1 -2 $R2 -U $S -q --very-sensitive-local -p 12 --un $BT2_OUT_DIR/$file.singletons.fastq --un-conc $BT2_OUT_DIR/$file.paired.fastq centrifuge -x $CENT_DB -1 $NH_R1 -2 $NH_R2 -U $NH_S -S $OUT_DIR/$file-classout --report-file $OUT_DIR/$file-centrifuge_report.tsv -q done",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 16,
+      "step_id": 15,
       "title": "Submit centrifuge_tax.sh using qsub",
       "instruction": "Submit centrifuge_tax.sh using qsub: mkdir std-err std-outqsub -o std-out/ -e std-err/ centrifuge_tax.sh mkdir std-err std-out qsub -o std-out/ -e std-err/ centrifuge_tax.sh",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 16,
       "title": "Once the job is running it...",
       "instruction": "Once the job is running it will loop through all of your Fastq files, remove human reads from the Fastq files, then run Centrifuge on unmapped files to generate taxonomic data. This will take about 1 hour to generate reports for all of your fastq files. You can use qstat to check the status of your job. $ qstat -u username Use YOUR usernameUnder S (Status) 'Q' means queued, 'R' means running $ qstat -u username Use YOUR username Under S (Status) &#39;Q&#39; means queued, &#39;R&#39; means running",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 18,
+      "step_id": 17,
       "title": "Once the job is complete move...",
       "instruction": "Once the job is complete move into your taxonomy directory and ensure all output files are there. If the job was successful there should be a total of 6 &#34;classout&#34; files and 6 &#34;centrifuge_report.tsv&#34; files. $ cd taxonomy$ ls $ cd taxonomy $ ls",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 19,
+      "step_id": 18,
       "title": "In your taxonomy directory make a...",
       "instruction": "In your taxonomy directory make a new directory called barplots $ mkdir barplots Make sure you are in /rsgrps/bh_class/username/taxonomy for this to work correctly",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 20,
+      "step_id": 19,
       "title": "op &lt;- par(mar=c(15, 8, 4, 2) + 0",
       "instruction": "op &lt;- par(mar=c(15, 8, 4, 2) + 0.1, mgp = c(10, 1, 0)) p1 &lt;- barplot(read_subset$proportion_classified, main=paste0(&#34;Read Proportional Classification: &#34;,data_title), names.arg = read_subset$name, las=2, cex.names = 1, cex.axis = 1, ylab=&#34;Proportion Classified&#34;, ylim = c(0, 0.90)) grid(nx=NA, ny=NULL) print(p",
       "substeps": [],
@@ -179,7 +174,7 @@
       "timers": []
     },
     {
-      "step_id": 21,
+      "step_id": 20,
       "title": "dev",
       "instruction": "dev.off() } for (i in cent.dir) { lapply(file.names, gen_barplot) }&#34; description=&#34;Make sure to edit username in cent.dir and out.dir to include YOUR path. Also ensure that both cent.dir and out.dir end with the slash&#34; os_version=&#34;&#34; os_name=&#34;&#34; guid=&#34;7E0BB61835A345388D581175AF409955&#34; &gt; #!/usr/bin/env Rscript #----------EDIT HERE---------- cent.dir &lt;- &#34;/rsgrps/bh_class/username/taxonomy/&#34; out.dir &lt;- &#34;/rsgrps/bh_class/username/taxonomy/barplots/&#34; #-------------------------------- file.names &lt;- dir(cent.dir, pattern=&#34;-centrifuge_report.tsv&#34;) gen_barplot &lt;- function (data) { data_title &lt;- gsub(&#34;-centrifuge_report.tsv&#34;, &#34;&#34;, data) data &lt;- read.delim(paste0(i, data)) total_reads &lt;- sum(data$numReads) proportion_classified &lt;- data$numReads / total_reads data[&#34;proportion_classified&#34;] &lt;- proportion_classified read_subset &lt;- subset(data, proportion_classified &gt; 0.005, select = c(&#34;name&#34;, &#34;numReads&#34;, &#34;proportion_classified&#34;)) read_subset$numReads &lt;- as.numeric(read_subset$numReads) png(filename=paste0(out.dir,data_title,&#34;_taxonomy.png&#34;), width = 600, height =",
       "substeps": [],
@@ -187,7 +182,7 @@
       "timers": []
     },
     {
-      "step_id": 22,
+      "step_id": 21,
       "title": "op &lt;- par(mar=c(15, 8, 4, 2) + 0",
       "instruction": "op &lt;- par(mar=c(15, 8, 4, 2) + 0.1, mgp = c(10, 1, 0)) p1 &lt;- barplot(read_subset$proportion_classified, main=paste0(&#34;Read Proportional Classification: &#34;,data_title), names.arg = read_subset$name, las=2, cex.names = 1, cex.axis = 1, ylab=&#34;Proportion Classified&#34;, ylim = c(0, 0.90)) grid(nx=NA, ny=NULL) print(p",
       "substeps": [],
@@ -195,7 +190,7 @@
       "timers": []
     },
     {
-      "step_id": 23,
+      "step_id": 22,
       "title": "dev",
       "instruction": "dev.off() } for (i in cent.dir) { lapply(file.names, gen_barplot) } Make sure to edit username in cent.dir and out.dir to include YOUR path. Also ensure that both cent.dir and out.dir end with the slash",
       "substeps": [],
@@ -203,63 +198,56 @@
       "timers": []
     },
     {
-      "step_id": 24,
+      "step_id": 23,
       "title": "Once you have edited cent",
       "instruction": "Once you have edited cent.dir and out.dir save and close the file. Make cent_barplots.R executable. $ chmod +x cent_barplots.R",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 25,
+      "step_id": 24,
       "title": "Load the module R",
       "instruction": "Load the module R: $ module load R",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 26,
-      "title": "Execute cent_barplots",
-      "instruction": "Execute cent_barplots.R $ ./cent_barplots.R",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 27,
+      "step_id": 25,
       "title": "You should see something similar to what is shown below",
       "instruction": "You should see something similar to what is shown below.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 28,
+      "step_id": 26,
       "title": "Move into your barplots directory and...",
       "instruction": "Move into your barplots directory and make sure you have 6 .png images. $ cd /rsgrps/bh_class/username/taxonomy/barplots$ ls $ cd /rsgrps/bh_class/username/taxonomy/barplots $ ls",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 29,
+      "step_id": 27,
       "title": "To view the images you must...",
       "instruction": "To view the images you must scp to your local machine. Open a new terminal (don&#39;t log into hpc). Determine where you want to store the files on your local machine and move into that directory. Windows users using Cygwin, your file will be stored in C:/cygwin64/home/USER. Just open a new terminal window and proceed to next step (you can&#39;t move to a specific local directory).",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 30,
+      "step_id": 28,
       "title": "Execute the following command to scp the",
       "instruction": "Execute the following command to scp the .png files to your local machine: $ scp netid@hpc.arizona.edu:/rsgrps/bh_class/username/taxonomy/barplots/*.png . Replace netid and username. (They may be different).",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 31,
+      "step_id": 29,
       "title": "You can now open the images on your local machine",
       "instruction": "You can now open the images on your local machine. Reminder that windows users will have their images in C:/cygwin64/home/USER.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 32,
+      "step_id": 30,
       "title": "Report on what you&#39;ve found for each sample",
       "instruction": "Report on what you&#39;ve found for each sample. Make sure to state the method used to obtain these results.",
       "is_critical": false,

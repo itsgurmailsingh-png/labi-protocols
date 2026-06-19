@@ -33,19 +33,12 @@
     "qctool v2",
     "bigsnpR",
     "custom code for INTERVAL NMR analyses",
-    "Intel Xeon Platinum 8368Q processor"
+    "Intel Xeon Platinum 8368Q processor",
+    "Timing: <5 min"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Input data preparation and formatting",
-      "instruction": "Timing: <5 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "Input data preparation and formatting",
       "instruction": "This step determines if any traits should be removed from the analysis (e.g., due to high levels of missingness). It also harmonizes the GWAS data from all traits so that the variants are aligned to the same allele in all GWASs and only variants present in all GWASs are included.1.If a summary statistics file is unindexed, then compress it and index it using the command line tools bgzip and tabix respectively (bgzip and tabix are distributed in bcftools).Note: In this example the chromosome identifier and the 1-based physical position coordinate are stored in columns 3 and 4 of the summary statistics file respectively. All our example files use GRCh37 coordinates.$ bgzip -c MFR_chr1.tsv > MFR_chr1.tsv.gz$ tabix -s 3 -b 4 -e 4 MFR_chr1.tsv.gz2.Open R and load the required packages, installing if needed.> if (!requireNamespace(\"BiocManager\",quietly=TRUE)) install.packages(\"BiocManager\")> packages for (pkg in packages) { if (!requireNamespace(pkg, quietly = TRUE)) { BiocManager::install(pkg)} library(pkg, character.only=TRUE)}> if (!requireNamespace(\"remotes\", quietly = TRUE)) { install.packages(\"remotes\") }> remotes::install_github(\"jennasimit/flashfmZero\";)> library(flashfmZero)",
       "substeps": [],
@@ -53,7 +46,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 1,
       "title": "Input data preparation and formatting",
       "instruction": "See troubleshooting 1 if flashfmZero cannot be installed.3.Remove traits with an unacceptably high proportion of missing measurements (here, the missingness threshold is half of the participants, though this is somewhat arbitrary) and calculate a trait correlation matrix.Note: This matrix will be used later to filter traits to ensure that no three retained traits form a block of traits in which all pairwise correlations are greater than 0.99.a.Read in trait data, where ‘traits.csv’ is a comma separated file having traits in columns with trait names in a header row.> Y_start count_non_missing_values missing_data_fraction trait_rm 0.50)> if(length(trait_rm)>0) {> Y_start missing_data_fraction }d.Calculate the trait correlation matrix.> corY_start region region MFR_ss_tabix scanTabix(MFR_ss_tabix, param = region) %>% unlist() %>% paste(collapse=\"\\n\") %>% read_tsv(col_names=FALSE) -> MFR_ss> read_tsv(\"./MFR_chr1.tsv.gz\", n_max=0) %>% colnames() -> colnames(MFR_ss)c.Store the regional summary statistics for the phenotype in the list of data frames.> obsgwas[[\"MFR\"]] 0.99, prioritizing traits according to the number of such correlations and the proportion of missingness.# Build the adjacency matrix> adj_mat 0.99> diag(adj_mat) variables_to_trim while (any(adj_mat)) {# Compute the degree (number of low-correlation connections) for each variable> deg score remove_index variables_to_trim adj_mat[remove_index, ] = FALSE> adj_mat[,remove_index] = FALSE> }6.Remove the highly correlated traits that were identified in the previous step and update the trait correlation matrix.# Subset data frame to include only the variables to keep> traits_to_keep Y write.table(as.data.frame(colnames(Y)), file=\"selected_phenotypes.tsv\", col.names=FALSE, row.names=FALSE, quote=FALSE, sep=\"\\t\")> corY obsgwas <- harmoniseGWAS(obsgwas, minMAF=0.005, minINFO=0.4, beta_colname=\"EFFECT\", se_colname=\"SE\", snpID_colname=\"ID_dbSNP\", EA_colname=\"ALT\", NEA_colname=\"REF\", EAfreq_colname=\"ALT_FREQ\", BP_colname=\"BP\", pvalue_colname=\"P\", INFO_colname=\"INFO\")See troubleshooting 2 if there are difficulties running this step without any errors.Note: In the arguments of the harmoniseGWAS function (above), specify the name of the column that contains each variable. The effect estimate column name is passed in the beta_colname argument, the standard error column name in se_colname, the variant name column name in snpID_colname, the effect allele column name in EA_colname, the non-effect allele column name in NEA_colname, the effect allele frequency column name in EAfreq_colname, the base-pair position column name in BP_colname, the p-value column name in pvalue_colname, and the imputation quality metric column name in INFO_colname. Specify the minimum MAF and minimum imputation quality metric level in minMAF and minINFO respectively. The defaults are minMAF=0.005, minINFO=0.4.b.The list object of GWAS data frames returned by harmoniseGWAS will have the column names “beta”, “SE”, “rsID”, and “EAF”, respectively for the effect estimates, their standard errors, the variant IDs, and the effect allele frequencies. These columns, in this name format, are needed to run the fine-mapping functions.CRITICAL: The variant IDs may take on any form, including combinations of rsIDs and position-based names, but missing values are not permitted and if a variant exists in multiple GWASs, it must have the same variant ID in those GWASs; they are the same IDs as those passed in the columns specified in the snpID_colnname argument.",
       "substeps": [],
@@ -61,7 +54,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 2,
       "title": "Quantification and statistical analysis",
       "instruction": "Fine-mapping results are output for each latent factor, including a credible set and variant MPPs. A typical threshold for selecting high-confidence variants is MPP>0.90. The fine-mapping functions also output SNP group-level results, e.g., MPPg, the marginal posterior probability of causality for variants belonging to a particular SNP group. These SNP groups represent distinct signals in the region.",
       "substeps": [],

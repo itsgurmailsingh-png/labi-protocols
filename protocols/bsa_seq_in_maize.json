@@ -22,7 +22,9 @@
   "quality_score": 11.5,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 138,
-  "materials": [],
+  "materials": [
+    "Covert to .csv awk &#39;{print$1&#39;,&#39;$2&#39;,&#39;$3&#39;,&#39;$4&#39;,&#39;$5}&#39; chr1_filter3.pileup &gt; chr1_EMS.csv"
+  ],
   "steps": [
     {
       "step_id": 0,
@@ -161,14 +163,6 @@
     },
     {
       "step_id": 18,
-      "title": "Covert to",
-      "instruction": "Covert to .csv awk &#39;{print$1&#39;,&#39;$2&#39;,&#39;$3&#39;,&#39;$4&#39;,&#39;$5}&#39; chr1_filter3.pileup &gt; chr1_EMS.csv",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 19,
       "title": "Add a header to your csv...",
       "instruction": "Add a header to your csv by first creating this csv header in a text editor and then copying into your working directory: position,ref,alt,f_variant,coverage \\n cat header.csv chr1.csv &gt; chr1_final.csv",
       "substeps": [],
@@ -176,35 +170,35 @@
       "timers": []
     },
     {
-      "step_id": 20,
+      "step_id": 19,
       "title": "Load R packages dplyr and ggplot2...",
       "instruction": "Load R packages dplyr and ggplot2 Start up R studio and begin a new R script: install.packages(&#39;dplyr&#39;) library(dplyr) library(ggplot2)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 21,
+      "step_id": 20,
       "title": "Read your files into R studio...",
       "instruction": "Read your files into R studio (All commands are run the same for each chromosome) chr1_final &lt;- read.csv(&#39;path to chr1_final.csv&#39;) If you have files with SNP positions from the WT background or from the maize Hapmap, read these in also. WT_chr1 &lt;- read.table(&#39;path to WT_chr1&#39;) Hapmap_chr1 &lt;- read.table(&#39;path to Hapmap_chr1&#39;) If these files are a single column of positions, then you can simply add a header with: colnames(WT_chr1) &lt;- c(“position”) The &#34;position&#34; header is essential for later steps.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 22,
+      "step_id": 21,
       "title": "Optional step",
       "instruction": "Optional step: Filter for coverage +- 1SD of the mean chr1_coverage100 &lt;- filter(chr1_180502, coverage&lt;=100) chr1_summary &lt;- summarise(chr1_coverage100,mean=mean(coverage), sd=sd(coverage)) chr1_filtercov &lt;- filter(chr1_coverage100, coverage&gt;=&#34;lowerlimit&#34; &amp; coverage&lt;=&#34;upperlimit&#34;)",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 23,
+      "step_id": 22,
       "title": "Plot homozygous SNPs with ggplot2 Initial...",
       "instruction": "Plot homozygous SNPs with ggplot2 Initial plot to figure out which chromosome has the most SNPs. ggplot(subset(chr1_final_NoWTHapmap, f_variant&gt;=0.99), aes(x=position)) + geom_histogram(binwidth=1000000) + expand_limits(y=c(0,chr1_final_NoWTHapmap)) +scale_x_continuous(breaks = round(seq(min(0), max(chr1_final_NoWTHapmap$position), by=20000000), 10000000)) +theme(axis.text.x = element_text(angle = 70, hjust = 1)) + theme_bw() Adjust the y-axis for the chromosome with the highest amount of SNPs (Varies from data to data). ggplot(subset(chr1_final_NoWTHapmap, f_variant&gt;=0.99), aes(x=position)) + geom_histogram(binwidth=1000000) + expand_limits(y=c(0, 1000 )) +scale_x_continuous(breaks = round(seq(min(0), max(chr1_final_NoWTHapmap$position), by=20000000), 10000000)) +theme(axis.text.x = element_text(angle = 70, hjust = 1)) + theme_bw() The mapping region will be a region of abundant SNPs in your data.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 24,
+      "step_id": 23,
       "title": "Divide Varscan by chromosome awk ‘{if($1==”Chromosome number”)print$0}’ Varscan",
       "instruction": "Divide Varscan by chromosome awk ‘{if($1==”Chromosome number”)print$0}’ Varscan.vcf &gt; chr1.vcf",
       "substeps": [],
@@ -212,7 +206,7 @@
       "timers": []
     },
     {
-      "step_id": 25,
+      "step_id": 24,
       "title": "Extract mapping region (vns here) awk ‘{if($2&gt;=40000000 &amp;&amp; $2&lt;=70000000)print$0}’ chr1",
       "instruction": "Extract mapping region (vns here) awk ‘{if($2&gt;=40000000 &amp;&amp; $2&lt;=70000000)print$0}’ chr1.vcf &gt; chr1_mapping_region.vcf",
       "substeps": [],
@@ -220,15 +214,7 @@
       "timers": []
     },
     {
-      "step_id": 26,
-      "title": "Remove background SNPs (Hapmap and WT)...",
-      "instruction": "Remove background SNPs (Hapmap and WT) (analyzed on MGHPCC) bsub -o chr1_mapping_region_NoWT.vcf -e background.err -n 1 -R rusage[mem=4096] -W 120 -q short grep –wvFf background_SNPs.txt chr1_mapping_region.vcf Alternatively use: awk &#39;FNR==NR {hash[$0]; next} !($2 in hash)&#39; Hapmap_chr1.txt chr1_mapping_region.vcf &gt; chr1_NoHapmap.vcf",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 27,
+      "step_id": 25,
       "title": "Filter for EMS variants awk &#39;{if...",
       "instruction": "Filter for EMS variants awk &#39;{if ($4==&#39;C&#39; &amp;&amp; $5==&#39;T&#39;) print $0; else if ($4==&#39;G&#39; &amp;&amp; $5==&#39;A&#39;) print $0 }&#39; chr1_NoHapmap.vcf &gt; chr1_NoHapmap_EMS.vcf",
       "substeps": [],
@@ -236,14 +222,14 @@
       "timers": []
     },
     {
-      "step_id": 28,
+      "step_id": 26,
       "title": "Run SnpEff on your filtered EMS...",
       "instruction": "Run SnpEff on your filtered EMS SNPs You can build a database in SnpEff for version 4 of the maize genome using instructions from the manual (http://snpeff.sourceforge.net/SnpEff_manual.html). Once your database is built, navigate to the SnpEff folder, move your filtered EMS SNP file there, and run the following: java -jar snpEff.jar Zmv4 chr1_NoHapmap_EMS.vcf We submitted this command to our computing cluster with additional flags. bsub -o vns_SNPeff.vcf -e vns_SNPeff.err -n 4 -R rusage[mem=4096] -W 120 -q short bsub = command to submit a job -o = output file -e = error log file -n = number of computing cores -R = amount of memory per core -W = run for a max of 120 minutes -q = submit to short queue",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 29,
+      "step_id": 27,
       "title": "Filter for Moderate effect SNPs grep MODERATE vns_SNPeff",
       "instruction": "Filter for Moderate effect SNPs grep MODERATE vns_SNPeff.vcf &gt; MODERATE.vcf",
       "substeps": [],
@@ -251,7 +237,7 @@
       "timers": []
     },
     {
-      "step_id": 30,
+      "step_id": 28,
       "title": "Filter for High effect SNPs grep HIGH vns_SNPeff",
       "instruction": "Filter for High effect SNPs grep HIGH vns_SNPeff.vcf &gt; HIGH.vcf",
       "substeps": [],
@@ -259,7 +245,7 @@
       "timers": []
     },
     {
-      "step_id": 31,
+      "step_id": 29,
       "title": "Filter for homozygous SNPs in both...",
       "instruction": "Filter for homozygous SNPs in both your Moderate and High effect files. grep HOM=1 MODERATE.vcf &gt; MODERATE_HOM.vcf grep HOM=1 HIGH.vcf &gt; HIGH_HOM.vcf",
       "substeps": [],
@@ -267,21 +253,21 @@
       "timers": []
     },
     {
-      "step_id": 32,
+      "step_id": 30,
       "title": "Optional step",
       "instruction": "Optional step: Confirm mapping region and narrow down candidate SNPs Once a mapping region has been identified from your plotting, you can use the Varscan indel file to design markers and verify your mapping region. Additionally, if there are several candidate SNPs in your interval, you can use these markers to narrow down the mapping interval. 1. Extract the mapping region awk ‘{if($2&gt;=40000000 &amp;&amp; $2&lt;=70000000)print$0}’ chr1_varscan.vcf &gt; chr1_mapping_region.vcf 2. Call homozygous Indels grep HOM=1 chr1_mapping_region.vcf &gt; chr1_mapping_region_HOM.vcf Pick indels that are &gt;=10bp for best results. Design primers over the indel, perform PCR, and run the product on a 3.5% agarose gel. Differences in band size will indicate the genetic background at that indel.",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 33,
+      "step_id": 31,
       "title": "Annotate Moderate and High effect genes...",
       "instruction": "Annotate Moderate and High effect genes Download the version 4 gene annotations from maizesequence.org (ftp://ftp.gramene.org/pub/gramene/CURRENT_RELEASE/gff3/zea_mays/gene_function). Use this file and your Moderate and High effect vcf to annotate your genes. First, extract gene IDs from your Moderate and High effect vcf files 1. Cut out &#34;gene:Zm&#34; from your vcf awk -F&#39;|&#39; &#39;{print$5}&#39; MODERATE.vcf &gt; MODERATE_filter1.vcf 2. Remove &#39;gene:&#39; awk -F&#39;:&#39; &#39;{print$2}&#39; MODERATE_filter1.vcf &gt; MODERATE_gene_IDs.txt Then extract your Moderate IDs from the annotation file. grep -wf MODERATE_gene_IDs.txt B73v4.gene_function.txt",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 34,
+      "step_id": 32,
       "title": "Optional step",
       "instruction": "Optional step: Use Provean to assess Moderate SNPs You can use Provean to determine if a Moderate SNP is likely to be deleterious (http://provean.jcvi.org/seq_submit.php). The accuracy of Provean is about 77.9% and may miss your candidate SNP. Additionally, Provean is low throughput for non-human genomes, so for large numbers of Moderate SNPs an alternative program or narrowing down the mapping interval may be more successful for candidate SNP identification.",
       "is_critical": false,

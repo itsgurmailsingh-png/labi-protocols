@@ -36,19 +36,13 @@
     "Thermo Scientific NP-40 Surfact-Amps detergent solution",
     "Sigma Magnesium chloride hexahydrate",
     "Sigma Tween 20",
-    "AppliChem EDTA Disodium salt 2-hydrate for molecular biology"
+    "AppliChem EDTA Disodium salt 2-hydrate for molecular biology",
+    "Timing: 8 days",
+    "Timing: 1.5 h"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Pull-down of RBP-bound RNA, library preparation, and sequencing",
-      "instruction": "Timing: 8 days",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "Pull-down of RBP-bound RNA, library preparation, and sequencing",
       "instruction": "This step includes the preparation of cells expressing the RBP and target RNAs, metabolic labeling of RNA with subsequent crosslinking, pull-down of RBP-RNA complexes, RNA isolation, library preparation and sequencing.",
       "substeps": [],
@@ -56,7 +50,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 1,
       "title": "Pull-down of RBP-bound RNA, library preparation, and sequencing",
       "instruction": "We use a RAW264.7 macrophage cell line which harbors a CRISPR/Cas9-mediated TTP deletion. These cells were engineered to inducibly express exogenous C-terminally Myc-tagged TTP from a doxycycline inducible promoter (Bestehorn et al1). While we have not tested the protocol for other cell lines or RBPs, we believe that it can be adapted for different cell lines and RBPs of interest (endogenous or exogeneous), provided antibodies for the pull-down step are available.",
       "substeps": [],
@@ -64,7 +58,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 2,
       "title": "Pull-down of RBP-bound RNA, library preparation, and sequencing",
       "instruction": "Clean workspace with an RNase decontamination solution and only use sterile filter tips throughout the experiment.",
       "substeps": [],
@@ -72,15 +66,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
-      "title": "Enrichment analysis",
-      "instruction": "Timing: 1.5 h",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
+      "step_id": 3,
       "title": "Enrichment analysis",
       "instruction": "In this step, we perform a basic enrichment analysis on TPM normalized counts.Note: Targets of the RBP are identified by their enrichment in the PD fraction over Input. Since most genes are depleted in the PD fraction and few genes are strongly enriched, the assumption of a common scale factor that DESeq2 depends on13 is not met for this data.11.Reduce false positives in enrichment analysis by setting a cutoff.Note: These false positives would originate from log-transformation-caused spreading of counts of lowly expressed genes and the concomitant introduction of noise in step 12. Therefore, filter for genes whose counts are above the mean in PD. Troubleshooting.a.Perform calculation and filtering.Optional: Save your filtered TPM count tables as intermediate files.# calculate mean overall TPM in PD as cutoff value>PD.mean data.TPM.cutoff %> lapply(filter, mean_PD>PD.mean)%>%> lapply(column_to_rownames,\"Row.names\")b.Check if the filtering worked.Note: The number of rows should decrease and genes with low PD counts should be removed.12.Log-transform normalized counts.Note: It is common practice to add a pseudocount to the normalized count value to avoid undefined values for not expressed genes here. However, genes with 0 counts were not of interest for this analysis and most likely already filtered out in step 11. Any remaining genes with nonfinite values after log-transformation are removed here.# function for removal of genes with nonfinite values (-Inf)>all.is.finite df %> filter_all(all_vars(is.finite(.)))> return(df)>}# log-transformation>data.log %> lapply(all.is.finite) #removing rows where log-transf. gave -Inf>names(data.log) t.test.per.df df %> rownames_to_column(\"gene\")%>%> rowwise() %>% #important to run t.test per gene!> mutate(p_val = t.test(c_across(contains(\"PD_\")),> c_across(contains(\"Input_\")),> alternative = \"two.sided\")$p.value)%>%> ungroup() %>% #important to run correction across all tests!> mutate(p_adj = p.adjust(p_val, method = \"BH\"))%>%> column_to_rownames(\"gene\")> return(df)>}# run t-test and p-value correction>data.ttest data.DE df % mutate(logFC=mean_PD-mean_Input)> return(df)> })%>%> lapply(function(df){> df %> mutate(\"enriched\"=case_when(> p_adj 0 ∼ \"enriched genes\",> T ∼ \"not enriched genes\"))> return(df)> })b.Manually check if your logFC values and the classification of enriched genes make sense.15.Extract lists of significantly enriched genes in exonic and intronic counts and combine into one list.Optional: Save enriched.genes as a csv file.# individual lists for enriched genes in intronic or exonic counts>enriched.genes.lists df %filter(p_adj 0)> return(df)> })%>%> lapply(rownames)# combined list>enriched.genes enriched.genes.lists$exon)",
       "substeps": [],

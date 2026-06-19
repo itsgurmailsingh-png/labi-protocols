@@ -31,19 +31,12 @@
     "gplots package",
     "openxlsx package",
     "stringr package",
-    "reshape2 package"
+    "reshape2 package",
+    "Timing: few hours"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Downstream analysis of the data based on the zonation",
-      "instruction": "Timing: few hours",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "test1 <- test1[rev(order(NES))] TopResult <- as",
       "instruction": "test1 <- test1[rev(order(NES))] TopResult <- as.data.frame(test1[,])[, c(1,2,3,4,5,6,7)] TopResult$Cluster <- i TopResultAllCluster <- rbind(TopResultAllCluster, TopResult)}write.table(x = TopResultAllCluster, file = paste(data_dir, \"GSEA_Zones_unique_integrated.res01.txt\", sep = \"/\"), quote = FALSE, row.names = TRUE, sep = \"\\t\")#11b:TopResultAllCluster$Group <- stringr::str_split_fixed(TopResultAllCluster$Cluster, \"_\", 2)[,1]TopResultAllCluster$Zones <- stringr::str_split_fixed(TopResultAllCluster$Cluster, \"_\", 2)[,2]orderC <- unique(TopResultAllCluster$Zones)[order(unique(TopResultAllCluster$Zones))]SideColors <- rep(c(rep(\"darkred\",3), rep(\"red\",1), rep(\"darkgreen\",3), rep(\"green\",1)), 3)newName <- function(dfCNES,i) { rownames(dfCNES) <- dfCNES[, i] dfCNES <- dfCNES[, -(i)] return(dfCNES)}for (ix in unique(TopResultAllCluster$Group)) { test <- TopResultAllCluster[TopResultAllCluster$Group == ix,] test <- test[!is.na(test$padj),] test <- test[test$padj < 0.05,] AllCluster <- unique(test$Zones) orgerGO <- unique(test$pathway) dfCNES <- data.frame(pathway = orgerGO[order(orgerGO)]) for (i in 1:length(AllCluster)){ dfC1 <- test[test$Zones == AllCluster[i],] dfC1 <- data.frame(dfC1[order(dfC1$pathway), c(1, 6)]) colnames(dfC1) <- c(\"pathway\", AllCluster[i]) dfCNES <- merge(dfCNES, dfC1, by = 1, all = T) } dfCNES <- newName(dfCNES,",
       "substeps": [],
@@ -51,7 +44,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
+      "step_id": 1,
       "title": "dfCNES <- dfCNES[rowSums(is",
       "instruction": "dfCNES <- dfCNES[rowSums(is.na(dfCNES)+0) < 8,] dfCNES[is.na(dfCNES)] <- 0 finaldf2 <- as.matrix(dfCNES) finaldf2 <- finaldf2[, orderC] nameF <- paste(ix, \"uniquezones.txt\", sep = \".\") assign(nameF, finaldf",
       "substeps": [],
@@ -59,7 +52,7 @@
       "timers": []
     },
     {
-      "step_id": 3,
+      "step_id": 2,
       "title": "write",
       "instruction": "write.table(x = finaldf2, file = paste(out_dir, nameF, sep = \"/\"), quote = FALSE, row.names = T, sep = \"\\t\")}#11c:Selected.Terms <- c(\"GOBP_RESPONSE_TO_TYPE_I_INTERFERON\",\"GOBP_RESPONSE_TO_INTERFERON_GAMMA\",\"GOBP_RESPONSE_TO_VIRUS\",\"GOBP_POSITIVE_REGULATION_OF_CYTOKINE_PRODUCTION\",\"GOBP_T_CELL_ACTIVATION\",\"GOBP_ADAPTIVE_IMMUNE_RESPONSE\",\"GOBP_REGULATION_OF_IMMUNE_EFFECTOR_PROCESS\",\"IL10_RO\",\"HALLMARK_ANGIOGENESIS\",\"HALLMARK_P53_PATHWAY\",\"HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION\",\"HALLMARK_ADIPOGENESIS\",\"HALLMARK_PEROXISOME\",\"GOBP_SHORT_CHAIN_FATTY_ACID_METABOLIC_PROCESS\",\"GOBP_LIPID_OXIDATION\",\"HALLMARK_BILE_ACID_METABOLISM\")dfNames <- paste0(unique(TopResultAllCluster$Group),\".uniquezones.txt\")ix3 <- matrix(nrow = length(Selected.Terms), ncol = 0)row.names(ix3) <- Selected.Termsfor (i in dfNames) { ix <- read.table(paste(out_dir, i, sep = \"/\"), header = T, sep = \"\\t\") ix <- ix[rownames(ix) %in% Selected.Terms,] diffG <- setdiff(Selected.Terms,rownames(ix)) diffM <- matrix(rep(0, 8∗length(diffG)), ncol =",
       "substeps": [],
@@ -67,7 +60,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
+      "step_id": 3,
       "title": "rownames(diffM) <- diffG colnames(diffM) <- colnames(ix)...",
       "instruction": "rownames(diffM) <- diffG colnames(diffM) <- colnames(ix) ix2 <- rbind(ix, diffM) ix2 <- ix2[Selected.Terms,] colnames(ix2) <- paste(sub(\".uniquezones.txt\", \"\", i), colnames(ix2), sep = \".\") ix3 <- cbind(ix3, ix2)}ix3 <- as.matrix(ix3)pdf(paste(out_dir, \"Heatmap.uniquezones.pdf\", sep = \"/\"), heigh = 6, width = 8)heatmap.2(ix3, margins = c(8, 22), col = viridisLite::viridis(10), cexCol = 1, cexRow = .8, keysize = 1.1, dendrogram = \"none\", colsep = c(8,16), main = i, scale = \"none\", Rowv = F, Colv = F, ColSideColors = SideColors)legend(\"topright\", legend = c(\"Inner tumor\", \"Border tumor\", \"Peritumor\", \"Liver\"), col = unique(SideColors), lty = 1, lwd = 5, cex = .7)dev.off()Figure 12Heatmap showing GSEA analysis on distinct compartmental zones and treatment cohorts",
       "substeps": [],

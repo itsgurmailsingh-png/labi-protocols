@@ -31,7 +31,8 @@
     "SAMtools",
     "R scripts",
     "Linux computer with bash",
-    "Genotype data (VCF files)"
+    "Genotype data (VCF files)",
+    "Timing: 1.5 h"
   ],
   "steps": [
     {
@@ -77,7 +78,7 @@
     {
       "step_id": 5,
       "title": "Step-4: Calculate match rates to a known archaic genome",
-      "instruction": "Timing: 1.5 h",
+      "instruction": "SPrime is able to detect archaic introgression without knowing the archaic genome by utilizing a purported non-admixed population as an outgroup. For Neanderthal or Denisovan introgression, a West African population is typically used as the outgroup, for example the YRI from the 1000 Genomes Project. If a relevant archaic genome has been sequenced, one can map the detected variants to the archaic genome to confirm the source of introgression. We use the genome of the Altai Denisovan and the genome of the Vindija Neanderthal to represent two different sources of archaic introgression. The archaic genomes are in VCF format and the mask files are in BED (Browser Extensible Data) format.6.For each variant detected by SPrime, map it to the archaic genome, resulting in “match”, “mismatch”, or “notcomp” to the archaic genome. The three states mean the detected variant is present in the archaic genome, is not present in the archaic genome, or is not comparable because genotype quality in the archaic genome is low for that locus. To complete this step, we have an C script named “map_arch”, which adds the match status for each variant as an additional column to SPrime’s output. In the following code, we add match status to the Neanderthal genome and match status to the Denisovan genome.maparch=\"../tools/map_arch_genome/map_arch\"for chr in {1..22}; doscript=o.script.${chr}.sh#map variants to the Neanderthal genomebedfile=\"../download/archaic_genome/RecalledVindija/chr${chr}_mask.bed.gz\"archaicfile=\"../download/archaic_genome/RecalledVindija/chr${chr}_mq25_mapab100.vcf.gz\"reftag=\"AltaiNean\"scorefile=\"../step3/chb.yri.${chr}.score\"outmscore=\"out.chr${chr}.mscore\";tmpprefix=../tmp/${RANDOM}echo \"#! /bin/bash${maparch} --kp --sep '\\t' --tag ${reftag} --mskbed ${bedfile} --vcf ${archaicfile} --score ${scorefile} > ${tmpprefix}.tmp1.${chr}.mscore\" >${script}#map variants to the Denisovan genomebedfile=\"../download/archaic_genome/RecalledDenisova/chr${chr}_mask.bed.gz\"archaicfile=\"../download/archaic_genome/RecalledDenisova/chr${chr}_mq25_mapab100.vcf.gz\"reftag=\"AltaiDeni\"echo \"${maparch} –kp –sep '\\t' –tag ${reftag} –mskbed ${bedfile} –vcf ${archaicfile} --score ${tmpprefix}.tmp1.${chr}.mscore > ${tmpprefix}.tmp2.${chr}.mscoremv ${tmpprefix}.tmp2.${chr}.mscore ${outmscore}rm ${tmpprefix}.tmp∗.${chr}.mscorerm ${script}\" >> ${script}sh ${script}done",
       "substeps": [],
       "is_critical": false,
       "timers": []
@@ -85,21 +86,13 @@
     {
       "step_id": 6,
       "title": "Step-4: Calculate match rates to a known archaic genome",
-      "instruction": "SPrime is able to detect archaic introgression without knowing the archaic genome by utilizing a purported non-admixed population as an outgroup. For Neanderthal or Denisovan introgression, a West African population is typically used as the outgroup, for example the YRI from the 1000 Genomes Project. If a relevant archaic genome has been sequenced, one can map the detected variants to the archaic genome to confirm the source of introgression. We use the genome of the Altai Denisovan and the genome of the Vindija Neanderthal to represent two different sources of archaic introgression. The archaic genomes are in VCF format and the mask files are in BED (Browser Extensible Data) format.6.For each variant detected by SPrime, map it to the archaic genome, resulting in “match”, “mismatch”, or “notcomp” to the archaic genome. The three states mean the detected variant is present in the archaic genome, is not present in the archaic genome, or is not comparable because genotype quality in the archaic genome is low for that locus. To complete this step, we have an C script named “map_arch”, which adds the match status for each variant as an additional column to SPrime’s output. In the following code, we add match status to the Neanderthal genome and match status to the Denisovan genome.maparch=\"../tools/map_arch_genome/map_arch\"for chr in {1..22}; doscript=o.script.${chr}.sh#map variants to the Neanderthal genomebedfile=\"../download/archaic_genome/RecalledVindija/chr${chr}_mask.bed.gz\"archaicfile=\"../download/archaic_genome/RecalledVindija/chr${chr}_mq25_mapab100.vcf.gz\"reftag=\"AltaiNean\"scorefile=\"../step3/chb.yri.${chr}.score\"outmscore=\"out.chr${chr}.mscore\";tmpprefix=../tmp/${RANDOM}echo \"#! /bin/bash${maparch} --kp --sep '\\t' --tag ${reftag} --mskbed ${bedfile} --vcf ${archaicfile} --score ${scorefile} > ${tmpprefix}.tmp1.${chr}.mscore\" >${script}#map variants to the Denisovan genomebedfile=\"../download/archaic_genome/RecalledDenisova/chr${chr}_mask.bed.gz\"archaicfile=\"../download/archaic_genome/RecalledDenisova/chr${chr}_mq25_mapab100.vcf.gz\"reftag=\"AltaiDeni\"echo \"${maparch} –kp –sep '\\t' –tag ${reftag} –mskbed ${bedfile} –vcf ${archaicfile} --score ${tmpprefix}.tmp1.${chr}.mscore > ${tmpprefix}.tmp2.${chr}.mscoremv ${tmpprefix}.tmp2.${chr}.mscore ${outmscore}rm ${tmpprefix}.tmp∗.${chr}.mscorerm ${script}\" >> ${script}sh ${script}done",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 7,
-      "title": "Step-4: Calculate match rates to a known archaic genome",
       "instruction": "The mismatch analysis takes 7 mins for chromosome 2 and 81 mins for all autosomes. The maximum memory in use for one chromosome is 10GB.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "Step-5: Find multiple sources of archaic introgression",
       "instruction": "Timing: 1 min7.This is an optional step for those who are interested in population history. Once we know the match status of each detected variant to the archaic genome, we are able to calculate the match rate for each reported introgression segment. The match rate for a segment is the number of matching positions divided by the sum of matching and mis-matching positions (the match rate is undefined if all the SPrime variants in the segment are not comparable to the archaic genome). If a segment has high match rate to a particular archaic genome, this segment probably shares close ancestry with that archaic genome. By calculating the match rate to different archaic genomes, we may find evidence of different sources of introgression as in Figure 2 (Browning et al., 2018). The commands to generate this figure are:Figure 2Contour plot of CHB results showing three sources of archaic admixtureThe peak in the upper left represents ancestry from a group that is closely related to the Altai Denisovan, the peak in the middle left represents ancestry from a group that is distantly related to the Altai Denisovan, the peak on the lower right represents ancestry from Neanderthals, and the peak in the lower left represents other segments which may be false positive introgression calls or introgression from another source.# calculate match rate for each introgressed segment## Rscript ../tools/score_summary.r [directory with annotated score files from step 4] [output filename]Rscript ../tools/score_summary.r ../step4 match.summary.txt# contour plot show different waves of archaic introgression## Rscript ../tools/plot_contour.r [input summary file] [prefix of plot output]Rscript ../tools/plot_contour.r match.summary.txt chb.contour",
       "substeps": [],

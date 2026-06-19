@@ -31,7 +31,8 @@
     "GOSemSim",
     "inparanoid",
     "DREM",
-    "topGO"
+    "topGO",
+    "registerDoParallel(cl, cores="
   ],
   "steps": [
     {
@@ -79,14 +80,6 @@
     },
     {
       "step_id": 6,
-      "title": "registerDoParallel(cl, cores=",
-      "instruction": "registerDoParallel(cl, cores=",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 7,
       "title": "drought_tar_sima &lt;- foreach(jjj=1:dim(NCA_list[[1]])[1],",
       "instruction": "drought_tar_sima &lt;- foreach(jjj=1:dim(NCA_list[[1]])[1], .combine=&#39;c&#39;) %dopar% { temp_tae = colnames(NCA_list[[1]])[which(NCA_list[[1]][jjj,]!=0)] temp_gene_sima = NULL for(kk in 1:(length(temp_tae))) { for(kkk in (kk+1):length(temp_tae)) { int1 = which(row.names(matrix_Genes_gos)==temp_tae[kk]) int2 = which(row.names(matrix_Genes_gos)==temp_tae[kkk]) temp_go1 = matrix_Genes_gos[int1,][which(!is.na(matrix_Genes_gos[int1,]))] temp_go2 = matrix_Genes_gos[int2,][which(!is.na(matrix_Genes_gos[int2,]))] if((length(temp_go1)&gt;0)&amp;&amp;(length(temp_go2)&gt;0)) { temp_gene_sima = c(temp_gene_sima,gene_similarity(temp_go1,temp_go2,wang_simia_total)) }else{ temp_gene_sima = c(temp_gene_sima,NA) } } } return(temp_gene_sima) } stopCluster(cl) ### generate one random network, with the number of edge is the same with the number of total connections as pairs of TGs for each TF library(&#34;igraph&#34;) set.seed(",
       "substeps": [],
@@ -94,7 +87,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 7,
       "title": "g1_r_f &lt;- erdos",
       "instruction": "g1_r_f &lt;- erdos.renyi.game(25971, length(which(!is.na(drought_tar_sima))), type = &#34;gnm&#34;) g1_egde_r_f = get.edgelist(g1_r_f) droght_gens = setdiff(row.names(matrix_Genes_gos),unique(c(row.names(NCA_list[[1]]),colnames(NCA_list[[1]])))) g1_edge_names_r_f = cbind(droght_gens[g1_egde_r_f[,1]],droght_gens[g1_egde_r_f[,2]]) ### parallelly calculate the GO function similarity of two genes connected by one edge. library(foreach) library(doParallel) cl &lt;- makeCluster(",
       "substeps": [],
@@ -102,15 +95,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
-      "title": "registerDoParallel(cl, cores=",
-      "instruction": "registerDoParallel(cl, cores=",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
+      "step_id": 8,
       "title": "res2_p_r_drougt &lt;- foreach(jjj=1:dim(g1_edge_names_r_f)[1],",
       "instruction": "res2_p_r_drougt &lt;- foreach(jjj=1:dim(g1_edge_names_r_f)[1], .combine=&#39;c&#39;) %dopar% { int1 = which(row.names(matrix_Genes_gos)==g1_edge_names_r_f[,1][jjj]) int2 = which(row.names(matrix_Genes_gos)==g1_edge_names_r_f[,2][jjj]) temp_go1 = matrix_Genes_gos[int1,][which(!is.na(matrix_Genes_gos[int1,]))] temp_go2 = matrix_Genes_gos[int2,][which(!is.na(matrix_Genes_gos[int2,]))] if((length(temp_go1)&gt;0)&amp;&amp;(length(temp_go2)&gt;0)) { return(gene_similarity(temp_go1,temp_go2,wang_simia_total)) # genes_sima_random = c(genes_sima_random,gene_similarity(temp_go1,temp_go2,wang_simia)) }else{ return(0) } } stopCluster(cl) &#34; description=&#34;To quantify functional relevance of the predicted TGs for each TF, we have calculated GO semantic similarity scores of the GO terms between each pair of the co-regulated TGs, using the GOSemSim package&#34; os_version=&#34;&#34; os_name=&#34;Unix - R script&#34; guid=&#34;B733E0AFFCD049F09031EB785EC5E590&#34; &gt; # To quantify functional relevance of the predicted TGs for each TF, we have calculated GO semantic similarity scores of the GO terms between each pair of the co-regulated TGs, using the GOSemSim package #here, we considered only the GO biological processes # Here, we just mannually constructed the relationship between genes and go terms, focused on biological process (BP) # step1, for all BP, construct this relationship. go_annos = readLines(paste(go_paths,&#34;GO_annotation&#34;,sep=&#34;&#34;)) GO_idss = NULL go_genss = NULL for(i in 2:length(go_annos)) { temps = unlist(strsplit(go_annos[i],&#34;\\t&#34;)) if(temps[4]==&#34;P&#34;) { GO_idss = c(GO_idss,temps[2]) go_genss = c(go_genss,temps[1]) } } unique_gens = unique(go_genss) max_tas = 0 for(i in 1:length(unique_gens)) { mac_is = which(unique_gens[i]==go_genss) if(length(mac_is)&gt;max_tas) { max_tas = length(mac_is) } } matrix_Genes_gos = matrix(NA,length(unique_gens),max_tas) all_in_go = NULL for(i in 1:length(unique_gens)) { mac_is = which(unique_gens[i]==go_genss) matrix_Genes_gos[i,1:length(mac_is)] = GO_idss[mac_is] } row.names(matrix_Genes_gos) = paste(unique_gens,&#34;.v4.1&#34;,sep=&#34;&#34;) # calculate the Go function similarity for any two BP GO term library(GOSemSim) library(&#34;org.Hs.eg.db&#34;, lib.loc=&#34;~/R/x86_64-redhat-linux-gnu-library/3.4&#34;) GO_datass = list(NULL,NULL,NULL) wang_simia = list(NULL,NULL,NULL) ### all BP Go term similarity hsGO &lt;- godata(&#39;org.Hs.eg.db&#39;, ont=&#34;BP&#34;) go1_BP = unique(GO_idss) go2_BP = unique(GO_idss) wang_simia_BP = mgoSim(go1_BP, go2_BP, semData=hsGO, measure=&#34;Wang&#34;, combine=NULL) # The function for the calculation of go term similarity of any two genes (G1 and G",
       "substeps": [],
@@ -118,7 +103,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
+      "step_id": 9,
       "title": "gene_similarity &lt;- function(G1,G2,similarty) { max_simia1 =...",
       "instruction": "gene_similarity &lt;- function(G1,G2,similarty) { max_simia1 = rep(0,length(G1)) max_simia2 = rep(0,length(G2)) max_simia1_1 = rep(1,length(G1)) max_simia2_2 = rep(1,length(G2)) for(i in 1:length(G1)) { G1_sima_max = similarty[which(row.names(similarty)==G1[i]),match(G2,colnames(similarty))] max_simia1[i] = max(G1_sima_max) } for(i in 1:length(G2)) { G2_sima_max = similarty[which(row.names(similarty)==G2[i]),match(G1,colnames(similarty))] max_simia2[i] = max(G2_sima_max) } return((sum(c(max_simia1,max_simia2))/(sum(c(max_simia1_1,max_simia2_2))))) } # parallelly calculate the GO function similarity of TGs for each TF. Here, NCA_list is the variable of list, and each list is the gene regulatory matrix, with row for TF and column for TGs library(foreach) library(doParallel) cl &lt;- makeCluster(",
       "substeps": [],
@@ -126,15 +111,7 @@
       "timers": []
     },
     {
-      "step_id": 12,
-      "title": "registerDoParallel(cl, cores=",
-      "instruction": "registerDoParallel(cl, cores=",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 13,
+      "step_id": 10,
       "title": "drought_tar_sima &lt;- foreach(jjj=1:dim(NCA_list[[1]])[1],",
       "instruction": "drought_tar_sima &lt;- foreach(jjj=1:dim(NCA_list[[1]])[1], .combine=&#39;c&#39;) %dopar% { temp_tae = colnames(NCA_list[[1]])[which(NCA_list[[1]][jjj,]!=0)] temp_gene_sima = NULL for(kk in 1:(length(temp_tae))) { for(kkk in (kk+1):length(temp_tae)) { int1 = which(row.names(matrix_Genes_gos)==temp_tae[kk]) int2 = which(row.names(matrix_Genes_gos)==temp_tae[kkk]) temp_go1 = matrix_Genes_gos[int1,][which(!is.na(matrix_Genes_gos[int1,]))] temp_go2 = matrix_Genes_gos[int2,][which(!is.na(matrix_Genes_gos[int2,]))] if((length(temp_go1)&gt;0)&amp;&amp;(length(temp_go2)&gt;0)) { temp_gene_sima = c(temp_gene_sima,gene_similarity(temp_go1,temp_go2,wang_simia_total)) }else{ temp_gene_sima = c(temp_gene_sima,NA) } } } return(temp_gene_sima) } stopCluster(cl) ### generate one random network, with the number of edge is the same with the number of total connections as pairs of TGs for each TF library(&#34;igraph&#34;) set.seed(",
       "substeps": [],
@@ -142,7 +119,7 @@
       "timers": []
     },
     {
-      "step_id": 14,
+      "step_id": 11,
       "title": "g1_r_f &lt;- erdos",
       "instruction": "g1_r_f &lt;- erdos.renyi.game(25971, length(which(!is.na(drought_tar_sima))), type = &#34;gnm&#34;) g1_egde_r_f = get.edgelist(g1_r_f) droght_gens = setdiff(row.names(matrix_Genes_gos),unique(c(row.names(NCA_list[[1]]),colnames(NCA_list[[1]])))) g1_edge_names_r_f = cbind(droght_gens[g1_egde_r_f[,1]],droght_gens[g1_egde_r_f[,2]]) ### parallelly calculate the GO function similarity of two genes connected by one edge. library(foreach) library(doParallel) cl &lt;- makeCluster(",
       "substeps": [],
@@ -150,15 +127,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
-      "title": "registerDoParallel(cl, cores=",
-      "instruction": "registerDoParallel(cl, cores=",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
+      "step_id": 12,
       "title": "res2_p_r_drougt &lt;- foreach(jjj=1:dim(g1_edge_names_r_f)[1],",
       "instruction": "res2_p_r_drougt &lt;- foreach(jjj=1:dim(g1_edge_names_r_f)[1], .combine=&#39;c&#39;) %dopar% { int1 = which(row.names(matrix_Genes_gos)==g1_edge_names_r_f[,1][jjj]) int2 = which(row.names(matrix_Genes_gos)==g1_edge_names_r_f[,2][jjj]) temp_go1 = matrix_Genes_gos[int1,][which(!is.na(matrix_Genes_gos[int1,]))] temp_go2 = matrix_Genes_gos[int2,][which(!is.na(matrix_Genes_gos[int2,]))] if((length(temp_go1)&gt;0)&amp;&amp;(length(temp_go2)&gt;0)) { return(gene_similarity(temp_go1,temp_go2,wang_simia_total)) # genes_sima_random = c(genes_sima_random,gene_similarity(temp_go1,temp_go2,wang_simia)) }else{ return(0) } } stopCluster(cl) To quantify functional relevance of the predicted TGs for each TF, we have calculated GO semantic similarity scores of the GO terms between each pair of the co-regulated TGs, using the GOSemSim package Unix - R script igraph 1.2.1",
       "substeps": [],
@@ -166,21 +135,21 @@
       "timers": []
     },
     {
-      "step_id": 17,
+      "step_id": 13,
       "title": "Validation of predicted TF-TG interactions inparanoid 4",
       "instruction": "Validation of predicted TF-TG interactions inparanoid 4.1 # run 'perl inparanoid.pl X.fa Y.fa' The script 'inparanoid.pl' in the software 'inparanoid' was used to generate the orthologous groups between two species. We consider a predicted TF-TG interaction as validated if it has orthologous pairs of TF-TG interactions in the mannually collected predicetd relationships of other species. Unix - Perl script",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 18,
+      "step_id": 14,
       "title": "Dynamic regulatory maps DREM 2",
       "instruction": "Dynamic regulatory maps DREM 2.0.3 # run software 'drem.jar' file in the directory of DREM software installation directory. The method of DREM takes as input fold-change (treated relative to untreated) time series data and transcription factor-gene interaction data, and produces as output a dynamic regulatory map. Windows - Jave",
       "is_critical": false,
       "timers": []
     },
     {
-      "step_id": 19,
+      "step_id": 15,
       "title": "GO enrichment analysis topGO 2",
       "instruction": "GO enrichment analysis topGO 2.30.1 ### one defined function for GO enrichment analysis. here, ‘inter_genes’ for your interested genescal_enrichments GO term enrichment was conducted over a given gene set using the topGO R package, where all annotated genes in switchgrass was used as the background. A GO function is considered enriched if the p-value Windows - R script ### one defined function for GO enrichment analysis. here, ‘inter_genes’ for your interested genes cal_enrichments &lt;- function(GO_path,save_path_,inter_genes,codition){ # note: here, inter_genes and all_used_gene need to have same naming rule. geneID2GO &lt;- readMappings(file = paste(GO_path,&#34;gene2_go&#34;,sep=&#34;&#34;)) all_used_gene = names(geneID2GO) geneList = factor(as.integer(all_used_gene %in% inter_genes)) names(geneList) = all_used_gene # run test for Biological process GOdata_BP &lt;- new(&#34;topGOdata&#34;, ontology = &#34;BP&#34;, allGenes = geneList, annot = annFUN.gene2GO, gene2GO = geneID2GO) BP_fisher = runTest(GOdata_BP,algorithm = &#34;classic&#34;, statistic = &#34;fisher&#34;) allRes_BP &lt;- GenTable(GOdata_BP, classic = BP_fisher, orderBy = &#34;weight&#34;, ranksOf = &#34;classic&#34;, topNodes = length(which(BP_fisher@score&lt; 0.01))) write.table(allRes_BP,file = paste(save_path_,codition,&#34;_BP.txt&#34;,sep=&#34;&#34;),sep=&#34;\\t&#34;,quote = F,row.names = F ) # run test for Molecular function GOdata_MF &lt;- new(&#34;topGOdata&#34;, ontology = &#34;MF&#34;, allGenes = geneList, annot = annFUN.gene2GO, gene2GO = geneID2GO) MF_fisher = runTest(GOdata_MF,algorithm = &#34;classic&#34;, statistic = &#34;fisher&#34;) allRes_MF &lt;- GenTable(GOdata_MF, classic = MF_fisher, orderBy = &#34;weight&#34;, ranksOf = &#34;classic&#34;, topNodes = length(which(MF_fisher@score&lt; 0.01))) write.table(allRes_MF,file = paste(save_path_,codition,&#34;_MF.txt&#34;,sep=&#34;&#34;),sep=&#34;\\t&#34;,quote = F,row.names = F ) # run test for Cellular component GOdata_CC &lt;- new(&#34;topGOdata&#34;, ontology = &#34;CC&#34;, allGenes = geneList, annot = annFUN.gene2GO, gene2GO = geneID2GO) CC_fisher = runTest(GOdata_CC,algorithm = &#34;classic&#34;, statistic = &#34;fisher&#34;) allRes_CC &lt;- GenTable(GOdata_CC, classic = CC_fisher, orderBy = &#34;weight&#34;, ranksOf = &#34;classic&#34;, topNodes = length(which(CC_fisher@score&lt; 0.01))) write.table(allRes_CC,file = paste(save_path_,codition,&#34;_CC.txt&#34;,sep=&#34;&#34;),sep=&#34;\\t&#34;,quote = F,row.names = F ) } GO term enrichment was conducted over a given gene set using the topGO R package, where all annotated genes in switchgrass was used as the background. A GO function is considered enriched if the p-value &lt; 0.01. Windows - R script",
       "is_critical": false,

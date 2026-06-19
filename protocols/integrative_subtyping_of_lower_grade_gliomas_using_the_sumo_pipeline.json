@@ -36,19 +36,17 @@
     "R",
     "tidyverse",
     "survival",
-    "survminer"
+    "survminer",
+    "Timing: 1 min",
+    "Timing: 9 min",
+    "Timing: 11 min",
+    "Timing: 37 min",
+    "Timing: 13 h 30 min",
+    "Timing: 14 s"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Step 1: Package installation",
-      "instruction": "Timing: 1 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 1,
       "title": "Step 1: Package installation",
       "instruction": "The SUMO command-line tool can be installed from the Python Packaging Index (PyPI), by executing the command below. Note that SUMO requires a Python 3.6+ version and corresponding pip (package installer), distributed together with Python. Here, we refer to pip as pip3 to avoid confusion with the default Python 2 specific version of pip.1.Upgrade pip3 (to a >19.0 version) and the setuptools package:pip3 install --upgrade pip setuptools2.Install SUMO, by running the following command-line command:pip3 install python-sumo",
       "substeps": [],
@@ -56,15 +54,7 @@
       "timers": []
     },
     {
-      "step_id": 2,
-      "title": "Step 2: Data preparation",
-      "instruction": "Timing: 9 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
+      "step_id": 1,
       "title": "Step 2: Data preparation",
       "instruction": "See before you begin for an explanation of data pre-processing steps. In this protocol, the gene expression and miRNA expression feature matrices downloaded from XENA have already been log-normalized to remove the dependence of the variance on the mean of the counts. So, we omit the data transformation step in the vignette below. Here, we use R to pre-process the dataset (see SUMO documentation for examples of pre-processing scripts in python). In this protocol, we assume that the user has set their working directory to the directory with the files downloaded from Xena (See the key resources table). The working directory can be set by using the ‘setwd’ command in R.3.Install and load the required R packages:>install.packages(c(\"devtools\", \"tidyverse\", \"reticulate\", \"survival\", \"survminer\"))>devtools::install_github(\"stephenturner/annotables@v0.1.90\")>library(annotables)>library(tidyverse)4.Pre-processing of miRNA expression data:a.Load the data:>data data normalize.matrix data.norm write.table(data.norm, file=\"TCGA.LGG.miRNAexp.tsv\", sep=\"\\t\", col.names = TRUE, row.names = TRUE)5.Pre-processing of gene expression data:a.Load the data:>data data data 1) > 1,]c.(optional) Limit the feature matrix to protein-coding genes:>protein_coding % left_join(grch38, by = \"symbol\") %>% select(symbol, biotype) %>% filter(biotype == \"protein_coding\") %>% pull(symbol) %>% unique()>data data.norm write.table(data.norm, file=\"TCGA.LGG.mRNAexp.tsv\", sep=\"\\t\", col.names = TRUE, row.names = TRUE)6.Pre-processing of methylation data:a.Load the data:>data data dataM dataM.norm write.table(dataM.norm, file=\"TCGA.LGG.met.tsv\", sep=\"\\t\", col.names = TRUE, row.names = TRUE)",
       "substeps": [],
@@ -72,15 +62,7 @@
       "timers": []
     },
     {
-      "step_id": 4,
-      "title": "Step 3: Creating similarity networks",
-      "instruction": "Timing: 11 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
+      "step_id": 2,
       "title": "Step 3: Creating similarity networks",
       "instruction": "In this step, each of the pre-processed feature matrices is used to calculate data-type-specific distances between the samples. Next, the distances are converted to similarities between samples. Each similarity matrix corresponding to a different data type is then used as an adjacency matrix to construct a “layer” of a multiplex similarity network (see (Sienkiewicz et al., 2020) for more details about the method).Note: We assume that SUMO is run in the directory with the pre-processed files.7.Use the following command to run SUMO on the pre-processed files:sumo prepareTCGA.LGG.mRNAexp.tsv,TCGA.LGG.met.tsv,TCGA.LGG.miRNAexp.tsvprepared.LGG.npza.The required positional arguments of SUMO are:i“prepare” - selected sumo `mode` which uses the pre-processed feature matrices to construct the similarity networks,ii“infile1,infile2,…” - comma-delimited list of files containing standardized feature matrices, with samples in columns and features in rows (here: TCGA.LGG.mRNAexp.tsv,TCGA.LGG.met.tsv,TCGA.LGG.miRNAexp.tsv),iii“outfile.npz” - path to the output file in .npz format, which is a zipped archive of files named after the variable they contain (here: prepared.LGG.npz).b.Some of the optional arguments for SUMO in `prepare` mode include:i“-atol” - SUMO checks if the data was standardized by assessing the mean and standard deviation of each feature. This parameter allows the user to specify an allowed tolerance level in this test. In this protocol, we increase it to include the sparse miRNA expression matrix, with a smaller number of features (see Troubleshooting problem 1 for more details).ii“-method” – distance to be used in calculation of sample-sample similarity (here we use the default Euclidean distance, which is appropriate for log-normalized counts and M-values used in methylation data),iii“-k” and “-alpha” – hyperparameters that affect the distribution of values in the similarity matrix (see (Sienkiewicz et al., 2020) for more details),iv“-log” and “-logfile” - arguments governing the logging level and the optional path to save the logging file,v“-plot” - path to save the heatmaps that show the similarity matrix for each data type (the default behavior is to display these plots in an interactive mode on the screen).c.The above command creates a multiplex network file in form of a zipped NumPy archive containing:ithe pairwise sample similarity matrices organized as network adjacency matrices in order of input files (arrays indexed: “0”, “1”, “2”),iiinput feature matrices, after additional internal sumo filtering (arrays indexed: “f0”, “f1”, “f2”),iiian organized list of sample identifiers in the order corresponding to rows/columns of adjacency matrices (the “sample” array).",
       "substeps": [],
@@ -88,15 +70,7 @@
       "timers": []
     },
     {
-      "step_id": 6,
-      "title": "Step 4: Detecting molecular subtypes",
-      "instruction": "Timing: 37 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 7,
+      "step_id": 3,
       "title": "for more details),iv“-t” number of computational threads",
       "instruction": "for more details),iv“-t” number of computational threads.c.The output directory includes a sub-directory with the cluster assignments and information for each “k” (see Figure 1A). Every sub-directory contains:ia .log file and a .npz file with factorization results for each “eta” value,ii“sumo_results.npz” - a hyperlink to factorization result corresponding to the best “eta”,iii“clusters.tsv” - a file with the assigned sample labels.Additionally, SUMO creates a sub-directory “plots” with several plots that can assist in the selection of the optimal number of subtypes in the dataset.d.Each .npz file with the factorization results for given (“k”, “eta”) pair contains:itwo internal metrics, namely the proportion of ambiguously clustered pairs (PAC) (Şenbabaoğlu et al.,",
       "substeps": [],
@@ -104,7 +78,7 @@
       "timers": []
     },
     {
-      "step_id": 8,
+      "step_id": 4,
       "title": "and cophenetic correlation coefficient (Hutchins et al",
       "instruction": "and cophenetic correlation coefficient (Hutchins et al., 2008). Each metric is calculated multiple times on subsets of samples and the results are saved in the “pac” and “cophenet” arrays,iiquality metric assessing the within-cluster similarities of final sample groups (“quality” array), used for sparsity parameter selection,iiiconsensus matrix resulting from running the factorization multiple times on subsets of samples (“unfiltered_consensus” array) and its filtered copy used for assignment of final sample labels (“consensus” array)9.Select the optimal number of clusters/factorization rank.a.(recommended) Inspect the “cophenet.png” and “pac.png” files in created “LGG/plots” sub-directory. The created plots show the distribution of two popular clustering metrics: the cophenetic correlation coefficient (CCC) and the proportion of ambiguously clustered pairs (PAC). We recommend selecting the factorization rank for which the CCC is high (over 0.",
       "substeps": [],
@@ -112,7 +86,7 @@
       "timers": []
     },
     {
-      "step_id": 9,
+      "step_id": 5,
       "title": "and PAC score is less than 0",
       "instruction": "and PAC score is less than 0.1.b.(extended) Use the following commands to plot both ranks together in R (see Figure 1B):i.load required R packages:>library(tidyverse)>library(reticulate)ii.iterate through the sub-directories of “LGG” and read the PAC and CCC values. SUMO utilizes a re-sampling approach, there are multiple values for each clustering rank “k”, crated by calculating metrics on subsets of samples in consensus matrix:>np sumo_run_dir dir_names pac_tbl % as_tibble() %>% mutate(rep = row_number()) %>% gather(\"dir_name\", \"PAC\", -rep)>ccc_tbl % as_tibble() %>% mutate(rep = row_number()) %>% gather(\"dir_name\", \"CCC\", -rep)iii.calculate median, minimum, and maximum for the two metrics corresponding to each clustering rank:>metric_tbl % left_join(pac_tbl, by = c(\"rep\", \"dir_name\")) %>% separate(dir_name, c(NA, 'k'), sep=\"k\") %>% mutate(k=as.factor(as.numeric(k))) %>% gather(metric, value, -k, -rep) %>% group_by(metric, k) %>% summarise(median_value=median(value), min_value=min(value), max_value=max(value))iv.plot the metrics together:>metric_tbl %>% ggplot() + geom_line(aes(x=k, y=median_value, color=metric, group=metric), size=1) + geom_ribbon(aes(x=k, ymin=min_value, ymax=max_value, group=metric, fill=metric), alpha=0.3) + theme_bw() + labs(y=\"metric value\") + theme(legend.position = \"bottom\")",
       "substeps": [],
@@ -120,7 +94,7 @@
       "timers": []
     },
     {
-      "step_id": 10,
+      "step_id": 6,
       "title": "Step 4: Detecting molecular subtypes",
       "instruction": "Figure 1Output of `sumo run`(A) The structure of the output directory generated in Step 4 of the protocol.(B) Two internal clustering stability metrics calculated by SUMO: proportion of ambiguously clustered pairs (PAC) and cophenetic correlation coefficient (CCC). The optimal cluster rank is characterized by a low PAC value and a high CCC value.",
       "substeps": [],
@@ -128,15 +102,7 @@
       "timers": []
     },
     {
-      "step_id": 11,
-      "title": "Step 5: Identifying potential biomarkers",
-      "instruction": "Timing: 13 h 30 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
+      "step_id": 7,
       "title": "Step 5: Identifying potential biomarkers",
       "instruction": "In this step, we identify the features that are predictive of the subtypes determined in the last step. These features are potential biomarkers that can be used to assign new samples to the determined subtypes. We train a tree-based LightGBM model (Ke et al., 2017) using the feature matrices and the assigned labels from the last step, though this sort of feature importance can be determined using other approaches such as support vector machines. We then calculate the Shapley values (Lundberg and Lee, 2017) for each feature in the resulting model. The Shapley value is the average marginal contribution of a feature, and the features with Shapley values greater than one are considered to be important in driving the separation of that cluster.10.Use following command to run SUMO in the `interpret` mode:sumo interpret LGG/k5/sumo_results.npzTCGA.LGG.mRNAexp.tsv,TCGA.LGG.met.tsv,TCGA.LGG.miRNAexp.tsvLGG_interpret_k5a.The required positional arguments of SUMO are:i.“interpret” - selected sumo `mode` which determines the importance of features,ii.“sumo_results.npz” - path to selected factorization results from the `run` mode of SUMO (here we selected 5 as the optimal number of clusters although 2 is also a good choice, see expected outcomes for more details),iii.“infile1,infile2,…” - a comma-delimited list of files containing standardized feature matrices,iv.“output_prefix”- prefix of the output files.b.Some of the optional arguments in this mode include:i.“-log” and “-logfile” - arguments governing the logging level and optional path to save the logging file,ii.“-max_iter“ and “-n_folds” - the model parameters that govern the search through hyperparameter space and model cross-validation,iii.“-t” number of computational threads.c.The outputs of this step are two files with feature importance in form of SHAP (Shapley Additive exPlanations) values calculated using the trained model. The .tsv file contains a matrix of values, with features represented in rows, and the clusters represented in columns. The value of each cell corresponds to the importance of a given feature in that cluster. The .hits.tsv file is a summary of the most important features for each cluster.",
       "substeps": [],
@@ -144,15 +110,7 @@
       "timers": []
     },
     {
-      "step_id": 13,
-      "title": "Step 6: Examples of downstream analyses",
-      "instruction": "Timing: 14 s",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
+      "step_id": 8,
       "title": "Step 6: Examples of downstream analyses",
       "instruction": "In the previous steps, we identified five different subtypes using the TCGA-LGG data. We also identified genes, methylation probes, and microRNAs that could be potential biomarkers for each of the five subtypes. Now, several downstream analyses can be performed to evaluate the identified subtypes and important features. One such analysis is to determine whether there is a significant difference in prognosis for at least one of the detected subtypes. See expected outcomes for the discussion of results.11.Load required R packages:>library(tidyverse)>library(survival)>library(survminer)12.Survival analysis:a.Load the sample labels (for the selected number of clusters) produced by SUMO:>labels data % select(sample, OS, OS.time) %>% right_join(labels, by = \"sample\")c.Plot the Kaplan-Meier curves (Figure 2):>ggsurvplot(survfit(Surv(OS.time, OS) ∼ label, data=data), data=data, palette = \"npg\", pval = TRUE, ggtheme = theme_bw(), risk.table = TRUE)Note: Crossing hazard rates can lead to loss of power in log-rank tests. The assumptions of proportional hazard should be tested using the Schoenfeld residuals and alternative approaches such as weighted log-rank tests should be used in case of violations (Bouliotis and Billingham, 2011).13.Evaluation of potential biomarkers for a selected subtype of interest:a.Load the sample labels, produced by `sumo run`, and corresponding `sumo interpret` results:>data % gather(group, importance, -feature)>labels selected_label top_features % filter(group == paste0(\"GROUP_\",selected_label)) %>% arrange(desc(importance)) %>% top_n(6, importance)d.Extract the values of top features from pre-processed feature matrices:>patterns % unique(), collapse = ' '), collapse = '')>infiles data for (fname in infiles){ samples 0){ for(read_line in rlines){ split_line % full_join(feature_tbl, by=c(\"sample\",\"feature\",\"fname\",\"value\")) } } } close(the_pipe) }>data % left_join(labels, by = \"sample\") %>% left_join(top_features, by = \"feature\")e.Confirm if each feature of interest has significantly different values for the cluster of interest using the Kruskal-Wallis test:>test_feature % mutate(group=ifelse(label==strsplit(the_group, \"_\")[[1]][-1], the_group, \"OTHER_SAMPLES\")) pval data % group_by(feature) %>% summarise(pval=test_feature(value, label, group)) %>% right_join(data, by = \"feature\")f.Plot values of each feature of interest across the clusters/subtypes (Figure 3):>data %>% separate(group, c(NA, \"group\"), sep=\"_\") %>% mutate(group=as.numeric(group), selected_group=as.factor(label==group), label=as.factor(label)) %>% ggplot() + geom_violin(aes(x=label, y=value, fill=selected_group, color=selected_group), alpha=0.3) + geom_text(data=data %>% select(feature, group, importance, pval) %>% distinct(), aes(x = -Inf, y = -Inf, label=paste(\"p- value\", ifelse(pval > 0.0001, round(pval, 4), \"< 0.0001\"))), hjust = -0.05, vjust = -0.5, size=4) + facet_wrap(paste(feature, \"(importance:\", round(importance, 3),\")\")∼., scales=\"free\") + theme_bw(base_size = 12) + theme(legend.position = \"null\") + labs(y=\"feature value\", x=\"subtype\")",
       "substeps": [],
@@ -160,7 +118,7 @@
       "timers": []
     },
     {
-      "step_id": 15,
+      "step_id": 9,
       "title": "Step 6: Examples of downstream analyses",
       "instruction": "Figure 2Kaplan-Meier survival analysis for the five subtypes detected by SUMOWe report the p-value of the log-rank test.Figure 3Evaluation of important features for differentiation of subtype 3We show the top six candidate features identified, by `sumo interpret`. The reported p-value is calculated using the Kruskal-Wallis test.",
       "substeps": [],
