@@ -17,86 +17,76 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Before beginning, we need to convert the sample names into consistent class names. This can easily be done by manually editing the output/merged_abundance_table.txt output/merged_abundance_table.txt generated in the previous protocols or using the following &#34;sed&#34; based Unix command: For this specific image we increased the LDA threshold to 4.7 in order to display a more compact image with fewer biomarkers. Notice that the cladograms produced by LEfSe can be less graphically appealing and detailed than those built using GraPhlAn . Using the tmp/merged_abundance_table.lefse.out file and, a combination of scripting or manual editing, it is possible to obtain an improved graphical output for LEfSe.",
+      "title": "Standardize sample class names",
+      "instruction": "Convert the sample names in output/merged_abundance_table.txt to consistent class names either by manually editing the file or by applying an appropriate sed command; this prepares the file for LEfSe processing.",
+      "substeps": [
+        {
+          "instruction": "Open output/merged_abundance_table.txt and edit class names so they are uniform across samples.",
+          "title": ""
+        },
+        {
+          "instruction": "Alternatively, run a sed command that replaces the original class identifiers with the desired consistent names.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "The first LEfSe step consists of formatting the input table, making sure the class information is in the first row and scaling the values in [0,1M] which is useful for numerical computational reasons. $ format_input.py tmp/merged_abundance_table.4lefse.txt tmp/merged_abundance_table.lefse -c 1 -o 1000000",
+      "title": "Format LEfSe input table",
+      "instruction": "Run format_input.py to create a LEfSe‑compatible table, ensuring the class information is in the first row and scaling all abundance values to the range [0, 1,000,000] (‑c 1 ‑o 1000000). Command: $ format_input.py tmp/merged_abundance_table.4lefse.txt tmp/merged_abundance_table.lefse -c 1 -o 1000000",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Now, the LEfSe biomarker discovery tool can be used with default statistical options. Here we change one default parameter to increase the threshold on the LDA effect size from 2 (default) to 4. $ run_lefse.py tmp/merged_abundance_table.lefse tmp/merged_abundance_table.lefse.out -l 4",
+      "title": "Run LEfSe biomarker analysis",
+      "instruction": "Execute run_lefse.py on the formatted table and set the LDA effect‑size threshold to 4 (instead of the default 2) with the option ‑l 4. Command: $ run_lefse.py tmp/merged_abundance_table.lefse tmp/merged_abundance_table.lefse.out -l 4. Note: for a more compact final image the threshold was later increased to 4.7.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "The results of the operation can now be displayed plotting the resulting list of biomarkers with corresponding effect sizes. $ plot_res.py --dpi 300 tmp/merged_abundance_table.lefse.out output_images/lefse_biomarkers.png",
+      "title": "Plot biomarker effect sizes",
+      "instruction": "Generate a PNG image of the biomarkers and their effect sizes using plot_res.py with a resolution of 300 dpi. Command: $ plot_res.py --dpi 300 tmp/merged_abundance_table.lefse.out output_images/lefse_biomarkers.png",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "The resulting image ( output_images/lefse_biomarkers.png output_images/lefse_biomarkers.png ) is shown below: a For this specific image we increased the LDA threshold to 4.7 in order to display a more compact image with fewer biomarkers.",
+      "title": "Generate taxonomic cladogram",
+      "instruction": "Create a cladogram that maps biomarkers onto the taxonomic tree with plot_cladogram.py, using 300 dpi and PNG format. Command: $ plot_cladogram.py --dpi 300 --format png tmp/merged_abundance_table.lefse.out output_images/lefse_biomarkers_cladogram.png",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Another complementary visualization focuses on showing the biomarkers on the underlying taxonomic tree. $ plot_cladogram.py --dpi 300 --format png tmp/merged_abundance_table.lefse.out output_images/lefse_biomarkers_cladogram.png",
+      "title": "Plot single feature barplot",
+      "instruction": "Visualize the abundance distribution of an individual feature (e.g., Firmicutes) as a barplot with plot_features.py. Example command: $ plot_features.py -f one --feature_name",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "The default plotting output is shown here: a Notice that the cladograms produced by LEfSe can be less graphically appealing and detailed than those built using GraPhlAn . Using the tmp/merged_abundance_table.lefse.out file and, a combination of scripting or manual editing, it is possible to obtain an improved graphical output for LEfSe.",
+      "title": "Export features to zip archive",
+      "instruction": "Export biomarker features (or all features) into a compressed zip file using plot_features.py. To export only LEfSe‑identified biomarkers use -f diff; to export all features use -f all. Example command for biomarkers: $ plot_features.py -f diff --archive zip tmp/merged_abundance_table.lefse tmp/merged_abundance_table.lefse.out biomarkers.zip",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 7,
-      "title": "",
-      "instruction": "Single features can also be plotted as barplots with plot_features.py plot_features.py . For example, to plot the distribution of abundances for Firmicutes the command is: $ plot_features.py -f one --feature_name",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 8,
-      "title": "",
-      "instruction": "All features (or all biomarkers) can also be exported in one compressed archive: Notice that with -f diff we are exporting only features that are biomarkers according to LEfSe, but with can export all features with -f all . $ plot_features.py -f diff --archive zip tmp/merged_abundance_table.lefse tmp/merged_abundance_table.lefse.out biomarkers.zip",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 9,
-      "title": "",
-      "instruction": "Here are the resulting figures for Firmicutes and for Veillonellaceae (extracted from biomarkers.zip). a a",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T13:30:12.158375Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 12,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

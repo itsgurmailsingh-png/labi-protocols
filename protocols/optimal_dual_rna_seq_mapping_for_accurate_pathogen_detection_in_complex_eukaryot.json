@@ -1,0 +1,370 @@
+{
+  "protocol_id": "optimal_dual_rna_seq_mapping_for_accurate_pathogen_detection_in_complex_eukaryot",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Optimal Dual RNA-Seq Mapping for Accurate Pathogen Detection in Complex Eukaryotic Hosts",
+  "author": "Infanta Saleth Teresa Eden M.",
+  "doi": "10.21769/BioProtoc.5182",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.5182",
+  "citation": "10.21769/BioProtoc.5182",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 3.5,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 12,
+  "materials": [
+    "Initial QC: Basic statistics for sample SRR18042662 Figure",
+    "Join files based on column 1 for file"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Download SRA data and create FASTQ.gz files",
+      "instruction": "Use SRA‑Toolkit (v3.1.0) to prefetch all listed SRR run IDs, extract FASTQ files with fasterq‑dump (50 threads), and compress the resulting FASTQ files to .fastq.gz using gzip.",
+      "substeps": [
+        {
+          "instruction": "$ prefetch SRR18042662 SRR18042663 SRR18042664 SRR18042665 SRR18042666 SRR18042667 SRR18042668 SRR18042669 SRR18042670",
+          "title": ""
+        },
+        {
+          "instruction": "$ fasterq-dump --threads 50 SRR18042662 SRR18042663 SRR18042664 SRR18042665 SRR18042666 SRR18042667 SRR18042668 SRR18042669 SRR18042670",
+          "title": ""
+        },
+        {
+          "instruction": "$ gzip *.fastq",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Initial quality assessment of raw reads",
+      "instruction": "Run FastQC on all compressed FASTQ files using 10 threads and combine the individual HTML reports with MultiQC.",
+      "substeps": [
+        {
+          "instruction": "$ fastqc -t 10 *.fastq.gz",
+          "title": ""
+        },
+        {
+          "instruction": "$ multiqc .",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Trim adapters and filter low‑quality bases",
+      "instruction": "Trim adapters and low‑quality bases from both paired‑end and single‑end reads using TrimGalore (quality 20, stringency 7, retain_unpaired for PE, 2 cores) and/or fastp (v0.23.4, 16 threads, detect adapters, cut tail, correction, over‑representation analysis). After trimming, re‑run FastQC and MultiQC to verify quality.",
+      "substeps": [
+        {
+          "instruction": "# TrimGalore – paired‑end",
+          "title": ""
+        },
+        {
+          "instruction": "$ trim_galore --quality 20 --stringency 7 --paired SRR18042662_1.fastq.gz SRR18042662_2.fastq.gz --output_dir 2.Trimmed_reads/ --cores 2 --retain_unpaired",
+          "title": ""
+        },
+        {
+          "instruction": "# TrimGalore – single‑end",
+          "title": ""
+        },
+        {
+          "instruction": "$ trim_galore --quality 20 --stringency 7 SRR18042663.fastq.gz --output_dir 2.Trimmed_reads/ --cores 2",
+          "title": ""
+        },
+        {
+          "instruction": "# fastp – paired‑end",
+          "title": ""
+        },
+        {
+          "instruction": "$ fastp -i SRR18042662_1.fastq.gz -I SRR18042662_2.fastq.gz -o SRR18042662_1_clean.fastq.gz -O SRR18042662_2_clean.fastq.gz --detect_adapter_for_pe --cut_tail --correction --overrepresentation_analysis --json SRR18042662.fastp.json --html SRR18042662.fastp.html --thread 16",
+          "title": ""
+        },
+        {
+          "instruction": "# fastp – single‑end",
+          "title": ""
+        },
+        {
+          "instruction": "$ fastp -i SRR18042663.fastq.gz -o SRR18042663_clean.fastq.gz --cut_tail --overrepresentation_analysis --json SRR18042663.fastp.json --html SRR18042663.fastp.html --thread 16",
+          "title": ""
+        },
+        {
+          "instruction": "# Re‑run QC on trimmed reads",
+          "title": ""
+        },
+        {
+          "instruction": "$ fastqc -t 10 2.Trimmed_reads/*.fastq.gz",
+          "title": ""
+        },
+        {
+          "instruction": "$ multiqc .",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Build genome indexes for host and pathogen",
+      "instruction": "Create a HISAT2 index for the human hg38 genome (including splice‑site and exon files), a BWA index for the Mycobacterium tuberculosis genome, and optionally a STAR index for hg38.",
+      "substeps": [
+        {
+          "instruction": "# Extract splice sites and exons from hg38 GTF",
+          "title": ""
+        },
+        {
+          "instruction": "$ extract_splice_sites.py GCF_000001405.40_GRCh38.p14_genomic.gtf > splice_sites.tsv",
+          "title": ""
+        },
+        {
+          "instruction": "$ extract_exons.py GCF_000001405.40_GRCh38.p14_genomic.gtf > exons.tsv",
+          "title": ""
+        },
+        {
+          "instruction": "# HISAT2 index with splice‑site and exon information",
+          "title": ""
+        },
+        {
+          "instruction": "$ hisat2-build GCF_000001405.40_GRCh38.p14_genomic.fna hisat2_hg38_index/hg38_index -p 40 --ss splice_sites.tsv --exon exons.tsv",
+          "title": ""
+        },
+        {
+          "instruction": "# BWA index for Mtb genome (RefSeq GCF_000195955.2)",
+          "title": ""
+        },
+        {
+          "instruction": "$ bwa index GCF_000195955.2_ASM19595v2_genomic.fna",
+          "title": ""
+        },
+        {
+          "instruction": "# Optional STAR index for hg38",
+          "title": ""
+        },
+        {
+          "instruction": "$ STAR --runThreadN 4 --runMode genomeGenerate --genomeDir STAR_index --genomeFastaFiles GCF_000001405.40_GRCh38.p14_genomic.fna --sjdbGTFfile GCF_000001405.40_GRCh38.p14_genomic.gtf",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Map reads to host and pathogen genomes (choose approach)",
+      "instruction": "Two alternative strategies are provided. (A) Host‑first: map trimmed reads to hg38 with HISAT2, extract unmapped reads, then map those to the Mtb genome with BWA. (B) Pathogen‑first: map trimmed reads to the Mtb genome with BWA, extract unmapped reads, then map those to hg38 with HISAT2. Use samtools and bedtools to convert between BAM and FASTQ as needed.",
+      "substeps": [
+        {
+          "instruction": "## A) Host‑first mapping",
+          "title": ""
+        },
+        {
+          "instruction": "# HISAT2 mapping to hg38 (paired‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ hisat2 --dta -x hisat2_hg38_index/hg38_index -1 2.Trimmed_reads/SRR18042662_trimmed_1.fq.gz -2 2.Trimmed_reads/SRR18042662_trimmed_2.fq.gz -p 20 --un-conc-gz B.Mapping_HISAT2/SRR18042662_Unmapped_pairs --summary-file B.Mapping_HISAT2/SRR18042662_align_stats.txt | samtools view -@15 -b -S | samtools sort -n -@15 -o B.Mapping_HISAT2/SRR18042662.sorted.bam -O BAM",
+          "title": ""
+        },
+        {
+          "instruction": "# HISAT2 mapping to hg38 (single‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ hisat2 --dta -x hisat2_hg38_index/hg38_index -U 2.Trimmed_reads/SRR18042663_trimmed.fq.gz -p 20 --un-conc-gz B.Mapping_HISAT2/SRR18042663_Unmapped_reads.fq.gz --summary-file B.Mapping_HISAT2/SRR18042663_align_stats.txt | samtools view -@15 -b -S | samtools sort -n -@15 -o B.Mapping_HISAT2/SRR18042663.sorted.bam -O BAM",
+          "title": ""
+        },
+        {
+          "instruction": "# Extract unmapped reads (host‑first) from the HISAT2 BAM files",
+          "title": ""
+        },
+        {
+          "instruction": "$ samtools view -b -f 4 B.Mapping_HISAT2/SRR18042662.sorted.bam > B.Mapping_HISAT2/SRR18042662_unmapped.bam",
+          "title": ""
+        },
+        {
+          "instruction": "$ samtools view -b -f 4 B.Mapping_HISAT2/SRR18042663.sorted.bam > B.Mapping_HISAT2/SRR18042663_unmapped.bam",
+          "title": ""
+        },
+        {
+          "instruction": "# Convert unmapped BAM to FASTQ (paired‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ bedtools bamtofastq -i B.Mapping_HISAT2/SRR18042662_unmapped.bam -fq B.Mapping_HISAT2/SRR18042662_unmapped_1.fq -fq2 B.Mapping_HISAT2/SRR18042662_unmapped_2.fq",
+          "title": ""
+        },
+        {
+          "instruction": "# Convert unmapped BAM to FASTQ (single‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ samtools fastq B.Mapping_HISAT2/SRR18042663_unmapped.bam > B.Mapping_HISAT2/SRR18042663_unmapped.fq",
+          "title": ""
+        },
+        {
+          "instruction": "# BWA mapping of unmapped reads to Mtb genome (paired‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ bwa mem -t 20 GCF_000195955.2_ASM19595v2_genomic.fna B.Mapping_HISAT2/SRR18042662_unmapped_1.fq B.Mapping_HISAT2/SRR18042662_unmapped_2.fq | samtools view -@15 -b -S | samtools sort -n -@15 -o B.Mapping_BWA_HostFirst/SRR18042662_Mtb.bam -O BAM",
+          "title": ""
+        },
+        {
+          "instruction": "# BWA mapping of unmapped reads to Mtb genome (single‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ bwa mem -t 20 GCF_000195955.2_ASM19595v2_genomic.fna B.Mapping_HISAT2/SRR18042663_unmapped.fq | samtools view -@15 -b -S | samtools sort -n -@15 -o B.Mapping_BWA_HostFirst/SRR18042663_Mtb.bam -O BAM",
+          "title": ""
+        },
+        {
+          "instruction": "## B) Pathogen‑first mapping",
+          "title": ""
+        },
+        {
+          "instruction": "# BWA mapping of trimmed reads to Mtb genome (paired‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ bwa mem -t 20 GCF_000195955.2_ASM19595v2_genomic.fna 2.Trimmed_reads/SRR18042662_trimmed_1.fq.gz 2.Trimmed_reads/SRR18042662_trimmed_2.fq.gz | samtools view -@15 -b -S | samtools sort -n -@15 -o B.Mapping_BWA_PathogenFirst/SRR18042662.sorted.bam -O BAM",
+          "title": ""
+        },
+        {
+          "instruction": "# BWA mapping of trimmed reads to Mtb genome (single‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ bwa mem -t 20 GCF_000195955.2_ASM19595v2_genomic.fna 2.Trimmed_reads/SRR18042663_trimmed.fq.gz | samtools view -@15 -b -S | samtools sort -n -@15 -o B.Mapping_BWA_PathogenFirst/SRR18042663.sorted.bam -O BAM",
+          "title": ""
+        },
+        {
+          "instruction": "# Extract unmapped (host) reads from the pathogen‑first BAM files",
+          "title": ""
+        },
+        {
+          "instruction": "$ samtools view -b -f 4 B.Mapping_BWA_PathogenFirst/SRR18042662.sorted.bam > B.Mapping_BWA_PathogenFirst/SRR18042662_unmapped_host.bam",
+          "title": ""
+        },
+        {
+          "instruction": "$ samtools view -b -f 4 B.Mapping_BWA_PathogenFirst/SRR18042663.sorted.bam > B.Mapping_BWA_PathogenFirst/SRR18042663_unmapped_host.bam",
+          "title": ""
+        },
+        {
+          "instruction": "# Convert unmapped host BAM to FASTQ",
+          "title": ""
+        },
+        {
+          "instruction": "$ bedtools bamtofastq -i B.Mapping_BWA_PathogenFirst/SRR18042662_unmapped_host.bam -fq B.Mapping_BWA_PathogenFirst/SRR18042662_unmapped_Host_1.fq -fq2 B.Mapping_BWA_PathogenFirst/SRR18042662_unmapped_Host_2.fq",
+          "title": ""
+        },
+        {
+          "instruction": "$ samtools fastq B.Mapping_BWA_PathogenFirst/SRR18042663_unmapped_host.bam > B.Mapping_BWA_PathogenFirst/SRR18042663_unmapped_Host.fq",
+          "title": ""
+        },
+        {
+          "instruction": "# HISAT2 mapping of the unmapped host reads to hg38 (paired‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ hisat2 --dta -x hisat2_hg38_index/hg38_index -1 B.Mapping_BWA_PathogenFirst/SRR18042662_unmapped_Host_1.fq -2 B.Mapping_BWA_PathogenFirst/SRR18042662_unmapped_Host_2.fq -p 20 | samtools view -@15 -b -S | samtools sort -n -@15 -o B.Mapping_HISAT2_PathogenFirst/SRR18042662_host.sorted.bam -O BAM",
+          "title": ""
+        },
+        {
+          "instruction": "# HISAT2 mapping of the unmapped host reads to hg38 (single‑end)",
+          "title": ""
+        },
+        {
+          "instruction": "$ hisat2 --dta -x hisat2_hg38_index/hg38_index -U B.Mapping_BWA_PathogenFirst/SRR18042663_unmapped_Host.fq -p 20 | samtools view -@15 -b -S | samtools sort -n -@15 -o B.Mapping_HISAT2_PathogenFirst/SRR18042663_host.sorted.bam -O BAM",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Quantify gene‑level read counts",
+      "instruction": "Use featureCounts to count reads mapping to exonic regions of the Mtb and hg38 annotations for both paired‑end and single‑end BAM files, then merge the paired‑ and single‑end count tables.",
+      "substeps": [
+        {
+          "instruction": "# Pathogen (Mtb) – paired‑end",
+          "title": ""
+        },
+        {
+          "instruction": "$ featureCounts -a Mtb_Genome/genomic.gff -t gene -g Name -p -o C.Read_Count_Quantification/Pathogen_Quant_PE.tsv -O --countReadPairs -T 40 B.Mapping_BWA_PathogenFirst/SRR18042662.sorted.bam B.Mapping_BWA_PathogenFirst/SRR18042665.sorted.bam B.Mapping_BWA_PathogenFirst/SRR18042668.sorted.bam",
+          "title": ""
+        },
+        {
+          "instruction": "# Pathogen (Mtb) – single‑end",
+          "title": ""
+        },
+        {
+          "instruction": "$ featureCounts -a Mtb_Genome/genomic.gff -t gene -g Name -o C.Read_Count_Quantification/Pathogen_Quant_SE.tsv -O -T 40 B.Mapping_BWA_PathogenFirst/SRR18042663.sorted.bam B.Mapping_BWA_PathogenFirst/SRR18042664.sorted.bam B.Mapping_BWA_PathogenFirst/SRR18042666.sorted.bam B.Mapping_BWA_PathogenFirst/SRR18042667.sorted.bam B.Mapping_BWA_PathogenFirst/SRR18042669.sorted.bam B.Mapping_BWA_PathogenFirst/SRR18042670.sorted.bam",
+          "title": ""
+        },
+        {
+          "instruction": "# Merge pathogen PE and SE tables",
+          "title": ""
+        },
+        {
+          "instruction": "$ cut -f1,7- Pathogen_Quant_PE.tsv | grep -v \"#\" > temp_Pathogen_Quant_PE.tsv",
+          "title": ""
+        },
+        {
+          "instruction": "$ cut -f1,7- Pathogen_Quant_SE.tsv | grep -v \"#\" > temp_Pathogen_Quant_SE.tsv",
+          "title": ""
+        },
+        {
+          "instruction": "$ join -o auto -e '0' -a 1 -a 2 -1 1 -2 1 temp_Pathogen_Quant_PE.tsv temp_Pathogen_Quant_SE.tsv > Pathogen_Quantification_matrix.tsv",
+          "title": ""
+        },
+        {
+          "instruction": "# Host (hg38) – analogous commands (replace Mtb .gff with hg38 annotation .gff3)",
+          "title": ""
+        },
+        {
+          "instruction": "$ featureCounts -a hg38_annotation.gff3 -t gene -g Name -p -o C.Read_Count_Quantification/Host_Quant_PE.tsv -O --countReadPairs -T 40 B.Mapping_HISAT2_PathogenFirst/SRR18042662_host.sorted.bam ...",
+          "title": ""
+        },
+        {
+          "instruction": "$ featureCounts -a hg38_annotation.gff3 -t gene -g Name -o C.Read_Count_Quantification/Host_Quant_SE.tsv -O -T 40 B.Mapping_HISAT2_PathogenFirst/SRR18042663_host.sorted.bam ...",
+          "title": ""
+        },
+        {
+          "instruction": "# Merge host PE and SE tables (same join commands as above)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Differential expression and functional enrichment",
+      "instruction": "Import the merged count matrices into DESeq2, edgeR or Cuffdiff for differential gene expression analysis. Perform Gene Ontology and pathway enrichment with BINGO, CytoHubba, and DAVID. Optionally annotate differentially expressed genes using BLAST against external databases.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 25,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

@@ -11,12 +11,310 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
   "doi": "10.1016/j.mex.2024.103107",
   "citation": "10.1016/j.mex.2024.103107",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "The dataset encompassed Particulate Matter 2.5 (PM2.",
+    "The Exponentially Weighted Moving Average (EWMA) chart's design is characterized by two primary parameters: the sigma multiplier for control limits (L) and the weighting factor (λ). Optimal selection of L and λ is crucial for attaining the desired Average Run Length (ARL). The selection of these two parameters is important because EWMA is capable of detecting small shifts. Therefore, this method is suitable for cases with frequent changes, such as air quality monitoring. Empirical evidence suggests that a weighting factor within the interval 0.05 ≤ λ ≤ 0.25 generally yields satisfactory performance. The EWMA is a prevalent technique in time series analysis and prediction [29]. The EWMA's computation, which incorporates a weighted average of historical and current data points, renders it relatively insensitive to departures from normality. Consequently, it is a robust control charting technique for monitoring individual observations.",
+    "The air quality index data for each phase is modeled using Support Vector Regression (SVR) to address autocorrelation. After organizing the data into input variable compositions, the optimal hyperparameter values for the SVR model are determined according to the kernel type used. The kernels employed in this study are Radial Basis Function (RBF) and Polynomial kernels. For the Radial Basis Function kernel, the hyperparameters considered are C and σ. Specifically, the values of the hyperparameter C (cost) used are 0.01, 0.1, 1, 10, and 100, while the values of the hyperparameter σ (sigma) used are 0.01, 1, and 5. Based on these specified hyperparameter values, there are 15 combinations of hyperparameters for the Radial Basis Function kernel that will be used in a grid search to produce the best model with the smallest RMSE (Root Mean Squared Error) value. A combination of RBF Kernel Hyperparameters are presented in Table 1.Table 1Combination of RBF kernel hyperparameters.Table 1CombinationCσ10.010.0120.01130.01540.10.0150.1160.15710.0181191510100.011110112105131000.01141001151005",
+    "Phase-I",
+    "Phase-II",
+    "In the testing stage, the application of the EWMA control chart with varying lambda values showed a shift in the process that was not detected in the training stage. In particular, with λ = 0.4, one residual point that was outside the control limits (out-of-control, OOC) was detected (See Fig. 14). This detection indicates a moderate shift in the test data. This needs to be investigated further, and the cause should be determined whether it is due to the dry season or the increase in temperature. Furthermore, it is important to note that Southeast Asia, including Jakarta, experienced a significant heatwave from March to April. This heatwave could have contributed to the observed shift in the data. The extreme temperatures during this period may have affected air quality and increased the levels of particulate matter (PM 2.5), leading to the out-of-control point detected in the EWMA control chart. This potential impact of the heatwave underscores the need for a thorough investigation into the underlying causes of the process shift. Table 6 shows the results of the EWMA chart Phase I and Phase II.Fig. 14Testing EWMA Chart with lambda (a) 0.1, (b) 0.2, (c) 0.3, (d) 0.4.Fig. 14Table 6Results of the EWMA chart based on XGBoost residual phase I and phase II.Table 6LambdaNumber of OOC Phase INumber of OOC Phase II0.1000.2000.3000.401"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Collect and split AQI data",
+      "instruction": "Download PM2.5‑based Air Quality Index data from the AQICN platform for the period 1 Jan 2023 – 31 May 2024. Partition the dataset into Phase I (training) covering 1 Jan 2023 – 31 Dec 2023) and Phase II (testing) covering 1 Jan 2024 – 31 May 2024.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Assess autocorrelation",
+      "instruction": "Plot the Autocorrelation Function (ACF) of the PM2.5 series to confirm the presence of autocorrelation (noted for lags 1‑37).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Identify significant lags",
+      "instruction": "Plot the Partial Autocorrelation Function (PACF) with a 0.05 significance level and select the lags that exceed the confidence bounds: 1, 2, 4, 5, 8. Use these lags as input variables (y₍i‑1₎, y₍i‑2₎, y₍i‑4₎, y₍i‑5₎, y₍i‑8₎) for all subsequent models.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Prepare modeling environment",
+      "instruction": "Install R 4.1.2 and load the packages caret, xgboost, e1071, kernlab, qcc, and ggplot2 for data preprocessing, model training, validation, and charting.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Train XGBoost model",
+      "instruction": "Using the Phase I data and the selected lagged inputs, train an XGBoost regression model with maximum tree depth 3 and 50 boosting rounds (nrounds = 50).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Tune SVR hyper‑parameters",
+      "instruction": "Perform a grid‑search with time‑series cross‑validation (no shuffling) on Phase I data for two kernel types.",
+      "substeps": [
+        {
+          "instruction": "RBF kernel: test C = 0.01, 0.1, 1, 10, 100 and σ = 0.01, 1, 5 (15 combinations). Select the combination with the smallest RMSE (C = 10, σ = 0.01; RMSE = 17.155).",
+          "title": ""
+        },
+        {
+          "instruction": "Polynomial kernel: test C = 0.01, 0.1, 1, 100; degree d = 1‑5; coefficient r = 0.001, 0.01, 0.1 (60 combinations). Select the best (C = 100, d = 1, r = 0.001; RMSE = 17.167).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Evaluate model performance",
+      "instruction": "Compute Root Mean Squared Error (RMSE) with 95 % confidence intervals for both models on Phase I (training) and Phase II (testing):\n- XGBoost: Phase I RMSE = 9.87 [9.10, 10.57]; Phase II RMSE = 20.38 [17.99, 22.47]\n- SVR (RBF): Phase I RMSE = 17.16 [15.69, 18.69]; Phase II RMSE = 18.85 [16.95, 20.78]",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Generate residual series",
+      "instruction": "For each model (XGBoost and SVR) and each phase, calculate residuals = observed AQI – predicted AQI. Store four residual series: XGBoost‑Phase I, XGBoost‑Phase II, SVR‑Phase I, SVR‑Phase II.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Create Individual control charts",
+      "instruction": "Using the qcc package, plot Individual (Shewhart) control charts for each residual series. Compute the average (x̄), average moving range (MR̄), and control limits UCL = x̄ + 3·MR̄/d₂, LCL = x̄ − 3·MR̄/d₂ (d₂ for n = 2). Record out‑of‑control (OOC) points:",
+      "substeps": [
+        {
+          "instruction": "XGBoost Phase I: 0 OOC points",
+          "title": ""
+        },
+        {
+          "instruction": "XGBoost Phase II: 22 OOC points",
+          "title": ""
+        },
+        {
+          "instruction": "SVR Phase I: 6 OOC points",
+          "title": ""
+        },
+        {
+          "instruction": "SVR Phase II: 0 OOC points",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Create EWMA control charts",
+      "instruction": "For each residual series, plot EWMA charts with weighting factors λ = 0.1, 0.2, 0.3, 0.4. Use Z₀ = μ₀ (overall mean) and control limits UCL = μ₀ + L·σ·√[λ/(2‑λ)] and LCL = μ₀ − L·σ·√[λ/(2‑λ)], where L is the sigma multiplier. Record OOC points:",
+      "substeps": [
+        {
+          "instruction": "XGBoost Phase I: 0 OOC points for all λ",
+          "title": ""
+        },
+        {
+          "instruction": "XGBoost Phase II: 1 OOC point at λ = 0.4",
+          "title": ""
+        },
+        {
+          "instruction": "SVR Phase I: 0 OOC points for all λ",
+          "title": ""
+        },
+        {
+          "instruction": "SVR Phase II: 0 OOC points for all λ",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Compare chart sensitivities",
+      "instruction": "Summarize the OOC counts from Table 8:\n- XGBoost + Individual: 0 (Phase I), 22 (Phase II)\n- XGBoost + EWMA: 0 (Phase I), 1 (Phase II)\n- SVR + Individual: 6 (Phase I), 0 (Phase II)\n- SVR + EWMA: 0 (Phase I), 0 (Phase II)\nConclude that XGBoost combined with EWMA provides the best balance of stability (no false alarms in Phase I) and sensitivity (detects a single moderate shift in Phase II).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Interpret monitoring results",
+      "instruction": "For any OOC point, investigate potential causes (e.g., heatwave March‑April 2024, industrial activity, traffic, weather). Use the identified shift to trigger further data collection or corrective actions in air‑quality management.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T02:23:40.412977Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "This study has several limitations that need to be considered. First, the machine learning method used, particularly XGBoost, tends to experience overfitting when applied to long time spans, which can reduce the model's generalization ability and degrade its performance when faced with new data. Second, the control charts used in the analysis, including the Individual and EWMA charts, are only able to detect small process shifts. However, they may require further inspection to ensure that the process is truly in control, especially when dealing with more significant changes in air quality data. Air quality is typically assessed using several key pollutants as indicators, including particulate matter (PM10 and PM2.5), nitrogen dioxide (NO2), sulfur dioxide (SO2), carbon monoxide (CO), ozone (O3), and volatile organic compounds (VOCs). These pollutants are critical as they directly affect human health and the environment. For instance, PM2.5 and PM10 are associated with respiratory and cardiovascular diseases, while ground-level ozone contributes to lung damage and worsens conditions like asthma. Third, The study focused exclusively on PM2.5 concentrations in Jakarta, which may limit the generalizability of the findings to other pollutants or geographical locations. Future research could be expanded to include a broader range of air quality indicators to provide a more comprehensive assessment of air quality. Additionally, monitoring efforts should be extended to other regions in Indonesia, such as Bandung and Surabaya, which face challenges from high vehicular emissions and industrial activities, as well as Kalimantan and Sumatra, where recurring forest fires significantly impact air quality. Additionally, this study did not incorporate variables such as weather conditions, wind patterns, and other environmental factors, which may influence air quality. Future research could benefit from multivariate analysis and consider incorporating these additional variables. Las",
+  "content_type": "protocol",
+  "content_type_score": 22,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 74290,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 68414,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 86478,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 94243,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 116486,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr14.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr14.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 100749,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr14.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr15.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr15.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 145127,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr15.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr16.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr16.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 137843,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr16.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 55506,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 207840,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 35155,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 121145,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 115605,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 118709,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 92309,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC11721863/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11721863/",
+      "caption": "",
+      "bytes": 86186,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11721863/gr9.jpg"
+    }
+  ]
 }

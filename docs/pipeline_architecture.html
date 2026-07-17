@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labi Protocol Pipeline — Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  h1 { text-align: center; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .subtitle { text-align: center; font-size: 13px; color: #8b949e; margin-bottom: 40px; }
+
+  .pipeline { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 0; }
+
+  /* STATUS BAR */
+  .status-bar {
+    background: #161b22; border: 1.5px solid #30363d; border-radius: 10px;
+    padding: 16px 24px; display: flex; gap: 24px; align-items: center;
+    justify-content: center; flex-wrap: wrap; margin-bottom: 32px;
+  }
+  .status-item { text-align: center; }
+  .status-item .num { font-size: 26px; font-weight: 700; color: #fff; }
+  .status-item .num.green  { color: #3fb950; }
+  .status-item .num.blue   { color: #58a6ff; }
+  .status-item .num.yellow { color: #d29922; }
+  .status-item .num.grey   { color: #8b949e; }
+  .status-item .label { font-size: 11px; color: #8b949e; margin-top: 2px; }
+  .divider { width: 1px; height: 40px; background: #30363d; }
+
+  /* SOURCES ROW */
+  .sources-row { display: flex; gap: 12px; justify-content: center; }
+  .source-card { flex: 1; max-width: 220px; border-radius: 10px; padding: 16px 18px; border: 1.5px solid; position: relative; }
+  .source-card.green  { border-color: #2ea043; background: #0d2818; }
+  .source-card.yellow { border-color: #d29922; background: #1f1a08; }
+  .source-card.red    { border-color: #da3633; background: #2a0c0c; }
+  .source-card .badge { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
+  .green  .badge { background: #1a4e2e; color: #3fb950; }
+  .yellow .badge { background: #3d2f00; color: #d29922; }
+  .red    .badge { background: #3d0b0b; color: #f85149; }
+  .source-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .source-card p  { font-size: 12px; color: #8b949e; line-height: 1.5; }
+  .source-card .stat { margin-top: 10px; font-size: 24px; font-weight: 700; color: #fff; }
+  .source-card .stat span { font-size: 12px; color: #8b949e; font-weight: 400; margin-left: 4px; }
+  .script-tag { font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: #58a6ff; background: #0d1b2e; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 10px; }
+  .progress-bar { width: 100%; height: 4px; background: #21262d; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .progress-bar .fill { height: 100%; border-radius: 2px; background: linear-gradient(to right, #1f6feb, #3fb950); }
+
+  /* ARROWS */
+  .arrow-down { display: flex; justify-content: center; align-items: center; height: 36px; position: relative; }
+  .arrow-down::after { content: ''; position: absolute; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, #30363d, #58a6ff); left: 50%; }
+  .arrow-down .tip { width: 10px; height: 10px; border-right: 2px solid #58a6ff; border-bottom: 2px solid #58a6ff; transform: rotate(45deg); position: absolute; bottom: 0; z-index: 1; background: #0d1117; }
+
+  /* STAGE BLOCKS */
+  .stage { border-radius: 10px; padding: 20px 24px; border: 1.5px solid #30363d; background: #161b22; }
+  .stage.gate { border-color: #d29922; background: #1a1500; }
+  .stage.active { border-color: #3fb950; background: #0a1f0f; }
+  .stage-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .layer-num { background: #1f6feb; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; letter-spacing: 0.5px; }
+  .stage h2 { font-size: 15px; font-weight: 600; }
+  .stage p { font-size: 13px; color: #8b949e; line-height: 1.6; }
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; }
+
+  .tag-running { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: #1a4e2e; color: #3fb950; letter-spacing: 1px; text-transform: uppercase; animation: pulse 2s infinite; }
+  .tag-waiting { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: #21262d; color: #8b949e; letter-spacing: 1px; text-transform: uppercase; }
+  .tag-done    { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: #0d1b2e; color: #58a6ff; letter-spacing: 1px; text-transform: uppercase; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  .gate-rules { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .gate-rule { flex: 1; min-width: 180px; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; line-height: 1.6; }
+  .gate-rule.pass { background: #0d2818; border: 1px solid #2ea043; color: #3fb950; }
+  .gate-rule.fail { background: #2a0c0c; border: 1px solid #da3633; color: #f85149; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .pill { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: #21262d; border: 1px solid #30363d; color: #c9d1d9; }
+  .pill.hi { background: #1f2d3e; border-color: #1f6feb; color: #58a6ff; }
+  .pill.green { background: #0d2818; border-color: #2ea043; color: #3fb950; }
+
+  /* VERSION SYSTEM */
+  .version-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px 16px; margin-top: 14px; }
+  .version-box .vb-title { font-size: 12px; font-weight: 600; color: #c9d1d9; margin-bottom: 8px; }
+  .version-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #21262d; font-size: 12px; }
+  .version-row:last-child { border-bottom: none; }
+  .version-row .vtag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+  .vtag.parent { background: #1f6feb; color: #fff; }
+  .vtag.v2     { background: #21262d; color: #8b949e; }
+  .vname { flex: 1; color: #c9d1d9; }
+  .vscore { color: #d29922; font-weight: 600; }
+  .vpeer  { color: #3fb950; font-size: 10px; }
+
+  /* QUALITY SCORE BOX */
+  .score-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 12px 16px; margin-top: 14px; font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; color: #8b949e; line-height: 2; }
+  .score-box .highlight { color: #d29922; }
+
+  /* OUTPUT ROW */
+  .output-row { display: flex; gap: 12px; }
+  .output-card { flex: 1; border-radius: 10px; padding: 16px 18px; border: 1.5px solid #30363d; background: #161b22; }
+  .output-card h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .output-card p { font-size: 12px; color: #8b949e; line-height: 1.5; }
+  .output-card .icon { font-size: 22px; margin-bottom: 8px; display: block; }
+</style>
+</head>
+<body>
+
+<h1>Labi Protocol Data Pipeline</h1>
+<p class="subtitle">Multi-source · License-verified · Version-grouped · Quality-ranked → CDN delivery</p>
+
+<div class="pipeline">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-item">
+      <div class="num green">6,291</div>
+      <div class="label">protocols.io raw</div>
+    </div>
+    <div class="divider"></div>
+    <div class="status-item">
+      <div class="num blue">308</div>
+      <div class="label">PMC raw</div>
+    </div>
+    <div class="divider"></div>
+    <div class="status-item">
+      <div class="num yellow" id="stat-backfill">~24%</div>
+      <div class="label">Steps backfilled</div>
+    </div>
+    <div class="divider"></div>
+    <div class="status-item">
+      <div class="num grey" id="stat-normalised">0</div>
+      <div class="label">Normalised</div>
+    </div>
+    <div class="divider"></div>
+    <div class="status-item">
+      <div class="num grey" id="stat-merged">0</div>
+      <div class="label">Version-grouped</div>
+    </div>
+    <div class="divider"></div>
+    <div class="status-item">
+      <div class="num grey" id="stat-cdn">0</div>
+      <div class="label">CDN-ready</div>
+    </div>
+  </div>
+
+  <!-- SOURCES -->
+  <div class="sources-row">
+
+    <div class="source-card green">
+      <span class="badge">✅ Done</span>
+      <h3>protocols.io</h3>
+      <p>Public API v3 · Bearer token<br>CrossRef DOI per protocol<br>stats + peer_reviewed fetched</p>
+      <div class="stat">6,291 <span>protocols</span></div>
+      <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+      <div class="script-tag">fetch_protocols_io_verified.py</div>
+    </div>
+
+    <div class="source-card green">
+      <span class="badge">✅ Done</span>
+      <h3>PubMed Central</h3>
+      <p>NCBI E-utilities · XML parser<br>NISO ALI namespace license_ref<br>CC-BY gate applied</p>
+      <div class="stat">308 <span>protocols</span></div>
+      <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+      <div class="script-tag">fetch_pubmed_central.py</div>
+    </div>
+
+    <div class="source-card yellow">
+      <span class="badge">⚡ Running</span>
+      <h3>Steps Backfill</h3>
+      <p>Detail endpoint per protocol<br>Extracts steps + stats + forks<br>Updates raw JSON in-place</p>
+      <div class="stat">~24% <span>complete</span></div>
+      <div class="progress-bar"><div class="fill" style="width:24%"></div></div>
+      <div class="script-tag">backfill_steps_protocols_io.py</div>
+    </div>
+
+    <div class="source-card red">
+      <span class="badge">⚠ Blocked</span>
+      <h3>bio-protocol.org</h3>
+      <p>Peer-reviewed CC-BY journal<br>SafeLine WAF → HTTP 468<br>Server-side requests blocked</p>
+      <div class="stat">0 <span>/ 4,944 in sitemap</span></div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+      <div class="script-tag">fetch_bio_protocol.py</div>
+    </div>
+
+  </div>
+
+  <div class="arrow-down"><div class="tip"></div></div>
+
+  <!-- LICENSE GATE -->
+  <div class="stage gate">
+    <div class="stage-header">
+      <span style="font-size:18px;">🔒</span>
+      <h2>License Gate — Hard Filter (per protocol, at fetch time)</h2>
+      <span class="script-tag" style="margin-left:auto;">CrossRef api.crossref.org/works/{doi}</span>
+    </div>
+    <p>Every protocol is individually verified via CrossRef DOI registry before being saved. No license is assumed. PMC uses NISO ALI &lt;license_ref&gt; XML element.</p>
+    <div class="gate-rules">
+      <div class="gate-rule pass">
+        ✅ KEEP<br>
+        creativecommons.org/licenses/<strong>by</strong>/4.0/<br>
+        Plain CC-BY — commercial ✓ · derivatives ✓
+      </div>
+      <div class="gate-rule fail">
+        ❌ DISCARD<br>
+        /by-<strong>nc</strong>/ · /by-<strong>sa</strong>/ · /by-<strong>nd</strong>/<br>
+        No DOI · CrossRef 404 · unverifiable
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="tip"></div></div>
+
+  <!-- LAYER 1b: BACKFILL -->
+  <div class="stage active">
+    <div class="stage-header">
+      <span class="layer-num">LAYER 1b</span>
+      <h2>Steps + Quality Backfill</h2>
+      <span class="tag-running">Running</span>
+      <span class="script-tag" style="margin-left:auto;">backfill_steps_protocols_io.py</span>
+    </div>
+    <p>Fetch script (search endpoint) does not return steps. This script hits the individual detail endpoint for every saved protocol and updates in-place.</p>
+    <div class="pills" style="margin-top:12px;">
+      <span class="pill hi">steps_raw[ ]</span>
+      <span class="pill hi">stats.views</span>
+      <span class="pill hi">stats.runs</span>
+      <span class="pill hi">stats.bookmarks</span>
+      <span class="pill hi">stats.forks</span>
+      <span class="pill hi">peer_reviewed</span>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="tip"></div></div>
+
+  <!-- LAYER 2 -->
+  <div class="stage">
+    <div class="stage-header">
+      <span class="layer-num">LAYER 2</span>
+      <h2>Normalise</h2>
+      <span class="tag-waiting">Waiting for backfill</span>
+      <span class="script-tag" style="margin-left:auto;">normalise.py</span>
+    </div>
+    <p>Gemini 2.5-flash converts raw source JSON → canonical Labi schema. ~$3 total for 6,600 protocols. Regex fallback if no API key.</p>
+    <div class="pills">
+      <span class="pill hi">title</span>
+      <span class="pill hi">author</span>
+      <span class="pill hi">category</span>
+      <span class="pill hi">estimated_time_mins</span>
+      <span class="pill">materials[ ]</span>
+      <span class="pill">steps[ ] → {step_id, instruction, is_critical, timers[ ]}</span>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="tip"></div></div>
+
+  <!-- LAYER 3 -->
+  <div class="stage">
+    <div class="stage-header">
+      <span class="layer-num">LAYER 3</span>
+      <h2>Version Grouping + Quality Ranking</h2>
+      <span class="tag-waiting">Waiting</span>
+      <span class="script-tag" style="margin-left:auto;">merge_and_dedup.py</span>
+    </div>
+    <p>MinHash LSH (128 perms) groups similar protocols as versions instead of deleting them. Only near-identical content (≥0.95 Jaccard) is treated as a true duplicate. Protocols between 0.70–0.95 similarity become version families.</p>
+
+    <div style="display:flex; gap:12px; margin-top:14px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px; background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:12px 14px;">
+        <div style="font-size:11px; color:#8b949e; margin-bottom:6px; font-weight:600;">JACCARD THRESHOLDS</div>
+        <div style="font-size:12px; font-family:monospace; line-height:2;">
+          <span style="color:#f85149;">≥ 0.95</span> → true duplicate → drop one<br>
+          <span style="color:#d29922;">0.70–0.95</span> → same family → version group<br>
+          <span style="color:#3fb950;">&lt; 0.70</span> → different protocol → keep both
+        </div>
+      </div>
+
+      <div style="flex:1; min-width:200px;">
+        <div class="score-box">
+          <div style="color:#c9d1d9; font-weight:600; margin-bottom:4px; font-family:sans-serif; font-size:12px;">QUALITY SCORE (determines parent)</div>
+          quality = <span class="highlight">(runs × 3)</span><br>
+                  + <span class="highlight">(peer_reviewed × 50)</span><br>
+                  + <span class="highlight">bookmarks</span><br>
+                  + <span class="highlight">(views / 100)</span><br>
+                  + <span class="highlight">(steps × 0.5)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Version group example -->
+    <div class="version-box">
+      <div class="vb-title">Example: "TRIzol RNA Extraction" version group</div>
+      <div class="version-row">
+        <span class="vtag parent">PARENT</span>
+        <span class="vname">Rio DC, Ares M Jr — protocols.io</span>
+        <span class="vscore">score: 147</span>
+        <span class="vpeer">✅ peer reviewed</span>
+      </div>
+      <div class="version-row">
+        <span class="vtag v2">v2</span>
+        <span class="vname">Chomczynski P — protocols.io</span>
+        <span class="vscore">score: 84</span>
+        <span>doi: 10.17504/xyz</span>
+      </div>
+      <div class="version-row">
+        <span class="vtag v2">v3</span>
+        <span class="vname">Nature Protocols — PubMed Central</span>
+        <span class="vscore">score: 61</span>
+        <span>doi: 10.1038/nprot.xxx</span>
+      </div>
+    </div>
+
+    <div class="pills" style="margin-top:14px;">
+      <span class="pill hi">parent_protocol_id</span>
+      <span class="pill hi">version_count</span>
+      <span class="pill hi">quality_score</span>
+      <span class="pill hi">doi</span>
+      <span class="pill hi">author</span>
+      <span class="pill hi">source_url</span>
+      <span class="pill">peer_reviewed</span>
+      <span class="pill">stats{ views, runs, bookmarks, forks }</span>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="tip"></div></div>
+
+  <!-- LAYER 4 -->
+  <div class="stage">
+    <div class="stage-header">
+      <span class="layer-num">LAYER 4</span>
+      <h2>Index + Count Update + Publish</h2>
+      <span class="tag-waiting">Waiting</span>
+      <span class="script-tag" style="margin-left:auto;">pipeline.py --layer 4</span>
+    </div>
+    <p>Builds <span class="mono" style="color:#58a6ff;">search_index.json</span> (compact metadata for offline search), runs <span class="mono" style="color:#58a6ff;">update_protocol_count.py</span> to patch live count into the marketing site, and copies final JSONs to <span class="mono" style="color:#58a6ff;">protocols/</span> for CDN.</p>
+  </div>
+
+  <div class="arrow-down"><div class="tip"></div></div>
+
+  <!-- DELIVERY -->
+  <div class="output-row">
+    <div class="output-card">
+      <span class="icon">⚡</span>
+      <h3>search_index.json</h3>
+      <p>Bundled Flutter asset. Loaded at app start. Instant offline search — no network call. Sorted by quality_score descending.</p>
+    </div>
+    <div class="output-card">
+      <span class="icon">🌐</span>
+      <h3>jsDelivr CDN</h3>
+      <p>Individual protocol JSONs fetched on demand. Includes doi, author, source_url, all versions. Cached in Isar on-device.</p>
+      <p style="margin-top:8px; font-family:monospace; font-size:11px; color:#58a6ff;">cdn.jsdelivr.net/gh/itsgurmailsingh-png/<br>labi-protocols@main/protocols/{id}.json</p>
+    </div>
+    <div class="output-card">
+      <span class="icon">📱</span>
+      <h3>Flutter App</h3>
+      <p>Best version shown by default. "X versions" button reveals version drawer with author, doi, run count per version. User picks to match PI's protocol.</p>
+    </div>
+    <div class="output-card">
+      <span class="icon">🌍</span>
+      <h3>Marketing Site</h3>
+      <p>protocols.html auto-patched with real deduped count after every Layer 4 run via update_protocol_count.py.</p>
+    </div>
+  </div>
+
+  <p style="text-align:center; color:#8b949e; font-size:12px; margin-top:32px;">
+    Last updated: June 16 2026 · 6,599 CC-BY verified raw protocols · backfill running
+  </p>
+
+</div>
+</body>
+</html>

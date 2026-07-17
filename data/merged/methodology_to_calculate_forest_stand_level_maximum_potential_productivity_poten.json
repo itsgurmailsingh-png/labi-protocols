@@ -1,0 +1,377 @@
+{
+  "protocol_id": "methodology_to_calculate_forest_stand_level_maximum_potential_productivity_poten",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Methodology to calculate forest stand level maximum potential productivity, potential achievable productivity and ecosystem fit",
+  "author": "Klock, Vogt, et al.",
+  "doi": "10.1016/j.mex.2022.101812",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9418551/",
+  "citation": "10.1016/j.mex.2022.101812",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 4.0,
+  "category": "Bioinformatics",
+  "estimated_time_mins": null,
+  "materials": [
+    "global proximal-sensed solar radiation and temperature data, (",
+    "identification of productivity groups using unsupervised clustering, ("
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Collect field and remote‑sensing data",
+      "instruction": "Gather (1) direct field measures of total net primary productivity (tNppobs) and site‑level environmental conditions (climatic, edaphic, biotic), (2) high‑resolution average monthly/daily temperature and solar radiation rasters for each site’s geographic coordinates (use buffer zones if point data are unavailable), and (3) the average annual atmospheric CO₂ concentration for the year of data collection (1981‑2011) from the Mauna Loa Observatory (https://www.sealevel.info/co2.html).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Load raster data and extract site values",
+      "instruction": "In R, load the required packages, read the CSV of site coordinates, create raster stacks for temperature and solar radiation files, rename layers to month names, extract raster values at each site, convert to data frames, and set all negative values to NA.",
+      "substeps": [
+        {
+          "instruction": "require(raster); require(rockchalk); require(dplyr)",
+          "title": ""
+        },
+        {
+          "instruction": "data <- read.csv(\"your_file.csv\")",
+          "title": ""
+        },
+        {
+          "instruction": "samples <- data.frame(X = data$X, Y = data$Y)",
+          "title": ""
+        },
+        {
+          "instruction": "mean.temp.files <- list.files(path = \"\", pattern = \"\\.tif$\", full.names = TRUE)",
+          "title": ""
+        },
+        {
+          "instruction": "meantemp <- stack(mean.temp.files)",
+          "title": ""
+        },
+        {
+          "instruction": "month <- c(\"Jan\",\"Feb\",\"Mar\",\"Apr\",\"May\",\"Jun\",\"Jul\",\"Aug\",\"Sep\",\"Oct\",\"Nov\",\"Dec\")",
+          "title": ""
+        },
+        {
+          "instruction": "names(meantemp) <- month",
+          "title": ""
+        },
+        {
+          "instruction": "meantemp.data <- extract(meantemp, samples)",
+          "title": ""
+        },
+        {
+          "instruction": "x <- as.data.frame(meantemp.data)",
+          "title": ""
+        },
+        {
+          "instruction": "x[x < 0] <- NA",
+          "title": ""
+        },
+        {
+          "instruction": "srad.files <- list.files(path = \"\", pattern = \"\\.tif$\", full.names = TRUE)",
+          "title": ""
+        },
+        {
+          "instruction": "srad <- stack(srad.files)",
+          "title": ""
+        },
+        {
+          "instruction": "month.srad <- c(\"Jan1\",\"Feb1\",\"Mar1\",\"Apr1\",\"May1\",\"Jun1\",\"Jul1\",\"Aug1\",\"Sep1\",\"Oct1\",\"Nov1\",\"Dec1\")",
+          "title": ""
+        },
+        {
+          "instruction": "names(srad) <- month.srad",
+          "title": ""
+        },
+        {
+          "instruction": "srad.data <- extract(srad, samples)",
+          "title": ""
+        },
+        {
+          "instruction": "srad.data <- as.data.frame(srad.data)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Determine growing season metrics",
+      "instruction": "Combine temperature and solar data, identify months with mean temperature > 0 °C (growing season), compute the number of grow days per month, and calculate seasonal averages of temperature and solar radiation.",
+      "substeps": [
+        {
+          "instruction": "tempsol <- data.frame(x, srad.data)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowTemp <- rowMeans(tempsol[ , month], na.rm = TRUE)   # mean temperature of growing season",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowSolar <- rowMeans(tempsol[ , month.srad], na.rm = TRUE)   # mean solar radiation of growing season",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysJan <- ifelse(is.na(tempsol$Jan1), 0, 31)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysFeb <- ifelse(is.na(tempsol$Feb1), 0, 28)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysMar <- ifelse(is.na(tempsol$Mar1), 0, 31)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysApr <- ifelse(is.na(tempsol$Apr1), 0, 30)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysMay <- ifelse(is.na(tempsol$May1), 0, 31)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysJun <- ifelse(is.na(tempsol$Jun1), 0, 30)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysJul <- ifelse(is.na(tempsol$Jul1), 0, 31)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysAug <- ifelse(is.na(tempsol$Aug1), 0, 31)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysSep <- ifelse(is.na(tempsol$Sep1), 0, 30)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysOct <- ifelse(is.na(tempsol$Oct1), 0, 31)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysNov <- ifelse(is.na(tempsol$Nov1), 0, 30)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDaysDec <- ifelse(is.na(tempsol$Dec1), 0, 31)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$GrowDays <- rowSums(tempsol[ , grep(\"GrowDays\", names(tempsol))])   # total growing days",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Define physiological constants",
+      "instruction": "Set the model parameters used in all subsequent calculations.",
+      "substeps": [
+        {
+          "instruction": "R <- 0.008314   # kJ mol⁻¹ K⁻¹ (molar gas constant)",
+          "title": ""
+        },
+        {
+          "instruction": "K <- 18.2       # MJ kg⁻¹, inverse specific energy of plant biomass",
+          "title": ""
+        },
+        {
+          "instruction": "Ca <- 400       # ppm, standard atmospheric CO₂ concentration",
+          "title": ""
+        },
+        {
+          "instruction": "Ci <- Ca * 0.7  # = 280 ppm, intercellular CO₂ concentration",
+          "title": ""
+        },
+        {
+          "instruction": "beta <- 0.45    # fraction of absorbed quanta reaching PSII",
+          "title": ""
+        },
+        {
+          "instruction": "alpha <- 0.9    # interception efficiency εi (canopy absorbs 90% of PAR)",
+          "title": ""
+        },
+        {
+          "instruction": "Ei <- 0.9       # same as α for use in tNpptmax equation",
+          "title": ""
+        },
+        {
+          "instruction": "PAR_frac <- 0.45   # PAR is 45% of total solar radiation",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Calculate photosynthetic parameters",
+      "instruction": "Using the growing‑season temperature (Gt) and the constants above, compute the photorespiration compensation point (γ), the rubisco‑limited carboxylation rate (Wi), net CO₂ uptake (A), and the conversion efficiency (Ec).",
+      "substeps": [
+        {
+          "instruction": "tempsol$gamma <- exp(19.02 - 37.83 / (R * (tempsol$GrowTemp + 273.15)))",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$Wi <- Ci / (4.5 * Ci + 10.5 * tempsol$gamma)",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$A <- (1 - tempsol$gamma / Ci) * tempsol$Wi",
+          "title": ""
+        },
+        {
+          "instruction": "tempsol$Ec <- tempsol$A * beta * alpha",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Derive theoretical maximum NPP (tNpptmax)",
+      "instruction": "Combine seasonal solar radiation, growing‑season length, and physiological efficiencies to obtain the site‑specific theoretical maximum net primary productivity.",
+      "substeps": [
+        {
+          "instruction": "tempsol$tNpptmax <- tempsol$GrowSolar * tempsol$GrowDays * PAR_frac * Ei * tempsol$Ec * K   # units conversion to Mg ha⁻¹ yr⁻¹ applied as needed",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Calculate Ecosystem Fit (eFit)",
+      "instruction": "Compute the percentage of observed productivity relative to the theoretical maximum.",
+      "substeps": [
+        {
+          "instruction": "tempsol$eFit <- (tempsol$tNppobs / tempsol$tNpptmax) * 100   # percent eFit",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Optional: Random Forest analysis and validation",
+      "instruction": "If desired, model the relationship between eFit and environmental variables using Random Forest and validate the results.",
+      "substeps": [
+        {
+          "instruction": "library(randomForest); library(randomForestSRC); library(caret); library(pdp)",
+          "title": ""
+        },
+        {
+          "instruction": "# Fit Random Forest regression",
+          "title": ""
+        },
+        {
+          "instruction": "rf_model <- randomForest(eFit ~ ., data = tempsol[, c('eFit','env1','env2',... )])",
+          "title": ""
+        },
+        {
+          "instruction": "# Test normality of residuals",
+          "title": ""
+        },
+        {
+          "instruction": "shapiro.test(rf_model$residuals)",
+          "title": ""
+        },
+        {
+          "instruction": "# Evaluate significance (p < 0.05) and variable importance",
+          "title": ""
+        },
+        {
+          "instruction": "importance(rf_model)",
+          "title": ""
+        },
+        {
+          "instruction": "# Validate with Pearson correlation",
+          "title": ""
+        },
+        {
+          "instruction": "cor(tempsol$eFit, predict(rf_model))",
+          "title": ""
+        },
+        {
+          "instruction": "# Perform clustering (PAM) and t‑SNE for visualization as described in the manuscript",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC9418551/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9418551/",
+      "caption": "",
+      "bytes": 51134,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9418551/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC9418551/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9418551/",
+      "caption": "",
+      "bytes": 90001,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9418551/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC9418551/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9418551/",
+      "caption": "",
+      "bytes": 144440,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9418551/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC9418551/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9418551/",
+      "caption": "",
+      "bytes": 110364,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9418551/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC9418551/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9418551/",
+      "caption": "",
+      "bytes": 82824,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9418551/gr4.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 29,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

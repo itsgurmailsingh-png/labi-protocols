@@ -14,9 +14,404 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "The Taproot organ represents the thick roots and crown. These are the primary reserve organs that can supply sugars and N to support shoot growth, especially early in spring and following defoliations. In the model, this is accomplished by assuming that taproots contain a sizeable fraction of non-structural biomass which can be made mobilised to support new growth via re-translocation. The amount of data available to parameterise how much reserves are stored in plantain taproots is limited. Published data suggest that sugars plus fructans make up 4–11 % of taproots’ biomass in plantain [46], compared to 15–35 % in chicory, which is consistent with plantain forage having much smaller taproots [15]. In the PlantainForage model, the parameters related to re-translocation (StructuralFraction, DMRetranslocationFactor, and NRetranslocationFactor) were estimated to reflect those findings (0.6, 0.1, and 0.1; respectively). However, these values should be updated when more data become available. Furthermore, an additional factor, a function of photoperiod (Fig. 4), is used to limit re-translocation to the period in which the plants are actively growing (spring to early autumn).Fig. 4Factor describing the relative effect of photoperiod used in the PlantainForage model to modify re-translocation of biomass from taproots.Fig. 4"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Specifications table",
+      "instruction": "Subject areaAgricultural and Biological SciencesMore specific subject areaCrop growth modelling, forage production and animal feed, also related to Environmental Science, on water quality and greenhouse gases emission.Name of your methodPlantainForage ModelName and reference of original methodN/AResource availabilityAPSIM simulation modelAPSIM documentationValidation simulation",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Overview of model implementation",
+      "instruction": "All development was made using APSIM Next Generation (release number 7650.0, Jan 2025, is the reference for this work). APSIM is an open-source modelling framework composed of several sub-models [26,27] that describe a range of processes in the soil and plants, and it can simulate a wide variety of farming systems (full description and documentation of the framework can be found on www.apsim.info; the code and test simulations can be accessed via github.com/APSIMInitiative/ApsimX). This work focuses on the description of the plant growth model and the setup of validation tests. The description and parameterisation of other sub-models (e.g. soil water balance) are given briefly and only where necessary.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Overview of model implementation",
+      "instruction": "The PlantainForage model was built using the Plant Modelling Framework (PMF) [28], aiming to simulate the growth of a plantain forage crop, either as a monoculture or in multi-species swards. The model focuses primarily on describing plant growth from sowing to maturity and regrowth after defoliations. It considers only a simplified account of the reproductive phase, without an explicit consideration of flower development and seed production (these may be included in future releases). As with any model built using PMF, the PlantainForage model is composed of sub-models describing the various organs and phenology phases of plantain (Fig. 1). It is important to note that the model aims to describe the average behaviour of the plant population, without explicitly including population dynamics. This results in a somewhat fuzzy definition of the various development stages and the partition of biomass between the various organs. Similar to most forages, a population of plantain is likely to contain young and mature plants, as well as having some plants with mature seeds while others are just developing flower stalks. This provides further justification for a simplified reproductive phase where stalks, flowers, and seed are all developing simultaneously. Furthermore, the model describes a perennial crop, with phenology re-setting to the vegetative stage at the end of the reproductive phase. In reality, plantain persistence is usually observed to be limited in grazing pasture systems due to competition with other forages, with population declining sharply after about two-three years [29,30]. Given the abundance of seed production in plantain, some level of natural re-seeding is likely to occur [31]. However, in grass-dominant swards this appears to be insufficient to maintain a stable level of plantain in the sward [30,32], with farmers actively over- or under-sowing the swards regularly to compensate.Fig. 1Basic schematics of the various phenological phases and organs that comprise the PlantainForage model. The progression between the four phenological phases (germinating, emerging, vegetative and reproductive) are controlled by ThermalTime and Photoperiod. The GotoPhase represents a reset to the vegetative phase at the end of the reproductive phase. The allocation of newly photosynthesised or re-translocated biomass (C and N) between the five organs (Leaf, Stem, Inflorescence, Taproot, and Roots) is controlled by the organ Arbitrator.Fig. 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Phenology",
+      "instruction": "Both thermal time and photoperiod are used to simulate the progression through phenological phases of plantain. From sowing, the model uses a simple set of phases to account for germination and emergence stages, after that the model cycles between a vegetative and a reproductive phase. The switch between vegetative and reproductive phases is controlled by the accumulation of days with long sunlight [13,33,34], and the model assumes the reverse to end the reproductive phase, at which point the model resets to the vegetative phase.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Phenology",
+      "instruction": "The thermal time, or cumulative growing degrees days, is calculated from the daily average temperature using three cardinal temperatures: minimum, maximum, and optimum (Fig. 2). Crop development accelerates as temperature increases from minimum to optimum and then slows down, ceasing completely at maximum temperature. There is very little information about the temperature thresholds for plantain forage. The minimum temperature seems to be particularly variable, as one of the traits that varies among cultivars is winter activity [35]. Based on data for wild varieties as well as similar species (Plantago asiatica), it is possible to infer that the minimum temperature varies between 0 and 14 °C, while optimum temperature sits just above 20 °C [36,37]. Plantain forage is reported as tolerant to high temperatures [2] and will outgrow ryegrass over summer [20]; the available data suggest that maximum temperature is above 30, perhaps as high as 38 °C in some varieties [36,37]. Since these values are not specific for cultivars of forage plantain currently used in New Zealand, the uncertainty surrounding these parameters represents a major knowledge gap and hinders the use of models for identifying the best cultivars and management strategies for different locations.Fig. 2Daily thermal time computed as a function of the average air temperature used in the PlantainForage model.Fig. 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Phenology",
+      "instruction": "Following the conventions of PMF, germination in the PlantainForage model is assumed to occur one day after sowing, provided that the soil moisture is greater than zero. Variations between stands are solely accounted for in the emergence phase, following germination. The model assumes a 100 % germination rate. Typical reported values for germination rates vary between 75 and 95 % [14,21], therefore the user must adjust the sowing rate to achieve the correct plant density. Plantain forage has small seeds and to ensure even emergence, it is recommended that sowing depth should be <10 mm [38,39]; seeds may remain dormant for years deeper in the soil. As variations in germination rate are not explicitly simulated by the PlantainForage model, the sowing depth will only affect timing of emergence in the current version. This is controlled by the elongation rate, which is assumed to be a function of thermal time (Eq. (1)). The elongation rate for seedlings was parameterised based on typical values for forage crops as no specific data are available for plantain.(1)τt,emerg=15+10dSwhere τt,emerg is the accumulated thermal time ( °Cd) required to complete the emergence phase and dS is the sowing depth (mm).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Phenology",
+      "instruction": "The vegetative phase begins immediately after the plants emerge from the ground and is also triggered after the end of the reproductive phase (phenology reset). During this phase, only the vegetative organs (roots, taproots, and leaves) are allowed to grow. A period under long daylight triggers the end of the vegetative and the start of the reproductive phase. The literature does not provide a clear indication of the exact photoperiod required to trigger the phase change, but it is evident that it must be greater than the period of darkness (14–16 h have been used to induce flowering in growth chambers) and last for a few weeks [33,34,40,41]. Typically, inflorescence stalks start to develop in mid to late spring [3,41,42].The base PlantainForage model uses the accumulation of days in which the photoperiod is greater than 11.5 h to trigger the end of the vegetative phase. Different cultivars may have different requirements, broadly classified as early or late flowering [41].",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Phenology",
+      "instruction": "The reproductive phase is when the plants are actively growing reproductive organs (stalks, inflorescence, and seed). Flower stages and seeds development are not explicitly described in the current model, which defines only a generic ‘inflorescence’ organ. Reports indicate that seed ripening occurs approximately 8–10 weeks after flowering, with commercial cultivars closer to the low end of the range [3,13]. The length of the reproductive phase appears to be related to the onset of flowering [41]. However, flowering generally continues throughout the summer into autumn and seems to be curtailed only by frosts and/or short days [40]. In the model, photoperiod is used to define the end of the reproductive phase, following a similar approach used to start it. With the accumulation of short days (days with daylight <11.5 h) used to trigger the end of the reproductive phase. This approach also ensures a phenology reset even in warmer climates. The model also uses the variation of photoperiod throughout the year to control the partitioning of new biomass into various organs, as described in a later section.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Morphology",
+      "instruction": "The PlantainForage model considers five organs to describe the plant: leaves, stems (or stalks), inflorescence, taproot, and roots. As with other models built using PMF, each organ has a biomass component that holds the amount of carbon (C) and nitrogen (N) in three pools, structural, non-structural, and metabolic [28]. New biomass is allocated to each organ based on its relative demands, aiming to maintain specific biomass ratios between organs. These ratios can vary depending on phenology, with more biomass being allocated to above-ground organs (shoot) during the reproductive phase. The primary source of C biomass is photosynthesis, with some re-translocation from taproots also possible. The supply of N encompasses uptake from the soil and re-translocation from senescing organs.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Morphology",
+      "instruction": "The canopy is basically composed of the Leaf organ. This sub-model has parameters to define the conversion of biomass into leaf area (specific leaf area) as well as plant height. The height and leaf area indices (for both live and dead material) are passed, along with the light interception coefficient, onto MicroClimate (see apsim.info documentation [43]). This is the model that calculates the actual light interception for plantain, and partitions the light resource among any other competing species in the sward. The MicroClimate model also computes water demand for plantain and again partitions the available water among the various species. The current model assumes a fixed specific leaf area (21 m2/kg) to convert biomass into leaf area [15,44,45], ignoring variations due to environmental conditions (e.g., light or N availability). A simple function derived from data collected in a New Zealand trial is used to estimate plant height from leaf development (Fig. 3) [21]. This links height with leaf biomass and ensures that plant height is reset whenever a defoliation event happens. Variations due to cultivar or environmental factors are not currently considered.Fig. 3Plant height as function of leaf biomass used in the PlantainForage model, based on [21].Fig. 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Morphology",
+      "instruction": "The Stem organ represents all the stems/stalks in the plant, without distinction between developmental stage. Stems only develop during the reproductive phase to support the inflorescence and have no specific function within the model. The Inflorescence organ accounts for all the reproductive parts of the plant (flowers, pods, and seed). The model does not distinguish between the age or placement of inflorescence in the canopy. Seeds are not explicitly simulated in the current version. Palatability of stalks and inflorescence is generally low and grazing animals will avoid them [19,20]. In APSIM, this distinction is not part of the plantain plant model. Any selective defoliation must be set up in the defoliation agent (e.g., animal models or manager scripts).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Morphology",
+      "instruction": "The Taproot organ represents the thick roots and crown. These are the primary reserve organs that can supply sugars and N to support shoot growth, especially early in spring and following defoliations. In the model, this is accomplished by assuming that taproots contain a sizeable fraction of non-structural biomass which can be made mobilised to support new growth via re-translocation. The amount of data available to parameterise how much reserves are stored in plantain taproots is limited. Published data suggest that sugars plus fructans make up 4–11 % of taproots’ biomass in plantain [46], compared to 15–35 % in chicory, which is consistent with plantain forage having much smaller taproots [15]. In the PlantainForage model, the parameters related to re-translocation (StructuralFraction, DMRetranslocationFactor, and NRetranslocationFactor) were estimated to reflect those findings (0.6, 0.1, and 0.1; respectively). However, these values should be updated when more data become available. Furthermore, an additional factor, a function of photoperiod (Fig. 4), is used to limit re-translocation to the period in which the plants are actively growing (spring to early autumn).Fig. 4Factor describing the relative effect of photoperiod used in the PlantainForage model to modify re-translocation of biomass from taproots.Fig. 4",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Morphology",
+      "instruction": "The Root organ represents all the fine roots of the plant. This organ is distributed over the soil profile, with specific demands and biomass partition for each soil layer in the simulation, down to the rooting depth. Most plantain roots are concentrated near the surface, but can extend down to a depth of one metre or more. The growth pattern also shows a lot of architectural variation [2,16,47,48]. The PlantainForage model distributes root biomass down to one metre, provided that soil conditions permit (setting the soil parameter ‘XF’ to zero will prevent roots growing in that layer [49]). A specific root length of 120 m/g is used to convert biomass into root length [38,48,50]. Water and N uptake is computed based on the distribution of roots in each soil layer. The uptake process is mediated by the SoilArbitrator model (see apsim.info documentation), which considers the demand from the species in the sward with the supply from the soil to define the actual amounts taken up by each species in the simulation (if there are more than one).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Biomass accumulation and translocation",
+      "instruction": "Biomass increases as a function of photosynthesis, which is simulated exclusively by the leaf organ in the PlantainForage model. Data for photosynthesis in forage plantain are very sparse and data from studies on wild varieties had to be used to support parameterisation. Reported values for CO2 assimilation rates in plantain are generally consistent [44,51,52] and follow a classic relationship with light intensity (directly proportional) as well with N concentration in the leaves (inversely proportional). Reported values of photosynthetic rate indicate that these are similar or slightly higher in plantain forage when compared to other leafy forages like chicory [51,52]. PMF uses radiation use efficiency (RUE) values to calculate the daily photosynthetic rate. Based on published data, the total RUE for plantain was estimated to be around 2.0 g DM/MJ [44,53].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Biomass accumulation and translocation",
+      "instruction": "The current model considers that photosynthesis and biomass turnover are affected by several environmental factors, such as temperature and water availability. Due to limited information available specific to plantain, generic responses are used (Figs. 5 and 6). Plantain is ubiquitous in meadows in subtropical and temperate climates around the world, and it is generally considered to be tolerant to high temperatures, but not to cold [1,2,53,54]. The growth pattern of forage plantain can vary significantly among cultivars, with some being selected for winter growth and still outperforming temperate grasses in summer [2,20,35]. However, survivability in harsh winters in the USA was found to be low [40,54]. Forage plantain is also often mentioned as a drought-tolerant species [2,46,55], but less so than deep-rooted species such as chicory or red clover. The use of reserves from the taproots may be a key mechanism for plantain’s drought resistance, as is the case for many herbs [46,52]. Sensitivity to nitrogen concentration in leaves follows a simple function similar to other plants in APSIM, while for vapour pressure deficit (VPD), a simple function is adapted from a comprehensive review on plant responses to VPD [56].Fig. 5Relative responses of photosynthesis to several environmental factors in the PlantainForage model, where a value of one represents unrestricted growth, or at a reference value for the case of CO2 response. In (A) FCO2 is the response factor to atmospheric CO2 (reference at 350 ppm)[57]; in (B) FN is the response to N concentration in leaves (relative to optimum); in (C) FT is the response to the weighted mean air temperature (0.75Tmax+0.25Tmin); in (D) FW is the response to water supply, as a function of the ratio between demand and supply; and in (E) FVPD is the response factor to vapour pressure deficit.Fig. 5Fig. 6Effects of environmental factors on the senescence and turnover of plantain organs. These vary from zero (no turnover) and can go beyond one (at reference turnover rate). In (A) FPheno is the relative turnover rate as function of phenology state for leaves (solid line) and other above-ground organs (dashed line); in (B) FCover is the effect of crop cover on leaves; in (C) and (D) FT and FW are the effects of air temperature and soil water availability for above-ground organs; in (E) and (F) FT and FW are the effects of temperature and soil moisture status (where zero represents wilting point, one is field capacity and two means soil moisture at saturation) on the relative turnover of below-ground organs.Fig. 6",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Biomass accumulation and translocation",
+      "instruction": "The sparse available data suggests that plantain has a relatively slow senescence rate compared to other meadow herbs [58,59]. For the model, reference values were defined to reproduce the general pattern from observations, but this is an area that will need further investigation. The reference senescence rates (0.005 for leaf, 0.1 for stems, 0.25 for inflorescence, 0.005 for taproots, and 0.01 for roots) are adjusted using a phenology factor (Fig. 6A). This accounts for seasonal variations and growth stage, with older plants having a higher turnover rate. The rate is further adjusted according to environmental factors (Fig. 6), which are defined using generic responses to the stand condition (i.e. cover) and the environment. Biomass turnover is assumed to increase with cover, particularly at high levels, due to resource competition (currently, this is valid only within the PlantainForage model and will not account for inter-species competition). For environmental factors (temperature and soil moisture), general responses are also assumed, with variations for above- and below-ground organs. The model assumes that a large water deficit can accelerate senescence of leaves and other above-ground organs, but will have a negligible effect on below-ground senescence. On the other hand, excess moisture is considered to have a detrimental effect for below-ground organs, accelerating senescence, but above-ground organs are not affected. The sensitivity of plantain to conditions with either very low moisture or water logging is not clear, although the latter has been reported to be detrimental [60] (Plantago major seems to be more tolerant to water logging than Plantago lanceolata [1]). These responses require further verification and should be updated in the future as additional data become available.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Biomass accumulation and translocation",
+      "instruction": "It is worth noting that any below-ground biomass that senesces is immediately added to the soil organic matter pool, whereas above-ground organs retain dead material for a while and detach it into the surface organic matter pool over time. The detachment rate is modified by a factor that is a function of soil moisture (Fig. 7), which serves as a proxy to the overall system moisture. This implies that the detachment of plant material occurs slower in dry conditions due to the reduced biological activity.Fig. 7Effects of soil moisture status (where zero represents wilting point, one is field capacity and two means soil moisture at saturation) on the relative detachment rate for material of above-ground organs (solid line for leaves and dashed lines for the other above-ground organs).Fig. 7",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Biomass partitioning",
+      "instruction": "The allocation of new biomass (growth) to the various organs in the PlantainForage model is regulated using ratios between the biomass of various organs, or group of organs (e.g. Shoot:Roots, Stem:Leaf) [61,62]. This approach accounts for the plasticity in biomass allocation in plants, which are particularly important after defoliation when the biomass of some organs is mostly removed from the plant. In this case, the plant will prioritise the re-growth of some organs (e.g. leaves) at the expense of others (i.e. roots). This implies that the plants have 'target' ratios that they attempt to maintain, and these can vary with phenology stage and resource availability. The validity and mechanisms regulating biomass ratios is still debated by physiologists, but they are very useful for modelling purposes [61,63]. In the PlantainForage model, this approach takes into consideration the target (rtarget) and the current ratio (rcurrent) to determine the proportion of new growth to be allocated to pairs of organs (or group or organs). To illustrate how biomass allocation is computed, the shoot-to-root ratio is used as an example here. The proportion of biomass to allocate above-ground organs, or shoot (pShoot), is computed using:(2)pShoot=rSR,target2rSR,target2+rSR,currentwhere rSR,target is shoot-to-root ratio targeted by the model, its value start at 2.5 reaching a potential value of 3.5 during the reproductive phase (Fig. 8), and reverting late in autumn. Note that these values may vary in the future with implementation of new cultivars or other model adjusts. rSR,current represents the ratio of current biomass in above-ground organs (Leaf, Stem, and Inflorescence) to those below-ground (Taproot and Root).Fig. 8Variation in target shoot-to-root ratio used in the PlantainForage model during the reproductive phase to allocate new biomass into above- and below-ground organs (A). The actual allocation fractions change depending on the current biomass ratio (see Eq. (2)), the right-hand graph (B) shows an example when the current ratio is fixed at 3.5.Fig. 8",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Biomass partitioning",
+      "instruction": "Further partitioning of newly grown biomass into each organ is similarly determined using ratios between Leaf and reproductive organs (Stem and Inflorescence), and then between Stem and Inflorescence (Fig. 9). Photoperiod and the variation in photoperiod over the season are then used to modulate the target ratios such that the model can capture the observed seasonal variation in biomass allocation. This simple approach ensures stem growth is prioritised early in the reproductive phase (when photoperiod is increasing) while flower and seed development are favoured later on (when photoperiod starts to decrease).Fig. 9Target ratios of biomass between reproductive organs (Stem and Inflorescence) and Leaf (A), and between Inflorescence and Stem (C) that are used in the PlantainForage model during the reproductive phase to allocate new biomass into each above-ground organ. The actual allocation fractions change depending on the current biomass ratios (similar to Eq. (2)). The right-hand graphs show examples when this ratio is equal to 0.25 for reproductive organs and Leaf (B) and 1.0 for Inflorescence and Stem (D).Fig. 9",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Biomass partitioning",
+      "instruction": "The allocation of biomass to below-ground organs also follows a similar approach, with the target ratio between Taproot and Root varying in response to changes in photoperiod. This ensures that allocation prioritises taproots (build up reserves) in autumn when the photoperiod decreases (Fig. 10). The ratio is further adjusted based on plant biomass (g DM per plant) providing a compromise method ensuring that root growth is prioritised in smaller, young, plants, with taproot development becoming more significant in larger, older plants.Fig. 10Variations in target biomass ratio between Taproot and Root used in the PlantainForage model to allocate new growth biomass into below-ground organs. The graphs show the relative variations as a function of photoperiod (A) and plant biomass (C). The allocation fractions used in the model are computed using the current biomass ratio (similar to Eq. (2)). The right-hand graph shows examples of relative allocation fractions as function of photoperiod (B) and plant biomass (D) when the current ratio is set to 0.25.Fig. 10",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Nitrogen balance",
+      "instruction": "The nitrogen content of the various plant organs is defined by three concentration thresholds (Table 1). These parameters were estimated from data collected during various trials covering different management regimes and cultivars [21,24,44,51,54,64]. Unfortunately, none of these datasets are comprehensive enough to provide definitive parameters for different varieties. Further work is needed, especially with newer cultivars and for below ground organs. In the model, plant growth is maximum when the N content of plant leaves is equal or above the critical value, and a penalty occurs if the content falls below that threshold (Fig. 5B). In conditions with high soil N, uptake can lead to the N concentration of plant organs exceeding the critical level, representing luxury uptake. This excess uptake can result in plants N content getting up to the maximum value. This luxury N content can be re-translocated and used by the plant to support growth when soil N is insufficient to meet demand. Upon senescence, the amount of nitrogen above the minimum concentration also becomes available for use during plant growth.Table 1Nitrogen (N) concentration thresholds for each organ in the PlantainForage model.Table 1OrganMinimum N (g/g)Critical N (g/g)Maximum N (g/g)Leaf0.0230.0350.050Stem0.0050.0250.025Inflorescence0.0250.0350.035Taproot0.0050.0200.020Roots0.0050.0150.015",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Defoliation",
+      "instruction": "The removal of crop biomass in the PlantainForage model follows the underlying processes in PMF. Biomass (C and N) can be removed from any organ using the RemoveBiomass command. This can be called from anyone of the auxiliary models that are available in the APSIM framework (Operations, SimpleGrazing, or Manager scripts – see apsim.info). From the PlantainForage model perspective, any defoliation is treated equally, i.e., there are no differences if the sward is mown or grazed by animals. Some variations can and often are implemented by additional actions triggered in parallel to a defoliation, such as the return of defoliated material as residues or as dung and urine. The current model assumes that phenology is not affected by defoliation, which seems to be the case in most situations in grazing systems (perhaps with the exception of very heavy defoliations). Nonetheless, PMF does allow setting the phenology stage from another sub-model in APSIM, which can be used in simulations where this is deemed necessary.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Field trials",
+      "instruction": "Validation simulations were set up in APSIM based on several field trials performed at different locations across New Zealand. These cover different climatic and edaphic conditions as well as different management. Generally, the trials have been managed as cut and carry, with only one under grazing. The management in those trials encompasses a wide range of N fertiliser applications, the presence or absence of irrigation, and variable defoliation pressure. Further details including the actual dates and amounts for irrigation, fertiliser applications, and defoliation can be found in the simulation files (available at github.com/APSIMInitiative/ApsimX/Tests/Validation/PlantainForage). A brief description of each trial is given below.FRNL-Lincoln. Trial conducted at Lincoln University Research Dairy Farm (43° 38′S, 172° 26′E), between 2014 and 2016, as part of the Forages for Reduced Nitrogen Leaching programme [65]. Plots with pure plantain stands were sown in autumn 2014 and involved six N fertiliser treatments (nominal N rates of 0, 50, 100, 200, 350 and 500 kg/ha/yr) with four replicates. The plots were irrigated and mown regularly; measurements comprised biomass yield and quality indicators (here N content is used). The site has an imperfectly-drained Pallic soil and a dry temperate climate (annual rainfall of 650 mm and daily average temperature of 12.1 °C).FRNL-Ruakura. This field trials was performed at DairyNZ's Scott Farm, in Ruakura (37° 46′S, 175° 22′E), between the spring of 2014 and 2016 [66]. This was also part of the Forages for Reduced Nitrogen Leaching programme and had the same treatments (N rates of 0, 50, 100, 200, 350 and 500 kg/ha/yr), with three replicates, and broadly similar management to the one in Lincoln, except that it was not irrigated. Biomass yield and mean N content of harvested material were recorded at each defoliation (also done by mowing). The site has a well-drained Allophanic soil and a wet temperate climate (annual rainfall of 1190 mm and daily average temperature of 13.7 °C).ScottFarmFD902. This was a defoliation trial conducted at Scott farm, Ruakura, from 2010 to 2012 by DairyNZ [21]. The study investigated the effect of cut height (which defined the rotation length) and residual height on plantain growth. Defoliations were triggered when the sward reached target heights of 150, 250, 350, and 450 mm, and the crop was cut down to heights of either 40 or 70 mm (±10 mm). Irrigation was applied in the first year only and some N fertiliser was applied over summer. Data reported from the trial include biomass yield, botanical composition (presence of weeds), and leaf size. Light interception was also measured in this trial.LincolnRDF. Field trial performed at Lincoln University Research Dairy Farm, between 2010 and 2012. The experiment had two nitrogen treatments, a low (at 125 kg N/ha/yr in five applications) and a high (at 250 kg N/ha/yr) rate, applied with the same number of split applications. Yield was determined in quadrats mown down to 45 mm every 4 weeks. After this, animals were allowed to graze the areas, aiming for a residual height of to 45 mm. This was followed by further mowing if necessary to tidy up the plots. When grazing dates coincided with the allotted N schedule, urea was then applied by hand within seven days following the grazing.MasseyDairyNo1. Part of a field trial performed at No1 Dairy Unit at Massey University in Palmerston North, New Zealand (40° 22′S, 175° 36′E) [67]. The experiment was conducted during 2011–2012 (first growing season) and 2012–2013 (second growing season). Three pasture treatments were evaluated: (i) chicory, (ii) plantain, and (iii) an herb-clover mix pasture, under two grazing frequencies; every two or four weeks. Perennial ryegrass/white clover pasture was also established and grazed to provide a benchmark. Only the data from pure plantain plots were used here. The site has a well-drained sandy soil and a temperate climate (annual rainfall of 970 mm and daily average temperature of 13.3 °C).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "Ancillary data and validation metrics",
+      "instruction": "For each of the trials, the soil type was known and a combination of published data as well as data from the New Zealand National Soil Database (ManaakiWhenua-LandcareResearch) was employed to derive the parameters needed for soil models in APSIM [49]. Daily weather data were obtained from nearby (<3 km away) weather stations (Cliflo, NIWA).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Ancillary data and validation metrics",
+      "instruction": "The model performance was analysed using a series of goodness-of-fit measures, as is standard in APSIM validations (see apsim.info). These include the coefficient of determination (R²), the Nash-Sutcliffe model efficiency coefficient (NSE), and the root mean square error (RMSE) [68]. Graphical comparisons between predicted and observed values are also summarised in the figures below.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Model performance",
+      "instruction": "The overall performance of the model can be considered “very good” for simulating biomass production over the growing season (Table 2), according to APSIM standards (NSE > 0.8). Predictions for individual defoliation events were less accurate, but still generally “satisfactory” (NSE > 0.5). There was considerable variation in performance between datasets. For the two FRNL trials (see also Figs. 11, 13, and 14) and the FD902 (see Fig. 15), which consisted of small plots under well-controlled settings, the model is capable of describing biomass production very well, including variation within the season. As expected, the performance was not as good for the less controlled and/or grazed trials when comparing within-season yields, for which there are more factors contributing to the variability (e.g. grazing preference and urine patches), although cumulative values were still good (Table 2 and Figs. 16 and 17). It is important to note that the trials have not been designed to be used for model comparison specifically and some of the measurements may not align well with the assumptions made on the simulations. For instance, it is assumed in the model that a fixed proportion of any existing above-ground organ is harvested on each defoliation, but there is no record of the proportion of various plant parts actually harvested, nor whether ‘weeds’ had always been removed or were analysed together with plantain. Grazing and cut residuals can be quite variable in terms of biomass, especially when only approximate height is recorded. These aspects add noise to the data and thus make comparisons on specific dates much more difficult.Table 2Summary of some measures for the performance of the PlantainForage model when compared with observed data from five New Zealand field trials. Where: harvested biomass represents the amount harvested on each defoliation event, for each replicate; cumulative biomass yield is the harvested biomass accumulated over one growing season (1 July to 30 June); and cumulative N yield is the amount of N in the harvested material accumulated over the season.Table 2DatasetHarvested biomass (kg DM/ha)Cumulative biomass yield (kg DM/ha)Cumulative N yield (kg N/ha)R²NSERMSER²NSERMSER²NSERMSEFRNL-Lincoln0.500.474490.900.8912040.890.8535.5FRNL-Ruakura0.450.447590.890.8911870.900.8733.6ScottFarmFD9020.650.636680.790.731971---LincolnRDF0−1.395910.870.879390.750.7333.6MasseyDairyNo10.130.119290.730.682618---All data0.530.514170.820.8018140.870.8535.0Fig. 11Predicted (lines) and observed (dots) values for cumulative biomass yield over two growing seasons for the FRNL trials, at Lincoln and Ruakura. Treatments consisted of annual N fertiliser rate at 0 (●), 50 (■), 100 (▲), 200 (◆), 350 (+), and 500 kg/ha (×).Fig. 11",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "Model performance",
+      "instruction": "Above-ground biomass accumulation between defoliation was only recorded in the FRNL trials, and more extensively only for the Lincoln site. The model performed reasonably well, with goodness-of-fit measures in line with those of within-season defoliation amounts (R² was 0.57, NSE was 0.54, and RMSE was 328 kg DM/ha for Lincoln; and 0.50, 0.48, and 429 kg DM/ha for Ruakura, respectively). As was observed with defoliated biomass amounts, the performance tended to be worse in the second year of the trial (example in Fig. 11). This is likely an indication of the model’s current inability to account for a decline in plant population, or the fact that weeds were not considered in the current simulations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "Model performance",
+      "instruction": "Only a limited amount of data were available to validate the dynamics of N in the plantain biomass. These consisted of the overall N content from defoliated material for some of the datasets. The model is capable of describing the seasonal pattern reasonably well (e.g. Fig. 12) and the overall amount of N harvested per season (Table 2 and Figs. 13, 14, and 16). However, considerable deviation still exists between values for individual defoliation events, indicating that this is an area that can be further improved after the collection of more data. Note that the measurements show large variability between replicates, suggesting large spatial variations and/or the need to improve the measurement methodology.Fig. 12Predicted (lines) and observed (dots) seasonal variations in N concentration two growing seasons for the FRNL trial at Lincoln. Four treatments are show, for annual N fertiliser rates of 0 (●),100 (▲), 350 (+), and 500 kg/ha (×).Fig. 12Fig. 13Predicted versus observed values for cumulative harvested biomass (A) and N yield (B) for the FRNL-Lincoln trial. Treatments were annual N fertiliser rate at 0 (●), 50 (■), 100 (▲), 200 (◆), 350 (+), and 500 kg/ha (×). The solid line represents the linear regression between predicted and observed values while the dashed line is the 1:1 relationship.Fig. 13Fig. 14Predicted versus observed values for cumulative harvested biomass (A) and N yield (B) for the FRNL-Ruakura trial. Treatments were annual N fertiliser rate at 0 (●), 50 (■), 100 (▲), 200 (◆), 350 (+), and 500 kg/ha (×).The solid line represents the linear regression between predicted and observed values while the dashed line is the 1:1 relationship.Fig. 14Fig. 15Predicted versus observed values for cumulative harvested biomass for the Scott Farm FD902 trial. Treatments consisted of varying cutting heights (trigger - residual), at 15–4 cm (●), 15–7 cm (○), 25–4 cm (■), 25–7 cm (⬜), 35–4 cm (▲), 35–7 cm (△), 45–4 cm (×), and 45–7 cm (×).The solid line represents the linear regression between predicted and observed values while the dashed line is the 1:1 relationship.Fig. 15Fig. 16Predicted versus observed values for cumulative harvested biomass (A) and N yield (B) for the LincolnRDF trial. Treatments were two N fertiliser rates, a low (●) and a high (■). See text for details. The solid line represents the linear regression between predicted and observed values while the dashed line is the 1:1 relationship.Fig. 16Fig. 17Predicted versus observed values for cumulative harvested biomass yield (A) and seasonal variation of N concentration in the herbage harvested (B) for the MasseyDairyNo1 trial. Treatments consisted of two grazing frequencies, every two (●) or four weeks (■). In (A), the solid line represents the linear regression between predicted and observed values while the dashed line is the 1:1 relationship. In (B), the solid line represents predicted values.Fig. 17",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "Final remarks and areas for future improvements",
+      "instruction": "The model described here is the second iteration of development initially started in 2019. By using APSIM, we were able to focus on the development of the plant model and can now use the full framework to explore interactions between plantain and the environment, particularly soil processes, as well as investigate the effects of management practices on plantain growth and on those interactions with the environment. Model performance varied from very good to satisfactory when predicting biomass and nitrogen harvested over a growing season. However, the performance was only satisfactory or poor when comparing against data at individual harvests. The model showed good sensitivity to treatments studied, especially N fertiliser rates. These results suggest the model can be used to predict annual biomass production for forage plantain with confidence, but predictions within a season must be taken with some caution. The calibration and validation datasets were mostly from New Zealand, some important environmental factors included temperature and photoperiod were in a limited range. Therefore, future validation is needed when applying the PlantainForage model in locations outside of New Zealand. Although a number of studies with plantain have been conducted over the last few years, the amount of data for specific model parameterisation remains limited. This is particularly acute for parameterising the allocation and re-translocation of biomass and nitrogen among the various organs. Lack of data on roots growth and distribution in the soil profile is also a major gap. This is important to improve model performance to estimate growth under different conditions (e.g., water stress) and regrowth after defoliation. Nitrogen balance and feed quality are also related to how biomass is allocated across different organs over the growing season, the data available are not yet detailed enough to parameterise the model with great confidence. Understanding the allocation of biomass to roots and its reallocation to support growth in spring and after defoliation is important to help simulate the persistence of plantain and guide plantain management practice on farm. Little is known about the rooting depth and the distribution of roots in the soil for New Zealand conditions. Similarly, more information is needed to discern variations between cultivars, for phenology, biomass allocation, and root distribution. This dearth of data makes it difficult to parameterise and evaluate the model’s performance on different environmental conditions and increases the uncertainty within simulations of mixed swards. Data for plantain is being slowly generated and will allow for future upgrades to the model, but we specifically recommend controlled experiments to assess biomass allocation and the impact of defoliation on pasture persistence, especially in multi-species swards. This is particularly important as some of the effects of plantain on N losses, a major selling point for the use of plantain in grazed swards, are linked to maintaining a minimum level of the crop in the field [23]. The PlantainForage model in its current form can be used to study the conditions needed and potential companion species, but more data are needed to ascertain its predictions and help to understand the relative advantages and disadvantages of plantain within farming systems. Nonetheless, the current model can contribute to the efforts investigating alternative crops and improving management of forage and livestock systems, reducing its environmental impact while maintaining productivity.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T03:57:34.758159Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "All development was made using APSIM Next Generation (release number 7650.0, Jan 2025, is the reference for this work). APSIM is an open-source modelling framework composed of several sub-models [26,27] that describe a range of processes in the soil and plants, and it can simulate a wide variety of farming systems (full description and documentation of the framework can be found on www.apsim.info; the code and test simulations can be accessed via github.com/APSIMInitiative/ApsimX). This work focuses on the description of the plant growth model and the setup of validation tests. The description and parameterisation of other sub-models (e.g. soil water balance) are given briefly and only where necessary. The PlantainForage model was built using the Plant Modelling Framework (PMF) [28], aiming to simulate the growth of a plantain forage crop, either as a monoculture or in multi-species swards. The model focuses primarily on describing plant growth from sowing to maturity and regrowth after defoliations. It considers only a simplified account of the reproductive phase, without an explicit consideration of flower development and seed production (these may be included in future releases). As with any model built using PMF, the PlantainForage model is composed of sub-models describing the various organs and phenology phases of plantain (Fig. 1). It is important to note that the model aims to describe the average behaviour of the plant population, without explicitly including population dynamics. This results in a somewhat fuzzy definition of the various development stages and the partition of biomass between the various organs. Similar to most forages, a population of plantain is likely to contain young and mature plants, as well as having some plants with mature seeds while others are just developing flower stalks. This provides further justification for a simplified reproductive phase where stalks, flowers, and seed are all developing simultaneously. Furthermore, the mod",
+  "content_type": "protocol",
+  "content_type_score": 24,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 197460,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 65805,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 74441,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 95973,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 69811,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr14.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr14.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 54863,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr14.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr15.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr15.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 108487,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr15.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr16.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr16.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 45549,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr16.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr17.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr17.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 68413,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr17.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 33399,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 29708,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 28384,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 77833,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 80793,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 41308,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 31600,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC12329591/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12329591/",
+      "caption": "",
+      "bytes": 69070,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12329591/gr9.jpg"
+    }
+  ]
 }

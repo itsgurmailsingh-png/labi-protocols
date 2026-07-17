@@ -35,110 +35,162 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "This protocol describes how the power conversion efficiency (η) of an underwater solar cell can be characterized in a typical laboratory setting by simulating the underwater spectrum with an LED solar simulator. This type of solar simulator works particularly well for this purpose as it allows for tuning of the irradiance spectrum by varying the intensities of each individual LED (centered at different wavelengths). Using this feature, LEDs can be used to simulate underwater spectra and the performance of a solar cell can be measured under such conditions.",
+      "title": "Set up measurement hardware",
+      "instruction": "Place the LED solar simulator (e.g., Oriel VeraSol‑2) on the bench, connect a Keithley 2400 source‑measure unit and a laboratory PC, and mount the solar cell on an adjustable‑height lab jack positioned under the simulator.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "While we employed an Oriel VeraSol-2 by Newport (Figure 1A), any LED solar simulator with LEDs in the spectral range of interest can, in principle, be employed for this purpose. The VeraSol-2 arrives with software allowing for easy adjustment of the output irradiance of each LED in the array (Figure 1B), which is important for simulating underwater irradiance spectra (Figure 1C). Additionally, up to nine custom irradiance spectra can be saved within the accompanying software, which reduces human error and allows for easy access between the underwater solar spectra. Besides the solar simulator, a source-measure unit (here a Keithley 2400 SMU), a laboratory PC, and a stage (here a lab jack) with an adjustable height are needed.Figure 1Before you begin(A) Photograph of the employed experimental setup consisting of the VeraSol-2 setup class AAA solar simulator coupled to a Keithley 2400 SMU.(B) Spectrum control software, allowing for fine tuning each individual LED in the setup.(C) Water-attenuation spectra of various saltwater (S), freshwater (F) and pure water (P) sources.(D) Newport Oriel mc-Si reference solar cell.(E) EQE spectrum and device characteristics of the mc-Si solar cell. (A, B) was adapted from Röhr et al.1; (C) was adapted from Röhr et al.2",
+      "title": "Prepare EQE data files",
+      "instruction": "Obtain the external quantum efficiency (EQE) spectra for the reference mc‑Si cell and the test device, save each as a CSV file with columns ‘wv’ (wavelength in nm) and ‘qe’ (EQE), ensuring identical wavelength ranges for both files.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Before you begin",
-      "instruction": "This protocol includes Python code used for calculating the power settings to match simulator LEDs to the underwater spectra, translation to reference conditions, and spectral mismatch calculations. Additional code for calculating the water-attenuated irradiance spectra has also been given if existing data is not available.",
-      "substeps": [],
+      "title": "Run SpectraMaximus scripts",
+      "instruction": "Execute the provided Python code (SpectraMaximus) which (a) calculates LED power settings to reproduce the desired underwater attenuation spectrum, (b) computes the target short‑circuit current for the reference cell, (c) determines the spectral mismatch coefficient M, and (d) performs the current‑correction calculations.",
+      "substeps": [
+        {
+          "instruction": "Load LED output spectra, underwater spectra, AM1.5G reference spectrum, reference‑cell EQE and test‑cell EQE into the script.",
+          "title": ""
+        },
+        {
+          "instruction": "Run the functions that implement Equations 3, 4‑5, 9‑10, and the correction workflow.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Before you begin",
-      "instruction": "While all the used data can be found on the GitHub repository, below we provide steps as to how the data can be obtained directly from the primary sources. So, while not strictly necessary, we strongly encourage the reader to go through the steps outlined below.",
+      "title": "Calibrate device‑simulator distance",
+      "instruction": "Using the adjustable lab jack, vary the distance between the solar cell and the LED simulator until the measured short‑circuit current of the calibrated reference cell satisfies Equation 3: IDUTLED / IDUTUW = 1.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Math used for the current-correction procedure",
-      "instruction": "The simulated spectrum deviates slightly from the desired underwater spectrum, requiring a calibration step to accurately simulate the current characteristics of the test device. This calibration is easily accomplished by adjusting the distance between the device and the simulator using an adjustable lab jack and the calibrated reference device.",
+      "title": "Calculate target short‑circuit current",
+      "instruction": "With SpectraMaximus, input the LED outputs, underwater spectrum, AM1.5G reference spectrum, reference‑cell EQE and test‑cell EQE; the script solves Equation 3 to give the target short‑circuit current I_DUT,LED at the calibrated height.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Math used for the current-correction procedure",
-      "instruction": "The provided code, SpectraMaximus, takes the LED outputs, underwater spectra, reference spectrum (AM1.5G), reference device EQE, and test device EQE to calculate a target short circuit current for the reference cell, at which height the following relation is true:(Equation 3)IDUTLEDIDUTUW=1",
+      "title": "Determine spectrum calibration numbers",
+      "instruction": "Compute the calibration numbers using Equations 4 and 5: CNUW = I_REF U W / E_UW, CNRC = I_REF R C / E_tot, then I_REF UW = I_REF RC × CN_UW × E_UW / (CN_RC × E_tot).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Math used for the current-correction procedure",
-      "instruction": "By defining a spectrum calibration number, CN, for the underwater and reference spectra as in Osterwald et al.6 we define the current of the reference cell under an arbitrary underwater spectrum. Dividing these two equations together obtains Equation 5.(Equation 4)CNUW=IREFUWEUW,CNRC=IREFRCEtotx(Equation 5)IREFUW=IREFRCCNUW×EUWCNRC×Etot",
+      "title": "Compute spectral mismatch coefficient",
+      "instruction": "Evaluate the integrals in Equation 9 and 10 to obtain M = (IDUTLED / IREFLED) × (IREFUW / IDUTUW) = [∫ε_LED·SR_DUT dλ / ∫ε_LED·SR_REF dλ] × [∫ε_UW·SR_REF dλ / ∫ε_UW·SR_DUT dλ].",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Math used for the current-correction procedure",
-      "instruction": "Substituting integrated spectral response and integrated spectral irradiance into the equations for calibration number, we obtain:(Equation 6)CNRC=∫λ1λ2SRREF(λ)×εREF(λ)dλ∫λ1λ1εRC(λ)dλ(Equation 7)CNUW=∫λ1λ2SRREF(λ)×εUW(λ)dλ∫λ1λ1εUW(λ)dλ",
-      "substeps": [],
+      "title": "Convert EQE to spectral response",
+      "instruction": "For each EQE file, compute the spectral response SR(λ) using SR = (q λ / h c) EQE = λ / 1239.8 × EQE; implement the supplied Python loop to add a ‘sr’ column to the dataframe.",
+      "substeps": [
+        {
+          "instruction": "Read CSV with pandas: test = pd.read_csv(file, header=0, names=['wv','qe']).",
+          "title": ""
+        },
+        {
+          "instruction": "If first file, store wavelength column in df_EQE.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate sr = (test['qe']) * (test['wv'] / 1239.8) and append to dataframe.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Math used for the current-correction procedure",
-      "instruction": "By substituting these equations into Equation 5 and canceling the appropriate terms, we obtain a simple ratio of two integrals multiplied by the reference current to obtain IREFUW.(Equation 8)IREFUW=IREFRC×∫λ1λ2SRREF(λ)×εUW(λ)dλ∫λ1λ2SRREF(λ)×εRC(λ)dλ",
+      "title": "Isolate reference LED current",
+      "instruction": "Rearrange Equation 9 to solve for I_REFLED, giving I_REFLED = I_REFUW × M (Equation 12).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Math used for the current-correction procedure",
-      "instruction": "Having obtained the relevant underwater current for the reference device, we must now calculate the spectral mismatch7 coefficient M between the underwater spectrum and the simulated LED spectrum. M is defined as the ratio of four currents in Osterwald et al.6 We solve for the desired current IREFLED and apply the current matching condition in Equation 12.(Equation 9)M=IDUTLEDIREFLED×IREFUWIDUTUW(Equation 10)M=∫λ1λ2εLED(λ)×SRDUT(λ)dλ∫λ1λ2εLED(λ)×SRREF(λ)dλ×∫λ1λ2εUW(λ)×SRREF(λ)dλ∫λ1λ2εUW(λ)×SRDUT(λ)dλ.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "Math used for the current-correction procedure",
-      "instruction": "SR stands for spectral response and it is related to the cell’s EQE, which is one of the initial inputs into SpectraMaximus. The conversion of the reference and test cell EQEs to SRREF and SRDUT (Figure 7) is found by the following equation, where q is the elementary charge, λ is the wavelength, h is Planck’s constant, and c is the speed of light:(Equation 11)SR(λ)=qλhcEQE(λ)=λ1239.8EQE(λ)for i in range (0,len(Test_EQEs)): test= pd.read_csv(Test_EQEs[i],header=0,names=['wv','qe']) if i == 0: df_EQE['wv'] = test['wv'] test['sr'] = ((test['qe'])∗(test['wv'] / 1239.8))Figure 7Spectral response and EQESRDUT of the CdTe cell (blue) and the corresponding EQE (dotted) compared to SRRC of the mc-Si reference cell.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "Math used for the current-correction procedure",
-      "instruction": "When Equation 9 is manipulated to isolate for IREFLED, the obtained value is the short-circuit current that the reference device will register when it is at the height for which the current matching condition (Equation 3) is true, ensuring an accurate current is measured in the test device.(Equation 12)IREFLED=IREFUWM",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "Math used for the current-correction procedure",
-      "instruction": "The code describing the above math is shown below.for Wavelength_name in name_list: Simulation_spectrum = np.dot(L,df_LEDset[wv_name]) Wavelength_range = np.linspace(start_nm, end_nm,∖ num=(end_nm-start_nm+1)) #---------------Interpolation ----- ---------------- # . . . Refer to code . . . | # -------------------------------------------------- #----------Spectral Mismatch Calculation ----------- . . . int1 = np.trapz(SR_ref ∗ E_uws) int2 = np.trapz(SR_ref ∗ E_sim) int3 = np.trapz(SR_test ∗ E_sim) int4 = np.trapz(SR_test ∗ E_uws) int5 = np.trapz(SR_ref ∗ E_am15g) h = int3/int4 E_sim = E_sim/h . . .#-------------Spectral Mismatch Calculation --------- m = (int1/int2) ∗ (int3/int4) . . .#--------Short Circuit Current Correction------------ I_uw_ref = I_rc_ref∗(int1/int5) I_sim_ref = I_uw_ref/m",
-      "substeps": [],
+      "title": "Apply spectral mismatch correction",
+      "instruction": "Using the code fragment, interpolate the simulated spectrum, compute integrals int1‑int5 with np.trapz, calculate h = int3/int4, adjust simulated irradiance E_sim = E_sim/h, compute mismatch m = (int1/int2) × (int3/int4), then correct short‑circuit current: I_uw_ref = I_rc_ref × (int1/int5), I_sim_ref = I_uw_ref / m.",
+      "substeps": [
+        {
+          "instruction": "Simulation_spectrum = np.dot(L, df_LEDset[wv_name])",
+          "title": ""
+        },
+        {
+          "instruction": "Wavelength_range = np.linspace(start_nm, end_nm, num=(end_nm-start_nm+1))",
+          "title": ""
+        },
+        {
+          "instruction": "int1 = np.trapz(SR_ref * E_uws)",
+          "title": ""
+        },
+        {
+          "instruction": "int2 = np.trapz(SR_ref * E_sim)",
+          "title": ""
+        },
+        {
+          "instruction": "int3 = np.trapz(SR_test * E_sim)",
+          "title": ""
+        },
+        {
+          "instruction": "int4 = np.trapz(SR_test * E_uws)",
+          "title": ""
+        },
+        {
+          "instruction": "int5 = np.trapz(SR_ref * E_am15g)",
+          "title": ""
+        },
+        {
+          "instruction": "h = int3 / int4",
+          "title": ""
+        },
+        {
+          "instruction": "E_sim = E_sim / h",
+          "title": ""
+        },
+        {
+          "instruction": "m = (int1 / int2) * (int3 / int4)",
+          "title": ""
+        },
+        {
+          "instruction": "I_uw_ref = I_rc_ref * (int1 / int5)",
+          "title": ""
+        },
+        {
+          "instruction": "I_sim_ref = I_uw_ref / m",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T00:49:02.043634Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "This protocol describes how the power conversion efficiency (η) of an underwater solar cell can be characterized in a typical laboratory setting by simulating the underwater spectrum with an LED solar simulator. This type of solar simulator works particularly well for this purpose as it allows for tuning of the irradiance spectrum by varying the intensities of each individual LED (centered at different wavelengths). Using this feature, LEDs can be used to simulate underwater spectra and the performance of a solar cell can be measured under such conditions. While we employed an Oriel VeraSol-2 by Newport (Figure 1A), any LED solar simulator with LEDs in the spectral range of interest can, in principle, be employed for this purpose. The VeraSol-2 arrives with software allowing for easy adjustment of the output irradiance of each LED in the array (Figure 1B), which is important for simulating underwater irradiance spectra (Figure 1C). Additionally, up to nine custom irradiance spectra can be saved within the accompanying software, which reduces human error and allows for easy access between the underwater solar spectra. Besides the solar simulator, a source-measure unit (here a Keithley 2400 SMU), a laboratory PC, and a stage (here a lab jack) with an adjustable height are needed.Figure 1Before you begin(A) Photograph of the employed experimental setup consisting of the VeraSol-2 setup class AAA solar simulator coupled to a Keithley 2400 SMU.(B) Spectrum control software, allowing for fine tuning each individual LED in the setup.(C) Water-attenuation spectra of various saltwater (S), freshwater (F) and pure water (P) sources.(D) Newport Oriel mc-Si reference solar cell.(E) EQE spectrum and device characteristics of the mc-Si solar cell. (A, B) was adapted from Röhr et al.1; (C) was adapted from Röhr et al.2 This protocol includes Python code used for calculating the power settings to match simulator LEDs to the underwater spectra, translation to reference conditions, a",
+  "content_type": "protocol",
+  "content_type_score": 24,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

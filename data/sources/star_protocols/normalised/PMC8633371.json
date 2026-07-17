@@ -25,10 +25,237 @@
     "Java",
     "R",
     "Readxl",
-    "Stringr"
+    "Stringr",
+    "Timing: <1 h",
+    "Java has been installed.",
+    "CausalPath is a freely available open-source project hosted on GitHub. The software is written in Java. This protocol uses the R (3.6.2) as well as the readxl (1.3.1), and stringr (1.4.0) packages to reformat example data from an Excel spreadsheet into the necessary plain-text, tab-delimited, tabular input format. A list of software used is in the Key Resources Table.",
+    "Timing: 1 h",
+    "Timing: <15 min",
+    "This study did not generate new unique reagents."
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Install Java and CausalPath",
+      "instruction": "Download and install Java 8 (or Java 11) from Oracle (oracle.com/java) or OpenJDK (adoptopenjdk.net). Install the CausalPath Java archive (causalpath.jar) version 1.2.0 from https://github.com/PathwayAndDataAnalysis/causalpath/releases. (Optional) Download and install ChiBE (Chisio BioPAX Editor) from https://github.com/PathwayCommons/chibe for local network visualization.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Install R and required packages",
+      "instruction": "Download and install R version 3.6.2 from https://cran.r-project.org (compatible with Linux, Windows, macOS). In an R console, run: install.packages(\"readxl\"); install.packages(\"stringr\") to obtain the readxl (v1.3.1) and stringr (v1.4.0) packages. Skip this step if your input data are already in CausalPath format.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Reformat source data for CausalPath",
+      "instruction": "Save the following R script as “phospho_mass_spec_data_extract.R” in the same folder as the source Excel file (1‑s2.0‑S0006497120799349‑mmc2.xlsx). Then run the script with source(\"phospho_mass_spec_data_extract.R\"). The script reads sheet “Cond #2 TiO2 Brief”, extracts gene symbols, site lists, computes signed p‑values (sign(logFC) * FDR), builds a data frame with columns ID, Symbols, Sites, Effect (blank), SignedP, and writes a tab‑delimited file “data_causalpath.txt”. Ensure the script and Excel file share the same directory and that the output file name matches the one referenced in the parameters file.",
+      "substeps": [
+        {
+          "instruction": "library(readxl)",
+          "title": ""
+        },
+        {
+          "instruction": "library(stringr)",
+          "title": ""
+        },
+        {
+          "instruction": "# READ DATA",
+          "title": ""
+        },
+        {
+          "instruction": "dat <- read_excel(\"1-s2.0-S0006497120799349-mmc2.xlsx\", sheet=\"Cond #2 TiO2 Brief\", skip=11)",
+          "title": ""
+        },
+        {
+          "instruction": "# INITIALIZE RESULTS DATA.FRAME",
+          "title": ""
+        },
+        {
+          "instruction": "reformatted_dat <- data.frame(ID=character(0), Symbols=character(0), Sites=character(0), Effect=character(0), SignedP=numeric(0), stringsAsFactors=FALSE)",
+          "title": ""
+        },
+        {
+          "instruction": "# EXTRACT VALUES",
+          "title": ""
+        },
+        {
+          "instruction": "pb <- txtProgressBar(min=1, max=nrow(dat), style=3)",
+          "title": ""
+        },
+        {
+          "instruction": "for(i in 1:nrow(dat)) {",
+          "title": ""
+        },
+        {
+          "instruction": "setTxtProgressBar(pb, i)",
+          "title": ""
+        },
+        {
+          "instruction": "gene_symbol <- dat$`UniProt Gene Name`[i]",
+          "title": ""
+        },
+        {
+          "instruction": "position <- dat$`Site List`[i]",
+          "title": ""
+        },
+        {
+          "instruction": "positions <- str_split(position, \"; \")[[1]]",
+          "title": ""
+        },
+        {
+          "instruction": "sites <- paste(positions, collapse=\"|\")",
+          "title": ""
+        },
+        {
+          "instruction": "sites_id <- paste(positions, collapse=\"_\")",
+          "title": ""
+        },
+        {
+          "instruction": "id <- paste0(gene_symbol, \"_\", sites_id)",
+          "title": ""
+        },
+        {
+          "instruction": "t1 <- data.frame(ID=id, Symbols=gene_symbol, Sites=sites, Effect=\"\", SignedP=sign(dat$logFC[i])*dat$FDR[i], stringsAsFactors=FALSE)",
+          "title": ""
+        },
+        {
+          "instruction": "reformatted_dat <- rbind(reformatted_dat, t1)",
+          "title": ""
+        },
+        {
+          "instruction": "}",
+          "title": ""
+        },
+        {
+          "instruction": "# VERIFY ROW COUNT",
+          "title": ""
+        },
+        {
+          "instruction": "stopifnot(nrow(dat) == nrow(reformatted_dat))",
+          "title": ""
+        },
+        {
+          "instruction": "# SAVE RESULTS",
+          "title": ""
+        },
+        {
+          "instruction": "write.table(reformatted_dat, \"data_causalpath.txt\", sep=\"\\t\", row.names=FALSE, quote=FALSE)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Create and edit parameters.txt",
+      "instruction": "In the same directory as “causalpath.jar”, create a plain‑text file named exactly “parameters.txt”. Populate it with one “parameter‑name = parameter‑value” per line, using the values below (modify only if your data differ):",
+      "substeps": [
+        {
+          "instruction": "proteomics-values-file = data_causalpath.txt",
+          "title": ""
+        },
+        {
+          "instruction": "id-column = ID",
+          "title": ""
+        },
+        {
+          "instruction": "symbols-column = Symbols",
+          "title": ""
+        },
+        {
+          "instruction": "sites-column = Sites",
+          "title": ""
+        },
+        {
+          "instruction": "effect-column = Effect",
+          "title": ""
+        },
+        {
+          "instruction": "value-transformation = signed-p-values",
+          "title": ""
+        },
+        {
+          "instruction": "value-column = SignedP",
+          "title": ""
+        },
+        {
+          "instruction": "threshold-for-data-significance = 0.1 phosphoprotein",
+          "title": ""
+        },
+        {
+          "instruction": "color-saturation-value = 10",
+          "title": ""
+        },
+        {
+          "instruction": "calculate-network-significance = true",
+          "title": ""
+        },
+        {
+          "instruction": "permutations-for-significance = 10000",
+          "title": ""
+        },
+        {
+          "instruction": "fdr-threshold-for-network-significance = 0.1",
+          "title": ""
+        },
+        {
+          "instruction": "use-network-significance-for-causal-reasoning = true",
+          "title": ""
+        },
+        {
+          "instruction": "show-all-genes-with-proteomic-data = false",
+          "title": ""
+        },
+        {
+          "instruction": "gene-activity = GP6 a",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Run CausalPath analysis",
+      "instruction": "Open a command‑line terminal, navigate to the folder containing “causalpath.jar”, “data_causalpath.txt”, and “parameters.txt”. Execute the algorithm with:",
+      "substeps": [
+        {
+          "instruction": "java -jar causalpath.jar gpvi_mass_spec",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Visualize results on causalpath.org",
+      "instruction": "Open https://causalpath.org, click “Visualize results from previous analysis”, and select the folder that contains the CausalPath output files (do not select individual files). Accept any browser upload prompts. After upload, double‑click the folder name in the left sidebar to view the network. Use the “Show legend” button, drag nodes to reposition, click phosphorylation sites for details, and optionally enable “Topology grouping” to simplify large networks.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Optional: Visualize with Newt pathway editor",
+      "instruction": "Open https://web.newteditor.org. Import the network by selecting File → Import → SIF and choosing “causative.sif”. Then import styling via File → Import → SIF Style and select “causative.format”. To simplify large networks, enable “Topology grouping” by clicking the “Map” tab on the right‑hand sidebar and checking “Enable Topology Grouping of SIF Nodes”. (ChiBE can be used similarly if preferred).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:24:31.517252Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "CausalPath maps proteomic and other molecular profiles to pathway information from the Pathway Commons database (Rodchenkov et al., 2020; Babur et al., 2021; Barsi and Szalai, 2021) and other resources, focusing on causality among correlated measurements. This mapping generates a model of molecular signal flow that is consistent with both the profiling data and the published literature. Results are presented as a network model with links to information found in the Pathway Commons database. This analysis mimics aspects of the “manual” exploration of the scientific literature that researchers perform when they review their experimental data. CausalPath allows the systematic exploration of hundreds of thousands of curated mechanisms, which would be infeasible to do manually. The protocol below describes the specific steps for the CausalPath analysis of a proteomics study that quantified changes in >3000 phosphopeptide levels using mass spectrometry, related to the initialization and progression of platelet GPVI signaling (Babur et al., 2020; Aslan, 2021). We have also used similar protocols for the analysis of high-throughput mass spectrometry and reverse-phase protein array (RPPA) screens from National Cancer Institute's Clinical Proteomic Tumor Analysis Consortium (CPTAC) and The Cancer Genome Atlas (TCGA) programs, respectively (Babur et al., 2021).CRITICAL: A prerequisite to following this protocol is basic knowledge for 1) exploring a computer file system and 2) running commands through a command-line terminal. REAGENT or RESOURCESOURCEIDENTIFIERSoftware and algorithmsCausalPathBabur et al., 2021; https://github.com/PathwayAndDataAnalysis/causalpath/releases1.2.0ChiBE (Chisio BioPAX Editor)Babur et al., 2010; https://github.com/PathwayCommons/chibe2.1Javahttps://adoptopenjdk.net/11Rhttps://cran.r-project.org/3.6.2Readxlhttps://cran.r-project.org/web/packages/readxl/index.html1.3.1Stringrhttps://cran.r-project.org/web/packages/stringr/index.html1.4.0 The set of 1)",
+  "content_type": "protocol",
+  "content_type_score": 29,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

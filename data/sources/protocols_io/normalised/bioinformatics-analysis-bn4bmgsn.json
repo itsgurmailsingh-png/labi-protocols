@@ -23,86 +23,118 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Carry out all data processing on an Ubuntu 16.04 (xenial) operating system. Perform basecalls using Illumina Real-Time Analysis (RTA2) software on the MiniSeq System. Use FastQC to assess the quality of the raw sequence data (fastq reads), with fastq-screen used to detect any unwanted contamination.",
+      "title": "Set up OS and basecalling",
+      "instruction": "Run all data processing on Ubuntu 16.04 (xenial) and perform basecalling with Illumina Real‑Time Analysis (RTA2) software on the MiniSeq System.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Aggregate all quality control reports with MultiQC [ 17 ]. Trim ChIP-seq paired end reads with cutadapt, remove any adapter sequence from the 3′ end of reads using standard Illumina adapter sequences. Also, perform quality trimming from the 3′ end using a user-defined cutoff (phred-33 quality 10).",
+      "title": "Assess raw read quality",
+      "instruction": "Run FastQC on the raw FASTQ files and use fastq‑screen to detect any unwanted contamination.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "After adapter and quality trimming, remove any read less than the defined minimum length (30 bp). Map reads to both S. pombe calibration genome and S. cerevisiae w303 experimental genome, retaining only those reads that map to each reference.",
+      "title": "Combine QC reports",
+      "instruction": "Aggregate all FastQC and fastq‑screen reports with MultiQC (reference [17]).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "To obtain reads mapping only to SacCer W303; trimmed fastq reads should first be mapped with the MiniMap2 alignment tool [ 18 ] (“-ax sr” short genomic reads) to reference S. pombe , whereas unmapped S. pombe reads should be selected using SAMtools [ 19 ] (include SAM Flag -F 4) and convert back into fastq format (interleaved), those unmapped S. pombe reads can then be mapped to SacCer W303.",
+      "title": "Trim adapters and low‑quality bases",
+      "instruction": "Trim ChIP‑seq paired‑end reads with cutadapt, removing standard Illumina adapter sequences from the 3′ end and performing quality trimming from the 3′ end using a phred‑33 cutoff of 10.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Here, any unmapped reads can be filtered out using samtools (exclude SAM Flag -F 4) and remove rDNA regions from the section of chromosome XII which corresponds to the repetitive rDNA using BEDtools intersect [20], as this region is saturated with reads.",
+      "title": "Discard short reads",
+      "instruction": "After trimming, remove any read shorter than the defined minimum length of 30 bp.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "To obtain reads mapping only to S. pombe the above process should be performed in reverse. The original trimmed reads should also be mapped to SacCer w303, select unmapped SacCer w303 reads using SAMtools, map those unmapped SacCer w303 reads to S. pombe , and filter unmapped reads out using SAMtools. Exclude mitochondrial DNA using SAMtools for both genomes.",
+      "title": "Map reads to both genomes",
+      "instruction": "Map the trimmed reads separately to the S. pombe calibration genome and to the S. cerevisiae w303 experimental genome, retaining only reads that map to each reference.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "In order to visualize mapped reads, create bedGraphs from the aligned Binary Alignment Map (BAM) files using BEDtools genomeCoverageBed with reads per millions (RPM) normalization (calculated with custom script using SAMtools flagstat output) &amp; use UCSC wigToBigWig to convert these into BigWigs.",
+      "title": "Extract SacCer‑only reads",
+      "instruction": "To obtain reads mapping only to SacCer W303, first map the trimmed reads to the S. pombe reference with MiniMap2 using the “-ax sr” preset for short genomic reads (reference [18]); select unmapped S. pombe reads with SAMtools using flag -F 4, convert those unmapped reads back to interleaved FASTQ, then map this FASTQ to SacCer W303; finally filter out any reads that remain unmapped (SAMtools -F 4) and remove rDNA regions on chromosome XII using BEDtools intersect (reference [20]).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "For meiotic samples, where SK1 strains were used, perform mapping to the SK1 genome, rather than SacCer3 as described above.",
+      "title": "Extract S.pombe‑only reads",
+      "instruction": "To obtain reads mapping only to S. pombe, reverse the above workflow: map the original trimmed reads to SacCer W303, select unmapped SacCer reads with SAMtools -F 4, convert them to FASTQ, map these to the S. pombe reference, filter out any reads that remain unmapped (SAMtools -F 4), and exclude mitochondrial DNA for both genomes using SAMtools.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "To generate the calibrated ChIP bigWigs; use SAMtools flagstat to count reads mapping to SacCer3 w303 and S. pombe only for each sample, these values can then be used to calculate the Occupancy Ratio (OR) value as previously described [ 8 ]; Wc*IPx/Wx*IPc (W = Input; IP = chIP; c = calibration genome ( S. pombe ); x = experimental genome (sacCer w303)).",
+      "title": "Map meiotic samples to SK1",
+      "instruction": "For meiotic samples that used SK1 strains, map reads to the SK1 genome instead of SacCer3, following the same mapping and filtering steps described above.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Use each OR value to calibrate ChIP bedgraphs using BEDtools genomeCoverageBed and convert to bigWig with UCSC wigToBigWig. These bigWigs are viewable in a genome browser such as Integrative Genomics Viewer (IGV) [ 21 ] or the ensembl genome browser. All bigWigs from our published analyses are submitted to the Genome Expression Omnibus (GEO) archive and raw reads to the Sequence Read Archive (SRA).",
+      "title": "Create normalized bedGraphs and BigWigs",
+      "instruction": "Generate bedGraph files from the aligned BAM files with BEDtools genomeCoverageBed, normalizing to reads per million (RPM) using a custom script that incorporates SAMtools flagstat output; convert the bedGraphs to BigWig format with UCSC wigToBigWig.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Calculate Occupancy Ratio and calibrate",
+      "instruction": "Use SAMtools flagstat to count reads mapping to SacCer3 W303 and to S. pombe for each sample; compute the Occupancy Ratio (OR) as Wc × IPx / Wx × IPc (W = Input, IP = ChIP, c = calibration genome S. pombe, x = experimental genome SacCer W303); apply each OR value to calibrate the ChIP bedGraphs with BEDtools genomeCoverageBed and reconvert to BigWig using UCSC wigToBigWig.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Visualize and submit data",
+      "instruction": "View the final BigWig files in a genome browser such as IGV or the Ensembl genome browser; submit all BigWigs to GEO and raw reads to the SRA.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T13:47:57.943690Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 38,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ee4b9nan-D1F14FEC687311F08F960A58A9FEAC02.jpg",
+      "local_path": "data/media/protocols_io/bioinformatics-analysis-bn4bmgsn/ee4b9nan-D1F14FEC687311F08F960A58A9FEAC02.jpg",
+      "source_url": "https://files.protocols.io/external/ee4b9nan-D1F14FEC687311F08F960A58A9FEAC02.jpg",
+      "caption": "",
+      "bytes": 8552,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/bioinformatics-analysis-bn4bmgsn/ee4b9nan-D1F14FEC687311F08F960A58A9FEAC02.jpg"
+    }
+  ]
 }

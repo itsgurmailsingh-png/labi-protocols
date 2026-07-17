@@ -11,21 +11,283 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
   "doi": "10.1016/j.mex.2022.101773",
   "citation": "10.1016/j.mex.2022.101773",
-  "category": "Other",
+  "category": "Lab Automation & Robotics",
   "tags": [],
   "estimated_time_mins": 6,
-  "materials": [],
+  "materials": [
+    "The imaging components are mounted on a linear slide table (IGUS SHT-12) for alignment and to allow fine focus adjustment. Mounted at one end is a GigE Vision camera (2448 × 2048 pixels resolution, Allied Vision, Prosilica GC2450C, 2/3” sensor) with a telecentric lens (8.8 × 6.6 mm Field of View, 1x magnification, Edmund Optics #55–350). Telecentric lenses give an orthographic view of the subject, allowing the accurate measurement of in-focus samples regardless of their distance from the lens. Mounted 100 mm in front of the camera lens (inside the lens' approx. 3 mm useable depth of field) is the tubing section to be imaged. This section of tubing is enclosed in a 1 cm3 plastic cuvette with smaller tubes to allow it to be filled with water, made watertight with silicon sealant. This water-filled outer layer serves to reduce image distortion caused by the curved sides of the inner tubing. At the other end of the slide table is an LED array (Advanced Illumination, SL246), aimed directly into the camera lens. An opaque tube between the LED array and sample cuvette prevents light spillover around the edges of the imaging area, and a section of holographic diffusion film over the end of the opaque tube gives more even lighting (see Fig. 4).Fig. 4Detail of imaging setup.Fig 4:"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Image analysis",
-      "instruction": "Extracting useful measurements from the captured images requires first that frames containing eggs or larvae be identified. Relevant features (such as eyes or yolk sacs) are manually identified on a subset of images and used to train a neural network. The network then extracts these features from the complete set of images, and the results post-processed with classical machine vision techniques to correct or remove spurious results and calculate the sizes of the features in the image. This allows the estimation of biologically relevant metrics such as body and yolk sac volume, giving the growth rate and yolk sac utilization of the population over time. The steps in this image processing pipeline are shown in Fig. 5.Fig. 5Image analysis pipeline. A portion of the raw images are annotated by hand and presented, with annotations, to the neural network for training. Following training the neural network attempts segmentation on unseen images, and the worst of these are annotated and added to the training set. The results receive additional post-processing, and biologically relevant endpoints are extracted.Fig 5:",
+      "title": "Prepare sample introduction",
+      "instruction": "Collect seawater containing fish eggs or larvae and introduce the samples slowly into a small glass funnel mounted on a retort stand, using either a 10 mL syringe for best control or pouring from a small beaker, adding the samples in portions to avoid clogging of the funnel outflow.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Connect inlet tubing to imaging cell",
+      "instruction": "Attach the funnel outlet to ~600 mm of hard, clear perfluoroalkoxy (PFA) tubing (2 mm inner diameter, 3 mm outer diameter) that runs into a cuvette mounted in front of the camera; after the cuvette, connect ~900 mm of soft, translucent Marprene tubing (3 mm ID, 5 mm OD) that terminates inside a 250 mL collection bottle through a hole drilled in the bottle lid.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Set up peristaltic pump and bubble line",
+      "instruction": "Connect a Watson‑Marlow peristaltic pump (model 205S/CA4) to the collection bottle with ~1250 mm of Marprene tubing (entering the bottle through the lid); also connect ~1300 mm of Marprene tubing from the pump outflow side back to the sample funnel to create a bubbling line that injects air into the water and prevents sample clumping. When the pump is turned on it creates a vacuum in the bottle, first drawing air and then seawater through the sample tube at a flow rate that reaches ~200 mm³ s⁻¹ once the tubing is fully filled.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Assemble imaging hardware on slide",
+      "instruction": "Mount the imaging components on an IGUS SHT‑12 linear slide table for alignment and fine focus. Install a GigE Vision camera (Allied Vision Prosilica GC2450C, 2448 × 2048 px, 2/3\" sensor) with a telecentric lens (Edmund Optics #55‑350, 1× magnification, 8.8 × 6.6 mm field of view) at one end of the slide. Position the ~100 mm section of imaging tubing 100 mm in front of the camera lens (inside the lens’s ≈3 mm usable depth of field). Enclose this tubing section in a 1 cm³ plastic cuvette, fill the cuvette with water, and seal it with silicone sealant to reduce image distortion from the curved inner tubing.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Install LED illumination",
+      "instruction": "Place an Advanced Illumination SL246 LED array (or equivalent) at the opposite end of the slide table, aimed directly into the camera lens. Insert an opaque tube between the LED array and the sample cuvette to prevent light spillover, and cover the end of the opaque tube with a piece of holographic diffusion film to achieve even lighting.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Connect camera and LED controller",
+      "instruction": "Connect the camera to a laptop (ASUS ROG Strix G751J) via Ethernet cable. Connect the camera’s trigger output to a Metaphase Technologies ULC‑2 universal LED controller, which in turn powers and triggers the LED array.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Configure image acquisition software",
+      "instruction": "Run the open‑source PySilCam software. Set acquisition to single‑frame capture at a fixed 8 Hz frame rate, using the camera’s native Bayer8 format. Crop images at capture to 2448 × 750 px (file size ≈1.8 MB per image). Configure the trigger so that on each frame start the camera sends a signal to the LED controller, which fires the LED array with a strobe duration of 60 µs. Set exposure time between 47 µs and 60 µs (longer exposure for older, more pigmented fish).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Start flow and record images",
+      "instruction": "Turn on the peristaltic pump to create vacuum and draw seawater (with samples) through the inlet tubing, imaging section, and into the collection bottle while the camera continuously records images according to the settings above.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Select candidate frames via background subtraction",
+      "instruction": "For each captured frame, compute a moving‑average background using the surrounding 50 frames. Subtract this background to obtain a binary foreground image. Calculate area and bounding box for each connected foreground blob; discard blobs that are too small to be an egg or larva. Retain frames containing one or more large blobs for manual checking.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Manually annotate features",
+      "instruction": "Using the Fish Annotator software and a graphics tablet, draw outlines of the relevant features on each retained frame: for eggs – egg shell, embryo, and non‑yolk area; for larvae – whole body, eye(s), and yolk sac. Adjust image brightness/contrast, apply automated ROI marking, background subtraction, and preview feature points as needed to aid annotation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Save annotations as PNG and CSV",
+      "instruction": "Export each hand‑drawn annotation as a lossless 8‑bit PNG file. Smooth and parameterize the outlines into polygons of evenly spaced points and save the coordinates as a comma‑separated values (CSV) file. Store the original unmodified image, the PNG, and the CSV together for later training.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Create training and validation sets",
+      "instruction": "Randomly assign each annotated image to either the training set (≈90 % of images) or the validation set (≈10 % of images).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Train Mask‑R‑CNN networks",
+      "instruction": "Train two separate Mask‑R‑CNN models (using the modified implementation from AutoMOMI): one for eggs and one for larvae. For larvae define three classes (yolk, body, eye); for eggs define three classes (body, egg, yolk). Set hyper‑parameters: max_gt_instances = 20, mrcnn_mask_loss = 2. Train for 900 iterations per epoch, monitoring loss with TensorBoard, for typically 2 000–3 000 epochs on an Nvidia RTX‑2080 Ti GPU. After each epoch, evaluate on the validation set and on a set of unannotated test images; manually annotate poorly segmented images and add them to the training set, then repeat training until satisfactory performance is achieved.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Post‑process segmentation masks",
+      "instruction": "Apply classical machine‑vision rules to the network output for each image: ensure inner body parts (eyes, yolk sacs) lie within the body bounds; allow at most one body region per fish; allow at most two eyes; allow at most one yolk sac; fill any internal holes in regions; discard regions that cross image edges; require eyes and yolk sacs to be associated with a body. Discard any mask that fails these checks.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Extract morphometric measurements",
+      "instruction": "From the validated masks compute: a centre line of the fish body to obtain standard length (SL); minor and major axes of eyes and yolk sac; areas of body, eyes, and yolk sac. Convert all pixel measurements to millimetres using the known pixel‑scaling factor.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Calculate larval volumes",
+      "instruction": "For each larva, compute total volume VL assuming a cylinder: VL = (π / 4) × AL × LL, where AL is the measured projected body area and LL is the standard length. Compute yolk sac volume VY as a prolate spheroid: VY = (4 / 3) π × (LY / 2) × (WY / 2)², where LY and WY are measured yolk length and width. Structural volume VS = VL − VY. Compute eye volume VE as a prolate spheroid: VE = (4 / 3) π × (WE / 2)² × (LE / 2), where WE and LE are eye width and length. Use eye width (WE) as the eye diameter for literature comparisons.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Calculate egg volumes",
+      "instruction": "Assume cod eggs are spherical. Measure major (LE) and minor (WE) axes of the egg outline; compute average diameter DE = (LE + WE) / 2, then radius RE = DE / 2. Calculate egg volume VE = (4 / 3) π × RE³. (Yolk sac volume is not used because yolk segmentation is unreliable.)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Prepare cod egg samples for imaging",
+      "instruction": "Obtain Atlantic cod (Gadus morhua) eggs (arrived 2 Apr 2020, temperature 4 °C, O₂ = 22.3 mg L⁻¹). Keep eggs in a 200 L tank with 1 µm‑filtered seawater at 8.5 °C until 7 days post‑fertilisation (dpf). Transfer eggs to 0.5 L boroside beakers at 9–10 °C thereafter. Remove dead eggs and larvae daily and renew water every 2–3 days. Begin imaging on 4 Apr (3 dpf) and continue until 17 Apr (≈5 days post‑hatch).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T12:04:06.630028Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "Seawater containing ichthyoplankton (e.g., fish eggs or larvae) in suspension is introduced through a funnel into a narrow tube. The tubing empties into a bottle through a hole drilled in the bottle lid. Another tube poking through the bottle lid connects to a peristaltic pump which pulls air from the bottle, creating a vacuum inside that draws water through the imaging system. A short section of tubing is imaged by the camera, illuminated by an LED array directing light through the tubing and its contents and into the camera lens. A diagram of these connections can be found in Fig. 1, and annotated photographs of the experimental setup can be seen in Fig. 2 and Fig. 3.Fig. 1Flow diagram of experimental setup. Samples are introduced to the funnel and flow through the imaging chamber to the collection bottle, pulled by the vacuum from the pump. The pump introduces bubbles into the water in the funnel. Light from the LED array passes through the imaging chamber into the lens and camera. Images from the camera are saved to the computer, and the camera shutter triggers the LED array.Fig 1:Fig. 2Setup showing the sample intake funnel (a) connected via a tube (b) to the imaging cell (c) connected via a tube (d) to the collection bottle (e), where a vacuum is drawn through a tube (f) by a peristaltic pump (g). A bubbler tube (h) runs from the pump into the funnel.Fig 2:Fig. 3Setup showing electrical and data connections. The laptop (a) uses an ethernet cable (b) to power and control a camera (c). The camera sends a signal via (d) to the external LED controller (e), which uses a cable (f) to power and to trigger the strobe (g).Fig 3: Images from the camera are recorded onto a computer. A subset of images is manually annotated with the outlines of features of interest, and these images and annotations comprise a training set for a neural network. Once trained, the network automatically selects and annotates features from the full set of images. Classical machine vision algor",
+  "content_type": "protocol",
+  "content_type_score": 39,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 64170,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 121310,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr9.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 101950,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 60980,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 75266,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 61820,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 62390,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 173447,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 45713,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 69952,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 40823,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 70870,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC9256663/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9256663/",
+      "caption": "",
+      "bytes": 72173,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9256663/gr7.jpg"
+    }
+  ]
 }

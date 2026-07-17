@@ -28,10 +28,602 @@
     "Dplyr",
     "Tidyr",
     "AnnotationDbi",
-    "org.Hs.eg.db"
+    "org.Hs.eg.db",
+    "ImmCellfie can either be operated via the web dashboard (immcellfie.renci.org) or through an OpenAPI application programming interface (API). The API can be used for running data in batch and for integrating with notebooks (e.g., Jupyter, Google Colab) (Figure 9). For documentation on interfacing with the API, see http://immcellfie.renci.org:8081/docs. The protocol presented here describes the steps for running ImmCellFie via the web dashboard. Here, we provide specific instructions for preprocessing the HPA example expression data in R prior to running ImmCellFie. However, this preprocessing step can be performed using any programming language and/or online gene-mapping web tool as long as the end result meets ImmCellFie formatting requirements. The easiest option to follow the preprocessing steps outlined in this tutorial is to use RStudio. Both R and RStudio can be downloaded from https://www.r-project.org/ and https://rstudio.com/products/rstudio/download/, respectively.",
+    "Timing: 30 s",
+    "Timing: 5–10 min",
+    "Timing: seconds",
+    "ID of the sample•Column",
+    "ID of the metabolic task•Column",
+    "Task score for this sample•Column",
+    "Binary task score for this sample•Column",
+    "Essential reaction associated with this task•Column",
+    "Timing: seconds to minutes",
+    "Timing: minutes",
+    "Can I delete datasets?",
+    "Why did the CellFie run fail?",
+    "The CellFie tool housed on ImmCellFie is freely available from:",
+    "https://github.com/LewisLabUCSD/CellFie (https://doi.org/10.5281/zenodo.7511046).",
+    "https://hub.docker.com/repository/docker/hmasson/cellfie-standalone-app.",
+    "Web application code:",
+    "https://github.com/RENCI/fuse-dashboard-immcellfie (dashboard front-end code).",
+    "https://github.com/RENCI/fuse-agent (dashboard back-end agent and API code).",
+    "Tools orchestrated by fuse-agent:",
+    "https://github.com/RENCI/fuse-tool-pca.",
+    "https://github.com/RENCI/fuse-tool-cellfie."
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Create ImmCellFie user account",
+      "instruction": "Create a new ImmCellFie account (no password) to link uploaded datasets with results.",
+      "substeps": [
+        {
+          "instruction": "Navigate to http://immcellfie.renci.org.",
+          "title": ""
+        },
+        {
+          "instruction": "Click the ‘User’ tab.",
+          "title": ""
+        },
+        {
+          "instruction": "Enter your email address as the username (accounts are not password protected).",
+          "title": ""
+        },
+        {
+          "instruction": "Acknowledge that uploaded data will be publicly visible and avoid including PHI or sensitive data.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Prepare input files in required format",
+      "instruction": "Generate two CSV files (expression and optional properties) that meet ImmCellFie formatting rules.",
+      "substeps": [
+        {
+          "instruction": "Download the HPA blood expression zip folder and save it locally.",
+          "title": ""
+        },
+        {
+          "instruction": "Open RStudio (download R from https://www.r-project.org/ and RStudio from https://rstudio.com/products/rstudio/download/ if needed).",
+          "title": ""
+        },
+        {
+          "instruction": "Load required R libraries:",
+          "title": ""
+        },
+        {
+          "instruction": "```R",
+          "title": ""
+        },
+        {
+          "instruction": "library(data.table)",
+          "title": ""
+        },
+        {
+          "instruction": "library(dplyr)",
+          "title": ""
+        },
+        {
+          "instruction": "library(tidyr)",
+          "title": ""
+        },
+        {
+          "instruction": "library(AnnotationDbi)",
+          "title": ""
+        },
+        {
+          "instruction": "library(org.Hs.eg.db)",
+          "title": ""
+        },
+        {
+          "instruction": "```",
+          "title": ""
+        },
+        {
+          "instruction": "Load the HPA data and reshape to wide format:",
+          "title": ""
+        },
+        {
+          "instruction": "```R",
+          "title": ""
+        },
+        {
+          "instruction": "blood.data <- fread('path/to/zip/contents')  # adjust path",
+          "title": ""
+        },
+        {
+          "instruction": "TPM.matrix <- spread(blood.data, 'Sample ID', TPM)",
+          "title": ""
+        },
+        {
+          "instruction": "```",
+          "title": ""
+        },
+        {
+          "instruction": "Convert Ensembl IDs to Entrez IDs and remove NAs:",
+          "title": ""
+        },
+        {
+          "instruction": "```R",
+          "title": ""
+        },
+        {
+          "instruction": "gene.map <- mapIds(org.Hs.eg.db, keys=TPM.matrix$ENSEMBL, column='ENTREZID', keytype='ENSEMBL')",
+          "title": ""
+        },
+        {
+          "instruction": "TPM.matrix.entrez <- cbind(ENTREZID=gene.map, TPM.matrix[,-which(names(TPM.matrix) == 'ENSEMBL')])",
+          "title": ""
+        },
+        {
+          "instruction": "TPM.matrix.entrez <- na.omit(TPM.matrix.entrez)",
+          "title": ""
+        },
+        {
+          "instruction": "```",
+          "title": ""
+        },
+        {
+          "instruction": "Aggregate duplicate Entrez IDs by keeping the maximum TPM value:",
+          "title": ""
+        },
+        {
+          "instruction": "```R",
+          "title": ""
+        },
+        {
+          "instruction": "TPM.entrez.max <- TPM.matrix.entrez %>% group_by(ENTREZID) %>% summarise_all(max)",
+          "title": ""
+        },
+        {
+          "instruction": "```",
+          "title": ""
+        },
+        {
+          "instruction": "Add a pseudo‑count of 1 to all TPM values (to avoid zeros in log transforms):",
+          "title": ""
+        },
+        {
+          "instruction": "```R",
+          "title": ""
+        },
+        {
+          "instruction": "TPM.entrez.pseudo <- TPM.entrez.max %>% mutate_all(~ . + 1)",
+          "title": ""
+        },
+        {
+          "instruction": "```",
+          "title": ""
+        },
+        {
+          "instruction": "Prepare the optional phenotypic properties file (ensure it has a header and rows match the column order of the expression file).",
+          "title": ""
+        },
+        {
+          "instruction": "Export the two files as CSV:",
+          "title": ""
+        },
+        {
+          "instruction": "```R",
+          "title": ""
+        },
+        {
+          "instruction": "fwrite(TPM.entrez.pseudo, 'demo_expression.csv')",
+          "title": ""
+        },
+        {
+          "instruction": "fwrite(pheno.data, 'demo_pheno.csv')",
+          "title": ""
+        },
+        {
+          "instruction": "```",
+          "title": ""
+        },
+        {
+          "instruction": "If you prefer not to use R, you may skip the above steps and use the pre‑processed files provided (File S2 – demo_expression.csv and File S3 – demo_pheno.csv) or create equivalent CSVs with spreadsheet software such as Microsoft Excel.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Import data into ImmCellFie",
+      "instruction": "Upload the prepared CSV files to your ImmCellFie account.",
+      "substeps": [
+        {
+          "instruction": "From the ImmCellFie dashboard, click ‘Select data’ under your username or go to the ‘Data’ tab.",
+          "title": ""
+        },
+        {
+          "instruction": "Choose ‘Upload local files’. A pop‑up with formatting instructions will appear.",
+          "title": ""
+        },
+        {
+          "instruction": "Upload **demo_expression.csv** and **demo_pheno.csv**.",
+          "title": ""
+        },
+        {
+          "instruction": "Enter “ImmCellFie Demo” in the optional ‘Description’ box.",
+          "title": ""
+        },
+        {
+          "instruction": "Click ‘Upload’ and wait for the confirmation that the files were successfully uploaded.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Load dataset for analysis",
+      "instruction": "Make the uploaded dataset available for running CellFie.",
+      "substeps": [
+        {
+          "instruction": "If the upload pop‑up is still open, click the ‘Load’ button at its bottom right; otherwise, go to the Data page and click ‘Load’ next to the “ImmCellFie Demo” dataset.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Run the CellFie algorithm",
+      "instruction": "Configure analysis parameters and execute CellFie on the uploaded data.",
+      "substeps": [
+        {
+          "instruction": "From the ImmCellFie dashboard click ‘Analyze’ → select ‘CellFie’ from the drop‑down menu.",
+          "title": ""
+        },
+        {
+          "instruction": "In the left‑hand parameter panel:",
+          "title": ""
+        },
+        {
+          "instruction": "• Choose **human** from the ‘Organism’ menu (automatically selects model ‘recon v2.2’).",
+          "title": ""
+        },
+        {
+          "instruction": "• Select **local** for ‘Threshold type’ (gene‑specific local thresholding).",
+          "title": ""
+        },
+        {
+          "instruction": "• Keep default local thresholding settings:",
+          "title": ""
+        },
+        {
+          "instruction": "– Percentile or value: **percentile**",
+          "title": ""
+        },
+        {
+          "instruction": "– Local threshold type: **min‑max mean**",
+          "title": ""
+        },
+        {
+          "instruction": "– Low percentile: **25**",
+          "title": ""
+        },
+        {
+          "instruction": "– High percentile: **75**",
+          "title": ""
+        },
+        {
+          "instruction": "• Optionally add the description “demo‑results”.",
+          "title": ""
+        },
+        {
+          "instruction": "Click ‘Run CellFie’. A pop‑up will show an estimated run time (≈9 min for the example dataset).",
+          "title": ""
+        },
+        {
+          "instruction": "Wait for the spinning wheel to disappear, indicating completion.",
+          "title": ""
+        },
+        {
+          "instruction": "When the run finishes, click ‘Load’ in the result pop‑up (or use the Data page’s load button) to view the results.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Download raw CellFie results",
+      "instruction": "Retrieve the output files for downstream analysis.",
+      "substeps": [
+        {
+          "instruction": "In the CellFie Results view click the ‘Downloads’ button at the top.",
+          "title": ""
+        },
+        {
+          "instruction": "Batch‑download the four files:",
+          "title": ""
+        },
+        {
+          "instruction": "• **score.csv** – matrix of continuous task scores (rows = tasks, columns = samples).",
+          "title": ""
+        },
+        {
+          "instruction": "• **scoreBinary.csv** – matrix of binary activity (1 = active, 0 = inactive).",
+          "title": ""
+        },
+        {
+          "instruction": "• **taskInfo.csv** – mapping of task IDs to system/subsystem names (provides row labels).",
+          "title": ""
+        },
+        {
+          "instruction": "• **detailScoring.csv** – detailed per‑sample, per‑task information (sample ID, task ID, task score, binary score, essential reaction, reaction activity level, gene used, original gene expression, etc.).",
+          "title": ""
+        },
+        {
+          "instruction": "Note that the score matrices lack headers; use taskInfo.csv to add row labels and the original expression file’s header row for column labels in any spreadsheet program.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Create subgroups based on cell type",
+      "instruction": "Define sample groups for comparative analyses using the optional properties file.",
+      "substeps": [
+        {
+          "instruction": "In the CellFie Results page click ‘Create subgroups’ (bottom left) or navigate to the ‘Subgroups’ page.",
+          "title": ""
+        },
+        {
+          "instruction": "The default group is ‘All samples’. Click the button under the ‘Immune cell’ column to split the data by the cell‑type column in the properties file.",
+          "title": ""
+        },
+        {
+          "instruction": "You will now see groups such as MAIT T‑cell, NK‑cell, T‑reg, basophil, etc.",
+          "title": ""
+        },
+        {
+          "instruction": "To build custom higher‑level groups, click ‘Add subgroup’, name it (e.g., “Granulocytes”), and select the constituent cell types by clicking on their bars in the plot (e.g., basophil, eosinophil, neutrophil).",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat to create the following custom subgroups:",
+          "title": ""
+        },
+        {
+          "instruction": "• **Monocytes** – classical monocyte, intermediate monocyte, non‑classical monocyte",
+          "title": ""
+        },
+        {
+          "instruction": "• **Dendritic Cells** – myeloid DC, plasmacytoid DC",
+          "title": ""
+        },
+        {
+          "instruction": "• **B cells** – memory B‑cell, naive B‑cell",
+          "title": ""
+        },
+        {
+          "instruction": "• **T Cells** – MAIT T‑cell, T‑reg, gdT‑cell, memory CD4 T‑cell, memory CD8 T‑cell, naive CD4 T‑cell, naive CD8 T‑cell",
+          "title": ""
+        },
+        {
+          "instruction": "Return to the Results page (Analyze → CellFie) when finished.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Explore hierarchy with Tree tool",
+      "instruction": "Navigate the CellFie task hierarchy and view scores at different depths.",
+      "substeps": [
+        {
+          "instruction": "Click the ‘Tree’ tab in the CellFie Results view.",
+          "title": ""
+        },
+        {
+          "instruction": "By default the first two subgroups (e.g., MAIT T‑cell and NK‑cell) are selected for comparison.",
+          "title": ""
+        },
+        {
+          "instruction": "Use the hierarchy controls to expand or collapse system, subsystem, and task levels.",
+          "title": ""
+        },
+        {
+          "instruction": "Adjust parameters as needed (Depth, Subgroup, Color map, Search) to focus on specific elements.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Visualize hierarchy with Hierarchy tool",
+      "instruction": "Generate publication‑ready hierarchical visualizations (treemap, enclosure diagram, Voronoi map).",
+      "substeps": [
+        {
+          "instruction": "Click the ‘Hierarchy’ tab.",
+          "title": ""
+        },
+        {
+          "instruction": "Select two subgroups to compare (example: memory CD4 T‑cell vs. memory CD8 T‑cell).",
+          "title": ""
+        },
+        {
+          "instruction": "Choose the visualization type – set to **enclosure diagram** for this example.",
+          "title": ""
+        },
+        {
+          "instruction": "Set parameters:",
+          "title": ""
+        },
+        {
+          "instruction": "• Depth: **3** (task level)",
+          "title": ""
+        },
+        {
+          "instruction": "• Subgroup: **memory CD4 T‑cell vs. memory CD8 T‑cell**",
+          "title": ""
+        },
+        {
+          "instruction": "• Value: **activity** (binary)",
+          "title": ""
+        },
+        {
+          "instruction": "• Color map: **blue‑orange**",
+          "title": ""
+        },
+        {
+          "instruction": "• Label opacity: **0.75**",
+          "title": ""
+        },
+        {
+          "instruction": "Hover over any element to see a pop‑out with summary statistics.",
+          "title": ""
+        },
+        {
+          "instruction": "Use the ‘Download’ button to save the plot as SVG or PNG if desired.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Compare groups with Volcano plot",
+      "instruction": "Identify significantly different metabolic tasks between two subgroups.",
+      "substeps": [
+        {
+          "instruction": "Click the ‘Volcano plot’ tab.",
+          "title": ""
+        },
+        {
+          "instruction": "Select two subgroups (example: neutrophils vs. eosinophils).",
+          "title": ""
+        },
+        {
+          "instruction": "Choose the hierarchy depth (e.g., **Depth 2** for subsystems).",
+          "title": ""
+        },
+        {
+          "instruction": "The plot shows up‑regulated tasks in red, down‑regulated in blue, non‑significant in gray.",
+          "title": ""
+        },
+        {
+          "instruction": "Optionally adjust significance (p‑value) and fold‑change thresholds (commonly 0.01 and 1.5).",
+          "title": ""
+        },
+        {
+          "instruction": "Select specific subsystems (e.g., “OXIDATIVE PHOSPHORYLATION & ROS DETOXIFICATION”, “PYRIMIDINE CATABOLISM”, “AMINO SUGARS METABOLISM”, “N‑GLYCAN METABOLISM”) either by clicking on the bubbles or using the search drop‑down.",
+          "title": ""
+        },
+        {
+          "instruction": "Click the information button to view detailed statistics for each selected subsystem.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the figure as SVG or PNG if needed.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Generate heatmap of activity scores",
+      "instruction": "Create grouped heatmaps for visual comparison of scores across subgroups.",
+      "substeps": [
+        {
+          "instruction": "Click the ‘Heatmap’ tab.",
+          "title": ""
+        },
+        {
+          "instruction": "Select two subgroups (example: Monocytes vs. Dendritic Cells).",
+          "title": ""
+        },
+        {
+          "instruction": "Set **Depth** to **2** (subsystem) and **Value** to **score** (continuous) – the heatmap will be sorted by mean score by default.",
+          "title": ""
+        },
+        {
+          "instruction": "Observe that monocytes show higher activity in the top subsystems (e.g., “EICOSANOID METABOLISM”).",
+          "title": ""
+        },
+        {
+          "instruction": "Change **Depth** to **3** (task), **Value** to **activity** (binary), and **Color map** to **yellow‑green‑blue** to view binary activity.",
+          "title": ""
+        },
+        {
+          "instruction": "Note tasks such as “Synthesis of creatine from arginine” and “Conversion of lysine to L‑2‑Aminoadipate” that are active in all dendritic cells and inactive in all monocytes.",
+          "title": ""
+        },
+        {
+          "instruction": "Use the ‘Download’ button to export the heatmap as SVG or PNG.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Visualize metabolic pathways with Escher maps",
+      "instruction": "Overlay reaction activity scores onto pathway maps for single or comparative views.",
+      "substeps": [
+        {
+          "instruction": "Click the ‘Pathway map’ tab.",
+          "title": ""
+        },
+        {
+          "instruction": "Select two subgroups (example: naive B‑cell vs. memory B‑cell).",
+          "title": ""
+        },
+        {
+          "instruction": "Choose a metabolic system from the ‘Select map’ drop‑down (e.g., **Amino Acids Metabolism**).",
+          "title": ""
+        },
+        {
+          "instruction": "Set **Subgroup** to **naive B‑cell vs. memory B‑cell** to display log₂ fold‑change of mean reaction scores between the groups.",
+          "title": ""
+        },
+        {
+          "instruction": "The map colors reactions according to activity (blue‑green‑red scale).",
+          "title": ""
+        },
+        {
+          "instruction": "Use the ‘View’ menu to enter full‑screen mode.",
+          "title": ""
+        },
+        {
+          "instruction": "Customize appearance via the ‘Settings’ menu (refer to https://escher.readthedocs.io/en/latest/getting_started.html#sections-1-9‑View‑options‑and‑1-11‑Settings for details).",
+          "title": ""
+        },
+        {
+          "instruction": "Optionally save the map as SVG or PNG.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:40:20.471715Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Life functions through complex interdependencies between genes, proteins, and metabolites. The advent of high-throughput omic technologies have enabled researchers to comprehensively monitor these individual molecule-types; however, interpretation of such omics experiments remains challenging due to the aforementioned interdependence between molecular components. While statistical methods are invaluable for identifying sets of genes involved in a given phenotype, it remains difficult to obtain and quantify mechanisms underlying a cell’s functions from only enriched pathway and ontology terms. Genome-scale metabolic networks2,3 provide systems biologists with tools to analyze genome-scale omics datasets. These reconstructed networks directly link genotype to phenotype via a mathematical knowledge base of all metabolic reactions within an organism. Unfortunately, working with these models requires specialized training and extensive effort to deploy. There is a need for more accessible tools that allow any researcher to obtain similar mechanistic insights from omics data. To this end we developed CellFie,1 an approach that leverages 195 metabolic tasks identified in mammalian cells using genome-scale metabolic models, and enables one to overlay transcriptomic and proteomic data to quantify activity changes in each metabolic task. These metabolic tasks are organized into a hierarchical structure of systems and subsystems, grouping tasks based on their biological functions. For detailed descriptions of the tasks and associated references, we point users to the original publication: Richelle et al.1 (in particular Table S1 in Richelle et al.). Exhaustive description of the curated list of metabolic tasks). Using the CellFie platform, researchers have studied the metabolic impacts of many systems, including perturbing renal drug transporters,4 and identifying metabolic tasks perturbed in Alzheimer’s disease.1 ImmCellFie (immcellfie.renci.org), presented here, was developed",
+  "content_type": "protocol",
+  "content_type_score": 32,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

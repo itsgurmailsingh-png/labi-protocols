@@ -9,7 +9,141 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "Graphical abstract",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "Overview",
+      "instruction": "During design, designers widely use building performance models (BPMs) to analyze, understand, and predict building systems, energy usages, occupancy comfort, safety, and health. BPMs are usually constructed based on data of human-building interactions obtained using traditional data collection methods (e.g., surveys, sensors, and laboratories). These methods are heavily reliant on existing buildings. Consequently, data of human-building interactions collected in such a manner does not effectively describe those interactions in new designs. This often contributes to the discrepancy between estimations and real building performance, which has often been cited as a major impediment towards the achievement of building performance objectives [[2], [3], [4]]."
+    },
+    {
+      "title": "Overview",
+      "instruction": "To that end, the authors have offered a computational framework to reduce the abovementioned discrepancy by improving the prediction accuracy of BPMs. The framework enhances the prediction accuracy of existing BPMs by incorporating context-aware design-specific data associated with new designs, which allows designers to finetune existing BPMs using the context information in new designs. Immersive virtual environments (IVEs) are used to simulate building contexts of building under design as well as observe and collect human-building interactions. Artificial neural networks (ANNs) combine an existing BPM with context-aware design-specific data acquired by using IVEs."
+    },
+    {
+      "title": "Overview",
+      "instruction": "The paper focuses on details of theories, algorithms, experimental designs, and data collections of the framework. Full research and validations of the framework can be found in [1]."
+    },
+    {
+      "title": "Computational framework",
+      "instruction": "There four main elements included in the computational framework (see Fig. 1); (1) an existing building performance model (an existing BPM), (2) context-aware design-specific data obtained from IVE experiments, (3) computation, and (4) an augmented BPM. In the following, theories, algorithms, experimental designs, and data collections of the components are elaborated in detail.Fig. 1The computational framework [1].Fig. 1"
+    },
+    {
+      "title": "Existing building performance model",
+      "instruction": "An existing building performance model (an existing BPM) presents relationships between dependent variables such as human-building interactions and independent variables such as interior configurations, locations of building components, and outdoor environments. Existing BPMs can be in a variety of forms such as statistical models (e.g., regression) and occupancy data [[5], [6], [7]]."
+    },
+    {
+      "title": "Existing building performance model",
+      "instruction": "To demonstrate the framework, the authors chose a lighting BPM developed by Hunt [8] as an existing BPM. The Hunt model is in the form of Probit regression (see Fig. 2). Monte Carlo (MC) simulation is applied to acquire independent and identically distributed (IID) samples of the existing BPM. In the MC simulation, work area illuminance (x) is considered as inputs. A uniform distribution is used to randomly generated work area illuminance with range from 200 lux to 700 lux. The uniform distribution is used because values of the work area illuminance are assumed to occur with the same relative frequency. The MC simulation used work area illuminance (lux) and Hunt model to produce the probabilities of switching on. The obtained IID samples of work area illuminance (lux) and the corresponding probability of switching on are paired, called the existing BPM dataset, and comprised of 5000 data points. The number of data points are determined based on the learning curve approach [9]. The learning curve is a plot between the number of training data and the accuracy of the trained ANN with a specific number of iterations. Up to a certain point, additional training data do not significantly increase the accuracy of the trained ANN (called knee point). The number of training data point is defined based on the knee point. Details of ANNs are explained in the computation section.Fig. 2The diagram of executing the existing building performance model.Fig. 2"
+    },
+    {
+      "title": "Context-aware design-specific data",
+      "instruction": "Fig. 3 illustrates steps to obtain context-aware design-specific data (IVE data) and how to synthetically generate IID samples from obtained IVE data (the synthetic IVE dataset). The details of each step are explained in the following sections.Fig. 3Diagram of context-aware design-specific data [1].Fig. 3"
+    },
+    {
+      "title": "The physical environment",
+      "instruction": "An office is selected as the physical environment (see Fig. 3). The dimension is 9’ x 12’ x 10’ (width × length × height). The office is equipped with multiple sensors to measure the following: 1) indoor and outdoor illuminance (lux), 2) the light switch status (on and off), and 3) the occupancy statuses (occupy and non-occupy) as described in Table 1. The sensors collect data with 5 s intervals between September 23rd and October 27th, 2016.Table 1Descriptions and locations of the sensors installed in the office.Table 1SensorMeasurementLocation# in Fig. 3Onset UX90-005 HOBO occupancy/lightThe occupancy and the lighting statusAbove the entrance door1Onset UX90-005 HOBO occupancy/lightThe occupancy and the lighting statusOn the work area (desk)3Onset U12-012 HOBO temperature/relative humidity/light/ data loggersThe work area illuminanceOn the work area (desk)2Onset U12-012 HOBO temperature/relative humidity/light/ data loggersThe outdoor illuminanceOn the window4"
+    },
+    {
+      "title": "The physical environment",
+      "instruction": "The data of the occupancy obtained from the physical environment are observed with respect to occupant interactions’ patterns with the light switch. Contextual information of factors influencing interactions are also investigated and defined (e.g., occupancy status, length of intermediate leaving, outdoor illuminance, and work area illuminance). Factors influencing human-building interactions on light switch usages are summarized as shown in Table 2 and they are used to develop the IVE experiments. Moreover, the data obtained from the physical environment are used as a baseline to evaluate results of an augmented BPM.Table 2Contextual factors, independent, and dependent variables in the case study.Table 2Contextual Factor (Observation)StatusOccupancyNon-occupy (False)Occupy (True)Intermediate LeavingNo-leaveShort intermediate leave (shorter than an hour)Long intermediate leave (longer than or equal to an hour)Outdoor IlluminanceDarkNormalBrightIndependent Variable (Observation)StatusWork Area IlluminanceDark (200 Lux)Normal (500 Lux)Bright (700 Lux)Dependent Variable (State)StatusLight SwitchOn (S1)Off (S2)"
+    },
+    {
+      "title": "IVE experiment",
+      "instruction": "The IVE experiment is designed by using the Spatial-Temporal Event-Driven (STED) modeling approach [10] along with the occupancy data obtained from the physical environment. Based on the STED, the IVE experiment is constructed by using four major variables, i.e., states, contexts, events, and human(H)-building(B) interactions. States are the statuses of operations in the building at the certain point of time, i.e., light on and off in the IVE experiment (see Table 2). Contexts are situations of independent variables and the contextual factors in Table 2, which describe conditions of the building at the certain point of time. Events are occurences such as events during a day (arrival, intermediate leaving, and departure) that set contexts as well as influence the occupant interacions changing or maintaining the state. H-B interactions refer to occupant interactions with building components (e.g., light switch), which are triggered by the occurances of events."
+    },
+    {
+      "title": "IVE experiment",
+      "instruction": "IVE experiments are arranged in sequences. Each sequence is comprised of multiple events, namely initial, arrival, intermediate leaving, coming back from intermediate leaving, and departure (see Table 3). The unique combination of factors in the IVE experiment are defined by events described in Fig. 4. Three events of the arrival, two events of the intermediate leave, three events of the returning from intermediate leave, and two events of the departure lead to 3 × 2 × 3 × 2 = 36 sequences. For example, the first sequence represents: (1) at arrival, bright illuminance and occupy, (2) at intermediate leave, long intermediate leave and non-occupy, (3) at returning from intermediate leave, bright illuminance and occupy, and (4) at departure, normal illuminance and non-occupy.Table 3The sequence of the IVE experiment.Table 3EventSequence of IVE Experiment in a SequenceLight Status Before InteractionVirtual and Auditory Cues Exposed to the ParticipantInteractionLight Status After InteractionArrival at the OfficeInitial light statusParticipant interacts with light switchLight status of the eventIntermediate LeaveLight status of the previous eventParticipant interacts with light switchLight status of the eventReturning from the Intermediate LeaveLight status of the previous eventParticipant interacts with light switchLight status of the eventDepartureLight status of the previous eventParticipant interacts with light switchLight status of the eventFig. 4Diagram of factors included in the IVE experiment [1].Fig. 4"
+    },
+    {
+      "title": "IVE experiment",
+      "instruction": "In the IVE experiment, visual and auditory cues are exposed to the participant to inform the participant about the situations of variables in Table 2. The prticipant is a male faculty member in Louisiana State University, who also occupies the physical environment. During the IVE experiment, the roll of the participant is to select the light switch status based on given events. There are three alternative light switch statuses for the participant to select, namely switch on, off, and maintain the light switch. The IVE experiment occurs in two sessions and lasts 140 min in total. Occupancy status, work area illuminance, outdoor illuminace, and intermediate leaving status data as well as the selections of the light switch status are recorded throughout the experiment. The recorded data are called context-aware design-specific data."
+    },
+    {
+      "title": "Generating IID samples from IVE experiment",
+      "instruction": "Since the sample size of context-aware design-specific data is relatively small, IID samples are generated by using a Hidden Markov Model (HMM) Baum-Welch [11]. The HMM learns the relationship between factors influencing human-building interactions (i.e., occupancy, intermediate leaving, work area and outdoor illuminance) and human-building interactions (i.e., light switching). The HMM assumes that, in each sequence, the current state at time t (St) influences occurrence of the adjacent state at time t + 1 (St+1). The state changes from the current state at time t to the next state at time t + 1 is describe as a state transition [12]. The time steps of data collected from the IVE experiment are presented in Table 4. For instance, if the light is on (St) at the arrival event (t), the situation of the light on may influence the occupant to turn off the light or leave the light on (St+1) at the intermediate leaving event (t + 1). The probabilities of state transitions are analyzed. A transition probability matrix is used to present the probabilities of state transitions. The observations are sets of contexts occurring under particular events. For example, at the arrival event (t), the observation is occupied office, no leave, dark outdoor and work area illuminance. The probabilities of observations are calculated and simplified in an observation probability matrix.Table 4Time steps of data collected from the IVE experiment.Table 4Time stept t+1EventInitialArrival at the OfficeArrival at the OfficeIntermediate LeaveIntermediate LeaveReturning from the Intermediate LeaveReturning from the Intermediate LeaveDeparture"
+    },
+    {
+      "title": "Generating IID samples from IVE experiment",
+      "instruction": "The IVE experiment data are classified into the states and the observations of events (see Table 2). The states are the statuses of the light switch. The other variables are observations. Each observation is encoded in a vector form and represented as an ordinal variable. The example of an encoded observations is described as follow: occupancy, no intermediate leave, bright work area illuminance, and bright outdoor illuminance are represented as “Occupy + No leave + Bright + Bright”. Then, it is represented by “1”. After that, the initial-state, transition probabilities and observation probabilities are analyzed."
+    },
+    {
+      "title": "Generating IID samples from IVE experiment",
+      "instruction": "Initial-state probabilities are probabilities that states (sn) in Table 2 occur at initial events in 36 sequences (p(sn)), which can be calculated using (1).(1)p(sn) =Number of times the Sn occurs in initial eventstotal number of intial events"
+    },
+    {
+      "title": "Generating IID samples from IVE experiment",
+      "instruction": "In this study, the initial light status is randomly assigned with light on and off equally likely throughout the 36 sequences. Therefore, the initial-state probabilities are 0.5 for both light switch on (S1) and light switch off (S2)."
+    },
+    {
+      "title": "Generating IID samples from IVE experiment",
+      "instruction": "Transition probabilities are probabilities of state changes from event e (Si) to event e+1 (Sj) across the experiment (p(Si, Sj)). The formula to obtain transition probabilities is shown in (2).(2)p(Si, Sj) =Number of occurences that Si at event e changes to Sj at event e+1 Total number of occurences of Si"
+    },
+    {
+      "title": "Generating IID samples from IVE experiment",
+      "instruction": "Transition probabilities of this study are calculated and demonstrated in Table 5, where S1 is light switch on and S2 is light switch off.Table 5Transition probability matrix of this application.Table 5Transition probabilitySt+1 occurred at e+1S1S2St occurred at eS10.350.65S20.960.04"
+    },
+    {
+      "title": "Generating IID samples from IVE experiment",
+      "instruction": "Observation probabilities are probabilities that an observation occurs under each state. The formula to obtain observation probabilities is shown in (3). The observation probability matrix of this study is obtained and shown in Table 6.(3)p(Si, K) =Number of occurences of observation K associated with SiTotal number of occurences of Si Table 6Observation probability matrix of this application.Table 6Status of observationsObservation probabilityNon-occupy + No leave + Dark + DarkNon-occupy + No leave + Normal + NormalNon-occupy + No leave + Bright + BrightNon-occupy + Short leave + Dark + DarkNon-occupy + Short leave + Normal + NormalNon-occupy + Short leave + Bright + BrightNon-occupy + Long leave + Dark + DarkNon-occupy + Long leave + Normal + NormalNon-occupy + Long leave + Bright + BrightOccupy + No leave + Dark + DarkOccupy + No leave + Normal + NormalOccupy + No leave + Bright + BrightState1(S1)0.060.060.060.0400.040000.250.250.24State2(S2)0.290.290.070.030.070.030.070.070.07000.01"
+    },
+    {
+      "title": "Generating IID samples from IVE experiment",
+      "instruction": "Then the HMM takes the initial-state, the transition and the observation probabilities calculated previously, and the 36 sequences of observations as inputs in the training process. Fig. 5 shows IID samples from the IVE experiment data, where the HMMLearn Python library is used for the training and application of the HMM [13].Fig. 5IID samples of the IVE data.Fig. 5"
+    },
+    {
+      "title": "Generating IID samples from IVE experiment",
+      "instruction": "The trained HMM produces 5000 data points of the statuses of the light switch, the independent variables, and the contextual factors. Like the existing BPM dataset, the number of data points are determined by using the learning curve approach [9]. The probabilities of switching on are analyzed by using data of statuses of the light switch. Then, the probabilities of switching on, the IID samples of the independent variables, and the contextual factors are paired. The paired dataset is called the synthetic IVE dataset."
+    },
+    {
+      "title": "Computation",
+      "instruction": "The core of the framework is the computation for biasing an existing BPM dataset by using a synthetic IVE dataset to enhance the performance of the existing BPM. Fig. 6 demonstrates the major stages of the computation in the framework (i.e., data pre-processing, combination of the existing BPM dataset and the synthetic IVE dataset, as well as feature ranking), which are explained in the following.Fig. 6Flowchart representing the computation of the framework.Fig. 6"
+    },
+    {
+      "title": "Data pre-processing",
+      "instruction": "Four major data preprocessing steps are performed, namely missing data generation, data normalization, data splitting, and adding Additive White Gaussian Noise (AWGN)."
+    },
+    {
+      "title": "Data pre-processing",
+      "instruction": "Missing data generation: Since the existing BPM dataset does not include contextual factors, data of contextual factors are randomly generated by replicating contextual factors in the synthetic IVE dataset (see Fig. 7). The descriptions are as follows:•The data of occupancy are generated by using variables of non-occupancy and occupancy.•The data of intermediate leaving are generated by using variables of non-leave, short intermediate leave, and long intermediate leave.•The data of outdoor illuminance are generated by using variables of dark, normal, and, bright.Fig. 7Diagram of generating missing data for the existing BPM dataset.Fig. 7"
+    },
+    {
+      "title": "Data pre-processing",
+      "instruction": "Data normalization: The input data (i.e., an independent variable and contextual factors) of the existing BPM dataset and the synthetic IVE dataset are normalized with respect to the standard deviations and means of the synthetic IVE dataset. The probabilities of switching on (outputs) of both datasets are not normalized."
+    },
+    {
+      "title": "Data pre-processing",
+      "instruction": "Data splitting: The normalized existing BPM dataset and synthetic IVE dataset are separated based on an 80-20 split as follows:1)training datasets, which include:athe existing BPM training datasetbthe synthetic IVE training dataset2)testing datasets, which include:athe existing BPM testing dataset,bthe synthetic IVE testing dataset"
+    },
+    {
+      "title": "Data pre-processing",
+      "instruction": "Adding noise: five percent of the synthetic IVE training dataset is substituted for Additive white Gaussian noise (AWGN) to increase the variability of the data and reduce overfitting during the computation process. The steps of generating AWGN for the synthetic IVE training dataset are explained in Fig. 8.Fig. 8Steps to calculate the AWGN for the synthetic IVE training dataset.Fig. 8"
+    },
+    {
+      "title": "Combining the existing BPM dataset and the synthetic IVE dataset",
+      "instruction": "Back Propagation-based Artificial Neural Network (ANN): The framework combines the existing BPM dataset and the synthetic IVE dataset by using the Back Propagation-based Artificial Neural Network (ANN) [14]. The computational process is constructed by using the Python language. The ANN system is built based on the Keras functional application program interface (API) [15]. The three-layered ANN comprises of the input, hiddens, and output layers (see Fig. 9). The input layer involves the data of the following: 1) occupancy, 2) outdoor illuminance, 3) work area illuminance, and 4) intermediate leaving from mixtures of the existing BPM training dataset and the synthetic IVE training dataset. The output layer takes the data of the probability of switching on from mixtures of both training datasets. The hidden layers use 300 hidden neurons per layer with rectified linear unit activation function (ReLU). The output layer uses sigmoid activation function. The regularization is elastic net regularization (combination of L1 (Laplacian) and L2 (Gaussian) penalties). The loss function uses binary cross entropy (logistic regression). The regularization and learning rate are 10−6.Fig. 9Scheme of the Back Propagation – based Artificial Neural Network (ANN) [1].Fig. 9"
+    },
+    {
+      "title": "Combining the existing BPM dataset and the synthetic IVE dataset",
+      "instruction": "Training Algorithm: The ANN is trained by using the algorithm shown in Fig. 10, where notations are described in Table 7. The ANN is initialized by training it with the existing BPM training dataset (DtrEX) for 60,000 epochs (see step 1 in Fig. 10). After initialization, the ANN is trained on the existing BPM training dataset (DtrEX) and the synthetic IVE training dataset (DtrSI) for various mixture ratios by following step 2 described in Fig. 10. A mixture ratio (α), a number between 0 and 1, is defined to determine a mixture of the existing BPM dataset (DtrEX) and the synthetic IVE dataset (DtrSI). The ANN is trained by using an efficient greedy heuristic algorithm. The mean absolute errors (MAEs) are used as measurements to specify whether the ANN should be trained on the existing BPM training dataset or the synthetic IVE training dataset in each epoch. The MAE is used in the algorithm in two aspects. First, the MAEEX measures errors between the expected outputs of the existing BPM testing dataset (OtsEX) and the predictions of an updated BPM on the existing BPM testing dataset (PredEX), which can be calculate by using Eq. (4). Second, the MAESI measures errors between the expected outputs of the synthetic IVE testing dataset (OtsSI) and the predictions of an updated BPM on the synthetic IVE testing dataset (PredSI), which can be calculate by using Eq. (5). The notations used in Eqs. (4) and (5) are described in Table 7.(4)MAEEX=∑1NEXOtsEX-PredEXNEX(5)MAESI=∑1NSIOtsSI-PredSINSIFig. 10Training algorithm.Fig. 10Table 7Notations of variables used in the training algorithm (Fig. 10).Table 7VariablesNotationThe existing BPM training datasetDtrEXThe synthetic IVE training datasetDtrSIThe existing BPM testing datasetDtsEXThe synthetic IVE testing datasetDtsSIThe expected outputs ofDtsEXOtsEXThe expected outputs ofDtsSIOtsSIThe number of data points in DtsEXNEXThe number of data points in DtsSINSIPrediction of the ANN on DtsEXPredEXPrediction of the ANN on DtsSIPredSI"
+    },
+    {
+      "title": "Combining the existing BPM dataset and the synthetic IVE dataset",
+      "instruction": "At every epoch, if MAESIMAEEX > 1-αα, the algorithm greedily attempts to reduce MAESIMAEEX in this epoch. This is done by training the updated BPM on the synthetic IVE training dataset in this epoch that reduces the MAESI and increases the MAEEX. Otherwise, in that epoch, the updated BPM is trained on the existing BPM training dataset, i.e., MAESIMAEEX increases. In this study, the process continues for 400,000 epochs. The 400,000 epochs are defined based on many trials of the number of epochs started from 50,000 with an interval of 50,000 epochs. The learning curve [9] approach is used to investigate the errors of the predicted outcomes of the learned ANN by plotting the values of the MAEs (i.e., MAESI and MAEEX) and the number of epochs. The values of the MAEs remain almost the same, when the number of epochs is higher than 400,000. Therefore, the 400,000 epochs are used throughout the study."
+    },
+    {
+      "title": "Combining the existing BPM dataset and the synthetic IVE dataset",
+      "instruction": "Several combinations of the existing BPM dataset and the synthetic IVE dataset are constructed based on given mixture ratios (α). The obtained results of combinations are “updated BPMs”. Each updated BPMs is evaluated against the data from the physical building. The updated BPM that has the least errors when evaluated against the data from the physical building becomes an augmented BPM."
+    },
+    {
+      "title": "Feature ranking",
+      "instruction": "In this study, factors impacting predictions include: 1) occupancy status, 2) intermediate leaving, 3) work area illuminance, and 4) outdoor illuminance, which their levels of impacts are certainly different. Feature ranking determines the relative impact of such factors. The feature ranking uses three-layered ANN similar to Fig. 9 for evaluating the level of impact of each factor. To evaluate the impact of each factor, the synthetic IVE training dataset and the synthetic IVE testing dataset are modified so that the input to the ANN contains only one factor of interest a time. For example, evaluating the impact of occupancy status on the prediction of probability of switching on can be performed by having only data of occupancy status as the input to the ANN and the output remains the same (i.e., the probability of switch on). The ANN is trained by the modified synthetic IVE training dataset for 400,000 epochs. Then, the ANN predicts the outputs on the modified synthetic IVE testing dataset. The correlation of determinations (R2) statistically indicate how accurate the learning of the ANN by calculating linear relationships between the expected outputs and predicted outputs [16]. R2 can be in range from 0 to 1. If R2 is close to or equal to 1, the predictions of the ANN have low or without errors, meaning a factor strongly impact on the prediction of the ANN. The algorithm of the feature ranking and notations are demonstrated in Fig. 11 and Table 8 respectively.Fig. 11Feature ranking algorithm.Fig. 11Table 8Variables and Notations used in the feature ranking algorithm (Fig. 11).Table 8VariablesNotationThe synthetic IVE training dataset with only factor of interest (n) as inputDtr_nSIThe synthetic IVE testing dataset with only factor of interest (n) as inputDts_nSIPrediction of the ANN on Dts_nSIPrednSI"
+    },
+    {
+      "title": "Limitation and future work",
+      "instruction": "Several potentials have been demonstrated through the application of the framework [1]. However, limitations of the framework still exist with respect to the following aspects:•The framework requires users to define mixture ratio manually. The optimal mixture may be difficult to obtain since users may not accurately approximate the mixture in advance. To enhance the effectiveness of the framework, a different approach is needed to determine an optimal mixture without using a trial-and-error method, for example using the energy efficiency goal of a building to determine the mixture ratio [17,18].•The results of the study are obtained from one participant, which may affect the observational data significantly. More cases and the variety of participants need to be considered in future studies.•The numbers of iterations to train the ANN in this application are defined by using a pre-specified number of epochs, which must be high enough to ensure the proper training and accurate outcomes. As a result, computational resources (e.g., time, memory space, and storage) may be excessively consumed. In the future work, an algorithm will be developed to determine the convergence point for training the ANN, which may reduce the number of epochs and the use of computational resources. For instance, an algorithm determines the differences of the mean absolute error (MAE) between a previous and a current epoch (early stopping). If the MAE of the current epoch is less than the MAE of the current epoch for a specific number (user defined number), the training is converged."
+    }
+  ],
   "materials": [],
-  "fetched_at": "2026-06-19T00:47:08.882192+00:00"
+  "fetched_at": "2026-06-19T00:47:08.882192+00:00",
+  "media": []
 }

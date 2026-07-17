@@ -1,0 +1,379 @@
+{
+  "protocol_id": "maximizing_diversity_within_and_among_teams_in_a_large_scale_project",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Maximizing diversity within and among teams in a large-scale project",
+  "author": "Talmor",
+  "doi": "10.1016/j.mex.2022.101908",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9672448/",
+  "citation": "10.1016/j.mex.2022.101908",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 21.0,
+  "category": "Bioinformatics",
+  "estimated_time_mins": null,
+  "materials": [
+    "The project's managers preferred that team members share as few common interests as possible to facilitate effective monitoring and increase the odds of optimal performance, which depended on minimizing improper cooperation between team members. In the past, creating such groups was based on a lottery and the greedy approach – that is, in each round three delegates were randomly selected. If this trio shared a low level of interests, the team was approved, the size of their groups was reduced by 1, and the next lottery was executed. Otherwise, the groups' sizes remained the same and another lottery trial was executed. This process was exhausting, time-consuming, and did not guarantee maximal diversity. Furthermore, there was no diversity benchmark for evaluating the results.",
+    "Objective function\n(1)Z=Min{333x1+133x2+…+113x63+333x64}",
+    "Constraints",
+    "Constraints for chair assignments:(2)∑{sj|schair(j)=A}xj=400(3)∑{sj|schair(j)=B}xj=300(4)∑{sj|schair(j)=C}xj=200(5)∑{sj|schair(j)=D}xj=100",
+    "Constraints for deputy assignments:(6)∑{sj|sdeputy(j)=A}xj=300(7)∑{sj|sdeputy(j)=B}xj=400(8)∑{sj|sdeputy(j)=C}xj=100(9)∑{sj|sdeputy(j)=D}xj=200",
+    "Constraints for associate assignments:(10)∑{sj|sassociate(j)=A}xj=250(11)∑{sj|sassociate(j)=B}xj=250(12)∑{sj|sassociate(j)=C}xj=300(13)∑{sj|sassociate(j)=D}xj=200",
+    "Value range:(14)xj∈N⋃{0},∀j=1,2,…,64",
+    "When zooming into the overall mix of teams, we noticed that only 9 combinations were used out of the possible 64. Furthermore, there was no balance among these 9 combinations – one combination was assigned 300 times whereas others were used only 50 times (see Table 3). Such outcome is justified when that is the only mix that minimizes the total penalty, but was it really the case? It is more likely that the model terminates when the minimum total penalty is achieved, because no limit was imposed on the frequency of combinations. This means that only one aspect of diversity (that is, within teams) is addressed in the original algorithm, and not a second aspect (diversity among teams). This drawback is discussed and solved in Section 4.Table 3Mix of combinations in the optimal solution produced by the original algorithm – illustrative example(maximizing diversity within teams).Table 3Serial number in combinations vectorCombinationpenaltyNumber of times used (=number of teams created)7(A, B, C)1130010(A, C, B)115012(A, C, D)15020(B, A, D)1110029(B, D, A)1120034(C, A, B)1110037(C, B, A)115040(C, B, D)15050(D, A, B)11100Total10,0001000",
+    "are the bounds of the combinations."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Framing the Problem",
+      "instruction": "The challenge we faced was to create thousands of diverse teams for a special project. Each team included three members: chair, deputy, and associate, selected from various interest groups. The number of groups could potentially range from 10 to 20, their size was proportional to their political power, and the total number of members in all groups was sufficient to fully staff all the required teams. There were three levels of shared interests among groups: high, medium, and low. High refers to groups whose interests match strongly; Medium applies to groups that share similar but not the same interests; Low applies to groups that share very limited or no interests. Members of the same group would naturally be designated as High.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Framing the Problem",
+      "instruction": "The project's managers preferred that team members share as few common interests as possible to facilitate effective monitoring and increase the odds of optimal performance, which depended on minimizing improper cooperation between team members. In the past, creating such groups was based on a lottery and the greedy approach – that is, in each round three delegates were randomly selected. If this trio shared a low level of interests, the team was approved, the size of their groups was reduced by 1, and the next lottery was executed. Otherwise, the groups' sizes remained the same and another lottery trial was executed. This process was exhausting, time-consuming, and did not guarantee maximal diversity. Furthermore, there was no diversity benchmark for evaluating the results.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "The original algorithm",
+      "instruction": "The basic algorithm we suggested to resolve the problem included three stages. First, all possible combinations for setting up three-member teams are listed. Second, a penalty function is calculated for each combination. Third, the mix of combinations that minimizes the total penalty is determined using integer linear programming (ILP).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Stage 1 – Creating the list of combinations",
+      "instruction": "The list of combinations is created using the existing groups: delegates from the first, second, and third groups are chosen for the roles of chair, deputy, and associate roles, respectively. At this stage, we do not restrict the team's makeup (i.e., several delegates from the same group may be chosen). Thus, given that there are M groups, the number of possible combinations is M3.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Stage 2 – Defining the penalty function",
+      "instruction": "First, based on management's preferences, we set price tags as follows: a pair of delegates from groups that share a high level of interests costs 111 points; a pair of delegates from groups that share a medium level of interests costs 11 points; a pair of delegates from groups that share a low level of interests costs 1 point. These price tags were chosen to reflect the fact that each level of interests includes the levels below it as well, and is thus penalized for it.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Stage 2 – Defining the penalty function",
+      "instruction": "Second, we implemented this rule to define the price tag for each pair of groups according to their level of shared interests.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Stage 2 – Defining the penalty function",
+      "instruction": "Third, we calculated the penalty incurred by each combination created in the first stage as the sum of the price tags of its pairs.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Stage 2 – Defining the penalty function",
+      "instruction": "For example, suppose that there are four groups: A, B, C, D. Thus, there are 64 (=43) combinations in the list – starting with (A, A, A) and ending with (D, D, D). Also, assume that the map of interests is as follows: Only pairs of delegates from the first group – such as (A, A), (B, B), etc. – share a high level of interests, so their price tag is 111; groups A and B share a medium level of interests, so the price tag of (A, B) and (B, A) is 11; groups C and D share a low level of interests, and therefore the price tag of (C, D) and (D, C) is 1.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Stage 2 – Defining the penalty function",
+      "instruction": "Referring to the rules defined above, the penalties assigned to combinations in the list created in the first stage ranged from 333, for teams where all delegates belong to the same group, to 1, for teams comprising delegates from groups (A, C, D) or from groups (B, C, D). The complete penalty function and its frequency (i.e., the number of combinations assigned each penalty) are shown in Table 1.Table 1Penalty function (values and frequencies) for 3-member teams arranged from 4 different-sized groups: A, B, C, D, in line with a given map of interests: High – {A}, {B}, {C}, {D}; Medium – {A, B}; Low – {C, D}. The “price tag” of a team is based on the level of common interests among its members: high penalty for high level; medium penalty for medium level; and low penalty for low level.Table 1Combination (m1,m2,m3)DemonstrationsPenaltyFrequencym1=m2=m3(A, A, A), (B, B, B)…3334{m1}∪{m2}∪{m3}={A,B}(A, A, B), (A, B, B)…1336{m1}∪{m2}∪{m3}={C,D}(C, C, D), (D, C, D)…1136{m1}∪{m2}∪{m3}={A,C} or(A, A, C), (C, C, A)…11124{m1}∪{m2}∪{m3}={A,D} or(A, A, D), (D, D, A)…{m1}∪{m2}∪{m3}={B,C} or(B, B, C), (C, C, B)…{m1}∪{m2}∪{m3}={B,D}(B, B, D), (D, B, D)…{m1}∪{m2}∪{m3}={A,B,C} or(A, B, C), (B, A, C)…1112{m1}∪{m2}∪{m3}={A,B,D}(A, B, D), (D, A, B)…{m1}∪{m2}∪{m3}={A,C,D} or(A, C, D), (D, A, C)…112{m1}∪{m2}∪{m3}={B,C,D}(B, C, D), (D, C, B)…",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Stage 3 - Integer linear programming",
+      "instruction": "Next, integer linear programming is used to find the best mix of combinations, which maximizes the diversity of each team. This goal is equivalent to the objective of minimizing the total penalty imposed on all teams.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Stage 3 - Integer linear programming",
+      "instruction": "Because the penalties are derived from the teams' combinations, we defined the decision variables as follows: each decision variable represents the number of times a specific combination is assigned. This approach enables us to substantially reduce the size of the problem because the focus is not on the number of matches required, which may be tens of thousands, but on the number of possible combinations (which is the number of groups to the power of 3 – hundreds or a few thousands at most).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Stage 3 - Integer linear programming",
+      "instruction": "The problem's constraints include sets of equations – a set of three equations for each group. Each equation represents a role. The sum of decision variables that represent combinations in which this group holds this role is equal to its number of delegates for this role. The total number of constraints is three times the number of groups.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Stage 3 - Integer linear programming",
+      "instruction": "Referring to the illustrative example (section 3.2), assume that 1,000 teams should be assigned, and that the number of delegates for each role and group are as given in Table 2. The ILP formulation is as follows in section 3.4.Table 2Data of illustrative example - 4 different-sized groups A, B, C, D, and a given map of interests. Each group has delegates for each role. The mission is to create 1,000 3-member teams in a way that maximizes diversity in each team, while also maximizing diversity among teams.Table 2groupsABCDTotalNumber of delegatesChairs4003002001001000Deputies3004001002001000Associates2502503002001000Map of interestsHigh {A}, {B}, {C}, {D}Medium {A, B}Low {C, D}",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "Given parameters\nN = 1,000 Number of teamsM={A,B,C,D} Set of groupsBrole the number of delegates that each group allocates for each role:\nBchair=(400,300,200,100) Bdeputy=(300,400,100,200) Bassociate=(250,250,300,200)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "For each vector, the sum of its components is equal to the number of teams:∑m∈{A,B,C,D}bm,role=1000∀role=chair,deputy,associateL_High={{A},{B},{C},{D}}L_medium={{A,B}}L_Low={{C,D}}",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "Analyzed parameters\nS A vector that lists the 64 three-group combinations:\nS=(s1,s2,…s64)=((A,A,A),(A,A,B),…,(D,D,C),(D,D,D)) sj=(schair(j),sdeputy(j),sassociate(j))\nC The penalty costs of vector S, cjis the cost for assigning one team by the sj combination, following the penalty function as shown in Table 1.\nC=(333,133,…,113,333)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "Decision variables\nX A vector in which each element represents the number of teams in the j-th element of S; i.e., x1 represents the number of teams where the combination is (A,A,A);x2 represents the number of teams where the combination is (A,A,B);…x64 represents the number of teams where the combination is (D,D,D).\nX=(x1x2⋮˙x64)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "Objective function\n(1)Z=Min{333x1+133x2+…+113x63+333x64}",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "Constraints",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "Constraints for chair assignments:(2)∑{sj|schair(j)=A}xj=400(3)∑{sj|schair(j)=B}xj=300(4)∑{sj|schair(j)=C}xj=200(5)∑{sj|schair(j)=D}xj=100",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "Constraints for deputy assignments:(6)∑{sj|sdeputy(j)=A}xj=300(7)∑{sj|sdeputy(j)=B}xj=400(8)∑{sj|sdeputy(j)=C}xj=100(9)∑{sj|sdeputy(j)=D}xj=200",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "Constraints for associate assignments:(10)∑{sj|sassociate(j)=A}xj=250(11)∑{sj|sassociate(j)=B}xj=250(12)∑{sj|sassociate(j)=C}xj=300(13)∑{sj|sassociate(j)=D}xj=200",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "Value range:(14)xj∈N⋃{0},∀j=1,2,…,64",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "The ILP formulation of the illustrative example",
+      "instruction": "The general mathematical formulation is given in the appendix.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Results",
+      "instruction": "The algorithm was coded in Python 3.7.2 on a conventional laptop. We applied it to the illustrative example and got the optimal solution of 10,000 penalty points within 0.68 seconds, distributed as follows: 900 teams with a price tag of 11, and 100 teams with a price tag of 1.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Results",
+      "instruction": "When zooming into the overall mix of teams, we noticed that only 9 combinations were used out of the possible 64. Furthermore, there was no balance among these 9 combinations – one combination was assigned 300 times whereas others were used only 50 times (see Table 3). Such outcome is justified when that is the only mix that minimizes the total penalty, but was it really the case? It is more likely that the model terminates when the minimum total penalty is achieved, because no limit was imposed on the frequency of combinations. This means that only one aspect of diversity (that is, within teams) is addressed in the original algorithm, and not a second aspect (diversity among teams). This drawback is discussed and solved in Section 4.Table 3Mix of combinations in the optimal solution produced by the original algorithm – illustrative example(maximizing diversity within teams).Table 3Serial number in combinations vectorCombinationpenaltyNumber of times used (=number of teams created)7(A, B, C)1130010(A, C, B)115012(A, C, D)15020(B, A, D)1110029(B, D, A)1120034(C, A, B)1110037(C, B, A)115040(C, B, D)15050(D, A, B)11100Total10,0001000",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "The Updated Algorithm",
+      "instruction": "As noted, the concept of diversity can be applied within teams (assigning diverse delegates to a given team), but also among teams (producing teams featuring diverse combinations of delegates).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "The Updated Algorithm",
+      "instruction": "Although the original algorithm is efficient, scalable, and converges quickly, it only addresses the first concept of diversity mentioned above. As a result, a specific match with a minimal penalty may be used to produce many teams, while other combinations with minimal penalty scores may be used only a few times or not at all, even though the optimal values of the objective function in both cases are the same. In the long run, interest groups may exploit this drawback to promote improper cooperation. To prevent or limit this possibility, we suggest a solution that limits the number of teams featuring the same combination of delegates in a way that ensures diversity both within and among teams. This goal is achieved by adding an iterative process to stage 3 based on a binary search, as follows:Initialize:a. Perform stage 1, stage 2, and stage 3 of the basic algorithm to determine Z and X. Z is the optimal value of the objective function, and X is the vector of instances (i.e., the number of times each combination is used).b. Set:Q=maxj{xj|xj∈X}Q is the largest element in X, i.e., the number of times the most popular combination is used.L=⌈N|M|3⌉L is the minimal positive element in X. To guarantee a solution, the minimal number of times each combination is used should be at least the number of required teams divided by the number of potential combinations.Step 1Determine:R=|{xj|xj∈X,xj>0}|R is the number of different matches in Xthat are used at least once.Step 2If |Q−L|≤0.01NTerminate.The optimal solution is X, the number of combinations used is R, and the value of the objective function is Z.Step 3Calculate an upper bound:UB=Q+L2Step 4Add a set of inequalities to the original ILP model to create an updated model (hereafter – U-ILP):xj≤Q1∀xj∈XStep 5Run the U-ILP model and get new Z1 and X1 (Z1 is the optimal value of the U-ILP objective function, and X1 is the vector of instances).Step 6If Z1=Z set X≔X1, Q≔UBElse set L≔Q1,Go to step 1Go to step 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "The Updated Algorithm",
+      "instruction": "The performance of the upgraded algorithm follows the performance of binary search log2n, where in our context n is the value of (Q−L), calculated in step 1b.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 29,
+      "title": "The Updated Algorithm",
+      "instruction": "Applying the updated algorithm to the illustrative example increased the number of used combinations to 14 and balanced their frequency, as presented in Table 4. Whereas the difference between the most used and the least used combinations was 250 (300-50) in the original algorithm, it was only 88 (112-24) in the updated algorithm.Table 4Mix of combinations in the optimal solution produced by the updated algorithm – illustrative example (Maximizing diversity within AND among teams).Table 4Serial number in combinations vectorCombination (chair, vice, associate)penaltyNumber of times usedUpdated algorithmOriginal algorithm7(A, B, C)111123008(A, B, D)11100010(A, C, B)111005012(A, C, D)105014(A, D, B)1138015(A, D, C)150019(B, A, C)11112020(B, A, D)117610029(B, D, A)1111220034(C, A, B)116410037(C, B, A)111125040(C, B, D)1245050(D, A, B)114810053(D, B, A)1126055(D, B, C)1260Total10,00010001000",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 30,
+      "title": "Implementation",
+      "instruction": "The updated algorithm was applied to the two cases presented in Talmor [25]. The first case refers to creating 10,250 teams using delegates from 12 groups. The second case refers to creating 10,600 teams using delegates from 11 groups. The entire input data of these two cases is presented in Table 5.Table 5Input data of the two cases as presented in [25].Table 5Case 1GroupsA1A2A3D1D2D3G1G2H1H2H3H4Number of delegatesChairs27052896874662500443396335314255237633Deputies27032899866668499438401342311249234640Associates27042899872669497437405341311248237630Map of interests*medium{A1, A2, A3}, {D1, D2, D3}, {G1, G2}, {H1, H2, H3, H4}Low{A1, A2, D1, D2, G1, H1, H2}, {A3, D3, G2, H3, H4}Case 2GroupsABCDEFGHIJKNumber of delegatesChairs3276531622798621182267264132911511559Deputies3280528625800617179269264133111521555Associates3277530620801619181270266133011531553Map of interests*medium{A, B}, {C, D}, {E, F}, {G, H}, {J, K, F}Low{A, B, C, D, G, J}, {E, F, H, K}⁎A high level of shared interests always exists with delegates from the same group. Also, the price tag of each pair is set according to its own level of shared interests as well as all levels below it.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 31,
+      "title": "Implementation",
+      "instruction": "Table 6 and Table 7 detail the process of the updated algorithm in cases 1 and 2, respectively.Table 6The iterative process of case study 1. Applying the updated algorithm to calculate maximal diversity within and among teams.Table 6IterationInputOutputTerminate?UBZ1QLRInitializeN/A107312669835No1339107312339846No2174107414339174N/ANo325710731225717457No421610731221617468No519510731219517475No618510731218517475YesTable 7The iterative process of case study 2. Applying the updated algorithm to calculate maximal diversity within and among teams.Table 7IterationInputOutputTerminate?UBZ1QLRInitializeN/A188201000631No150318820503646No225518820255663No313019518255130N/ANo41921882019213073No51611882016113080No614619106161146N/ANo715318938161153N/AYes",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 32,
+      "title": "Implementation",
+      "instruction": "In case study 1, the maximal diversity among teams was achieved in the 6th iteration. Note that the number of different combinations increased from 35 to 75, while the total penalty remained minimal. The process ended after approximately 20 seconds.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 33,
+      "title": "Implementation",
+      "instruction": "In case study 2, the maximal diversity among teams was achieved in the 5th iteration, where the gap between L and Q was bridged. The increase in the number of different combinations from 31 to 80 did not affect the total penalty value. The process ended after approximately 25 seconds.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 34,
+      "title": "Implementation",
+      "instruction": "When comparing the distributions of the price tags of the original algorithm solution vs. the updated algorithm solution, no substantial difference was observed. Fig. 1 demonstrates this finding.Fig. 1The price tag distributions – a comparison between the original and updated algorithms, cases 1 and 2.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 35,
+      "title": "Discussion and Summary",
+      "instruction": "This paper presents a practical and effective approach for creating thousands of diverse teams based on two notions: the first is the ranking of diversity preferences and setting penalties according to this rank; the second is referring to a group (and not to an element within it) as the basic entity when formulating the algorithm.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 36,
+      "title": "Discussion and Summary",
+      "instruction": "Thus, we set the stages of the algorithm as follows: first - identifying all possible team combinations; next - assigning penalty costs to each option, based on our diversity ranking; last - running an integer linear programming model formulated to minimize the total penalties and achieve an optimal set of assignments. An updated algorithm, based on the original one, was developed using an iterative binary search, so diversity was maximized both within and among teams.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 37,
+      "title": "Discussion and Summary",
+      "instruction": "Although the idea of a penalty may seem similar to previous studies that integrated multi-criteria analysis in the assignment process [20,26], the preferences for the ranking methods and mathematical formulation are different. Moreover, both the original and updated algorithms can be applied to problems involving very large numbers of assignments without increasing the convergence time to an optimal solution, as demonstrated in the case studies. The scalability and rapid convergence are rooted in the fact that the size of the problem depends only on the number of groups, rather than on the total number of groups members.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 38,
+      "title": "Discussion and Summary",
+      "instruction": "These benefits make our approach highly relevant in cases where heterogeneous teams are required (i.e., hospital shifts, educational activities, hackathons). Our model is also suitable for cases where team members must monitor each other and the number of teams with the same combination of members needs to be limited. Examples of such cases include counting election ballots or preventing security breaches at sensitive facilities.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 39,
+      "title": "Discussion and Summary",
+      "instruction": "As mentioned above, the number of groups impacts the scope of the problem: the larger this number, the more decision variables are required, increasing the run-time of the ILP model. In practice, the problems we coped with featured no more than 20 groups at most. Thus, the optimal solution was achieved in under 30 seconds for the updated algorithm. However, applying the algorithm to a problem involving a larger number of groups should be analyzed separately. More potential directions for future research include applying this approach to teams of different sizes or to larger teams.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 40,
+      "title": "Appendix: Mathematical formulation",
+      "instruction": "Table 2ParametersNNumber of teams.MSet of groups, namely: M={mi|miisthegroup′siname}BroleA vector that represents the number of eligible delegates of each group in a specific role. It is defined as:B(role)=(b(m1,role),b(m2,role),…,b(m|M|,role))forrole=chair,deputy,associateNote that Brole are non-negative integer vectors. In addition, for each vector, the sum of its components is equal to the number of teams:∑mi∈Mb(mi,role)=Nrole=chair,deputy,associateL_HighA set of sets of groups that share high level of interests, namely:L_High={L1k|L1k⊆M}L_MedA set of sets of groups that share medium level of interests, namely:L_Med={L2k|L2k⊆M}L_LowA set of sets of groups that share low level of interests, namely:L_Low={L3k|L3k⊆M}L_High,L_Med and L_Low are used to calculate the coefficient vector.Analyzed parametersSA vector that lists all three-group combinations:S=(s1,s2,…,s|M|3) where: sj=(schair(j),sdeputy(j),sassociate(j)),for srole(j)∈M,role=chair,deputy,associateCThe penalty costs of vector S, meaning that cjis the cost for operating one team by the sj combination.C=(c1,c2,…,c|S|),cj≥0Following our penalty function as demonstrated in Table 3.Decision variablesXThe vector of instances, i.e.: a vector in which each element represents the number of times the sj combination is used.X=(x1,x2…,x|S|)TObjective functionZ=Min{∑j=1|S|cjxj}(A.1)Constraints∑{sj|srole(j)=mi}xj=b(mi,role)forrole=chair,deputy,associate,∀mi∈M(A.2)xj∈N∪{0},∀j=1,2,…,|S|(A.3)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 41,
+      "title": "Appendix: Mathematical formulation",
+      "instruction": "Eq. (A.1) is the mathematical formulation of the objective function; Eqs. (A.2) are the mathematical formulation of the constraints described in section 3.3: for each group mi, the total number of teams in which this group holds a specific role equals to this group's allocation for this role. Eqs. (A.3) are the bounds of the combinations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "likely_not_protocol",
+  "content_type_score": 21,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

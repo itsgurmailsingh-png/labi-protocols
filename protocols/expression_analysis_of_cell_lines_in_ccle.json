@@ -19,44 +19,144 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 0.5,
+  "quality_score": 6.5,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 6,
   "materials": [],
   "steps": [
     {
       "step_id": 0,
-      "title": "Additionally, we classified DEGs by the...",
-      "instruction": "Additionally, we classified DEGs by the difference in the log2 average between the two clusters. DEGs with higher expression of cluster A cell lines than those of cluster B were defined as A genes, and those with higher expression of cluster B cell lines were defined as B genes. 5 Principal Component Analysis (PCA) Principal component analysis (PCA) for DEGs was performed to confirm the ability of our approach to distinguish the cell types in clusters A and B. Further, we carried out a discriminant analysis of the principal components and evaluated the validity of the clusters using the adegenet package in R. 6 Comparison of DEGs from RNA-seq data We evaluated the DEGs in the HCC RNA-seq data acquired from TCGA. For visualization, we used log-transformed TPM as the expression level [specifically log2(TPM + 1)]. For clinical samples from TCGA, the fold change between the two clusters was calculated. Genes were then sorted according to fold change after subtracting the average expression level between two clusters. 7 TCGA clinical data analysis We analyzed the clinical data of patients classified into two clusters defined based on cell line analysis. The weight of the surgical specimen, a continuous variable, was assessed using the Brunner-Munzel test. The operating procedure, a categorical variable, was assessed using Fisher’s exact test. Cox proportional-hazards model and log-rank test were used for survival analysis. A p-value of less than 0.05 was considered statistically significant. 8 Gene Ontology (GO) enrichment analysis We performed GO enrichment analysis of the A and B genes through DAVID ( https://david.ncifcrf.gov/) via the Bioconductor “RDAVIDWebService” package, with a Benjamini-Hochberg-adjusted p-value &lt; 0.",
-      "substeps": [],
+      "title": "Download and preprocess datasets",
+      "instruction": "Download the following files: mRNA expression data (CCLE_Expression.Arrays_2013-03-18.tar.gz) and annotation file (CCLE_Expression.Arrays.sif_2012-10-18.txt) from the CCLE portal (https://portals.broadinstitute.org/ccle); COSMIC data from the ENBL‑EBI website (https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-3610/); microarray CEL files (to be normalized later); RNA‑seq data and annotation from the NCI site (ftp://caftpd.nci.nih.gov/pub/OCG-DCC/CTD2/TGen/CCLE_RNA-seq_Analysis/); TCGA HCC RNA‑seq normalized TPM file (http://gdac.broadinstitute.org/runs/stddata__2016_01_28/data/LIHC/20160128/gdac.broadinstitute.org_LIHC.Merge_rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.Level_3.2016012800.0.0.tar.gz), raw count file (http://gdac.broadinstitute.org/runs/stddata__2016_01_28/data/LIHC/20160128/gdac.broadinstitute.org_LIHC.Merge_rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes__data.Level_3.2016012800.0.0.tar.gz), and clinical annotation file (http://gdac.broadinstitute.org/runs/stddata__2016_01_28/data/LIHC/20160128/gdac.broadinstitute.org_LIHC.Clinical_Pick_Tier1.Level_4.2016012800.0.0.tar.gz) from the Broad Institute website; additional TCGA clinical data from the GDC portal (https://portal.gdc.cancer.gov/repository, S1 Table); and primary cell expression data (GSE49910) from NCBI GEO (https://www.ncbi.nlm.nih.gov/gds/?term=GSE49910[Accession]).",
+      "substeps": [
+        {
+          "instruction": "Download CCLE expression tarball and annotation file.",
+          "title": ""
+        },
+        {
+          "instruction": "Download COSMIC dataset.",
+          "title": ""
+        },
+        {
+          "instruction": "Download NCI RNA‑seq and annotation files.",
+          "title": ""
+        },
+        {
+          "instruction": "Download TCGA normalized TPM, raw counts, and clinical files.",
+          "title": ""
+        },
+        {
+          "instruction": "Download extra TCGA clinical data from GDC.",
+          "title": ""
+        },
+        {
+          "instruction": "Download primary cell GEO dataset.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "We used “GOTERM_BP_FAT” level annotation",
-      "instruction": "We used “GOTERM_BP_FAT” level annotation. The top ten GO terms were visualized using bar plots, with the q-value and the number of enriched genes. 9 Mapping to primary cell atlas We normalized all CEL files, including liver cancer cell lines and primary cells, and integrated them. Sample categories were annotated from the metadata. Expression levels were visualized using a heatmap. 10 Calculation of representative vectors for each cell type The vector of the expression pattern for each cell type was generated as the log2 median of each probe set ID value (S1 Document). 11 Statistical Analysis Statistical analysis and data visualization of the expression array and RNA-seq were performed on the R studio (version 1.2.",
+      "title": "Normalize microarray data",
+      "instruction": "Apply MAS5 or RMA normalization to all downloaded microarray CEL files, then convert the resulting signal intensities to log2 scale for each probe set ID.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "server and R studio (1",
-      "instruction": "server and R studio (1.3.959) ( https://rstudio.com/) using several R (version 3.4.1, 3.5.3, and 3.6.",
+      "title": "Hierarchical clustering of expression",
+      "instruction": "Perform unsupervised hierarchical clustering on the mRNA expression matrices of cancer cell lines, HCC samples, and primary cells using Spearman correlation distance and either average linkage or Ward’s method; upload the analysis code to GitHub (https://github.com/fk506cni/cell_line_comparison/tree/master/analysis/77GEarray_re).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "and Bioconductor (3",
-      "instruction": "and Bioconductor (3.5 and 3.6 ) packages (S1 Document). Analysis codes were deposited to GitHub ( https://github.com/fk506cni/cell_line_comparison). Comparison of a continuous variable in 2 groups was assessed using the Brunner-Munzel test. Qualitative data were compared using the Fisher’s exact test to compare categorical variables. A p-value of less than 0.05 was considered statistically significant.",
+      "title": "Identify differentially expressed genes",
+      "instruction": "Using the Bioconductor limma package, compute moderated t‑statistics with the eBayes function, obtain corrected p‑values and Benjamini‑Hochberg q‑values for each probe set ID, and define DEGs as probe set IDs with q‑value < 0.0001.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Classify DEGs into cluster‑specific genes",
+      "instruction": "Calculate the log2 average expression of each DEG in the two liver‑cancer cell‑line clusters; label genes with higher expression in cluster A as “A genes” and those higher in cluster B as “B genes”.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "PCA and discriminant analysis",
+      "instruction": "Run principal component analysis on the DEG matrix to assess separation of clusters A and B; then perform discriminant analysis of the principal components using the adegenet R package to evaluate cluster validity.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Compare DEGs with TCGA RNA‑seq",
+      "instruction": "For TCGA HCC RNA‑seq data, transform TPM values as log2(TPM + 1); compute the fold change of each gene between the two clusters; subtract the average expression between clusters and sort genes by the resulting fold‑change values.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Statistical analysis of clinical data",
+      "instruction": "Assess the weight of surgical specimens between clusters with the Brunner‑Munzel test; evaluate the operating‑procedure categories with Fisher’s exact test; fit a Cox proportional‑hazards model and perform a log‑rank test for survival; consider p < 0.05 statistically significant.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "GO enrichment of A and B genes",
+      "instruction": "Submit the A‑gene and B‑gene lists to DAVID via the Bioconductor RDAVIDWebService package (https://david.ncifcrf.gov/); use the “GOTERM_BP_FAT” annotation and retain terms with Benjamini‑Hochberg‑adjusted p‑value < 0.2; visualize the top ten GO terms with bar plots showing q‑value and number of enriched genes.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Map expression to primary cell atlas",
+      "instruction": "Normalize all CEL files (cell lines and primary cells), integrate them into a single matrix, annotate sample categories from metadata, and visualize the expression patterns with a heatmap.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Calculate representative expression vectors",
+      "instruction": "For each cell type, compute the log2 median of each probe set ID across replicates to generate a representative expression vector (as described in S1 Document).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Literature review of liver cell lines",
+      "instruction": "Search original articles describing the establishment of liver cancer cell lines (references 13‑25); extract patient ages from those studies and compare groups using the Brunner‑Munzel test.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Statistical environment setup",
+      "instruction": "Conduct all analyses and visualizations in RStudio (versions 1.2.5042 and 1.3.959) using R versions 3.4.1, 3.5.3, and 3.6.3 and Bioconductor versions 3.5 and 3.6; deposit all analysis scripts to GitHub (https://github.com/fk506cni/cell_line_comparison); apply Brunner‑Munzel test for continuous variables, Fisher’s exact test for categorical variables, and declare significance at p < 0.05.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 33,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

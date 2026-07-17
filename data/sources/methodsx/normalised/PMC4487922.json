@@ -11,12 +11,146 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4487922/",
   "doi": "10.1016/j.mex.2015.05.002",
   "citation": "10.1016/j.mex.2015.05.002",
-  "category": "Other",
+  "category": "Lab Automation & Robotics",
   "tags": [],
   "estimated_time_mins": null,
   "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Stain tissue and scan whole slide",
+      "instruction": "Stain tumor sections for CD31 using the NCL‑CD31‑1A10 antibody (Leica Biosystems, Diegem, Belgium) on a Ventana Benchmark® XT platform, then scan each slide on a Pannoramic SCAN (3DHISTECH) scanner.",
+      "substeps": [
+        {
+          "instruction": "Use a 20× Plan Apo objective (0.80 NA) and a Hitachi HV‑F22CL 3CCD progressive‑scan color camera.",
+          "title": ""
+        },
+        {
+          "instruction": "Set image resolution to 0.23 µm/pixel, JPEG quality factor to 80, and interpolated focus distance to 15.",
+          "title": ""
+        },
+        {
+          "instruction": "Enable stitching and configure a specific scan profile for each slide; fill holes in the scan area to ensure correct tissue detection.",
+          "title": ""
+        },
+        {
+          "instruction": "After scanning, examine the whole‑slide image to confirm image quality and that the entire tissue section is captured.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Create point annotations with AutoTag",
+      "instruction": "Open the scanned slide in Pannoramic Viewer (build 1.15.4.43061, 3DHISTECH) and run the AutoHotkey script AutoTag in the background to automate point‑annotation naming.",
+      "substeps": [
+        {
+          "instruction": "In the viewer, select the point‑annotation tool and click each desired location (ROI) on the image.",
+          "title": ""
+        },
+        {
+          "instruction": "AutoTag monitors the screen, creates a point annotation at each click, and assigns a sequential number starting from 1.",
+          "title": ""
+        },
+        {
+          "instruction": "Continue until all required ROIs are annotated.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Determine minimum ROI count via bootstrapping",
+      "instruction": "Calculate the smallest number of ROIs needed for reliable microvessel‑density measurement by bootstrapping.",
+      "substeps": [
+        {
+          "instruction": "Select 25 ROIs on a CD31‑stained colorectal carcinoma slide (i = 1…25).",
+          "title": ""
+        },
+        {
+          "instruction": "For each ROI compute microvessel density QA = Σ Ni / Σ Vi,ref, where Ni is the vessel count and Vi,ref the number of grid points hitting tissue.",
+          "title": ""
+        },
+        {
+          "instruction": "Resample the 25 ROIs with replacement 1000 times and calculate QA for each resample.",
+          "title": ""
+        },
+        {
+          "instruction": "Plot the coefficient of variation (CV) of QA versus the number of ROIs and fit a trend line f(x) = a x⁻ᵇ.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute the derivative f′(x) = ‑a b x⁻ᵇ⁻¹; the minimum ROI number is reached when the derivative falls below 0.50 %.",
+          "title": ""
+        },
+        {
+          "instruction": "Applying this analysis to 19 colorectal, 22 renal cell, 21 glioblastoma, and 21 ovarian carcinoma cases indicated that 10 ROIs are sufficient.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Set magnification and export annotation list",
+      "instruction": "After all point annotations are created, let AutoTag prompt for the imaging magnification, choose 20× (sufficient for microvessel identification), and generate a summary file.",
+      "substeps": [
+        {
+          "instruction": "AutoTag writes a .txt file with three columns: sample name, number of annotations, and chosen magnification.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Generate snapshot images with AutoSnap",
+      "instruction": "Run the second AutoHotkey script AutoSnap, which reads the .txt file and automatically creates centered snapshot images for each annotation.",
+      "substeps": [
+        {
+          "instruction": "AutoSnap saves each image with a standardized filename at a predefined folder location.",
+          "title": ""
+        },
+        {
+          "instruction": "Include sleep/pause functions to accommodate software or network lag; typical runtime is ~66 s per image (vs. 19 s for manual creation).",
+          "title": ""
+        },
+        {
+          "instruction": "The process can run unattended (e.g., overnight) because no user input is required.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Prepare digital grids in Photoshop",
+      "instruction": "Create two transparent digital grids in Adobe Photoshop: a 5 × 5 field grid and a 9 × 9 field grid, each covering 2500 µm², intended for 40× and 20× magnifications respectively.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Apply grids to images via Bridge batch",
+      "instruction": "Use Adobe Bridge to batch‑process the AutoSnap images with a self‑written Photoshop action that overlays the appropriate grid layer and saves the result as a new image.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T06:33:21.424293Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "protocol",
+  "content_type_score": 33,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

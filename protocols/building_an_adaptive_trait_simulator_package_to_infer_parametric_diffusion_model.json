@@ -1,0 +1,182 @@
+{
+  "protocol_id": "building_an_adaptive_trait_simulator_package_to_infer_parametric_diffusion_model",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Building an adaptive trait simulator package to infer parametric diffusion model along phylogenetic tree",
+  "author": "Jhwueng",
+  "doi": "10.1016/j.mex.2020.100978",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7341453/",
+  "citation": "10.1016/j.mex.2020.100978",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 5.5,
+  "category": "Other",
+  "estimated_time_mins": 282,
+  "materials": [
+    "Compute the summary statistics S(D) for data D",
+    "draw sample Θj from prior π(Θ0)",
+    "# First install package 'ouxy'",
+    "# install.packages(\"ouxy\")",
+    "library(ouxy)",
+    "library(phytools)",
+    "# use coral data",
+    "data(bat)",
+    "# call for tree",
+    "tree<-bat$tree",
+    "# response variable: Body mass(g).",
+    "traitset<-bat$traitset",
+    "rownames(traitset)<-tree$tip.label",
+    "# plot tree and traits",
+    "dotTree(tree,traitset,standardize=FALSE,length=6)",
+    "The following R script performs the analysis.",
+    "#perform the analysis using ouxy",
+    "traitset<-log(traitset)",
+    "output<-ouxy(tree=tree,traitset=traitset,tol=0.01,sims= 50000) #It takes a while",
+    "#save your file",
+    "save.image(\"bat_analysis.rda\")",
+    "#save.image(\"lizard_analysis.rda\")",
+    "round(output$s.mnlog$rejection$BayesF,4)",
+    "Posterior model probabilitiesOUBMBMOUBMCIROUOUBMOUOUCIR0.51950.42950.00950.0415",
+    "The Bayes factors:"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Prepare trait data and tree",
+      "instruction": "Obtain a rooted ultrametric phylogenetic tree as an ape tree object and a matching trait data frame where species names correspond to tip labels. For the bat example the response variable is body mass (g) and the covariates are head height (mm) and head length (mm).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Install and load R packages",
+      "instruction": "Install the ouxy package from CRAN and load it together with the phytools package.",
+      "substeps": [
+        {
+          "instruction": "install.packages(\"ouxy\")",
+          "title": ""
+        },
+        {
+          "instruction": "library(ouxy)",
+          "title": ""
+        },
+        {
+          "instruction": "library(phytools)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Load example dataset and extract objects",
+      "instruction": "Load the bat dataset, assign the tree to an object called tree and the trait matrix to traitset, then set the row names of traitset to match the tree tip labels.",
+      "substeps": [
+        {
+          "instruction": "data(bat)",
+          "title": ""
+        },
+        {
+          "instruction": "tree <- bat$tree",
+          "title": ""
+        },
+        {
+          "instruction": "traitset <- bat$traitset",
+          "title": ""
+        },
+        {
+          "instruction": "rownames(traitset) <- tree$tip.label",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Visualize tree and traits (optional)",
+      "instruction": "Plot the phylogeny with trait values using dotTree with standardize=FALSE and length=6.",
+      "substeps": [
+        {
+          "instruction": "dotTree(tree, traitset, standardize=FALSE, length=6)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Log‑transform traits",
+      "instruction": "Convert all trait values to a ratio scale by applying a natural‑log transform: traitset <- log(traitset).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Run ouxy ABC analysis",
+      "instruction": "Execute the main ouxy function with tolerance 0.01 and 50 000 simulations: output <- ouxy(tree=tree, traitset=traitset, tol=0.01, sims=50000). This step draws prior samples, simulates traits under the four models (OUBMBM, OUOUBM, OUBMCIR, OUOUCIR), computes the 12 summary statistics (raw mean, variance, median, skewness, kurtosis; contrast mean, variance, median, skewness, kurtosis; Bloomberg's K; Pagel's λ) and applies the ABC rejection method.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Save analysis results",
+      "instruction": "Save the R workspace to a .rda file, e.g., save.image(\"bat_analysis.rda\").",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Load saved results (if needed)",
+      "instruction": "Load a previously saved analysis from the web: load(url(\"http://www.tonyjhwueng.info/ououcir/bat_analysis.rda\")).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Inspect posterior model probabilities",
+      "instruction": "Access the posterior model probabilities with output$s.mnlog (based on tol*sims = 500 posterior samples). Round the Bayes‑factor values with round(output$s.mnlog$rejection$BayesF,4). The reported probabilities are OUBMBM = 0.5195, OUBMCIROUOUBM = 0.4295, OUBMCIR = 0.0095, OUOUCIR = 0.0415.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Examine Bayes factors",
+      "instruction": "The Bayes‑factor matrix (rows = model i, columns = model j) is:\n\nOUBMBM vs OUBMBM = 1.0000, OUBMBM vs OUOUBM = 1.2095, OUBMBM vs OUBMCIR = 54.6842, OUBMBM vs OUOUCIR = 12.5181\nOUOUBM vs OUBMBM = 0.8268, OUOUBM vs OUOUBM = 1.0000, OUOUBM vs OUBMCIR = 0.45, OUOUBM vs OUOUCIR = 0.2105\nOUBMCIR vs OUBMBM = 10.3494, OUBMCIR vs OUOUBM = 0.0183, OUBMCIR vs OUBMCIR = 1.0000, OUBMCIR vs OUOUCIR = 0.2289\nOUOUCIR vs OUBMBM = 0.0799, OUOUCIR vs OUOUBM = 0.0966, OUOUCIR vs OUBMCIR = 4.3684, OUOUCIR vs OUOUCIR = 1.0000.\n\nFor example, the Bayes factor of OUBMBM versus OUOUCIR is 12.5181 (0.5195 ÷ 0.0415).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Retrieve posterior parameter means",
+      "instruction": "Obtain the posterior mean for each model’s parameters from the appropriate component of the output object (e.g., output$<model>_posterior_means as documented in the ouxy manual).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 30,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

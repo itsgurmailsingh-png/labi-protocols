@@ -22,107 +22,202 @@
   "estimated_time_mins": 72,
   "materials": [
     "MATLAB R2022a or newer",
-    "MATLAB files for simulation"
+    "MATLAB files for simulation",
+    "Timing: 2–5 min",
+    "Timing: 10–20 min"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "This protocol describes how to generate and analyze synthetic morphogen gradients under cell-to-cell parameter variability in one- and two-dimensional epithelial tissues using MATLAB, based on the conceptual framework introduced by Vetter and Iber.2 In this model, morphogen molecules are produced within a designated source region and then diffuse across the surrounding tissue, where they bind to receptors, degrade, or get turned over otherwise. To represent this process mathematically, we solve steady-state reaction-diffusion equations of the form:DΔC(x,y)=R(C,x,y)where C(x,y) is the morphogen concentration at position (x,y) in the tissue, D is the morphogen diffusion coefficient, Δ is the Laplace operator, and R(C,x,y) represents parameterized chemical reaction terms. In previous applications, we used the following form:D(∂2c(x,y)∂x2+α∂2c(x,y)∂y2)=dC(x,y)n−pH(−x)",
+      "title": "Launch MorphoGrad configuration GUI",
+      "instruction": "Start MATLAB and launch the MorphoGrad graphical user interface by executing the command morphograd.gui.ConfigBuilder(). This configuration step typically takes 2–5 min.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "Here, α is an anisotropy factor that allows diffusion to differ between the x- and y-directions. The term dC(x,y)n models concentration-dependent degradation at rate d with an exponent n, where values n>1 model nonlinear decay.3\npH(-x) represents morphogen production restricted to the source region, with H the Heaviside step function, which evaluates to 1 for positive arguments (i.e., inside the source) and to 0 for negative arguments (i.e., outside the source). For one-dimensional simulations, the y-dependence and the corresponding diffusion term are removed.",
+      "title": "Select simulation dimensionality",
+      "instruction": "In the Setup tab of the GUI, choose whether the simulation will be one‑dimensional or two‑dimensional.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Before you begin",
-      "instruction": "The computational framework divides both the source and the patterning region into discrete cells. Each cell can have its own parameter set (for example, diffusion, degradation, or production rates), enabling simulation of tissue-level heterogeneity. To incorporate biological variability, parameters are sampled from log-normal distributions. Log-normal distributions are biologically plausible, as many measured cellular properties, such as cell areas and biochemical rate parameters, are right-skewed and strictly non-negative. As shown in Adelmann et al.,4 the precise choice of distribution does not affect the qualitative behavior of the simulated gradients, if certain properties (such as non-negativity) are met.",
+      "title": "Define domain geometry and cell size",
+      "instruction": "Open the Domain tab. • For 1D simulations: enter the total domain length L and the start and end positions of the source region; the remaining length becomes the patterning domain. • For 2D simulations: additionally specify the tissue width in the y‑direction and provide distinct cell diameters for the x‑ and y‑directions. The source may be placed at any x‑position but must fully span the y‑direction. Ensure that the patterning length, source length, and (in 2D) tissue width are integer multiples of the chosen cell diameters so the domain can be discretized into whole cells. This step also takes roughly 2–5 min.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Before you begin",
-      "instruction": "Morphogen gradients play a central role in many developmental processes by providing positional information that enables cells to adopt distinct cell fates within a tissue. According to Wolpert’s famous French flag model, fixed thresholds Cθ(xθ,y) define the position of domain boundaries.5 Due to biological variability, boundary positions vary between embryos i, resulting in a positional error that can be quantified as the standard deviation of the readout positions,σx=std(xθ,i).",
+      "title": "Choose or define reaction equation",
+      "instruction": "Open the Equation tab. Select a preset equation or enter a custom reaction term. Preset options: a) Linear decay with production: DΔC + p H(x) – d C = 0. b) Nonlinear decay with production: DΔC + p H(x) – d C^n = 0, where n > 1. If no preset matches, type a valid MATLAB expression for the reaction term R(C,x,y;params) following the syntax rules below. Setting up the equations usually requires 10–20 min.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Before you begin",
-      "instruction": "Quantification of the positional error allows us to assess how cell-to-cell parameter variability and cell-area variability affect precision of cell fate boundaries.6 An example output of a noisy two-dimensional gradient is shown in Figure 1.Figure 1Visualization of a 2D stochastic gradient simulation output",
+      "title": "Enter custom reaction syntax",
+      "instruction": "When defining a custom term: • Use variables C, x, y (or C(x), C(x,y)). • Multiply source‑only terms by the Heaviside function H. • Vectorize the expression with element‑wise operators (.*, ./, .^). • Allowed MATLAB functions include sqrt, exp, log, log10, sin, cosh. • Do not use reserved identifiers C, x, y, D, α, n, H, or C_ref as parameter names. • For highly nonlinear equations (n ≫ 1), provide an appropriate initial guess or increase the solver error tolerance.",
       "substeps": [],
-      "is_critical": false,
+      "is_critical": true,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Setting up the geometry and domain",
-      "instruction": "Timing: 2–5 min",
+      "title": "Run stochastic gradient ensemble",
+      "instruction": "Execute the simulation to generate an ensemble of independent stochastic gradient realizations (using the GUI run button or appropriate command). Each cell’s parameters are sampled from log‑normal distributions as defined in the toolbox settings.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Setting up the geometry and domain",
-      "instruction": "In this section, we describe how to configure the simulation geometry and domain using the MorphoGrad graphical user interface (GUI).1.Launch the GUI by calling morphograd.gui.ConfigBuilder().2.In the Setup tab, select whether the simulation is one- or two-dimensional (Figure 2).Figure 2Defining the dimension in the configuration builder3.Open the Domain tab (Figure 3).a.1D: Define the total domain length L. Specify the start and end positions of the source region. The remaining domain is labeled as patterning domain.b.2D: Additionally specify the tissue width in y-direction. Specify distinct diameters in x- and y-direction.Figure 3Setup of 1D and 2D domainsNote: The source can be placed at an arbitrary position along the x-direction but always completely spans the y-direction.CRITICAL: The patterning length, the source length, and (in 2D) the tissue width must be integer multiples of the specified cell diameters, to allow to discretize the domain into a whole number of cells. Cells are approximated as line segments in 1D and as rectangles in 2D. See troubleshooting 1.",
-      "substeps": [],
-      "is_critical": true,
-      "timers": []
-    },
-    {
-      "step_id": 7,
-      "title": "Setting up the differential equations",
-      "instruction": "Timing: 10–20 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
-      "title": "Setting up the differential equations",
-      "instruction": "In this section, we describe how to select preset equations or define a custom reaction term using valid MATLAB syntax.4.Open the Equation tab (Figure 4).Figure 4Defining the reaction terms5.Choose whether to use a preset equation or define a custom reaction equation. The following presets are available (1D and 2D):a.Linear decay with production in the source and degradation:DΔC+pH(x)−dC=0b.Nonlinear decay with production in the source and nonlinear degradation (n>1):DΔC+pH(x)−dCn=06.If the presets do not match your desired model, define a custom reaction term. Enter a valid MATLAB expression in the text field. The syntax follows the following rules:a.Variables: C is the species concentration, x and y are spatial coordinates. The species can be written as C,C(x),C(x,y).b.Source terms: Terms active only in the source region must be multiplied by H, the Heaviside function which evaluates to 1 in the source and to 0 outside of it.c.Vectorization: The code is vectorized. If you are familiar with the syntax, use element-wise operators (.∗, ./, .ˆ).d.Functions: You can include standard MATLAB functions (e.g., sqrt, exp, log, log10, sin, cosh).e.Reserved names: Parameter names must not conflict with the reserved identifiers C,x,y,D,α,n,H, and C_ref.Note: The reaction term is everything excluding the diffusion term DΔC and has the form R(C,x,y;params), where C is the species (e.g. the morphogen) concentration and params are the different parameters.CRITICAL: Highly nonlinear equations (n≫1) can lead to slow solver convergence. In such cases, provide an appropriate initial guess or adjust solver error tolerance as needed.",
-      "substeps": [],
-      "is_critical": true,
-      "timers": []
-    },
-    {
-      "step_id": 9,
-      "title": "Quantification and statistical analysis",
-      "instruction": "Morphogen gradient precision is quantified using ensembles of independent stochastic gradient simulations. Simulation outputs are analyzed to assess how variability in morphogen gradient profiles translates into variability in patterning outcomes.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "Quantification and statistical analysis",
-      "instruction": "One approach to quantifying precision is to define a readout position, which corresponds to the spatial location at which a concentration threshold is crossed and marks the boundary between different cell fates. Variability in this readout position across independent stochastic gradient realizations is quantified by the positional error, defined as the standard deviation of the readout positions, and is a measure of boundary precision.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "Quantification and statistical analysis",
-      "instruction": "More generally, summary statistics can be used to quantify the variability across stochastic gradient simulations. These may include, for example, the mean readout position, the positional error, coefficients of variation, and corresponding standard errors. Together, these measures allow the assessment of gradient robustness and precision across ensembles of stochastic realizations. Figures 10B and 10C, and 11B show representative examples of such analyses, but they are not exhaustive. Additional workflows for stochastic gradient simulations, parameter screens, parallelization, reproduction of published figures, and further analysis and visualization methods are provided in the associated Git repository.",
+      "title": "Compute positional error and statistics",
+      "instruction": "For each realization, determine the readout position where the morphogen concentration crosses a chosen threshold Cθ. Collect all readout positions across the ensemble and calculate the positional error as the standard deviation σx = std(xθ,i). Optionally compute additional summary statistics such as mean readout position, coefficient of variation, and standard error.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:15:49.993842Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "This protocol describes how to generate and analyze synthetic morphogen gradients under cell-to-cell parameter variability in one- and two-dimensional epithelial tissues using MATLAB, based on the conceptual framework introduced by Vetter and Iber.2 In this model, morphogen molecules are produced within a designated source region and then diffuse across the surrounding tissue, where they bind to receptors, degrade, or get turned over otherwise. To represent this process mathematically, we solve steady-state reaction-diffusion equations of the form:DΔC(x,y)=R(C,x,y)where C(x,y) is the morphogen concentration at position (x,y) in the tissue, D is the morphogen diffusion coefficient, Δ is the Laplace operator, and R(C,x,y) represents parameterized chemical reaction terms. In previous applications, we used the following form:D(∂2c(x,y)∂x2+α∂2c(x,y)∂y2)=dC(x,y)n−pH(−x) Here, α is an anisotropy factor that allows diffusion to differ between the x- and y-directions. The term dC(x,y)n models concentration-dependent degradation at rate d with an exponent n, where values n>1 model nonlinear decay.3\npH(-x) represents morphogen production restricted to the source region, with H the Heaviside step function, which evaluates to 1 for positive arguments (i.e., inside the source) and to 0 for negative arguments (i.e., outside the source). For one-dimensional simulations, the y-dependence and the corresponding diffusion term are removed. The computational framework divides both the source and the patterning region into discrete cells. Each cell can have its own parameter set (for example, diffusion, degradation, or production rates), enabling simulation of tissue-level heterogeneity. To incorporate biological variability, parameters are sampled from log-normal distributions. Log-normal distributions are biologically plausible, as many measured cellular properties, such as cell areas and biochemical rate parameters, are right-skewed and strictly non-negative. As shown in Adelmann et a",
+  "content_type": "protocol",
+  "content_type_score": 22,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.gif",
+      "local_path": "data/media/star_protocols/PMC13255066/fx1.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 3464,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/fx1.gif"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.gif",
+      "local_path": "data/media/star_protocols/PMC13255066/fx2.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 3290,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/fx2.gif"
+    },
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 293474,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 175032,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 229542,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 158497,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 105736,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 148747,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 204975,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 131300,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 127063,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 116735,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 112872,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/star_protocols/PMC13255066/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13255066/",
+      "caption": "",
+      "bytes": 115527,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13255066/gr9.jpg"
+    }
+  ]
 }

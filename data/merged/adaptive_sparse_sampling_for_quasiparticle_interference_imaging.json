@@ -1,0 +1,162 @@
+{
+  "protocol_id": "adaptive_sparse_sampling_for_quasiparticle_interference_imaging",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Adaptive sparse sampling for quasiparticle interference imaging",
+  "author": "Oppliger, Zengin, et al.",
+  "doi": "10.1016/j.mex.2022.101784",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9309409/",
+  "citation": "10.1016/j.mex.2022.101784",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 2.5,
+  "category": "Bioinformatics",
+  "estimated_time_mins": 170,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Generate tip travel paths",
+      "instruction": "From a square grid of size N = n × n select p × qN random locations (q ∈ (0,1] a small fraction) and, for each subset p, compute a near‑optimal traveling‑salesperson (TSP) path using either a genetic algorithm or a cheapest‑insertion algorithm with the same fixed start and end coordinates for all paths.",
+      "substeps": [
+        {
+          "instruction": "Limit each path to at most qN = 3000 locations to keep the TSP calculation tractable.",
+          "title": ""
+        },
+        {
+          "instruction": "Allow informed‑sampling criteria (e.g., proximity to the border, no‑go areas, high‑LDOS defect sites) when choosing locations.",
+          "title": ""
+        },
+        {
+          "instruction": "Record that a genetic‑algorithm TSP for 3000 points takes ≈2.5 h per CPU core (AMD EPYC 7302P); cheapest‑insertion is faster but yields a slightly longer total path length.",
+          "title": ""
+        },
+        {
+          "instruction": "Pre‑calculate Σ_{p=100} TSP paths; for a typical experiment use 20–30 of them (≈60 000–90 000 measurement locations).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Combine paths with regular topographies",
+      "instruction": "Begin the experiment by acquiring a regular topography scan centered on fiducial surface features, then interleave TSP path subsets and additional topography scans according to the desired number of consecutive subsets.",
+      "substeps": [
+        {
+          "instruction": "After each TSP subset, record a regular topography; the scan ends the current ASS iteration.",
+          "title": ""
+        },
+        {
+          "instruction": "Create a jittery random‑walk path from the last TSP location to the start of the topography scan, and another jittery path from the last topography location to the start of the next TSP subset to let the piezo settle creep.",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat: TSP subset → jittery path → topography → jittery path → next TSP subset, etc.",
+          "title": ""
+        },
+        {
+          "instruction": "Correlate successive topography images to obtain the effective displacement caused by thermal drift or residual creep; store this displacement for use in the final QPI coordinate correction.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Measure LDOS and preview QPI",
+      "instruction": "At every location defined by the combined TSP‑topography sequence measure the local density of states (LDOS) and reconstruct the quasiparticle‑interference (QPI) image via sparse‑recovery.",
+      "substeps": [
+        {
+          "instruction": "Measure LDOS either by conventional bias spectroscopy or by parallel spectroscopy for each selected energy; treat each energy independently.",
+          "title": ""
+        },
+        {
+          "instruction": "Record the acquisition timestamp for every spectrum (for possible drift correction).",
+          "title": ""
+        },
+        {
+          "instruction": "Feed the growing set of LDOS values into the SPGL1 MATLAB solver (basis‑pursuit denoising) to obtain a QPI image on a 1024 × 1024 grid.",
+          "title": ""
+        },
+        {
+          "instruction": "The sparse‑recovery computation for one energy slice takes only a few minutes, enabling a rapid preview of QPI quality after each iteration.",
+          "title": ""
+        },
+        {
+          "instruction": "Set STM acquisition parameters: bias Vb = ‑250 mV, drive amplitude Vdrv = 400 mV, drive frequency fdrv = 1600 Hz, tunnelling current It = 1.5 nA, dwell time tspc = 20 ms, temperature T = 4.3 K, grid size 1024 × 1024.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Correct tip instabilities",
+      "instruction": "Apply a global background correction to each TSP segment to remove tip‑change artefacts while preserving spatial LDOS modulations.",
+      "substeps": [
+        {
+          "instruction": "For each segment s compute mean m_s = Σ_k ρ_Sk ρ_Tk / qN and standard deviation σ_s = Σ_k (ρ_Sk ρ_Tk ‑ m_s)^2 / qN over all bias voltages and locations k.",
+          "title": ""
+        },
+        {
+          "instruction": "Choose a reference segment (preferably the first, tip‑stable segment) with mean m_ref and σ_ref.",
+          "title": ""
+        },
+        {
+          "instruction": "For every other segment replace ρ_S ρ_T by ρ_S ρ_T' = (ρ_S ρ_T ‑ m_s)·σ_ref/σ_s + m_ref.",
+          "title": ""
+        },
+        {
+          "instruction": "If a tip change is detected (e.g., by an edge detector), split the affected segment into sub‑segments and treat the pre‑change part as reference for the remainder.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Correct linear drift",
+      "instruction": "Use the interleaved topography images and timestamps to compensate for linear sample drift across the whole measurement.",
+      "substeps": [
+        {
+          "instruction": "Determine the global displacement vector v = (v_x, v_y) from image registration between successive reference topographies.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute drift speed dv/dt = v / Δt where Δt is the total elapsed time between the two topographies.",
+          "title": ""
+        },
+        {
+          "instruction": "For each LDOS location k adjust its coordinates: r_k' = r_k + (dv/dt)·(t_k ‑ t_{k‑1}).",
+          "title": ""
+        },
+        {
+          "instruction": "Apply the corrected coordinates before the final sparse‑recovery of the QPI image.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 30,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

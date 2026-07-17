@@ -1,0 +1,350 @@
+{
+  "protocol_id": "a_simple_method_for_getting_standard_error_on_the_ratiometric_calcium_estimator",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "A simple method for getting standard error on the ratiometric calcium estimator",
+  "author": "Hess, Pouzat, et al.",
+  "doi": "10.1016/j.mex.2021.101548",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563851/",
+  "citation": "10.1016/j.mex.2021.101548",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 16.0,
+  "category": "Other",
+  "estimated_time_mins": 6,
+  "materials": [
+    "can be used together with Eqs. (",
+    "The methodological details of the measurements to which the analysis presented in the present manuscript was applied are described in the companion paper [3].",
+    "The simulations, computations and figures of the present manuscript were done with Python 3 (https://www.python.org/), numpy (https://numpy.org/), scipy and matplotlib (https://matplotlib.org/). The Python codes and the data required to reproduce the simulations and figures presented in this manuscript can be downloaded from GitLab (https://gitlab.com/c_pouzat/getting-se-on-ratiometric-ca-estimator).",
+    "The use of scipy was kept to a bare minimum to maximize code lifeduration (scipy tends to evolve too fast with minimal concern for backward compatibility). The random number generators used were therefore the ones of numpy: the uniform random number generator derives from the Permuted Congruential Generator (64-bit, PCG64) (https://www.pcg-random.org/) [11] while the normal random number generator is an adaptation of the Ziggurat method [12] of Julia (https://docs.julialang.org/en/v1/); unfortunately one has to check the source code of both numpy and Julia to find that out.",
+    "requires the computation of a single derivative."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Rational",
+      "instruction": "Since its introduction by Grynkiewicz et al. [2], the ratiometric indicator Fura-2 has led to a revolution in our understanding of the role of calcium ions (Ca2+) in neuronal and cellular function. This indicator provides a straightforward estimation of the free Ca2+ concentration ([Ca2+]) in neurons and cells with a fine spatial and time resolution. The experimentalist must determine a ‘region of interest’ (ROI) within which the [Ca2+] can be assumed to be uniform and is scientifically relevant. Fluorescence must be measured following excitation at two different wavelengths: typically around 340 and 380 nm; and, since cells exhibit autofluorescence or ‘background fluorescence’ at those wavelengths, the measured fluorescence intensity is made of two sources: the Fura-2 linked fluorescence and the autofluorescence. The measured intensity within the ROI is therefore usually corrected by subtrating from it an estimation of the autofluorescence intensity obtained from simultaneous measurements from a ‘background measurement region’ (BMR); that is, a nearby region where there is no Fura-2. At a given time the experimentalist will therefore collect a fluorescence intensity measurement from the ROI at 340 and 380 nm; we are going to write adu340 and adu380 these measurements, where ‘adu’ stands for ‘analog to digital unit’ and corresponds to the raw output of the fluorescence measurement device, usually a charge-coupled device (CCD); if the experimentalist is careful not to saturate the sensor, the adu count is proportional to the number of photo-electrons present in the pixel, or in the group of pixels when on-chip binning is used, at the end of the exposure period. The experimentalist will also collect intensity measurements from the BMR, measurements that we are going to write adu340,B and adu380,B. If P CCD pixels make the ROI and PB pixels make the BMR and if the illumination time at 340 nm is T340, while the illumination time at 380 nm is T380 (both times are measured in s), the experimentalist starts by estimating the fluorescence intensity per pixel per time unit following an excitation by a light flash of wavelengths λ (λ=340 or 380 nm) as:(1)fλ=1Tλ(aduλP−aduλ,BPB),withλ=340or380nm,where an assumption of autofluorescence uniformity is implicitly made. The following ratio is then computed:(2)r=f340f380.This is an important and attractive feature of the method as well as the origin of its name. Since only ratios are subsequently used, geometric factors like the volume of the Fura loaded region under the ROI do not need to be estimated.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Rational",
+      "instruction": "The estimated [Ca2+] that we will write Ca^ for short (the ’^’ sign is used for marking estimated values) is then obtained, following [2, Eq. (5), p. 3447], with:(3)Ca^=Keffr−RminRmax−r,where Keff (measured in μM), Rmin and Rmax are calibrated parameters (the last two parameters are ratios and are dimensionless). Rmin is the ratio (Eq. (2)) observed in the absence of calcium, while Rmax is the ratio observed with a saturating concentration. Keff is the calcium concentration at which the ratio is half way between Rmin and Rmax. If a set of experiments is performed on a given cell type with the same batch of Fura, as in the companion paper [3], the calibration errors on these three parameters will be the same for each experiment. If different cell types are considered and/or different Fura batches are used, the calibration errors should be taken into account before making comparison of estimated calcium dynamics parameters (see [1] for discussion).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Rational",
+      "instruction": "If we now want to rigorously fit [Ca2+] dynamics models to sequences of Ca^, we need to get standard errors, σCa^, on our estimates. This is where the ratiometric method gets ‘more involved’, at least if we want standard errors from a single transient as opposed to a mean of many transients. We typically work (e.g.\n[1], [3]) in a setting, using the so called ‘added buffer approach’, where we cannot get more than a single transient in given conditions since Fura is constantly diffusing into the recorded cell modifying thereby the time constant of calcium transients. It is worth pointing out that there is a more general interest in obtaining standard errors from a single transient: getting these fluorescence measurements requires shining UV light on the neurons we are recording from and generates photodamage. Despite the ubiquity of ratiometric measurements in neuroscience and cell physiology, we are aware of a single paper–by some of us [1]–where the ’standard error question’ was directly addressed. The method proposed in [1] requires a 3 wavelengths protocol: measurements at 340, 380 and 360 (the isosbestic wavelength) nm; it drops, so to speak, the above advantage of working with a ratiometric estimator since it fits directly the adu340 and adu380 data (at the cost of estimating some geometry related parameters) and it requires a model of the autofluorescence dynamics if the latter is not stationnary. It therefore requires a slightly more complicated ’3 wavelengths’ recording protocol as well as a more involved fitting procedure. The dataset of the companion paper [3] exhibits a clear but reversible autofluorescence rundown that cannot be ignored since autofluorescence accounts for half of the signal in the ROI. Rather that constructing / tailoring the accurate enough autofluorence models required by the ’direct approach’ of [1] we looked for an alternative method providing standard errors for the ratiometric estimator.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Fluorescence intensity",
+      "instruction": "As detailed in [1], [2], the fluorescence intensities giving rise to the adu340, adu340,B, adu380 and adu380,B signals can be written as:(4)I340={[Fura]totalϕKFura+[Ca2+](RminKeff+Rmax[Ca2+])+F340B}T340P,(5)I340B=F340BT340PB,(6)I380={[Fura]totalϕKFura+[Ca2+](Keff+[Ca2+])+F380B}T380P,(7)I380B=F380BT380PB,where FλB is the autofluorescence intensity per pixel per time unit at wavelength λ, KFura is the Fura dissociation constant (a calibrated parameter measured in μM), [Fura]total, is the total (bound plus free) concentration of Fura in the cell (measured in μM) and ϕ is an experiment specific parameter (measured in 1/μM/s) lumping together the quantum efficiency, the neurite volume, etc (see [1] for details).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Recorded signals adu340, adu340,B, adu380 and adu380,B",
+      "instruction": "As detailed and discussed in [1], [4], the signal aduλ recorded with a CCD chip whose gain is G and whose read-out variance is σread−out2 can be modeled as the realization of a Gaussian random variable ADUλ with parameters:(8)μADUλ=GIλ,(9)σADUλ2=GμADUλ+G2Pσread−out2,with the obvious adaptation when dealing with the BMR signal: Iλ is replaced by IλB and P is replaced by PB. Parameters G and σread−out2 are CCD chip parameters provided by the manufacturer. Calibration procedures are discussed in [1], [4] and a comprehensive example with data and codes can be found in [5]. Our experience is that the values provided by manufacturers are good starting points; the user calibrated read-out noise is sometime slightly larger than the one specified by the manufacturer.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Variance estimates for adu340, adu340,B, adu380 and adu380,B",
+      "instruction": "So, to have the variance of ADUλ we need to know Iλ and for that we need to know [Ca2+] (Eqs. (4) and (6)) precisely what we want to estimate. But the expected value of ADUλ is GIλ (Eq. (8)), we can therefore use as a first approximation the observed value aduλ of ADUλ as a guess for GIλ, so in Eq. (9) we plug-in aduλ for GIλ, leading to:(10)σ^ADUλ2=Gaduλ+G2Pσread−out2≈σADUλ2.In other words, we will use the observed aduλ as if it were the actual fluorescence intensity times the CCD chip gain, ADUλ=GIλ, in order to estimate the variance. In doing so we will sometime slightly underestimate the actual variance (when the observed aduλ turns out to be smaller than ADUλ) and sometime slightly overestimate it (when the observed aduλ turns out to be larger than ADUλ). Since we are going to combine many such approximations, we expect–and we will substantiate this claim in Section 3–that overall the under-estimations will be compensated for by the over-estimations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Variance estimate for Ca^",
+      "instruction": "Now that we have a σ^ADUλ2 we can work with – that is, an estimate from the data alone –, we want to get σ^r2 (Eq. (2)) and σ^Ca^2. We can either use the propagation of uncertainty (also referred to as error propagation, compounding of errors or delta method) [6], [7] together with Eqs. (2) and (3), or a ’quick’ Monte Carlo approach. We drop any explicit time index in the sequel in order to keep the equations more readable, but it should be clear that such variance estimates have to be obtained for each sampled point.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Propagation of uncertainty",
+      "instruction": "This method requires, in the general case, an assumption of ‘small enough’ standard error since it is based on a first order Taylor expansion (see Section Appendix A for details). It leads first to the following expression for the variance, σ^fλ2, of fλ in Eq. (1):(11)σ^fλ2≈1Tλ2(σ^ADUλ2P2+σ^ADUλB2PB2).The variance σ^r2 of r in Eq. (2) is then:(12)σ^r2≈1f3802(σ^f3402+r2σ^f3802)and the variance σ^Ca^2 of Ca^ in Eq. (3) is:(13)σ^Ca^2≈(KeffRmax−r)2(1+Ca^)2σ^r2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "A remark on σ^Ca^2 behavior",
+      "instruction": "The last three Eqs. (11)–(13) can be used together with Eqs. (8) and (9) to understand why σ^Ca^2 will increase with the calcium concentration and therefore why a weighted nonlinear least-square procedure is required [8], [9], [10] in order to get proper confidence intervals on calcium dynamics model parameters. Eq. (9) tells us that the variance of the raw signals is an increasing linear function of their means. When the calcium concentration increases, the recorded signal at 340 nm increases while the one at 380 nm decreases (Fig. 1). So according to Eq. (11), σ^f3402 increases while σ^f3802 decreases in proportion to [Ca2+]. From Eq. (12) we see that σ^r2 also increases since σ^f3402 does increase and r2σ^f3802 is roughly proportional to f3402/f380 and increases. Then from Eq. (13) we see that r is getting closer to Rmax, therefore the denominator is decreasing, while we just argued that σ^r2 increases. Together, the two imply that σ^Ca^2 is an increasing function of [Ca2+]. This can be seen on the bottom panel of Fig. 2 where the error bars on the left side (corresponding to larger [Ca2+]) are about twice as large as the ones on the right side (corresponding to smaller [Ca2+]).Fig. 1Observed (red) and simulated (blue) ADU at 340 (left) and 380 nm (right) for the first transient (only the late phase of the transient was simulated).Fig. 1Fig. 2Top: Simulated ratiometric estimator - ‘actual’ [Ca2+] divided by ratiometric estimator standard error (if everything goes well we should see draws from a standard normal distribution); bottom: Simulated ratiometric estimator (with error bars given by the standard error) in black and ‘actual’ [Ca2+] in red.Fig. 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Monte-Carlo method",
+      "instruction": "Here we draw, k quadruple of vectors(adu340[j],adu340B[j],adu380[j],adu380B[j]),j=1,…,k,from four independent Gaussian distributions of the general form:(14)aduλ[j]=aduλ+zλ[j]σ^ADUλ,where aduλ is the observed value and zλ[j] is drawn from a standard normal distribution. We then plug-in these quadruples into Eq. (1) leading to k couples:f340[j]=1T340(adu340[j]P−adu340B[j]PB),f380[j]=1T380(adu380[j]P−adu380B[j]PB),j=1,…,k.These k couples are ‘plugged-in Eq. (2)’ leading to k\nr[j]:r[j]=f340[j]f380[j]j=1,…,k,before plugging in the latter into Eq. (3) to get k\nCa^[j]:Ca^[j]=Keffr[j]−RminRmax−r[j]j=1,…,k.The empirical variance of these simulated observations will be our σ^Ca^2:(15)σ^Ca^2=1k−1∑j=1k(Ca^[j]−Ca^•)2,whereCa^•=1k∑j=1kCa^[j].Since the Monte-Carlo method requires milder assumptions (the variances do not have to be small) and is easy to adapt, we tend to favor it; to be on the safe side, users can use both methods and, if they disagree, plot a histogram of the Ca^[j] to make sure that the discrepancy source is the non-normality of the latter.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Comment",
+      "instruction": "The present approach based on a σ^Ca^2 estimation is slightly less rigorous than the ‘direct approach’ of [1] but it is far more flexible since it does not require an independent estimation / measurement of [Fura]total. In line with the discussion following Eq. (3), in the companion paper [3] we chose to consider the calibrated parameters Keff, Rmin and Rmax as fixed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Rational",
+      "instruction": "Eqs. (4)–(7), together with Eqs. (8) and (9) can be viewed as a data generation model. This means that if we choose model parameters values as well as an arbitrary [Ca2+] time course, we can simulate measurements (adu) at both wavelengths in the ROI as well as in the BMR. We can then use these simulated adu exactly as we used the actual data, namely get r(ti) (Eq. (2)) and Ca^(ti) (Eq. (3)) as well as the (squared) standard errors σ^Ca^2(ti) (Section 2.4).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Rational",
+      "instruction": "Now if the σ^Ca^2(ti) are good approximations for the actual but unknown σCa2(ti), the distribution of the normalized residuals:Ca^(ti)−Ca(ti)σ^Ca^(ti),should be very close to a standard normal distribution. This is precisely what we are going to check.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Simulated data",
+      "instruction": "We are going to use the first transient of dataset DA_121219_E1 of the companion paper [3]. The ‘static’ parameters – that is the parameters not link to the calcium dynamics – used for the simulation are the actual experimental parameters rounded to the third decimal (Table 1).Table 1’Static’ parameters used for the simulation.Table 1ParameterValueRmin0.147Rmax1.599Keff1.093 (μM)KFura0.225 (μM)[Fura]totalϕ1.89e+05 (s−1)T3400.01 (s)T3800.003 (s)P3PB448G0.146σread−out2268.96F340B189512 (s−1)F380B711589 (s−1)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Simulated data",
+      "instruction": "The simulated calcium dynamics is a monoexponential decay mimicking the tail of the transient:Ca(t)=Ca0+{0ift<t0δexp(−(t−t0)/τ)ift≥t0and the parameter values (Table 2) are just a rounded version of the fitting procedure output (see companion paper [3]).Table 2Calcium dynamics parameters used for the simulation. Time 0 is when seal is obtained.Table 2ParameterValuet02283.415 (s)Ca00.059 (μM)δ0.114 (μM)τ2.339 (s)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Simulated data",
+      "instruction": "The simulated data obtained in that way are shown on Fig. 1 (blue traces) together with the actual data (red curves) they are supposed to mimic. At a qualitative level at least, our data generation model is able to produce realistic looking simulations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Software and simulation details",
+      "instruction": "The methodological details of the measurements to which the analysis presented in the present manuscript was applied are described in the companion paper [3].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Software and simulation details",
+      "instruction": "The simulations, computations and figures of the present manuscript were done with Python 3 (https://www.python.org/), numpy (https://numpy.org/), scipy and matplotlib (https://matplotlib.org/). The Python codes and the data required to reproduce the simulations and figures presented in this manuscript can be downloaded from GitLab (https://gitlab.com/c_pouzat/getting-se-on-ratiometric-ca-estimator).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Software and simulation details",
+      "instruction": "The use of scipy was kept to a bare minimum to maximize code lifeduration (scipy tends to evolve too fast with minimal concern for backward compatibility). The random number generators used were therefore the ones of numpy: the uniform random number generator derives from the Permuted Congruential Generator (64-bit, PCG64) (https://www.pcg-random.org/) [11] while the normal random number generator is an adaptation of the Ziggurat method [12] of Julia (https://docs.julialang.org/en/v1/); unfortunately one has to check the source code of both numpy and Julia to find that out.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Are the standard errors of ratiometric estimator accurate?",
+      "instruction": "Since the two σ^Ca^2 estimation methods, propagation of uncertainty and Monte-Carlo, agree at each time point within 2%, we illustrate in this section the results obtained with the Monte-Carlo method.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Are the standard errors of ratiometric estimator accurate?",
+      "instruction": "We take next the simulated data (blue curves on Fig. 1) together with the simulated background signals (not shown) as if they were actual data and we compute the ratiometric estimator and its standard error as described in Section 2.4, using k=104 replicates. Fig. 2 shows the standardized residuals as well as the simulated data together with the true [Ca2+], we know it since we used it to simulate the data!",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Are the standard errors of ratiometric estimator accurate?",
+      "instruction": "The upper part of Fig. 2 is only a qualitative way of checking that the normalized residuals follow a standard normal distribution. A quantitative assessment is provided by the Shapiro-Wilk W statistic, that is here: 0.987; giving a p-value of 0.128. There is therefore no ground for rejecting the null hypothesis that the normalized residuals are IID draws from a standard normal distribution.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Are the standard errors of ratiometric estimator accurate?",
+      "instruction": "As an additional, visual but less powerful test, we plot the empirical cumulative distribution function (ECDF) of the normalized residuals together with the theoretical (normal) one and with Kolmogorov’s confidence bands (Fig. 3). If the empirical ECDF arises from a normally distributed sample with mean 0 and SD 1, it should be completely contained in the 95% confidence band 95% of the time and in the 99% band, 99% of the time (these are confidence bands not collections of pointwise confidence intervals).Fig. 3Empirical cumulative distribution function (ECDF) of the normalized residuals (red) together with 95% (grey) and 99% (blue) Kolomogorov confidence bands.Fig. 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "Are the standard errors of ratiometric estimator accurate?",
+      "instruction": "We conclude from these visual representations and formal tests that our normalized residuals follow the expected standard normal distribution, implying that our proposed method for getting the standard errors of the ratiometric estimator is fundamentally correct.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Discussion",
+      "instruction": "We have presented a new and simple method for getting standard errors on calcium concentration estimates from ratiometric measurements. This method does not require any more data than what experimentalists using ratiometric dyes like Fura-2 are usually collecting: measurements at 340 and 380 nm both within a region of interest and within a background measurement region. Once the errors bars have been obtained, arbitrary models can be fitted to the calcium transients – by weighted nonlinear least-squares [10] – and meaningful confidence intervals for the parameters of these models will follow as illustrated in the companion paper [3]. The present contribution is therefore best viewed as a major simplification of the ‘direct approach’ of [1]. In contrast to the latter, the new method does not require a ‘3 wavelengths protocol’, it does not require either a precise fit of the autofluorescence dynamics at the three wavelengths and is therefore much easier to implement. We provide moreover two independent implementations, one in C and one in Python, they are open source and freely available. The rather verbose Python implementation of the heart of the method (Section 2.4) requires 25 lines of code and nothing beyond basic numpy functions. We are therefore confident that this method could help experimental physiologists getting much more quantitative results at a very modest extra cost.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Co-submission",
+      "instruction": "This manuscript is a co-submission associated with Analysis of neuronalCa2+\nhandling properties by combining perforated patch clamp recordings and the added buffer approach, DOI: 10.1016/j.ceca.2021.102411.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "Propagation of uncertainty",
+      "instruction": "We outline in this section how to reach Eqs. (11)–(13) of Section 2.4.1. We first need to remember that is X and Y are two independent random variables with mean EX=μX and EY=μY and variance VX=σX2 and VY=σY2, then if Z=a+bX+cY (a,b,c∈R) we have:EZ=a+bμX+cμY,VZ=b2σX2+c2σY2.Eq. (11) is a direct consequence of the last equality. If X is (approximately) normally distributed with (X∼N(μX,σX2)) as well as Y, we can write: X≈μX+Z1σX and Y≈μY+Z2σY, where Z1 and Z2 are independent and follow a standard normal distribution, N(0,1). If now Z=f(X,Y) and the partial derivatives of f at (μX,μY) exist then:Z=f(μX+Z1σX,μY+Z2σY)≈f(μX,μY)+Z1σX∂f(μX,μY)∂X+Z2σY∂f(μX,μY)∂Y.This is just a first order Taylor expansion and that is where the ‘small enough standard error’ assumption is necessary. Z is then (approximately) a linear combination of two independent standard normal random variables and we immediately get:EZ=f(μX,μY),VZ=(∂f(μX,μY)∂X)2σX2+(∂f(μX,μY)∂Y)2σY2.Eq. (12) follows directly by computing the necessary partial derivatives, while Eq. (13) requires the computation of a single derivative.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "B1 General features",
+      "instruction": "The evolution of the aduλB is shown on Fig. 4. We see that the autofluorescence runs down when high frequency flashes are applied during the 3 transients, with a partial recovery between transients.Fig. 4Autofluorescence at 3 excitation wavelengths, 340 nm (red), 360 (blue), 380 (brown). Both during low frequency Stimulation (four portions made of dots) and during the transients where a higher frequency stimulation was applied (3 groups with almost vertical lines).Fig. 4",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "B2 Within transient dynamics",
+      "instruction": "The ‘direct method’ of [1] requires the knowledge of the autofluorescence value at each time point during a transient at both 340, 360 and 380 nm, since Eqs. (4) and (6) are fitted directly to the recorded adu340 and adu380 and they depend on the total Fura concentration at transient time that is estimated from the difference of the 360 nm measurements in the ROI and the BMR. We therefore take a closer look a the autofluorescence dynamics during the first transient (Fig. 5).Fig. 5Normalized autofluorescence at 3 excitation wavelengths, 340 nm (red), 360 nm (blue) and 380 (brown) during the first transient. At each wavelength, the normalization is performed by dividing each value by the maximal one.Fig. 5",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 29,
+      "title": "B2 Within transient dynamics",
+      "instruction": "At that stage we can fit a straight line plus a cosine function whose period is the duration of a transient. That’s a good way to capture the main structure in the transient, but is still does not account for the full signal variability (Fig. 5). As can be seen from the normalized residuals – the residuals divided by the standard deviation – that should be very nearly independent random draws from a standard normal distribution if the model is correct, there are finer structures left (like the double valley on the 380 nm residuals) meaning that those fits won’t pass formal goodness of fit tests. Indeed if we apply Pearson’s χ2 tests to these stabilized residuals we get:•at 340 nm a residual sum of squares (RSS) 326, leading to a P(χ1972>326)= 0.0,•at 360 nm a RSS of 288, leading to a P(χ1972>288)= 2.6e-05,•at 380 nm a RSS of 275, leading to a P(χ1972>275)= 0.000203.Fig. 6Bottom: Autofluorescence (red) at 340 nm (left), 360 nm (middle) and 380 nm (right) together with a straight line plus cosine function fit (blue). Top, the normalized residuals: (adu−fit)/Gfit+PBG2σread−out2.Fig. 5",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 30,
+      "title": "B2 Within transient dynamics",
+      "instruction": "We are then left with three possibilities:1.try to refine the ‘straight line plus cosine function’ empirical model in order to get acceptable fits,2.try to get a better understanding of the autofluorescence dynamics,3.find another way to get error bars on our estimates.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 31,
+      "title": "B2 Within transient dynamics",
+      "instruction": "Since we wanted to propose an ‘as general and easy as possible’ method we chose the third approach in the present manuscript.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC8563851/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563851/",
+      "caption": "",
+      "bytes": 98222,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563851/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC8563851/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563851/",
+      "caption": "",
+      "bytes": 82317,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563851/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC8563851/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563851/",
+      "caption": "",
+      "bytes": 51994,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563851/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC8563851/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563851/",
+      "caption": "",
+      "bytes": 44976,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563851/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC8563851/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563851/",
+      "caption": "",
+      "bytes": 78727,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563851/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC8563851/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563851/",
+      "caption": "",
+      "bytes": 77610,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563851/gr1.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 25,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

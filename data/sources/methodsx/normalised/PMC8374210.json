@@ -11,93 +11,151 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
   "doi": "10.1016/j.mex.2021.101211",
   "citation": "10.1016/j.mex.2021.101211",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [],
   "estimated_time_mins": 60,
   "materials": [],
   "steps": [
     {
       "step_id": 0,
-      "title": "Spatial dataset preparation",
-      "instruction": "A georeferenced dataset of the Nomenclature of Territorial Units for Statistics Level 2 NUTS 2 areas for countries in the European Union, plus Norway, Switzerland and the UK is used to apply the method. The spatial dataset is structured using the GeoDataFrame framework of the geopandas tool. The Identification (NUTS_ID), country reference code (CNTR_CODE), and the geometrical information (geometry) of the NUTS 2 areas, extracted from the Eurostat database [3], are added to the dataset. The coordinate reference system (CRS) of the geometry of the areas, is set as EPSG 3035.",
+      "title": "Load NUTS2 spatial dataset",
+      "instruction": "Download the Eurostat NUTS‑2 shapefile for all EU countries plus Norway, Switzerland and the UK, load it into a GeoDataFrame, keep the columns NUTS_ID, CNTR_CODE and geometry, and set the coordinate reference system (CRS) of the geometry to EPSG:3035.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Spatial dataset preparation",
-      "instruction": "Next, the population in the NUTS 2 areas is added to the dataset. The population values are extracted from the gridded population of the world version 4 (GPWv4) of 2015 [4], using the NUTS 2 area geometry and the zonal_stats function in the rasterstats python package [12]. The CRS of the GPWv4 GeoTIFF file is WGS84, and therefore the NUTS 2 areas geometry is converted to the same CRS before applying the zonal_stats function. The geometries of the NUTS 2 areas dataset is then transformed back to European Petroleum Survey Group (EPSG) 3035.",
+      "title": "Add population attributes",
+      "instruction": "Download the GPWv4 2015 GeoTIFF (CRS WGS84), re‑project the NUTS2 geometries to WGS84, use rasterstats.zonal_stats to compute the total population within each NUTS2 polygon, attach the population values to the GeoDataFrame, then re‑project the geometries back to EPSG:3035.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Spatial dataset preparation",
-      "instruction": "The sum of the electricity storage capacity of pumped storage hydropower plants within the NUTS 2 areas are added to the spatial dataset. The information on pumped storage hydropower plants is from the Joint Research Centre (JRC) hydropower plants database [5]. The JRC hydropower plants database pumped storage hydropower plants are labelled HPHS in the database type column. The longitude and latitude location values of the hydropower plant database are in CRS EPSG 4326 and therefore are first converted to CRS EPSG 3035. The sum of the electricity storage capacity of pumped storage hydropower plants within the NUTS 2 areas is the sum of the storage capacity of the HPHS labelled hydropower plants located within the NUTS 2 areas. For HPHS labelled hydropower plants whose storage capacity is not given or given as zero, the storage capacity is assumed to be six times the installed power capacity of the plant. The last set of data attributed to NUTS 2 area dataset is the electricity generation potential from wind and solar technology available in the NUTS 2 areas. Two factors determine the electricity generation potential. The first factor is the installation capacity potential assigned to that region which is dependent on the eligible land or offshore area assigned to the NUTS 2 area.",
+      "title": "Add pumped‑storage capacity",
+      "instruction": "Load the Joint Research Centre (JRC) hydropower plants database, filter rows where the type column equals \"HPHS\", re‑project the latitude/longitude coordinates from EPSG:4326 to EPSG:3035, sum the electricity storage capacity of HPHS plants that fall inside each NUTS2 area; for any HPHS plant with missing or zero storage, set its storage to six times its installed power capacity, and store the summed capacity as an attribute of the NUTS2 dataset.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Spatial dataset preparation",
-      "instruction": "The Geospatial Land Availability for Energy Systems framework (GLAES) [8] is the tool used to determine the eligible areas. The eligible land areas are calculated by applying the med scenario from [8] on the NUTS 2 area geometry. The eligible offshore areas within the exclusive economic zones are determined by eliminating non-eligible areas. These non-eligible areas are areas listed in the World Database on Protected Areas [7], areas with more than 60 m water depths, areas wherein 2017 ships were recorded to have spent in average more than one hour in a square km per month, areas within 12 nautical miles of the coast, areas within one nautical mile of gas and oil pipelines [6]. 30% of the remaining eligible area is proportionally distributed to NUTS 2 areas according to the size of their coastal borders to their exclusive economic zone. The installation capacity potential of offshore wind, onshore wind and solar are calculated using the capacity density values 5.36 MW/km2, 4 MW/km2 and 12 MW/km2 respectively. The second factor used to determine the electricity generation potential, of wind and solar, is the average full load hours. The full load hours of technology is the annual sum of the normalised maximum power output profile assigned to the NUTS 2 area taken from the renewables.ninja platform [13]. The full load hours of the onshore wind and solar are multiplied with their respective potential installed capacities to calculate their electricity generation potential within a NUTS 2 area. The offshore wind electricity generation potential is calculated by multiplying the full load hours with the potential offshore capacity assigned to a NUTS 2 areas. The technology with the highest electricity generation potential is assigned to the NUTS 2 area dataset.",
+      "title": "Determine eligible land and offshore area",
+      "instruction": "Run the Geospatial Land Availability for Energy Systems (GLAES) framework using the med scenario on each NUTS2 geometry to obtain eligible land; exclude (i) areas listed in the World Database on Protected Areas, (ii) marine zones deeper than 60 m, (iii) zones where 2017 ship traffic averaged >1 h km⁻² month⁻¹, (iv) zones within 12 nautical miles of the coast, and (v) zones within 1 nautical mile of gas or oil pipelines; allocate 30 % of the remaining eligible area proportionally to NUTS2 units according to the length of their coastal border with the exclusive economic zone.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Defining regions using the max-p-regions method",
-      "instruction": "The Python Spatial Analysis Library (PySAL) contains a spatial optimisation library called spopt [14]. As described in the pseudocode 1 below, the MaxPHeuristic function of the spopt library, in conjunction with the libpysal python library, is used to implement the max-p-regions method.",
+      "title": "Calculate installation capacity potential",
+      "instruction": "Multiply the eligible offshore area by a capacity density of 5.36 MW km⁻² to obtain offshore‑wind installed capacity; multiply the eligible on‑shore land area by 4 MW km⁻² for on‑shore wind capacity; multiply the eligible land area by 12 MW km⁻² for solar capacity. Store these three capacity values for each NUTS2 area.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Defining regions using the max-p-regions method",
-      "instruction": "The MaxPHeuristic function uses a heuristic approach of solving the max-p-regions problem which defines an objective function and constraints used to maximise the heterogeneity between the regions and maximise the number of regions created. As presented in [15], there are three options to conduct a local search when finding the best feasible solution to define regions. The MaxPHeuristic function uses the simulate annealing approach. A contiguity constraint is defined in the MaxPHeuristic function by assigning weight values to the NUTS 2 areas using the queen contiguity weights function provided by libpysal [16]. The max-p regions method is detailed in Fig. 1.Fig. 1Pseudocode detailing the parameters and functions used to conduct the max-p regions method.Fig 1",
+      "title": "Obtain full‑load hours",
+      "instruction": "Download the annual normalised maximum power output profiles for on‑shore wind, offshore wind and solar from the renewables.ninja platform, extract the full‑load hours (annual sum of the profiles) for each technology and associate them with the corresponding NUTS2 area.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Defining regions using the max-p-regions method",
-      "instruction": "The result of the MaxPHeuristic function returns an assigned partition value for each NUTS 2 area. The NUTS 2 areas that were assigned the same partition value are grouped into the same region. The size and number of regions created depend on the threshold value. By changing the area factor used to determine the threshold value, it is possible to vary the size and number of regions allows for the variation of the spatial scale of the energy system model. The area factor must be less than the fraction of the sum of the area values to the median of the area values of the NUTS 2 areas.",
+      "title": "Compute electricity generation potential",
+      "instruction": "For each technology, multiply its installed capacity (MW) by its full‑load hours (h) to obtain electricity generation potential (MWh) per NUTS2 area; assign to the NUTS2 record the technology that yields the highest generation potential and store that value as the region’s electricity generation potential.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Defining regions using the max-p-regions method",
-      "instruction": "The energy-related max-p-regions method defines regions of NUTS 2 areas based on their energy-related spatial attributes. The aim of the method is to differentiate regions according to how they consume, produce and store electricity in a power system with high wind and solar energy penetration. Therefore three spatial attributes used to define heterogeneity of the NUTS 2 areas are population; wind and solar resource potential; and pumped-hydro storage capacity. These three spatial attributes are assigned as the features attribute in the MaxPHeuristic function to create energy-related max-p regions.",
+      "title": "Prepare attributes for max‑p regions",
+      "instruction": "Ensure the GeoDataFrame now contains three numeric attributes for every NUTS2 polygon: (1) population, (2) the maximum electricity generation potential among wind‑offshore, wind‑on‑shore and solar, and (3) pumped‑hydro storage capacity. These will be supplied as the feature matrix to the MaxPHeuristic function.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Defining regions using the max-p-regions method",
-      "instruction": "An alternative method to define regions is to associate NUTS 2 areas at random to regions while maintaining the contiguity of the regions, hereafter referred to as the random-regions method. The random-regions method assigns a set of unique random values from 0 to 1 to the NUTS 2 areas. The random-regions method follows the pseudocode 1 in Fig. 1 but uses the random values instead of the energy-related spatial attributes to determine the heterogeneity between regions when creating the model with the MaxPHeuristic function. The random-regions method was used in [17] to investigate the effectiveness of the max-p regions method to minimise the effects of spatial resolution reduction on power system models. The NUTS 2 area spatial dataset can be filtered to focus on a particular set of NUTS 2 areas. The NUTS 2 areas of Germany were filtered to create energy-related regions and random regions depicted in Fig. 2.Fig. 2Example of creating three energy-related max-p regions and three random regions from the NUTS 2 areas of Germany. The energy-related attributes solar and wind potential, population and pumped-hydro storage are used to determine the heterogeneity between regions and create energy-related max-p regions. Random values from 0 to 1 and are used to determine the heterogeneity between regions to create random regions.Fig 2",
+      "title": "Create contiguity weight matrix",
+      "instruction": "Using libpysal, compute queen‑contiguity weights for the NUTS2 polygons; pass this weight matrix to MaxPHeuristic as the contiguity constraint.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Defining regions using the max-p-regions method",
-      "instruction": "The complete process to create the energy-related max-p regions and the random regions is illustrated in Fig. 3.Fig. 3Illustration of the process to create energy-related max-p regions and random regions.Fig 3",
+      "title": "Run MaxPHeuristic for energy regions",
+      "instruction": "Import spopt.MaxPHeuristic, set the objective to maximise heterogeneity of the three features, select the simulated‑annealing local‑search option, define an area‑factor threshold that is less than (sum of all NUTS2 areas) / (median of NUTS2 areas), provide the feature matrix, queen‑contiguity weights and threshold to MaxPHeuristic, execute the algorithm, and record the returned partition label for each NUTS2 area (areas sharing a label belong to the same region).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Generate random regions (optional)",
+      "instruction": "Assign each NUTS2 area a unique random value between 0 and 1, use these random values as the feature input to the same MaxPHeuristic configuration (including queen contiguity and simulated annealing) to obtain a random‑region partition that still respects contiguity.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Filter for specific country (e.g., Germany)",
+      "instruction": "If the analysis should focus on a subset of NUTS2 areas, filter the GeoDataFrame to the desired country codes (e.g., all German NUTS2 codes) before executing steps 8‑11.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T10:50:16.025739Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 17,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC8374210/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
+      "caption": "",
+      "bytes": 34978,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374210/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC8374210/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
+      "caption": "",
+      "bytes": 119228,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374210/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC8374210/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
+      "caption": "",
+      "bytes": 72963,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374210/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC8374210/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
+      "caption": "",
+      "bytes": 48579,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374210/gr3.jpg"
+    }
+  ]
 }

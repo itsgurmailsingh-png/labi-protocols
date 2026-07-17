@@ -19,75 +19,193 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 4.5,
+  "quality_score": 6.5,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 54,
-  "materials": [],
+  "materials": [
+    "Single-Cell RNA (scRNA) Sequencing and Analysis"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Library Preparation. Thaw PBMC samples and wash with warm DMEM + 10% FBS. Perform automated cell counting. Resuspend cells in 1× PBS + 1% BSA to a final concentration of 100–2,000 cells/µL. Prepare Gene Expression (GEX) and T-cell receptor (TCR) libraries according to the manufacturer’s protocols for the 10x Genomics Chromium GEM-X Single Cell V(D)J + 5’ Gene Expression (v3) kit.",
+      "title": "Prepare PBMC Samples",
+      "instruction": "Thaw PBMC samples and wash with warm DMEM + 10% FBS.",
+      "substeps": [
+        {
+          "instruction": "Perform automated cell counting.",
+          "title": ""
+        },
+        {
+          "instruction": "Resuspend cells in 1× PBS + 1% BSA to a final concentration of 100–2,000 cells/µL.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Single-Cell TCR (scTCR) Sequencing Analysis. Analyze VDJ data using scRepertoire (v2.0.7). 1 Assign each cell a TCR clonotype based on paired TRA and TRB chains. Uniquely identify each TCR clonotype using a combination of V, D, J, C gene segments and CDR nucleotide sequences. Retain only cells with a single productive TRB chain for downstream analysis.",
+      "title": "Prepare GEX and TCR Libraries",
+      "instruction": "Prepare Gene Expression (GEX) and T-cell receptor (TCR) libraries following the manufacturer’s protocols for the 10x Genomics Chromium GEM-X Single Cell V(D)J + 5’ Gene Expression (v3) kit.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Single-Cell RNA (scRNA) Sequencing and Analysis",
+      "title": "Generate Customized Reference Genome",
+      "instruction": "Use cellranger mkref (v7.0.1) to generate a customized reference genome by aggregating the human reference (GRCh38/hg38) with GCAR1 construct sequences.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Pre-processing and Quality Control (QC). Generate a customized reference genome using cellranger mkref (v7.0.1) by aggregating the human reference (GRCh38/hg38) with GCAR1 construct sequences. 2 Align sequencing data to the customized reference using cellranger multi (v7.0.1). 2 Identify VDJ+ cells from the GEX dataset and subset them for downstream analyses. Perform all subsequent processing and QC in Seurat (v5). 3 Identify GCAR1-expressing cells using subset (SeuratObject, subset = GCAR &gt; 0). Apply the following QC filters: - Raw nCount_RNA &gt; 5,000 - Mitochondrial RNA percentage (percent.mt) &lt; 10% (except for the GCAR1 Product sample, wherepercent.mt &gt; 20% is allowed) Normalize data using SCTransform, regressing out mitochondrial content. Integrate all samples across timepoints: select integration features with SelectIntegrationFeatures(), identify anchors using FindIntegrationAnchors(reduction = &#34;rpca&#34;), and generate integrated expression values with IntegrateData(). Perform cell clustering at resolution 0.8 (resulting in 30 clusters).",
+      "title": "Align Sequencing Data",
+      "instruction": "Align sequencing data to the customized reference using cellranger multi (v7.0.1).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Cluster-Level Cell Type Predictions. Perform unsupervised cell-type labelling using SCimilarity (v0.2.0; “unconstrained” model). 4 Re-run the model in “constrained” mode to obtain a min_dist value for each cell’s label prediction (0 indicates an identical match to the reference). Calculate a cluster label score that incorporates the min_dist value per label (x),and the number of cells with each label (xc), per cluster, as: cluster label score_x = (threshold(min_dist) – median(min_dist))_k × proportion(x_c)",
+      "title": "Perform Initial Data Subset and QC",
+      "instruction": "Identify VDJ+ cells from the GEX dataset and subset them for downstream analyses using Seurat (v5).",
+      "substeps": [
+        {
+          "instruction": "Identify GCAR1-expressing cells using subset (SeuratObject, subset = GCAR > 0).",
+          "title": ""
+        },
+        {
+          "instruction": "Apply QC filters: Raw nCount_RNA > 5,000 and Mitochondrial RNA percentage (percent.mt) < 20%.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Validate annotations. Perform pathway enrichment analysis to extract cluster-specific marker genes with FindAllMarkers() (using performNormalization()), filter for markers with avg_log2FC &gt; 1.0, and query with the g:Profiler2 R package focusing on GO:BP terms. 5,6",
+      "title": "Normalize and Integrate Data",
+      "instruction": "Normalize data using SCTransform, regressing out mitochondrial content, and integrate samples across timepoints.",
+      "substeps": [
+        {
+          "instruction": "Select integration features with SelectIntegrationFeatures().",
+          "title": ""
+        },
+        {
+          "instruction": "Identify anchors using FindIntegrationAnchors(reduction = \"rpca\").",
+          "title": ""
+        },
+        {
+          "instruction": "Generate integrated expression values with IntegrateData().",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Cluster-Level GCAR1 Status. Annotate clusters as GCAR1+ if they contain &gt;250 cells or &gt;15% GCAR1+ cells. Calculate p-values for the proportion of GCAR1-positive cells in each cluster using a two-proportion z-test.",
+      "title": "Perform Cell Clustering",
+      "instruction": "Perform cell clustering at resolution 0.8 to generate 30 clusters.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Cell-Level Cell Type Classification. Refine SCimilarity cell-level labels into broad cell types using semi-manual curation and tumour marker gene expression levels. Retain cells only if cell-level and cluster-level annotations agree on T-cell status (to eliminate ambiguous assignments).",
+      "title": "Analyze TCR Clonotypes",
+      "instruction": "Analyze VDJ data using scRepertoire (v2.0.7).",
+      "substeps": [
+        {
+          "instruction": "Assign each cell a TCR clonotype based on paired TRA and TRB chains.",
+          "title": ""
+        },
+        {
+          "instruction": "Uniquely identify each TCR clonotype using a combination of V, D, J, C gene segments and CDR nucleotide sequences.",
+          "title": ""
+        },
+        {
+          "instruction": "Retain only cells with a single productive TRB chain for downstream analysis.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Marker Gene Expression Profiling. Profile CAR T-cell immunophenotyping genes using established published marker lists. 7",
+      "title": "Predict Cell Types",
+      "instruction": "Perform unsupervised cell-type labelling using SCimilarity (v0.2.0; “unconstrained” model).",
+      "substeps": [
+        {
+          "instruction": "Re-run the model in “constrained” mode to obtain a min_dist value for each cell’s label prediction (where 0 indicates an identical match to the reference).",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate a cluster label score using the formula: cluster label score_x = (threshold(min_dist) – median(min_dist))_k × proportion(x_c).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Validate Annotations",
+      "instruction": "Perform pathway enrichment analysis to extract cluster-specific marker genes.",
+      "substeps": [
+        {
+          "instruction": "Use FindAllMarkers() (with performNormalization()) to find markers with avg_log2FC > 1.0.",
+          "title": ""
+        },
+        {
+          "instruction": "Query markers with the g:Profiler2 R package focusing on GO:BP terms.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Annotate GCAR1 Status",
+      "instruction": "Annotate clusters as GCAR1+ if they contain >250 cells or >15% GCAR1+ cells.",
+      "substeps": [
+        {
+          "instruction": "Calculate p-values for the proportion of GCAR1-positive cells in each cluster using a two-proportion z-test.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Classify Cell Types",
+      "instruction": "Refine SCimilarity cell-level labels into broad cell types using semi-manual curation and tumour marker gene expression levels.",
+      "substeps": [
+        {
+          "instruction": "Retain cells only if cell-level and cluster-level annotations agree on T-cell status.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Profile Marker Gene Expression",
+      "instruction": "Profile CAR T-cell immunophenotyping genes using established published marker lists.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 63,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

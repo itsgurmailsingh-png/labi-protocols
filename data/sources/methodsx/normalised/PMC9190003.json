@@ -14,9 +14,273 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "BAI and TBI, and T",
+    "BAIS2 and TBI. The third threshold combination, T"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Acquire satellite fire and optical data",
+      "instruction": "Download MODIS daily fire mask composites (MYD14A1.006 and MOD14A1.006) for 2019 March‑May at 1 km resolution and Sentinel‑2 Level‑2A (S2A) imagery for the same period; generate seven‑day composites of S2A for March, April and May 2019.",
+      "substeps": [
+        {
+          "instruction": "Use MODIS 11‑µm radiances to create fire masks; note that MODIS detects fires ≥18 ha with ~50 % probability.",
+          "title": ""
+        },
+        {
+          "instruction": "Create seven‑day S2A composites (SWIR2, NIR, GREEN) for visual interpretation (false‑colour composite: R=SWIR2, G=NIR, B=GREEN).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Define sampling criteria and collect polygons",
+      "instruction": "Identify burned scar polygons that satisfy all spatial and confidence criteria, then draw sample polygons in Google Earth Engine (GEE).",
+      "substeps": [
+        {
+          "instruction": "Overlay S2A seven‑day composites with MOD14A1.006 and MYD14A1.006 fire pixels; keep only fire pixels of high confidence (classes 8 or 9).",
+          "title": ""
+        },
+        {
+          "instruction": "Require burned scar area ≥0.5 km² (≈50 ha) and distance >500 m from any forested area.",
+          "title": ""
+        },
+        {
+          "instruction": "Exclude pixels within 1 km² of settlements, power plants, factories, mining structures, water bodies, active flames, or smoke.",
+          "title": ""
+        },
+        {
+          "instruction": "Select only scars that show a double‑hump NDVI phenology across two cultivation seasons.",
+          "title": ""
+        },
+        {
+          "instruction": "Create ~100 burned‑sample polygons per seven‑day composite (limited by GEE); total 1 160 burned polygons (≈40 pixels per polygon).",
+          "title": ""
+        },
+        {
+          "instruction": "Create unburned polygons of comparable size (≈40 pixels each) from harvested/open fields, vegetation, non‑burnable features, etc.; 3 246 unburned polygons covering all subclasses.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Pre‑process Sentinel‑2 Level‑2A data",
+      "instruction": "Filter, mask, and export S2A tiles for analysis.",
+      "substeps": [
+        {
+          "instruction": "Select Level‑2A surface‑reflectance tiles (100 × 100 km², UTM/WGS84) with <10 % cloud cover.",
+          "title": ""
+        },
+        {
+          "instruction": "Use the QA60 band (60 m) to mask remaining clouds and cloud shadows; visually discard hazy images.",
+          "title": ""
+        },
+        {
+          "instruction": "Resample all bands to 10 m resolution (GEE scaling algorithm).",
+          "title": ""
+        },
+        {
+          "instruction": "Process a total of 3 522 S2A tiles.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Mask non‑agricultural land covers",
+      "instruction": "Remove forests, water, flooded vegetation and other non‑target classes from all images.",
+      "substeps": [
+        {
+          "instruction": "Apply ESRI 2020 Global Land Use/Land Cover (10 m) mask for water, trees and flooded vegetation over Madhya Pradesh.",
+          "title": ""
+        },
+        {
+          "instruction": "Add JAXA Global PALSAR‑2 water mask (2017) and a water mask derived from the Modified Normalized Difference Water Index (MNDWI) threshold obtained by random water sampling.",
+          "title": ""
+        },
+        {
+          "instruction": "Combine all masks to exclude non‑agricultural pixels.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Compute spectral indices for all polygons",
+      "instruction": "Calculate the full set of fire‑sensitive and vegetation indices for each of the 4 406 sample polygons.",
+      "substeps": [
+        {
+          "instruction": "Use bands: VIS B2‑B4, NIR B8, Red‑Edge B6‑B8A, SWIR1 B11, SWIR2 B12.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate NDVI, BAI, BAIS2, NBR, NBR2, MIRBI, TBI, TGI, TWI using the equations listed in Table 2.",
+          "title": ""
+        },
+        {
+          "instruction": "Export the index values for every polygon (≈40 pixels per polygon).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Assess class separability and mask high‑NDVI pixels",
+      "instruction": "Identify indices that separate burned (SB) from unburned (SUB) classes and remove tree‑contaminated pixels.",
+      "substeps": [
+        {
+          "instruction": "Compute the M‑statistic: M = |μB‑μUB| / (σB + σUB) for each index.",
+          "title": ""
+        },
+        {
+          "instruction": "Mask any pixel whose NDVI exceeds the mean NDVI of its composite (removes tree pixels).",
+          "title": ""
+        },
+        {
+          "instruction": "Select indices with M > 1; retain BAI, BAIS2, TBI (exclude NBR due to poor separability).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Determine threshold ranges and define combinations",
+      "instruction": "Set percentile‑based thresholds for each selected index and create four multi‑index schemes.",
+      "substeps": [
+        {
+          "instruction": "For each index, compute the 5th and 95th percentiles of the sampled burned class; use these as lower and upper bounds.",
+          "title": ""
+        },
+        {
+          "instruction": "Define T1 = BAI & TBI, T2 = BAIS2 & TBI, T3 = BAI & BAIS2, T4 = BAI & BAIS2 & TBI.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply each combination to every seven‑day S2A composite, classifying a pixel as burned only if it satisfies all thresholds in the combination.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Generate binary burned maps for each composite",
+      "instruction": "Apply the threshold combinations to produce burned‑area rasters.",
+      "substeps": [
+        {
+          "instruction": "Run T1‑T4 on all 7‑day composites (2019‑2021); output binary images (burned = 1, unburned = 0).",
+          "title": ""
+        },
+        {
+          "instruction": "Transform binary outputs into vector polygons for later analysis.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Evaluate threshold performance with Random Forest",
+      "instruction": "Train and test a decision‑forest classifier using the same sample set to rank the threshold schemes.",
+      "substeps": [
+        {
+          "instruction": "In GEE, use the smileRandomForest algorithm with up to 200 trees (hyper‑parameter tuned).",
+          "title": ""
+        },
+        {
+          "instruction": "Randomly allocate 60 % of polygons for training, 40 % for validation.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute Commission Error (CE = FP/(TP+FP)), Omission Error (OE = FN/(FN+TP)), and F1 score for each T‑scheme.",
+          "title": ""
+        },
+        {
+          "instruction": "Select the scheme with lowest CE and highest F1 (T1).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Create final burned‑area products",
+      "instruction": "Produce monthly and 5‑day burned‑area maps for 2019‑2021 using the optimal T1 thresholds.",
+      "substeps": [
+        {
+          "instruction": "Apply T1 to all S2A images with <10 % cloud cover; additionally mask cloud‑shadow pixels over burned scars.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate 5‑day composites; for each composite tn, mask out pixels already burned in tn‑1 (continuous three‑month temporal correction) to avoid repeat extraction.",
+          "title": ""
+        },
+        {
+          "instruction": "Aggregate 5‑day results into monthly burned‑area mosaics (10 m resolution).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Validate the final product with PlanetScope imagery",
+      "instruction": "Compare S2A‑ABAMP201921 maps against high‑resolution PlanetScope reference data.",
+      "substeps": [
+        {
+          "instruction": "Download 3 m, near‑daily PlanetScope (RGB + NIR) scenes for dates matching the S2A composites.",
+          "title": ""
+        },
+        {
+          "instruction": "For each PlanetScope scene, digitize ~30 reference polygons (burned and unburned).",
+          "title": ""
+        },
+        {
+          "instruction": "Subset the corresponding S2A area, apply the T1 threshold, and convert to binary.",
+          "title": ""
+        },
+        {
+          "instruction": "Train a Random Forest classifier with the PlanetScope reference polygons and classify the S2A binary image.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute CE, OE, and F1 for each year (2019: CE 10.73 %, OE 0.01 %, F1 94.24 %; 2020: CE 38.31 %, OE 0.17 %, F1 76.07 %; 2021: CE 28.88 %, OE 0.88 %, F1 82.76 %).",
+          "title": ""
+        },
+        {
+          "instruction": "Total validation area: 28 159.76 km² (17 images 2019, 2 images 2020, 4 images 2021).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T11:56:58.399225Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "To collect ground truth data on burned and unburned pixels, we developed a novel virtual sampling methodology (Fig. 1) that uses active fire data sets to target likely regions with burning for visual interpretation of Sentinel-2 imagery. The following sub-sections provide details of the datasets used and the sampling method that we developed for this study.Fig. 1Remotely sensed data assisted virtual sampling of agriculture burned and unburned pixels.Fig. 1: Validation for the S2A-ABAMP201921 product was performed using PlanetScope images from Planet as independent satellite products. We used the 3 m resampled near-daily four-band (RGB and NIR) corrected imagery from all PlanetScope sensors. Near daily images were provided with radiometric, sensor, and geometric corrections with a tile footprint of approximately 25.0 × 23.0 km2\n[20]. The validation data at higher spatial and temporal resolution (3 m, ∼daily) than S2A (10 m, 5-days) were used as previous studies have recommended using high spatial and temporal resolution data for validation [2]. A total area of 28,159.76 km2 was processed to validate the final S2A-ABAMP201921 10 m product for 2019-2021. We accessed imagery using the free tier for academic use. Validation was performed using images with the same acquisition dates as our S2A data to avoid temporal mismatch (see [3] Supplemental Materials: Table S1). The virtual sample collection methodology explained in section 3.1 was used to derive approximately 30 reference burned and unburned polygons for each PlanetScope image. We subsetted the S2A imagery to match the spatial extent of each PlanetScope scene, and the T1 threshold condition was applied to each subset. The final S2A-ABAMP201921 subset was converted to a binary image with burned foreground as 1 and unburned background as 0. The RF classifier was built using the PlanetScope reference polygons as training samples and then was used to classify the binary image. We also validated each global burned area ",
+  "content_type": "protocol",
+  "content_type_score": 34,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

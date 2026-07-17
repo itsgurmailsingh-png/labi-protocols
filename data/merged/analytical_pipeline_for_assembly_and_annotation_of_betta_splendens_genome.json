@@ -19,82 +19,195 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 5.0,
+  "quality_score": 6.0,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 60,
   "materials": [],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Get raw sequencing data in Fastq format. Filter the raw sequencing data by using SOAPfilter (version 2.2). Using parameters &#39;-i insertsize -y -z -p -M 2&#39;",
+      "title": "Obtain raw sequencing data",
+      "instruction": "Collect the raw sequencing reads in FASTQ format.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Estimate the genome size with k-mer (version 1.0) analysis. Using parameters &#39;k=17 -t 12&#39;",
+      "title": "Filter reads with SOAPfilter",
+      "instruction": "Run SOAPfilter (v2.2) on the FASTQ files using the options '-i insertsize -y -z -p -M 2'.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "1. Run SOAPdenovo (version 2.04 ) to assemble the Betta splendens genome. 2. Perform Gapcloser (version 1.12) to further close gaps in our genome obtained in step3. 1-Note: using parameters&#39;pregraph(-K 29 -p 20);contig(-M 2);map(-k 41);scaff(&lt;default&gt;)&#39; 2-Note: using reads from all insert-size libraries",
+      "title": "Estimate genome size via k‑mer",
+      "instruction": "Perform k‑mer analysis (k‑mer v1.0) with parameters 'k=17 -t 12' to estimate the Betta splendens genome size.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "1. Run RepeatModeler(1.0.8) and LTR_FINDER(1.0.6), respectively, to build de novo library based on the input assembled genome sequence. 2. Basing on the library constructed in step 5 as database, run RepeatMasker (version 3.3.0) to find and then classify the repetitive sequences. 1-Note: &lt;default&gt; 2-Note: using parameters &#39;-nolow -no_is -norna -parallel 1&#39;",
+      "title": "Assemble genome and close gaps",
+      "instruction": "Assemble the genome with SOAPdenovo and then close gaps with Gapcloser, using reads from all insert‑size libraries.",
+      "substeps": [
+        {
+          "instruction": "Run SOAPdenovo (v2.04) with pregraph(-K 29 -p 20); contig(-M 2); map(-k 41); scaff() parameters.",
+          "title": ""
+        },
+        {
+          "instruction": "Run Gapcloser (v1.12) on the SOAPdenovo assembly using the same set of insert‑size library reads.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Run RepeatMasker and ProteinMask (version 3.3.0) to identify repeats in the genome at DNA and protein level, respectively, by aligning sequences against existing databases, Repbase TE library (Version 17.01) and TE protein database. Using parameters &#39;RepeatMasker(-nolow -no_is -norna -parallel 1)ProteinMask(-noLowSimple -pvalue 0.0001)&#39;",
+      "title": "Build repeat library with RepeatModeler",
+      "instruction": "Create a de‑novo repeat library from the assembled genome.",
+      "substeps": [
+        {
+          "instruction": "Run RepeatModeler (v1.0.8) on the assembly.",
+          "title": ""
+        },
+        {
+          "instruction": "Run LTR_FINDER (v1.0.6) on the assembly.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Run Augustus (version 3.0.3) and GlimmerHMM (version 3.0.1) to de novo predict genes in the repeat-masked genome sequences. Using parameters &#39;Augustus(--species=zebrafish --uniqueGeneId=true --noInFrameStop=true --gff3=on --strand=both)GlimmerHMM(-d zebrafish -f -g)&#39; Using parameters &#39;-d zebrafish -f -g&#39;",
+      "title": "Mask repeats using RepeatMasker",
+      "instruction": "Mask repetitive sequences in the genome using the library generated in the previous step.",
+      "substeps": [
+        {
+          "instruction": "Run RepeatMasker (v3.3.0) with parameters '-nolow -no_is -norna -parallel 1' and the de‑novo library as the repeat database.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Download protein sequences of homlog species (danio rerio(release-64), gadus morhua(release-65), gasterosteus aculeatus(release-64), oryzias latipes(release-64), takifugu rubripes(release-64), and tetraodon nigroviridis(release-64)), then align these against our masked genome sequences with BLAT, and then based on the BLAT mapping results, run GeneWise (version 2.2.0 ) to predict genes. Using parameters &#39;--min_align_coverage 0.3 --max divergence rate 0.3 --extend length for both sides of regions 2000&#39;",
+      "title": "Identify DNA and protein repeats",
+      "instruction": "Detect repeats at both DNA and protein levels against known repeat databases.",
+      "substeps": [
+        {
+          "instruction": "Run RepeatMasker (v3.3.0) with '-nolow -no_is -norna -parallel 1' against Repbase TE library (Version 17.01).",
+          "title": ""
+        },
+        {
+          "instruction": "Run ProteinMask (v3.3.0) with parameters '-noLowSimple -pvalue 0.0001' against the TE protein database.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Integrate genes predicted in step 8-9 to obtain the consensus gene set by using GLEAN. Filtering with criterion &#39;overlap cutoff 0.8 and at least one homolog support&#39;",
+      "title": "Predict genes with Augustus and GlimmerHMM",
+      "instruction": "Perform de‑novo gene prediction on the repeat‑masked genome using two ab‑initio tools.",
+      "substeps": [
+        {
+          "instruction": "Run Augustus (v3.0.3) with '--species=zebrafish --uniqueGeneId=true --noInFrameStop=true --gff3=on --strand=both'.",
+          "title": ""
+        },
+        {
+          "instruction": "Run GlimmerHMM (v3.0.1) with '-d zebrafish -f -g'.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Perform TopHat (version 2.1.0) with default parameters to align filtered RNA-seq reads against gene set mentioned in Step10, and then use Cufflinks (version 2.2.1) to assemble these transcripts, then use training parameters to predict ORFs, and finally obtain the more intergrity and trusty gene set. Filtering RNA sequencing data by SOAPnuke with parameters &#39;-l 10 -q 0.5 -n 0.01 -Q 2”",
+      "title": "Homology‑based gene prediction with BLAT and GeneWise",
+      "instruction": "Use protein sequences from related species to guide gene prediction.",
+      "substeps": [
+        {
+          "instruction": "Download protein sequences of homologous species: Danio rerio (release‑64), Gadus morhua (release‑65), Gasterosteus aculeatus (release‑64), Oryzias latipes (release‑64), Takifugu rubripes (release‑64), and Tetraodon nigroviridis (release‑64).",
+          "title": ""
+        },
+        {
+          "instruction": "Align the downloaded proteins to the repeat‑masked genome with BLAT.",
+          "title": ""
+        },
+        {
+          "instruction": "Run GeneWise (v2.2.0) on the BLAT alignments using parameters '--min_align_coverage 0.3 --max divergence rate 0.3 --extend length for both sides of regions 2000'.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Run BUSCO(version 3.0.1) and map final gene set and genome to actinopterygii reference to assess the completeness. Using parameters &#39;-e 0.001 -limit 3&#39;",
+      "title": "Integrate gene predictions using GLEAN",
+      "instruction": "Combine the ab‑initio and homology‑based gene sets into a consensus set with GLEAN, filtering by overlap cutoff 0.8 and requiring at least one homolog support.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Process RNA‑seq and refine gene models",
+      "instruction": "Use RNA‑seq data to improve the consensus gene set.",
+      "substeps": [
+        {
+          "instruction": "Filter raw RNA‑seq reads with SOAPnuke using '-l 10 -q 0.5 -n 0.01 -Q 2'.",
+          "title": ""
+        },
+        {
+          "instruction": "Align the filtered reads to the consensus gene set with TopHat (v2.1.0) using default parameters.",
+          "title": ""
+        },
+        {
+          "instruction": "Assemble the aligned transcripts with Cufflinks (v2.2.1).",
+          "title": ""
+        },
+        {
+          "instruction": "Predict open reading frames using the training parameters supplied by Cufflinks.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate the final, more complete and reliable gene set.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Assess completeness with BUSCO",
+      "instruction": "Evaluate the completeness of the final gene set and genome by running BUSCO (v3.0.1) and mapping to the actinopterygii reference.",
+      "substeps": [
+        {
+          "instruction": "Run BUSCO with parameters '-e 0.001 -limit 3'.",
+          "title": ""
+        },
+        {
+          "instruction": "Map the final gene set and genome to the actinopterygii reference to obtain completeness metrics.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 78,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

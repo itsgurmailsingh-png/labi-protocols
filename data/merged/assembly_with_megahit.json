@@ -19,7 +19,7 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 7.0,
+  "quality_score": 5.5,
   "category": "Bioinformatics",
   "estimated_time_mins": 84,
   "materials": [
@@ -31,108 +31,113 @@
     "std-err directory",
     "MetaQuast",
     ".bashrc file",
-    "fasta files directory"
+    "fasta files directory",
+    "Move into your project directory. $ cd /rsgrps/bh_class/username",
+    "Save and close the .bashrc file"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Log into the HPC. $ ssh hpc$ ocelote $ ssh hpc $ ocelote",
+      "title": "Log into HPC",
+      "instruction": "Connect to the high‑performance cluster via SSH (e.g., `ssh hpc.ocelote`).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Move into your project directory. $ cd /rsgrps/bh_class/username",
+      "title": "Create and enter assembly directory",
+      "instruction": "Make a new directory called `assembly` and change into it: `mkdir assembly && cd assembly`.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Create a directory for assembly output. Then move into that directory. $ mkdir assembly$ cd !$ $ mkdir assembly $ cd !$",
+      "title": "Organize FASTA files",
+      "instruction": "Create a folder for FASTA files and move all FASTA files into it (adjust paths if needed): `mkdir fasta; mv fastq/*.fasta fasta`.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Before we continue, determine if you have single end or paired end files. If you have two files per SRR number, you have paired end reads. Otherwise, you have single end reads. 1. If you have single end reads proceed to step 10. 2. If you have paired end reads, skip to step 11.",
+      "title": "Determine read type",
+      "instruction": "Check whether you have paired‑end reads (two files per SRR, e.g., *_1.fasta and *_2.fasta) or single‑end reads (one file per SRR). If single‑end, skip to the step for single‑end script; if paired‑end, skip to the step for paired‑end script.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Assembly script for PAIRED END FILES Create a script called run-assembly.sh #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l select=1:ncpus=20:mem=40gb#PBS -l pvmem=38gb#PBS -l walltime=24:00:00#PBS -l cput=48:00:00#PBS -M netid@email.arizona.edu#PBS -m beaFASTA_DIR='/rsgrps/bh_class/username/fasta'ASSEM_DIR='/rsgrps/bh_class/username/assembly'MIN_CONTIG_LEN=500OUT_DIR='/rsgrps/bh_class/username/assembly/megahit-out'cd $ASSEM_DIRSINGLEs=`ls $FASTA_DIR/*_1.fasta | python -c 'import sys; print #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l select=1:ncpus=20:mem=40gb #PBS -l pvmem=38gb #PBS -l walltime=24:00:00 #PBS -l cput=48:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea FASTA_DIR=&#39;/rsgrps/bh_class/username/fasta&#39; ASSEM_DIR=&#39;/rsgrps/bh_class/username/assembly&#39; MIN_CONTIG_LEN=500 OUT_DIR=&#39;/rsgrps/bh_class/username/assembly/megahit-out&#39; cd $ASSEM_DIR SINGLEs=`ls $FASTA_DIR/*_1.fasta | python -c &#39;import sys; print &#34;,&#34;.join([x.strip() for x in sys.stdin.readlines()])&#39;` megahit -r $SINGLEs --preset meta-sensitive --min-contig-len $MIN_CONTIG_LEN -o $OUT_DIR -t 12 OUT_DIR does NOT need to be created prior to running this script. Megahit will make the directory on its own.",
+      "title": "Create paired‑end assembly script",
+      "instruction": "Create a file named `run-assembly.sh` with the following content (replace `username` with your actual username):\n```\n#!/bin/bash\n#PBS -W group_list=bh_class\n#PBS -q windfall\n#PBS -l select=1:ncpus=20:mem=40gb\n#PBS -l pvmem=38gb\n#PBS -l walltime=24:00:00\n#PBS -l cput=48:00:00\n#PBS -M netid@email.arizona.edu\n#PBS -m bea\n\nFASTA_DIR='/rsgrps/bh_class/username/fasta'\nASSEM_DIR='/rsgrps/bh_class/username/assembly'\nMIN_CONTIG_LEN=500\nOUT_DIR='/rsgrps/bh_class/username/assembly/megahit-out'\n\ncd $ASSEM_DIR\nSINGLEs=`ls $FASTA_DIR/*_1.fasta | python -c 'import sys; print \",\".join([x.strip() for x in sys.stdin.readlines()])'`\nmegahit -r $SINGLEs --preset meta-sensitive --min-contig-len $MIN_CONTIG_LEN -o $OUT_DIR -t 12\n```\nNote: `OUT_DIR` does **not** need to exist beforehand; Megahit will create it automatically.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Assembly script for SINGLE END FILES Create a script called run-assembly.sh #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l select=1:ncpus=20:mem=40gb#PBS -l pvmem=38gb#PBS -l walltime=24:00:00#PBS -l cput=48:00:00#PBS -M netid@email.arizona.edu#PBS -m beaFASTA_DIR='/rsgrps/bh_class/username/fasta'ASSEM_DIR='/rsgrps/bh_class/username/assembly'MIN_CONTIG_LEN=500OUT_DIR='/rsgrps/bh_class/username/assembly/megahit-out'cd $ASSEM_DIRSINGLEs=`ls $FASTA_DIR/*.fasta | python -c 'import sys; print #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l select=1:ncpus=20:mem=40gb #PBS -l pvmem=38gb #PBS -l walltime=24:00:00 #PBS -l cput=48:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea FASTA_DIR=&#39;/rsgrps/bh_class/username/fasta&#39; ASSEM_DIR=&#39;/rsgrps/bh_class/username/assembly&#39; MIN_CONTIG_LEN=500 OUT_DIR=&#39;/rsgrps/bh_class/username/assembly/megahit-out&#39; cd $ASSEM_DIR SINGLEs=`ls $FASTA_DIR/*.fasta | python -c &#39;import sys; print &#34;,&#34;.join([x.strip() for x in sys.stdin.readlines()])&#39;` megahit -r $SINGLEs --preset meta-sensitive --min-contig-len $MIN_CONTIG_LEN -o $OUT_DIR -t 12 OUT_DIR does NOT need to be created prior to running this script. Megahit will make the directory on its own.",
+      "title": "Create single‑end assembly script",
+      "instruction": "Create a file named `run-assembly.sh` with the following content (replace `username` with your actual username):\n```\n#!/bin/bash\n#PBS -W group_list=bh_class\n#PBS -q windfall\n#PBS -l select=1:ncpus=20:mem=40gb\n#PBS -l pvmem=38gb\n#PBS -l walltime=24:00:00\n#PBS -l cput=48:00:00\n#PBS -M netid@email.arizona.edu\n#PBS -m bea\n\nFASTA_DIR='/rsgrps/bh_class/username/fasta'\nASSEM_DIR='/rsgrps/bh_class/username/assembly'\nMIN_CONTIG_LEN=500\nOUT_DIR='/rsgrps/bh_class/username/assembly/megahit-out'\n\ncd $ASSEM_DIR\nSINGLEs=`ls $FASTA_DIR/*.fasta | python -c 'import sys; print \",\".join([x.strip() for x in sys.stdin.readlines()])'`\nmegahit -r $SINGLEs --preset meta-sensitive --min-contig-len $MIN_CONTIG_LEN -o $OUT_DIR -t 12\n```\nAgain, `OUT_DIR` will be created by Megahit if it does not already exist.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Make directories for standard out and standard error. mkdir std-out std-err",
+      "title": "Create job output folders",
+      "instruction": "Make directories for standard output and standard error: `mkdir std-out std-err`.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Run the assembly: $ chmod +x run-assembly.sh$ qsub -e std-err/ -o std-out/ run-assembly.sh $ chmod +x run-assembly.sh $ qsub -e std-err/ -o std-out/ run-assembly.sh",
+      "title": "Submit assembly job",
+      "instruction": "Make the script executable and submit it to the scheduler, directing output and error to the folders created:\n```\nchmod +x run-assembly.sh\nqsub -e std-err/ -o std-out/ run-assembly.sh\n```",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "You can check the status of your job with the following command: $ qstat -u username Job runtime will vary depending on the size of your dataset.",
+      "title": "Monitor job status",
+      "instruction": "Check the status of your job with `qstat -u username`. Runtime will vary with dataset size.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Upon job completion, get assembly statistics using MetaQuast on CyVerse. Assembly Stats with MetaQuast by James E Thornton Jr",
+      "title": "Assess assembly with MetaQuast",
+      "instruction": "When the job finishes, run MetaQuast on CyVerse to obtain assembly statistics (exact command not provided in the source).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "From your home directory, open .bashrc file for editing. $ nano .bashrc Remember, you are already in your home directory after logging into ocelote.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "",
-      "instruction": "Input the following line into your .bashrc file: export PATH=/rsgrps/bh_class/bin:$PATH This will allow us to execute tools found in /rsgrps/bh_class/bin without specifying the path name.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "",
-      "instruction": "Save and close the .bashrc file",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 13,
-      "title": "",
-      "instruction": "Make a directory for fasta files. This is the format of your files after doing quality control. You will also need to move all fasta files into this directory. mkdir fastamv fastq/*.fasta fasta mkdir fasta mv fastq/*.fasta fasta This step assumes that the fasta files are in the fastq directory. Alter the command accordingly if this is not the case.",
+      "title": "Add tools to PATH",
+      "instruction": "Edit your `.bashrc` file (`nano .bashrc`) and add the line `export PATH=/rsgrps/bh_class/bin:$PATH`. Save the file and reload the shell (`source ~/.bashrc` or log out and back in).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [
+    {
+      "type": "image",
+      "filename": "payc2w6-38A0951C687311F08F960A58A9FEAC02.jpg",
+      "local_path": "data/media/protocols_io/assembly-with-megahit-kb7csrn/payc2w6-38A0951C687311F08F960A58A9FEAC02.jpg",
+      "source_url": "https://files.protocols.io/external/payc2w6-38A0951C687311F08F960A58A9FEAC02.jpg",
+      "caption": "",
+      "bytes": 18679,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/assembly-with-megahit-kb7csrn/payc2w6-38A0951C687311F08F960A58A9FEAC02.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 30,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

@@ -19,614 +19,504 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 43.0,
-  "category": "Other",
+  "quality_score": 28.5,
+  "category": "Synthetic Biology",
   "estimated_time_mins": 516,
-  "materials": [],
+  "materials": [
+    "Paste G-code lines into G-code editing software, such as CAMotics.",
+    "to lift above support bath",
+    "Prepare crosslinking initiator solutions: e.g., 50 millimolar (mM) LAP or 2 millimolar (mM) Eosin Y disodium salt in PBS (Figure 4, center). For printing using alginate, prepare a solution of 1 Molarity (M) calcium chloride in PBS.",
+    "Sterilize supplies by autoclaving or by heavily coating with 70% ethanol, then allowing to dry completely in the TC hood, ensuring the inside of the Luer lock fittings is dry.",
+    "Gather required equipment, including print syringes, 27G × ½” blunt-tip needles, spatulas, Eppendorf tubes, and syringe holders for the 3D bioprinter (Figure 4, left). Figure 4. Sacrificial ink preparation for GUIDE-3DP. Left: Supplies needed for sacrificial ink preparation. Center: Crosslinking initiator solutions composed of LAP (50 mM; left) and Eosin Y disodium salt (2 mM; right). Right: Resuspended gelatin microparticle slurry (100 mg/mL).",
+    "If sterile printing is to be performed, filter the solutions through a 0.22 μm syringe filter.",
+    "Gather all printing equipment and materials, including the 3D bioprinter, syringes, nozzles, screwdrivers, DPBS, and UV lamp (if LAP is used as the crosslinking initiator) or white light lamp (if Eosin Y is used as the crosslinking initiator).",
+    "Interconnected retinal network: Figure 2bi.gcode",
+    "Branched vascular network: Figure 2bii.gcode",
+    "Dual-material capillary-like network: Figure 2biii.gcode"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "For reference, select images or 3D models from available databases such as NIH3D, BioRender, and Vascular Model Repository. Import the desired reference into Rhinoceros 3D (Rhino3D) or an equivalent modeling software.",
+      "title": "Import reference model into Rhino",
+      "instruction": "Select reference images or 3D models from databases such as NIH3D, BioRender, or Vascular Model Repository and import the chosen file into Rhino3D (or equivalent modeling software).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "To model the structure, draw shapes or line segments as necessary for the desired geometry, such as using the ‘Control Point Curve’ feature in Rhino3D.",
+      "title": "Create geometry in Rhino",
+      "instruction": "Draw the desired shapes or line segments using Rhino’s tools (e.g., Control Point Curve) to represent the intended vascular network.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "After finishing the drawing, select the starting segment of the print path and divide the segment into points with set spacing (e.g., 0.5 mm intervals) using the “Divide” command in Rhino3D (Figure 1). Figure 1. Division of print path segment into points with set spacing. Direction of divided path is indicated as a white arrow.",
+      "title": "Divide print path into points",
+      "instruction": "Select the starting segment of the print path and use the “Divide” command to create points spaced at 0.5 mm intervals (or another set spacing).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "For each segment, select all points and export as a .txt file. In Rhino3D, go to File &gt; Export Selected &gt; Save as type: Points (*.txt).",
+      "title": "Export point coordinates",
+      "instruction": "Select all generated points, then choose File > Export Selected and save as type “Points (*.txt)”.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Copy the XYZ coordinates to Excel and add G-code syntax for each set of coordinates (“G1 X(#) Y(#) Z(#) E(#)”). See template spreadsheet ( Additional_File_1.xlsx ) for more details. Generally, extrusion values of 0.005–0.02 mm per step are suitable with a point spacing of 0.5 mm.",
+      "title": "Convert coordinates to G‑code",
+      "instruction": "Copy the XYZ coordinates from the .txt file into Excel, add G‑code syntax for each line (e.g., “G1 X(#) Y(#) Z(#) E(#)”), using extrusion values of 0.005–0.02 mm per step and a point spacing of 0.5 mm.",
+      "substeps": [
+        {
+          "instruction": "Paste XYZ columns into spreadsheet.",
+          "title": ""
+        },
+        {
+          "instruction": "Create a column with the string “G1 X” & concatenate X value, “ Y” & Y value, “ Z” & Z value, “ E” & extrusion value.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the sheet as a .gcode text file.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Paste G-code lines into G-code editing software, such as CAMotics.",
+      "title": "Add required G‑code headers",
+      "instruction": "At the top of the G‑code file prepend the following commands: “M83” (relative extrusion), “G92 X(start) Y(start) Z(start) E0” (set starting position), and a speed command such as “G1 F180” (print speed within 100–300 mm min⁻¹). Include any upward movement (e.g., “G1 F1200 X‑10 Y0 Z20”) at the end if desired.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Add required syntax to run the G-code (see example below). Example G-Code (2 cm Line Print) ;start gcodeM83 ; puts E axis (extruder) into relative modeG92 X10 Y0 Z0 E0 ; defines current position to starting position of gcode (copy over coordinates from below)G1 F180 X10 Y0 Z0 E0.1 ; in first line of print path: define print speed (F value, mm/min)G1 X9.5 Y0 Z0 E0.1 ; initial high extrusion steps (here, 2x E0.1) to make sure nozzle is extrudingG1 X9 Y0 Z0 E0.01G1 X8.5 Y0 Z0 E0.01G1 X8 Y0 Z0 E0.01G1 X7.5 Y0 Z0 E0.01G1 X7 Y0 Z0 E0.01G1 X6.5 Y0 Z0 E0.01G1 X6 Y0 Z0 E0.01G1 X5.5 Y0 Z0 E0.01G1 X5 Y0 Z0 E0.01G1 X4.5 Y0 Z0 E0.01G1 X4 Y0 Z0 E0.01G1 X3.5 Y0 Z0 E0.01G1 X3 Y0 Z0 E0.01G1 X2.5 Y0 Z0 E0.01G1 X2 Y0 Z0 E0.01G1 X1.5 Y0 Z0 E0.01G1 X1 Y0 Z0 E0.01G1 X0.5 Y0 Z0 E0.01G1 X0 Y0 Z0 E0.01G1 X-0.5 Y0 Z0 E0.01G1 X-1 Y0 Z0 E0.01G1 X-1.5 Y0 Z0 E0.01G1 X-2 Y0 Z0 E0.01G1 X-2.5 Y0 Z0 E0.01G1 X-3 Y0 Z0 E0.01G1 X-3.5 Y0 Z0 E0.01G1 X-4 Y0 Z0 E0.01G1 X-4.5 Y0 Z0 E0.01G1 X-5 Y0 Z0 E0.01G1 X-5.5 Y0 Z0 E0.01G1 X-6 Y0 Z0 E0.01G1 X-6.5 Y0 Z0 E0.01G1 X-7 Y0 Z0 E0.01G1 X-7.5 Y0 Z0 E0.01G1 X-8 Y0 Z0 E0.01G1 X-8.5 Y0 Z0 E0.01G1 X-9 Y0 Z0 E0.01G1 X-9.5 Y0 Z0 E-0.1 ; at end of print, retraction steps (2x E-0.1) to prevent nozzle dragG1 X-10 Y0 Z0 E-0.1 ;end gcodeG1 F1200 X-10 Y0 Z20 ; after printing, moves nozzle up 2 cm (Z20) to lift above support bath",
+      "title": "Generate G‑code for all segments",
+      "instruction": "Repeat steps 3–6 for every segment of the print path. To avoid extrusion between segments, re‑trace the previous segment with zero extrusion, or reverse segment direction using Excel’s Sort function. Add upward movement (e.g., 20 mm Z) at the final line if needed.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Define the extrusion mode by adding “M83” (relative extrusion) at the start of the G-code.",
+      "title": "Test G‑code visualization",
+      "instruction": "Load the assembled G‑code into a viewer or the printer software and run a test simulation to confirm the complete print path before actual printing.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Define the starting position of the G-code by adding “G92 X(#) Y(#) Z(#) E0” to the start of the G-code, where “X(#) Y(#) Z(#)” is the starting coordinate.",
+      "title": "Prepare 0.1 M carbonate‑bicarbonate buffer",
+      "instruction": "For a 300 mL batch, dissolve 0.954 g sodium carbonate and 1.758 g sodium bicarbonate in deionized water on a stir plate until fully dissolved.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Add the print speed (F value) to the first line of the print path G-code. Print speeds of 100–300 mm/min (i.e., F100-300) are typically appropriate.",
+      "title": "Dissolve gelatin in buffer",
+      "instruction": "Add cold‑water fish (CWF) gelatin to reach 20 % w/v (e.g., 60 g gelatin for 300 mL buffer). Place the mixture in a glass bottle, seal, and either (a) shake at 200 rpm, 37 °C in a bacterial shaker, or (b) microwave in short bursts until warm, then stir on a hot plate at 37 °C until completely dissolved.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "Repeat steps 4–7 for all segments of the print path. To avoid extrusion between segments, it is ideal to re-trace along the print path to start another segment, rather than directly translating the nozzle across. This may require tracing along already printed segments with zero extrusion.",
+      "title": "Adjust pH to 10",
+      "instruction": "Measure the solution pH and adjust to 10 using 5 M NaOH, adding dropwise while stirring.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
-      "instruction": "The direction of some segments may need to be reversed. This can be performed using the Sort function in Excel.",
+      "title": "Heat mixture to 70 °C",
+      "instruction": "Transfer the gelatin solution to a beaker (e.g., 1 L beaker for 300 mL) and heat on a hot plate in a fume hood while stirring at 200 rpm until the temperature stabilizes at 70 °C.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
-      "instruction": "Program in an upward movement (e.g., 20 mm) if desired at the end of the G-code to lift the nozzle from the support bath.",
+      "title": "Add methacrylic anhydride (MAA)",
+      "instruction": "When the mixture is at 70 °C, add MAA dropwise at ~0.0833 mL per gram gelatin (5 mL MAA for the 300 mL batch). Perform the addition in the fume hood under stirring.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
-      "instruction": "Test run the G-code with the addition of each segment to visualize the print path.",
+      "title": "React for 2 hours",
+      "instruction": "Maintain the reaction at 70 °C with stirring at 200 rpm for 02:00:00.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
-      "instruction": "Prepare 0.1 Molarity (M) carbonate-bicarbonate (CB) buffer: For a 300 mL reaction scale, add 0.954 g sodium carbonate and 1.758 g sodium bicarbonate. Place on a stir plate to dissolve.",
-      "is_critical": false,
+      "title": "Cover beaker to prevent evaporation",
+      "instruction": "Immediately after MAA addition, cover the beaker with aluminum foil.",
+      "substeps": [],
+      "is_critical": true,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
-      "instruction": "Add cold water fish (CWF) gelatin to 20 mass/volume % in CB buffer: For a 300 mL reaction scale, add 60 g .",
+      "title": "Purify GelMA",
+      "instruction": "Choose either ethanol precipitation or dialysis to remove unreacted MAA.",
+      "substeps": [
+        {
+          "instruction": "Ethanol precipitation: Fill a bucket with 3 × reaction‑volume ethanol in the fume hood. Slowly pour the reaction mixture into the ethanol while mixing with a spatula; GelMA will crash out as a gummy ball. Add fresh ethanol as needed until the solid can be lifted with the spatula. Collect the precipitate, spread on a tray, and dry for ≥24 h at room temperature.",
+          "title": ""
+        },
+        {
+          "instruction": "Dialysis: Dilute the GelMA solution to 5 % w/v (1 : 4 with ultrapure water). Transfer to a 10 kDa MWCO dialysis membrane and dialyze against >2 L ultrapure water for 5 days at room temperature, changing water twice daily for the first 2 days and once daily for the remaining 3 days. After dialysis, sterile‑filter through a 0.22 µm membrane, freeze, and lyophilize.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
-      "instruction": "Fully dissolve the gelatin by preparing the solution in a glass bottle, then placing the sealed bottle into a bacterial shaker at 200 rpm, 37 °C, . Alternatively, heat the mixture by uncapping the bottle and microwaving for several seconds at a time until warm, then stir the mixture on a hot plate set to 37 °C until fully dissolved.",
+      "title": "Load sacrificial ink into syringe",
+      "instruction": "Using a 1 mL positive‑displacement pipette, transfer the prepared sacrificial ink into a printing syringe and attach a 27G × ½ in blunt‑tip needle.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
-      "instruction": "Pour the gelatin solution into a glass beaker. A large volume (e.g., 1 L beaker for 300 mL solution) is important for containing the subsequent reaction.",
+      "title": "Add crosslinking initiator and beads",
+      "instruction": "Add the chosen initiator to the gelatin microparticle ink: 1–5 mM LAP or 0.025–0.1 mM Eosin Y disodium salt. Fluorescent beads may be added for visualization.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
-      "instruction": "Adjust the pH to 10 using 5 Molarity (M) sodium hydroxide.",
+      "title": "Calculate gelatin microparticle concentration",
+      "instruction": "For the desired ink volume, target 100 mg mL⁻¹ gelatin microparticles (i.e., 10 % w/v). Weigh the appropriate amount of gelatin microparticles and resuspend in cold PBS or media.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
-      "instruction": "Heat the mixture to 70 °C on a hot plate in the fume hood while stirring at 200 rpm, °C, .",
+      "title": "Seal and store ink plates",
+      "instruction": "Seal the ink‑containing plates with Parafilm and store at 4 °C until use.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
-      "instruction": "When the temperature is stable at 70 °C , add MAA dropwise to the stirring gelatin in the fume hood at ~ 0.0833 mL MAA per gram gelatin (Figure 2, left). For a 300 mL reaction scale, add 5 mL MAA. Figure 2. Preparation of cold water GelMA. Left: Addition of MAA to gelatin solution. Center: Ethanol precipitation of GelMA reaction mixture. Right: Final GelMA stock solution.",
+      "title": "Centrifuge plates to remove bubbles",
+      "instruction": "Centrifuge the sealed plates at 4000 rpm, room temperature, for 5 minutes using a swinging‑bucket rotor.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
-      "instruction": "Allow the reaction to run for 02:00:00 at 70 °C while stirring at 200 rpm, °C, .",
+      "title": "Prepare support bath in 6‑well plates",
+      "instruction": "Scoop 8 g of the support material into each well of a 6‑well plate (adjust volume if multiple constructs per well).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 22,
-      "title": "",
-      "instruction": "Purify the GelMA by either ethanol precipitation or dialysis. Select the purification method based on the desired level of purity: Dialysis results in a higher degree of MAA removal, but requires more time to perform than ethanol precipitation.",
+      "title": "Add fibrinogen for cell adhesion (optional)",
+      "instruction": "If cell seeding is planned, add 0.5–1 % w/v fibrinogen to the support bath to enhance adhesion.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 23,
-      "title": "",
-      "instruction": "Immediately after MAA addition, cover the beaker with aluminum foil to prevent evaporation.",
-      "is_critical": true,
+      "title": "Add TEA and NVP if using Eosin Y",
+      "instruction": "When Eosin Y is the initiator, supplement the ink with 0.5 % w/v triethanolamine (TEA) and 0.2 % w/v N‑vinylpyrrolidone (NVP).",
+      "substeps": [],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 24,
-      "title": "",
-      "instruction": "Transfer the sacrificial ink into a print syringe using a 1 mL positive displacement pipette. Attach a 27G × ½” blunt-tip needle to the syringe (Figure 5). Figure 5. Loading of sacrificial ink into print syringe. Left: As-prepared ink comprising gelatin microparticles (100 mg/mL), Eosin Y disodium salt (0.1 mM), and pink fluorescent beads. Center: Addition of sacrificial ink to syringe using a positive displacement pipette. Right: Sacrificial ink loaded into syringe fitted with a 27G × ½” needle.",
+      "title": "Mix GelMA and AVC to make support bath",
+      "instruction": "Mix 40 % w/v GelMA stock with 4 % w/v Aristoflex AVC stock in a 1:1 volume ratio (or, for alginate, mix 4 % alginate with 4 % AVC 1:1). Stir thoroughly with a spatula until homogeneous; the bath will thicken as it becomes uniform.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 25,
-      "title": "",
-      "instruction": "Add the crosslinking initiator (e.g., LAP or Eosin Y disodium salt) to the desired concentration to the gelatin microparticles. In addition, fluorescent beads can be included to aid visualization. Crosslinking initiator concentrations of 1–5 mM for LAP or 0.025–0.1 mM for Eosin Y disodium salt are typically appropriate.",
+      "title": "Autoclave stock solutions if sterile",
+      "instruction": "If sterile printing is required, autoclave GelMA and AVC stock solutions on a liquid cycle before mixing.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 26,
-      "title": "",
-      "instruction": "For the desired volume of sacrificial ink, calculate the weight of gelatin microparticles necessary for a concentration of 100 mg/mL (i.e., 10 mass/volume % ).",
+      "title": "Prepare 4 % AVC stock solution",
+      "instruction": "Dissolve AVC powder in PBS to 4 % w/v in an autoclavable glass bottle. Shake at 200 rpm, 37 °C or stir on a plate until fully dissolved. Wear mask and goggles while handling AVC powder.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 27,
-      "title": "",
-      "instruction": "Prepare crosslinking initiator solutions: e.g., 50 millimolar (mM) LAP or 2 millimolar (mM) Eosin Y disodium salt in PBS (Figure 4, center). For printing using alginate, prepare a solution of 1 Molarity (M) calcium chloride in PBS.",
+      "title": "Prepare 40 % GelMA stock solution",
+      "instruction": "Weigh the required mass of CWF GelMA, dilute in PBS to obtain a 40 % w/v stock, and stir until fully dissolved (or follow the same procedure as for alginate if using alginate).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 28,
-      "title": "",
-      "instruction": "Sterilize supplies by autoclaving or by heavily coating with 70% ethanol, then allowing to dry completely in the TC hood, ensuring the inside of the Luer lock fittings is dry.",
+      "title": "Calculate support bath volumes for plate",
+      "instruction": "For a 6‑well plate, plan ~8 g of support bath per well; prepare extra volume for multiple constructs that will be crosslinked together.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 29,
-      "title": "",
-      "instruction": "Gather required equipment, including print syringes, 27G × ½” blunt-tip needles, spatulas, Eppendorf tubes, and syringe holders for the 3D bioprinter (Figure 4, left). Figure 4. Sacrificial ink preparation for GUIDE-3DP. Left: Supplies needed for sacrificial ink preparation. Center: Crosslinking initiator solutions composed of LAP (50 mM; left) and Eosin Y disodium salt (2 mM; right). Right: Resuspended gelatin microparticle slurry (100 mg/mL).",
+      "title": "Store GelMA stock at 4 °C",
+      "instruction": "Keep the prepared GelMA stock solution refrigerated at 4 °C until needed.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 30,
-      "title": "",
-      "instruction": "Seal the plates with Parafilm and store at 4 °C until use.",
+      "title": "Determine GelMA concentration by drying",
+      "instruction": "Aliquot 50–200 mg of GelMA into 3–4 weigh boats, record the wet mass, dry the aliquots covered for ~24 h at room temperature, then weigh the dry mass. Calculate wt % using wt % = M_dry / (M_wet – M_dry) × 100 %.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 31,
-      "title": "",
-      "instruction": "Centrifuge the plates at 4000 rpm, Room temperature, 5 minutes using a swinging bucket rotor to remove air bubbles and level the surface.",
+      "title": "Redissolve dried GelMA and remove ethanol",
+      "instruction": "Place the dried GelMA in a beaker on a hot plate set to 85–90 °C, stir, and continue until residual ethanol (bp 37 °C) boils off for at least 01:00:00.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 32,
-      "title": "",
-      "instruction": "Prepare printing dishes by scooping 8 g of support material into each required well of a 6-well plate (Figure 3, right).",
+      "title": "Adjust GelMA concentration with water",
+      "instruction": "Mix the redissolved GelMA with ultrapure water in a 1:1 to 1:2 weight ratio to reach the desired final concentration.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 33,
-      "title": "",
-      "instruction": "If cell seeding is to be performed, 0.5-1 mass/volume % fibrinogen can be added to enhance cell adhesion.",
+      "title": "Dry precipitated GelMA before use",
+      "instruction": "Transfer the precipitated GelMA to a beaker, cover partially with plastic wrap, and let dry for ≥24 h in the fume hood before further processing.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 34,
-      "title": "",
-      "instruction": "If Eosin Y were to be used as the crosslinking initiator, add the co-initiators triethanolamine (TEA) and N-vinylpyrrolidone (NVP) at 0.5 mass/volume % and 0.2 mass/volume % , respectively.",
+      "title": "Set up calibration camera",
+      "instruction": "Secure a calibration camera onto the printer bed using laboratory tape or double‑sided tape so that both extruder needles can be moved into its field of view.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 35,
-      "title": "",
-      "instruction": "Mix the 40 mass/volume % GelMA and 4 mass/volume % AVC stock solutions in a 1:1 ratio to prepare the support bath (Figure 3, center). If using alginate, mix the 4 mass/volume % alginate and 4 mass/volume % AVC stock solutions in a 1:1 ratio. Stir the mixture thoroughly with a spatula to ensure that no AVC aggregates remain. The support bath will thicken as it becomes more homogeneous.",
+      "title": "Zero Tool 0 X/Y axes",
+      "instruction": "Move Tool 0 needle to the center of the camera view, focus by adjusting Z, then in the printer console enter: G92 X0, G92 Y0, G10 P0 X0, G10 P0 Y0.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 36,
-      "title": "",
-      "instruction": "If used for sterile printing, autoclave GelMA and AVC stock solutions on a liquid cycle.",
+      "title": "Set Tool 1 X/Y offsets",
+      "instruction": "Move Tool 1 to the camera center, issue M114 to read its X/Y displacement relative to Tool 0, then set the offsets with G10 P1 X(-#) and G10 P1 Y(-#) where # is the reported displacement.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 37,
-      "title": "",
-      "instruction": "In an autoclavable glass bottle, prepare a 4 mass/volume % Aristoflex AVC stock solution by dissolving AVC powder in PBS (Figure 3, left). Place the sealed bottle into a bacterial shaker at 200 rpm, 37 °C, or on a stir plate to fully dissolve the AVC stock solution. Figure 3. Support bath preparation for GUIDE-3DP. Left: Aristoflex AVC (4 wt%) stock solution. Center: GelMA (60 wt%) stock solution (left) and GelMA (20 wt%) + AVC (2 wt%) support material (right). Right: Support bath loaded into 6-well plate for printing. Wear a mask and goggles while handling AVC powder.",
+      "title": "Calibrate Z axis for Tool 0",
+      "instruction": "Place a steel alignment block on the bed, lower Tool 0 until the needle just touches the block surface, then set Z zero with G92 Z0 and G10 P0 Z0.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 38,
-      "title": "",
-      "instruction": "Weigh the required mass of CWF GelMA and dilute in PBS to obtain a 40 mass / volume% stock solution. Allow the solution to dissolve while stirring. If using alginate, weigh the required mass of alginic acid sodium salt and dilute in PBS to obtain a 4 mass/volume % stock solution.",
+      "title": "Calibrate Z offset for Tool 1",
+      "instruction": "Lower Tool 1 onto the same block, read its Z position with M114, and set the offset using G10 P1 Z(-#) where # is the reported Z coordinate.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 39,
-      "title": "",
-      "instruction": "Calculate the amount of each support bath and stock solution needed. For a 6-well plate, approximately 8 g of support bath per well is used. Prepare extra volume to account for multiple constructs per well, considering that constructs in the same well will be crosslinked together.",
+      "title": "Reset absolute origin for both tools",
+      "instruction": "Move both extruders to the center of the bed near the bottom (within the support bath region if applicable) and enter G92 X0 Y0 Z0 to reset the absolute origin.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 40,
-      "title": "",
-      "instruction": "Store the prepared GelMA at 4 °C until use.",
+      "title": "Verify origin and adjust offsets",
+      "instruction": "Run M114 to confirm the origin reads (0,0,0). Move both tools to X0 Y0 with G1 X0 Y0 and check that Tool 1 aligns exactly; if not, correct offsets with G10 P0 or G10 P1 commands.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 41,
-      "title": "",
-      "instruction": "Calculate the GelMA concentration using the following formula: wt\\% = \\frac{M_{dry}}{M_{wet}-M_{dry}} \\times 100\\% , where M_{wet} is the initial wet mass and M_{dry} is the final dry mass.",
+      "title": "Insert custom tool‑change G‑code",
+      "instruction": "Add a custom tool‑change G‑code block to the printer’s start/end scripts to safely raise and lower the extruder needles during printing.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 42,
-      "title": "",
-      "instruction": "Allow the aliquots to dry, covered, for ~ 24:00:00 at room temperature.",
+      "title": "Warm support baths to room temperature",
+      "instruction": "Retrieve the prepared support baths from 4 °C storage and allow them to equilibrate to room temperature before printing.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 43,
-      "title": "",
-      "instruction": "To measure the concentration of the prepared GelMA solution, aliquot a small amount (e.g., 50-200 mg each) into 3–4 weigh boats and immediately measure the wet mass of each aliquot.",
-      "is_critical": true,
+      "title": "Load G‑code and mount syringe",
+      "instruction": "Load the finalized .gcode file into the 3D bioprinter software and mount the print syringe containing the sacrificial ink.",
+      "substeps": [],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 44,
-      "title": "",
-      "instruction": "Aliquot the produced GelMA into 50 mL conical tubes (Figure 2, right).",
+      "title": "Position nozzle and start printing",
+      "instruction": "Place the nozzle at the chosen start location within the support bath and execute the G‑code to print the designed network.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 45,
-      "title": "",
-      "instruction": "Place the beaker on a hot plate set to 85-90 °C while stirring to redissolve the dried GelMA and boil off residual ethanol (the ethanol boiling point is 37 °C ). Continue this process until the boiling ceases (at least 01:00:00 ).",
+      "title": "Incubate printed construct for diffusion",
+      "instruction": "Leave the printed construct at room temperature for 5–15 minutes (or as required) to allow diffusion of the crosslinking initiator and formation of wall thickness.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 46,
-      "title": "",
-      "instruction": "Mix dried GelMA in a 1:1–1:2 ratio by weight with ultrapure water. The ratio can be adjusted according to the desired final GelMA concentration.",
+      "title": "Photocrosslink construct",
+      "instruction": "If LAP is the initiator, expose the construct to UV light for 5 minutes; if Eosin Y is used, expose to white‑light for 10 minutes. Skip this step for alginate constructs.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 47,
-      "title": "",
-      "instruction": "Transfer the precipitated GelMA into a beaker. Cover the beaker partially with plastic wrap to protect from debris. Let dry for at least 24:00:00 in the fume hood.",
+      "title": "Remove and wash construct",
+      "instruction": "Gently lift the construct from the support bath, then wash it in DPBS (for GelMA) or HBSS (for alginate) to remove uncrosslinked material. Transfer to a fresh dish and rinse with gentle pipetting.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 48,
-      "title": "",
-      "instruction": "For precipitation, fill a bucket with 3x reaction volume of ethanol in the fume hood. Pour the GelMA reaction mixture into the ethanol slowly whilst mixing with a spatula (Figure 2, center). The GelMA will crash out of solution and form a gummy ball. Add fresh ethanol when the GelMA is not sufficiently solid to lift with the spatula.",
+      "title": "Melt sacrificial ink at 37 °C",
+      "instruction": "Transfer the washed construct to fresh culture medium and incubate at 37 °C to melt the gelatin‑microparticle sacrificial ink.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 49,
-      "title": "",
-      "instruction": "For dialysis, dilute the GelMA solution to 5 mass/volume % (i.e., 1:4 ratio) using ultrapure water. Dialyze using a 10 kDa molecular weight cutoff (MWCO) membrane against &gt;2 L of ultrapure water for 5 days at room temperature. Change the water twice a day for the first 2 days and once a day for the subsequent 3 days. The dialyzed GelMA solution is then sterile filtered through a 0.22 μm membrane, frozen, and lyophilized.",
+      "title": "Open lumen ends and wash gelatin",
+      "instruction": "Cut open the closed ends of the printed lumen, flush out residual melted gelatin with fresh medium, and transfer the construct to a new dish.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 50,
-      "title": "",
-      "instruction": "If sterile printing is to be performed, filter the solutions through a 0.22 μm syringe filter.",
+      "title": "Adjust sacrificial ink pH to ~7",
+      "instruction": "After preparing the sacrificial ink, adjust its pH to approximately 7 using 1 M NaOH.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 51,
-      "title": "",
-      "instruction": "Weigh out an aliquot of gelatin microparticles into a 5 mL Eppendorf tube and resuspend to 100 mg/mL in cold PBS or media (Figure 4, right). Mix gently with a narrow spatula to rehydrate, being careful to only hold the rim of the tube. Avoid holding the sides of the tube to prevent gelatin melting.",
+      "title": "Add endothelial cells to ink",
+      "instruction": "Suspend endothelial cells in the sacrificial ink to achieve a density of 1 × 10⁷ cells mL⁻¹.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 52,
-      "title": "",
-      "instruction": "Secure a calibration camera onto the print bed using laboratory tape or double-sided tape. Ensure that the camera is positioned in a location where both extruder needles can be moved into its field of view.",
+      "title": "Post‑print wash and short incubation",
+      "instruction": "After printing, diffusion, and crosslinking, extract the construct, wash with pre‑warmed culture medium, and incubate at 37 °C for 00:10:00 to allow cells to sediment onto the lumen surface.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 53,
-      "title": "",
-      "instruction": "Move the needle of Tool 0 to the center of the camera’s field of view. Adjust the Z position until the needle is in focus, ensuring it is far enough from the bed to match the focal distance of the camera lens (Figure 6). Figure 6. Alignment of Tool 0 in the X and Y axes using a calibration camera.",
+      "title": "Flip construct and incubate second side",
+      "instruction": "Flip the construct and incubate for an additional 00:10:00 at 37 °C to promote cell attachment on the opposite lumen surface.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 54,
-      "title": "",
-      "instruction": "Open the printer console and define Tool 0’s X and Y position and offset as zero. This is done by selecting Tool 0 (“T0”), setting the current X and Y positions to absolute zero (“G92 X0” and “G92 Y0”), and clearing any offset (“G10 P0 X0” and “G10 P0 Y0”). X & Y Axis Zeroing for Tool 0 T0 ; select tool 0G92 X0 ; set X position of Tool 0 to absolute 0G10 P0 X0 ; set Tool 0 (P0) X offset to 0G92 Y0 ; set Y position of Tool 0 to absolute 0G10 P0 Y0 ; set Tool 0 (P0) Y offset to 0",
+      "title": "Final wash and add thrombin if needed",
+      "instruction": "Perform a final wash with fresh culture medium. For fibrinogen‑containing constructs, add thrombin to the medium at 5 U mL⁻¹ and incubate for at least 02:00:00 to allow fibrin crosslinking.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 55,
-      "title": "",
-      "instruction": "Move Tool 1 into the center of the camera’s field of view (Figure 7). In the console, retrieve Tool 1’s current position relative to Tool 0 using the “M114” command. Use the X and Y displacements displayed in the console to define Tool 1’s offset relative to Tool 0 by entering “G10 P1 X(-#)” and “G10 P1 Y(-#)”, where # is the corresponding output coordinate from the ‘M114” command. Figure 7. Alignment of Tool 1 in the X and Y axes using a calibration camera. X & Y Offset Specification for Tool 1 M114; return the current position of the selected tool (Tool 0). Use the X and Y displacements below (#).G10 P1 X(- #); set the X displacement for Tool 1 to the negative X position for Tool 0G10 P1 Y(- #); set the Y displacement for Tool 1 to the negative Y position for Tool 0",
+      "title": "Alternative post‑print cell seeding",
+      "instruction": "Instead of pre‑mixing cells, inject a cell suspension (1 × 10⁷ cells mL⁻¹) into the printed lumen, incubate 00:10:00, flip the construct, and incubate another 00:10:00 for cell attachment on the opposite side.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 56,
-      "title": "",
-      "instruction": "To calibrate the Z axis, place a steel alignment block on the print bed at a location accessible by both tools. Begin by lowering Tool 0 until the needle just touches the top of the block (Figure 8). Lightly tap the needle tip with forceps to confirm contact — If there is resistance but no bending, the needle is correctly positioned. Figure 8. Alignment of print nozzle in the Z axis using a calibration cube.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 57,
-      "title": "",
-      "instruction": "In the console, set Tool 0’s Z position and offset to zero using “G92 Z0” and “G10 P0 Z0”. Z Axis Zeroing for Tool 0 G92 Z0; set Z position of Tool 0 to absolute 0G10 P0 Z0; set Tool 0 (P0) Z offset to 0",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 58,
-      "title": "",
-      "instruction": "Move Tool 1 to the same block surface and carefully lower it until it is flush with the top of the block. Retrieve the current position relative to Tool 0 using the “M114” command and define Tool 1’s Z offset using “G10 P1 Z(-#)”, where # is the Z coordinate from the “M114” command. M114; return the current position of the selected tool (Tool 0). Use the Z displacement below (#).G10 P1 Z(- #); set the Z displacement for Tool 1 to the negative Z position for Tool 0.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 59,
-      "title": "",
-      "instruction": "As an alternative method, calibration of all axes can be performed using a precision-machined reference block.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 60,
-      "title": "",
-      "instruction": "Carefully move Tool 0 so that its tip is aligned to each face of the calibration block.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 61,
-      "title": "",
-      "instruction": "Move both extruders to the center of the print bed near the bottom, within range of the support bath if applicable, and reset the absolute origin by selecting Tool 0 and entering “G92 X0 Y0 Z0”.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 62,
-      "title": "",
-      "instruction": "Use the “M114” command to verify that the origin has been correctly set to (0, 0, 0). Then, to confirm alignment, move both Tool 0 and Tool 1 to X = 0, Y = 0 using “G1 X0 Y0” and check that Tool 1 moves precisely to the same central position. If discrepancies are present, reset the tool offsets using the “G10 P0” or “G10 P1” commands as necessary.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 63,
-      "title": "",
-      "instruction": "Insert a custom tool-change G-code into each process to safely raise and lower the extruder needles. Define start and end G-codes as needed.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 64,
-      "title": "",
-      "instruction": "Calibration should be repeated any time needles or syringes are replaced. Calibration steps can be executed using Pronterface, Duet Web Control, or other G-code-compatible interfaces.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 65,
-      "title": "",
-      "instruction": "If different needle gauges are used, offsets may need to be adjusted to account for differences in tip geometry. In such cases, a camera-based calibration method is preferable for maximizing precision.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 66,
-      "title": "",
-      "instruction": "Once its tip is flush with the X face of the block, assign Tool 0 as the absolute origin in the X axis using the command “G92 X0”, then clear any offsets using the command “G10 P0 X0”.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 67,
-      "title": "",
-      "instruction": "Repeat the alignment process for Tool 0 with the Y and Z axes, aligning the nozzle and setting the Y and Z positions to zero using the corresponding “G92” and “G10” commands in the same way as the X axis.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 68,
-      "title": "",
-      "instruction": "Repeat the alignment procedure for Tool 1. Using the “M114” command, determine the offsets in X, Y, and Z relative to Tool 0 while Tool 1 is flush with the X, Y, and Z faces of the calibration cube, respectively. Enter the offsets as “G10 P1 X(-#)”, “G10 P1 Y(-#)”, and “G10 P1 Z(-#)”, where # is the output coordinate for the axis being aligned from the “M114” command.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 69,
-      "title": "",
-      "instruction": "Gather all printing equipment and materials, including the 3D bioprinter, syringes, nozzles, screwdrivers, DPBS, and UV lamp (if LAP is used as the crosslinking initiator) or white light lamp (if Eosin Y is used as the crosslinking initiator).",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 70,
-      "title": "",
-      "instruction": "Retrieve support baths from 4℃ and allow them to reach room temperature.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 71,
-      "title": "",
-      "instruction": "Load the .gcode file to the 3D bioprinter and mount the print syringe.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 72,
-      "title": "",
-      "instruction": "Position the nozzle within the support bath at a location suitable as the start point of the print. Execute the G-code file (Figure 9). Figure 9. Printing of a representative retinal vasculature structure (derived from NIH3D ).",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 73,
-      "title": "",
-      "instruction": "Incubate the printed constructs at room temperature to allow diffusion of crosslinking initiators for a specified time based on the desired wall thickness. A diffusion time of 5–15 minutes is typically used, although longer and shorter times can also be appropriate.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 74,
-      "title": "",
-      "instruction": "When LAP is used as the crosslinking initiator, crosslink the constructs using a UV lamp for 5 minutes. When Eosin Y is used, crosslink the constructs using a white-light lamp for 10 minutes (Figure 10). For printing using alginate, skip this step and directly remove the crosslinked construct from the support bath (Figure 11). Figure 10. Photocrosslinking of representative GelMA structure . Figure 11. Representative alginate structure before and after extraction from the support bath.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 75,
-      "title": "",
-      "instruction": "After crosslinking, gently remove the constructs from the support bath and wash them in DPBS (for GelMA) or HBSS (for alginate) to remove uncrosslinked support material. Transfer the construct to a fresh dish and further clean with gentle pipetting (Figure 12). Figure 12. Self-supporting construct obtained after extraction from the support bath.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 76,
-      "title": "",
-      "instruction": "Transfer the cleaned constructs to fresh medium and incubate at 37℃ to melt the gelatin microparticle sacrificial ink.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 77,
-      "title": "",
-      "instruction": "Cut open the closed ends of the lumen, wash out residual gelatin, and transfer the constructs to fresh dishes.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 78,
-      "title": "",
-      "instruction": "After preparing the sacrificial ink, adjust the pH to ~7 using 1 Molarity (M) sodium hydroxide.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 79,
-      "title": "",
-      "instruction": "Add a suspension of endothelial cells to the ink to yield a cell density of 10 7 mL -1 .",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 80,
-      "title": "",
-      "instruction": "After the printing, diffusion, and crosslinking steps, extract the resulting construct from the uncrosslinked support bath and gently wash with prewarmed culture medium. Incubate the construct at 37 °C for 00:10:00 to allow cell sedimentation and adhesion to the lumen surface.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 81,
-      "title": "",
-      "instruction": "Flip the construct and incubate for an additional 00:10:00 to allow cell attachment to the opposite side of the print lumen.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 82,
-      "title": "",
-      "instruction": "Cut open the ends of the structure to remove the melted sacrificial ink, further wash with gentle pipetting, and transfer the construct to fresh culture medium. For fibrinogen-containing constructs, thrombin can be added to the culture medium at 5 U mL -1 for at least 02:00:00 to allow fibrin crosslinking.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 83,
-      "title": "",
-      "instruction": "Alternatively, introduce endothelial cells after print fabrication by injecting the lumen with a cell suspension with a cell density of 10 7 mL -1 . Incubate the construct for 00:10:00 , then flip and incubate for an additional 00:10:00 to allow cell attachment to the opposite surface.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 84,
-      "title": "",
-      "instruction": "Prior to mixing of support bath components, allow the GelMA solution to come to room temperature and liquefy. To accelerate this process, the GelMA solution can optionally be heated briefly using a hot plate or briefly in a microwave until liquefied.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 85,
-      "title": "",
-      "instruction": "1. Interconnected retinal network: Figure 2bi.gcode 2. Branched vascular network: Figure 2bii.gcode 3. Dual-material capillary-like network: Figure 2biii.gcode",
+      "title": "Liquefy GelMA before mixing support bath",
+      "instruction": "Allow the GelMA solution to reach room temperature and liquefy; optionally heat briefly on a hot plate or microwave to accelerate liquefaction before mixing with support‑bath components.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 53,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

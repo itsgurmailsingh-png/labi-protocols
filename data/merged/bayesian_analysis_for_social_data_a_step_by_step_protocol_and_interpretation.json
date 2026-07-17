@@ -1,0 +1,345 @@
+{
+  "protocol_id": "bayesian_analysis_for_social_data_a_step_by_step_protocol_and_interpretation",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Bayesian analysis for social data: A step-by-step protocol and interpretation",
+  "author": "Vuong, La, et al.",
+  "doi": "10.1016/j.mex.2020.100924",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7262446/",
+  "citation": "10.1016/j.mex.2020.100924",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 4.0,
+  "category": "Other",
+  "estimated_time_mins": 240,
+  "materials": [
+    "For completing the \"relationship tree\" construction, the last step is to connect two observational data \"Lie\" and \"Viol\" as well as other transformed data to the outcome \"O\". Like previous commands, the function bvl_addArc() is used, but \"trans\" is replaced by \"slope\" (fixed effect) or \"varint\" (varying intercept), to convert the relationships between \"O\" and other nodes into regression relationships. There are four fundamental types of statistical model integrated in the bayesvl package: fixed-effect model (\"slope\"), varying-intercept model (\"varint\"), varying-slope model (\"varslope\"), and mixed-effect model (\"varpars\").R> model3 model3 model3 <- bvl_addArc(model3, \"Int1_or_Int2\", \"O\", \"varint\",+ priors = c(\"a0_ ~ normal(0,5)\", \"sigma_ ~ normal(0,5)\"))",
+    "The first and second commands are to create the regression relationships of the outcome with observational and transformed data, respectively, employing a fixed-effect model, while the third command is to create the regression relationship between the outcome and transformed data employing a varying-intercept model. In model 3, the prior distribution of all the paths from observational and transformed nodes to the outcome node is set as default, except for the path from \"Int1_or_Int2\" to \"O\". The prior distributions of the relationship between \"Int1_or_Int2\" and \"O\" is set by adding the code priors = c(\"a0_ ~ normal(0,5)\", \"sigma_ ~ normal(0,5)\") into the function bvl_addArc(). Similarly, this method can be applied to change the prior distribution of other relationships by using the prefix a0_, b_, or sigma_, depending on the relationship type. Besides normal distribution, other kinds of distribution can also be implemented for setting up prior distribution by replacing \"normal\" by the name of the designated distribution (e.g. binomial and beta, etc.). The prior distribution of each path can be checked by typing:R> bvl_stanPriors(model3)b_B_and_Viol_O ~ normal(0, 10)b_C_and_Viol_O ~ normal(0, 10)b_T_and_Viol_O ~ normal(0, 10)b_Viol_O ~ normal(0, 10)b_B_and_Lie_O ~ normal(0, 10)b_C_and_Lie_O ~ normal(0, 10)b_T_and_Lie_O ~ normal(0, 10)b_Lie_O ~ normal(0, 10)a0_Int1_or_Int2 ~ normal(0,5)sigma_Int1_or_Int2 ~ normal(0,5)u_Int1_or_Int2 ~ normal(0, sigma_Int1_or_Int2)",
+    "Estimates: model is not estimated!",
+    "meanse_meansd2.5%25%50%75%97.5%n_effRhatb_B_and_Viol_O2.550.051.460.131.502.413.425.739151.01b_C_and_Viol_O–0.280.010.61–1.46–0.68–0.310.130.9366891.00b_T_and_Viol_O–0.960.011.09–3.21–1.65–0.91–0.261.1468201.00b_Viol_O–0.620.010.42–1.43–0.90–0.62–0.350.2358921.00b_B_and_Lie_O0.700.021.44–1.78–0.280.561.524.0365461.00b_C_and_Lie_O1.470.020.680.210.971.451.942.8616761.01b_T_and_Lie_O2.230.021.59–0.411.102.063.165.8545231.00b_Lie_O–1.050.010.37–1.77–1.30–1.05–0.81–0.3239841.00a_Int1_or_Int2[1]1.200.000.210.781.051.201.331.6277671.00a_Int1_or_Int2[2]1.350.000.190.991.231.351.481.7335121.00a0_Int1_or_Int21.180.041.34–1.910.871.251.573.8313531.00sigma_Int1_or_Int21.490.041.820.040.280.781.986.6717591.00",
+    "R> bvl_plotTrace(model3)",
+    "R> bvl_plotAcfs(model3, NULL, 4, 3)",
+    "R> bvl_plotGelmans (model3)"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Set up R environment",
+      "instruction": "Install (if needed) and load the bayesvl R package version 0.8.5 in R version 3.6.2.",
+      "substeps": [
+        {
+          "instruction": "install.packages(\"bayesvl\", version = \"0.8.5\")  # if not already installed",
+          "title": ""
+        },
+        {
+          "instruction": "library(bayesvl)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Construct Model 1 (simple regression)",
+      "instruction": "Create a directed acyclic graph (DAG) with three binomial nodes (Lie, Viol, O) and fixed‑effect slopes, using default uninformative priors (mean 0, SD 10 for most coefficients, SD 100 for intercept).",
+      "substeps": [
+        {
+          "instruction": "model1 <- bayesvl()",
+          "title": ""
+        },
+        {
+          "instruction": "model1 <- bvl_addNode(model1, \"Lie\", \"binom\")",
+          "title": ""
+        },
+        {
+          "instruction": "model1 <- bvl_addNode(model1, \"Viol\", \"binom\")",
+          "title": ""
+        },
+        {
+          "instruction": "model1 <- bvl_addNode(model1, \"O\", \"binom\")",
+          "title": ""
+        },
+        {
+          "instruction": "model1 <- bvl_addArc(model1, \"Lie\", \"O\", \"slope\")",
+          "title": ""
+        },
+        {
+          "instruction": "model1 <- bvl_addArc(model1, \"Viol\", \"O\", \"slope\")  # prior defaults to normal(0,10)",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_stanPriors(model1)  # shows a_O ~ normal(0,100); b_Viol_O, b_Lie_O ~ normal(0,10)",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_bnPlot(model1)      # visual network (Fig. 2)",
+          "title": ""
+        },
+        {
+          "instruction": "summary(model1)         # shows model formula O ~ a_O + b_Lie_O*Lie + b_Viol_O*Viol",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Construct Model 2 (interaction regression)",
+      "instruction": "Build a DAG with interaction (transformed) variables between violence and three religious values, using default priors and fixed‑effect slopes.",
+      "substeps": [
+        {
+          "instruction": "model2 <- bayesvl()",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addNode(model2, \"Viol\", \"binom\")",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addNode(model2, \"VB\", \"norm\")   # Buddhist value (normal)",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addNode(model2, \"VC\", \"norm\")   # Confucian value (normal)",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addNode(model2, \"VT\", \"norm\")   # Taoist value (normal)",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addNode(model2, \"B_and_Viol\", \"trans\")",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addNode(model2, \"C_and_Viol\", \"trans\")",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addNode(model2, \"T_and_Viol\", \"trans\")",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addArc(model2, \"Viol\", \"B_and_Viol\", \"*\")",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addArc(model2, \"Viol\", \"C_and_Viol\", \"*\")",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addArc(model2, \"Viol\", \"T_and_Viol\", \"*\")",
+          "title": ""
+        },
+        {
+          "instruction": "model2 <- bvl_addArc(model2, \"T_and_Viol\", \"O\", \"slope\")",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_stanPriors(model2)  # defaults: a_O ~ normal(0,100); all b_*_O ~ normal(0,10)",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_bnPlot(model2)      # visual network (Fig. 4)",
+          "title": ""
+        },
+        {
+          "instruction": "summary(model2)         # shows formula with interaction terms",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Construct Model 3 (multilevel regression)",
+      "instruction": "Create a complex DAG that includes lying, violence, their interactions with religious values, and a conditional integer node Int1_or_Int2, using a varying‑intercept prior for that node.",
+      "substeps": [
+        {
+          "instruction": "model3 <- bayesvl()",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addNode(model3, \"Lie\", \"binom\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addNode(model3, \"Viol\", \"binom\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addNode(model3, \"VB\", \"norm\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addNode(model3, \"VC\", \"norm\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addNode(model3, \"VT\", \"norm\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addNode(model3, \"Int1\", \"norm\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addNode(model3, \"Int2\", \"norm\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addNode(model3, \"Int1_or_Int2\", out_type=\"int\", lower=0, test=c(0,1), fun=\"({Int1}+{Int2}>0 ? 1:0)\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addArc(model3, \"Int2\", \"Int1_or_Int2\", \"+\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addArc(model3, \"Lie\", \"O\", \"slope\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addArc(model3, \"Viol\", \"O\", \"slope\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addArc(model3, \"B_and_Viol\", \"O\", \"slope\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addArc(model3, \"C_and_Viol\", \"O\", \"slope\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addArc(model3, \"T_and_Viol\", \"O\", \"slope\")",
+          "title": ""
+        },
+        {
+          "instruction": "model3 <- bvl_addArc(model3, \"Int1_or_Int2\", \"O\", \"varint\", priors=c(\"a0_ ~ normal(0,5)\", \"sigma_ ~ normal(0,5)\"))",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_stanPriors(model3)  # shows priors for all paths; special priors for Int1_or_Int2->O as above",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_bnPlot(model3)      # visual network (Fig. 6)",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_formula(model3, \"B_and_Lie\")   # example: B_and_Lie ~ VB*Lie",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_formula(model3, \"Int1_or_Int2\") # shows conditional algorithm (Int1+Int2>0 ? 1:0)",
+          "title": ""
+        },
+        {
+          "instruction": "summary(model3)         # displays full formula with all terms",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Generate Stan code",
+      "instruction": "Export the Stan model code generated by bayesvl for inspection.",
+      "substeps": [
+        {
+          "instruction": "model_string <- bvl_getStanCode(model3)",
+          "title": ""
+        },
+        {
+          "instruction": "cat(model_string)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Fit model with MCMC",
+      "instruction": "Run Bayesian inference using the No‑U‑Turn Sampler (NUTS) with four chains, 5 000 iterations each, 2 000 warm‑up, yielding 12 000 post‑warm‑up draws.",
+      "substeps": [
+        {
+          "instruction": "fit3 <- bvl_modelFit(model3, data = your_data, chains = 4, iter = 5000, warmup = 2000, thin = 1)",
+          "title": ""
+        },
+        {
+          "instruction": "summary(fit3)  # shows posterior estimates, n_eff, Rhat, etc.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Inspect convergence diagnostics",
+      "instruction": "Visualize trace plots, autocorrelation, and Gelman‑Rubin shrink factors for the fitted model.",
+      "substeps": [
+        {
+          "instruction": "bvl_plotTrace(model3)                     # trace plots (Fig. 7)",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_plotAcfs(model3, NULL, 4, 3)          # autocorrelation plots (Fig. 8)",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_plotGelmans(model3)                  # Gelman shrink factor plots (Fig. 9)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Present posterior results",
+      "instruction": "Create graphical summaries of posterior distributions, intervals, and pairwise density comparisons.",
+      "substeps": [
+        {
+          "instruction": "bvl_plotParams(model3, row = 4, col = 3, credMass = 0.89, params = NULL)  # HPDI 89% (Fig. 10); set credMass=0.95 for 95% HPDI",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_plotIntervals(model3, c(\"b_B_and_Lie_O\", \"b_C_and_Lie_O\", \"b_T_and_Lie_O\", \"b_Lie_O\"))  # interval plots (Fig. 11)",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_plotDensity(model3, c(\"b_B_and_Lie_O\", \"b_C_and_Lie_O\", \"b_T_and_Lie_O\", \"b_Lie_O\"))    # density plots (Fig. 12)",
+          "title": ""
+        },
+        {
+          "instruction": "bvl_plotDensity2d(model3, \"b_Lie_O\", \"b_Viol_O\", color_scheme = \"red\")                     # 2‑D density comparison (Fig. 13)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 25,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

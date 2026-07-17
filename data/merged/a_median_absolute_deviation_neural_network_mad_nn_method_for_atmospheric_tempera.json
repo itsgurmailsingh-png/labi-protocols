@@ -1,0 +1,189 @@
+{
+  "protocol_id": "a_median_absolute_deviation_neural_network_mad_nn_method_for_atmospheric_tempera",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "A median absolute deviation-neural network (MAD-NN) method for atmospheric temperature data cleaning",
+  "author": "Owolabi, Okoh, et al.",
+  "doi": "10.1016/j.mex.2021.101533",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563688/",
+  "citation": "10.1016/j.mex.2021.101533",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 2.0,
+  "category": "Other",
+  "estimated_time_mins": 120,
+  "materials": [
+    "Step 1: Removal of outliers-the MAD technique.",
+    "For surface air temperature data obtained from a given observatory, an outlier is determined by a value that is more than three scaled median absolute deviations (MAD) away from the median. The value of three is chosen based on the 3-sigma rule which is the best-known criterion to detect an outlier [4]. The threshold value of three is also most commonly used because it has been severally shown to be an effective value for outlier detection [5,6]. Specifically, this value of three is set as the default in MATLAB's implementation of the outlier detection function [7]. To remove the outliers, the MAD technique [8,9] is implemented in a MATLAB script that reads in the raw surface air temperature data in 5 min resolution, and then detects outliers in the dataset by using the MATLAB function named ‘isoutlier’. Fig. 2 illustrates the capacity of the function to correctly detect outliers in the dataset. The points detected as outliers are shown in red color, in Fig. 2. The figure precisely contains surface air temperature dataset from Abuja, Minna, Lagos and Anyigba observatories. In this step of the data cleaning process, the red color data points (representing data detected as outliers) are removed, while the black data points (representing ‘good’ candidates) are included in the preserved dataset. In Fig. 2, there are few points marked in red on the peaks of the concentrated data which are detected as outliers by the algorithm used, whereas they may not actually be outliers. This limitation of the algorithm does not have a significant effect on the results of this work because, at worst case scenario, the data removed represents an insignificant amount of the entire dataset. The 3-Sigma rule typically retains nearly all (∼99.73%) of the entire dataset [4].Fig. 2Plots of coarse surface air temperature dataset indicating the outliers in the dataset for Abuja, Minna, Lagos and Anyigba.Fig 2",
+    "It is evident (for example, in Fig.",
+    "Step 4: Quality check."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Remove outliers with MAD",
+      "instruction": "For each observatory’s 5‑minute surface‑air‑temperature series, define an outlier as any value more than three scaled median absolute deviations (MAD) from the median (the 3‑sigma rule). In MATLAB, read the raw data and apply the built‑in function isoutlier with the default three‑MAD threshold, then delete the detected outlier points, retaining the remaining “good” data.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Train neural network on cleaned data",
+      "instruction": "Use the outlier‑free dataset to train a feed‑forward back‑propagation neural network (Levenberg‑Marquardt algorithm, MATLAB trainlm) that predicts surface‑air temperature from three inputs: Year, Day‑of‑Year, and Hour‑of‑Day.",
+      "substeps": [
+        {
+          "instruction": "Randomly split the full cleaned dataset into 70 % training, 15 % validation, and 15 % testing subsets.",
+          "title": ""
+        },
+        {
+          "instruction": "Create 20 identical network configurations differing only in hidden‑layer neuron count (1 to 20, step 1).",
+          "title": ""
+        },
+        {
+          "instruction": "Train each configuration on the training set, validate during training, and evaluate root‑mean‑square error (RMSE) on the test set.",
+          "title": ""
+        },
+        {
+          "instruction": "Select the hidden‑layer size that yields the lowest test RMSE (e.g., 19 neurons gave 1.79 °C RMSE for Abuja).",
+          "title": ""
+        },
+        {
+          "instruction": "Retrain the final network using the chosen hidden‑layer size on the combined training + validation data.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Fill gaps using NN predictions",
+      "instruction": "Generate temperature values for all missing 5‑minute timestamps (gaps created by outlier removal, power failures, or instrument bias) by feeding the corresponding Year, Day‑of‑Year, and Hour‑of‑Day into the trained neural network; then apply a 2‑dimensional median filter at the boundaries between observed and predicted points to smooth transitions.",
+      "substeps": [
+        {
+          "instruction": "Identify all time points lacking observed data.",
+          "title": ""
+        },
+        {
+          "instruction": "Predict temperature for each missing point with the trained network.",
+          "title": ""
+        },
+        {
+          "instruction": "Insert the predictions into the time series, producing a complete 5‑minute record.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply 2‑D median filtering across the interface of observed and predicted segments.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Perform final quality check",
+      "instruction": "Inspect the fully reconstructed temperature series for all 17 TRODAN stations using the provided quality‑check interface; for any irregular diurnal drops, retrieve the co‑located solar‑radiation measurements and accept the temperature data only if the radiation series shows a matching pattern, otherwise flag the segment.",
+      "substeps": [
+        {
+          "instruction": "Load the complete temperature dataset into the quality‑check GUI.",
+          "title": ""
+        },
+        {
+          "instruction": "Locate anomalous diurnal temperature declines (e.g., steep drops in late afternoon).",
+          "title": ""
+        },
+        {
+          "instruction": "Extract the corresponding solar‑radiation time series from TRODAN.",
+          "title": ""
+        },
+        {
+          "instruction": "If solar radiation exhibits a similar dip, consider the temperature observation valid; if not, mark it for further review.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC8563688/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563688/",
+      "caption": "",
+      "bytes": 64581,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563688/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC8563688/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563688/",
+      "caption": "",
+      "bytes": 54956,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563688/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC8563688/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563688/",
+      "caption": "",
+      "bytes": 30756,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563688/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC8563688/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563688/",
+      "caption": "",
+      "bytes": 91352,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563688/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC8563688/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563688/",
+      "caption": "",
+      "bytes": 71285,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563688/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC8563688/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563688/",
+      "caption": "",
+      "bytes": 77985,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563688/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC8563688/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563688/",
+      "caption": "",
+      "bytes": 238422,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563688/gr7.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 26,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

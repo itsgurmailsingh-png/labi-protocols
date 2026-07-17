@@ -13,146 +13,200 @@
   "citation": "10.1021/acs.analchem.5c08021",
   "category": "Proteomics",
   "estimated_time_mins": 102,
-  "materials": [],
+  "materials": [
+    "The first data set used for testing Fisher’s-based\napproach\nconsisted of expression (FITExP) proteomic data from drug-treated\nMCF-7 cells extracted from the ProTargetMiner database. Briefly, MCF-7 cells were exposed for 48 h to\nIC50 concentrations of nine anticancer compounds representing\ndiverse mechanisms of action. For FoM calculations, we used the known\ntargets of bortezomib (PSMB1 and PSMB5) and raltitrexed (TYMS and\nFPGS). The second data set was a solubility (PISA) assay from the ThermoTargetMiner database and originated from A549 cell lysate treated with different\ndrugs against lung cancer. For FoM determination, we used the known\ntargets of vorinostat (targets: HDACs), everolimus (target: MTOR)\nand olaparib (targets: PARP1, PARP2, and AKR1C3). The third data set\nwas an automated PISA assay (OPTI-PISA) obtained from A549 cell lysates treated with 10 μM methotrexate\n(MTX, target: DHFR), staurosporine (targets: kinases), or ganetespib\n(targets: HSP90s). The last data set comprised the combined PISA-expression proteomics profile of 5-fluorouracil (5-FU)-resistant\nversus 5FU-sensitive SW480 cells, with the 5FU targets of TYMS used\nfor FoM calculations."
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Each data\nset was composed of several raw LC-MS/MS data files of tryptic peptide\nmixtures with tandem mass tag (TMT) multiplexing. The data were processed\nwith either MaxQuant (MQ) or Proteome Discoverer (PD) analysis programs,\nor both. In the latter case, both MQ- and PD-obtained results were\nused in further analysis. Peptide-level outputs were used for Fisher’s\nanalysis, while protein-level outputs served for comparison with Fisher’s\nresults. Peptides and proteins assigned to contaminant proteins or\nreversed sequences were removed from the results, as were peptides\nnot uniquely assigned to one protein. Peptides were grouped by protein\nIDs, and peptide abundances were normalized to the total ion count\nwithin each TMT channel. For expression (FITExP) and solubility (PISA)\ndata sets in the method development part of the study, fold changes\nwere calculated directly from protein abundances. For the validation\ndata sets obtained by partial digestion (AFDIP and HOLSER), fold changes\nwere calculated from the abundances of top four peptides.",
+      "title": "Generate LC‑MS/MS datasets",
+      "instruction": "Treat MCF‑7 cells with IC50 concentrations of nine anticancer compounds for 48 h and A549 cell lysates with 10 μM methotrexate (or staurosporine, ganetespib) using expression (FITExP), solubility (PISA), OPTI‑PISA, AFDIP and HOLSER assays; digest proteins with trypsin, label peptides with TMT multiplexing, and acquire raw LC‑MS/MS files.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "In\nprotein-level analysis, molecules identified with modified peptides\nonly were filtered away. In both analysis types, identifications with\nmore than one missing value among the biological replicates (n ≥\n3) per condition (treatment or control) were removed, as well as proteins\nwith fewer than two peptides. In the PISA-Expression data set, any\nremaining missing values were imputed using the average normalized\nabundance in other replicates. Protein lists from both analysis types\nwere cross-validated, and only proteins present in both lists were\nretained to ensure fair comparison.",
+      "title": "Process raw LC‑MS/MS files",
+      "instruction": "Analyze each raw LC‑MS/MS file with MaxQuant (MQ) and/or Proteome Discoverer (PD) to generate peptide‑level and protein‑level output tables; if both programs are used, keep results from both for downstream analysis.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "For each peptide and protein, two-tailed,\nunpaired Student’s t test was performed comparing\nnormalized abundances of treated versus control samples. Fold changes\nwere calculated as the ratio of the median (among the replicates)\nabundances in treated samples to control samples. For PISA, expression,\nand OPTI-PISA data, only peptides with consistent fold-change direction\nwere retained. Benjamini–Hochberg (BH) multiple testing correction\nwas applied, and the resulting adjusted p-values were used in downstream\nanalysis.",
+      "title": "Remove contaminants and non‑unique peptides",
+      "instruction": "Exclude any peptide or protein assigned to contaminant proteins or reversed sequences and discard peptides that are not uniquely assigned to a single protein.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "In peptide-level analysis, peptides belonging to the\nsame protein ID were ranked by their p-value, fold changes or a composite\nscore defined as −log10­(p-value) × |log2­(fold change)|.\nIn Fisher’s method, either all peptides or the top N peptides\n(N = 2, 3, ... 6) for each protein were used. When N exceeded the\nnumber of available peptides for a given protein, missing values were\nhandled in one of the two ways: (i) using only the available p-values\n(“no imputation”), or (ii) imputing the average p-value\nof the existing peptides for the same protein.",
+      "title": "Group peptides by protein and normalize",
+      "instruction": "Group the remaining peptides by their protein IDs and normalize each peptide’s abundance to the total ion count within its TMT channel.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "For each\nprotein, X2 value was calculated from the p-values of N\nselected peptides:\n1\nX2=−2∑{i=1}{N}ln⁡p−valuei",
+      "title": "Calculate fold changes",
+      "instruction": "For expression (FITExP) and solubility (PISA) datasets, compute fold changes directly from protein abundances; for validation datasets (AFDIP and HOLSER), compute fold changes from the abundances of the top four peptides per protein.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "The combined protein p-value was computed\nas the one-tailed probability of observing a X2 value equal\nto or greater than the observed X2. This was done using\nthe pchisq­() function in R.",
+      "title": "Filter protein lists",
+      "instruction": "Remove proteins identified only with modified peptides; discard proteins with more than one missing value among biological replicates (n ≥ 3) per condition; discard proteins supported by fewer than two peptides.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "The Figure\nof Merit (FoM) designed to determine which variation of Fisher’s\napproach, if any, is optimal, was based on the combined ranking of\nknown targets of nine drugs (Supplementary Table 1). The selected drugs bind to a broad spectrum (106 in total)\nof experimentally validated human proteins registered as targets in\nDrugBank, and trigger diverse well-studied pathways, providing an\nobjective benchmark for this study. The basic requirement for FoM\nwas that analytical strategies that rank known targets higher (lower\nRank value) should produce larger FoM values. For each drug but staurosporine,\nFoM was calculated as\n2\nFoM=∑k=1n1,000,000RankFk",
+      "title": "Impute missing values (PISA‑Expression)",
+      "instruction": "For the PISA‑Expression dataset, replace any remaining missing normalized abundances with the average normalized abundance of that protein across the other replicates.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Here, RankFkranking factors\nof identified known targets (from DrugBank), and n is the number of such targets. Ranking factors were calculated\nas follows: for each protein, a score was computed by combining the\nfold change of protein abundance with its associated p-value, obtained\neither from BH-corrected t tests (protein-level analysis)\nor from Fisher’s method (peptide-level analysis). The score\nwas defined as −log10­(p-value) × |log2­(fold change)|.\nIn the HOLSER and AFDIP data sets, fold changes of proteins were calculated either\nas the average fold changes or center of gravity shifts of the top\nN peptides, where the direction (positive or negative) was determined\nby the majority of selected peptides. Proteins were sorted by their\nscores in the descending order, and the obtained ranks were then rescaled\nto a uniform range of 1–8000 to enable comparison of data sets\nwith different proteome depths. These rescaled ranks represented the\nranking factors in (2). For staurosporine, a broad-spectrum kinase\ninhibitor with hundreds of kinases known to bind the compound, we\ncounted the number of kinases within the top 100 ranked proteins,\nwhich served as the FoM score.",
+      "title": "Cross‑validate protein lists",
+      "instruction": "Compare the protein lists obtained from peptide‑level and protein‑level analyses and retain only proteins that appear in both lists.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Lastly, the FoM values for individual\ndata sets were renormalized\nfor the same N to a 1–10 scale, and the rescaled values were\nsummed together to obtain the final score for a given strategy.",
+      "title": "Statistical testing",
+      "instruction": "Perform a two‑tailed unpaired Student’s t‑test for each peptide and protein comparing normalized abundances of treated versus control samples; calculate fold change as the ratio of median treated abundance to median control abundance; for PISA, expression and OPTI‑PISA retain only peptides with consistent fold‑change direction; apply Benjamini–Hochberg correction to all p‑values.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "The proteomics\ndata sets are listed in Table \n, and all known targets of drugs used in this study are given\nin Supplementary Table 1.",
+      "title": "Rank peptides and compute composite score",
+      "instruction": "Within each protein, rank peptides by p‑value, fold change, or by the composite score –log10(p‑value) × |log2(fold change)|.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "The first data set used for testing Fisher’s-based\napproach\nconsisted of expression (FITExP) proteomic data from drug-treated\nMCF-7 cells extracted from the ProTargetMiner database. Briefly, MCF-7 cells were exposed for 48 h to\nIC50 concentrations of nine anticancer compounds representing\ndiverse mechanisms of action. For FoM calculations, we used the known\ntargets of bortezomib (PSMB1 and PSMB5) and raltitrexed (TYMS and\nFPGS). The second data set was a solubility (PISA) assay from the ThermoTargetMiner database and originated from A549 cell lysate treated with different\ndrugs against lung cancer. For FoM determination, we used the known\ntargets of vorinostat (targets: HDACs), everolimus (target: MTOR)\nand olaparib (targets: PARP1, PARP2, and AKR1C3). The third data set\nwas an automated PISA assay (OPTI-PISA) obtained from A549 cell lysates treated with 10 μM methotrexate\n(MTX, target: DHFR), staurosporine (targets: kinases), or ganetespib\n(targets: HSP90s). The last data set comprised the combined PISA-expression proteomics profile of 5-fluorouracil (5-FU)-resistant\nversus 5FU-sensitive SW480 cells, with the 5FU targets of TYMS used\nfor FoM calculations.",
+      "title": "Select top N peptides per protein",
+      "instruction": "For each protein, select either all peptides or the top N peptides (N = 2, 3, 4, 5, 6). If N exceeds the number of available peptides, handle missing p‑values by (i) using only the available p‑values (no imputation) or (ii) imputing the average p‑value of the existing peptides for that protein.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
-      "instruction": "The data sets used for validation of the\noptimal Fisher’s-based\nstrategy encompass data on protein domain accessibility to trypsin\nin the AFDIP and HOLSER techniques. In both cases, known targets of MTX (target:\nDHFR), staurosporine (targets: kinases), and rapamycin (targets: MTOR\nand FKBPs) were used for FoM determination.",
+      "title": "Calculate X² statistic",
+      "instruction": "Compute X² = ‑2 ∑_{i=1}^{N} ln(p_i) for the selected peptides of each protein.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
-      "instruction": "For each\nprotein, X2 value was calculated from the p-values of N\nselected peptides:\n1\nX2=−2∑{i=1}{N}ln⁡p−valuei",
+      "title": "Compute combined protein p‑value",
+      "instruction": "In R, use pchisq(X², df = 2 N, lower.tail = FALSE) to obtain the one‑tailed probability of observing an X² equal to or greater than the observed value; this is the combined protein p‑value.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
-      "instruction": "The combined protein p-value was computed\nas the one-tailed probability of observing a X2 value equal\nto or greater than the observed X2. This was done using\nthe pchisq­() function in R.",
+      "title": "Derive protein ranking score",
+      "instruction": "For each protein, calculate a score = –log10(combined p‑value) × |log2(fold change)| (or use the same composite formula with peptide‑level p‑values when appropriate).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
-      "instruction": "The proteomics\ndata sets are listed in Table \n, and all known targets of drugs used in this study are given\nin Supplementary Table 1.",
+      "title": "Rescale protein ranks",
+      "instruction": "Sort proteins by the score in descending order and rescale their rank positions to a uniform range of 1–8000 to enable comparison across datasets of different proteome depth.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
-      "instruction": "The first data set used for testing Fisher’s-based\napproach\nconsisted of expression (FITExP) proteomic data from drug-treated\nMCF-7 cells extracted from the ProTargetMiner database. Briefly, MCF-7 cells were exposed for 48 h to\nIC50 concentrations of nine anticancer compounds representing\ndiverse mechanisms of action. For FoM calculations, we used the known\ntargets of bortezomib (PSMB1 and PSMB5) and raltitrexed (TYMS and\nFPGS). The second data set was a solubility (PISA) assay from the ThermoTargetMiner database and originated from A549 cell lysate treated with different\ndrugs against lung cancer. For FoM determination, we used the known\ntargets of vorinostat (targets: HDACs), everolimus (target: MTOR)\nand olaparib (targets: PARP1, PARP2, and AKR1C3). The third data set\nwas an automated PISA assay (OPTI-PISA) obtained from A549 cell lysates treated with 10 μM methotrexate\n(MTX, target: DHFR), staurosporine (targets: kinases), or ganetespib\n(targets: HSP90s). The last data set comprised the combined PISA-expression proteomics profile of 5-fluorouracil (5-FU)-resistant\nversus 5FU-sensitive SW480 cells, with the 5FU targets of TYMS used\nfor FoM calculations.",
+      "title": "Calculate Figure of Merit per drug",
+      "instruction": "For each drug (except staurosporine), compute FoM = ∑_{k=1}^{n} 1,000,000 / RankFk, where RankFk is the rescaled rank of the k‑th known target (n = number of known targets). For staurosporine, count the number of kinases among the top 100 ranked proteins and use this count as the FoM.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
-      "instruction": "The data sets used for validation of the\noptimal Fisher’s-based\nstrategy encompass data on protein domain accessibility to trypsin\nin the AFDIP and HOLSER techniques. In both cases, known targets of MTX (target:\nDHFR), staurosporine (targets: kinases), and rapamycin (targets: MTOR\nand FKBPs) were used for FoM determination.",
+      "title": "Renormalize and sum FoM values",
+      "instruction": "For a given N, renormalize each dataset’s FoM to a 1–10 scale and sum the renormalized FoM values across all datasets to obtain the final score for the evaluated Fisher‑based strategy.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-18T19:15:35.463533Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "The data sets used for validation of the\noptimal Fisher’s-based\nstrategy encompass data on protein domain accessibility to trypsin\nin the AFDIP and HOLSER techniques. In both cases, known targets of MTX (target:\nDHFR), staurosporine (targets: kinases), and rapamycin (targets: MTOR\nand FKBPs) were used for FoM determination. The data sets used for validation of the\noptimal Fisher’s-based\nstrategy encompass data on protein domain accessibility to trypsin\nin the AFDIP and HOLSER techniques. In both cases, known targets of MTX (target:\nDHFR), staurosporine (targets: kinases), and rapamycin (targets: MTOR\nand FKBPs) were used for FoM determination.",
+  "media": [
+    {
+      "type": "image",
+      "filename": "ac5c08021_0004.jpg",
+      "local_path": "data/media/pubmed_central/PMC13150797/ac5c08021_0004.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/d9ec/13150797/5a3716a96466/ac5c08021_0004.jpg",
+      "caption": "",
+      "bytes": 105096,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/pubmed_central/PMC13150797/ac5c08021_0004.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "ac5c08021_0006.jpg",
+      "local_path": "data/media/pubmed_central/PMC13150797/ac5c08021_0006.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/d9ec/13150797/5a3716a96466/ac5c08021_0006.jpg",
+      "caption": "",
+      "bytes": 105096,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/pubmed_central/PMC13150797/ac5c08021_0006.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "ac5c08021_0002.jpg",
+      "local_path": "data/media/pubmed_central/PMC13150797/ac5c08021_0002.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/d9ec/13150797/607cf4894e3e/ac5c08021_0002.jpg",
+      "caption": "",
+      "bytes": 111451,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/pubmed_central/PMC13150797/ac5c08021_0002.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "ac5c08021_0001.jpg",
+      "local_path": "data/media/pubmed_central/PMC13150797/ac5c08021_0001.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/d9ec/13150797/afda2e116e4a/ac5c08021_0001.jpg",
+      "caption": "",
+      "bytes": 106009,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/pubmed_central/PMC13150797/ac5c08021_0001.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "ac5c08021_0003.jpg",
+      "local_path": "data/media/pubmed_central/PMC13150797/ac5c08021_0003.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/d9ec/13150797/c4adc9344242/ac5c08021_0003.jpg",
+      "caption": "",
+      "bytes": 71464,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/pubmed_central/PMC13150797/ac5c08021_0003.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 36,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

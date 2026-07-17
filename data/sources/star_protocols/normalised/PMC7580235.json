@@ -23,59 +23,76 @@
   "materials": [
     "Climate Data",
     "Projected Climate Change information",
-    "Sequence Samples"
+    "Sequence Samples",
+    "Timing: 10–20 min",
+    "Timing: 15–30 min"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Step-By-Step Method Details",
-      "instruction": "Note: all steps are performed in the statistical computing environment “R”. Example code for each step can be found at https://github.com/blumsteinm/Projecting_MAF_ClimateChange/STAR_Protocol_Example_Code.R",
-      "substeps": [],
+      "title": "Run PCA on climate data",
+      "instruction": "Order the rows of both the past climate Normals file and the future GCM projection file by population so they match, then use prcomp from the vegan package to perform a principal component analysis on the past climate matrix (include all climate variables) with scale=TRUE and center=TRUE. Project the future climate data into the PC space with predict(newdata=…) and inspect the results using biplot from vegan.",
+      "substeps": [
+        {
+          "instruction": "Order rows in both climate files by population.",
+          "title": ""
+        },
+        {
+          "instruction": "Run prcomp on the past climate matrix with scale=TRUE and center=TRUE.",
+          "title": ""
+        },
+        {
+          "instruction": "Use predict() with the future climate data as newdata to obtain future PC scores.",
+          "title": ""
+        },
+        {
+          "instruction": "Visualize the PCA results with biplot().",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Define the Major Axes of Climate Variation Using a Principal Component Analysis",
-      "instruction": "Timing: 10–20 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 2,
-      "title": "Define the Major Axes of Climate Variation Using a Principal Component Analysis",
-      "instruction": "This step takes the climatic data from the past Normals data and future GCM projections and puts them into principal components (PC) space. PCs pull out major axes of explanatory variation, which is particularly useful when many climate variables are highly correlated and thus difficult to use in a statistical model.3.Order rows in both climate files by population to ensure they match. This is essential for the principal component analysis (PCA) predictions.4.Use “prcomp” from the vegan package to run a PCA of the past climate Normals data, inputting a matrix of all climate variables as the object.a.Ensure that both “scale” and “center” are equal to TRUE. If not, climate variables with large values will disproportionately drive axis variation.5.Use “predict” and the future climate data as “newdata” to project the future climate variables into PC space.6.Check results using “biplot” from the vegan package (Figure 1).",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 3,
-      "title": "Define the Major Axes of Climate Variation Using a Principal Component Analysis",
-      "instruction": "Figure 1Visualizing Current and Future Climate in Principle Components SpaceA visualization of (A) climate variable correlations and (B) climate principal components space. The (A) correlations plot shows positive (blue) and negative (red) correlations between climate variables, with circle size and depth of color indicating the strength of the correlation. The (B) PCA plot depicts climate variables (blue arrows) in the first two axes of pc space. Where populations fall in PC space are shown with the colored dots, with the closed dots representing the past 30-years of climate data and their open counterparts representing where populations are expected to fall in the PC space in 2080.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 4,
-      "title": "Fit a Canonical Correspondence Analysis to Current Allele Frequencies versus Climate",
-      "instruction": "Timing: 15–30 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
-      "title": "Fit a Canonical Correspondence Analysis to Current Allele Frequencies versus Climate",
-      "instruction": "This step uses the climate PCs and the MAFs by population that we have tabulated to fit a canonical correspondence analysis (CCA) model. This model is the relationship between past climate and current MAFs. This CCA will be used to project MAFs into the future under climate change.7.Merge the past climate dataframe and MAFs dataframe using “merge” in base R. We merged based on “population name”, so that when data is put into models in subsequent steps, all columns are in the same order by population.a.Record the index of the climate and MAF columns so that you can distinguish between the two when running the CCA.8.Run a Null Model CCA with no predictors using “cca” from package vegan.a.This will be used for model comparisons in a future step. In this case, no explanatory predictors are put into the model, just allele data.b.We ran ours with 4,000 permutations.9.Run a CCA with all climate predictors included using “cca” from package vegan.a.Again, we ran this with 4,000 permutations.10.Drop environmental predictors that are collinear/non-significant via a step-wise model comparison using “ordistep” in the vegan package.a.We inputted the null CCA as the object, with the scope set to the full CCA predictor model.b.We ran ours in both directions, forward and backward, then used the optimal model returned as our CCA model. Using “$anova” with the model object will return the significance of variables remaining in the model.",
-      "substeps": [],
+      "title": "Fit CCA to allele frequencies",
+      "instruction": "Merge the past‑climate dataframe and the MAF dataframe by “population name” using base‑R merge, record the column indices for climate and MAF variables, then fit a null canonical correspondence analysis (CCA) with no predictors using cca from vegan with 4,000 permutations. Fit a full CCA including all climate PCs also with 4,000 permutations, and reduce the model by stepwise selection (forward and backward) with ordistep using the null CCA as the starting object and the full model as the scope. Retrieve the final model’s variable significance with $anova.",
+      "substeps": [
+        {
+          "instruction": "Merge climate and MAF data frames on “population name”.",
+          "title": ""
+        },
+        {
+          "instruction": "Record the indices of climate‑PC columns and MAF columns.",
+          "title": ""
+        },
+        {
+          "instruction": "Run a null CCA (no predictors) with cca(..., permutations=4000).",
+          "title": ""
+        },
+        {
+          "instruction": "Run a full CCA with all climate PCs using cca(..., permutations=4000).",
+          "title": ""
+        },
+        {
+          "instruction": "Perform stepwise model selection with ordistep(nullCCA, scope=fullCCA, direction=\"both\").",
+          "title": ""
+        },
+        {
+          "instruction": "Use the returned optimal model and call $anova to assess significance of retained predictors.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:08:45.990417Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Note: all steps are performed in the statistical computing environment “R”. Example code for each step can be found at https://github.com/blumsteinm/Projecting_MAF_ClimateChange/STAR_Protocol_Example_Code.R",
+  "content_type": "protocol",
+  "content_type_score": 32,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

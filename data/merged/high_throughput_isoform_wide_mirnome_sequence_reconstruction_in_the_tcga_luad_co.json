@@ -19,7 +19,7 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 8.5,
+  "quality_score": 3.5,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 102,
   "materials": [
@@ -31,129 +31,97 @@
     "pandas",
     "pyfaidx",
     "tqdm",
-    "apt-get"
+    "apt-get",
+    "Preprocess and normalize the genomic coordinate annotations."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Acquire or download the TCGA-LUAD miRNome annotation data. For the purpose of this exercise, the GDAC Broad Institute database will be used to obtain molecular data.",
+      "title": "Download TCGA‑LUAD miRSeq data",
+      "instruction": "Visit https://gdac.broadinstitute.org/, agree to the TCGA data‑use guidelines, select the Lung adenocarcinoma (LUAD) cohort, open the LUAD Archive pop‑up, navigate to the miRSeq section, choose the file named “illuminahiseq_mirnaseq‑miR_isoform_expression”, and download the tab‑delimited .txt file.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Visit the GDAC portal of Broad Institute at https://gdac.broadinstitute.org/ .",
+      "title": "Prepare annotation file",
+      "instruction": "Open the downloaded .txt file in a spreadsheet program, filter out rows with missing or incorrectly formatted values, ensure the “isoform_coords” column follows the required format assembly:chromosome:start‑end:strand (e.g., hg19:9:106938220‑106938244:+), and rename the column headers: “SampleId” → “sample_id”, “miRNA_ID” → “gene_id”, “isoform_coords” → “seq_loc”, “read_count” → “description”.",
+      "substeps": [
+        {
+          "instruction": "Open the .txt file in a spreadsheet program.",
+          "title": ""
+        },
+        {
+          "instruction": "Remove rows containing missing or malformed values.",
+          "title": ""
+        },
+        {
+          "instruction": "Check that “isoform_coords” matches assembly:chromosome:start‑end:strand.",
+          "title": ""
+        },
+        {
+          "instruction": "Rename columns to the required names.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Select &#39;Lung adenocarcinoma&#39; or LUAD cohort from the list. Note: You must agree to the TCGA guidelines on the responsible use of data to proceed.",
+      "title": "Install required software",
+      "instruction": "Install Python dependencies with pip install pandas pyfaidx tqdm and install samtools via apt‑get update -qq && apt‑get install -y samtools.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "From the LUAD Archive pop-up, navigate to the &#39;miRSeq&#39; section and select &#39;illuminahiseq_mirnaseq-miR_isoform_expression&#39;",
+      "title": "Obtain FAS2rDNA CLI",
+      "instruction": "Download the FAS2rDNA‑CLI script from https://fas2rdna.chordexbio.com/ or clone the GitHub repository at https://github.com/mahvin92/FAS2rDNA.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Wait until the download is finished (the file is normally in the form of tab-delimited .txt file type).",
+      "title": "Run FAS2rDNA reconstruction",
+      "instruction": "Execute the CLI, pointing to the directory that contains the prepared annotation file. Example commands:\npython3 fas2rdna.py \\\n  --input-dir /Users/Desktop/FAS2rDNA\nor, to embed a custom FASTA header:\npython3 fas2rdna.py \\\n  --input-dir /Users/Desktop/FAS2rDNA \\\n  --header \"{sample_id}|{gene_id}|{seq_loc}|{description}\"",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Preprocess and normalize the genomic coordinate annotations.",
+      "title": "Inspect generated FASTA files",
+      "instruction": "After the run finishes, examine the output tree under /Users/Desktop/FAS2rDNA/, which contains:\n/Users/Desktop/FAS2rDNA/\n├── LUAD.txt\n├── test.txt\n└── fas2rdna_output/\n    ├── genomes/\n    └── fasta/\n        ├── LUAD.fasta\n        ├── test.fasta\n        └── All_sequences.fasta",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Open the file using a spreadsheet program.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 7,
-      "title": "",
-      "instruction": "Inspect the data and filter out any missing values or incorrectly formatted valued.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
-      "title": "",
-      "instruction": "Ensure that the &#39;isoform_coords&#39; header of your data follow the FAS2rDNA-required format: Standard format: assembly:chromosome:start-end:strand Example data: hg19:9:106938220-106938244:+",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 9,
-      "title": "",
-      "instruction": "Once quality check is done, rename the &#39;SampleId&#39;, &#39;miRNA_ID&#39;, &#39;isoform_coords&#39;, and &#39;read_count&#39; headers to &#39;sample_id&#39;, &#39;gene_id&#39;, &#39;seq_loc&#39;, and &#39;description&#39;, respectively. This will ensure the data is properly formatted for FAS2rDNA.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "",
-      "instruction": "Perform isoform-wide sequence reconstruction using FAS2rDNA. For the purpose of this exercise, the FAS2rDNA-CLI version will be used (available at https://fas2rdna.chordexbio.com/ )",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "",
-      "instruction": "Install the required python dependencies. pip install pandas pyfaidx tqdm apt-get update -qq apt-get install -y samtools",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "",
-      "instruction": "Install or download the FAS2rDNA-CLI script. Note that the technical documentation of FAS2rDNA can be accessed publicly on GitHub (available at https://github.com/mahvin92/FAS2rDNA )",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 13,
-      "title": "",
-      "instruction": "Run FAS2rDNA using the the format below, specifying the location of the TCGA-LUAD miRNA annotation text file: python3 fas2rdna.py \\ --input-dir /Users/Desktop/FAS2rDNA or build a custom FASTA header by running the following line: python3 fas2rdna.py \\ --input-dir /Users/Desktop/FAS2rDNA \\ --header &#34;{sample_id}|{gene_id}|{seq_loc}|{description}&#34;",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
-      "title": "",
-      "instruction": "After FAS2rDNA finishes running, inspect the resulting .fasta ouput files. FAS2rDNA will generate the individual .fasta file from multiple text files and the combined .fasta file, compiling all multi-FASTA sequences in one file. The result map is in the following structure: /Users/Desktop/FAS2rDNA/ ├── LUAD.txt ├── test.txt └── fas2rdna_output/ ├── genomes/ ├── fasta/ │ ├── LUAD.fasta │ └── test.fasta └── All_sequences.fasta",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 15,
-      "title": "",
-      "instruction": "Cross-reference the generated sequences with the data input, ensuring all samples were represented, the sequences are in FASTA-format and the .fasta files are not empty. Sample LUAD data: sample_idgene_idseq_locdescription TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938243-96938263:+1 TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938243-96938264:+4 TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938243-96938265:+1 TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938243-96938266:+4 TCGA-05-4390-01A-02T-1754-13hsa-let-7a-1hg19:9:96938244-96938263:+13 ... Sample reconstructed LUAD miRNome FASTA-formatted sequences (FAS2rDNA result): &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 ATGAGGTAGTAGGTTGTATAG &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 ATGAGGTAGTAGGTTGTATAGT &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 ATGAGGTAGTAGGTTGTATAGTT &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 ATGAGGTAGTAGGTTGTATAGTTT &gt;TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1 TGAGGTAGTAGGTTGTATAG ...",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
-      "title": "",
-      "instruction": "FAS2rDNA operates in batch (multiple experiments), multi-assembly (detects different assembly versions like hg17, hg18, hg19, hg38 in humans), multi-loci (can reconstruct sequence from different DNA locations), auotomated formatting (compile multi-FASTA-formatted results, ready for downstream analyses), and multi-species (supports assemblies from humans to yeast genomes) workflows, giving users the speed, scalability, confidence and convenience needed to analyze and perform experiments using large genomic data.",
+      "title": "Validate FASTA output",
+      "instruction": "Cross‑reference the FASTA sequences with the original annotation to confirm that every sample is represented, that each entry is in proper FASTA format, and that the files are not empty.\nSample input rows (excerpt):\nsample_id gene_id seq_loc description\nTCGA-05-4390-01A-02T-1754-13 hsa-let-7a-1 hg19:9:96938243-96938263:+ 1\nTCGA-05-4390-01A-02T-1754-13 hsa-let-7a-1 hg19:9:96938243-96938264:+ 4\nTCGA-05-4390-01A-02T-1754-13 hsa-let-7a-1 hg19:9:96938243-96938265:+ 1\nTCGA-05-4390-01A-02T-1754-13 hsa-let-7a-1 hg19:9:96938243-96938266:+ 4\nTCGA-05-4390-01A-02T-1754-13 hsa-let-7a-1 hg19:9:96938244-96938263:+ 13\n…\nExample FASTA entries:\n>TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1\nATGAGGTAGTAGGTTGTATAG\n>TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1\nATGAGGTAGTAGGTTGTATAGT\n>TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1\nATGAGGTAGTAGGTTGTATAGTT\n>TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1\nATGAGGTAGTAGGTTGTATAGTTT\n>TCGA-05-4390-01A-02T-1754-13_hsa-let-7a-1\nTGAGGTAGTAGGTTGTATAG …",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [
+    {
+      "type": "image",
+      "filename": "1-ED0A6AC3E40411F0BD000A58A9FEAC02.png",
+      "local_path": "data/media/protocols_io/high-throughput-isoform-wide-mirnome-sequence-reco-hinnb4ddf/1-ED0A6AC3E40411F0BD000A58A9FEAC02.png",
+      "source_url": "https://files.protocols.io/external/1-ED0A6AC3E40411F0BD000A58A9FEAC02.png",
+      "caption": "",
+      "bytes": 24093,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/high-throughput-isoform-wide-mirnome-sequence-reco-hinnb4ddf/1-ED0A6AC3E40411F0BD000A58A9FEAC02.png"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 31,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

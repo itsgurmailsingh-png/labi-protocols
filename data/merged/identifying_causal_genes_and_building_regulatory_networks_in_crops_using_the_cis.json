@@ -1,0 +1,250 @@
+{
+  "protocol_id": "identifying_causal_genes_and_building_regulatory_networks_in_crops_using_the_cis",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Identifying Causal Genes and Building Regulatory Networks in Crops Using the CisTrans-ECAS Method",
+  "author": "Yutong Yan",
+  "doi": "10.21769/BioProtoc.5578",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.5578",
+  "citation": "10.21769/BioProtoc.5578",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 3.5,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 12,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Validate input data formats",
+      "instruction": "Ensure all input files follow the specifications in the README.md and contain a header row (header = TRUE). Verify that the R data frames exist and have the required columns: gffs (Gene, chr, start, end, …), exp_m (genes as rows, individuals as columns, log2‑transformed and quantile‑normalized TPMs), genes (character vector of target gene IDs), K (kinship matrix), and pheno (phenotypic data with individual IDs as row names). Prepare the files listed in Table 2 with the exact names and types:",
+      "substeps": [
+        {
+          "instruction": "--gffs_file: RData file gffs.RData containing gene annotation.",
+          "title": ""
+        },
+        {
+          "instruction": "--exp_file: RData file exp_matrix.RData containing the normalized expression matrix.",
+          "title": ""
+        },
+        {
+          "instruction": "--genodir: Pathname to the directory with PLINK binary genotype files (.bed, .bim, .fam) organized per chromosome.",
+          "title": ""
+        },
+        {
+          "instruction": "--gfile_prefix: String pattern for genotype file names, e.g. \"%s_529_test\" where %s is the chromosome number.",
+          "title": ""
+        },
+        {
+          "instruction": "--plinkdir: Pathname to the PLINK executable.",
+          "title": ""
+        },
+        {
+          "instruction": "--gctadir: Pathname to the GCTA executable.",
+          "title": ""
+        },
+        {
+          "instruction": "--K_file: RData file Kinship.RData containing the kinship matrix.",
+          "title": ""
+        },
+        {
+          "instruction": "--pheno_file: RData file pheno.RData containing phenotypic data.",
+          "title": ""
+        },
+        {
+          "instruction": "--gene_file: RData file genes.RData containing the vector of target gene IDs.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Compute cis/trans expression components",
+      "instruction": "For each chromosome, run the GCTA‑based decomposition script to obtain cis‑EC and trans‑EC matrices. Execute the following command, substituting the chromosome number for %s:",
+      "substeps": [
+        {
+          "instruction": "Rscript gcta_cis.R \\",
+          "title": ""
+        },
+        {
+          "instruction": "--gffs_file=./test_data/gffs.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--exp_file=./test_data/exp_matrix.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--genodir=./test_data/ \\",
+          "title": ""
+        },
+        {
+          "instruction": "--gfile_prefix=%s_529_test \\",
+          "title": ""
+        },
+        {
+          "instruction": "--plinkdir=/path/to/plink \\",
+          "title": ""
+        },
+        {
+          "instruction": "--gctadir=/path/to/gcta \\",
+          "title": ""
+        },
+        {
+          "instruction": "--out_dir=./test_res/gcta_cis \\",
+          "title": ""
+        },
+        {
+          "instruction": "--extend=1e5 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--ncor=4",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Merge chromosome results",
+      "instruction": "Combine the per‑chromosome .RData files produced by gcta_cis.R into four merged datasets using the provided script:",
+      "substeps": [
+        {
+          "instruction": "Rscript merge_cis_res.R --file_dir=./test_res/gcta_cis",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Run phenotype association (cistrans‑twas)",
+      "instruction": "Associate agronomic traits with the cis‑EC and trans‑EC components using the cistrans‑twas workflow. Use the Bonferroni‑adjusted p‑value threshold of 1.62e‑6 (adjust as needed for your gene count). Execute:",
+      "substeps": [
+        {
+          "instruction": "Rscript cistrans_twas.R \\",
+          "title": ""
+        },
+        {
+          "instruction": "--gffs_file=./test_data/gffs.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--K_file=./test_data/Kinship.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--pheno_file=./test_data/pheno.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--vc_file=./test_res/gcta_cis/gcta_cis_vc.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--cis_file=./test_res/gcta_cis/gcta_cis_cis.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--trans_file=./test_res/gcta_cis/gcta_cis_trans.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--out_dir=./test_res/cistrans_twas \\",
+          "title": ""
+        },
+        {
+          "instruction": "--p_threshold=1.62e-6",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Interpret cistrans‑twas results",
+      "instruction": "For each trait, a .csv file is generated. Genes are ranked by the rank_product, defined as the geometric mean of the p‑value ranks from the cis‑EC and trans‑EC associations; a smaller rank_product indicates a higher likelihood of causality.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Run e‑trait association (cistrans‑etwas)",
+      "instruction": "Construct gene regulatory networks by treating target‑gene expression as molecular phenotypes. Execute the cistrans‑etwas script with the same p‑value threshold:",
+      "substeps": [
+        {
+          "instruction": "Rscript cistrans_etwas.R \\",
+          "title": ""
+        },
+        {
+          "instruction": "--gffs_file=./test_data/gffs.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--K_file=./test_data/Kinship.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--exp_file=./test_data/exp_matrix.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--gene_file=./test_data/genes.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--vc_file=./test_res/gcta_cis/gcta_cis_vc.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--cis_file=./test_res/gcta_cis/gcta_cis_cis.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--trans_file=./test_res/gcta_cis/gcta_cis_trans.RData \\",
+          "title": ""
+        },
+        {
+          "instruction": "--out_dir=./test_res/cistrans_etwas \\",
+          "title": ""
+        },
+        {
+          "instruction": "--p_threshold=1.62e-6",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Interpret cistrans‑etwas results",
+      "instruction": "For each target gene listed in gene_file, a .csv result file is produced. Genes are ranked by rank_product; top‑ranked genes are candidate upstream regulators of the target gene. The output includes columns such as chr, start, end, strand, beta_cis, se_cis, zscore_cis, q‑value_cis, beta_trans, se_trans, zscore_trans, q‑value_trans, cis_rank, trans_rank, and Qsymbols.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 26,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

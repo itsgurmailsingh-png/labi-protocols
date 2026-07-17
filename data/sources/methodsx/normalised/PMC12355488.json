@@ -14,7 +14,11 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": 222,
-  "materials": [],
+  "materials": [
+    "Design grid (binary material distribution) X={0,1}HXW–Channel",
+    "Displacement field (from FEA)–Channel",
+    "Determines the importance of future rewards.GAE Lambda (λ)–0."
+  ],
   "steps": [
     {
       "step_id": 0,
@@ -124,28 +128,7 @@
       "step_id": 13,
       "title": "Step 3: Toplogy optimization using AI",
       "instruction": "Both share some common CNN layers to extract visual features from the design state as shown in Fig. 4. The hyperparameter setting of the CNN are shared in Table 4. The input or state fed into the neural network is a 3-channel image tensor that encodes the current state:–Channel 1: Design grid (binary material distribution) X={0,1}HXW–Channel 2: Displacement field (from FEA)–Channel 3: Stress field (e.g., von Mises)Fig. 4Neural network architecture (CNN-based actor-critic).Fig 4Table 4CNN hyperparameter settings.Table 4ComponentHyperparameterValue/SettingInput ShapeChannels × Height × Width3 × 40 × 60 (Design Grid, Displacement, Stress)Conv Layer 1Filters, Kernel Size, Activation32 filters, 3 × 3, ReLUPadding'same'Stride1Conv Layer 2Filters, Kernel Size, Activation64 filters, 3 × 3, ReLUPadding'same'Max PoolingPool Size2 × 2Stride2Conv Layer 3Filters, Kernel Size, Activation128 filters, 3 × 3, ReLUPadding'same'Flatten Layer–Converts 2D feature maps to 1D vectorActor HeadOutput Size, Activation2400 (60×40), Sigmoid for per-pixel action probCritic HeadOutput Size, Activation1 (scalar), LinearOptimizerType, Learning RateAdam, learning rate = 3e-4Policy UpdatePPO Clipping Range (ε)0.2. Limits the policy update step size in PPO’s surrogate loss.Epochs per Update4–10Batch Size64 or domain-size batchEntropy Coefficient–0.01 (to encourage exploration)Value Loss Coefficient–0.5Discount Factor (γ)–0.99. Determines the importance of future rewards.GAE Lambda (λ)–0.95. Controls bias-variance trade-off in GAE; helps smooth advantage estimation.Training StepsPer Epoch1000–2000 timestepsTotal Episodes–100+ depending on convergence",
-      "substeps": [
-        {
-          "instruction": "Both share some common CNN layers to extract visual features from the design state as shown in Fig. 4. The hyperparameter setting of the CNN are shared in Table 4. The input or state fed into the neural network is a 3-channel image tensor that encodes the current state:–Channel 1: Design grid (binary material distribution) X={0,1}HXW–Channel 2: Displacement field (from FEA)–Channel 3: Stress field (e.g., von Mises)Fig. 4Neural network architecture (CNN-based actor-critic).Fig 4Table 4CNN hyperparameter settings.Table 4ComponentHyperparameterValue/SettingInput ShapeChannels × Height × Width3 × 40 × 60 (Design Grid, Displacement, Stress)Conv Layer 1Filters, Kernel Size, Activation32 filters, 3 × 3, ReLUPadding'same'Stride1Conv Layer 2Filters, Kernel Size, Activation64 filters, 3 × 3, ReLUPadding'same'Max PoolingPool Size2 × 2Stride2Conv Layer 3Filters, Kernel Size, Activation128 filters, 3 × 3, ReLUPadding'same'Flatten Layer–Converts 2D feature maps to 1D vectorActor HeadOutput Size, Activation2400 (60×40), Sigmoid for per-pixel action probCritic HeadOutput Size, Activation1 (scalar), LinearOptimizerType, Learning RateAdam, learning rate = 3e-4Policy UpdatePPO Clipping Range (ε)",
-          "title": ""
-        },
-        {
-          "instruction": "Limits the policy update step size in PPO’s surrogate loss.Epochs per Update4–10Batch Size64 or domain-size batchEntropy Coefficient–",
-          "title": ""
-        },
-        {
-          "instruction": "(to encourage exploration)Value Loss Coefficient–0.5Discount Factor (γ)–",
-          "title": ""
-        },
-        {
-          "instruction": "Determines the importance of future rewards.GAE Lambda (λ)–",
-          "title": ""
-        },
-        {
-          "instruction": "Controls bias-variance trade-off in GAE; helps smooth advantage estimation.Training StepsPer Epoch1000–2000 timestepsTotal Episodes–100+ depending on convergence",
-          "title": ""
-        }
-      ],
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
@@ -183,9 +166,22 @@
     },
     {
       "step_id": 18,
-      "title": "Step 4: FEA validation",
+      "title": "Run FEA simulation in FEniCS",
       "instruction": "After the AI model proposes an optimized topology, the next critical step is to validate its structural feasibility using FEA. This ensures that the design is not only lightweight but also capable of withstanding applied loads under real-world conditions. In this step, we use FEniCS (Python-based) to simulate the mechanical behavior of the structure under specified boundary conditions and loading scenarios. The AI-generated design is converted into a mesh grid, and FEA is performed to evaluate two essential performance metrics: maximum displacement and Von Mises stress.",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Convert AI-generated design into a mesh grid",
+          "title": ""
+        },
+        {
+          "instruction": "Set up and run Python-based FEniCS simulation with specified boundary conditions and loading scenarios",
+          "title": ""
+        },
+        {
+          "instruction": "Record maximum displacement and von Mises stress from the FEA results",
+          "title": ""
+        }
+      ],
       "is_critical": true,
       "timers": []
     },
@@ -207,9 +203,34 @@
     },
     {
       "step_id": 21,
-      "title": "Step 5: Manufacturability & prototyping readiness",
+      "title": "Assess design manufacturability in MeshMixer",
       "instruction": "After the design has been smoothed, it is transformed into an STL (Stereolithography) file, which is a commonly used format for 3D printing. Limitations on additive manufacturing, such as minimum wall thickness, overhang angles, and support structure needs, are simulated and assessed using the MeshMixer tool. Additionally, the tool enables support generation and orientation adjustment, both of which are essential for guaranteeing printability without failure or distortion. In order to facilitate a seamless transfer from virtual design to actual component, designs that pass these manufacturability criteria are deemed appropriate for prototype. This stage is essential to guaranteeing that the generatively optimized structure is physically achievable with contemporary manufacturing technology in addition to being lightweight and high-performing.",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Export the smoothed design as an STL file.",
+          "title": ""
+        },
+        {
+          "instruction": "Open the STL file in MeshMixer.",
+          "title": ""
+        },
+        {
+          "instruction": "Simulate manufacturability limits (minimum wall thickness, overhang angles, support needs) in MeshMixer.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate required support structures in MeshMixer.",
+          "title": ""
+        },
+        {
+          "instruction": "Adjust part orientation for optimal printing in MeshMixer.",
+          "title": ""
+        },
+        {
+          "instruction": "If all criteria are met, mark the design as ready for prototyping.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
@@ -351,7 +372,131 @@
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T04:02:38.135838Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "The proposed research framework that integrates reinforcement learning with topology optimization for the generative design of lightweight structures is illustrated in Fig. 1. The workflow begins with problem formulation, including the definition of material properties, design constraints (e.g., stress, displacement limits), and boundary conditions. The next stage involves discretizing the design domain into a grid-based representation suitable for both the neural policy model and finite element solver. A Proximal Policy Optimization (PPO) agent is then deployed to learn optimal material distribution strategies by interacting with the environment through trial-and-error. Feedback is provided in the form of compliance, stress, and displacement data obtained via Finite Element Analysis (FEA). Based on this feedback, the agent adjusts its policy iteratively to improve structural performance and minimize material usage. Once an optimized topology is achieved, post-processing with Signed Distance Field (SDF) smoothing is applied to ensure surface continuity and manufacturability. The final geometry is then converted into an STL file for additive manufacturing readiness. This framework supports the generation of constraint-compliant, structurally efficient, and 3D-printable designs, offering a scalable solution for intelligent design automation.Fig. 1Research framework for generative design of lightweight structures using reinforcement learning topology optimization.Fig 1 Dataset: We use the open-source dataset commonly referenced in AI-based topology optimization studies. One of the most widely used datasets is the \"Topology Optimization Dataset (ToD)\" by Stanford University and ETH Zurich (https://topopt.mech.ethz.ch) The Topology Optimization Dataset (ToD) provides a benchmark for evaluating AI-driven topology optimization models. The goal is to minimize material usage while maintaining structural integrity under given boundary conditions and loads. The key objective f",
+  "content_type": "protocol",
+  "content_type_score": 33,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 48908,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 109762,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 126708,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 29778,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 70587,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 147624,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 15298,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 69802,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 48036,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 49280,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 86319,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 151940,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC12355488/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12355488/",
+      "caption": "",
+      "bytes": 119851,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12355488/gr9.jpg"
+    }
+  ]
 }

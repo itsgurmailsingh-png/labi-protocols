@@ -1,0 +1,202 @@
+{
+  "protocol_id": "high_resolution_and_deep_phylogenetic_reconstruction_of_ancestral_states_from_la",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "High-resolution and Deep Phylogenetic Reconstruction of Ancestral States from Large Transcriptomic Data Sets",
+  "author": "Sumanth Kumar Mutte",
+  "doi": "10.21769/BioProtoc.3566",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.3566",
+  "citation": "10.21769/BioProtoc.3566",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 5.5,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 6,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Create BLAST databases",
+      "instruction": "For each transcriptome and proteome, build a BLAST database using makeblastdb. Use ‘-dbtype nucl’ for transcriptome FASTA files and ‘-dbtype prot’ for proteome FASTA files.",
+      "substeps": [
+        {
+          "instruction": "makeblastdb -dbtype nucl -in transcriptome.fasta",
+          "title": ""
+        },
+        {
+          "instruction": "makeblastdb -dbtype prot -in proteome.fasta",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Prepare query FASTA file",
+      "instruction": "Assemble a FASTA file of protein sequences from well‑annotated genomes covering diverse taxa (list provided in Appendix‑1). This file will be used as the BLAST query.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Run BLAST searches",
+      "instruction": "Search the query file against the transcriptome database with tblastn and against the proteome database with blastp. Keep all default parameters, set the E‑value cutoff to 0.01, and output results in tab‑delimited format (outfmt 6).",
+      "substeps": [
+        {
+          "instruction": "tblastn -query filename.fa -db transcriptome.fasta -out output.blast -evalue 0.01 -outfmt '6 qseqid sseqid slen qstart qend sstart send evalue bitscore score length pident nident positive ppos mismatch gaps frames qcovs qcovhsp sseq'",
+          "title": ""
+        },
+        {
+          "instruction": "blastp -query filename.fa -db proteome.fasta -out output.blast -evalue 0.01 -outfmt '6 qseqid sseqid slen qstart qend sstart send evalue bitscore score length pident nident positive ppos mismatch gaps frames qcovs qcovhsp sseq'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Extract subject IDs",
+      "instruction": "From each BLAST output file, pull the second column (subject identifiers), sort them, and remove duplicates, writing the list to SubjectIdentifiers.txt.",
+      "substeps": [
+        {
+          "instruction": "cut -f2 output.blast | sort | uniq > SubjectIdentifiers.txt",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Retrieve selected sequences",
+      "instruction": "Using the list of identifiers, extract the matching transcript or protein records from the original FASTA files with faSomeRecords.",
+      "substeps": [
+        {
+          "instruction": "faSomeRecords transcriptome.fasta SubjectIdentifiers.txt SelectedTranscripts.fasta",
+          "title": ""
+        },
+        {
+          "instruction": "faSomeRecords proteome.fasta SubjectIdentifiers.txt SelectedProteins.fasta",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Translate transcripts to proteins",
+      "instruction": "Identify long open reading frames (≥100 aa) in the selected transcripts with TransDecoder.LongOrfs, then predict coding sequences and translate them with TransDecoder.Predict.",
+      "substeps": [
+        {
+          "instruction": "perl TransDecoder.LongOrfs -t SelectedTranscripts.fasta",
+          "title": ""
+        },
+        {
+          "instruction": "perl TransDecoder.Predict -t SelectedTranscripts.fasta",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Align sequences with MAFFT",
+      "instruction": "Align the protein (or translated) sequences using MAFFT with the globalpair algorithm and 1000 iterative refinements.",
+      "substeps": [
+        {
+          "instruction": "mafft --globalpair --maxiterate 1000 input_file > output_file",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Trim alignment with trimAl",
+      "instruction": "Remove poorly aligned columns using trimAl. Apply a gap‑threshold of 0.2 (remove positions with ≥80 % gaps) as a default; adjust to 0.3–0.4 for moderately conserved domains or 0.6–0.8 for highly conserved proteins. Optionally discard sequences shorter than ¼ of the average length in JalView.",
+      "substeps": [
+        {
+          "instruction": "trimal -in inputfile.fa -out outputfile.fa -fasta -gt 0.2",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Select evolutionary model",
+      "instruction": "Determine the best substitution model for each cleaned alignment. Use ModelFinder (built‑in IQ‑TREE) for automatic selection, or run ModelTest‑NG or PartitionFinder when ModelFinder disagrees with ModelTest‑NG.",
+      "substeps": [
+        {
+          "instruction": "modeltest-ng -d aa -i INFILE -o OUTFILE",
+          "title": ""
+        },
+        {
+          "instruction": "perl RAxML_ProteinModelSelection.pl alignment.fasta",
+          "title": ""
+        },
+        {
+          "instruction": "perl fasta2relaxedPhylip.pl -f input.fa -o output.phylip",
+          "title": ""
+        },
+        {
+          "instruction": "python PartitionFinderProtein.py partition_finder_models",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Construct phylogenetic trees",
+      "instruction": "Build maximum‑likelihood trees using IQ‑TREE, RAxML, and optionally PhyML. Use 1,000 rapid bootstraps and 1,000 SH‑aLRT replicates in IQ‑TREE; in RAxML employ rapid bootstrapping with autoMRE stopping, a random seed (‑x 12345 ‑p 12345), and the model from the previous step; in PhyML run 100 bootstraps with empirical amino‑acid frequencies and SPR tree search.",
+      "substeps": [
+        {
+          "instruction": "iqtree -s CleanAlignment.fa -pre OutputName -alrt 1000 -bb 1000 -m MFP+MERGE",
+          "title": ""
+        },
+        {
+          "instruction": "raxmlHPC-PTHREADS-AVX2 -f a -x 12345 -p 12345 -j -# autoMRE -m PROTGAMMAJTT -s CleanAlignment.fa -n OutputName",
+          "title": ""
+        },
+        {
+          "instruction": "PhyML-3.1_linux64 -i CleanAlignment.fa -d aa -b 100 -m JTT -f e -s SPR -a e",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Visualize and curate trees",
+      "instruction": "Upload the resulting trees to the iTOL web server, add protein‑domain information (InterProScan or MEME), sequence lengths (TransDecoder), and taxonomic data (OneKP/MMETSP). Manually inspect trees, removing branches caused by long‑branch attraction, partial sequences, or misplaced taxa; if many problematic branches remain, repeat the analysis with additional species or after discarding spurious sequences.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 25,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

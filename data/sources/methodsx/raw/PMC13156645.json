@@ -9,7 +9,310 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "The highlights of this research are•Count data modeling was initiated using Poisson regression, and overdispersion was tested to justify the use of NBR.•Spatial dependence and heterogeneity were tested using Moran’s I and Breusch-Pagan tests, followed by localized modeling with GWNBR.•Model performance was compared using AIC to evaluate improvements from global to spatially weighted count models.",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "Poisson regression",
+      "instruction": "Poisson regression is the fundamental statistical model for analyzing count data, where the response variable Yi represents the number of occurrences of an event within a fixed unit of time, space, or population [13]. The key assumption of the Poisson distribution is equidispersion, meaning that the conditional mean and variance of the response are equal E(Yi)=Var(Yi)=μi. The probability mass function of the Poisson distribution is written in Eq. (1).(1)f(yi;μi)=e−μiμiyiyi!,yi=0,1,2,⋯where yi denotes the observed count, μi>0 denotes the expected number of events for observation i, and e represents Euler’s number [14]. To connect the mean count with explanatory variables, Poisson regression employs a log-link function in Eq. (2) below.(2)log(μi)=β0+β1xi1+…+βpxipwhere xij represents the j-th explanatory of observation i and β0,β1,…,βp are regression coefficients. In Poisson regression, the expected count is linked to a set of explanatory variables through a log-linear model as Eq. (3).(3)μi=exp(Xiβ)Here, Xi=(xi1,xi2,…,xip) represents the covariates and β=(β0,β1,…,βp) denotes the parameter vector. This formulation ensures that the predicted counts are non-negative. Parameter estimation is performed using the Maximum Likelihood Estimation (MLE) method, which maximizes the probability of observing the data given the specified model [15]. The log-likelihood function of the Poisson regression model is written as Eq. (4).(4)l(β)=∑i=1n(yiln(μi)−μi−ln(yi!))where n is the number of observations. The likelihood function encapsulates the contribution of each observation to the model, and maximizing it yields estimates of the regression parameters β."
+    },
+    {
+      "title": "Poisson regression",
+      "instruction": "Despite its popularity, the Poisson model often proves restrictive because of its equidispersion assumption. In practice, many datasets exhibit overdispersion Var(Yi)>E(Yi) or underdispersion Var(Yi)<E(Yi). Overdispersion leads to underestimation of standard errors and overly optimistic significance tests, which can produce biased statistical inference [16]. When overdispersion is present, the Negative Binomial Regression model provides a more flexible alternative by introducing an additional dispersion parameter that relaxes the equidispersion assumption."
+    },
+    {
+      "title": "Negative binomial regression",
+      "instruction": "In the Poisson regression model, the fundamental assumption is that the mean and the variance of the response variable are equal, expressed as E(Yi)=Var(Yi)=μi. In many situations, this assumption does not hold, and the variance exceeds the mean. This phenomenon is referred to as overdispersion. When overdispersion occurs, the variance of the estimators becomes underestimated, which leads to incorrect inference. Therefore, it is necessary to evaluate whether the assumption of equidispersion is satisfied. The detection of overdispersion can be performed using the dispersion parameter θ, which is defined as the ratio between the deviance and the degrees of freedom written as Eq. (5).(5)θ=D(β^)dfwhere df=n−p and p is the number of estimated parameters. The deviance statistic D(β^) is defined as Eq. (6) below.(6)D(β^)=−2lnΛ=−2ln(L(ω)L(Ω))where L(ω) is the likelihood of the fitted model and L(Ω) is the likelihood of the saturated model. When θ=0, the model reduces to the standard Poisson regression. A value of θ>0 captures overdispersion, while θ<0 corresponds to underdispersion [15]."
+    },
+    {
+      "title": "Negative binomial regression",
+      "instruction": "To accommodate the presence of overdispersion, the Negative Binomial Regression (NBR) model can be applied. The Negative Binomial distribution is obtained as a Poisson-Gamma mixture distribution, in which the mean parameter of the Poisson distribution is assumed to follow a Gamma distribution. The probability mass function of the Negative Binomial distribution is given as Eq. (7).(7)f(yi;μi,θ)=Γ(yi+1θ)Γ(1θ)Γ(yi+1)(11+θμi)1θ(θμi1+θμi)yiwhere Γ is the gamma function and θ>0 is the dispersion parameter [17]. The expectation and variance of the Negative Binomial distribution are E(Yi)=μi and Var(Yi)=μi+θμi2. This expression shows that the variance is always greater than the mean whenever θ>0, thus making the model suitable when overdispersion exists in the data [18]. Furthermore, when θ=0, the variance reduces to μi, which means the Negative Binomial distribution converges to the Poisson distribution [13]."
+    },
+    {
+      "title": "Negative binomial regression",
+      "instruction": "The regression structure for the Negative Binomial model is similar to the Poisson regression, where the logarithm of the mean is expressed as a linear function of the covariates in Eq. (8).(8)log(μi)=β0+β1xi1+…+βpxip"
+    },
+    {
+      "title": "Negative binomial regression",
+      "instruction": "The estimation of the parameters β and the dispersion parameter θ is carried out using the Maximum Likelihood Estimation (MLE) approach, where the log-likelihood function is written as Eq. (9).(9)l(β,θ)=∑i=1n(lnΓ(yi+1θ)−lnΓ(1θ)−lnΓ(yi+1)−(1θ)ln(1+θμi)+yiln(θμi1+θμi))"
+    },
+    {
+      "title": "Negative binomial regression",
+      "instruction": "By including the dispersion parameter, the Negative Binomial regression is able to model count data with variance greater than the mean, which cannot be properly handled by the standard Poisson regression [16]."
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "Spatial regression is a statistical method used to analyze data that exhibits spatial dependence. Moran's I index is utilized to quantify spatial autocorrelation, defined as the extent to which a variable at a specific location exhibits a pattern of association with neighboring locations [6]. The index takes on values ranging from −1 to 1, with positive values denoting clustering (spatial aggregation) and negative values indicating a pattern of opposite dispersion (spatial dispersion). The Moran's I test statistic is calculated by the Eq. (10) below [19].(10)ZI=I−E(I)var(I)withI=n∑i∑jwij×∑i∑jwij(yi−y¯)(yj−y¯)∑i(yi−y¯)2where wij is the element of the i-th row and j-th column spatial weighting matrix, yi is the value of the response variable at location i, yj is the value of the response variable at location j, and y¯ is the average of the response variable y. The hypothesis of Moran's I test is"
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "H0:I=0 (No spatial dependencies)"
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "H1:I≠0 (There is a spatial dependency)"
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "The critical region of the test is that H0is rejected if the value |ZI|>Zα/2 or p-value < α. In this study, Moran’s I was applied to the residuals of the global Negative Binomial Regression model rather than raw counts to detect remaining spatial autocorrelation after accounting for covariates. Significant Moran’s I indicates unexplained spatial dependence, justifying the use of GWNBR. If Moran’s I index is statistically significant, it is necessary to employ a spatial regression approach for the purpose of capturing the effects of interregional linkages in the estimation model [20]."
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "The Breusch-Pagan test is used to identify the presence of heteroscedasticity, which is a condition in which residual variants are not constant across regions. In the context of spatial regression, heteroscedasticity often arises due to differences in economic characteristics between regions [7]. The Breusch-Pagan test was applied to the Pearson residuals of the Negative Binomial Regression model to assess whether residual variance varies systematically across provinces. Using Pearson residuals rather than raw counts aligns the BP test with the generalized linear model (GLM) framework, as suggested in Hilbe [16]. The statistics of the Breusch-Pagan test are expressed in Eq. (11) as follows.(11)BP=12fT(ZTZ)−1ZTfwhere the element of vector f is fi=(ei2σ2−1), ei is the least square observation for the i-th observation. Z is an n×p sized matrix containing a vector of standardized covariates variables. The test hypothesis uses the Breusch-Pagan test statistics as follows."
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "H0:σ12=σ22=…=σn2=σ2 (Homoskedasticity)"
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "H1: there is at least one σi2≠σ2;i=1,2,…,n (Heteroscedasticity)"
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "The critical region is that H0 is rejected if the value of BP>χp2 or p-value < α with p is number of covariates. In the event of heteroscedasticity being indicated by the test results, corrections must be implemented. Such corrections may take the form of robust estimation αp or the Generalized Least Squares (GLS) method, which serves to enhance the validity of the regression results [21]. By incorporating spatial autocorrelation analysis using Moran's Index I and conducting a heteroscedasticity test using the Breusch-Pagan test, the spatial regression approach can be a more valid and reliable analysis."
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "In regression analysis for spatial data, one of the fundamental assumptions is the independence of observations. However, in practice, observations located in nearby regions often exhibit spatial dependence. To address this, spatial econometric methods incorporate spatial weights that represent the geographical relationships among observational units [22]. Geographic coordinates (longitude and latitude) of provincial centroids were obtained from the official shapefiles provided by the Central Bureau of Statistics. These coordinates were used directly to compute Euclidean distances between provinces for constructing the spatial weight matrix. No coordinate projection or transformation was applied during the analysis."
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "A spatial weight matrix W=[wij] is defined, where each element wij reflects the spatial relationship between location i and location j. The weights are typically non-negative and satisfy wii=0. Spatial weights can be constructed using different approaches, including contiguity-based structures and distance-based structures. Contiguity-based weights assign wij=1 if region i and j share a common boundary and wij=0 otherwise, whereas distance-based matrices define wij as a function of the geographical distance between i and j [23]. In this study, spatial weights were constructed using a distance-based kernel weighting scheme derived from Euclidean distances between provincial coordinates. This approach allows observations located closer in space to exert stronger influence than distant observations. The spatial weighting framework is incorporated into a geographically weighted modeling approach, allowing regression coefficients to vary across locations. The extension of regression to incorporate spatial heterogeneity can be achieved through Geographically Weighted Regression (GWR), which allows regression coefficients to vary across locations [24]. In this framework, each location i is associated with a set of coefficients β(ui,vi), where (ui,vi) are the spatial coordinates of location i. The general form of the GWR model is expressed as Eq. (12).(12)yi=β0(ui,vi)+∑k=1pβk(ui,vi)xik+εi"
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "The parameters βk(ui,vi) are estimated locally using weighted least squares, where the weights depend on the distance between observation i and the calibration point j. The local estimation of parameters is conducted through a kernel weighting function that assigns higher weights to observations closer to the focal location and lower weights to distant observations. A common choice is the adaptive bi-square kernel, defined as Eq. (13).(13)wij(bi)={(1−(dijbi)2)2,dij<bi0,otherswhere dij=(ui,uj)2+(vi,vj)2 is euclidian distance between location i and j, and bi is bandwidth at the i-th location [24]. In geographically weighted models, the bandwidth defines the spatial scale of the analysis. For adaptive kernels, it represents the proportion of nearest neighboring provinces used in local estimation, while for fixed kernels it corresponds to the distance between provincial centroids. Smaller bandwidths capture more localized spatial variation, whereas larger bandwidths produce smoother estimates over broader regions. To determine the optimal bandwidth, Cross-Validation (CV) is commonly used. The CV score is computed as Eq. (14).(14)CV(b)=∑i=1n(yi−y^≠i(b))2where y^≠i(b) is the fitted value for i obtained by excluding i from the calibration and estimating the model with bandwidth b [24]."
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "When the response variable is in the form of count data and overdispersion is present, the Geographically Weighted Negative Binomial Regression (GWNBR) model is applied [25]. This model combines the flexibility of the Negative Binomial regression in handling overdispersed count data with the spatial adaptivity of GWR. The mean structure of the GWNBR model is defined as Eq. (15).(15)log(μi)=β0(ui,vi)+β1(ui,vi)xi1+…+βp(ui,vi)xip"
+    },
+    {
+      "title": "Spatial weighting and geographically weighted negative binomial regression",
+      "instruction": "The probability mass function of the Negative Binomial distribution is given as Eq. (16).(16)f(yi|βj(ui,vi))=Γ(yi+1θ)Γ(1θ)Γ(yi+1)(11+θμi)1θ(θμi1+θμi)yiwith variance function Var(Yi)=μi+θμi2."
+    },
+    {
+      "title": "Best model selection",
+      "instruction": "Selecting the best-fitting model involves balancing model accuracy with parsimony. One of the most widely used criteria for model selection is the Akaike Information Criterion (AIC), which is defined as Eq. (17).(17)AIC=−2ln(L)+2kwhere L denotes the maximum likelihood of the fitted model and k is the number of estimated parameters [26]. Models with smaller AIC values are preferred, as they indicate better goodness-of-fit while penalizing unnecessary model complexity."
+    },
+    {
+      "title": "Best model selection",
+      "instruction": "In the analysis of spatial count data, AIC is particularly useful for comparing baseline models such as Poisson regression and Negative Binomial regression against spatially adaptive models like GWNBR. A substantial reduction in AIC when moving from global models to GWNBR provides evidence that accounting for both overdispersion and spatial heterogeneity leads to a superior model representation [27]."
+    },
+    {
+      "title": "Computational implementation",
+      "instruction": "All analyses were conducted using R software version 4.3.3. The implementation relied entirely on open-source R packages to ensure transparency and reproducibility. The following R packages and versions were used: MASS (v7.3–60) for Poisson and Negative Binomial regression, car (v3.1–2) for multicollinearity testing using the Variance Inflation Factor (VIF), lmtest (v0.9–40) for the Breusch–Pagan heteroscedasticity test, ape (v5.7–1) for Moran’s I spatial autocorrelation analysis, spgwr (v0.6–36) for kernel-based spatial weighting and bandwidth selection, fields (v14.1) for Euclidean distance computation, zoo (v1.8–12) for auxiliary data handling, and Matrix (v1.6–5) for numerical matrix operations. Matrix operations and numerical inversion were performed using base R and the Matrix package."
+    },
+    {
+      "title": "Computational implementation",
+      "instruction": "Poisson regression was estimated using the glm() function with the poisson family, while Negative Binomial regression was fitted using the glm.nb() function from the MASS package. Spatial dependence was tested using the Moran.I() function, and spatial heterogeneity was assessed via the bptest() function. The Geographically Weighted Negative Binomial Regression (GWNBR) model was estimated using an iterative Newton-Raphson optimization algorithm, implemented through user-defined functions to obtain local parameter estimates and corresponding test statistics at each spatial location. Initial parameter values were obtained from the global Negative Binomial regression estimates to ensure stable convergence across locations. At each spatial location, the weighted log-likelihood function was maximized through iterative updates of the parameter vector based on the gradient and Hessian matrix of the local likelihood. Convergence was determined using a tolerance threshold of 10−8, defined as the maximum absolute difference between successive parameter estimates. To maintain numerical stability, the iterative process was terminated when convergence was achieved or when the number of iterations reached a predefined maximum of 20 iterations. The Hessian matrix obtained from the final iteration was subsequently used to compute local standard errors and Z-statistics for statistical inference of the estimated parameters."
+    },
+    {
+      "title": "Computational implementation",
+      "instruction": "Four kernel specifications were evaluated, namely adaptive bisquare, adaptive Gaussian, fixed bisquare, and fixed Gaussian kernels. Optimal bandwidths were selected using leave-one-out Cross-Validation (CV) implemented via the ggwr.sel() function. The kernel with the minimum CV value, namely the adaptive bisquare kernel, was selected for the final GWNBR model. In the adaptive specification, bandwidths were allowed to vary across locations to accommodate spatial heterogeneity. Data preprocessing included checking for missing values and consistency verification. Geographic coordinates (longitude and latitude) were extracted for each province and used to compute Euclidean distance matrices between observation locations. The spatial weight matrix was constructed using a distance-based kernel weighting scheme derived from Euclidean distances, rather than a contiguity-based adjacency structure. No polygon shapefiles were required, as the analysis relied exclusively on coordinate-based distance weighting. All spatial computations were conducted using geographic coordinates expressed in decimal degrees."
+    },
+    {
+      "title": "Computational implementation",
+      "instruction": "To ensure reproducibility of the proposed methodology, the following R code snippets illustrate the core functions used at each main stage of the analysis:# Poisson Regressionpois <- glm(Y ∼ predictors, family = poisson, data = data)# Negative Binomial Regressionnb <- glm.nb(Y ∼ predictors, data = data)# Moran's I Test (Spatial Dependence)MI <- Moran.I(data$Y, W)# Breusch-Pagan Test (Spatial Heterogeneity)bptest(nb)# Bandwidth Selection using Adaptive Bisquare Kernelbw <- ggwr.sel(Y ∼ predictors,data = data,coords = cbind(data$Long, data$Lat),adapt = TRUE,gweight = gwr.bisquare)# Geographically Weighted Negative Binomial Regression (custom function)gwnbr <- function(x, y, W, theta) {# x: design matrix (including intercept)# y: response variable# W: spatial weight matrix# theta: dispersion parameter from global NBR# Local parameter estimation at each location using spatial weights and Newton-Raphson optimizationreturn(list(coefficients = …, # local parameter estimatesz_values = … # local Z-statistics))}gwnbr_result <- gwnbr(x, y, W, nb$theta)"
+    },
+    {
+      "title": "Computational implementation",
+      "instruction": "The use of open-source software, explicit package versions, and representative code snippets allows the analytical workflow to be replicated by other researchers using the same dataset and methodological framework. Detailed numerical optimization steps for the Newton-Raphson algorithm are described conceptually in the methodology and implemented programmatically within the analysis."
+    },
+    {
+      "title": "Real data application",
+      "instruction": "The methodological framework of Geographically Weighted Negative Binomial Regression (GWNBR) described in the previous section is validated through a real data application. The analysis is conducted using provincial-level data obtained from the Central Bureau of Statistics (BPS) and the Ministry of Health of Indonesia for the year 2023. The dataset consists of 34 provinces, which serve as the observational units. The response variable is defined as Number of HIV Cases (y), while the explanatory variables include the Percentage of Poor Population (x1), Number of Village-Status Areas (x2), High School Graduates (x3), and Per Capita Expenditure (x4). The variables are measured in their original units, where x1 is expressed in percentage ( %), x2 and x3 represent counts, and x4 is measured in monetary units (Indonesian Rupiah) ensuring that the model reflects real socioeconomic magnitudes without prior standardization. This dataset is selected because it represents spatially distributed count data with strong socioeconomic linkages, providing an appropriate setting for validating the capability of GWNBR to simultaneously address overdispersion and spatial heterogeneity. The inclusion of poverty and education indicators reflects socioeconomic disparities across provinces, while the number of rural villages and per capita expenditure capture structural and economic dimensions influencing regional development. Beyond its methodological relevance, this application is also aligned with the Sustainable Development Goals (SDGs). Specifically, the analysis relates to SDG 1 (No Poverty), SDG 3 (Good Health and Well-Being), and SDG 4 (Quality Education), which emphasize the interconnectedness of poverty reduction, improved health outcomes, and equitable access to education."
+    },
+    {
+      "title": "Multicollinearity test",
+      "instruction": "Before doing the analysis using the Poisson Regression, Negative Binomial Regression, and Geographically Weighted Negative Binomial Regression (GWNBR) methods, the dataset was examined for multicollinearity to assess the presence of high correlations among explanatory variables.. Multicollinearity can be examined through the VIF value. If the VIF value is greater than 10, it can be concluded that there is multicollinearity. Table 1 shows the VIF values between the explanatory variables.Table 1Multicollinearity test results.Table 1 dummy alt textVariableVIFResultPercentage of Poor Population (x1)1.6732No multicollinearityNumber of Village-Status Areas (x2)1.0924No multicollinearityHigh School Graduates (x3)1.5559No multicollinearityPer Capita Expenditure (x4)2.2298No multicollinearity"
+    },
+    {
+      "title": "Poisson regression modeling",
+      "instruction": "The data on the number of HIV cases is assumed to be poisson distributed because it is count data. The following Table 2 is an estimate of the poisson regression model parameters.Table 2Parameter estimation and significance testing for the poisson regression model.Table 2 dummy alt textParameterCoefficientSEZ-valueP-valueResultβ^03.0650.03915078.3050.0000Significantβ^10.011510.0015187.5820.0000Significantβ^20.000310.000002179.450.0000Significantβ^30.002630.0006234.2170.0000Significantβ^40.000270.00000395.730.0000SignificantDeviance: 24,852df: 29AIC: 25,151"
+    },
+    {
+      "title": "Poisson regression modeling",
+      "instruction": "Based on the Table 2, the following poisson regression model was obtained:ln(μ^)=3.065+0.01151x1+0.00031x2+0.00263x3+0.00027x4After the model was developed, a simultaneous significance test of the parameters in the poisson regression model was conducted to determine whether the explanatory variables collectively have an effect on the response variable. The hypotheses used are as follows.H0:β1=β2=…=β4=0"
+    },
+    {
+      "title": "Poisson regression modeling",
+      "instruction": "H1:At least one of βk≠0; k = 1,2,3,4"
+    },
+    {
+      "title": "Poisson regression modeling",
+      "instruction": "Based on the test results with a 5 % significance level, the chi-square critical value is χ0.05;42=9.487729. Therefore, the decision is to reject H0 because the value of D(β^)=24,852>χ(0.05;4)2=9.487729. This means that at least one explanatory variable has a significant effect on the response variable. Therefore, it is need to continue with partial testing with the following hypothesis:H0:βk=0"
+    },
+    {
+      "title": "Poisson regression modeling",
+      "instruction": "H1:βk≠0; k = 1,2,3,4"
+    },
+    {
+      "title": "Poisson regression modeling",
+      "instruction": "Using a 5 % significance level, the critical value isZ0.025=1.96. Based on Table 2, the absolute values of the Z-values for all parameters exceed Z0.025. Therefore, it can be concluded that all explanatory variables used in modeling HIV have a significant effect on the number of HIV cases in Indonesia."
+    },
+    {
+      "title": "Poisson regression modeling",
+      "instruction": "Before applying the Poisson regression model, it is important to ensure that the fundamental assumptions of the model are satisfied, particularly the equidispersion condition, where the conditional mean equals the conditional variance. A key diagnostic is the assessment of overdispersion, since violation of this assumption may render the Poisson model inappropriate. Overdispersion was evaluated using the ratio between the deviance and its corresponding degrees of freedom. A ratio close to one indicates that the equidispersion assumption holds, whereas a ratio substantially greater than one indicates excess variability relative to the Poisson distribution."
+    },
+    {
+      "title": "Poisson regression modeling",
+      "instruction": "For the HIV case data, the model deviance value is 24,852 with 29 degrees of freedom, resulting in a deviance-to-degrees-of-freedom ratio of 856.97, which is far greater than unity. This diagnostic compares the observed variability with that expected under the Poisson assumption. A commonly accepted rule-of-thumb suggests that ratios substantially greater than one (for example, exceeding 1.5 or approaching 2) indicate the presence of overdispersion. The extremely large ratio obtained in this study therefore indicates severe overdispersion in the count data. This overdispersion also explains the unusually large Z-values observed in Table 2. Under the Poisson model, the variance is constrained to equal the mean, which can lead to underestimated standard errors when the data are overdispersed. As a consequence, the resulting Z-values become artificially inflated. Therefore, the large Z-values observed in the Poisson model reflect model misspecification rather than computational error. Based on this diagnostic, the Poisson regression model is considered unsuitable because it may produce biased standard errors and unreliable inference. Therefore, both models were specified under the same systematic component and log-link function, differing only in the variance structure where the Negative Binomial model introduces an additional dispersion parameter to relax the equidispersion assumption."
+    },
+    {
+      "title": "Negative binomial regression modeling",
+      "instruction": "Negative binomial regression can be used to address cases of overdispersion that occur in Poisson regression. In modeling using negative binomial regression, there is an initial parameter (θ) that serves to minimize the dispersion parameter, so that it can handle cases of overdispersion."
+    },
+    {
+      "title": "Negative binomial regression modeling",
+      "instruction": "Based on the Table 3, the following negative binomial regression model was obtained:ln(μ^)=1.949+0.06453x1+0.00035x2+0.01687x3+0.00026x4Table 3Parameter estimation and significance testing for the negative binomial regression model.Table 3 dummy alt textParameterCoefficientSEZ-valueP-valueResultβ^01.9491.161.680.09305Not Significantβ^10.064530.033141.9470.05154Not Significantβ^20.000350.000075.2660.0000Significantβ^30.016870.018840.8950.37066Not Significantβ^40.000260.000092.9550.00313SignificantDeviance: 37.167df: 29AIC: 551.13"
+    },
+    {
+      "title": "Negative binomial regression modeling",
+      "instruction": "Based on this model, it can be interpreted that for every 1 percent increase in the proportion of the poor population (x1) the number of HIV cases increases by exp(0.06453)=1.0667 cases, assuming that other variables remain constant. Compared with the Poisson model, the Z-values in Table 3 fall within a reasonable range. This occurs because the Negative Binomial model incorporates a dispersion parameter that adjusts the variance structure of the model, thereby correcting the underestimated standard errors observed under the Poisson assumption. Consequently, statistical inference based on the Negative Binomial model becomes more reliable for overdispersed count data."
+    },
+    {
+      "title": "Negative binomial regression modeling",
+      "instruction": "After the model was developed, a simultaneous significance test of the parameters in the negative binomial regression model was conducted to determine whether the explanatory variables collectively have an effect on the response variable. The hypotheses used are as follows.H0:β1=β2=…=β4=0"
+    },
+    {
+      "title": "Negative binomial regression modeling",
+      "instruction": "H1:At least one of βk≠0; k = 1,2,3,4"
+    },
+    {
+      "title": "Negative binomial regression modeling",
+      "instruction": "Based on the test results with a 5 % significance level, the critical value of χ0.05;42=9.487729. Therefore, the decision is to reject H0 because D(β^)=37.167>χ(0.05;4)2=9.487729. This means that at least one explanatory variable significantly influences the response variable. Hence, a partial (individual) test needs to be conducted with the following hypotheses:H0:βk=0"
+    },
+    {
+      "title": "Negative binomial regression modeling",
+      "instruction": "H1:βk≠0; k = 1,2,3,4"
+    },
+    {
+      "title": "Negative binomial regression modeling",
+      "instruction": "Using a significance level of 5 %, the critical value is Z0.025=1.96. Referring to Table 3, the absolute values of the Z-values indicate that two explanatory variables are significant, namely the number of village-status areas (x2) and per capita expenditure (x4). Comparing the ratio between the deviance and degrees of freedom, the negative binomial regression has a deviance value of 37.167 with 29 degrees of freedom, resulting in a ratio of 1.282. This ratio is closer to one and smaller than that obtained in the poisson regression, indicating that the negative binomial regression model can address the overdispersion problem present in the poisson regression model."
+    },
+    {
+      "title": "Spatial diagnostic testing",
+      "instruction": "Spatial aspects were examined through two main tests:"
+    },
+    {
+      "title": "Spatial dependence test",
+      "instruction": "Moran's I statistic was used to identify spatial dependence across regions. The test produced a value of ZI=3.804898, which exceeds the critical value Z0.025=1.96. Therefore, H0 is rejected, indicating a significant spatial dependence in the data."
+    },
+    {
+      "title": "Spatial heterogeneity test",
+      "instruction": "The Breusch–Pagan test was applied to assess variance differences across observation units. The resulting statistic was BP=13.915, which is greater than the critical value χ(0.05;4)2=9.487729. Thus, H0 is rejected, suggesting the presence of spatial heterogeneity."
+    },
+    {
+      "title": "Spatial heterogeneity test",
+      "instruction": "Since both spatial assumptions are fulfilled, the next step is to conduct an analysis that considers spatial effects, namely through the application of Geographically Weighted Negative Binomial Regression (GWNBR)."
+    },
+    {
+      "title": "Geographically weighted negative binomial regression modeling",
+      "instruction": "Modeling using the geographically weighted negative binomial regression (GWNBR) method was applied using spatial weights, represented by a matrix of kernel functions. The initial stage involves calculating the euclidean distance between the observation locations. The optimal bandwidth and best weights are then determined on the basis of the minimum cross-validation (CV) value. The selected weights are used to estimate the parameters at each observation point. Details of the CV value calculations for each type of weight are shown in Table 4.Table 4CV values for each kernel function.Table 4 dummy alt textKernel FunctionBandwidthCVAdaptive Bisquare0.5156261,908,610Adaptive Gaussian0.1283371,315,617Fixed Bisquare11.4550661,913,862Fixed Gaussian4.06426763,930,296"
+    },
+    {
+      "title": "Geographically weighted negative binomial regression modeling",
+      "instruction": "Based on the results in Table 4, the criterion for selecting the kernel function is the one with the minimum cross-validation value, so the adaptive bisquare kernel function is used to model the number of HIV cases in Indonesia."
+    },
+    {
+      "title": "Model fit test of GWNBR",
+      "instruction": "This test was conducted to evaluate the suitability of the spatial model compared to the global model. The comparison between the global Negative Binomial Regression (NBR) model and the Geographically Weighted Negative Binomial Regression (GWNBR) model was performed using an F-type statistic based on the ratio of deviance per degree of freedom. The test statistic is constructed by comparing the residual deviance of the global model Dglobal with that of the spatially weighted model Dspatial, standardized by their respective degrees of freedom. The F-type statistic can be expressed as Eq. (18).(18)F=Dglobal/df1Dspatial/df2where df1 represents the residual degrees of freedom associated with the global Negative Binomial model and df2 represents the effective residual degrees of freedom associated with the GWNBR model. Under the null hypothesis that spatial variation does not significantly improve the model fit, the statistic approximately follows an F distribution. In geographically weighted models, the degrees of freedom are not defined using the conventional global formulation df1=n−p. Instead, degrees of freedom are derived from the trace of the spatial hat matrix S. Specifically, the effective residual degrees of freedom can be written as df2=n−tr(S), while df1 follows the standard formulation from the global model. Rejection of the null hypothesis therefore indicates that the spatially varying GWNBR model provides a statistically significant improvement over the global NBR model, consistent with the geographically weighted modeling framework [8]."
+    },
+    {
+      "title": "Model fit test of GWNBR",
+      "instruction": "H0:βk(ui,vi)=βk (the GWNBR model does not improve the negative binomial regression model)"
+    },
+    {
+      "title": "Model fit test of GWNBR",
+      "instruction": "H1:βk(ui,vi)≠βk (the GWNBR model provides a better fit than the negative binomial regression model)"
+    },
+    {
+      "title": "Model fit test of GWNBR",
+      "instruction": "The test results using R software with a significance level of 5 % obtained an F-test statistic value of F=2.3003. The critical region for rejecting H0 is if the test statistic F>F0.05;29;28. Thus, the decision is to reject H0 because F=2.3003>F(0.05;29;28)=1.8752. It can be concluded that the GWNBR model is better used than the negative binomial regression model in modeling the number of HIV cases in Indonesia."
+    },
+    {
+      "title": "Simultaneous test of the GWNBR model",
+      "instruction": "Simultaneous testing of the GWNBR model parameters was carried out to determine the significance of the model parameters βk(ui,vi) on the response variable. The test was performed using the Maximum Likelihood Ratio Test (MLRT), which compares the deviance of the full model containing all explanatory variables with the deviance of the restricted model. The test statistic is defined as the difference in deviance between the two models and asymptotically follows a chi-square distribution. The degrees of freedom of the test correspond to the number of parameters simultaneously tested, which in this study equals the number of explanatory variables included in the model.H0:β1(ui,vi)=β2(ui,vi)=β3(ui,vi)=β4(ui,vi)"
+    },
+    {
+      "title": "Simultaneous test of the GWNBR model",
+      "instruction": "H1: at least one βk(ui,vi)≠0; k = 1,2,3,4; i = 1,2, …,34"
+    },
+    {
+      "title": "Simultaneous test of the GWNBR model",
+      "instruction": "The test statistic D(β^) represents the difference in deviance between the restricted model and the full model, which measures the improvement in model fit when the explanatory variables are included in the GWNBR model. The test results using R software with a significance level of 5 %, obtained the value D(β^)=8,304.335. The degrees of freedom for the test are equal to the number of explanatory variables tested simultaneously (df = 4). The critical region for rejecting H0 is if D(β^)>χ(0.05.4)2. Thus, the decision is to reject H0 because D(β^)=8,304.335>χ(0.05.4)2=9.487729. It can be concluded that there is at least one GWNBR model parameter that has a significant influence on the resulting model."
+    },
+    {
+      "title": "Simultaneous test of the GWNBR model",
+      "instruction": "Local parameters at each location were estimated by maximizing the geographically weighted log-likelihood using an iterative Newton-Raphson scheme. Global negative binomial estimates were used as starting values to ensure numerical stability. Convergence was declared when the relative change in the log-likelihood and parameter vector was below 10−8. The dispersion parameter θ(ui,vi) was estimated locally at each location together with the regression coefficients using profile likelihood, allowing spatial variation in overdispersion."
+    },
+    {
+      "title": "Partial test of the GWNBR model",
+      "instruction": "Partial testing of the GWNBR model parameters is used to identify which parameters are significant to the response variable at each observation location. The hypotheses used are as follows.H0:βk(ui,vi)=0;k=1,2,3,4;i=1,2,…,34H1:βk(ui,vi)≠0;k=1,2,3,4;i=1,2,…,34"
+    },
+    {
+      "title": "Partial test of the GWNBR model",
+      "instruction": "Based on the test results, different values of Z-value were obtained at each location. The significant variable influencing the number of HIV cases in all provinces was variable Per Capita Expenditure (x4)."
+    },
+    {
+      "title": "Partial test of the GWNBR model",
+      "instruction": "As an example of partial parameter testing, the province of DKI Jakarta was selected. Thus, the hypothesis can be written as follows.H0:βk(u11,v11)=0H1:βk(u11,v11)≠0"
+    },
+    {
+      "title": "Partial test of the GWNBR model",
+      "instruction": "The significance level used is 5 % with a critical region to reject H0 if the value |Z| > 1.96. The results of the DKI Jakarta parameter testing are presented in Table 5.Table 5Estimation results of GWNBR parameters in DKI Jakarta.Table 5 dummy alt textParameterCoefficientZ-valuesResultβ01.734573106,860Significantβ11.943409−3.30808Significantβ2−0.072759814.021Significantβ30.0005734.053285Significantβ40.10568448.10864Significantθ0.000015-"
+    },
+    {
+      "title": "Partial test of the GWNBR model",
+      "instruction": "Based on Table 5, the absolute Z-values for parameters β1, β2, β3, and β4 exceed the critical value of 1.96, indicating that all explanatory variables significantly affect the number of HIV cases in DKI Jakarta at the 5 % significance level. Several parameters exhibit very large Z-statistics. This occurs because the geographically weighted estimation produces location-specific standard errors derived from the inverse Hessian matrix of the local likelihood function. In locations where the spatially weighted observations provide strong local information, the estimated standard errors may become very small, resulting in large absolute Z-values. The heterogeneity of Z-values, including large magnitudes or differing signs, reflects spatial variation in local information and weighting. The dispersion parameter estimated for DKI Jakarta is very small (near-zero), indicating that the local variance structure at this location approaches the Poisson assumption. This observation does not contradict the earlier detection of global overdispersion. The overdispersion identified in the global Poisson model may partly arise from spatial heterogeneity across provinces. Because the GWNBR model estimates parameters locally using spatially weighted observations, the variance structure can differ across locations. Consequently, some regions may exhibit variance patterns that are close to equidispersion, resulting in a near-zero dispersion parameter. This finding therefore reflects spatial variation in dispersion rather than inconsistency with the earlier global diagnostics."
+    },
+    {
+      "title": "Partial test of the GWNBR model",
+      "instruction": "The model for the number of HIV cases in DKI Jakarta can be written as follows:μ^=exp(1.7346+1.9434X1−0.0728X2+0.0006X3+0.1057X4)Because the explanatory variables are measured on different scales, the coefficients are interpreted relative to a one-unit change in each variable according to its original measurement scale. Therefore, the multiplicative effects obtained from exp(β) reflect proportional changes in the expected number of HIV cases within each variable rather than direct magnitude comparison across variables. Based on the model formed for DKI Jakarta, it can be interpreted that for every 1 unit increase in the percentage of poor population (x1) assuming other explanatory variables remain constant, the number of HIV cases in DKI Jakarta will increase by exp(1.9434)=6.9825. Furthermore, for every 1 unit increase in number of village-status areas (x2) assuming other explanatory variables remain constant, the number of HIV cases will decrease by exp(−0.0728)=0.930. Likewise, a 1 unit increase in the number of senior high school graduates (x3) assuming other explanatory variables remain constant, will increase the number of HIV cases by exp(0.0006)=1.0006. Finally, a 1 unit increase in per capita expenditure (x4) assuming other explanatory variables remain constant, will increase the number of HIV cases by exp(0.1057)=1.1115."
+    },
+    {
+      "title": "Selection of the best model",
+      "instruction": "The best model refers to a model that has the capacity to explain the relationship between explanatory variables and response variables. The selection of the best model is done using the minimum Akaike Criterion Information (AIC). A comparison of the AIC values for each model is presented in Table 6 as follows.Table 6Comparison of AIC values for each regression model.Table 6 dummy alt textModelAICPoisson Regression25,151Negative Binomial Regression551.13Geographically Weighted Negative Binomial Regression488.71"
+    },
+    {
+      "title": "Selection of the best model",
+      "instruction": "Based on Table 6, the AIC value of the GWNBR model is 488.71. which is lower than the AIC values of both the poisson regression model and the negative binomial regression model. Therefore. it can be concluded that the GWNBR model is the optimal model for modeling the number of HIV cases in Indonesia. The AIC values obtained for the Poisson, NBR, and GWNBR models exhibit substantial differences in magnitude. This discrepancy primarily reflects differences in model specification and likelihood structure. The Poisson model assumes equidispersion, which is clearly violated in the present data as indicated by the severe overdispersion diagnostic. Consequently, the Poisson model produces a much poorer likelihood fit, resulting in a substantially larger AIC value. The Negative Binomial regression model improves the variance specification by introducing a dispersion parameter, which leads to a considerable reduction in the AIC value. The GWNBR model further extends this framework by allowing model parameters to vary spatially through geographically weighted estimation. By capturing spatial heterogeneity in the relationships between predictors and HIV cases, the GWNBR model achieves a better fit to the localized data structure, which results in a further reduction in the AIC value. Therefore, the large difference in AIC magnitude reflects the progressive improvement in model specification from a global equidispersed model to a spatially localized count model, rather than a scaling inconsistency."
+    },
+    {
+      "title": "Selection of the best model",
+      "instruction": "The results of the comparison between the estimated number of HIV cases (y^) and the actual number (y) are presented in Fig. 1 as follows.Fig. 1Comparison of actual values (y) and predicted values (y^).Fig 1 dummy alt text"
+    },
+    {
+      "title": "Selection of the best model",
+      "instruction": "Based on Fig. 1, the predicted values of HIV cases are fairly close to the actual values, especially following the general pattern of increase and decrease across various observation locations. However, there are noticeable differences in areas with a very high numbers of cases, indicating that the model is not yet fully accurate in predicting extreme cases."
+    },
+    {
+      "title": "Selection of the best model",
+      "instruction": "The spatially varying relationships identified by the GWNBR model provide important implications for public health policy. The results indicate that the determinants of HIV cases differ across provinces, suggesting that uniform national interventions may not be fully effective. In several provinces, education appears to play a stronger protective role, implying that strengthening educational access and HIV awareness programs may help reduce transmission risk. In contrast, poverty and rural characteristics remain dominant contributors in other regions, highlighting the importance of targeted socioeconomic and community-based interventions. These findings emphasize the need for localized, evidence-based public health strategies, where prevention and control programs are tailored according to province-specific risk profiles rather than relying solely on national averages. Therefore, spatial modeling such as GWNBR can support policymakers in identifying high-risk provinces, optimizing resource allocation, and designing geographically targeted HIV prevention strategies."
+    },
+    {
+      "title": "Limitations",
+      "instruction": "This study has several limitations that should be considered when interpreting the results. First, the analysis is based on provincial-level aggregated data, which may mask within-province variability and local heterogeneity. Consequently, the estimated relationships represent regional patterns rather than individual-level dynamics. Second, the data used in this study are cross-sectional, capturing spatial variation at a single point in time. Therefore, the analysis cannot account for temporal dynamics or changes in HIV incidence and socioeconomic factors over time. Third, the performance of the GWNBR model may be sensitive to bandwidth selection and kernel specification, which determine the spatial weighting structure of the local estimation. Although cross-validation was used to determine the optimal bandwidth, different kernel choices or bandwidth selection criteria may produce slightly different local parameter estimates. Fourth, spatial weighting based on geographic distance may introduce edge effects and may depend on coordinate projection and distance measurement. In regions located near the boundary of the study area, fewer neighboring observations may influence the stability of local parameter estimates. Finally, the stability of geographically weighted models can also be affected by sample size and local data density, particularly in regions with relatively limited observations. Future research may extend this work by incorporating panel data, alternative spatial weighting schemes, or multiscale geographically weighted approaches to further explore spatial heterogeneity in HIV incidence."
+    }
+  ],
   "materials": [],
-  "fetched_at": "2026-06-19T00:09:34.083470+00:00"
+  "fetched_at": "2026-06-19T00:09:34.083470+00:00",
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC13156645/gr1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/6a49/13156645/a8e4c472ebf6/gr1.jpg",
+      "caption": "",
+      "bytes": 74762
+    },
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC13156645/ga1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/6a49/13156645/e76eba1bf092/ga1.jpg",
+      "caption": "",
+      "bytes": 61988
+    }
+  ]
 }

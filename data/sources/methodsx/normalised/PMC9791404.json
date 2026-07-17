@@ -18,9 +18,257 @@
     "accuracy"
   ],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "Input:Input(shape= (input_size, input_size,3))",
+    "Input:learning_ rate, epoch, batch_size",
+    "Input:iou_ threshold, score_ threshold",
+    "Output:output_shape, mAP",
+    "deffire_module(model, fire_id, squeeze, expand)",
+    "defmaxpooling (pool_size, stride)",
+    "defresnet_block (model, filters, reps, stride)",
+    "map = model.evaluate (generator, iou_threshold,",
+    "score_threshold, average_precisions)",
+    "deflayer(conv, batchnorm, activation, maxpooling, dropout)",
+    "create layer1: ([16,3,1], norm_1, leakyReLU[.1], 2, null)",
+    "for i in range(2,3,4,5):",
+    "create layer(i): ([32∗(2∗∗i), 3, 1], norm_ + str(i+2),",
+    "leakyReLU[.1], 2, [0.20])",
+    "x (x) (layer(i))20: //return x",
+    "create fire_module1: (x, 2, 16, 64)",
+    "create fire_module2: (x, 3, 16, 64)",
+    "create maxpooling1: (3, 2)",
+    "create resnet_block1: (x, 64, 3, 1)",
+    "create fire_module3: (x, 4, 32, 128)",
+    "create fire_module4: (x, 5, 32, 128)",
+    "create maxpooling2: (3, 2)",
+    "create resnet_block1: (x, 128, 4, 2)",
+    "create fire_module5: (x, 6, 48, 192)",
+    "create fire_module6: (x, 7, 48, 192)",
+    "create fire_module7: (x, 8, 64, 256)",
+    "create fire_module8: (x, 9, 64, 256)",
+    "We have incorporated residual learning from ResNet-50 method into the ReSTiNet framework, followed by the down-sampling technique after the second and fourth fire modules. Building residual block is described in Eq. (7).(7)y=F(x,Wi)+xwhere, x and y denote the input and output vectors of the layers, accordingly. The function F (x, Wi) represents the residual mapping that needs to be learned. As shown in Fig. 4, there are two layers, F = W2σ(W1x), in which sigma indicates the ReLU function and several biases were eliminated to reduce the notation complexity. The operation F + x was accomplished applying a shortcut connection and elemental-wise addition procedure in conjunction with the second ReLU (non-linearity) function. The shortcut connections in Eq. (7) do not increase the number of parameters or the computational complexity [3].Fig. 4The structure of a residual block.Fig 4"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "ReSTiNet for low memory devices",
+      "instruction": "Fig. 1 illustrates the architecture of the Tiny-YOLO framework. This system consists of a detection layer, nine convolutional layers, and six max-pooling layers used to extract image features. This framework uses convolutional layers with 512 and 1024 filters, resulting in a large number of parameters, a large amount of memory, and slower recognition speed. The poor recognition accuracy of Tiny-YOLO is another problem. The arbitrary compression methods of the framework can further reduce detection accuracy.Fig. 1The architecture of Tiny-YOLO.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "ReSTiNet for low memory devices",
+      "instruction": "To address these challenges, this study presents ReSTiNet, focusing on the performance of the framework's accuracy and the size of its weight. The proposed ReSTiNet framework is described in detail in Algorithm 1 and shown in Fig. 2.Algorithm 1ReSTiNet pseudocode.Algorithm 11: Input:Input(shape= (input_size, input_size,3))2: Input:learning_ rate, epoch, batch_size 3: Input:iou_ threshold, score_ threshold 4: Output:output_shape, mAP5: deffire_module(model, fire_id, squeeze, expand)6: defmaxpooling (pool_size, stride)7: defresnet_block (model, filters, reps, stride)8: defmAP (model):9: map = model.evaluate (generator, iou_threshold,10: score_threshold, average_precisions)11: returnmap12: deflayer(conv, batchnorm, activation, maxpooling, dropout)13: defmain (){14: create layer1: ([16,3,1], norm_1, leakyReLU[.1], 2, null)15: x→layer116: for i in range(2,3,4,5):17: create layer(i): ([32∗(2∗∗i), 3, 1], norm_ + str(i+2),18: leakyReLU[.1], 2, [0.20])19: x (x) (layer(i))20: //return x21: create fire_module1: (x, 2, 16, 64)22: create fire_module2: (x, 3, 16, 64)23: create maxpooling1: (3, 2)24: create resnet_block1: (x, 64, 3, 1)25: create fire_module3: (x, 4, 32, 128)26: create fire_module4: (x, 5, 32, 128)27: create maxpooling2: (3, 2)28: create resnet_block1: (x, 128, 4, 2)29: create fire_module5: (x, 6, 48, 192)30: create fire_module6: (x, 7, 48, 192)31: create fire_module7: (x, 8, 64, 256)32: create fire_module8: (x, 9, 64, 256)33: dropout → 0.5034: returnmAP(x), output_shape(x)}Fig. 2The architecture of ReSTiNet. Fire modules are adopted from SqueezeNet, which shrinks the model. Then, residual connections are integrated from the ResNet-50 network inside the fire modulesto enhance the proposed ReSTiNet's efficiency, reproduced from [11]. The experimental outcomes of ReSTiNet are available at [11].Fig 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "ReSTiNet for low memory devices",
+      "instruction": "The objective of ReSTiNet is to design a framework that is faster, smaller and better capable of identifying people on low-memory devices. Instead of indiscriminately demolishing the convolution layers, network optimization is accomplished by reducing parameters to a reasonable level. The fire module in SqueezeNet compacts the network by employing a network bottleneck layer and expands the framework module without reducing the accuracy of detection remarkably. As a consequence, the fire module was implemented in order to accomplish the performance of a swifter as well as a tinier framework design. ReSTiNet thereafter searches for ways to maximize the detection accuracy while con- currently reducing the parameters. In [4], the authors obtained improved accuracy with fewer parameters by integrating residual blocks inside fire modules in the VGG-16 framework. As a result, the residual connection, which is employed by ReSTiNet to increase the accuracy of detection, is located inside the fire modules.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Construction of ReSTiNet",
+      "instruction": "Fig. 2 illustrates the ReSTiNet framework. ReSTiNet retains the first five frontal convolutional layers of Tiny-YOLO. The fire modules replace the layers along with 512 as well as 1024 filters in the Tiny-YOLO, which makes the model smaller. The suggested method is then assisted to obtain greater mAP by the integration of residual connections from the Resnet-50 framework within the fire modules. This study combines three popular frameworks: Tiny-YOLO [1,5], SqueezeNet [2], and the ResNet-50 [3,6] technique. The accomplishments are detailed as follows.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Tiny-YOLO",
+      "instruction": "A famous approach known as Tiny-YOLO, a diminutive of You Only Look Once (YOLO), was developed to produce a single-step system that combined the detection and classification strategies [1,7]. The bounding box and class predictions are generated based on a single evaluation of the input image.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Tiny-YOLO",
+      "instruction": "This approach differs from traditional methods in that it predicts both the class and the bounding box simultaneously. The steps are as follows: The input image is divided over the S × S grid at the first step. Next, a confidence score including the relevant bounding box is given to each grid cell. The confidence score is the likelihood or possibility that the object is present in each bounding box and is mathematically determined by the Eq. (1).(1)C=Pr(Object)*IOUpredtruthwhere, IOU (“intersection over union”) is detailed as a fraction that falls between 0 and 1 numerically. The intersection is the region where the bounding box predictor and the ground truth overlap. The union refers to the area that lies between the predictor and the ground truth. In ideal conditions, the IOU should be closer to 1, indicating that the ground truth is roughly equivalent to the bounding box prediction. In the same way, each grid cell can predict the conditional class probability C while the bounding boxes are being made. As a result, the class-specific probability function for each cell is described as,Pr(Classi|Object)*Pr(Object)*IOUpredtruth=Pr(Classi)*IOUpredtruth",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Fire module of ReSTiNet",
+      "instruction": "The purpose of introducing the fire module into ReSTiNet was to reduce the number of parameters while increasing the framework's depth and width. This action was taken to ensure the detection accuracy. This network has both the squeeze and expand components, which cause the framework to compress and expand. The squeeze or compress component employs NIN's convolutional layer with 1 × 1 size as a replacement for the standard layer with 3 × 3 sizes. The framework that uses the 1×1 strategy was determined to be more effective in terms of reducing the parameter numbers.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Fire module of ReSTiNet",
+      "instruction": "In addition, the detection accuracy does not change much because there is only one variable to learn about in the training parameter. Throughout the expansion, both 1×1 and 3×3 strategies generally are utilized. Finally, the concatenation layer concatenates the arriving outputs from the several convolutional layers.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Fire module of ReSTiNet",
+      "instruction": "For a convolutional layer, the parameters are given as ci the number of channel input variables, k as the kernel size, and co as the number of channel output variables. Using Eq. (2), the value of the number of parameters for the convolutional layer is then calculated. The number of channel inputs is ci for the fire module; ks1 is the kernel size of the squeeze component, and s1 is the number of channel output variables. If the value of ks1 is assigned to 1, a reduction of a large number of model parameters for the squeeze component is possible. The number of channel input variables is s1 followed by the kernel sizes ke1 and ke3 for the expand component. The total number of channel output variables is the sum of e1 and e3. Using Eq. (3), the number of model parameters is calculated. Fig. 3 illustrates the structure of the fire modules in ReSTiNet.(2)Pconv=(ci×k2+1)×co(3)Pfire=(ci+ks12+1)×S1+(s1+ke12+1)×e1+(s1+ke32+1)×e3Fig. 3The structure of Fire Module. It is made up of two layers: Squeeze and Expand. Squeeze layer consists of a small number 1 × 1 filters and expand layer consists of a small number of 3 × 3 and 1 × 1 filters.Fig 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Fire module of ReSTiNet",
+      "instruction": "The efficiency of the fire modules to be used more effectively is determined by their placement inside the framework. The ReSTiNet framework consists of eight fire modules in total. In the ReSTiNet framework, the 6th layer, which contains 512 filters, is substituted by the first four fire modules followed by a down-sampling strategy. The 7th and 8th layers, which have 1024 filters, are substituted by extra four fire modules prior to the 1 ×1 convolutional layer and detection layer. However, the selection of the input channel numbers ci is not constrained, although selecting a high input channel number would result in a parameter reduction.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Residual block between the fire module",
+      "instruction": "The optimization trajectory will have a negative slope because of the degradation when it is assumed that depth will improve the accuracy of detection. It has been noticed that the error rate in deep CNN designs is often greater than in other conventional neural ar- chitectures [4]. In [3], the authors developed a solution for degradation that allows certain stacked layers to accept the preexisting residual mapping. This is the region in which usual degradation prevents the layers from being consistent with the conventional subsidiary mapping. Eq. (5) indicates the subsidiary mapping as opposed to Eq. (4), where H(x) represents the desired mapping and F (x) describes the learned resid- ual mapping. The existent mapping has been changed to F (x) + x. In [3], the authors discovered that optimizing a residual-based mapping was easier than the main mapping.(4)F(x)=H(x)(5)F(x)≔H(x)−x(6)H(x)=F(x)+x",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Residual block between the fire module",
+      "instruction": "However, one or more layers were not taken into account during the shortcut connections as stated in [3,4]. Eq. (6) defines the shortcut connections [3]. In [3], shortcut connections were used to perform identity mappings. The outputs of stacked layers are fused with the output values of shortcut connections. The latter has the benefit of permit- ting parameter-free calculation, utilizing minor values in the process. In [8], the authors designed a highway-based architecture by combining shortcut connections and gating functions with their parameters. The potential for optimization using stochastic gradient descent (SGD) is an additional advantage of shortcut connections [3]. Deep learning open-source libraries facilitate the integration of identity shortcut connections [3,4].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Residual block between the fire module",
+      "instruction": "We have incorporated residual learning from ResNet-50 method into the ReSTiNet framework, followed by the down-sampling technique after the second and fourth fire modules. Building residual block is described in Eq. (7).(7)y=F(x,Wi)+xwhere, x and y denote the input and output vectors of the layers, accordingly. The function F (x, Wi) represents the residual mapping that needs to be learned. As shown in Fig. 4, there are two layers, F = W2σ(W1x), in which sigma indicates the ReLU function and several biases were eliminated to reduce the notation complexity. The operation F + x was accomplished applying a shortcut connection and elemental-wise addition procedure in conjunction with the second ReLU (non-linearity) function. The shortcut connections in Eq. (7) do not increase the number of parameters or the computational complexity [3].Fig. 4The structure of a residual block.Fig 4",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Dropout in ReSTiNet",
+      "instruction": "The mask that counteracts the actions of neurons in the subsequent layer is known as the dropout layer. This mask results in balancing neurons and maintains the integrity of the others. This layer is essential during CNN training because it mitigates the effects of over-fitting to the training data. Alternatively, there will be an impact from the initial data batches on the learning, resulting in disproportional performance outcomes. Therefore, the performance of learning the properties will be greatly decreased, and the delivery of such findings will be further delayed [9]. The standard approach for dropout is to employ a modest number between 20-50 percent of neurons, with 20 percent being a good starting point. A number that is too high prevents the framework from fully learning, while a value that is too low has no effect [10]. The recommended ReSTiNet framework uses 20% dropout in the convolutional layers (2nd–5th) and 50% dropout after the fire module to overcome the over-fitting issue.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Loss function of ReSTiNet",
+      "instruction": "In this research, we use a custom loss function like Tiny-YOLO, which has three parts: error in prediction coordinate, error in IOU, and classification error. The coordinate prediction error is defined as:(8)Errorcoord=λcoord∑i=0s2∑j=0BLijobj[(xi−xi∧)2+(yi−yi∧)2]+λcoord∑i=0s2∑j=0BLijobj[(wi−wi∧)2+(hi−hi∧)2]where s2 represents the grid cell number of all scale. B denotes the bounding boxes number for every grid. Lijobj represents target of the i-th grid cell which falls in the j-th bounding box. (xi∧,\nxi∧, wi∧, hi∧) and (xi,\nyi,\nwi,hi) define the center coordinate, height and width of the predicted box and the ground truth, respectively.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Loss function of ReSTiNet",
+      "instruction": "The IOU error is defined with Eq. (9).(9)ErrorIOU=λcoord∑i=0s2∑j=0BLijobj(Ci−Ci∧)2+λnoobj∑i=0s2∑j=0BLijnoobj(Ci−Ci∧)2where Ci∧ and Ci denote the predicted and true confidence, respectively.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Loss function of ReSTiNet",
+      "instruction": "The classification error is expressed as:(10)Errorcls=∑i=0s2Liobj∑cclasses(Pi(c)−Pi∧(c))2where, Pi∧(c) defines the predicted value, while Pi(c) defines the target true probability.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Loss function of ReSTiNet",
+      "instruction": "From the above equations, the resulting loss function is depicted in Eq. (11):(11)Loss=Errorcoord+ErrorIOU+Errorcls=λcoord∑i=0s2∑j=0BLijobj[(xi−xi)2+(yi−yi)2]+λcoord∑i=0s2∑j=0BLijobj[(wi−wi∧)2+(hi−hi∧)2]+λcoord∑i=0s2∑j=0BLijobj(Ci−Ci∧)2+λnoobj∑i=0s2∑j=0BLijnoobj(Ci−Ci∧)2+∑i=0s2Liobj∑cclasses(Pi(c)−Pi∧(c))2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Time complexity, success and challenge of ReSTiNet",
+      "instruction": "This section details the time complexity and success/challenge of the proposed ReSTiNet.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Time complexity of the ReSTiNet",
+      "instruction": "Some actions in the recommended method occur just once and have a time complexity of O(1). However, in the ReSTiNet several techniques have iteration and their time complexity is O(n2). Hence, the time complexity of our developed algorithm: O(1) + O(n2) = O(n2). Because of this, we describe this method as possessing a Quadratic Time Complexity, which means that as the quantity of the input rises, so does the amount of time required to execute it.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Benefit of the ReSTiNet",
+      "instruction": "This recommended approach is fairly flexible; therefore, it may be used to compress the many deep CNN models currently available. As human detection is the initial step in various applications, this proposed approach can be utilized for pedestrian detection and pose estimation on devices with limited memory.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Limitation of the ReSTiNet",
+      "instruction": "ReSTiNet uses the fire modules, which minimizes the model parameters and, therefore, the computing expenses. However, a substantial amount of computing still needs to be done to complete the task on a low-memory device. Therefore, the network is still trained on a machine (i.e., a remote server) that is capable of dealing with this computationally expensive procedure.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T13:04:55.660318Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 27,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC9791404/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9791404/",
+      "caption": "",
+      "bytes": 74188,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9791404/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC9791404/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9791404/",
+      "caption": "",
+      "bytes": 78927,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9791404/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC9791404/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9791404/",
+      "caption": "",
+      "bytes": 67634,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9791404/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC9791404/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9791404/",
+      "caption": "",
+      "bytes": 42661,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC9791404/gr4.jpg"
+    }
+  ]
 }

@@ -35,75 +35,985 @@
     "AMPure XP",
     "Qubit dsDNA HS assay kit",
     "NovaSeq 6000 S2 reagent kit (200 cycles)",
-    "Countess 3 automated cell counter"
+    "Countess 3 automated cell counter",
+    "ToolUsageInstallation commandBcl2fastqBcl2fastq is used for demultiplexing Illumina sequencing output files, converting the raw .bcl (base call) files into .fastq files. It separates reads from different samples according to their barcodes and generates the associated FASTQ files needed for downstream analysis. This tool also allows users to trim adapter sequences and filter out low-quality reads during the conversion process.conda install -c bioconda::bcl2fastqFastQCFastQC is a tool used for performing quality control checks on raw sequencing reads in FASTQ format. It provides a visual report summarizing the quality metrics, including per-base sequence quality (Phred scores), GC content, presence of adapter sequences, and overrepresented sequences. It is commonly used as the first step in data analysis to assess the quality of sequencing data before proceeding to downstream analyses.conda install -c bioconda::fastqcTrimmomaticTrimmomatic is a read trimming tool that removes low-quality bases from sequencing reads, cuts off adapters, and discards short reads. It helps improve the quality of the dataset by trimming or removing portions of reads that are likely to introduce errors in downstream analysis, ensuring that only high-quality reads are used.conda install -c bioconda::trimmomaticSTARSTAR (Spliced Transcripts Alignment to a Reference) is a splice-aware aligner used to map RNA-seq reads to a reference genome. It can accurately align reads across exon-exon junctions, which is essential for correctly mapping reads from spliced transcripts. It is typically used in RNA-seq workflows to quantify gene expression and annotate cell types based on mapped reads. Unmapped reads, which do not align to the human genome, can be further analyzed to explore for microbial or other non-human content.conda install -c bioconda::STARKraken2Kraken2 is a metagenomic classifier that assigns taxonomic labels to DNA sequences by matching them to a reference database. It is often used to identify microbial content in a sample by classifying unmapped reads that do not align to the host genome. This tool can identify the presence of bacteria, viruses, fungi, and other microorganisms in sequencing data, making it useful for metagenomic and microbiome studies.conda install -c bioconda::kraken2Sevenbridges-pythonSevenbridges-python is a Python SDK for interacting with the Seven Bridges Genomics platform, particularly for workflows such as those on the BD Rhapsody platform, which is used for single-cell RNA sequencing. This tool allows users to automate the quantification of single-cell data, manage datasets, and run pipelines programmatically, integrating with the Seven Bridges cloud platform for scalable data analysis.conda install -c bioconda sevenbridges-pythonAGATTool to convert gff files to gtfconda install -c bioconda agat\nNote: Set up the “conda” package manager using the official link (https://conda.io/projects/conda/en/latest/user-guide/getting-started.html) for creating and activating the conda environment.",
+    "Timing: 2.5 h",
+    "_RSEC_MolsPerCell.csv.",
+    "_RSEC_ReadsPerCell.csv.",
+    "_DBEC_MolsPerCell.csv.",
+    "_DBEC_ReadsPerCell.csv.",
+    "_Expression_Data.st.",
+    "_Metrics_Summary.csv."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "The protocol below highlights detailed workflow of analyzing single-cell RNA sequencing (scRNA-seq) data to study traditionally non-culturable intracellular microbes at a resolution that was previously unattainable. The scRNA-seq approach allows for the simultaneous capture of host and microbial transcripts, providing a more extensive view of host-pathogen interactions within individual cells. This protocol innovatively applies scRNA-seq data, repurposing unmapped reads to reveal intracellular pathogens in specific immune cell populations in SARS-CoV-2 positive, recovered and healthy individuals. The applicability of this protocol can be expanded to other infectious diseases.Note: Care should be taken while isolating PBMCs from patient blood samples to perform single-cell lysis to preserve both host and microbial transcripts.CRITICAL: Appropriate informed consent and permissions from the relevant institutions are required for the collection and use of human samples.Note: This tutorial uses BD Rhapsody single-cell RNA-seq dataset and uses intermediate files generated from running BD Rhapsody pipeline on Seven Bridges which requires users to create an account to run the analysis. We also mentioned alternative open-access tools that can be explored wherever possible.",
-      "substeps": [],
-      "is_critical": true,
+      "title": "Isolate PBMCs from blood",
+      "instruction": "Perform peripheral blood mononuclear cell (PBMC) isolation from 3–5 mL whole blood collected in BD Vacutainer CPT tubes (kept at 25 °C) following the steps below.",
+      "substeps": [
+        {
+          "instruction": "Thaw 1× PBS (filtered) and FBS to 25 °C.",
+          "title": ""
+        },
+        {
+          "instruction": "Prepare 50 mL freezing media by mixing 45 mL FBS with 5 mL DMSO (store at 4 °C).",
+          "title": ""
+        },
+        {
+          "instruction": "Collect 3–5 mL blood into each CPT tube; keep tubes upright at 25 °C.",
+          "title": ""
+        },
+        {
+          "instruction": "Within 2 h, gently invert each tube 8–10 times to remix blood.",
+          "title": ""
+        },
+        {
+          "instruction": "Centrifuge tubes in a swing‑out rotor at 25 °C for ≥15 min at 1500–1800 × g (do not exceed 2000 × g).",
+          "title": ""
+        },
+        {
+          "instruction": "Locate the whitish mononuclear cell layer just below the plasma.",
+          "title": ""
+        },
+        {
+          "instruction": "Aspirate ~½ of the plasma without disturbing the cell layer.",
+          "title": ""
+        },
+        {
+          "instruction": "Using a sterile pipette, transfer the mononuclear cell layer to a 15 mL conical tube.",
+          "title": ""
+        },
+        {
+          "instruction": "Add 1× PBS to bring the volume to 15 mL, cap and invert 5 times.",
+          "title": ""
+        },
+        {
+          "instruction": "Centrifuge at 300 × g for 15 min, then carefully aspirate supernatant.",
+          "title": ""
+        },
+        {
+          "instruction": "Resuspend pellet, add 1× PBS to 10 mL, cap and invert 5 times.",
+          "title": ""
+        },
+        {
+          "instruction": "Centrifuge again at 300 × g for 10 min and aspirate supernatant.",
+          "title": ""
+        },
+        {
+          "instruction": "Resuspend the final pellet in 1 mL freezing media (90 % FBS, 10 % DMSO).",
+          "title": ""
+        },
+        {
+          "instruction": "Transfer the suspension to a labeled cryotube and store at –80 °C.",
+          "title": ""
+        },
+        {
+          "instruction": "Within one week move cryotubes to liquid nitrogen (–196 °C) for long‑term storage.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Installation of tools/software before analysis",
-      "instruction": "ToolUsageInstallation commandBcl2fastqBcl2fastq is used for demultiplexing Illumina sequencing output files, converting the raw .bcl (base call) files into .fastq files. It separates reads from different samples according to their barcodes and generates the associated FASTQ files needed for downstream analysis. This tool also allows users to trim adapter sequences and filter out low-quality reads during the conversion process.conda install -c bioconda::bcl2fastqFastQCFastQC is a tool used for performing quality control checks on raw sequencing reads in FASTQ format. It provides a visual report summarizing the quality metrics, including per-base sequence quality (Phred scores), GC content, presence of adapter sequences, and overrepresented sequences. It is commonly used as the first step in data analysis to assess the quality of sequencing data before proceeding to downstream analyses.conda install -c bioconda::fastqcTrimmomaticTrimmomatic is a read trimming tool that removes low-quality bases from sequencing reads, cuts off adapters, and discards short reads. It helps improve the quality of the dataset by trimming or removing portions of reads that are likely to introduce errors in downstream analysis, ensuring that only high-quality reads are used.conda install -c bioconda::trimmomaticSTARSTAR (Spliced Transcripts Alignment to a Reference) is a splice-aware aligner used to map RNA-seq reads to a reference genome. It can accurately align reads across exon-exon junctions, which is essential for correctly mapping reads from spliced transcripts. It is typically used in RNA-seq workflows to quantify gene expression and annotate cell types based on mapped reads. Unmapped reads, which do not align to the human genome, can be further analyzed to explore for microbial or other non-human content.conda install -c bioconda::STARKraken2Kraken2 is a metagenomic classifier that assigns taxonomic labels to DNA sequences by matching them to a reference database. It is often used to identify microbial content in a sample by classifying unmapped reads that do not align to the host genome. This tool can identify the presence of bacteria, viruses, fungi, and other microorganisms in sequencing data, making it useful for metagenomic and microbiome studies.conda install -c bioconda::kraken2Sevenbridges-pythonSevenbridges-python is a Python SDK for interacting with the Seven Bridges Genomics platform, particularly for workflows such as those on the BD Rhapsody platform, which is used for single-cell RNA sequencing. This tool allows users to automate the quantification of single-cell data, manage datasets, and run pipelines programmatically, integrating with the Seven Bridges cloud platform for scalable data analysis.conda install -c bioconda sevenbridges-pythonAGATTool to convert gff files to gtfconda install -c bioconda agat\nNote: Set up the “conda” package manager using the official link (https://conda.io/projects/conda/en/latest/user-guide/getting-started.html) for creating and activating the conda environment.",
-      "substeps": [],
-      "is_critical": true,
+      "title": "Install required bioinformatics tools",
+      "instruction": "Create a conda environment and install all software needed for downstream analysis.",
+      "substeps": [
+        {
+          "instruction": "conda install -c bioconda bcl2fastq",
+          "title": ""
+        },
+        {
+          "instruction": "conda install -c bioconda fastqc",
+          "title": ""
+        },
+        {
+          "instruction": "conda install -c bioconda trimmomatic",
+          "title": ""
+        },
+        {
+          "instruction": "conda install -c bioconda star",
+          "title": ""
+        },
+        {
+          "instruction": "conda install -c bioconda kraken2",
+          "title": ""
+        },
+        {
+          "instruction": "conda install -c bioconda sevenbridges-python",
+          "title": ""
+        },
+        {
+          "instruction": "conda install -c bioconda agat",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Bioinformatics analysis",
-      "instruction": "All bioinformatics analyses have been conducted on the CSIR-IGIB’s high-performance GPU-linux-based scientific computing server (CentOS 7.7) and a local workstation. A basic knowledge of scripting languages (bash, R, and Python) is required to understand and apply this protocol. Software and scripts used in this protocol are mentioned (See the software and algorithms section of the key resources table).",
-      "substeps": [],
+      "title": "Download raw sequencing data",
+      "instruction": "Retrieve the GEO dataset GSE201088 and, if needed, the corresponding SRA fastq files.",
+      "substeps": [
+        {
+          "instruction": "mkdir scRNAseq && cd scRNAseq",
+          "title": ""
+        },
+        {
+          "instruction": "wget --recursive --no-parent -nd https://ftp.ncbi.nlm.nih.gov/geo/series/GSE201nnn/GSE201088/suppl/GSE201088_RAW.tar",
+          "title": ""
+        },
+        {
+          "instruction": "tar -xvf GSE201088_RAW.tar",
+          "title": ""
+        },
+        {
+          "instruction": "for f in *.gz; do gunzip $f; done",
+          "title": ""
+        },
+        {
+          "instruction": "Install SRA‑Toolkit (https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit).",
+          "title": ""
+        },
+        {
+          "instruction": "prefetch SRR18827616",
+          "title": ""
+        },
+        {
+          "instruction": "fastq-dump SRR18827616.sra",
+          "title": ""
+        },
+        {
+          "instruction": "If prefetch fails, rerun with --max-size <value> to increase memory.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Computational requirements for analysis",
-      "instruction": "Basic installation requirements:•Memory = 400–600 GB.•Cores = 4–8.•Compute nodes = 40–80.•Operating system (Windows, Linux, Mac).•GPUs (V100)-Linux-based (CentOS 7.7) compute cluster.Note: A computer with a Linux and network connection is required. The RAM requirement depends on the number of samples to be analyzed. 16 GB RAM should be sufficient for an initial analysis. Based on the availability of RAM, analysis time may fluctuate (fast).Note: All the codes used in this study can also be available in github: https://github.com/INGEN-HOPE/Single-cell-microbial-Analysis.",
-      "substeps": [],
+      "title": "Quality control and trimming of reads",
+      "instruction": "Assess read quality with FastQC, trim adapters and low‑quality bases, and prepare reads for alignment.",
+      "substeps": [
+        {
+          "instruction": "Run FastQC on all raw FASTQ files: fastqc *.fastq.gz",
+          "title": ""
+        },
+        {
+          "instruction": "Trim reads with Trimmomatic (example command omitted; use default adapter and quality settings).",
+          "title": ""
+        },
+        {
+          "instruction": "For STARsolo mapping, keep R1 for cell barcode/UMI and R2 for cDNA.",
+          "title": ""
+        },
+        {
+          "instruction": "STARsolo trimming parameters for BD Rhapsody:",
+          "title": ""
+        },
+        {
+          "instruction": "--readFilesCommand zcat",
+          "title": ""
+        },
+        {
+          "instruction": "--soloType CB_UMI_Complex",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCBmatchWLtype 1MM",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCBposition 0_0_0_8 0_13_0_21 0_26_0_34",
+          "title": ""
+        },
+        {
+          "instruction": "--soloUMIposition 0_35_0_43",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCBwhitelist CL1S.txt CL2S.txt CL3S.txt",
+          "title": ""
+        },
+        {
+          "instruction": "--outFileNamePrefix ./star_solo",
+          "title": ""
+        },
+        {
+          "instruction": "--outSAMattributes CB UB",
+          "title": ""
+        },
+        {
+          "instruction": "--outSAMtype BAM SortedByCoordinate",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "PBMC isolation",
-      "instruction": "Timing: 2.5 h",
-      "substeps": [],
+      "title": "Align reads to human genome and extract unmapped reads",
+      "instruction": "Map trimmed reads to the human reference with STAR, then isolate reads that did not align.",
+      "substeps": [
+        {
+          "instruction": "STAR --runThreadN 40 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--genomeDir /path/to/human/STAR/index \\",
+          "title": ""
+        },
+        {
+          "instruction": "--readFilesIn _R2.fastq.gz _R1.fastq.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloType CB_UMI_Complex \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCBmatchWLtype 1MM \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCBposition 0_0_0_8 0_13_0_21 0_26_0_34 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloUMIposition 0_35_0_43 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCBwhitelist CL1S.txt CL2S.txt CL3S.txt \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outFileNamePrefix ./star_human \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outSAMattributes CB UB \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outSAMtype BAM SortedByCoordinate",
+          "title": ""
+        },
+        {
+          "instruction": "Extract unmapped reads:",
+          "title": ""
+        },
+        {
+          "instruction": "samtools view -u -f 4 star_human/Aligned.sortedByCoord.out.bam > unmapped.bam",
+          "title": ""
+        },
+        {
+          "instruction": "Convert to FASTQ:",
+          "title": ""
+        },
+        {
+          "instruction": "samtools bam2fq unmapped.bam | gzip > unmapped.fastq.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "PBMC isolation",
-      "instruction": "This major step describes the isolation of peripheral blood mononuclear cells from the blood samples of healthy, hospital-admitted SARS-CoV-2 positive, and recovered patients.Note: Thaw 1× PBS (filtered) and FBS at 25°C before starting the experiment. To prepare 50 mL of freezing media, mix 45 mL of FBS with 5 mL of DMSO. (See Tables 1 and 2.)1.Blood collection and PBMC isolation.Collect blood into the tube using standard venipuncture techniques. Ensure the BD Vacutainer CPT Tube is at 25°C and properly labeled for patient identification.Note: In this experiment, 3–5 mL of blood was collected from each patient in the BD Vacutainer CPT Tubes. For standard BD Vacutainer CPT Tubes, typically, up to 8 mL of blood can be collected.a.Store the tube upright at 25°C until centrifugation.Note: Centrifuge within 2 h to ensure proper barrier formation.b.Just before centrifugation, gently invert the tube 8–10 times to remix the blood.c.Place the tube in a horizontal rotor (swing-out head) centrifuge.d.Centrifuge at 25°C for at least 15 min at 1500–1800 × g.Note: Do not exceed 2000 × g to avoid tube breakage.e.After centrifugation, locate the whitish mononuclear cell layer just below the plasma layer.f.Aspirate approximately half of the plasma without disturbing the cell layer.g.Use a sterile pipette to collect the mononuclear cell layer and transfer it to a 15 mL conical centrifuge tube.Note: In general, from 5 mL of blood, 3.5–4 mL of plasma layer is expected, while around 0.3–1 mL of mononuclear cell layer is expected. This can vary depending on the cell yield, which is influenced by factors such as donor age, gender, blood sample quality, and other clinical parameters.h.Add 1× PBS to the cell suspension to bring the volume to 15 mL.i.Cap the tube, and mix by inverting 5 times.j.Centrifuge at 300 × g for 15 min and aspirate the supernatant carefully.k.Resuspend the pellet, add 1× PBS to bring the volume to 10 mL.l.Cap the tube, and mix by inverting 5 times.m.Centrifuge at 300 × g for 10 min and aspirate the supernatant carefully.n.Resuspend the cell pellet in the cryopreservation medium for cryopreservation.o.Dissolve the final PBMC pellet in 1 mL of freezing media (90% FBS and 10% DMSO) gently.p.Transfer to a labeled cryotube.Note: The yield of PBMCs can vary based on the individual donor's health, age, and other factors. On average, one can expect to obtain approximately 1–2 million PBMCs per mL of blood.20q.Store in a cryocooler at −80°C.r.Transfer these cryotubes to liquid nitrogen (−196°C) within one week until further use.Note: Do not do excess centrifugation, as it can lead to tube breakage and uneven separation of whole blood.Table 1Reagents required for freezing media preparationReagentFor 1 rxn.StorageFBS45 mL−20°CDMSO5 mL25°CTotal50 mL–Table 2Reagents required for PBMC isolationReagentFor 1 rxn.Storage1× PBS25 mL25°CFreezing media (FBS+DMSO)1 mL4°C",
-      "substeps": [],
-      "is_critical": true,
+      "title": "Classify unmapped reads with Kraken2",
+      "instruction": "Identify microbial taxa present in the unmapped read set using Kraken2 and visualize results with Pavian.",
+      "substeps": [
+        {
+          "instruction": "Download a Kraken2 database (maxikraken2_1903, ~140 GB) or the smaller kraken2‑microbial (30 GB) as storage permits.",
+          "title": ""
+        },
+        {
+          "instruction": "kraken2 --threads 20 --db /path/to/kraken2_db \\",
+          "title": ""
+        },
+        {
+          "instruction": "--report sample.report \\",
+          "title": ""
+        },
+        {
+          "instruction": "--output sample.output \\",
+          "title": ""
+        },
+        {
+          "instruction": "--gzip-compressed unmapped.fastq.gz",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat for each sample.",
+          "title": ""
+        },
+        {
+          "instruction": "Install Pavian in R:",
+          "title": ""
+        },
+        {
+          "instruction": "install.packages(\"remotes\"); remotes::install_github(\"fbeitwieser/pavian\")",
+          "title": ""
+        },
+        {
+          "instruction": "pavian::runApp(port=5000)",
+          "title": ""
+        },
+        {
+          "instruction": "Upload all *.report files to the Pavian web interface (increase maxUploadSize if needed).",
+          "title": ""
+        },
+        {
+          "instruction": "Export the combined count matrix as count_matrix_microbes.csv.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Data analysis and interpretation",
-      "instruction": "Timing: ∼4–8 h\nTiming: ∼2 days (for step 13)",
-      "substeps": [],
+      "title": "Normalize metagenomic read counts",
+      "instruction": "Apply Cumulative Sum Scaling (CSS) normalization to the microbial count matrix using the metagenomeSeq R package.",
+      "substeps": [
+        {
+          "instruction": "setwd(\"/path/to/working/dir\")",
+          "title": ""
+        },
+        {
+          "instruction": "library(metagenomeSeq)",
+          "title": ""
+        },
+        {
+          "instruction": "raw_data <- read.csv(\"count_matrix_microbes.csv\", row.names=1)",
+          "title": ""
+        },
+        {
+          "instruction": "physeq_obj <- phyloseq::phyloseq(phyloseq::otu_table(raw_data, taxa_are_rows=TRUE))",
+          "title": ""
+        },
+        {
+          "instruction": "physeq_obj <- prune_taxa(taxa_sums(physeq_obj) > 0, physeq_obj)  # filter 0‑count taxa",
+          "title": ""
+        },
+        {
+          "instruction": "# Filter taxa with <1 % relative abundance using phyloseq (optional)",
+          "title": ""
+        },
+        {
+          "instruction": "css_norm <- cumNorm(physeq_obj, p=0.5)  # CSS normalization",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Data analysis and interpretation",
-      "instruction": "To download the data associated with the paper, “Single Cell Multiomics of Healthy, COVID-19 positive and Recovered Individuals”, use the GEO ID given in the paper, GSE201088.11.Downloading the dataset or directly using sequencing dataset.a.Navigate the NCBI GEO FTP site (https://ftp.ncbi.nlm.nih.gov/geo/) to the series/ folder.b.Find the GSE20nnn/ directory.c.Enter the GSE201088/ folder.d.The data files available are in the suppl/ directory. If we choose to download all associated data, we can download the entire suppl/ directory.e.Use the wget command followed by the link to the suppl/ directory (right-clicking and choosing ‘Copy Link Address’).#create a directorymkdir scRNAseqcd scRNAseq#download supplementary fileswget --recursive --no-parent -nd https://ftp.ncbi.nlm.nih.gov/geo/series/GSE201nnn/GSE201088/suppl/GSE201088_RAW.tarf.After the download is complete, untar the file using the following commands. You can directly download associated metadata files. This will contain Expression_Data and RSEC_MolsPerCell files for each batch which will be used for cell annotation later.tar -xvf GSE201088_RAW.tarfor all in ∗.gz; do gunzip $all; doneNote: To download the raw sequence fastq files SRA toolkit will be required.g.Install SRA toolkit binaries for your specific OS available https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit. To download the fastq files, run the following command for selected SRA Run ID from SRA Run selector. Repeat for each SRA Run ID separately or follow the tutorial available https://erilu.github.io/python-fastq-downloader/ for batch download.prefetch SRR18827616fastq-dump SRR18827616.sraNote: If prefetch throws an error, increase max memory using --max-size command. Each fastq file size may range from 90–120 GB. This step will take some time depending on download speed. So, feel free to grab a coffee.Note: The intermediate files generated in this tutorial may be memory intensive.The R1 of both BD and 10× data contains the cell label and UMI indexes which will be used to identify cell counts whereas the R2 contains the cDNA which will be used for mapping to the human reference genome.Note: Reads QC/TrimmingRun .FastQC to obtain information on per-base quality and adapter contamination.Trimming Procedures: • Read1: Trim bases beyond the cell label and UMI identification, taking into account the bead version used. • Read2: Trim bases with poor quality (Phred score _R2.fastq.gz _R1.fastq.gz \\--readFilesCommand zcat \\--soloType CB_UMI_Complex \\--soloCBmatchWLtype 1MM \\--soloCBposition 0_0_0_8 0_13_0_21 0_26_0_34 \\--soloUMIposition 0_35_0_43 \\--soloCBwhitelist CL1S.txt CL2S.txt CL3S.txt \\--outFileNamePrefix ./star_solo \\--outSAMattributes CB UB \\--outSAMtype BAM SortedByCoordinate(See Table 11.)Note: --readFilesIn first R2 should be mentioned then R1. R2 contains the captured sequence and R1 contains the CB and UMI. For aligning 10× reads the codes are modified as following:#Aligning 10× dataSTAR --runThreadN 40 \\ --genomeDir \\ --readFilesIn read1.fq read2.fq \\ --soloType CB_UMI_Simple \\ --soloCBstart 1 \\ --soloCBlen 16 \\ --soloUMIstart 17 \\ --soloUMIlen 10 \\ --outFileNamePrefix / \\ --outSAMattributes CR UR CY UY CB UB \\ --outSAMtype BAM SortedByCoordinateNote: The read files are input in the Read1 Read2 order in this case. Alternatively, cellranger can be used for 10×.Table 11STARsolo parameters and descriptionParameterDescription--runThreadN 40Number of threads used for alignment, in this case 40 threads are utilized for faster performance--genomeDir /path/to/STAR/Directory where the STAR genome index is stored.NOTE: The genome index is the same as for normal STAR runs.--readFilesIn _R2.fastq.gz _R1.fastq.gzSpecifies the input paired-end read files, where R1 is forward and R2 is reverse.Note: first R2 should be mentioned then R1 in this case.--soloType CB_UMI_ComplexComplex barcodes are activated using CB_UMI_ComplexSimple barcodes are activated using CB_UMI_Simple--soloCBposition 0_0_0_8 0_13_0_21 0_26_0_34Defines positions for cell barcodes on the read, this only works with --soloType CB_UMI_Complex, Format: startAnchor_startDistance_endAnchor_endDistance0_0_0_8:The first barcode starts at the very beginning of the read (position 0) and spans the first 8 bases (ends at position 8).0_13_0_21:The second barcode starts at position 13 of the read and spans up to position 21 (total of 9 bases).0_26_0_34:The third barcode starts at position 26 and ends at position 34 of the read (also 9 bases long).--soloUMIposition 0_35_0_43Defines the positions of the UMI (Unique Molecular Identifier) on the read sequence.--soloCBwhitelist CL1S.txt CL2S.txt CL3S.txtSpecifies the whitelists for known cell barcodes, using multiple whitelist files for different channels or libraries.NOTE: For cell barcodes use https://teichlab.github.io/scg_lib_structs/methods_html/BD_Rhapsody.html to find CLS1-3 and save it as CLS1.txt, CLS2.txt and CLS3.txt--soloCBmatchWLtype 1MMAllows up to 1 mismatch between the cell barcode and the whitelist of known barcodes.--outSAMattributes CB UBBam tags:Includes Corrected cell barcode (CB) and UMI barcode (UB) attributes in the output SAM/BAM files.--outSAMtype BAM SortedByCoordinateSpecifies the output file type (BAM) and sorting method (Sorted by genomic coordinates).NOTE: SortedByCoordinate must be used with --outSAMattributes--soloCellFilter EmptyDrops_CRUses the CellRanger EmptyDrops method to filter out empty droplets.--soloMultiMappers EMSTARsolo offers several algorithms for handling multi-mapped UMIs:EM (Expectation-Maximization): Uses maximum likelihood estimation to assign multi-mapped reads to genes, optimizing accuracy based on the gene expression model from unique and multi-mapped reads.For additional parameters please refer to the STARsolo manual.d.For cell-filtering, additional curated options for multi-gene mapping can be included based on the sequencing chemistry used from the link.Note: To correct for errors in cell barcodes a user-input whitelist can additionally be added using --soloCBwhitelist command. To generate the whitelist UMI-tools is an option.Optional: Generating Whitelist.While mapping error correction and demultiplexing of cell barcodes using user-input whitelist.For alignment we need to first generate a whitelist of cell barcodes to identify cells using UMI-tools. (See Table 12.)#generating whitelistumi_tools whitelist --stdin CSP_R1_fastq.gz --extract-method=regex --bc-pattern= --set-cell-number= --log2stderr > whitelist.txt will be the estimated number of cells.Table 12Regex pattern for extracting whitelist of UMI from BD and 10× data Sequencing chemistry(?P .{9})(?P GTGA)(?P .{9})(?P GACA)(?P .{9})(?P .{6,9})T{3}.∗BD Rhapsody(?P .{16})(?P .{10})10× ChromiumThe complete explanation of the regex pattern used above is available at https://umi-tools.readthedocs.io/en/latest/regex.html#regex-regular-expression-mode.e.Next, we will extract unmapped reads to check for metagenomic reads presence.#Extracting unmapped readssamtools view -u -f 4 _starsoloAligned.sortedByCoord.out.bam > unmapped.bam#Convert bam to fastq for classificationsamtools bam2fq unmapped.bam | gzip > .fastq.gz13.Taxonomic classification using kraken2.Taking the reads unmapped to the human genome, we will run Kraken2 to check for presence of the microbial diversity at the bulk level. To select specific species with highest abundance throughout the sample set for downstream single-cell level analysis.For the kraken2 tool installed previously, download the maxikraken2_1903_140 GB database following the tutorial available https://lomanlab.github.io/mockcommunity/mc_databases.html.Note: If there is limitation of storage, kraken2-microbial (September 2018, 30 GB) can also be used.Download the database from the Kraken2 website, which contains bacteria, archaea, and viral reference sequences. Kraken2 map reads with taxa using k-mers from the genomic database and assigns taxonomy.a.Classification. (See Table 13.)kraken2 --threads 20 --db index --report .report --output .output --gzip-compressed .fastq.gzi.Change the with input fastq file names.ii.Run this command for each sample to generate the report file for all the samples and visualize using the Pavian tool (in R studio) to see the classified and unclassified microbial reads.iii.R1 was not used in this step as it contains cellular barcodes.Table 13Kraken parameters and descriptionParameterDescription--db indexSpecifies the path to the Kraken2 database to use for classification. Replace index with your actual database path.--report .reportDefines the file to which Kraken2 will write the classification report, summarizing the results.--output .outputSpecifies the file to which Kraken2 will write the detailed output of the classification, including the assignment of reads to taxa. output of the classification, including the assignment of reads to taxa--gzip-compressedIndicates that the input FASTQ files are compressed with gzip.--threshold NUMValue ranges from 0–0.5 can be used to improve precision and sensitivity of genus rankFor more info please refer to kraken manualb.Visualization using Pavian.install.packages(“remotes”)remotes::install_github(fbeitwieser/pavian”)pavian::runApp(port=5000)i.Upload all samples report files into pavian web browser:Note: If the files do not load try to increase upload size using: maxUploadSize = 3000∗10242.ii.Results overview.The count matrices for all the samples are downloaded in CSV format from the Pavian tool as count_matrix_microbes.csv.14.Normalization of metagenomic reads (These codes are run in R/Rstudio).Normalization is required to account for the differences in sequencing depth across samples, ensuring that variation reflects biological differences rather than technical artefacts. The CSS (Cumulative Sum Scaling) method from the R-package metagenomeSeq is used for this normalization, as it adjusts for varying sample depths by applying median-like quantile normalization.a.Creating metagenomeseq object.#Set working directorygetwd()setwd(“ ”)#Load librarylibrary(metagenomeSeq)#Upload the microbes count matrixraw_data 1% abundance are filtered using the phyloseq R package.b.Filtering Taxa with 1% abundance and corresponding species taxa from the kraken output file were extracted for further single-cell level analysis.15.Creating reference index including microbial genomes.After selecting the species which we would further like to explore at single-cell level, we will curate a reference genome combining the fasta and gtf of microbial species selected from previous step with human reference fasta and gtf to create an index file for alignment at single-cell level.As an example, one microbial species is shown below, similar steps can be done for all the selected microbial species.#bacteria genomeswget https://ftp.ensemblgenomes.ebi.ac.uk/pub/bacteria/release-59/fasta/bacteria_119_collection/bacillus_cereus_03bb102_gca_000022505/dna/Bacillus_cereus_03bb102_gca_000022505.ASM2250v1_.dna.toplevel.fa.gz wget https://ftp.ensemblgenomes.ebi.ac.uk/pub/bacteria/release-59/gff3/bacteria_119_collection/bacillus_cereus_03bb102_gca_000022505/Bacillus_cereus_03bb102_gca_000022505.ASM2250v1.59.gff3.gz a.If the reference genomes are in GFF3 format, first convert them to GTF format.b.Place all these files, including the previously used human genome, into a single folder.c.Then, concatenate the GTF files into a single genome GTF file and combine the corresponding FASTA files into a single genome FASTA file.#Convert gff3 to gtfagat_convert_sp_gff2gtf.pl --gff Bacillus_cereus_03bb102_gca_000022505.ASM2250v1.59.gff3 -to Bacillus_cereus.gtf #skip if already in gtf format.#creating merged fastacat ∗.fasta > human_microbes.fa.#creating merged gtfcat ∗.gtf > human_microbes.gtf.d.Using the merged gtf and fasta files, a new STAR index file is generated. Ensure all the gtf files are compatible. Check for overlapping annotations using gffcompare or bedtools.#Build STAR index.STAR --runThreadN 20 --runMode genomeGenerate --genomeDir STAR_index --genomeFastaFiles human_microbes.fa --sjdbGTFfile human_microbes.gtf --genomeSAsparseD 3.16.Alignment of fastq files.Next, we will align the filtered FASTQ files at the single-cell level to generate a count matrix using the new STAR index. You can either use the Seven Bridges platform for BD Rhapsody data or alternatively perform the alignment with STARsolo for both WTA and Abseq data.a.Using Seven Bridges platform.i.Fastq files of all the samples along with reference genome indexing files in .gz format were uploaded to BD Rhapsody web browser../sb upload start human_microbes_index.tar.gz --destination /microbes-run../sb upload start sample1_R1.fastq.gz --destination /microbes-run../sb upload start sample1_R2.fastq.gz --destination /microbes-run.ii.Seven Bridges is an online portal by BD Rhapsody to perform single-cell WTA analysis. Using the default parameters, the updated merged human_microbe STAR index along with raw sequencing reads (fasta files) are uploaded to obtain the cell-specific read count matrix.Note: Complete tutorial on running analysis on Seven Bridges can be found at https://bd-rhapsody-bioinfo-docs.genomics.bd.com/top_introduction.html.iii.The output files from Seven Bridges are:1. _RSEC_MolsPerCell.csv.2. _RSEC_ReadsPerCell.csv.3. _DBEC_MolsPerCell.csv.4. _DBEC_ReadsPerCell.csv.5. _final.BAM.6. _final.BAM.bai.7. _Expression_Data.st.8. _Metrics_Summary.csv.9. _UMI_Adjusted_Stats.csvNote: Since Seven Bridges is not an open-source tool, the pipeline used to run on Seven Bridges is also available at this link for performing alignment and count matrix generation manually.Optional: Using STARsolo.b.Alternatively, STARsolo can be used to perform alignment as follows:#alignment.STAR --runThreadN 40 \\ --genomeDir \\ --readFilesIn read2.fq.gz read1.fq.gz \\ --readFilesCommand zcat \\ --soloType CB_UMI_Complex \\ --soloCBmatchWLtype 1MM \\ --soloCellFilter EmptyDrops_CR \\ --soloCBposition 0_0_0_8 0_13_0_21 0_26_0_34 \\ --soloUMIposition 0_35_0_43 \\ --soloCBwhitelist CL1S.txt CL2S.txt CL3S.txt \\ --outFileNamePrefix / \\ --outSAMattributes CB UB \\ --outSAMtype BAM SortedByCoordinatec.Similarly, run STARsolo for ABseq data which will be used for cell type annotation step later. For Abseq data, an Abseq reference file is required in fasta format. This file can be generated from BD AbSeq Panel Generator (abseq-ref-gen.genomics.bd.com).>CD103|ITGAE|AHS0001|pAbOAAATAGTATCGAGCGTAGTTAAGTTGCGTAGCCGTT>CD161:DX12|KLRB1|AHS0002|pAbOGTTATGGTTGTCGGTAGAGTATCGTGTTGCGTTAGTNote: BD Biosciences uses this format for its sequence header: | | |pAbO.d.Create a gtf file for the fasta file using the following command and create a new STAR index for Abseq data and perform alignment like above.(These codes are run in R/Rstudio).# Load required librarylibrary(GenomicRanges)# Define a function to convert FASTA to GTFfasta_to_gtf \")# Load STARsolo output filesmat _RSEC_MolsPerCell.csv\")#oRsaveRDS(mat, file = \" _RSEC_MolsPerCell.rds\")The output file will look like following: The colnames will contain the gene names and the rownames contain the cell index.17.Extract microbial read count matrix from the human read count matrix.a.Extracting microbial gene count from WTA data.From the count matrix downloaded/generated from BD Rhapsody pipeline, we need to extract the cell-specific microbial read counts. For that we need to first curate a list of microbial genes from the gtf file for all the microbes used in the study.Here we show it for one microbe, similar steps are performed recursively for all the microbes selected in the study.# Load Librarieslibrary(data.table)library(rtracklayer)setwd(\"path/to/directory\")#extract all genes list from the genome gtf filegtf_files _RSEC_MolsPerCell.rds\")#Get gene list from the count matrix:countmat_gene_list1 countmat_gene_list1.c.We have loaded the count matrix for one sample named B1_RSEC_MolsPerCell. We will now load the microbial gene list curated from gtf in the previous step.#renaming the column namecc_sample1 200 & nFeature_RNA 5 was considered but it depends on the data).d.Calculate how many of these cells belong to each cell type and what percentage of each cell type they represent.This analysis provides insight into which cell types show significant microbial gene expression.# Load librarylibrary(Seurat)# Normalize the data in the \"pathogen\" assaycovid2 5)# Print the number of cells before subsettingcat(\"Number of cells before subset:\", ncol(covid2), \"\\n\")# Print the number of cells after subsettingcat(\"Number of cells after subset:\", ncol(subset), \"\\n\")# Print the number of cells removed during subsettingcat(\"Number of cells removed:\", ncol(covid2) - ncol(subset), \"\\n\")Number of cells before subset: 114704.Number of cells after subset: 30687.Number of cells removed: 84017.e.When you run SCTransform() on a Seurat object, it stores multiple models internally to handle differences in sequencing depth across cells or conditions. These models account for variable library sizes, batch effects, and other factors. The PrepSCTFindMarkers() function aligns the different models and prepares the data in a format that can be used by FindMarkers().# Display the levels (cell identities)levels(subset)#subset cell_type_counts22.Differential Microbial Abundance Analysis at pseudo-bulk level.Using the cell-specific microbial counts for each sample, we will perform differential abundance of microbes in different cell-types. We will first process the single-cell data by aggregating the counts by cell-type and sample, then prepare corresponding metadata, and perform differential expression analysis using DESeq2. Using the counts and metadata saved in the COVID RDS file in previous steps, we will perform the following steps.a.Aggregating counts by cell type.# Load librarieslibrary(tidyverse)library(cowplot)library(edgeR)library(Matrix)library(reshape2)library(S4Vectors)library(SingleCellExperiment)library(pheatmap)library(apeglm)library(png)library(DESeq2)library(RColorBrewer)library(data.table)library(Matrix.utils)#loading count datacounts sce>group#Aggregating counts across cluster-sample groups.#transposing row/columns to have cell_ids as row names matching those of groupsaggr_counts % str()#Comparing the first 10 elements of our input and output stringshead(colnames(aggr_counts), n = 10)head(tstrsplit(colnames(aggr_counts), \"_\")[[1]], n = 10)#Extract indices of columns matching a specific cell typeb_cell_idx %as.data.frame() %>%dplyr::select(group, sample)#Exclude duplicate rowsmetadata 0]#Match order of cell_counts and sample_idssample_order <- match(df$sample_id, names(cell_counts))cell_counts <- cell_counts[sample_order]#Append cell_counts to data framedf$cell_count <- cell_countsvi.The cluster-specific metadata (df) is joined with the generic metadata table to form a complete metadata dataframe for the current cluster. The plyr::join() function ensures that the metadata from both dataframes is merged based on shared column names. Finally, the resulting metadata for the cluster is stored in metadata_ls.#Join data frame (capturing metadata specific to cluster) to generic metadatadf <- plyr::join(df, metadata,by = intersect(names(df), names(metadata)))#Update rownames of metadata to match colnames of count matrix, as needed later for DErownames(df) <- df$cluster_sample_id#Store complete metadata for cluster i in listmetadata_ls[[i]] <- dfnames(metadata_ls)[i] <- unique(df$celltype)}#Explore the different components of the liststr(metadata_ls)c.Pseudo Bulk Analysis Using DESeq2.The pseudobulk approach used here aggregates single-cell data into bulk samples based on cell type, allowing for robust statistical analysis of differential expression across conditions. Visualization steps such as PCA and heatmaps help in understanding the data structure and relationships (Figure 5).#Starting pseudo bulk analysis using DESEq2## Select cell type of interestcluster_names# Double-check that both lists have same namesall(names(counts_ls) = = names(metadata_ls))idx <- which(names(counts_ls) = = \"DC\")cluster_counts <- counts_ls[[idx]]cluster_metadata <- metadata_ls[[idx]]# Check matching of matrix columns and metadata rowsall(colnames(cluster_counts) = = rownames(cluster_metadata))cluster_counts<-as.matrix(cluster_counts +1)#adding 1 to the count matrix to allow log transformation of the data.# Create DESeq2 objectdds <- DESeqDataSetFromMatrix(cluster_counts,colData = cluster_metadata,design = ∼ group)# Transform counts for data visualizationrld <- rlog(dds, blind = TRUE)# Plot PCA.DESeq2::plotPCA(rld, intgroup = \"cell_count\")# Extract the rlog matrix from the object and compute pairwise correlation valuesrld_mat <- assay(rld)rld_cor <- cor(rld_mat)# Plot heatmappheatmap(rld_cor, annotation = cluster_metadata[, c(\"group\"), drop = F])# Run DESeq2 differential expression analysisdds <- DESeq(dds)res <-results(dds)Figure 5Microbial read distribution and normalization across samples(A) PCA plot showing distribution of cell counts with microbial reads across samples. The scale represents the cell count.(B) The heatmap on the bottom illustrates the correlation of gene expression levels across all pairwise combinations of samples in the dataset. The hierarchical tree represents similarity between the samples, and the colored bars on top represent group information (green, healthy; pink, infected; blue, recovered). The gradient scale represents the correlation score.",
-      "substeps": [],
-      "is_critical": true,
+      "title": "Build combined human‑microbe reference index",
+      "instruction": "Create a STAR genome index that contains both the human genome and selected microbial genomes.",
+      "substeps": [
+        {
+          "instruction": "Download microbial FASTA and GFF3 files (example for Bacillus cereus):",
+          "title": ""
+        },
+        {
+          "instruction": "wget https://ftp.ensemblgenomes.ebi.ac.uk/pub/bacteria/release-59/fasta/bacteria_119_collection/bacillus_cereus_03bb102_gca_000022505/dna/Bacillus_cereus_03bb102_gca_000022505.ASM2250v1_.dna.toplevel.fa.gz",
+          "title": ""
+        },
+        {
+          "instruction": "wget https://ftp.ensemblgenomes.ebi.ac.uk/pub/bacteria/release-59/gff3/bacteria_119_collection/bacillus_cereus_03bb102_gca_000022505/Bacillus_cereus_03bb102_gca_000022505.ASM2250v1.59.gff3.gz",
+          "title": ""
+        },
+        {
+          "instruction": "If GFF3, convert to GTF:",
+          "title": ""
+        },
+        {
+          "instruction": "agat_convert_sp_gff2gtf.pl --gff Bacillus_cereus_03bb102_gca_000022505.ASM2250v1.59.gff3 -to Bacillus_cereus.gtf",
+          "title": ""
+        },
+        {
+          "instruction": "Place all human FASTA/GTF and microbial FASTA/GTF files in one folder.",
+          "title": ""
+        },
+        {
+          "instruction": "Concatenate FASTA files:",
+          "title": ""
+        },
+        {
+          "instruction": "cat *.fa *.fasta *.fa.gz > human_microbes.fa",
+          "title": ""
+        },
+        {
+          "instruction": "Concatenate GTF files:",
+          "title": ""
+        },
+        {
+          "instruction": "cat *.gtf > human_microbes.gtf",
+          "title": ""
+        },
+        {
+          "instruction": "Build STAR index:",
+          "title": ""
+        },
+        {
+          "instruction": "STAR --runThreadN 20 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--runMode genomeGenerate \\",
+          "title": ""
+        },
+        {
+          "instruction": "--genomeDir STAR_index \\",
+          "title": ""
+        },
+        {
+          "instruction": "--genomeFastaFiles human_microbes.fa \\",
+          "title": ""
+        },
+        {
+          "instruction": "--sjdbGTFfile human_microbes.gtf \\",
+          "title": ""
+        },
+        {
+          "instruction": "--genomeSAsparseD 3",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Align single‑cell reads to combined reference",
+      "instruction": "Map the cell‑specific FASTQ files to the human‑microbe STAR index using either Seven Bridges (BD Rhapsody) or STARsolo.",
+      "substeps": [
+        {
+          "instruction": "Option A – Seven Bridges:",
+          "title": ""
+        },
+        {
+          "instruction": "sb upload start human_microbes_index.tar.gz --destination /microbes-run",
+          "title": ""
+        },
+        {
+          "instruction": "sb upload start sample1_R1.fastq.gz --destination /microbes-run",
+          "title": ""
+        },
+        {
+          "instruction": "sb upload start sample1_R2.fastq.gz --destination /microbes-run",
+          "title": ""
+        },
+        {
+          "instruction": "Run the BD Rhapsody pipeline on the Seven Bridges portal with default parameters and the custom index.",
+          "title": ""
+        },
+        {
+          "instruction": "Expected output files include _RSEC_MolsPerCell.csv, _Expression_Data.st, etc.",
+          "title": ""
+        },
+        {
+          "instruction": "Option B – STARsolo:",
+          "title": ""
+        },
+        {
+          "instruction": "STAR --runThreadN 40 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--genomeDir STAR_index \\",
+          "title": ""
+        },
+        {
+          "instruction": "--readFilesIn sample_R2.fastq.gz sample_R1.fastq.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "--readFilesCommand zcat \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloType CB_UMI_Complex \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCBmatchWLtype 1MM \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCBposition 0_0_0_8 0_13_0_21 0_26_0_34 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloUMIposition 0_35_0_43 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCBwhitelist CL1S.txt CL2S.txt CL3S.txt \\",
+          "title": ""
+        },
+        {
+          "instruction": "--soloCellFilter EmptyDrops_CR \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outFileNamePrefix ./star_combined \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outSAMattributes CB UB \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outSAMtype BAM SortedByCoordinate",
+          "title": ""
+        },
+        {
+          "instruction": "For ABseq data, generate an ABseq reference FASTA and GTF (format shown in protocol) and repeat the STARsolo command with the appropriate index.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Extract microbial gene counts from single‑cell matrix",
+      "instruction": "From the BD Rhapsody (or STARsolo) count matrix, pull out counts for microbial genes identified in the combined GTF.",
+      "substeps": [
+        {
+          "instruction": "library(data.table); library(rtracklayer); library(Seurat)",
+          "title": ""
+        },
+        {
+          "instruction": "setwd(\"/path/to/count/matrix\")",
+          "title": ""
+        },
+        {
+          "instruction": "load(\"B1_RSEC_MolsPerCell.rds\")  # example count matrix",
+          "title": ""
+        },
+        {
+          "instruction": "gtf <- import.gff(\"human_microbes.gtf\")",
+          "title": ""
+        },
+        {
+          "instruction": "microbe_genes <- gtf[gtf$gene_biotype == \"protein_coding\" & grepl(\"Bacillus|...\", gtf$gene_id), \"gene_id\"]",
+          "title": ""
+        },
+        {
+          "instruction": "microbe_counts <- count_matrix[rownames(count_matrix) %in% microbe_genes, ]",
+          "title": ""
+        },
+        {
+          "instruction": "Save for downstream analysis:",
+          "title": ""
+        },
+        {
+          "instruction": "saveRDS(microbe_counts, file=\"microbe_counts.rds\")",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Pseudo‑bulk differential abundance analysis",
+      "instruction": "Aggregate microbial counts by cell type and sample, then test for differential abundance with DESeq2.",
+      "substeps": [
+        {
+          "instruction": "library(DESeq2); library(tidyverse); library(SingleCellExperiment)",
+          "title": ""
+        },
+        {
+          "instruction": "Load count matrix and metadata:",
+          "title": ""
+        },
+        {
+          "instruction": "counts <- readRDS(\"microbe_counts.rds\")",
+          "title": ""
+        },
+        {
+          "instruction": "meta <- read.csv(\"cell_metadata.csv\")  # must contain columns: cell_id, cell_type, sample_id, group",
+          "title": ""
+        },
+        {
+          "instruction": "Create pseudo‑bulk matrix:",
+          "title": ""
+        },
+        {
+          "instruction": "counts$cell_type <- meta$cell_type[match(colnames(counts), meta$cell_id)]",
+          "title": ""
+        },
+        {
+          "instruction": "counts$sample_id <- meta$sample_id[match(colnames(counts), meta$cell_id)]",
+          "title": ""
+        },
+        {
+          "instruction": "agg_counts <- counts %>% t() %>% as.data.frame() %>%",
+          "title": ""
+        },
+        {
+          "instruction": "group_by(cell_type, sample_id) %>% summarise_all(sum) %>%",
+          "title": ""
+        },
+        {
+          "instruction": "column_to_rownames(var=\"cell_type_sample\") %>% t()",
+          "title": ""
+        },
+        {
+          "instruction": "Prepare DESeq2 object:",
+          "title": ""
+        },
+        {
+          "instruction": "coldata <- data.frame(row.names=colnames(agg_counts), group=meta$group[match(colnames(agg_counts), meta$sample_id)])",
+          "title": ""
+        },
+        {
+          "instruction": "dds <- DESeqDataSetFromMatrix(countData=agg_counts, colData=coldata, design=~group)",
+          "title": ""
+        },
+        {
+          "instruction": "dds <- DESeq(dds)",
+          "title": ""
+        },
+        {
+          "instruction": "res <- results(dds)",
+          "title": ""
+        },
+        {
+          "instruction": "Write results:",
+          "title": ""
+        },
+        {
+          "instruction": "write.csv(as.data.frame(res), file=\"DESeq2_microbe_diff_abundance.csv\")",
+          "title": ""
+        },
+        {
+          "instruction": "Optional visualizations:",
+          "title": ""
+        },
+        {
+          "instruction": "rld <- rlog(dds, blind=FALSE)",
+          "title": ""
+        },
+        {
+          "instruction": "pheatmap(cor(assay(rld)), annotation_col=coldata)",
+          "title": ""
+        },
+        {
+          "instruction": "plotPCA(rld, intgroup=\"group\")",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T00:35:24.407716Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "The protocol below highlights detailed workflow of analyzing single-cell RNA sequencing (scRNA-seq) data to study traditionally non-culturable intracellular microbes at a resolution that was previously unattainable. The scRNA-seq approach allows for the simultaneous capture of host and microbial transcripts, providing a more extensive view of host-pathogen interactions within individual cells. This protocol innovatively applies scRNA-seq data, repurposing unmapped reads to reveal intracellular pathogens in specific immune cell populations in SARS-CoV-2 positive, recovered and healthy individuals. The applicability of this protocol can be expanded to other infectious diseases.Note: Care should be taken while isolating PBMCs from patient blood samples to perform single-cell lysis to preserve both host and microbial transcripts.CRITICAL: Appropriate informed consent and permissions from the relevant institutions are required for the collection and use of human samples.Note: This tutorial uses BD Rhapsody single-cell RNA-seq dataset and uses intermediate files generated from running BD Rhapsody pipeline on Seven Bridges which requires users to create an account to run the analysis. We also mentioned alternative open-access tools that can be explored wherever possible.",
+  "content_type": "protocol",
+  "content_type_score": 51,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 292894,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx10.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 156905,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx11.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 125015,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx12.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 134768,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx13.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 181252,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx14.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx14.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 205069,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx14.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx15.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx15.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 205133,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx15.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx16.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx16.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 224977,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx16.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx17.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx17.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 68088,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx17.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx18.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx18.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 75981,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx18.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx19.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx19.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 213443,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx19.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.gif",
+      "local_path": "data/media/star_protocols/PMC11780099/fx2.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 3281,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx2.gif"
+    },
+    {
+      "type": "image",
+      "filename": "fx20.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx20.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 229256,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx20.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx21.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx21.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 79813,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx21.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx22.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx22.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 56632,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx22.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx23.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx23.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 48799,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx23.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx24.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx24.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 106947,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx24.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx25.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx25.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 51262,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx25.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx26.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx26.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 89001,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx26.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx27.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx27.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 157874,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx27.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx3.gif",
+      "local_path": "data/media/star_protocols/PMC11780099/fx3.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 3426,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx3.gif"
+    },
+    {
+      "type": "image",
+      "filename": "fx4.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 142904,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx5.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 47875,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx6.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 148074,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx7.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 140021,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx8.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 240273,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx9.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/fx9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 167260,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/fx9.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 226536,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 131896,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 464799,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 304665,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC11780099/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11780099/",
+      "caption": "",
+      "bytes": 232574,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11780099/gr5.jpg"
+    }
+  ]
 }

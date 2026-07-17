@@ -18,9 +18,135 @@
     "landscape analysis"
   ],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "of band level (S1-c2), and further merged (S1-c",
+    "In other words, the artificial surfaces (clc-",
+    "and the agricultural areas (clc-",
+    "and a high TCD value (7, 8, 9,"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Derive coastline polyline (Stage 0)",
+      "instruction": "Merge the Corine Land Cover (CLC) data covering the coastal zone into a single polygon shapefile, convert that polygon to a polyline geometry, and split the polyline at its start and end points to create the coastline polyline shapefile, which will be used as the second input for Stage 1.",
+      "substeps": [
+        {
+          "instruction": "Merge CLC coastal‑zone polygons into one shapefile.",
+          "title": ""
+        },
+        {
+          "instruction": "Convert the merged polygon to a polyline geometry.",
+          "title": ""
+        },
+        {
+          "instruction": "Split the polyline at its start and end points to obtain the coastline polyline.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Create ten adjacency bands (Stage 1)",
+      "instruction": "Reclassify every CLC patch by its adjacency order to the coastline to generate ten bands (1–10). First, select patches that touch the coastline and assign them band 1. Then iteratively select patches adjacent to the previously defined band, exclude already‑assigned patches, and assign the next band number, repeating until band 10 is defined. Add a band‑level attribute to each patch and merge all band layers into a single shapefile for Stage 2.",
+      "substeps": [
+        {
+          "instruction": "Select CLC patches that touch the coastline → assign band 1.",
+          "title": ""
+        },
+        {
+          "instruction": "For band 2 to band 10: select patches adjacent to the preceding band, exclude already‑assigned patches, assign the current band number.",
+          "title": ""
+        },
+        {
+          "instruction": "Add a band‑level attribute to every patch.",
+          "title": ""
+        },
+        {
+          "instruction": "Merge the ten band layers into one shapefile.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Extract natural patches and build TCNLM (Stage 2)",
+      "instruction": "From the ten‑band shapefile, filter natural CLC classes (clc‑523, clc‑522, clc‑521, clc‑422, clc‑421, clc‑411, clc‑333, clc‑331, clc‑324, clc‑323, clc‑321, clc‑313, clc‑312, clc‑311) and, for Mediterranean contexts, also include clc‑223 (olive groves) and clc‑244 (agro‑forestry). Exclude artificial surfaces (clc‑100) and agricultural areas (clc‑200). For each band, select natural patches that intersect natural patches of the preceding band; export these intersecting patches as transversally connected natural landscape mosaics (TCNLM). Discard natural patches that do not connect to the preceding band. Merge all connected patches into a single TCNLM layer.",
+      "substeps": [
+        {
+          "instruction": "Filter out clc‑100 and clc‑200; keep the listed natural classes (and clc‑223, clc‑244 where applicable).",
+          "title": ""
+        },
+        {
+          "instruction": "For band 1: export all retained natural patches as frontline natural surfaces.",
+          "title": ""
+        },
+        {
+          "instruction": "For band 2‑10: select natural patches that intersect natural patches of the immediately lower band, export the intersecting patches as connected natural landscapes, and discard non‑intersecting patches.",
+          "title": ""
+        },
+        {
+          "instruction": "Merge the connected patches from all bands into one TCNLM shapefile.",
+          "title": ""
+        }
+      ],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Assign transversal continuity depth (Stage 3)",
+      "instruction": "Using the TCNLM layer, assign a Transversal Continuity Depth (TCD) value to each patch based on the highest band it connects to inland. Begin with band 10: set TCD = 10 for all band 10 patches. Then, for band 9 patches adjacent to band 10 patches, also assign TCD = 10; continue descending bands, assigning TCD = 10 to any patch that is connected (directly or indirectly) to band 10. After completing TCD = 10, repeat the process for unassigned patches with TCD = 9 (starting from band 9), then TCD = 8, and so on down to TCD = 1, which is given to patches adjacent only to the coastline and not connected to higher bands. Ensure each step selects patches of the current band that have not yet received a TCD value before assigning.",
+      "substeps": [
+        {
+          "instruction": "Select all band 10 patches → assign TCD = 10.",
+          "title": ""
+        },
+        {
+          "instruction": "Select band 9 patches adjacent to band 10 patches → assign TCD = 10.",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat adjacency checks for bands 8‑1, assigning TCD = 10 to any patch connected to a higher‑band patch.",
+          "title": ""
+        },
+        {
+          "instruction": "For remaining unassigned patches, repeat the whole sequence with TCD = 9, then TCD = 8, … down to TCD = 1.",
+          "title": ""
+        },
+        {
+          "instruction": "Finalize a merged shapefile where each TCNLM patch carries its TCD value.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Interpret results – cross‑tabulation (Stage 4A)",
+      "instruction": "Cross‑tabulate band level and TCD value for each TCNLM patch. Identify patches with low band level (1–4) and high TCD (7–10) as crucial components of the TCNLM; highlight any unique patches within their mosaic as endangered natural landscape patches.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Interpret results – artificial barrier analysis (Stage 4B)",
+      "instruction": "Filter band 1 patches that are artificial surfaces (clc‑100). Determine which of these artificial band 1 patches separate the coastline from TCNLM patches of band 2 or higher. Flag these artificial patches as potential restoration targets because converting them to natural land cover would reconnect the coastline to the TCNLM.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T07:42:34.139785Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 26,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

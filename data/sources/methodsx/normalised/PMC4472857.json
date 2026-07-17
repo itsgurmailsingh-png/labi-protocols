@@ -11,12 +11,153 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4472857/",
   "doi": "10.1016/j.mex.2014.07.004",
   "citation": "10.1016/j.mex.2014.07.004",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "The presented method generalizes the damage parameters by continuous calculation of the stress and strain amplitude and mean stress instead of waiting for the cycles to close. Not only the discussed Smith–Watson–Topper damage parameter but also other parameters [5,7] can now be used identically in the strain-life predictions under thermo-mechanical cyclic loading. The method will enable an application of widely used strain-life mean stress correction techniques in energy based approaches such as in Refs. [12–14]."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Requirements",
+      "instruction": "The stress and strain tensor histories are gained by elastoplastic models from structural finite element analyses (FEA) and are converted into equivalent uniaxial stress σ(ti) and equivalent uniaxial elastoplastic strain εep(ti) histories for i = 1, …, n. Thermal FEA are required to assess the corresponding temperature history T(ti). Test stand tests can replace FEA. Temperature history T(ti) influences the elastoplastic stress–strain response and material parameters, e.g., Young modulus E(ti) = E(Ti), where Ti = T(ti) but does not appear in the algorithm directly.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Requirements",
+      "instruction": "Counter j counts the strain reversal points including the first εep(t1) and the last εep(tn) point in the elastoplastic strain history. The strain reversal points constitute strain residuum εjep,res for j=1, …, ≤n. Current εep(ti) and the latest three strain reversal points εjep,res, εj−1ep,res, and εj−2ep,res are checked for a closed cycle successively. Residuum stresses σjres and residuum damage parameters Pjres coincide in time domain with residuum strains εjep,res.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Requirements",
+      "instruction": "Logical operator s enables the identification of rainflow cycles that hold nested rainflow cycles. It is set to true if the rainflow cycle is identified and j > 2. Otherwise it is false.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Algorithm flow",
+      "instruction": "The procedure of working out the damage parameter is given in Fig. 1. Here an overview of the pseudo code is provided. In line 1, counters i, j and maximum absolute strain εmaxep are initiated. Superscript ep stands for elastoplastic. Next, the outer loop begins. Index i runs over n available times ti. If the number of strain reversal points in the residuum j > 2, the algorithm in line 3 first checks if residuum strains εj−2ep,res, εj−1ep,res, εjep,res and strain εep(ti) form a rainflow [8] cycle.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Algorithm flow",
+      "instruction": "The three residuum strains representing strain reversal points as well as εep(ti) are required for the standardized four point rainflow counting algorithm [8]. The Clormann–Seeger [9] cycle is searched for in line 11. If j ≤ 2 or neither rainflow nor Clormann–Seeger cycle is found, the algorithm in line 15 checks if εep(ti) is on the cyclic stress–strain curve. Else, strain origin εoep(ti), stress origin σo(ti) and damage parameter origin Po(ti) are set to the j-th residuum values and logical operator s is set to false in line 18. Origins are required to make the amplitude and mean values calculation possible. They are determined in lines 5, 7, 12, 16 and 18. In line 20 strain amplitude(1)εaep(ti)=εep(ti)−εo(ti)2stress amplitude(2)σa(ti)=σ(ti)−σo(ti)2and mean stress(3)σm(ti)=σ(ti)+σo(ti)2referring to time ti are calculated. Similarly, mean strain is given byεmep(ti)=εep(ti)+εoep(ti)2Maximum stress is obtained in line 21 as follows(4)σmax(ti)=σm(ti)+|σa(ti)|If σmax(ti)>0, damage parameter amplitude in line 23(5)Pa(ti)=sign(εaep(ti))|σmax(ti)εaep(ti)E(ti)|Otherwise, Pa(ti)=0 in line 25. Damage parameter in line 27 referring to time ti is then(6)P(ti)=Po(ti)+2Pa(ti)If s in line 28 is false, the algorithm in line 29 checks if εep(ti) stands for the strain reversal point. If true, j is incremented and residuum strain εjep,res, residuum stress σjres, residuum damage parameter Pjres are set to the i-th values.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Algorithm flow",
+      "instruction": "In lines 4–9 origins εoep(ti),σo(ti), and Po(ti) are set depending on εep(ti) either as in line 16 or to the j − 2-th residuum values. Index j is decremented and s is set to true if j > 2. In lines 12–13 origins εoep(ti),σo(ti), and Po(ti) are set as in line 16. Index j is decremented and s is set to false. The algorithm can be adapted if SWT expression in lines 5, 12 and 16 is replaced by another damage parameter and if lines 21–26 are adjusted accordingly.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Example",
+      "instruction": "For simplicity reasons and to enable the point-to-point validation of the pseudo code, the isothermal linear elastic stress–strain response is studied.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Example",
+      "instruction": "Let elastoplastic strain εep(ti), stress σ(ti)=Eεep(ti), where E = 210,000 MPa, and temperature T(ti)=293 K histories be known (see Fig. 2 and Table 1). From εep(ti) history one Clormann–Seeger cycle (strain reversal points for the four point cycle counting algorithm at times t1, t5, t11, t25) and three rainflow cycles can be identified. The first appears within the Clormann–Seeger cycle (t11, t15, t18, t25), the second within times t25, t29, t31, t39 and the third compressive cycle within t31, t39, t42, t48. The memory [5] M1 rule applies at time t23, memory M2 rule at t21, t33 and at t45 and memory M3 rule at t47. As temperature is kept constant in this simple case, the strain, stress and damage parameter reversal points coincide.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Example",
+      "instruction": "Unlike the existing strain life approaches, where amplitude and mean values cannot be determined before cycle closure at times t21, t23, t33 and t45, the presented algorithm enables the determination of all load parameters at any time ti. It can be noted that the third compressive cycle starting at t39 results in Pa(t41)=Pa(t42)=Pa(t43)=Pa(t44)=0, which is correct as Pa(ti)≠0 only if σmax(ti)>0 (see line 22 in Fig. 1). The complete calculation is listed in Table 1.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Example",
+      "instruction": "Although damage parameter P(ti) is not a monotonic function, it still results in monotonically increasing fatigue damage Df(ti) as it is expressed in the form of total variation introduced in Ref. [10]. Since the damage parameter history is now known, fatigue damage Df(ti) can be calculated as explained in detail in Section 5.3 of Ref. [11].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Results",
+      "instruction": "The strain-life approach is standardized and widely accepted for determining fatigue damage under strain-controlled low cycle fatigue loading. It is a standard practise to use damage parameters to account for the mean stress correction here. However, to perform the conversion of the load parameters into the damage parameter, temperature should be kept constant.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Results",
+      "instruction": "The presented method generalizes the damage parameters by continuous calculation of the stress and strain amplitude and mean stress instead of waiting for the cycles to close. Not only the discussed Smith–Watson–Topper damage parameter but also other parameters [5,7] can now be used identically in the strain-life predictions under thermo-mechanical cyclic loading. The method will enable an application of widely used strain-life mean stress correction techniques in energy based approaches such as in Refs. [12–14].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T06:11:01.824024Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "protocol",
+  "content_type_score": 31,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC4472857/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4472857/",
+      "caption": "",
+      "bytes": 68646,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC4472857/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC4472857/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4472857/",
+      "caption": "",
+      "bytes": 115474,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC4472857/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC4472857/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4472857/",
+      "caption": "",
+      "bytes": 87309,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC4472857/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC4472857/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4472857/",
+      "caption": "",
+      "bytes": 98548,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC4472857/gr3.jpg"
+    }
+  ]
 }

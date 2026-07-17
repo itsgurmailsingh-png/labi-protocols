@@ -30,9 +30,603 @@
       "substeps": [],
       "is_critical": false,
       "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Sort and convert gene expression data",
+      "instruction": "The input to Sargent consists of a single-cell transcriptomics dataset (scRNA, or single nuclei [snRNA]), a set of cell types to be detected, and an associated gene set for each cell type (Fig. 1A). Sargent uses a score-based procedure to infer the cell type of origin for each cell based on the provided gene sets. First, for a given cell, it sorts non-zero expressed genes from high to low expression. Then, this ranked vector (of length N) is converted to a binary sequence (s) so that genes (g) that are included in a specific gene set (G) are substituted by 1, and 0 otherwise:s={1:gn∈G0:gn∉G}1≤n≤N.",
+      "substeps": [
+        {
+          "instruction": "Sort non-zero expressed genes from high to low expression for a given cell.",
+          "title": ""
+        },
+        {
+          "instruction": "Convert the ranked vector (of length N) to a binary sequence (s).",
+          "title": ""
+        },
+        {
+          "instruction": "Substitute genes (g) included in a specific gene set (G) with 1, and 0 otherwise: s={1:gn∈G0:gn∉G} for 1≤n≤N.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Compute assignment score S",
+      "instruction": "Next, a partial cumulative sum is performed over the binary sequence up to each element “k” of the binary vector, followed by the sum over all generated sequential “1-to-k” partial sums, which results in the assignment-score S for the given cell:S=∑k=1N∑n=1ksn.",
+      "substeps": [
+        {
+          "instruction": "Perform a partial cumulative sum over the binary sequence up to each element “k” of the binary vector",
+          "title": ""
+        },
+        {
+          "instruction": "Sum over all generated sequential “1-to-k” partial sums",
+          "title": ""
+        },
+        {
+          "instruction": "Record the assignment-score S for the given cell as S=∑k=1N∑n=1ksn",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Transform gene expression matrix",
+      "instruction": "This process is performed over all cells and gene sets (total M gene sets), transforming an input gene-by-cell expression matrix (number of genes × number of cells) into a gene-set-by-cell assignment-score matrix (number of gene sets × number of cells). Finally, each individual cell is assigned to the cell type with the highest assignment-score (Fig. 1B):max{Sm}1≤m≤M.",
+      "substeps": [
+        {
+          "instruction": "Process all cells and gene sets (total M gene sets)",
+          "title": ""
+        },
+        {
+          "instruction": "Transform input gene-by-cell expression matrix (number of genes × number of cells)",
+          "title": ""
+        },
+        {
+          "instruction": "Create gene-set-by-cell assignment-score matrix (number of gene sets × number of cells)",
+          "title": ""
+        },
+        {
+          "instruction": "Assign each individual cell to the cell type with the highest assignment-score: max{Sm} 1≤m≤M",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Scoring",
+      "instruction": "The scoring method is cell-based and is therefore independent of the gene expression units.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Trimming",
+      "instruction": "To prevent misassignment when scores are calculated uniformly across cell types or unknown cell types (unspecified in the marker matrix) are present, Sargent annotate cells as unclassified (Fig. 1C). Sargent uses the Gini index [8] as a measure of dispersion to identify ambiguous calls. First, for each cell, the Gini index is calculated among its assignment scores, transforming the gene-set-by-cell assignment-score matrix to a distribution of indexes (∈[0,1]). Then, cells with an index which is both an outlier (μ−xσ; where μ is the mean, x is the confidence interval, and σ is the standard deviation) and less than 0.5 are called ambiguous. Statistically, a Gini index below 0.5 does not represent a severe dispersion among assignment scores, suggesting a poor annotation. Cells with such ambiguous calls remain unclassified. In addition, if a cell does not express any of the specified markers or gains an equal score across multiple cell-types, it will remain unclassified.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Smoothing",
+      "instruction": "The last step in cell annotation is k-nearest neighbor (kNN) smoothing (Fig. 1D). This step is designed to smoothen annotations by aggregating information from cells with similar genome-wide expression profiles (neighbors). Smoothing is performed by first identifying cells with a minimum of k nearest-neighbors. Then, if more than 50% of neighbors reach a consensus on their labels (i.e., the most frequent label of the nearest neighbors), the surrounded cell will be relabeled according to the neighbors' consensus. A kNN graph can be generated using state-of-the-art methods [10,19]. Smoothing is optional and runs once over all cells.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Incorporate negative markers",
+      "instruction": "Negative markers combined with positive markers can increase the specificity of cell type identification, reducing the likelihood of misclassification and improving the overall accuracy of the analysis [3]. By default, the signature genes are expected to be highly expressed in one cell type compared to all other cell types. However, depending on the underlying data, these canonical markers may not be enough to segregate cell types with similar expression profiles (e.g., sub-groups of T-cells in the human blood). When this occurs, genes that are expected not to be detected in a specific cell type (e.g., CD8A in CD4 T cells) can be utilized to improve segregation. Therefore, genes that are characteristically lowly expressed in one cell type compared to the other cell types are introduced as the “negative markers”. Sargent incorporates negative markers by rewarding cells that do not express these markers and penalizing them otherwise. Such procedure increases the dispersion among assignment scores, leading to a more trustworthy outcome. In addition, we note that the Sargent algorithm has been implemented so that markers (either positive or negative) can be shared across multiple gene sets, therefore providing significant flexibility for investigators to design comprehensive, decisive, and optimal gene sets.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Perform sub-annotation of gene sets",
+      "instruction": "Too many cell type-specific gene sets can make annotation more challenging, especially for very heterogeneous datasets. When the ontology of cell type is extremely granular, a common strategy is to perform sub-annotation by utilizing a hierarchy of established cell types [4]. More specifically, data could undergo a first round of annotation at an intermediate hierarchy level (i.e., with broad cell type definitions). Subsequently, each group can be treated as a new separate dataset and annotated further with other gene sets. By focusing on just a subset of the data, the granularity will increase, and novel cell subtypes can be explored efficiently.",
+      "substeps": [
+        {
+          "instruction": "Annotate data at an intermediate hierarchy level with broad cell type definitions.",
+          "title": ""
+        },
+        {
+          "instruction": "Treat each group as a new separate dataset.",
+          "title": ""
+        },
+        {
+          "instruction": "Annotate each new dataset further with other gene sets.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Identify gene marker sources",
+      "instruction": "The list of gene sets to explore on the cells is one of the fundamental building blocks in Sargent. Therefore, it is imperative that investigators have a detailed understanding of cell types and associated markers they expect to observe in the tissue under investigation. A list of tissue-specific markers could come from a variety of sources. The two largest databases for cell type markers are available at CellMarker [23] and PanglaoDB [7]. Expert-annotated data are also available from databases like The Tabula Sapiens [18], which could be analyzed to define gene signatures. Alternatively, signatures could also be flexibly defined from investigators’ own experiments like CITE-seq [16] or cross-validation experiments.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Additional features and operational suggestions",
+      "instruction": "Sargent can be used as a stand-alone tool or as complementary to the other supervised methods. For instance, commonly used scRNA-seq analysis workflows like Seurat [10,15] may be used to identify segregated cell populations and apply Sargent to validate and refine the granularity of cell type annotation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Benchmark Sargent on simulated data",
+      "instruction": "We first benchmarked the performance of the Sargent on simulated data, where cell types are known a priori. Specifically, we used Splatter R package (with default parameters) [21] to create three sets of simulated scRNA-seq data of increasing size and complexity: (1) six datasets with 5,000 cells divided into five cell-types; (2) six datasets with 10,000 cells divided into ten cell types; (3) six datasets with 15,000 cells divided into 15 cell types. The proportion of cells in each cell-type group were randomly sampled from a uniform distribution. Each simulated dataset was composed of 10,000 genes (Fig. 2A).Fig. 2Sargent identifies cell types of origin with high confidence on simulated data. (A) Overview of 18 simulated datasets generated by the Splatter R package. (B) Schematic illustration of the benchmarking procedure. (C) Annotation of single cells using the Sargent and UCell algorithms. Performance was assessed by calculating sensitivity, specificity, and the F-1 score for simulated datasets with 5k, 10k, or 15k cells. (D) Sargent performance with under-specification of the marker gene sets. Sargent performance was assessed by calculating sensitivity, specificity, and the F-1 score where one to four cell types were removed from the training data. Marker genes were inferred without knowledge of the removed cell types.Fig 2",
+      "substeps": [
+        {
+          "instruction": "Use Splatter R package with default parameters to create datasets.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate six datasets with 5,000 cells divided into five cell types.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate six datasets with 10,000 cells divided into ten cell types.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate six datasets with 15,000 cells divided into 15 cell types.",
+          "title": ""
+        },
+        {
+          "instruction": "Randomly sample the proportion of cells in each cell-type group from a uniform distribution.",
+          "title": ""
+        },
+        {
+          "instruction": "Ensure each simulated dataset is composed of 10,000 genes.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Infer cell type-specific markers",
+      "instruction": "Sargent requires cell type-specific markers as the input. To infer them from simulated data we designed a systematic approach. First, we selected one simulated dataset as the training dataset (1 training + 5 testing). We inferred marker gene sets from the training data by performing differential expression analysis using Wilcoxon rank-sum test (“FindAllMarkers” function from Seurat R package with a minimum fraction of 0.1 cells expressing a given gene and at least 0.5-fold difference (log-scale) between the two groups of cells). The 100 top-ranked marker genes for each cell type were used as the input for annotation of the remaining five testing datasets. This approach provided a benchmark of 30 trials for each set of simulated data (Fig. 2B).",
+      "substeps": [
+        {
+          "instruction": "Select one simulated dataset as the training dataset (1 training + 5 testing)",
+          "title": ""
+        },
+        {
+          "instruction": "Perform differential expression analysis using Wilcoxon rank-sum test",
+          "title": ""
+        },
+        {
+          "instruction": "Use 'FindAllMarkers' function from Seurat R package",
+          "title": ""
+        },
+        {
+          "instruction": "Set minimum fraction of 0.1 cells expressing a given gene",
+          "title": ""
+        },
+        {
+          "instruction": "Set at least 0.5-fold difference (log-scale) between the two groups of cells",
+          "title": ""
+        },
+        {
+          "instruction": "Use the 100 top-ranked marker genes for each cell type as input for annotation of the remaining five testing datasets",
+          "title": ""
+        },
+        {
+          "instruction": "Provide a benchmark of 30 trials for each set of simulated data",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Quantify performance metrics",
+      "instruction": "The performance was quantified using the measures of sensitivity (SEN), specificity (SPC), and F1-score by the fractions TP/(TP+FN), TN/(TN+FP), and 2×TP/(2×TP+FP+FN), respectively, where:1.True positive (TP) is defined by the number of cell type-related pairs that are correctly identified,2.False positive (FP) is defined by the number of unrelated cell pairs that are incorrectly identified as cell type-related,3.True negative (TN) is defined by the number of unrelated cell pairs that are correctly identified as unrelated, and4.False negative (FN) is defined by the number of cell type-related pairs that are incorrectly identified as unrelated.",
+      "substeps": [
+        {
+          "instruction": "Calculate sensitivity (SEN) as TP/(TP+FN)",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate specificity (SPC) as TN/(TN+FP)",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate F1-score as 2×TP/(2×TP+FP+FN)",
+          "title": ""
+        },
+        {
+          "instruction": "Define True positive (TP) as correctly identified cell type-related pairs",
+          "title": ""
+        },
+        {
+          "instruction": "Define False positive (FP) as incorrectly identified unrelated cell pairs",
+          "title": ""
+        },
+        {
+          "instruction": "Define True negative (TN) as correctly identified unrelated cell pairs",
+          "title": ""
+        },
+        {
+          "instruction": "Define False negative (FN) as incorrectly identified cell type-related pairs",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Validation of the sargent algorithm using simulated scRNA-seq data",
+      "instruction": "We found that Sargent inferred the simulated cell type assignments with average sensitivity, specificity, and F1-score of above 99% across all trials (Fig. 2C). Next, we sought to compare the performance of Sargent with UCell [3]. Given that UCell lacks the capability to annotate individual cells definitively, we opted to assign each cell to the cell type that obtained the highest score according to UCell's scoring system. To ensure a fair comparison, we used the same simulated dataset and gene sets. Our analysis revealed that Sargent consistently outperformed UCell in terms of key performance metrics, including sensitivity, specificity, and F1-score (Fig. 2C).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Assess Sargent robustness",
+      "instruction": "We next sought to examine robustness of Sargent performance in discovering novel cell types (i.e., unclassified cell types). This task was performed by omitting a subset of the marker gene sets (under-specification of the marker gene sets) and applying Sargent to retrieve the missing cell types. We randomly chose one training dataset, then we randomly removed between 1 and 4 cell types from the training data: 1–2 cell types from data with five cell types; 1–3 cell types from data with 10 cell types; and 1–4 cell types from data with 15 cell types. Then, we inferred marker gene sets from the training data by performing differential expression analysis as discussed above. Last, we benchmarked Sargent's performance among the remaining simulated data. We repeated this procedure 100 times for each cell type removal. We note that cell types were removed prior to marker gene selection to ensure that marker genes were being selected with no knowledge of unknown cell types. We found that Sargent inferred the unknown cell types with average sensitivity, specificity, and F1-score values of above 95.0% across all trials (Fig. 2D). It should be noted that conducting similar analysis using UCell [3] was not viable as UCell is not equipped to identify unknown cell types.",
+      "substeps": [
+        {
+          "instruction": "Randomly select one training dataset.",
+          "title": ""
+        },
+        {
+          "instruction": "Randomly remove cell types: 1–2 from datasets with five cell types; 1–3 from datasets with ten cell types; and 1–4 from datasets with fifteen cell types.",
+          "title": ""
+        },
+        {
+          "instruction": "Perform differential expression analysis on the training data to infer marker gene sets (as described earlier).",
+          "title": ""
+        },
+        {
+          "instruction": "Benchmark Sargent performance on the remaining simulated data.",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat the entire procedure 100 times for each cell‑type‑removal scenario.",
+          "title": ""
+        },
+        {
+          "instruction": "Ensure cell‑type removal occurs before marker‑gene selection.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Record that marker sets do not affect score",
+      "instruction": "We further note that Sargent is not sensitive to the inclusion of marker gene sets for cell types that are not present in the dataset (over-specification of the marker gene sets). Since Sargent is a single-cell-based algorithm (i.e., cells do not compete against each other), the inclusion of a marker set for which no cells are found does not affect the score of the other marker gene sets, and hence it does not impact the annotation quality of the cell types present in the dataset.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Validation of the sargent algorithm using experimental scRNA-seq data",
+      "instruction": "Along with simulated data, we investigated the performance of Sargent by annotating experimental scRNA-seq data from multiple human tissues, including PBMC, heart, kidney, and lung, from published Tabula Sapiens Consortium [18]. We first extracted 50,115 peripheral blood mononuclear cells (PBMCs) and classified them using a hierarchy of known immune cell-types. We first created marker gene sets specifying cell types at a moderate immunophenotype granularity, namely: T cells and NK cells (TNK), monocytes and macrophages (MPh), B and plasma cells (BPC), neutrophils (Neut), erythrocytes (Eryth), megakaryocytes (Mega), and hematopoietic stem cells (HSC, Supplementary File S1). Sargent assigned cells to the correct type (the expert-annotated type), with 98% accuracy across all cell types (Fig. 3A). High assignment accuracy was also demonstrated by the Jaccard Index (JI): 98% among MPhs; 96% among TNKs, BPCs, and Eryts; 94% among Neuts; and 76% among Megas (Fig. 3B). A relatively lower JI was achieved among HSCs: 39%. However, when we explored the expression level of the HSCs’ canonical markers, CD34, CD133, and SPINK2, we observed that cells annotated by Sargent are more likely to be HSCs than the manually annotated cells (Fig. 3C). Only 16 out of more than 50,000 cells were not assigned to a cell type by Sargent as they did not have shown any expression of all the immunophenotypes’ canonical markers (Fig. 3C).Fig. 3Sargent identifies the cell-types of origin with high confidence in human PBMCs. (A) t-SNE plot showing the cluster-based manual annotation of cells from the original Tabula publication (left panel) and the cell types assigned by Sargent (right panel). (B) Heatmap comparing the number of cells annotated by experts (column) versus Sargent (row). Color represents the Jaccard Index calculated as the ratio of intersection over union between each pair of cell types. Value next to each cell-type label indicates the number of annotated cells. (C) Dot-plot comparing the expression level of selected markers between expert-annotated cell types versus the Sargent cell types.Fig 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Validation of the sargent algorithm using experimental scRNA-seq data",
+      "instruction": "We next evaluated Sargent's performance by increasing the granularity of annotated cell types within the PBMCs. We first retrieved 10,173 cells that were jointly annotated as TNK by Sargent and Tabula. Next, we curated a list of T and NK (natural killer) cells canonical markers (Supplementary File S1 and Fig. 4A). Sargent annotated 5,683 T cells and 4,486 NK cells with a clear separation in t-SNE space (Fig. 4B), with only 4 cells remaining unlabeled (Fig. 4C). The Jaccard Index similarity between Sargent and Tabula was 75% among T cells and 59% among NK cells (Fig. 4D). We identified a mixed population (18% JI) of 1,795 cells (17% of TNKs) with Sargent NK annotation and Tabula T annotation (Fig. 4D). We explored this population to determine which annotation was more plausible. We examined the expression level of T-cell canonical markers including CD3D, CD4, and CD8A. Our inspection showed that this mixed population did not express the T-cell canonical markers (Fig. 4E). In contrast, they highly expressed cytotoxic markers like NKG7, GNLY, FGFBP2, FCGR3A, and FCER1G (Fig. 4E). We hence concluded that it is more plausible for this population to be annotated as NK cells (as annotated by Sargent), as opposed to T cells (as annotated by Tabula).Fig. 4Sargent identifies T and natural killer cells with high confidence in human PBMCs. (A) t-SNE plots representing expression levels of selected genes. (B) t-SNE plot showing the manual expert cluster-based annotation of cell types from the original Tabula publication (top panel) and the cell types assigned by Sargent (bottom panel). (C) Dot-plot comparing the expression level of selected markers between expert-annotated cell types versus the Sargent cell types. (D) Heatmap comparing the number of cells annotated by experts (column) versus Sargent (row). Color represents the Jaccard Index calculated as the ratio of intersection over union between pairs of cell types. Value next to each cell-type label indicates the number of annotated cells. (E) Expression level of selected markers for cells annotated as NK by Sargent and T by Tabula.Fig 4",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Validation of the sargent algorithm using experimental scRNA-seq data",
+      "instruction": "We next increased the resolution of the analysis by focusing only on T cells. We first retrieved 5,634 cells that were jointly annotated as T cells by Sargent and Tabula. We then curated a list of CD4+ and CD8+ T-cell canonical positive and negative markers (Supplementary File S1 and Fig. 5A). Sargent annotated 3,995 CD4+ T and 1,639 CD8+ T cells (Fig. 5B and C). The Jaccard Index similarity between Sargent and Tabula was 78% among CD4+ T and 51% among CD8+ T cells (Fig. 5D). In addition, we observed a mixed population (17% of TCs) among Sargent and Tabula annotated cells comprised of 376 cells (7% JI) annotated as CD4+ T by Sargent but CD8+ T cells by Tabula, and 605 cells (12% JI) vice versa (Fig. 5D). We explored these two groups to determine the more plausible annotation. We examined the expression level of T-cell canonical markers, CD4, CD8A, and CD8B. Our inspection showed that the Sargent-specific CD4+ T cells expressed the CD4 marker, and not CD8A and CD8B (Fig. 5E: left-panel). In contrast, the Tabula-specific CD8+ T cells did not express CD8A and CD8B markers. Furthermore, Sargent-specific CD8+ T cells expressed CD8A and CD8B, and not CD4 (Fig. 5E: right-panel), while Tabula-specific CD4+ T cells expressed a relatively high level of CD8A and CD8B, but not CD4. Thus, this inspection revealed that Sargent's annotation was more plausible than Tabula's for the CD4+ and CD8+ subpopulations.Fig. 5Sargent identifies CD4+ T and CD8+ T cells with high confidence in human PBMCs. (A) t-SNE plots representing expression level of selected genes. (B) t-SNE plot showing the manual expert cluster-based annotation of cell types from the original Tabula publication (top panel) and the cell types assigned by Sargent (bottom panel), (C) Dot-plot comparing the expression level of selected markers between expert-annotated cell types versus the Sargent cell types. (D) Heatmap comparing the number of cells annotated by expert (column) versus Sargent (row). Color represents the Jaccard Index calculated as the ratio of intersection over union between pairs of cell types. Value next to each cell-type label indicates the number of annotated cells. (E) Expression level of selected markers for cells annotated as CD4+ by Sargent and CD8+ by Tabula (left panel), and cells annotated as CD8+ by Sargent and CD4+ by Tabula (right panel).Fig 5",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Annotate macrophages and monocytes",
+      "instruction": "We next switched our focus to macrophages and monocytes. Specifically, we benchmarked Sargent's performance by annotating macrophages and the three major monocyte populations: classical (CD14+CD16-), intermediate (CD14+CD16+), and non-classical (CD14-CD16+). We first retrieved 16,504 cells that were jointly annotated as MPh by both Sargent and Tabula. We then compiled a list of canonical macrophage and monocyte markers (Supplementary File S1). Sargent annotated 894 macrophages, 10,837 classical monocytes, 4,719 intermediate monocytes, 96 non-classical monocytes, and 3 unlabeled (Fig. 6A and B). The similarity between Sargent and Tabula annotation measured by Jaccard Index indicated a poor agreement (Fig. 6C) and, as for T and NK cells, we sought to determine which annotation was more plausible. We first examined the expression level of canonical macrophage markers including ITGAM, ITGAX, CD68, FCGR1A, and FCGR2A. Our inspection showed that macrophages annotated by Sargent expressed a higher level of the canonical markers than Tabula-annotated macrophages (Fig. 6B). Further inspection in the monocyte populations showed that Sargent achieved a clear segregation among classical, intermediate, and non-classical monocytes (Fig. 6D). In contrast, cells annotated by Tabula showed a mixed population, indicating a faulty annotation. Thus, these analyses revealed that cells annotated by Sargent are more likely to be macrophages or monocytes than manually annotated cells.Fig. 6Sargent identifies monocytes and macrophages with high confidence in human PBMCs. (A) t-SNE plot showing the manual expert cluster-based annotation of cell types from the original Tabula publication (left panel) and the cell types assigned by Sargent (right panel). (B) Dot-plot comparing the expression level of selected markers between expert-annotated cell types versus the Sargent cell types. (C) Heatmap comparing the number of cells annotated by expert (column) versus Sargent (row). Color represents the Jaccard Index calculated as the ratio of intersection over union between pairs of cell types. Value next to each cell-type label indicates the number of annotated cells. (D) Expression level of CD14 (x-axis) and CD16 (y-axis) in cells annotated by Sargent (top panels) and Tabula (bottom panels) as non-classical monocytes (Mon.CD16), intermediate monocytes (Mon.Int), and classical monocytes (Mon.CD14).Fig 6",
+      "substeps": [
+        {
+          "instruction": "Retrieve 16,504 cells annotated as MPh by Sargent and Tabula.",
+          "title": ""
+        },
+        {
+          "instruction": "Compile a list of canonical macrophage and monocyte markers from Supplementary File S1.",
+          "title": ""
+        },
+        {
+          "instruction": "Annotate 894 macrophages.",
+          "title": ""
+        },
+        {
+          "instruction": "Annotate 10,837 classical monocytes (CD14+CD16-).",
+          "title": ""
+        },
+        {
+          "instruction": "Annotate 4,719 intermediate monocytes (CD14+CD16+).",
+          "title": ""
+        },
+        {
+          "instruction": "Annotate 96 non-classical monocytes (CD14-CD16+).",
+          "title": ""
+        },
+        {
+          "instruction": "Identify 3 unlabeled cells.",
+          "title": ""
+        },
+        {
+          "instruction": "Examine expression level of ITGAM, ITGAX, CD68, FCGR1A, and FCGR2A in macrophages.",
+          "title": ""
+        },
+        {
+          "instruction": "Compare expression levels of canonical markers between Sargent and Tabula-annotated macrophages.",
+          "title": ""
+        },
+        {
+          "instruction": "Inspect monocyte populations for segregation among classical, intermediate, and non-classical monocytes.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Validation of the sargent algorithm using experimental scRNA-seq data",
+      "instruction": "We next benchmarked Sargent's performance on the BPC population comprised of naïve B cells (NBCs), memory B cells (MBCs), and plasma cells (PCs). We retrieved 3,525 cells that were jointly annotated as BPC by Sargent and Tabula. We then curated a list of canonical markers highlighting memory, naïve, and plasma states (Supplementary File S1). Sargent annotated 2,486 NBCs, 593 MBCs, and 446 PCs (Fig. 7A and B). The Jaccard Index similarity between Sargent and Tabula annotation was 87% similarity among NBCs, 64% similarity among MBCs, and 99% PCs (Fig. 7C). We identified a mixed population (9% JI) of 284 cells (8% of BPCs) comprised of Sargent annotated NBCs and Tabula annotated MBCs (Fig. 7C). When we examined the expression level of canonical BC markers including naïve markers IGHM and IGHD, and activation marker CD27, this population highly expressed IGHM and IGHD and lacked the expression of CD27 (Fig. 7D). Thus, Sargent's annotation of this population as NBCs is more likely to be correct.Fig. 7Sargent identifies B and plasma cells with high confidence in human PBMCs. (A) t-SNE plot showing the manual expert cluster-based annotation of cell types from the original Tabula publication (left panel) and the cell types assigned by Sargent (right panel). (B) Dot-plot comparing the expression level of selected markers between expert-annotated cell types versus the Sargent cell types. (C) Heatmap comparing the number of cells annotated by experts (column) versus Sargent (row). Color represents the Jaccard Index calculated as the ratio of intersection over union between pairs of cell types. Value next to each cell-type label indicates the number of annotated cells. (D) Expression level of selected markers for cells annotated as Naïve B by Sargent and Memory B by Tabula.Fig 7",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Test Sargent's cell type assignment",
+      "instruction": "We next tested Sargent's performance in assigning cell types of additional three human tissues (heart, kidney, and lung) as compared to the manual cell type annotations from the Tabula Sapiens study. The manual annotation of the human heart tissue (11,505 cells) comprised six cell types including: cardiac fibroblasts (CFs), cardiac muscle cells (CMC), endothelial cells (Endo), hepatocytes (Hepa), macrophages (Mac), and smooth muscle cells (SMC). We compiled a set of marker genes from literature to recognize these cell types in the dataset (Supplementary File S1). Sargent assigned cells with 96% similarity with the manually annotated cells over all six heart tissue cell types (Fig. 8A and B). High assignment similarity between Sargent and the manual annotation was shown at individual cell type level as measured by Jaccard Index: 97% for CFs; 96% for Endo cells; 95% for CMCs; 85% for SMCs; 70% similarity Hepa cells; and 67% for Macs (Fig. 8C).Fig. 8Sargent identifies the cell-types of origin with high confidence in human Heart. (A) t-SNE plot showing the manual expert cluster-based annotation of cell types from the original Tabula publication (left panel) and the cell types assigned by Sargent (right panel). (B) Dot-plot comparing the expression level of selected markers between expert annotated cell types versus the Sargent cell types. (C) Heatmap comparing the number of cells annotated by expert (column) versus Sargent (row). Color represents the Jaccard Index calculated as the ratio of intersection over union between pairs of cell types. Value next to each cell-type label indicates the number of annotated cells.Fig 8",
+      "substeps": [
+        {
+          "instruction": "Assign cell types for heart tissue (11,505 cells)",
+          "title": ""
+        },
+        {
+          "instruction": "Compare with manual annotations from Tabula Sapiens study",
+          "title": ""
+        },
+        {
+          "instruction": "Compile marker genes from literature (Supplementary File S1)",
+          "title": ""
+        },
+        {
+          "instruction": "Measure assignment similarity: 96% overall",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate Jaccard Index for CFs: 97%",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate Jaccard Index for Endo cells: 96%",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate Jaccard Index for CMCs: 95%",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate Jaccard Index for SMCs: 85%",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate Jaccard Index for Hepa cells: 70%",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate Jaccard Index for Macs: 67%",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "Analyze human kidney tissue cells",
+      "instruction": "Next, we switched our focus to human kidney tissue, which included 9,461 cells. The original annotation comprised of 5 cell types: B cells (B), endothelial cells (Endo), Epithelial cells (Epit), macrophages (Mac), and T and natural killer cell population (TNKs), for each of which we compiled a set of marker genes (Supplementary File S1). Sargent was again able to achieve a high similarity (99%) with the manually annotated cells over all the cell types (Fig. 9A and B), with only 17 cells remaining unlabeled, and hence with no strong indication among listed markers (Fig. 9B). High assignment similarity between Sargent and the manual annotation was demonstrated by the high Jaccard Index: 100% for Epit cells; 98% for TNKs; 96% for B cells; 91% for Macs; and 74% for Endo cells (Fig. 9C).Fig. 9Sargent identifies the cell-types of origin with high confidence in human Kidney. (A) t-SNE plot showing the manual expert cluster-based annotation of cell types from the original Tabula publication (left panel) and the cell types assigned by Sargent (right panel). (B) Dot-plot comparing the expression level of selected markers between expert annotated cell types versus the Sargent cell types. (C) Heatmap comparing the number of cells annotated by expert (column) versus Sargent (row). Color represents the Jaccard Index calculated as the ratio of intersection over union between pairs of cell types. Value next to each cell-type label indicates the number of annotated cells.Fig 9",
+      "substeps": [
+        {
+          "instruction": "Focus on human kidney tissue with 9,461 cells",
+          "title": ""
+        },
+        {
+          "instruction": "Compile marker genes for 5 cell types: B cells (B), endothelial cells (Endo), epithelial cells (Epit), macrophages (Mac), and T and natural killer cell population (TNKs)",
+          "title": ""
+        },
+        {
+          "instruction": "Achieve high similarity (99%) with manually annotated cells over all cell types",
+          "title": ""
+        },
+        {
+          "instruction": "Identify 17 cells remaining unlabeled with no strong indication among listed markers",
+          "title": ""
+        },
+        {
+          "instruction": "Demonstrate high assignment similarity with Jaccard Index: 100% for Epit cells, 98% for TNKs, 96% for B cells, 91% for Macs, and 74% for Endo cells",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Analyze Sargent's performance on lung tissue",
+      "instruction": "As our last test, we examined Sargent's performance on the complex human lung tissue (35,682 cells from Tabula Sapiens study). The original annotation included 17 main cell types: adventitial cells (AC), alveolar type 1 and type 2 cells (ATC), basal cells (Basal), basophils (Baso), B and Plasma cells (BPC), club cells (CC), endothelial (Endo), fibroblasts (Fibro), goblet, serous, and mucous cells (GSM), lung ciliated cells (LCC), mesothelial cells (MC), monocytes, dendritic cells, and macrophages (MPh), neutrophils (Neut), pericyte cells (PC), pulmonary ionocytes (PI), smooth muscle cells (SMC), CD4+ T cells, CD8+ T cells, and natural killer cells (TNK). We compiled a set of marker genes from literature to detect these cell types in the dataset (Supplementary File S1). Sargent was able to achieve a high similarity (96%) with the manually annotated cells over all the cell types, and only 14 cells remaining unlabeled (Fig. 10A and B). In addition, the high assignment similarity between Sargent and manual annotation was maintained at individual cell type level (Fig. 10C).Fig. 10Sargent identifies the cell-types of origin with high confidence in human Lung. (A) t-SNE plot showing the manual expert cluster-based annotation of cell types from the original Tabula publication (left panel) and the cell types assigned by Sargent (right panel). (B) Dot-plot comparing the expression level of selected markers between expert annotated cell types versus the Sargent cell types. (C) Heatmap comparing the number of cells annotated by expert (column) versus Sargent (row). Color represents the Jaccard Index calculated as the ratio of intersection over union between pairs of cell types. Value next to each cell-type label indicates the number of annotated cells.Fig 10",
+      "substeps": [
+        {
+          "instruction": "Examine Sargent's performance on complex human lung tissue (35,682 cells from Tabula Sapiens study)",
+          "title": ""
+        },
+        {
+          "instruction": "Review original annotation including 17 main cell types: adventitial cells (AC), alveolar type 1 and type 2 cells (ATC), basal cells (Basal), basophils (Baso), B and Plasma cells (BPC), club cells (CC), endothelial (Endo), fibroblasts (Fibro), goblet, serous, and mucous cells (GSM), lung ciliated cells (LCC), mesothelial cells (MC), monocytes, dendritic cells, and macrophages (MPh), neutrophils (Neut), pericyte cells (PC), pulmonary ionocytes (PI), smooth muscle cells (SMC), CD4+ T cells, CD8+ T cells, and natural killer cells (TNK)",
+          "title": ""
+        },
+        {
+          "instruction": "Compile a set of marker genes from literature to detect these cell types in the dataset (Supplementary File S1)",
+          "title": ""
+        },
+        {
+          "instruction": "Achieve a high similarity (96%) with manually annotated cells over all cell types",
+          "title": ""
+        },
+        {
+          "instruction": "Identify only 14 cells remaining unlabeled",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Computationally efficiency",
+      "instruction": "Computational efficiency is an important property considering the recent growth in the size of typical scRNA-seq datasets. Sargent is computationally inexpensive due to its single cell-level implementation; the algorithm's runtime grows linearly based on the input number of cells (O(n)), rather than with the size of the input gene expression matrix (quadratic growth – O(n2)). We recorded the time it took for Sargent to run using one single core with a 3.1 GHz processor and 128 GB Memory. Sargent annotation of 15,000 simulated cells (the largest simulated data used in this study) took less than 2 min. In addition, the annotation of ∼27k ± 20k (mean ± standard deviation) experimental cells (the average data size used in this study) took ∼2.3 ± 1.7 min.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:32:04.496224Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "scRNA-seq annotation in Sargent is performed in three sequential steps: (1) scoring; (2) trimming: and (3) smoothing (Fig. 1). We discussed each step below.Fig. 1An overview of the Sargent algorithm design. (A) Input gene-by-cell expression matrix (number of genes × number of cells). The color shade indicates the expression level of genes (row) for each cell (column). (B) Schematic illustration of the scoring step. Gene-set-by-cell assignment-score matrix (number of gene sets × number of cells). The color shade indicates the assignment score of the gene set (row) for each cell (column). (C) Schematic illustration of the trimming step. Sargent uses the Gini index as a measure of dispersion to identify ambiguous calls. Cells with low values (outliers) of the Gini index distribution are annotated as unclassified. (D) Schematic illustration of the smoothing step. Sargent aggregates information from cells with similar genome-wide expression profiles (neighbors) to relabel the surrounded cell according to the neighbors' annotation consensus.Fig 1 We first benchmarked the performance of the Sargent on simulated data, where cell types are known a priori. Specifically, we used Splatter R package (with default parameters) [21] to create three sets of simulated scRNA-seq data of increasing size and complexity: (1) six datasets with 5,000 cells divided into five cell-types; (2) six datasets with 10,000 cells divided into ten cell types; (3) six datasets with 15,000 cells divided into 15 cell types. The proportion of cells in each cell-type group were randomly sampled from a uniform distribution. Each simulated dataset was composed of 10,000 genes (Fig. 2A).Fig. 2Sargent identifies cell types of origin with high confidence on simulated data. (A) Overview of 18 simulated datasets generated by the Splatter R package. (B) Schematic illustration of the benchmarking procedure. (C) Annotation of single cells using the Sargent and UCell algorithms. Performance was assessed by calculati",
+  "content_type": "protocol",
+  "content_type_score": 41,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 93275,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 34223,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 124240,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 68339,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 130812,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 139383,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 128132,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 109675,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 109190,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 109523,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC10326446/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326446/",
+      "caption": "",
+      "bytes": 100364,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326446/gr9.jpg"
+    }
+  ]
 }

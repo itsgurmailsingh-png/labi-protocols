@@ -28,150 +28,107 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Identify stream gages in a flood-prone catchment using https://waterdata.usgs.gov/ . Real time data should be explored by state. For this example, select \"Texas.\" Fig. 1 - USGS Water Data for the Nation portal for exploring stream gage locations.",
+      "title": "Select gage and data type",
+      "instruction": "Open the USGS Water Data portal (https://waterdata.usgs.gov/), choose the state of interest (e.g., Texas), select \"Gage height\" from the list of data types, navigate to the desired catchment, click a specific gage (e.g., 08165500) and open its \"View Monitoring location page\".",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "This will take you to a new page, where the default display should be instantaneous gage height data, usually at 15-minute or 5-minute intervals. The following steps use 15-minute data and provide a method for converting 5-minute data to 15-minute data. Fig. 4 - The default view of gage height data at a selected gage is the seven-day record of instantaneous (15-minute or 5-minute) observations.",
+      "title": "Set analysis time span",
+      "instruction": "Click \"Change time span\" and enter the start and end dates for the period to be analyzed (e.g., October 12‑18, 2018) to capture the flash‑flood event, then apply the change.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Scroll down and \"Change time span\" to a period of interest. For this example, thresholds will be based on a flash flood in October 2018, so a seven-day period encompassing that event, October 12-18, was selected. Fig. 5 - Adjust time span to a date range that includes a historical storm in selected catchment to be used for thresholding.",
+      "title": "Download continuous data",
+      "instruction": "After the graph updates, click \"Download data\", choose the \"Continuous data\" option, and press \"Retrieve\" to open a .txt file containing the selected data.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "After the time span updates in the graph view, select “Download data,\" choose the option for “Continuous data,” and click “Retrieve.” Fig. 6 - Data download for custom time span.",
+      "title": "Import data into Excel",
+      "instruction": "In the new window, copy all columns beginning with the column labeled \"agency_cd\". Open Microsoft Excel, right‑click a cell, choose Paste Special → Text to paste the data into separate columns.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "A new window will open with the selected data. Copy all columnar data, beginning with the column labeled “agency_cd.” Fig. 7 - All data from the chosen time span can be copied from the .txt file, which opens in a new window.",
+      "title": "Remove duplicate timestamps",
+      "instruction": "Select the entire sheet, go to Data → Remove Duplicates, keep only the date/time column (Column C) checked and deselect all other columns, then confirm removal to avoid division‑by‑zero errors later.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Open Microsoft Excel, right click in a cell, and Paste Special --> Text to paste data into appropriate columns. Fig. 8 - Paste copied data into Excel to be processed.",
+      "title": "Delete non‑15‑minute records",
+      "instruction": "In Column C, use Find & Replace to locate any time stamps ending with :05, :10, :20, :25, :35, :40, :50, or :55 and replace them with the string \"!!!!\". Sort the sheet by Column C (newest to oldest); rows containing \"!!!!\" will appear at the top—delete those rows. Finally, re‑sort by Column C oldest‑to‑newest to restore chronological order.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Any duplicate observations will result in a division by zero error with respect to time when calculating 1st and 2nd derivatives. Remove any duplicate rows by selecting the entire sheet, navigating to Data --> Remove Duplicates, and deselecting all columns except the date/time (Column C, in this case). Fig. 9 - Removal of duplicate values ensures that there are time differences between each observation. Failure to remove duplicates will result in division by zero errors in Steps 10 and 11.",
+      "title": "Convert timestamps to hours",
+      "instruction": "Copy Column C to a new column and format the new column as Number (this converts the date/time to decimal days, placed in Column G). Create a \"Corrected Time\" column (Column H) and enter H2 = G2*24; copy the formula down to convert days to hours.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "In addition to missing or repeated time observations, some gages alternate temporal resolution. 15-minute data generally yield lower 1st and 2nd derivatives. Derivatives using 5-minute data can be higher due to division of potentially rapid fluctuations in gage height by a shorter time window. As 15-minute data are more common, we determine WHATs based on that temporal resolution. To expediently cleanse the hydrologic record of 5-minute interval data, a coding solution may be implemented. Because this may present a barrier to using the WHAT method for many people, one option for correcting the data using only Microsoft Excel is detailed below.",
+      "title": "Compute first derivative",
+      "instruction": "Label Column I \"1st derivative\". In I2 enter the formula =(E2‑E1)/(H2‑H1) (gage height in ft divided by time difference in hours) and copy the formula down the column.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Times should all be at quarter hour increments now (Fig. 14, Column H) and 1st and 2nd derivatives can be calculated. Label Column I \"1st derivative” and populate cell I2 with “=(E2-E1)/(H2-H1)”, then copy that formula down all of Column I. This will calculate a rate of change in gage height over each 15-minute period. Fig. 14 - Calculation of 1st derivative using gage height (ft, Column E) and corrected time (hrs, Column H).",
+      "title": "Compute second derivative",
+      "instruction": "Label Column J \"2nd derivative\". In J2 enter the formula =(I3‑I2)/(H3‑H2) to obtain the rate of change of the first derivative (acceleration) and copy the formula down.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Label Column J “2nd derivative” and populate cell J2 with with “=(I3-I2)/(H3-H2)”, then copy that formula down all of Column J. This will calculate a rate of change in the 1st derivative over each 15-minute period, which represents the 2nd derivative (acceleration). Fig. 15 - Calculation of 2nd derivative using 1st derivative (ft/hr, Column I) and corrected time (hrs, Column H).",
+      "title": "Calculate height‑times‑acceleration",
+      "instruction": "Label Column K \"Height times acceleration\". In K2 enter =E2*J2 to multiply gage height (ft) by its acceleration (ft/hr²) and copy the formula down the column.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "Extract the maximum value of (water height x acceleration) over the dataset (Column K). At this gage, the maximum was 313.8 ft^2/hr^2 during the storm event. This represents the WHAT for future flood scenarios.",
+      "title": "Determine maximum threshold",
+      "instruction": "Identify the maximum value in Column K (e.g., 313.8 ft²/hr² for the example storm). Record this value as the water‑height‑×‑acceleration threshold (WHAT) for the gage.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
-      "instruction": "Repeat this procedure for other gages in your catchment.",
+      "title": "Repeat for additional gages",
+      "instruction": "Apply the entire workflow to each other gage in the catchment to obtain their respective WHAT values.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 12,
-      "title": "",
-      "instruction": "Select \"Gage height\" from the list of available data types for the selected state. Fig. 2 - Data types available at USGS stream gages. For this procedure, only gage heights are needed. Navigate to the catchment of interest, select a gage of interest (08165500 in this case), and click \"View Monitoring location page.\" Fig. 3 - Spatial distribution of USGS gages with gage height data.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 13,
-      "title": "",
-      "instruction": "Select the column with date/time (Column C). Find and replace all time increments not at 15-minute intervals (:05, :10, :20, :25, :35, :40, :50, :55) with \"!!!!\". Fig. 10 - The \"Find and Select --> Replace\" option should be used on the date/time column. Fig. 11 - Dialog box for finding and replacing 5-minute observations with \"!!!!\".",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 14,
-      "title": "",
-      "instruction": "Sort the entire dataset (newest to oldest) by the date/time column. Rows containing the adjusted dates/times (those containing \"!!!!\") should now be at the top and can be deleted. Fig. 12 - All rows with date/times containing \"!!!!\" can be deleted.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 15,
-      "title": "",
-      "instruction": "Re-sort by date/time so the whole datasheet is chronological.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 16,
-      "title": "",
-      "instruction": "To use time differences to calculate 1st and 2nd derivatives, the date/time needs to be converted to hours. Copy/paste column C and format the new column as a number. This will change the date/time to days (column G). Fig. 13 - Copy the date/time column and reformat as \"number.\" This will change the date/time to a decimal number of days. Make a new \"Corrected Time\" column (Column H) and populate cell H2 with \"=(G2*24)\". Copy that formula down all of Column H. This will convert days in Column G to hours.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 17,
-      "title": "",
-      "instruction": "Label Column K “Height times acceleration” and populate cell K2 with “=(E2*J2)” to multiply water height at the gage by its acceleration. Copy that formula down all of Column K. Fig. 16 - Calculation of acceleration (2nd derivative, Column J) times gage height (ft, Column E). The maximum value during a chosen flood represents the \"water height x acceleration threshold\" for this particular gage.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-18T21:17:49.243971Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 31,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

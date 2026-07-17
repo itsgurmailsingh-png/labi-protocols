@@ -14,18 +14,130 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": 6,
-  "materials": [],
+  "materials": [
+    "creating random gaps in the dataset;",
+    "altering the data distribution; and"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Use of Cusums in threshold analysis",
-      "instruction": "The change points where Cusum curves reverse slopes in Fig. 6 (negative to positive for TP, positive to negative for salinity) provide further useful information. TP concentrations shift from below average to above average around 40 cm water depth, while the opposite is true for salinity. Such simple and quick analysis of driver-response relationships in the complex time series highlight the value of Cusum charts to easily examine underlying relationships, which cannot be directly observed in untransformed time series. The authors anticipate that thresholds established in driver-response Cusum charts will be a useful tool for ecosystem management, as discussed by Andersen et al. [1] and others. For instance, Fig. 6 suggests that water levels below ˜40 cm at SRS-5 correspond to lower TP concentrations. Long-term research in the Shark River conducted by the FCE-LTER program indicates an “upside-down estuary” phenomenon, where phosphorus (the limiting nutrient in this system) is sourced from the marine endmember rather than freshwater inflows [25]. As Everglades restoration efforts focus on altering freshwater flows upstream of Shark River Slough to manage phosphorus [26], this relationship could be used to guide desired water levels to manage the level of phosphorus in the estuary. In this way, Cusums may provide a useful management tool to establish guidelines for controlling one parameter based on historic relationships to another (in this case, TP and water level respectively). Moreover, such driver-response relationships may be useful when applied to readily available data (i.e. water level) to estimate parameters which may be measured less frequently or are more expensive to analyze (i.e. TP).",
+      "title": "Download raw data",
+      "instruction": "Access the Florida Coastal Everglades LTER online database (http://fcelter.fiu.edu/data/core) and download the daily total phosphorus (TP) concentration dataset LT_ND_Grahl_001 (and optionally salinity and water level datasets LT_ND_Grahl_001 and PHY_Grahl_002).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Bin to monthly means",
+      "instruction": "Convert the daily TP values to monthly arithmetic means, producing a time series of one value per month.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Standardize data",
+      "instruction": "Calculate the mean (m) and standard deviation (σ) of the monthly TP series, then compute standardized values zi for each month using zi = (xi – m) / σ.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Compute Cusum series",
+      "instruction": "Generate the cumulative sum series (Cusum) by applying zis = zi + zis‑1 for each month (initialize z0 = 0).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Plot results",
+      "instruction": "Create three plots: (A) original monthly TP series with the mean line, (B) standardized series (zi), and (C) Cusum series (zis). Use different colors to indicate values above or below the mean.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Normalize for NSE",
+      "instruction": "Rescale the original TP series to the 0–1 range (min‑max normalization) before any NSE calculations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Calculate NSE",
+      "instruction": "In R, load the hydroGOF package and compute the Nash‑Sutcliffe Efficiency (NSE) between the original Cusum series and each manipulated Cusum series using the formula NSE = 1 – Σ(observed‑predicted)² / Σ(observed‑mean)².",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Test data‑gap robustness",
+      "instruction": "Randomly remove (a) 50 % and (b) 75 % of the monthly TP points, recompute the Cusum for each reduced dataset, and calculate NSE values (50 % removal NSE = 0.968; 75 % removal NSE = 0.792).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Test distribution robustness",
+      "instruction": "Transform the original TP series using (a) square‑root, (b) square, and (c) log10. For each transformed series, recompute the Cusum and calculate NSE (all > 0.945; specific values: square‑root NSE = 0.945, square NSE = 0.946, log10 NSE = 0.945).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Test noise robustness",
+      "instruction": "Generate white‑noise values with a range equal to twice the TP mean (mean = 0.68 mg L⁻¹): • 100 % noise range –0.68 to +0.68 mg L⁻¹, • 200 % noise range –1.36 to +1.36 mg L⁻¹, • 1000 % noise range –6.80 to +6.80 mg L⁻¹. Add each noise set to the original TP series, recompute Cusums, and calculate NSE (100 % NSE = 0.985; 200 % NSE = 0.954; 1000 % NSE = 0.735).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Prepare driver‑response data",
+      "instruction": "For a chosen driver variable (e.g., water level), sort its observations in ascending order; reorder the paired response variable (TP or salinity) to match this driver order.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Cusum‑transform response",
+      "instruction": "Apply the Cusum calculation (Eq. 2) to the reordered response variable, producing a Cusum‑transformed response series.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Plot driver‑response relationships",
+      "instruction": "Create two plots for each response: (a) original response vs. untransformed driver (gray), and (b) Cusum‑transformed response vs. untransformed driver (red).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Identify threshold points",
+      "instruction": "Locate the water‑level value where the Cusum slope changes sign (negative to positive for TP, positive to negative for salinity); report the approximate threshold (≈ 40 cm water depth).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T08:38:56.077684Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "It is important to note limitations to the format of data compatible with the Cusum techniques described above, particularly irregular time intervals between sampling events. Since neither Eq. (1) or Eq. (2) incorporates the time interval between data points, regular sampling intervals are assumed. However, irregular sampling frequencies due to any number of potential limitations (e.g. seasonal lack of access to site, ice-over of aquatic sites, etc.) are common in environmental studies. This issue is illustrated in Fig. 2, where holes were randomly punched in the time series. The authors do observe some deformation of the Cusum shape, although NSE statistics in Table 1 indicate minimal change when half the data are randomly removed, and, even with 75% of the data randomly removed, the resulting Cusum is still well predicted (based on the previously discussed NSE threshold of 0.65 in the literature). It has also been documented that Cusum-transformed time series are not appropriate for linear regression, where the Cusum transformation increases auto-correlation in a time series, violating linear regression assumptions that data are independently sampled and identically distributed [27]. As such, applying linear regression modeling to two Cusum-transformed time series can result in spuriously high correlations. In the two examples of Cusum plot types presented in this manuscript, the variable on the y-axis is Cusum-transformed, while the variable on the x-axis is not, and we are not applying linear regression analysis. However, the authors caution that users of the Cusums methodology should be aware of potential limitations discussed in this section before using the technique.",
+  "content_type": "protocol",
+  "content_type_score": 33,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

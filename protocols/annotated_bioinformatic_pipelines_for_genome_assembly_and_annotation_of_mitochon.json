@@ -1,0 +1,254 @@
+{
+  "protocol_id": "annotated_bioinformatic_pipelines_for_genome_assembly_and_annotation_of_mitochon",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Annotated Bioinformatic Pipelines for Genome Assembly and Annotation of Mitochondrial Genomes",
+  "author": "Jessica C. Winn",
+  "doi": "10.21769/BioProtoc.5231",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.5231",
+  "citation": "10.21769/BioProtoc.5231",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 5.0,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 12,
+  "materials": [
+    "Annotated mitogenome of Galeorhinus galeus (Linnaeus",
+    "Use the complete mitogenome sequence in fasta format as the input file, search for mammalian mitochondrial tRNA genes ( -mtmam ), and predict tRNA secondary structure using the mammalian mitochondrial genetic code ( -gcmam ) in the ARWEN v.1.2.3 webserver [40] ( http://130.235.244.92/ARWEN/ , last accessed 1/12/2025). Alternatively, select the correct genetic code for your study organism. Note that ARWEN is specifically designed for metazoan mitochondrial genomes. Investigate other software for plant mitogenomes and plastids (e.g., MFannot [50] and Mitofy [51]). tRNA annotation can also be conducted using the tRNAscanSE webserver v.2.0 [41] ( http://lowelab.ucsc.edu/cgi-bin/tRNAscan-SE2.cgi , last accessed 1/12/2025). We selected the sequence source as vertebrate mitochondrial and uploaded the input mitogenome file in fasta format. a. MXfold2 [42] can be used to verify the secondary structure of duplicated tRNAs. We used it to compare the secondary structure of the duplicated tRNA Thr’ to that of tRNA Thr in Galeorhinus galeus (Figure S3). Simply navigate to the MXfold2 server ( http://ws.sato-lab.org/mxfold2/ , last accessed 1/12/2025), paste your tRNA sequence in fasta format into the search box, and click Predict . [Tip 1] tRNA-Scan has been trained using a broad set of vertebrate mitochondrial tRNAs. However, because it is an algorithmic model, rich parameterisation can cause overfitting to the training data, preventing robust predictions [52]. MXFold2 is a hybrid method that integrates folding scores calculated by a deep neural network trained with a large quantity of data but avoids overfitting rich-parameterised weight parameters to the training data by resorting to the thermodynamic parameters for assessing previously unobserved substructures [42]. MXfold2 produces a less stable secondary structure for tRNA Thr’ than for tRNA Thr ."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Reference‑based assembly",
+      "instruction": "Import raw Ion Torrent reads (bam) and a closely related reference mitogenome (GenBank format) into Geneious Prime v2024.0.2, then map reads to the reference with the Geneious read mapper using medium sensitivity and five iterations (default settings).",
+      "substeps": [
+        {
+          "instruction": "a. Download the reference mitogenome (e.g., Mustelus mustelus NC_039629.1) from NCBI and import it together with the raw bam files (e.g., from BioProject PRJNA997468).",
+          "title": ""
+        },
+        {
+          "instruction": "b. Run Geneious read mapper: select medium sensitivity, set iterations = 5 (default), keep all other parameters at default. The mapper will iteratively refine the consensus; Geneious recommends five iterations for optimal balance of speed and accuracy.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Hybrid assembly",
+      "instruction": "Export the reads that mapped to the reference as a filtered bam file, then assemble them de novo with SPAdes (v3.15) using Ion‑Torrent specific options and generate a Quast assembly report.",
+      "substeps": [
+        {
+          "instruction": "a. In Geneious, select the reference‑based assembly, choose Export → Export Documents → Export BAM index file to save the filtered reads (bam).",
+          "title": ""
+        },
+        {
+          "instruction": "b. Run SPAdes with eight threads, memory = 250 GB, k‑mers = 21,33,55,77,99,127, the –careful flag, and the –IonTorrent flag, supplying the filtered bam as the –s input. Example command:\n```\nwork=./Spades_hybrid_assembly\nspades.py -k 21,33,55,77,99,127 -t 8 -m 250 --IonTorrent -s $work/Data_1_Galeorhinus_galeus_IonTorrent_Filtered_RawData.bam --careful -o $work/G_galeus_Hybrid_Assembly\nquast.py -o $work/G_galeus_Hybrid_Assembly/Quast_G_galeus $work/G_galeus_Hybrid_Assembly/contigs.fasta\n```",
+          "title": ""
+        },
+        {
+          "instruction": "c. If the dataset has high GC or uneven coverage, optionally add the single‑cell mode (‑‑sc) and limit k‑mers to 21,33,55.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "De novo assembly",
+      "instruction": "Assemble the original raw bam reads directly with SPAdes (same parameters as hybrid) and produce a Quast report.",
+      "substeps": [
+        {
+          "instruction": "a. Run SPAdes on the raw Ion Torrent bam (e.g., IonCode_G_galeus_rawlib.basecaller.bam) with: -k 21,33,55,77,99,127, -t 8, -m 250, --IonTorrent, --careful. Example command:\n```\nwork=./Spades_de_novo_assembly\nspades.py -k 21,33,55,77,99,127 -t 8 -m 250 --IonTorrent -s $work/IonCode_G_galeus_rawlib.basecaller.bam --careful -o $work/G_galeus_Denovo_Assembly\nquast.py -o $work/G_galeus_Denovo_Assembly/Quast_G_galeus $work/G_galeus_Denovo_Assembly/contigs.fasta\n```",
+          "title": ""
+        },
+        {
+          "instruction": "b. Use the same Quast settings as in the hybrid step to generate the assembly report.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Compare assemblies",
+      "instruction": "Assess the reference‑based, hybrid, and de novo assemblies for read‑mapping statistics, contig numbers, and size, then align them to identify discrepancies.",
+      "substeps": [
+        {
+          "instruction": "a. Open the Geneious assembly report from step 1 and record the number of reads mapped to the reference and the contig size.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Open the Quast PDFs from the hybrid and de novo folders; note total contig count and size of the largest contig for each.",
+          "title": ""
+        },
+        {
+          "instruction": "c. In Geneious, align the three assemblies (reference, hybrid, de novo) using the Alignment tool with default parameters.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Inspect the alignment for mismatches or gaps. If the three assemblies are consistent, export the consensus sequence in fasta format for downstream annotation. If significant discrepancies exist, proceed to Sanger validation (step 5).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Validate structural variants by Sanger sequencing",
+      "instruction": "Amplify suspected duplicated or rearranged regions, sequence them, trim low‑quality ends, and compare to the three assemblies to confirm structural deviations.",
+      "substeps": [
+        {
+          "instruction": "a. Perform PCR using primers designed from the de novo assembly (e.g., Cytb CC F 5′‑ACTTGAATTGGAGGGCAACC‑3′ and Dloop Gga R 5′‑AGGGTATGTGGGCCATATCA‑3′), then send products for Sanger sequencing.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Trim noisy bases (~20–30 nt) from both ends of each Sanger trace in Finch TV (select first noisy base, Ctrl + A to last noisy base, right‑click → Delete).",
+          "title": ""
+        },
+        {
+          "instruction": "c. Align the trimmed Sanger sequences to the three assemblies in Geneious using the same read‑mapper settings (medium sensitivity, five iterations). Record % identity and note which assembly(s) the fragment matches.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Also align the trimmed Sanger fragment to the reference assembly to determine which genes are duplicated (e.g., a 646 bp non‑coding Cytb fragment plus a 68 bp tRNA‑Thr′).",
+          "title": ""
+        },
+        {
+          "instruction": "e. Interpret the result: de novo assembly correctly captured the duplication, hybrid captured part of it, reference collapsed the duplication. Use the de novo consensus (fasta) for final annotation.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Annotate mitogenome with MitoAnnotator",
+      "instruction": "Upload the final consensus fasta to MitoAnnotator, download the annotated files, verify gene translations, and prepare the GenBank file for submission.",
+      "substeps": [
+        {
+          "instruction": "a. Open http://mitofish.aori.u‑tokyo.ac.jp/annotation/input/, load the consensus fasta, click “Annotate”.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Download the resulting zip folder; it contains the annotated GenBank file, gene‑wise fasta files, and graphics. Edit gene names and add species‑specific images if desired.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Open the gene‑feature fasta (suffix _genes.fa) in Sequence Manipulation Suite 2 (https://www.bioinformatics.org/sms2/translate.html), select the appropriate genetic code (vertebrate mitochondrial), and translate each protein‑coding gene. Verify that no internal stop codons are present and that each CDS length is a multiple of three.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Import the GenBank file into Geneious, inspect annotations for completeness, manually count overlaps and intergenic spaces, and correct any errors.",
+          "title": ""
+        },
+        {
+          "instruction": "e. Submit the final GenBank file to NCBI via BankIt (https://www.ncbi.nlm.nih.gov/WebSub/).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Calculate nucleotide composition and skewness",
+      "instruction": "Use DAMBE to compute A+T, G+C contents and AT/GC skew for each gene and the whole mitogenome, then plot the results in R.",
+      "substeps": [
+        {
+          "instruction": "a. In DAMBE v7.0.35, open the gene‑wise fasta (e.g., Galeorhinus_galeus_genes.fa), choose Seq. Analysis → Nucleotide & di‑nuc Frequency to obtain A, T, G, C counts for each PCG, tRNA set, and the whole genome.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Calculate AT‑skew = (A‑T)/(A+T) and GC‑skew = (G‑C)/(G+C) using the obtained counts.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Plot nucleotide composition and skewness in R (example script provided in the protocol).",
+          "title": ""
+        },
+        {
+          "instruction": "d. In DAMBE, run Seq. Analysis → Codon Usage → Relative synonymous codon usage (RSCU) on the concatenated PCG fasta to obtain amino‑acid counts and RSCU values.",
+          "title": ""
+        },
+        {
+          "instruction": "e. Plot amino‑acid composition and RSCU in R using the supplied script.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Predict tRNA genes and secondary structures",
+      "instruction": "Identify mitochondrial tRNAs with ARWEN (or tRNAscan‑SE) and verify secondary structures using MXfold2.",
+      "substeps": [
+        {
+          "instruction": "a. Submit the complete mitogenome fasta to the ARWEN v1.2.3 webserver (http://130.235.244.92/ARWEN/) with options –mtmam and –gcmam (vertebrate mitochondrial code). Optionally run tRNAscan‑SE v2.0 with “vertebrate mitochondrial” source.",
+          "title": ""
+        },
+        {
+          "instruction": "b. For duplicated tRNAs (e.g., tRNA‑Thr′), paste the fasta sequence into MXfold2 (http://ws.sato‑lab.org/mxfold2/) and click “Predict” to compare folding stability with the canonical copy.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Identify tandem repeats in control region",
+      "instruction": "Run Tandem Repeat Finder on the consensus mitogenome to locate and characterize repeats in the control region.",
+      "substeps": [
+        {
+          "instruction": "a. Go to https://tandem.bu.edu/trf/trf.html, upload the fasta, keep Basic Options at default (or adjust Advanced Options if needed), and submit.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Download the Tandem Repeats Report and record repeat indices, period size, copy number, consensus size, % matches, % indels, score, nucleotide composition, and entropy.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Compile summary statistics table",
+      "instruction": "Gather all calculated metrics (assembly stats, nucleotide composition, skewness, codon usage, tRNA predictions, repeat data) into a single comparative table for the new mitogenome and related species.",
+      "substeps": [
+        {
+          "instruction": "a. Use the GenBank files and the output tables from Quast, DAMBE, ARWEN, and TRF to fill columns such as total reads mapped, contig sizes, A+T % , G+C % , AT‑skew, GC‑skew, RSCU values, repeat characteristics, and gene positions.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Save the table (e.g., as Excel or CSV) for inclusion in manuscripts or supplementary material.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 30,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

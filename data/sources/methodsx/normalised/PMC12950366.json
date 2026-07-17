@@ -20,10 +20,276 @@
   "estimated_time_mins": null,
   "materials": [
     "Image",
-    "application 1"
+    "application 1",
+    "1. MobileNetV2",
+    "After training, the performance of the CNN models: MobileNetV2, EfficientNetB0, ResNet50V2, and DenseNet121 was neatly evaluated on the dataset with metrics such as Accuracy, Precision, Recall, and F1-score. As shown in Table 5, the evaluation values are mentioned. The DenseNet121 model had the best values among the other metrics, not only on the Controlled Environment set but also, more importantly, on the On-Field set. From this comparison, one can learn that the model EfficientNetB0 shows poor performance; its accuracy, precision, recall, and F1-score are relatively lower in both sets. On the contrary, DenseNet121 appears to be the best model throughout, excelling with high performance at distinguishing between healthy, diseased, and dried leaves. Therefore, DenseNet121 emerges as the most reliable architecture for this classification task; furthermore, this also opens up avenues for reworking or strengthening EfficientNetB0, which can be either by hyperparameter tuning or changing the architecture or training with a larger and more diverse dataset, so that it performs equally well.Table 5Comparison of CNN models for evaluation.Table 5 dummy alt textModelTypeAccuracyPrecisionRecallF1 ScoreMobileNetV2CEOF97.77777897.96296397.77777897.79241790.21739190.11609890.21739190.098344EfficientNetB0CEOF37.77777814.27160537.77777820.71684636.95652213.65784536.95652219.944790ResNet50V2CEOF97.77777897.90123597.77777897.75661484.78260985.03194684.78260984.844720DenseNet121CEOF92.22222292.43138992.22222292.21218396.73913096.89613596.73913096.690465"
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Download and organize dataset",
+      "instruction": "Obtain the PriBeL betel leaf dataset from https://data.mendeley.com/datasets/btdym2t6mt/1. The dataset is pre‑stratified into Controlled Environment (CE) and On‑Field (OF) domains. For CE there are 893 images total: 803 for training (299 healthy, 198 diseased, 306 dried) and 90 for testing (34 healthy, 22 diseased, 34 dried). For OF there are 907 images total: 815 for training (302 healthy, 260 diseased, 253 dried) and 92 for testing (34 healthy, 29 diseased, 29 dried).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Split data and create generators",
+      "instruction": "From each domain split 90 % of the images for training and carve out 10 % of the training set for validation using Keras ImageDataGenerator; keep the remaining 10 % as the test set.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Preprocess images",
+      "instruction": "Resize every image to 224 × 224 × 3 (RGB) and normalize pixel values by dividing by 255 (i.e., pixel/255).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Set common training parameters",
+      "instruction": "Use a batch size of 32 and train for 32 epochs. Compile models with the Adam optimizer, categorical cross‑entropy loss, and accuracy as the evaluation metric.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Build model architectures",
+      "instruction": "Load ImageNet‑pretrained weights for each backbone, remove the original top classification layer, add a Global Average Pooling (GAP) layer, then add model‑specific classifier layers:",
+      "substeps": [
+        {
+          "instruction": "MobileNetV2 – freeze the convolutional base; add GAP → Dense(3) with softmax.",
+          "title": ""
+        },
+        {
+          "instruction": "EfficientNetB0 – keep the convolutional base fully trainable; add GAP → Dense(128, ReLU) → Dense(3) softmax.",
+          "title": ""
+        },
+        {
+          "instruction": "ResNet50V2 – freeze the convolutional base; add GAP → Dense(128, ReLU) → Dense(3) softmax.",
+          "title": ""
+        },
+        {
+          "instruction": "DenseNet121 – keep the convolutional base fully trainable; add GAP → Dense(128, ReLU) → Dense(3) softmax.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Train models on Google Colab",
+      "instruction": "Run each model on Google Colab (Runtime: Python 3, Hardware accelerator: CPU) using the same hardware configuration. Record wall‑clock training time (minutes) and inference time (seconds) for the full test set with batch size 32:",
+      "substeps": [
+        {
+          "instruction": "MobileNetV2 – CE: 33.75 min training, 30 s inference; OF: 154.58 min training, 41 s inference.",
+          "title": ""
+        },
+        {
+          "instruction": "EfficientNetB0 – CE: 19.16 min training, 23 s inference; OF: 148.03 min training, 24 s inference.",
+          "title": ""
+        },
+        {
+          "instruction": "ResNet50V2 – CE: 97.18 min training, 30 s inference; OF: 111.12 min training, 30 s inference.",
+          "title": ""
+        },
+        {
+          "instruction": "DenseNet121 – CE: 24.21 min training, 48 s inference; OF: 401.58 min training, 52 s inference.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Record model parameter statistics",
+      "instruction": "Note the trainable, non‑trainable, and total parameter counts for each architecture as reported:",
+      "substeps": [
+        {
+          "instruction": "MobileNetV2 – Trainable 38,432; Non‑trainable 257,984; Total 226,1,827.",
+          "title": ""
+        },
+        {
+          "instruction": "EfficientNetB0 – Trainable 41,903; Non‑trainable 42,023; Total 4213,926.",
+          "title": ""
+        },
+        {
+          "instruction": "ResNet50V2 – Trainable 262,659; Non‑trainable 23,564,800; Total 23,827,459.",
+          "title": ""
+        },
+        {
+          "instruction": "DenseNet121 – Trainable 7,085,443; Non‑trainable 83,648,716; Total 9,091.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Evaluate model performance",
+      "instruction": "For each model compute Accuracy, Precision, Recall, and F1‑Score on both CE and OF test sets and generate confusion matrices:",
+      "substeps": [
+        {
+          "instruction": "MobileNetV2 – CE: Acc 97.78 %, Prec 97.96 %, Rec 97.78 %, F1 97.79 %; OF: Acc 90.22 %, Prec 90.22 %, Rec 90.12 %, F1 90.22 %.",
+          "title": ""
+        },
+        {
+          "instruction": "EfficientNetB0 – CE: Acc 37.78 %, Prec 14.27 %, Rec 37.78 %, F1 20.72 %; OF: Acc 36.96 %, Prec 13.66 %, Rec 36.96 %, F1 19.94 %.",
+          "title": ""
+        },
+        {
+          "instruction": "ResNet50V2 – CE: Acc 97.78 %, Prec 97.90 %, Rec 97.78 %, F1 97.76 %; OF: Acc 84.78 %, Prec 84.78 %, Rec 84.84 %, F1 84.72 %.",
+          "title": ""
+        },
+        {
+          "instruction": "DenseNet121 – CE: Acc 92.22 %, Prec 92.43 %, Rec 92.22 %, F1 92.21 %; OF: Acc 96.74 %, Prec 96.90 %, Rec 96.74 %, F1 96.69 %.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Extract mid‑level feature maps",
+      "instruction": "Open the outputs of the following spatially aligned layers (all 14 × 14 resolution) for each trained model:",
+      "substeps": [
+        {
+          "instruction": "MobileNetV2 – Bottleneck Block 5 → 14 × 14 × 64.",
+          "title": ""
+        },
+        {
+          "instruction": "EfficientNetB0 – MBConv6 × 3 (k5) → 14 × 14 × 112.",
+          "title": ""
+        },
+        {
+          "instruction": "ResNet50V2 – Conv4_x → 14 × 14 × 1024.",
+          "title": ""
+        },
+        {
+          "instruction": "DenseNet121 – Dense Block 3 → 14 × 14 × 1024.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T05:14:24.248422Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "While all four CNN architectures were able to deliver high performance (90–97 % across accuracy, precision, recall, and F1-score), EfficientNetB0, however, was the one that stood out with the least results. This is likely due to the fact that its convolutional base is fully trainable, which in turn may have led to overfitting of the limited betel leaf dataset. Additionally, its compound scaling method makes it extremely dependent on the learning rate and fine-tuning xparameters. The uniform training setup for all models (epochs, optimizer, batch size) might not have been the best for each individual architecture. Besides, the limited size of the dataset might have influenced model generalization as well as class sensitivity. Due to computational constraints, deeper experiments such as hyperparameter tuning and cross-validation were not possible. Moreover, the absence of interpretability in the models restricts the understanding of feature learning. Next, researchers may consider progressive fine-tuning and differential learning rates for EfficientNetB0. By adding data augmentation and using larger and more diverse datasets, the model's robustness could be improved. Furthermore, using explainable AI techniques can give more transparency and trust to model decisions. On top of that, testing models under real-world agricultural environments will not only validate practical reliability but also trustworthiness. Also, cross-domain evaluation on other plant species can help generalization to be extended. Finally, combining CNNs with attention mechanisms may be a viable way to achieve even higher accuracies. These future works not only can enhance model capabilities but also the application potential in the field of agricultural AI.",
+  "content_type": "protocol",
+  "content_type_score": 32,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.gif",
+      "local_path": "data/media/methodsx/PMC12950366/fx1.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 8988,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/fx1.gif"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.gif",
+      "local_path": "data/media/methodsx/PMC12950366/fx2.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 9595,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/fx2.gif"
+    },
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC12950366/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 37263,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC12950366/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 78768,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC12950366/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 20651,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC12950366/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 29566,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC12950366/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 33346,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC12950366/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 27384,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC12950366/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 30339,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC12950366/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 44829,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC12950366/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12950366/",
+      "caption": "",
+      "bytes": 38624,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12950366/gr8.jpg"
+    }
+  ]
 }

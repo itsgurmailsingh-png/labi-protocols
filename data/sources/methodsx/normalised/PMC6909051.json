@@ -14,9 +14,233 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "For the development of the VIMO was required a sensor that had the capability to measure the oxygen percentage contained in the emission gases; such percentage ranges from 0 to a maximum of 30%. To carry out the VIMO’s development, the sensor model EC410 was used; Table 1 shows the technical parameters of the sensor [19]. It is an electrochemical sensor that detects the O2 gas concentration, quantifying the current produced by the sensor; the functioning of the sensor is based on the electrochemical principle, which consists in a working electrode found in the electrolytic cell; it works through an electrochemical oxidation process reacting with the gas to take census, the produced current in the census electrochemical reaction of the gas produces a direct proportion response with the O2 concentration, obtaining as a result the oxygen concentration percentage obtained through the current value. Since the current is too small to be processed by the DAQ, it was necessary to build a circuit incorporating a signal conditioning; recording an output voltage (Vo) of 2.435 V when 1% of oxygen concentration is registered, considering that it is the lowest concentration that can be registered in the sensor. The DAQ 6009 card process the O2 increases in percentage equivalent to 0.065 V/1%. The Eq. (2) was used to calculate the output voltage. Eq. (3) was implemented in the VI to convert the output voltage Vo with a range of 2.5–1.135 to the range of 0–21% of oxygen.(2)Vo = 2.5 V − 65 mV/% * [O2%](3)O2% = −15.3846 Vo + 38.4615Table 1Technical parameters of the oxygen sensor.Table 1FeaturesOperating conditionsNOO2Operating ranges0–2500 ppm0–30% O2ModelEC4-2500-NOEC410Sensitivity21–64 nA/ppm NON/AZero in air at 20 °C−0.06 To 4.5 ppm NON/AZero deviation (−20 to +50 °C)−2 to 10 ppm NON/AResolution0.5 ppm NO0.1% O2Response timet 90 = 35 st90 < 15sTemperature range−20 to +50 °C−20 to +50 °COperating humidity15–90% RH Non-condensing15–95% RHPressure range90–110 kPa90–110 kPaDC supply recommendedN/AN/A",
+    "For the development of the VIMNO the sensor selecting presents the characteristics for the nitric oxide measuring in a percentage between the ranges of 0–2500 ppm of concentration, the sensor used is model EC4-2500-No, Table 1 shows the sensor’s technical parameters. As well as the oxygen sensor used for the measurement of nitric oxide is electrochemical, it was also required to make an integrated circuit contemplating a signal conditioner. Eq. (4) characterizes the measurement system and represents the output voltage (Vo) calculation. As output voltage Vo has a value of 2.508 V when 1 ppm of NO is registered; considering that it is the minimum concentration value registered. The data acquisition card registers increase with a value of 0.004 V/1 ppm of NO. The Eq. (5) was implemented in the VI to convert the output voltage Vo with a range of 2.5–10.5 v to the range of 0–1000 ppm of NO.(4)Vo = 2.5 V + 8 mV/ppm*[NO ppm](5)NO ppm = 125 Vo – 312.5"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Configure DAQ hardware",
+      "instruction": "Connect the USB‑NI DAQ‑6009 card (8 analog inputs, 14‑bit, 48 kS/s, 2 static analog outputs 12‑bit, 12 digital I/O, 32‑bit counter) to the Lenovo PC (Intel i7‑471CHQ @2.50 GHz, Windows 10). In LabVIEW define physical channels for each analog input, set the same minimum and maximum voltage range for all channels, enable the “Reference signal ground” option, and configure timing (sampling clock, frequency, mode, samples per channel). Save the configuration as a task named “Air sensor” in the Task Builder.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Start and stop acquisition",
+      "instruction": "Run the saved “Air sensor” task to read analog inputs, display the data in a Waveform Graph indicator, then stop the task to prevent buffer overflow and abort the application when finished.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Assemble temperature measurement circuit",
+      "instruction": "Wire two LM35 solid‑state temperature sensors (linear 10 mV/°C, range –55 °C → –550 mV, >150 °C → 1500 mV) using shielded cable and a 10 kΩ protection resistor, connect to two DAQ analog inputs, and program LabVIEW to convert voltage to °C and °F and display both values on separate front‑panel indicators.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Build RPM measurement circuit",
+      "instruction": "Mount an infrared LED and a photodiode 1.5 cm apart facing each other on the engine flywheel, connect the receiver output to the DAQ counter input, configure the counter to count rising edges, and program the conversion to revolutions per minute (RPM).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Construct fuel‑consumption sensor",
+      "instruction": "Fabricate a polycarbonate container (12.2 × 11.1 cm, area 135.4 cm²) fitted with an ultrasonic distance sensor; calibrate it to give a ±50 ml error for a 1.5 L volume, enabling measurement of up to ~1.3 L h⁻¹ at 850 RPM. Implement the equation FC = [(12.2 cm × 11.1 cm) × (Au(t‑5) – Au(t))]/5 s, update the level (ml) and consumption (cm³/s) indicators every 5 s.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Install oxygen sensor circuit",
+      "instruction": "Use an EC‑410 electrochemical O₂ sensor (0–30 % O₂ range, sensitivity 21–64 nA/ppm NO, zero in air at 20 °C = ‑0.06 to 4.5 ppm NO, resolution 0.1 % O₂, response time 90 % ≈ 35 s, operating temp ‑20 to +50 °C, humidity 15–90 % RH). Condition its tiny current to a voltage where 1 % O₂ gives 2.435 V; the DAQ scales O₂ changes as 0.065 V / % O₂. Implement the conversions Vo = 2.5 V ‑ 65 mV × [O₂ %] and O₂ % = ‑15.3846 × Vo + 38.4615, displaying O₂ % (0–21 %) with ±0.1 % resolution.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Install nitric‑oxide sensor circuit",
+      "instruction": "Use an EC‑4‑2500‑No electrochemical NO sensor (0–2500 ppm range, sensitivity 0.5 ppm NO ≈ 0.5 nA, zero deviation ‑20 to +50 °C, resolution 0.5 ppm, response time 90 % ≈ 15 s, operating temp ‑20 to +50 °C, humidity 15–95 % RH). Condition its output so 1 ppm NO yields 2.508 V; the DAQ registers 0.004 V / ppm NO. Apply Vo = 2.5 V + 8 mV × [NO ppm] and NO ppm = 125 × Vo ‑ 312.5, displaying 0–1000 ppm with ±0.5 ppm resolution.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Calibrate O₂ and NO sensors",
+      "instruction": "Place each sensor in a controlled atmosphere (25 °C, 40 % RH, 1 atm) using a Fluke 500A multifunction calibrator with 99 % pure O₂ or N₂ as inert gas. After immersion, wait 30 min for stabilization, then verify that the sensor output is 0 V. Recorded calibration voltages: O₂ sensor = 1.249 V, ambient air = 0.0014 V, NO sensor = 2.501 V.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Assemble heat‑exchanger system",
+      "instruction": "Build the exhaust‑gas heat exchanger comprising: a radiator (50 × 100 × 5 cm), a water pump delivering 5.0 L min⁻¹, a 100 L water reservoir, copper pipe (¾ in. diameter, 1/8 in. wall thickness), and two fans (110 V CA 1.5 A and 12 V CD 3 A). Circulate water through the radiator while forced air at 25 °C passes over it, achieving an average temperature drop of ~60 °C (inlet ≈ 95 °C, outlet ≈ 35 °C) and keeping exhaust gas temperature at the sensor ≤50 °C for at least 1.5 h of engine operation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Install moisture‑trap series",
+      "instruction": "Place three moisture traps and one additional trap upstream of each gas sensor. Fill each trap with blue silica gel; monitor the gel color change to pink as an indicator of saturation, ensuring removal of condensed water and steam before the gas reaches the sensors.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Run engine and acquire data",
+      "instruction": "Operate the Mercedes‑Benz 4‑cylinder compression‑ignition diesel engine (atmospheric air supply). With the heat‑exchanger and moisture traps in place, ensure exhaust gas temperature at sensor connections stays below 50 °C. Simultaneously record temperature (VIMT), RPM (VIMRPM), fuel consumption (VIMFC), O₂ (VIMO), and NO (VIMNO) using the configured virtual instruments.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T09:22:24.480535Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "protocol",
+  "content_type_score": 30,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 63485,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 47922,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 60827,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 20104,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 22596,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 35881,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 49495,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 63755,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 44365,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 32734,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 40646,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 40992,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 75097,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC6909051/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6909051/",
+      "caption": "",
+      "bytes": 39654,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6909051/gr9.jpg"
+    }
+  ]
 }

@@ -11,16 +11,249 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
   "doi": "10.1016/j.mex.2023.102097",
   "citation": "10.1016/j.mex.2023.102097",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [
     "genetic algorithms",
     "forecasting",
     "petroleum"
   ],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "GMC(1,n) model is based on six steps [5]:",
+    "Step 1Constructing input sequences",
+    "denotes the original sequences. X1(",
+    "is the output and Xi(0),i=2,3,…,n are the variables.",
+    "Step 2Accumulated Generating Operation (AGO)",
+    "Step 3Designing the background value of the system",
+    "Step 4Establishing Grey systems of equations",
+    "from t−1 to t, Eq. (",
+    "is approximated by the following difference equation:(6)x1(0)(t)+az1(1)(t)=b2z2(1)(t)+b3z3(1)(t)+⋯+bnzn(1)(t)+u",
+    "Where: B=(−z1(1)(2)−z1(1)(3)⋮−z1(1)(n)x2(1)(2)x2(1)(3)⋮x2(1)(n)x3(1)(2)x3(1)(3)⋮x3(1)(n)⋯⋯⋱⋯xn(1)(2)xn(1)(3)⋮xn(1)(n)); Y=(x1(0)(2)x1(0)(3)⋮x1(0)(n))",
+    "Step 5Solving the system's differential equation",
+    "The solution to Eq. (5) is [5]:(8)x^1(1)(t)=x1(0)(1)ea(1−t)+∫1tea(τ−t)f(τ)dτ;t≥2",
+    "Step 6Inverse AGO (IAGO)",
+    "Create a variable set χ={χ1,χ2,…,χN} χ={k,θ,bj=1,…,n} Where: {χ1=k;χ2=θχ3=b1;…;χN=bn",
+    "Create a domain set D={D1,...,DN} Where: {D1=D(k);D2=D(θ)D3=D(b1);…;DN=D(bn)"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Collect and verify raw data",
+      "instruction": "Gather historical petroleum product consumption, lagged consumption, price, real income, household count, and urbanization rate from the listed sources (HPSF, CCPD, National Institute of Statistics, World Bank) for the period 1992‑2017 and verify consistency.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Select predictor variables",
+      "instruction": "Perform stepwise regression analysis (SRA) on the collected variables using significance level, F‑to‑enter (Fe) and F‑to‑remove (Fr) criteria; retain variables that satisfy F > Fe and discard those with F < Fr.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Construct input sequences",
+      "instruction": "For each retained variable Xi (i = 1…n, n = 7) build the original non‑negative sequence Xi(0) = {xi(0)(1), xi(0)(2), …, xi(0)(k)} with sample size k ≥ 4 (k = 4 for the initial CSP). X1(0) is the output (consumption), X2‑Xn(0) are the predictors.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Apply Accumulated Generating Operation",
+      "instruction": "Transform each Xi(0) to its first‑order AGO sequence Xi(1) where xi(1)(t) = ∑_{m=1}^{t} xi(0)(m) for t = 2…k, producing monotonically increasing sequences.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Compute background values",
+      "instruction": "Calculate the background series Z1(1)(t) = θ·X1(1)(t) + (1‑θ)·X1(1)(t‑1) for t = 2…T, using the horizontal adjustment coefficient θ (default 0.5, but may be set to 0.01‑0.99 to minimise forecast error).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Form grey system equations",
+      "instruction": "Set up the differential equation dx1(1)(t)/dt + a·x1(1)(t) = ∑_{j=2}^{n} bj·xj(1)(t) + u and approximate it with the trapezoid‑based difference equation x1(0)(t) + a·Z1(1)(t) = ∑_{j=2}^{n} bj·Zj(1)(t) + u.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Estimate coefficients by least squares",
+      "instruction": "Assemble matrix B and vector Y as defined in the protocol, then compute A = [ a, b2, …, bn, u ]ᵀ = (BᵀB)⁻¹ Bᵀ Y to obtain the grey parameters.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Solve the grey differential equation",
+      "instruction": "Numerically evaluate x̂¹(1)(t) = x1(0)(1)·e^{a(1‑t)} + 0.5·h(t)·∑_{i=2}^{t}[ f(τ)·e^{a(τ‑t)} + f(τ‑1)·e^{a(τ‑t‑1)} ] where h(t)=1 for t ≥ 2, using the trapezoid formula.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Apply inverse AGO to obtain forecasts",
+      "instruction": "Compute the predicted original values x̂¹(0)(t) = x̂¹(1)(t) ‑ x̂¹(1)(t‑1) for t ≥ 2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Define CSP for model parameters",
+      "instruction": "Create a constraint‑satisfaction problem P = (χ,D,C,R) with variables χ = {k, θ, a, b1…bn}, domains D (e.g., D(k) = {4,…,n²}, D(θ) = (0,1)), and constraints C1: 4 ≤ k < n², C2: 0 < θ < 1, C3: b1 ≠ b2 ≠ … ≠ bn. Apply the nAC3 N‑ary arc‑consistency algorithm to prune inconsistent values.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Initialize genetic algorithm",
+      "instruction": "Generate a population P(t) of N = 100 chromosomes, each encoding m = 3 + n = 10 genes (k, θ, a, b1…bn) as binary strings of total length 83. Use the encoding k,θ,a,bj = L + α·(U‑L)/ (2^{β}‑1) where L/U are lower/upper bounds, α is the decimal value of the binary gene, and β is the number of bits.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Set GA operators and parameters",
+      "instruction": "Configure mutation probability Pm = 1/83 (≈0.012) or lower (≤ 0.05), crossover probability Pc = 0.6, enable elitism, and define convergence precision ε = 0.05. Limit the run to a maximum of 50 generations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Run GA with arc‑consistency filtering",
+      "instruction": "For each generation: evaluate fitness (forecast accuracy), apply AC to each chromosome (treating it as a CSP) to discard infeasible genes, perform selection, crossover (Pc), mutation (Pm), and retain elite individuals. Stop when ε is reached or 50 generations elapsed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Sequential forecasting loop",
+      "instruction": "Repeat the following until the desired horizon is covered:\n1) Build GMC(1,n) with the most recent p = ? sequences (e.g., Xi(0)(1)…Xi(0)(p)).\n2) Optimize k, θ, a, bj via AC‑GA and forecast the next q consumption points X̂(0)(p+1)…X̂(0)(p+q).\n3) Discard the oldest p sequences, shift the window to Xi(0)(q+1)…Xi(0)(q+p), and go to step 1.\n(The values of p and q are chosen by the analyst; the protocol uses the same p and q throughout.)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Evaluate model performance",
+      "instruction": "Compute accuracy metrics on the test set (2009‑2017):\n- MAPE = (1/N)∑|X‑X̂|/X × 100 (thresholds: ≤0.01 perfect, ≤0.05 good, ≤0.1 acceptable, >0.1 poor)\n- Correlation r (≥0.98 excellent, ≥0.95 good, ≥0.90 acceptable, <0.90 poor)\n- Adjusted R² (same thresholds as r)\n- RMSE = √[(1/N)∑(X‑X̂)²] (lower is better, near 0 ideal)\n- AAE = (1/N)∑|X‑X̂| (lower is better)\nRecord CPU execution time (e.g., 97 s without AC, 5 s with AC, saving 92 s) and the generation at which convergence occurs (e.g., 34 → 13 with AC).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Report results and compare models",
+      "instruction": "Present forecast curves, residuals, and the performance tables (MAPE, RMSE, AAE, r, Adj R²) for GMC(1,n), OGMC(1,n), and Sequential‑GMC(1,n)‑GA. Highlight that the sequential‑GA with AC achieves the lowest errors (e.g., MAPE ≈ 1.44 % for LPG, 0.44 % for kerosene) and fastest convergence.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:21:36.172614Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "The optimal values of k,θ,a,bj=1,…,n are presented in Table 4 and are different from theoretical values reported in the literature. We note that without AC, execution takes 97 s and consistency is achieved at the 34th generation. Thereafter, each chromosome in P(t) is assumed to be a CSP while each gene is considered as a variable. The global optimum is obtained at the 13th generation after generating the CSP at random and removing inconsistent values from the variable domains. The new execution takes 5 s. So, AC technique reduced execution time by 92 s. This gain also explains from 34 to 13 generations. As a result, GA needed fewer iterations to converge to a global optimum.Table 4Chromosome creation and parameter optimization.Table 4ParameterModelled valueL−UGenetic structureNumber of genesOptimal value given by AC-GAGMC(1,n)OGMC(1,n)Kerosene modelθ0.510.480.01–0.9911130.49k444–10111144−a0.050.080.01–0.99111,11160.05b134.129.60–401,111,111,1111031.8b238.730.30–451,111,111,1111035.8b327.423.40–361,111,111,1111025.1b451.348.30–591,111,111,1111049.1b553.748.70–551,111,111,1111050.1b618.714.90–201,111,111,1111016.9b723.422.20–251,111,111,1111023.7Length of chromosome :83LPG modelθ0.470.450.01–0.9911130.51k454–12111145−a0.030.020.01–0.99111,11160.08b124.230.10–311,111,111,1111027.4b220.733.50–351,111,111,1111025.5b339.331.70–411,111,111,1111036.2b443.139.20–451,111,111,1111039.1b541.539.30–421,111,111,1111035.2b630.828.20–321,111,111,1111025.1b749.641.20–511,111,111,1111049.3Length of chromosome :83 AAEs for each model are shown in Figs. 2(a-c) and 3(a-c). Prediction deviations given by Sequential-GMC(1,n)-GA are insignificant compared to GMC(1,n) and OGMC(1,n). Graphs of real and predicted consumption are shown in Fig. 4, Fig. 5, with annual residual curves. Forecast curves produced by Sequential-GMC(1,n)-GA almost fits to perfection with real data. Moreover, annual residuals curves of Sequential-GMC(1,n)-GA are much more spread over time than GMC(1,n) and OGMC(1,n). ",
+  "content_type": "likely_not_protocol",
+  "content_type_score": 21,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC10009715/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
+      "caption": "",
+      "bytes": 72489,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10009715/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10009715/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
+      "caption": "",
+      "bytes": 124910,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10009715/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10009715/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
+      "caption": "",
+      "bytes": 44371,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10009715/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10009715/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
+      "caption": "",
+      "bytes": 46693,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10009715/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC10009715/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
+      "caption": "",
+      "bytes": 46036,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10009715/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC10009715/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
+      "caption": "",
+      "bytes": 49561,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10009715/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC10009715/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
+      "caption": "",
+      "bytes": 48678,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10009715/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC10009715/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
+      "caption": "",
+      "bytes": 45473,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10009715/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC10009715/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009715/",
+      "caption": "",
+      "bytes": 42772,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10009715/gr8.jpg"
+    }
+  ]
 }

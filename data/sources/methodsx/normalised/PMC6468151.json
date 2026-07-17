@@ -18,38 +18,222 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "The multispectral approach in remote sensing typically includes the estimation of spectral indices. For biocrusts, the normalized difference vegetation index (NDVI [1,2]) has been proposed; however, high NDVI values of wet biocrusts may be misinterpreted as vascular plant vegetation dynamics whereas dry biocrusts only gained negligible NDVI values [3]. To overcome this disadvantage, several more specific spectral indices have been proposed for biocrusts, like the crust index (CI, respectively [4]), the brightness index (BI [5]) or the biological soil crust index (BSCI [6]), where biocrusts are characterized by typical ranges of respective index values. All spectral indices well reflect crust activity or biomass but are not specific enough to differentiate between different crust types, like lichen, cyanobacterial, algal or moss biocrusts. Rodriguez-Caballero et al. [7] propose support vector machines (SVM) for supervised classification of biocrusts from hyperspectral remote sensing data. However, a common problem with linear spectral mixture analysis (SMA) remains when the number of spectral endmembers is greater than the number actually required to unmix an individual pixel in the scene [3]. Non-spectral unsupervised principal component analysis (PCA) classification of biocrusts has indicated that the development of the microbial community was affected at multiple scales, including biocrust successional stage, seasonal effect and the micro-geomorphology [8]. High-resolution VIS-NIR spectroscopy was employed to study the influence of wetting on cyanolichen-dominated biocrusts in a non-imaging approach [7]. There was no attempt so far in the literature to use multispectral PCA classification of biocrusts in high-resolution images.",
-      "substeps": [],
+      "title": "Load required R packages and define functions",
+      "instruction": "In R, load the gatepoints and jpeg packages, then create two functions: plot_jpeg for displaying image objects and plot_PCA for reallocating classification results to image coordinates (code provided in supplementary information).",
+      "substeps": [
+        {
+          "instruction": "library(gatepoints)",
+          "title": ""
+        },
+        {
+          "instruction": "library(jpeg)",
+          "title": ""
+        },
+        {
+          "instruction": "Define function plot_jpeg(...)",
+          "title": ""
+        },
+        {
+          "instruction": "Define function plot_PCA(...)",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Method details",
-      "instruction": "The method proposed refers to Rodarmel and Shan [9] who suggested principal component analysis for preprocessing of hyperspectral images. Based on their finding that only the first few principal component image bands contain significant information, this study aimed at elucidating the feasibility of biocrust classification by manual selection of spectral features in PCA ordination plots.",
-      "substeps": [],
+      "title": "Import RGB and NIR images and record dimensions",
+      "instruction": "Read the calibrated RGB image (imageRGB.jpg) and the registered NIR image (imageNIR-reg.jpg) with readJPEG, assign them to imgRGB.stat and imgNIR.stat, and store their x‑y dimensions in variable res as the first two elements of dim(imgRGB.stat).",
+      "substeps": [
+        {
+          "instruction": "imgRGB.stat <- readJPEG(\"imageRGB.jpg\")  # load RGB image",
+          "title": ""
+        },
+        {
+          "instruction": "imgNIR.stat <- readJPEG(\"imageNIR-reg.jpg\")  # load NIR image",
+          "title": ""
+        },
+        {
+          "instruction": "res <- dim(imgRGB.stat)[1:2]",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Method details",
-      "instruction": "The study site was a catena from the mobile part of an inland dune to dry acidic grassland dominated by Corynephorus canescens and located near Lieberose, Brandenburg, northeast Germany (51°55′49″N, 14°22′22″E). A detailed description of the sampling site is given by [10]. The samples represented the sandy substrate, an algal biocrust dominated by Zygogonium ericetorum, a moss crust dominated by Polytrichum piliferum, and a mixed biocrust composed of both Z. ericetorum and P. piliferum (Fig. 1).Fig. 1RGB (left) and NIR (right) images used for biocrust classification. A – Polytrichum-dominated moss biocrust, B – mixed biocrust, C – bare sandy soil, D – Zygogonium-dominated algal biocrust selected.Fig. 1",
-      "substeps": [],
+      "title": "Construct hypercube and reshape to 1‑D matrix",
+      "instruction": "Combine the three channels of the RGB image and the three channels of the NIR image into a 3‑D array named imgMult whose z‑dimension equals the sum of the channel counts of both images; then flatten imgMult to a 2‑D array imgMult.1d with rows equal to res[1]*res[2] and columns equal to (dim(imgRGB.stat)[3] + dim(imgNIR.stat)[3]).",
+      "substeps": [
+        {
+          "instruction": "imgMult <- array(c(imgRGB.stat[,,1:3], imgNIR.stat[,,1:3]), dim = c(res[1], res[2], (dim(imgRGB.stat)[3] + dim(imgNIR.stat)[3])))",
+          "title": ""
+        },
+        {
+          "instruction": "imgMult.1d <- array(imgMult, dim = c(res[1]*res[2], (dim(imgRGB.stat)[3] + dim(imgNIR.stat)[3])))",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Method workflow",
-      "instruction": "1Load packages gatepoints and jpeg of the R software suite [11]. Define two functions to plot image objects (plot_jpeg) and to reallocate the result of classification to image coordinates (plot_PCA). The R code for the two functions is listed in the additional information section.2Load the RGB and the respective registered NIR image files into the workspace and store the xy-dimensions in variable „res“, where imageNIR-reg.jpg and imageRGB.jpg denote the calibrated and registered NIR and RGB image files.imgRGB.stat <- readJPEG(\"imageRGB.jpg\") # load RGB imageimgNIR.stat <- readJPEG(\"imageNIR-reg.jpg\") # load NIR imageres = dim(imgRGB.stat)[1:2]3Merge image objects to hypercube denoted as „imgMult“. The number of spectral channels (the z-dimension) of the hypercube equals sum of the spectral channels of the RGB and NIR images. Unfold hypercube to object „imgMult.1d“.imgMult <- array(c(imgRGB.stat[, , 1:3], imgNIR.stat[, , 1:3]), dim = c(res[1], res[2], (dim(imgRGB.stat)[3] + dim(imgNIR.stat)[3])))imgMult.1d <- array(imgMult, dim = c(res[1]*res[2], (dim(imgRGB.stat)[3] + dim(imgNIR.stat)[3])))4Run PCA. For the given example images, the first two components explained 9615% of the total variance.img.PCA <- prcomp(imgMult.1d, scale. = T)5Create empty dataframe for selection results (kk2) and PC1 vs. PC2 density plot. Each coordinate in Fig. 2 represents a single spectrum, where clusters of high pixel density denote objects with similar spectral features.kk2 <- data.frame(img.PCA$x[,1], img.PCA$x[,2])smoothScatter(img.PCA$x[,1], img.PCA$x[,2])Fig. 2PCA ordination density plot of the first and second components of unfolded hypercube.Fig. 26Select spectral features by outlining a polygon with the mouse pointer. The function „fhs “(freehand select) of the gatepoints package allows selection of data points by outlining polygons in two-dimensional scatterplots. In the present method, each data point represents spectrally identical pixels in a PC1 vs. PC2 density plot, where data points inside the polygon were denoted as „T “(TRUE) and all other data points as „F “(FALSE). Close selection with click on right mouse button and plot selection result using the previously defined plot_PCA function (see step 1 of this section), which generates binarized plots with selected features being represented in white color and all other in black. Fig. 3 shows the selection of the data points representing the bare sandy soil, algae and mosses.selectedPoints <- fhs(kk2, names = F, pch = NA_integer_)plot_PCA(selectedPoints)Fig. 3The data points outlined by yellow, dark and bright green polygons (left) represent pixels of bare sandy soil, as well as algae and mosses in the biocrusts, respectively (right).Fig. 3",
-      "substeps": [],
+      "title": "Perform principal component analysis",
+      "instruction": "Run PCA on imgMult.1d with scaling (scale. = TRUE) using prcomp, storing the result in img.PCA; for the example images the first two components explained 9615% of the total variance.",
+      "substeps": [
+        {
+          "instruction": "img.PCA <- prcomp(imgMult.1d, scale. = TRUE)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Generate PC1‑PC2 density plot and data frame",
+      "instruction": "Create a data frame kk2 containing the scores of PC1 and PC2 from img.PCA, then produce a smoothScatter density plot of these two components.",
+      "substeps": [
+        {
+          "instruction": "kk2 <- data.frame(img.PCA$x[,1], img.PCA$x[,2])",
+          "title": ""
+        },
+        {
+          "instruction": "smoothScatter(img.PCA$x[,1], img.PCA$x[,2])",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Select spectral features with freehand polygon and visualize",
+      "instruction": "Use the fhs function from gatepoints to outline polygons on the PC1‑PC2 scatter (kk2), setting names = FALSE and pch = NA_integer_; points inside polygons are marked TRUE, others FALSE. Close the selection with a right‑click, then display the binary classification with plot_PCA, which renders selected pixels in white and all others in black.",
+      "substeps": [
+        {
+          "instruction": "selectedPoints <- fhs(kk2, names = FALSE, pch = NA_integer_)",
+          "title": ""
+        },
+        {
+          "instruction": "plot_PCA(selectedPoints)",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T08:37:49.093449Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "The multispectral approach in remote sensing typically includes the estimation of spectral indices. For biocrusts, the normalized difference vegetation index (NDVI [1,2]) has been proposed; however, high NDVI values of wet biocrusts may be misinterpreted as vascular plant vegetation dynamics whereas dry biocrusts only gained negligible NDVI values [3]. To overcome this disadvantage, several more specific spectral indices have been proposed for biocrusts, like the crust index (CI, respectively [4]), the brightness index (BI [5]) or the biological soil crust index (BSCI [6]), where biocrusts are characterized by typical ranges of respective index values. All spectral indices well reflect crust activity or biomass but are not specific enough to differentiate between different crust types, like lichen, cyanobacterial, algal or moss biocrusts. Rodriguez-Caballero et al. [7] propose support vector machines (SVM) for supervised classification of biocrusts from hyperspectral remote sensing data. However, a common problem with linear spectral mixture analysis (SMA) remains when the number of spectral endmembers is greater than the number actually required to unmix an individual pixel in the scene [3]. Non-spectral unsupervised principal component analysis (PCA) classification of biocrusts has indicated that the development of the microbial community was affected at multiple scales, including biocrust successional stage, seasonal effect and the micro-geomorphology [8]. High-resolution VIS-NIR spectroscopy was employed to study the influence of wetting on cyanolichen-dominated biocrusts in a non-imaging approach [7]. There was no attempt so far in the literature to use multispectral PCA classification of biocrusts in high-resolution images. The method proposed refers to Rodarmel and Shan [9] who suggested principal component analysis for preprocessing of hyperspectral images. Based on their finding that only the first few principal component image bands contain significant inf",
+  "content_type": "protocol",
+  "content_type_score": 28,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 135880,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/fx2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 78732,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/fx2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx3.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/fx3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 51395,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/fx3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 129701,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 40387,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 307296,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 386607,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 27812,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 130299,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 201240,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC6468151/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6468151/",
+      "caption": "",
+      "bytes": 45247,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6468151/gr8.jpg"
+    }
+  ]
 }

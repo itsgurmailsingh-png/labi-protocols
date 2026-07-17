@@ -13,106 +13,167 @@
   "citation": "dx.doi.org/10.17504/protocols.io.fjbbkin",
   "category": "Bioinformatics",
   "estimated_time_mins": 72,
-  "materials": [],
+  "materials": [
+    "$ biom summarize-table -i uclust_otus/otu_table_even10.biom",
+    "$ biom summarize-table -i uclust_otus/otu_table_even10.biom --qualitative"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Validate Mapping File Format",
-      "instruction": "Checking mapping file format $ validate_mapping_file.py -m map_file.txt -o mapping_file_output",
+      "title": "Validate mapping file",
+      "instruction": "Run QIIME's validate_mapping_file.py with the mapping file to check format and write output to mapping_file_output.",
+      "substeps": [
+        {
+          "instruction": "validate_mapping_file.py -m map_file.txt -o mapping_file_output",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "Join Paired-End Reads",
-      "instruction": "Join paired end reads $ join_paired_ends.py -f Undetermined_S0_L001_R1_001.fastq -r Undetermined_S0_L001_R2_001.fastq -b Undetermined_S0_L001_I1_001.fastq -o reads",
+      "title": "Join paired‑end reads",
+      "instruction": "Combine forward, reverse, and barcode FASTQ files into joined reads using QIIME's join_paired_ends.py and write results to the directory “reads”.",
+      "substeps": [
+        {
+          "instruction": "join_paired_ends.py -f Undetermined_S0_L001_R1_001.fastq -r Undetermined_S0_L001_R2_001.fastq -b Undetermined_S0_L001_I1_001.fastq -o reads",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "Demultiplex and Quality Filter",
-      "instruction": "Depmultiplex & quality filter $ split_libraries_fastq.py -i fastqjoin.join.fastq -b fastqjoin.join_barcodes.fastq -o split -m map_file.txt -q 29 --barcode_type 12 --store_demultiplexed_fastq",
+      "title": "Demultiplex and quality filter",
+      "instruction": "Demultiplex the joined FASTQ file, apply a quality filter of Q≥29, specify barcode length 12, and store demultiplexed FASTQ files using split_libraries_fastq.py.",
+      "substeps": [
+        {
+          "instruction": "split_libraries_fastq.py -i fastqjoin.join.fastq -b fastqjoin.join_barcodes.fastq -o split -m map_file.txt -q 29 --barcode_type 12 --store_demultiplexed_fastq",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "De Novo OTU Picking",
-      "instruction": "De novo OTU picking $ pick_de_novo_otus.py -i subs_seqs_q.fasta -o uclust_otus/",
+      "title": "De novo OTU picking",
+      "instruction": "Perform de novo OTU clustering on the quality‑filtered sequences with pick_de_novo_otus.py, outputting results to the uclust_otus directory.",
+      "substeps": [
+        {
+          "instruction": "pick_de_novo_otus.py -i subs_seqs_q.fasta -o uclust_otus/",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "Closed-Reference OTU Picking",
-      "instruction": "Closed-reference OTU picking $ pick_closed_reference_otus.py -i subs_seqs_q.fasta -r $PWD/gg_13_8_otus/rep_set/97_otus.fasta -t $PWD/gg_13_8_otus/taxonomy/97_otu_taxonomy.txt -o_ref_otus",
+      "title": "Closed‑reference OTU picking",
+      "instruction": "Cluster sequences against the Greengenes 13_8 97% reference set using pick_closed_reference_otus.py, providing the reference fasta and taxonomy files, and write reference OTUs.",
+      "substeps": [
+        {
+          "instruction": "pick_closed_reference_otus.py -i subs_seqs_q.fasta -r $PWD/gg_13_8_otus/rep_set/97_otus.fasta -t $PWD/gg_13_8_otus/taxonomy/97_otu_taxonomy.txt -o_ref_otus",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "Open-Reference OTU Picking",
-      "instruction": "Open-reference OTU picking $ pick_open_reference_otus.py -i subs_seqs_q.fasta -r $PWD/gg_13_8_otus/rep_set/97_otus.fasta -o uclust_open_otu",
+      "title": "Open‑reference OTU picking",
+      "instruction": "Run open‑reference OTU clustering with pick_open_reference_otus.py using the same Greengenes reference fasta, outputting to uclust_open_otu.",
+      "substeps": [
+        {
+          "instruction": "pick_open_reference_otus.py -i subs_seqs_q.fasta -r $PWD/gg_13_8_otus/rep_set/97_otus.fasta -o uclust_open_otu",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "Summarize BIOM Table",
-      "instruction": "$ biom summarize-table -i uclust_otus/otu_table_even10.biom",
+      "title": "Summarize and annotate BIOM tables",
+      "instruction": "Generate summary statistics, add sample and observation metadata, and convert the BIOM OTU table to a tab‑delimited text file.",
+      "substeps": [
+        {
+          "instruction": "biom summarize-table -i uclust_otus/otu_table_even10.biom",
+          "title": ""
+        },
+        {
+          "instruction": "biom summarize-table -i uclust_otus/otu_table_even10.biom --qualitative",
+          "title": ""
+        },
+        {
+          "instruction": "biom add-metadata -i $PWD/otu_table_even10.biom -o denovo_otu.biom --sample-metadata-fp map_file.txt --observation-metadata-fp $PWD/uclust_assigned_taxonomy/subs_seqs_q_rep_set_tax_assignments.txt --observation-header OTUID,taxonomy --sc-separated taxonomy",
+          "title": ""
+        },
+        {
+          "instruction": "biom convert -i otu_table.biom -o otu_table.txt --table-type 'otutable' --header-key taxonomy -b",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "Qualitative BIOM Table Summarization",
-      "instruction": "$ biom summarize-table -i uclust_otus/otu_table_even10.biom --qualitative",
+      "title": "Identify chimeric sequences",
+      "instruction": "Detect chimeric sequences in the representative set alignment using ChimeraSlayer and write the list to chimeric_seqs.txt.",
+      "substeps": [
+        {
+          "instruction": "identify_chimeric_seqs.py -m ChimeraSlayer -i rep_set_aligned.fasta -a gold.fa -o chimeric_seqs.txt",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "Add Metadata to BIOM Table",
-      "instruction": "$ biom add-metadata -i $PWD/otu_table_even10.biom -o denovo_otu.biom --sample-metadata-fp map_file.txt --observation-metadata-fp $PWD/uclust_assigned_taxonomy/subs_seqs_q_rep_set_tax_assignments.txt --observation-header OTUID,taxonomy --sc-separated taxonomy",
+      "title": "Core diversity analysis",
+      "instruction": "Run QIIME's core_diversity_analyses.py on the de novo OTU BIOM table with a rarefaction depth of 10, using the mapping file and reference tree.",
+      "substeps": [
+        {
+          "instruction": "core_diversity_analyses.py -i denovo_otu.biom -o core_diversity -e 10 -m map_file.txt -t ref_set.tre",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 9,
-      "title": "Convert BIOM Table to Text",
-      "instruction": "$ biom convert -i otu_table.biom -o otu_table.txt --table-type 'otutable' --header-key taxonomy -b",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 10,
-      "title": "Identify Chimeric Sequences",
-      "instruction": "$ identify_chimeric_seqs.py -m ChimeraSlayer -i rep_set_aligned.fasta -a gold.fa -o chimeric_seqs.txt",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 11,
-      "title": "Perform Core Diversity Analysis",
-      "instruction": "$ core_diversity_analyses.py -i denovo_otu.biom -o core_diversity -e 10 -m map_file.txt -t ref_set.tre",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T10:11:51.350840Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 38,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "emndwkw-27F2E2C4687311F08F960A58A9FEAC02.jpg",
+      "local_path": "data/media/protocols_io/ECOGEO-Omics-Training-3-2-Amplicon-Analysis-QIIME-fjbbkin/emndwkw-27F2E2C4687311F08F960A58A9FEAC02.jpg",
+      "source_url": "https://files.protocols.io/external/emndwkw-27F2E2C4687311F08F960A58A9FEAC02.jpg",
+      "caption": "",
+      "bytes": 42865,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/ECOGEO-Omics-Training-3-2-Amplicon-Analysis-QIIME-fjbbkin/emndwkw-27F2E2C4687311F08F960A58A9FEAC02.jpg"
+    },
+    {
+      "type": "document",
+      "filename": "ECOGEO_3_2QIIME.pdf",
+      "local_path": "data/media/protocols_io/ECOGEO-Omics-Training-3-2-Amplicon-Analysis-QIIME-fjbbkin/ECOGEO_3_2QIIME.pdf",
+      "source_url": "https://content.protocols.io/empdwkw.pdf",
+      "caption": "",
+      "bytes": 1212740,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/ECOGEO-Omics-Training-3-2-Amplicon-Analysis-QIIME-fjbbkin/ECOGEO_3_2QIIME.pdf"
+    }
+  ],
+  "_cover_image_checked": true
 }

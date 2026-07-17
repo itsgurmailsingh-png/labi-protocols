@@ -9,7 +9,117 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "Since the angle degrees of freedom do not have the vector property, it is critical to handle this for nonlinear geometrical behavior. To simulate the nonlinear geometrical behavior of shell structure efficiently, we developed a solid‐shell element type without drilling degrees of freedom. In this paper, the element satisfies the assumption of the straight normal of the shell and we established penalty functions in the thickness direction of the shell. The formulations of equivalent node force and tangent stiffness obtained by 3D isoparametric element theory can be expressed by matrix forms clearly. The constitutive relationship in the global system is derived from the local constitutive matrix according to the tensor coordinate transform. Finally, taking a series of classic flat plate problems and curved shell problems as examples, the solid shell element using the penalty method is compared with the solid shell element using the artificial stiffness method and other shell elements. The results show that the solid element proposed in this paper can effectively eliminate shear self-locking after using the reduced integral scheme and obtain satisfactory accuracy for thin shells and medium-thickness•A type of solid shell element without rotational degrees of freedom is introduced using the penalty method.•A suitable penalty factor of this element is determined through numerical experiments.•This element is more efficient than the traditional shell elements and can be programmed with less time.",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "Basic assumptions of the element",
+      "instruction": "The shell theory is based on three basic assumptions. One is the assumption of straight normal, that is, the normal before deformation is still normal (for thin shells) or straight line (for medium thick shells) after deformation; the second is the assumption of generalized plane stress state in the shell coordinate system, ignoring the normal stress; Finally, it is assumed that the thickness of the shell, that is, the length of the normal is always constant. The degenerate two-dimensional shell element is directly constructed based on the shell theory, so these three assumptions are automatically satisfied. The solid shell element needs to introduce the above assumptions into the finite element formulation of the solid element."
+    },
+    {
+      "title": "Interpolation mode",
+      "instruction": "As shown in Fig. 1, for the shell element, ξ, η are the local coordinates in the plane, and ζ is the local coordinates in the thickness direction. Moreover Xa,Xa+s,ua, ua+s are coordinates and displacements of the node pairs on the top or bottom of the element, such as node one and node nine.Fig. 1Quadrilateral shell element.Fig 1"
+    },
+    {
+      "title": "Interpolation mode",
+      "instruction": "The shell element uses isoparametric interpolation.(1)X=∑a=12sNa(ξ,η,ζ)Xa=∑a=1s[1−ζ2N¯a(ξ,η)Xa+1+ζ2N¯a(ξ,η)Xa+s](2)u=∑a=12sNa(ξ,η,ζ)ua"
+    },
+    {
+      "title": "Interpolation mode",
+      "instruction": "In the formula, N¯a(ξ,η) is the two-dimensional interpolation basis function in the element surface."
+    },
+    {
+      "title": "Interpolation mode",
+      "instruction": "For the material point A in the local coordinate which on the connecting line of the node pairs a and a+s in the initial configuration, using Eq. (1), the position of the point in the initial configuration is.(3)XA=0.5(1−ζ¯)Xa+0.5(1+ζ¯)Xa+s"
+    },
+    {
+      "title": "Interpolation mode",
+      "instruction": "The position of point A in the current configuration is.(4)xA=XA+uA=1−ζ¯2(Xa+ua)+1+ζ¯2(Xa+s+ua+s)=1−ζ¯2xa+1+ζ¯2xa+s"
+    },
+    {
+      "title": "Interpolation mode",
+      "instruction": "Eq. (3) shows that the point on the connection line between node a and a+s before the deformation is still on the connection line of the pair of nodes after the deformation. The connection line of the pair of nodes before and after the deformation is always straight. Based on Eqs. (1) and (2), it can be further proved that the material line with local coordinates in the initial configuration remains a straight line after deformation."
+    },
+    {
+      "title": "Assumptions of generalized plane stress",
+      "instruction": "The stress state in the shell is assumed to be the generalized plane stress state. That is, the normal stress of the shell is considered to be zero."
+    },
+    {
+      "title": "Assumptions of generalized plane stress",
+      "instruction": "Assuming x′y′z′ be the shell coordinate system at the integration point, and its unit basis vectorse′1,e′2,e′3 are constructed as follows.(5)e′1=(∂x∂ξ,∂y∂ξ,∂z∂ξ)e′2=(∂x∂ξ,∂y∂ξ,∂z∂ξ)×(∂x∂η,∂y∂η,∂z∂η)e′2=e′3×e′1"
+    },
+    {
+      "title": "Assumptions of generalized plane stress",
+      "instruction": "The conversion matrix θ between the shell coordinate system and the global coordinate system and the transformation relationship between the strain tensor and the stress tensor can be obtained.(6)θ=[e′1e′2e′3](7)ɛ′=θTɛθ,σ′=θTσθHere σ,ɛ,σ′, ɛ′ are the stress and strain tensors in the global and local coordinate systems, respectively."
+    },
+    {
+      "title": "Assumptions of generalized plane stress",
+      "instruction": "The generalized plane stress relationship in the local coordinate system is.(8)σ′ij=(Dijkl−Dij33D33kl/D3333)ɛ′kl=D¯ijkl′ɛ′klwhere Dijkl is the fourth-order elastic constitutive tensor. For isotropic linear elastic bodies, the matrix form of the above formula is as follows.(9)[σ′xσ′yσ′zσ′xyσ′yzσ′xz]=E1−ν2[1vv101−ν21−ν2k1−ν2k][ε′xε′yε′z2ε′xy2ε′yz2ε′zx]where k=1.2 is the shear correction coefficient. When a shell element is a plane, the overall stiffness matrix will be singular because the third main diagonal element of the elastic matrix is 0. Ref. [19] introduces artificial stiffness q on the third main diagonal element to prevent the stiffness matrix of the element from being singular.(10)q=0.1he2le2E1−v2where the characteristic thickness of the element he can be taken as the mean value of the thickness at the node pairs; the characteristic length le can be taken as the mean value of the side length of the element."
+    },
+    {
+      "title": "Assumptions of generalized plane stress",
+      "instruction": "Convert the strain tensor ɛ in the global coordinate system at the integration point to the shell coordinate system by ɛ′=θTɛθ, and then according to σ′=D¯:ɛ′, the stress tensor σ corresponding in the global coordinate system can be attained. The elastic constitutive tensor D¯ijkl in the global coordinate system can be obtained from D¯′ijkl by tensor transformation, and numerical methods can also determine it. Take D¯ij11 as an example, use ɛ˜11=ɛ11+10−4 to establish the strain tensor ɛ˜, so that the stress tensor σ˜ can be derived from in the global coordinate system, then D¯ij11=(σ˜ij−σij)×104."
+    },
+    {
+      "title": "A measure of maintaining normal length",
+      "instruction": "The disadvantage of the above method is that it is not easy to determine a reasonable value of artificial stiffness. For this reason, this paper proposes introducing the assumption of the constant length of normal in the shell theory to eliminate the singularity of the total stiffness matrix."
+    },
+    {
+      "title": "A measure of maintaining normal length",
+      "instruction": "For the pair of node a and nodea+s, the corresponding constraint equation for the constant length of the normal line is.(11)fa=ha−Ha=0ha=(xa+s−xa)T·(xa+s−xa)Ha=(Xa+s−Xa)T·(Xa+s−Xa)where Ha and ha are the initial length and the deformed length of the normal at the node a and node a+s, respectively."
+    },
+    {
+      "title": "A measure of maintaining normal length",
+      "instruction": "Introduce the constraint in the form of a penalty function to define the strain energy.(12)W=12Cfa2"
+    },
+    {
+      "title": "A measure of maintaining normal length",
+      "instruction": "The penalty factor C is taken as EA˜/H, where A˜ is the area of the shell element divided by the number of node pairs, and H is the average thickness of the element. The essence, as mentioned above, is to introduce a spring with high stiffness between each node pair to achieve the requirement of approximately satisfying the constraint conditions."
+    },
+    {
+      "title": "A measure of maintaining normal length",
+      "instruction": "Strain energy W variation is equal to virtual work of internal force.(13)δW=Cfaδfa=Cfaha[xa−xa+sxa+s−xa]T[δuaδua+s]"
+    },
+    {
+      "title": "A measure of maintaining normal length",
+      "instruction": "The node equivalent effectiveness of the internal force FaC corresponding to this constraint is.(14)FaC=Cfaha[xa−xa+sxa+s−xa]=C(1−Haha)[xa−xa+sya−ya+sza−za+sxa+s−xaya+s−yaza+s−za]denote uaC=[uaTua+sT]T(15)dduaC(1ha)=−1ha3[xa−xa+sya−ya+sza−za+sxa+s−xaya+s−yaza+s−za]"
+    },
+    {
+      "title": "A measure of maintaining normal length",
+      "instruction": "The corresponding tangent stiffness matrix.(16)KaC=dFaCduaC=CHaha3[xa−xa+sya−ya+sza−za+sxa+s−xaya+s−yaza+s−za][xa−xa+sya−ya+sza−za+sxa+s−xaya+s−yaza+s−za]T+C(1−Haha)[100−1000100−1000100−1−1001000−1001000−1001]"
+    },
+    {
+      "title": "A measure of maintaining normal length",
+      "instruction": "It should be noticed that, compared with the artificial stiffness method, this method can strictly guarantee the generalized plane stress assumption, but the tangent stiffness matrix derived from the penalty method is also nonlinear under small deformations."
+    },
+    {
+      "title": "Static load on a plate",
+      "instruction": "The side length of the elastic square plate is 1000 mm, the elastic modulus E = 2e5 MPa, and the Poisson's ratio v=0.3. The non-dimensional deflection wmaxD/FL2 at the centre of the plate when subjected to concentrated or uniform loads under different thicknesses t and different constraint conditions are respectively considered, and the results of ANSYS SHELL281 element are compared. D is the bending stiffness of the board."
+    },
+    {
+      "title": "Static load on a plate",
+      "instruction": "Table 1 shows the deflection results of 100 N concentrated force on the centre when the four sides are simply supported. among them, the penalty method refers to using the penalty function to introduce the invariable normal length constraint to eliminate the singularity of the total rigidity. The results obtained by both the artificial stiffness method and the penalty method agree with the calculation results of SHELL281 and follow the analytical solution. Therefore, subsequent experiments will only give numerical calculation results based on the penalty method.Table 1Simply support plate subjected to concentrate force.Table 1MeshSmall deflectionLarge deflectionArtificial stiffnessPenalty methodSHELL281Artificial stiffnessPenalty methodSHELL281Thickness = 1 mm4 × 41.140e-21.139e-21.160e-21.532e-31.472e-31.474e-38 × 81.158e-21.157e-21.158e-21.532e-31.531e-31.532e-3Thickness = 10 mm4 × 41.171e-21.167e-21.167e-21.171e-21.167e-21.167e-28 × 81.173e-21.169e-21.169e-21.173e-21.169e-21.169e-2Theriacal result:1.160 × 10–2"
+    },
+    {
+      "title": "Static load on a plate",
+      "instruction": "To further investigate the situation of the plate at the fixed-support boundary angle and point support, the load is the uniform force or the concentrated force of the resultant force. The calculation results are shown in Tables 2 and 3. The data shows that by controlling the displacement of the top and bottom surfaces of the element at the same time, this element can better simulate the zero corner condition of the fixed boundary without introducing the corner displacement. In addition, the element results are still consistent with the calculation results of SHELL281.Table 2Fixed plate subjected to distribute force.Table 2MeshSmall deflectionLarge deflectionPenalty methodSHELL281Penalty methodSHELL281Thickness = 1 mm4 × 48.318e-48.533e-43.568e-33.589e-48 × 81.257e-31.257e-33.734e-33.740e-4Thickness = 10 mm4 × 41.259e-31.259e-31.259e-31.259e-38 × 81.268e-31.268e-31.268e-31.268e-3Table 3Corner point simply support plate subjected to concentrate force.Table 3MeshSmall deflectionLarge deflectionPenalty methodSHELL281Penalty methodSHELL281Thickness = 1 mm4 × 43.808e-23.905e-21.377e-21.377e-28 × 83.819e-23.914e-21.421e-21.420e-2Thickness = 10 mm4 × 43.930e-23.930e-23.930e-23.930e-28 × 83.931e-23.931e-23.931e-23.931e-2"
+    },
+    {
+      "title": "Concentrated force on semicircular curved shell",
+      "instruction": "Fig. 3 shows the test of the semicircular curved shell. One end is fixed, the other end is free, and the free end is subjected to concentrated force. The material parameters are the same as in Example 1. The geometric dimensions are shown in Fig. 3. Due to symmetry, the mesh model is half of the actual structure. The grid division mode is shown in Fig. 4. For curved shells with different thicknesses, the deflection of the force point calculated by the element according to the large deformation is shown in Fig. 5 and Fig. 6, respectively. It can be seen from the figure that the quadrilateral solid shell element can always calculate the results consistent with the SHELL281 under various conditions. When the plate and shell thickness is thicker, and the mesh is triangular, compared with the SHELL281 element, the calculated deflection of the force point of the solid shell element is closer to the result of the quadrilateral element when the mesh quality is lower."
+    },
+    {
+      "title": "Open toroidal shell under line load",
+      "instruction": "An elastic open thin shell ring is subjected to a pair of transverse shear forces at the end, as shown in Fig. 7. The structural elastic modulus E = 2.1e6, the Poisson's ratio is zero, the inner diameter of the ring is R1 = 6, the outer diameter R2 = 10, the thickness is 0.03, and the radial linear load is 0.8."
+    },
+    {
+      "title": "Open toroidal shell under line load",
+      "instruction": "The model uses 8 × 36 in-plane meshes with a total of 288 elements. The load-displacement curves of the two points A and B in the vertical direction are shown in Fig. 9. It can be seen that the calculation results of this element are consistent with the calculation results of ANSYS. The element formula used in the literature [1,[20], [21], [22] is relatively complicated, and the matrix form of the solid shell element formula based on the penalty method given in this paper is more concise than them."
+    },
+    {
+      "title": "Open toroidal shell under line load",
+      "instruction": "Figs. 2 and 8Fig. 2Corner point simply support plate subjected to concentrate force.Fig 2Fig. 3Curved shell subjected concentrate force.Fig 3Fig. 4Semicylindrical shell 4 × 4 mesh.Fig 4Fig. 5Results for Example 2 (1 mm).Fig 5Fig. 6Results for Example 2 (10 mm).Fig 6Fig. 7Slit annular plate lifted by a line force.Fig 7Fig. 8Initial and deformed configuration.Fig 8Fig. 9Load-deflection curves for the slit annular plate.Fig 9"
+    }
+  ],
   "materials": [],
-  "fetched_at": "2026-06-19T00:38:50.053991+00:00"
+  "fetched_at": "2026-06-19T00:38:50.053991+00:00",
+  "media": []
 }

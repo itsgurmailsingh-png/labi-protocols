@@ -22,70 +22,269 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "login to the HPC ssh hpcice ssh hpc ice",
+      "title": "Log into HPC",
+      "instruction": "Connect to the high‑performance cluster via SSH (e.g., `ssh hpcice` or `ssh hpc`).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "To get an idea of the broad functional categories in the samples we are going to use the reads to quantify hits to Kegg ids. Then we will group the hits by broad categories to include in a bar chart in Anvi&#39;o for each sample. We are going to use a similar approach as we did before for annotating the function to genes (see previus protocol), except this time we will map the reads to kegg ids by using uproc. First we need to create a diretory to run the analysis in: mkdir /rsgrps/bh_class/username/function-readscd /rsgrps/bh_class/username/function-readsmkdir std-errmkdir std-out mkdir /rsgrps/bh_class/username/function-reads cd /rsgrps/bh_class/username/function-reads mkdir std-err mkdir std-out",
+      "title": "Create analysis directories",
+      "instruction": "Make a working directory and subfolders for logs and output, then move into it:",
+      "substeps": [
+        {
+          "instruction": "`mkdir /rsgrps/bh_class/username/function-reads`",
+          "title": ""
+        },
+        {
+          "instruction": "`mkdir /rsgrps/bh_class/username/function-reads/std-err`",
+          "title": ""
+        },
+        {
+          "instruction": "`mkdir /rsgrps/bh_class/username/function-reads/std-out`",
+          "title": ""
+        },
+        {
+          "instruction": "`cd /rsgrps/bh_class/username/function-reads`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Now we need to create a script to run uproc on the reads for each of the samples. We will do this by running uproc on the reads that did not map to human (or the unmapped reads). Create a script called: uproc_function.sh #!/bin/bash#PBS -W group_list=bh_class#PBS -q windfall#PBS -l jobtype=cluster_only#PBS -l select=1:ncpus=12:mem=23gb#PBS -l pvmem=22gb#PBS -l walltime=24:00:00#PBS -l cput=24:00:00#PBS -M netid@email.arizona.edu#PBS -m bea#--------------EDIT THESE---------------FASTQ_DIR= Make sure your script is executable, and that no lines were split (the uproc command should be a single line). #!/bin/bash #PBS -W group_list=bh_class #PBS -q windfall #PBS -l jobtype=cluster_only #PBS -l select=1:ncpus=12:mem=23gb #PBS -l pvmem=22gb #PBS -l walltime=24:00:00 #PBS -l cput=24:00:00 #PBS -M netid@email.arizona.edu #PBS -m bea #--------------EDIT THESE--------------- FASTQ_DIR=&#34;/rsgrps/bh_class/username/unmapped&#34; OUT_DIR=&#34;/rsgrps/bh_class/username/function-reads&#34; OUTPUT=&#34;$OUT_DIR/uproc-out&#34; #--------------------------------------- export UPROC=&#34;/rsgrps/bh_class/bin/uproc-dna&#34; export DATA=&#34;/rsgrps/bh_class/data/uproc&#34; export UPROC_MODEL=&#34;$DATA/model&#34; export UPROC_OUT_DIR=&#34;$OUT_DIR/uproc-out&#34; export KEGG=&#34;$DATA/keggready&#34; cd $FASTQ_DIR for file in `cat fastq-list`; do # filtered no human R1=$FASTQ_DIR/$file&#34;.paired.1.fastq&#34; R2=$FASTQ_DIR/$file&#34;.paired.2.fastq&#34; S=$FASTQ_DIR/$file&#34;.singletons.fastq&#34; $UPROC --preds --short --threads 12 --output $OUTPUT.$file.kegg $KEGG $UPROC_MODEL $R1 $R2 $S done Make sure your script is executable, and that no lines were split (the uproc command should be a single line).",
+      "title": "Write uproc PBS script",
+      "instruction": "Create a file named `uproc_function.sh` containing the PBS header, environment variable definitions, and the uproc command loop. Edit the FASTQ_DIR variable to point to your unmapped reads directory.",
+      "substeps": [
+        {
+          "instruction": "#!/bin/bash",
+          "title": ""
+        },
+        {
+          "instruction": "#PBS -W group_list=bh_class",
+          "title": ""
+        },
+        {
+          "instruction": "#PBS -q windfall",
+          "title": ""
+        },
+        {
+          "instruction": "#PBS -l jobtype=cluster_only",
+          "title": ""
+        },
+        {
+          "instruction": "#PBS -l select=1:ncpus=12:mem=23gb",
+          "title": ""
+        },
+        {
+          "instruction": "#PBS -l pvmem=22gb",
+          "title": ""
+        },
+        {
+          "instruction": "#PBS -l walltime=24:00:00",
+          "title": ""
+        },
+        {
+          "instruction": "#PBS -l cput=24:00:00",
+          "title": ""
+        },
+        {
+          "instruction": "#PBS -M netid@email.arizona.edu",
+          "title": ""
+        },
+        {
+          "instruction": "#PBS -m bea",
+          "title": ""
+        },
+        {
+          "instruction": "#--------------EDIT THESE---------------",
+          "title": ""
+        },
+        {
+          "instruction": "FASTQ_DIR=\"/rsgrps/bh_class/username/unmapped\"",
+          "title": ""
+        },
+        {
+          "instruction": "OUT_DIR=\"/rsgrps/bh_class/username/function-reads\"",
+          "title": ""
+        },
+        {
+          "instruction": "OUTPUT=\"$OUT_DIR/uproc-out\"",
+          "title": ""
+        },
+        {
+          "instruction": "#---------------------------------------",
+          "title": ""
+        },
+        {
+          "instruction": "export UPROC=\"/rsgrps/bh_class/bin/uproc-dna\"",
+          "title": ""
+        },
+        {
+          "instruction": "export DATA=\"/rsgrps/bh_class/data/uproc\"",
+          "title": ""
+        },
+        {
+          "instruction": "export UPROC_MODEL=\"$DATA/model\"",
+          "title": ""
+        },
+        {
+          "instruction": "export UPROC_OUT_DIR=\"$OUT_DIR/uproc-out\"",
+          "title": ""
+        },
+        {
+          "instruction": "export KEGG=\"$DATA/keggready\"",
+          "title": ""
+        },
+        {
+          "instruction": "cd $FASTQ_DIR",
+          "title": ""
+        },
+        {
+          "instruction": "for file in `cat fastq-list`; do",
+          "title": ""
+        },
+        {
+          "instruction": "R1=$FASTQ_DIR/${file}.paired.1.fastq",
+          "title": ""
+        },
+        {
+          "instruction": "R2=$FASTQ_DIR/${file}.paired.2.fastq",
+          "title": ""
+        },
+        {
+          "instruction": "S=$FASTQ_DIR/${file}.singletons.fastq",
+          "title": ""
+        },
+        {
+          "instruction": "$UPROC --preds --short --threads 12 --output $OUTPUT.$file.kegg $KEGG $UPROC_MODEL $R1 $R2 $S",
+          "title": ""
+        },
+        {
+          "instruction": "done",
+          "title": ""
+        },
+        {
+          "instruction": "# Make sure the script is executable and that the uproc command remains a single line.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "The output files will be called &#39;uproc-out.$file.kegg&#39;, where $file is one of your SRR file names. You will need to write a script that loops through each of these file names, converts the SRR file name into the body site &#39;short name&#39; (e.g. Um for belly button), and then creates a read count for each of the broad kegg categories for each sample (use the file /rsgrps/bh_class/kegg_to_broadcat to convert the kegg ids in the uproc file to the broad categories). Also note that there are 31 categories, but this is way too many to display on our anvi&#39;o graph. So the results should only display %reads that hit to the top five categories for all samples and group the rest into &#39;Other&#39; (where Func1 is replaced by the &#39;broad category desc&#39; in the output below). Also remember that you will need to have a mapping file for converting the sample SRR id to the sample name, and linking to the categories for the output. e.g. %s %s SRR Sample Occlusion MicroEnv SRR1647143 Ra Occluded Sebaceous SRR1647048 Sc Exposed Sebaceous SRR1647047 Ax Occluded Moist SRR1647142 Um Occluded Moist SRR1647049 Fh Exposed Sebaceous SRR1647046 Ac IntOcculded IntMoist SRR1647045 Pa Exposed IntMoist SRR1647141 Tw Occluded Moist Note that this script should be similar to the script that Ken wrote in class to convert uproc output into input for Anvio. The main difference is that you need to create a summary table for the output. %s %s Sample Occlusion MicroEnv Func1 Func2 Func3 Func4 Func5 FuncOther Ra Occluded Sebaceous 33 21 16 3 2 25 Sc Exposed Sebaceous 40 21 16 10 2 11 Ax Occluded Moist 30 18 5 10 1 36 Um Occluded Moist 28 13 6 10 25 18 Fh Exposed Sebaceous 27 21 12 10 2 28 Ac IntOcculded IntMoist 5 14 16 6 4 55 Pa Exposed IntMoist 6 21 16 10 2 45 Tw Occluded Moist 33 21 16 10 2 18",
+      "title": "Make script executable",
+      "instruction": "Run `chmod +x uproc_function.sh` to allow the job script to be submitted.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Run the script above on the HPC to get read matches to kegg ids. qsub -e std-err -o std-out uproc_function.sh",
+      "title": "Submit uproc job",
+      "instruction": "Submit the PBS script to the cluster, directing standard error and output to the previously created folders:",
+      "substeps": [
+        {
+          "instruction": "`qsub -e std-err -o std-out uproc_function.sh`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Start Anvi&#39;o as you have done in past protocols. Go into the directory with the anvi&#39;o databases. Download the output (on the HPC) from the script above to your computer. scp sftp.hpc.arizona.edu:/rsgrps/bh_class/username/function-reads/samples-table . where samples-table is the output of the script you wrote in the step above.",
+      "title": "Summarize uproc output",
+      "instruction": "After the job finishes, run a custom summarization script that:",
+      "substeps": [
+        {
+          "instruction": "Iterates over each `uproc-out.$file.kegg` file (where $file is an SRR base name).",
+          "title": ""
+        },
+        {
+          "instruction": "Uses `/rsgrps/bh_class/kegg_to_broadcat` to translate KEGG IDs to one of the 31 broad functional categories.",
+          "title": ""
+        },
+        {
+          "instruction": "Converts the SRR file name to a body‑site short name (e.g., Um for belly button) using a mapping file that links SRR IDs to sample names, occlusion status, and micro‑environment (example mapping provided in the protocol).",
+          "title": ""
+        },
+        {
+          "instruction": "Counts reads per broad category for each sample.",
+          "title": ""
+        },
+        {
+          "instruction": "Identifies the five categories with the highest total read counts across all samples; those become Func1–Func5. All remaining categories are summed into a single \"Other\" column (FuncOther).",
+          "title": ""
+        },
+        {
+          "instruction": "Writes a tab‑delimited `samples-table` with columns: Sample, Occlusion, MicroEnv, Func1, Func2, Func3, Func4, Func5, FuncOther (example rows shown in the protocol).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Use the command below to create an anvi&#39;o samples database. anvi-gen-samples-info-database --samples-information samples-table -o samples.db",
+      "title": "Transfer samples table",
+      "instruction": "Copy the generated `samples-table` from the HPC to your local workstation:",
+      "substeps": [
+        {
+          "instruction": "`scp sftp.hpc.arizona.edu:/rsgrps/bh_class/username/function-reads/samples-table .`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Start Anvi&#39;o with the samples.db to visualize the results for the samples. anvi-interactive -p SAMPLES-MERGED/PROFILE.db -c contigs.db -s samples.db",
+      "title": "Create Anvi'o samples database",
+      "instruction": "Generate an Anvi'o samples‑information database from the table:",
+      "substeps": [
+        {
+          "instruction": "`anvi-gen-samples-info-database --samples-information samples-table -o samples.db`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Visualize results in Anvi'o",
+      "instruction": "Launch Anvi'o interactive view using the newly created samples database:",
+      "substeps": [
+        {
+          "instruction": "`anvi-interactive -p SAMPLES-MERGED/PROFILE.db -c contigs.db -s samples.db`",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T13:51:45.684561Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 18,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gxibvtw-2C6D206E687311F08F960A58A9FEAC02.jpg",
+      "local_path": "data/media/protocols_io/c-hw10-sample-read-count-to-functional-categories-gkibuue/gxibvtw-2C6D206E687311F08F960A58A9FEAC02.jpg",
+      "source_url": "https://files.protocols.io/external/gxibvtw-2C6D206E687311F08F960A58A9FEAC02.jpg",
+      "caption": "",
+      "bytes": 19395,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/c-hw10-sample-read-count-to-functional-categories-gkibuue/gxibvtw-2C6D206E687311F08F960A58A9FEAC02.jpg"
+    }
+  ]
 }

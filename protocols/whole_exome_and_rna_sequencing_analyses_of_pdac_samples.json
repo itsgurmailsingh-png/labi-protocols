@@ -32,98 +32,172 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "To remove the discrepancies in tissues...",
-      "instruction": "To remove the discrepancies in tissues acquired for genomic, proteomic, and pathological analyses, we adopted a new tissue processing strategy. Briefly, the tumour tissues were cryo-pulverised to obtain a fine tissue powder. The tissue powder was then divided into aliquots for DNA and RNA (ca. 3 mg) isolation and protein extraction (15 mg). This strategy allowed us to produce all proteogenomic data (e.g. WES, mRNAseq, global proteome, and phosphoproteome) and acquire tumour cellularity data from an equivalent tissue sample.",
+      "title": "Prepare Tissue Samples",
+      "instruction": "Process tumor tissues to ensure consistency across genomic, proteomic, and pathological analyses.",
+      "substeps": [
+        {
+          "instruction": "Cryo-pulverize tumor tissues to obtain a fine tissue powder.",
+          "title": ""
+        },
+        {
+          "instruction": "Divide the powder into aliquots: approximately 3 mg for DNA and RNA isolation, and 15 mg for protein extraction.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "with the MEM algorithm 1",
-      "instruction": "with the MEM algorithm 1 . Using Samtools (version 1.4.",
-      "substeps": [],
+      "title": "Perform Whole Exome Sequencing (WES)",
+      "instruction": "Capture and sequence the exome using the SureSelect Human All Exon v5 probe set following the Agilent SureSelect Target Enrichment protocol (version B.3, June 2015).",
+      "substeps": [
+        {
+          "instruction": "Hybridize >100 ng of genomic DNA onto capture probes for 24 h on a thermal cycler.",
+          "title": ""
+        },
+        {
+          "instruction": "Perform quantification and quality control using TapeStation DNA ScreenTape D1000 (Agilent) and quantitative PCR (qPCR) after library construction.",
+          "title": ""
+        },
+        {
+          "instruction": "Sequence libraries with paired-end 101 bp reads on the Illumina HiSeq 2500 platform, ensuring WES depths of at least 100× for blood samples and 300× for tumor samples.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "2 , SAM files were further...",
-      "instruction": "2 , SAM files were further processed to generate, sort, and index BAM files. After alignment, duplicate reads were removed using Picard (version 2.18.",
-      "substeps": [],
+      "title": "Process WES Data and Call Variants",
+      "instruction": "Map reads and identify somatic and germline variants using a bioinformatics pipeline.",
+      "substeps": [
+        {
+          "instruction": "Map FASTQ reads to the GRCh38 genome using BWA (version 0.7.17) with the MEM algorithm.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate, sort, and index BAM files from SAM files using Samtools (version 1.4.1).",
+          "title": ""
+        },
+        {
+          "instruction": "Remove duplicate reads using Picard (version 2.18.7).",
+          "title": ""
+        },
+        {
+          "instruction": "Pre-process data using IndelRealigner and BaseRecalibrator modules of GATK (version 3.8).",
+          "title": ""
+        },
+        {
+          "instruction": "Identify germline variants in blood samples using HaplotypeCaller.",
+          "title": ""
+        },
+        {
+          "instruction": "Call somatic variants from tumors compared with matched blood samples using Mutect2 (version 3.8) according to GATK best practices.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "3",
-      "instruction": "3 . IndelRealigner and BaseRecalibrator modules of the Genome Analysis Tool Kit (GATK; version 3.",
-      "substeps": [],
+      "title": "Analyze Somatic Mutations and CNVs",
+      "instruction": "Identify significantly mutated genes (SMGs) and copy number variations (CNVs).",
+      "substeps": [
+        {
+          "instruction": "Identify SMGs from VCF files using MutSigCV (version 1.4), defining SMGs as mutated genes with a q value < 0.05 (excluding biallelic somatic SNVs).",
+          "title": ""
+        },
+        {
+          "instruction": "Annotate exonic variants using ANNOVAR (version 2018Apr16), convert tables to MAF files, and visualize using the maftools R package.",
+          "title": ""
+        },
+        {
+          "instruction": "Categorize variants into missense, nonsense, in-frame insertions/deletions, and frameshift insertions/deletions using snpEff (version 4.3t).",
+          "title": ""
+        },
+        {
+          "instruction": "Apply CNVkit (version 0.9.6) to WES data for segmented copy data, filtering out data not corresponding with the 22 major autosomes and sex chromosomes.",
+          "title": ""
+        },
+        {
+          "instruction": "Analyze filtered CNV data using GISTIC2.0 (version 2.0.22) to identify copy number-altered genomic regions and genes.",
+          "title": ""
+        },
+        {
+          "instruction": "Define exome coverage as shared genomic regions between capture probe regions and callable regions using GATK CallableLoic.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate tumor mutation burden as the number of protein sequence-altering variants divided by the exome coverage.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "4 were used for pre-processing before variant calling",
-      "instruction": "4 were used for pre-processing before variant calling. Germline variants in blood samples were identified by HaplotypeCaller, and somatic variants were called using Mutect2 (version 3.",
-      "substeps": [],
+      "title": "Perform Exome Capture RNA Sequencing",
+      "instruction": "Isolate and sequence the mRNA encoding exome to overcome RNA degradation in PDAC tissues.",
+      "substeps": [
+        {
+          "instruction": "Quantify total RNA using Quant-IT RiboGreen and run on TapeStation RNA ScreenTape to calculate DV200 (percentage of fragments > 200 nucleotides).",
+          "title": ""
+        },
+        {
+          "instruction": "Isolate the mRNA encoding exome from >100 ng of total RNA using Illumina TruSeq RNA exome per manufacturer instructions.",
+          "title": ""
+        },
+        {
+          "instruction": "Construct a strand-specific cDNA library with adaptor ligation.",
+          "title": ""
+        },
+        {
+          "instruction": "Sequence with paired-end 101 bp reads using the Illumina HiSeq 2500 platform.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "5 from the tumours, when compared...",
-      "instruction": "5 from the tumours, when compared with matched blood samples, according to the GATK best practice.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 6,
-      "title": "6",
-      "instruction": "6 . The exonic variants were annotated using ANNOVAR (version 2018Apr",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 7,
-      "title": "7 , and annovar tables were...",
-      "instruction": "7 , and annovar tables were converted to MAF files and visualized using maftools 8 R package. Coverage and covariate files provided by MutSigCV were used to calculate q values. Mutated genes with a q value &lt; 0.05 were defined as the SMGs. When determining SMGs, biallelic somatic single nucleotide variants (SNVs) were not considered. For CNV analysis, CNVkit (version 0.9.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
-      "title": "9 was applied to the WES...",
-      "instruction": "9 was applied to the WES data to obtain segmented copy data. Segmented data that did not correspond with the contigs of 22 major autosomes and sex chromosomes were filtered out. The filtered data were analysed using GISTIC2.0 (version 2.0.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 9,
-      "title": "10 to identify copy number-altered genomic regions and genes",
-      "instruction": "10 to identify copy number-altered genomic regions and genes. These variants were categorised into missense and nonsense mutations, in-frame insertions, in-frame deletions, frameshift insertions, and frameshift deletions according to the snpEff (version 4.3t) 11 annotation. Exome coverage was defined as shared genomic regions between capture probe regions and callable regions using the GATK CallableLoic tool. Tumour mutation burden was defined as the number of protein sequence-altering variants divided by the exome coverage.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "To obtain high-quality data and overcome...",
-      "instruction": "To obtain high-quality data and overcome RNA degradation problems in the PDAC tissues, exome capture RNA sequencing was performed. After quantifying total RNA using Quant-IT RiboGreen, the samples were run on the TapeStation RNA ScreenTape to calculate DV200, a percentage of RNA fragments of over 200 nucleotides. The mRNA encoding exome was isolated from &gt;100 ng of total RNA using the Illumina TruSeq RNA exome according to the manufacturer’s instructions. The strand-specific cDNA library was constructed with adaptor ligation and then sequenced with paired-end 101 bp reads using the Illumina HiSeq 2500 platform. Adaptors and reads of low quality or short length were trimmed using Trimmomatic (version 0.36) 12 . The trimmed reads were aligned to the GRCh38 genome using STAR (version 2.5.3a) 13 . The resulting mapped reads were used to quantify the expression levels for genes according to GENCODE v27 GTF annotation using RSEM (version 1.3.0) 14 .",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "Proteogenomic landscape of human pancreatic ductal...",
-      "instruction": "Proteogenomic landscape of human pancreatic ductal adenocarcinoma in an Asian population reveals tumor cell-enriched and immune-rich subtypes by Do Young Hyeon, Dowoon Nam, Youngmin Han, Duk Ki Kim, Gibeom Kim, Daeun Kim, Jingi Bae, Seunghoon Back, Dong-Gi Mun, Inamul Hasan Madar, Hangyeore Lee, Su-Jin Kim, Hokeun Kim, Sangyeop Hyun, Chang Rok Kim, Seon Ah Choi, Yong Ryoul Kim, Juhee Jeong, Suwan Jeon, Yeon Woong Choo, Kyung Bun Lee, Wooil Kwon, Seunghyuk Choi, Taewan Goo, Taesung Park, Young-Ah Suh, Hongbeom Kim, Ja-Lok Ku, Min-Sik Kim, Eunok Paek, Daechan Park, Keehoon Jung, Sung Hee Baek, Jin-Young Jang, Daehee Hwang, Sang-Won Lee published in Nature Cancer on 22 Dec, 2022 https://dx.doi.org/10.1038/s43018-022-00479-7",
+      "title": "Process RNA Sequencing Data",
+      "instruction": "Trim, align, and quantify gene expression from RNA-seq reads.",
+      "substeps": [
+        {
+          "instruction": "Trim adaptors and low-quality or short reads using Trimmomatic (version 0.36).",
+          "title": ""
+        },
+        {
+          "instruction": "Align trimmed reads to the GRCh38 genome using STAR (version 2.5.3a).",
+          "title": ""
+        },
+        {
+          "instruction": "Quantify gene expression levels using RSEM (version 1.3.0) according to GENCODE v27 GTF annotation.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [
+    {
+      "type": "document",
+      "filename": "Manuscript.Pdf",
+      "local_path": "data/media/protocols_io/strong-whole-exome-sequencing-and-rna-sequencing-d38q8rvw/Manuscript.Pdf",
+      "source_url": "https://content.protocols.io/files/s34acicn7.pdf",
+      "caption": "",
+      "bytes": 270734,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/strong-whole-exome-sequencing-and-rna-sequencing-d38q8rvw/Manuscript.Pdf"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 28,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

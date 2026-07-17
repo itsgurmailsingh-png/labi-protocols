@@ -18,9 +18,97 @@
     "shading effects"
   ],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "Implementation of shadow modelling was done using the Python programming language (Version 3.8.5), the Blender 3D software [8] and the Blender GIS-addon application for georeferenced data upload. Data handling and analyses was performed using Python API for Blender, Anaconda Distribution (Anaconda Navigator 1.10.0) for package management and Jupyter Notebook (Version 6.1.4) as an interactive development environment."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Set up software environment",
+      "instruction": "Install Python 3.8.5, Anaconda Navigator 1.10.0, Jupyter Notebook 6.1.4, Blender 3.x and the Blender‑GIS add‑on; ensure the Python packages pysolar, SAGA‑Python API (ta_lighting_2) and any required Blender Python APIs are available.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Prepare input data",
+      "instruction": "Obtain the 1 m resolution Digital Elevation Model (DEM) of the experimental field, the 2‑D tree position file, and the tree‑growth pattern definition; generate the list of modelling moments covering 60 years with 20‑minute intervals.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Define scenario geometry",
+      "instruction": "Create two scenario definitions: (a) North‑South orientation – row width 1 m, row spacing 32 m, intra‑row tree spacing 12 m, total row length 1163 m, 92 trees; (b) West‑East orientation – row width 1 m, row spacing 36 m, intra‑row tree spacing 12 m, total row length 1048 m, 84 trees. Apply a 20 m buffer to the field polygon so only inner‑area trees are modelled.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Set temporal and growth parameters",
+      "instruction": "Use a constant height growth of 0.25 m yr⁻¹ and a crown‑diameter growth of 5 mm yr⁻¹. Compute crown diameter (m) with Crowndiameter = 0.1393 × DBH + 2.6937 (DBH in cm). Model the crown as a sphere. Assign crown opacity of 20 % for November–April (leafless) and 75 % for May–October (foliated). Note that the modelling generates 13 375 intervals per year (≈ 802 5000 outputs for 60 years).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Compute sun positions",
+      "instruction": "For each moment, call pysolar.solar to obtain sun azimuth (φ°) and altitude (α°).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Filter and convert sun angles",
+      "instruction": "Keep only intervals with altitude > 0°. Convert azimuth and altitude to radians (φrad = φdeg × π/180, αrad = αdeg × π/180) and compute the sun direction vector Vsun = (cosαrad·sinφrad, cosαrad·cosφrad, sinαrad).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Run shade‑modelling algorithm",
+      "instruction": "For each moment: (1) Convert DEM to a 3‑D triangle mesh (surface). (2) Project 2‑D tree positions onto the surface to obtain 3‑D tree coordinates (tpos3d). (3) Calculate Potential Incoming Solar Radiation (PISR) for the moment using the DEM. (4) Compute sun direction vector (ray). (5) Determine tree opacity from the growth pattern and seasonal state. (6) If sun altitude ≤ 0°, skip to next moment. (7) Build 3‑D tree meshes from tpos3d, height, and crown sphere. (8) For each point p on the surface, cast a ray from p in the sun direction; if the ray intersects any tree mesh, set PISR_TreeShade[p] = PISR[p] × treeOpacity, else set PISR_TreeShade[p] = PISR[p]. (9) Store the resulting PISR_TreeShade map.)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Calculate field‑wide PISR",
+      "instruction": "Run the SAGA GIS module ta_lighting_2 (via the SAGA Python API) on the DEM to obtain the baseline Potential Incoming Solar Radiation for the entire field (no‑tree scenario).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Compute PISR reduction",
+      "instruction": "For each scenario, apply PISRReduction [%] = (1 − PISR_scenario / PISR_NoTrees) × 100 % to the shade‑adjusted PISR maps.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Aggregate results by distance class",
+      "instruction": "Create five distance classes on both sides of each tree row: 0.5–3 m, 3–6 m, 6–9 m, 9–12 m, 12–15 m. Summarise PISR reduction statistics for each class to enable spatio‑temporal analysis.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:48:46.848494Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Pseudocode of ShadOT's ‘Shade modelling step’ The algorithm in the 'Shade modelling step' (see Fig. 1) is presented here as pseudocode (Algorithm 1). This process is performed for every single moment and stored as 'PISR_TreeShade'.Fig. 1Overview of the functionality of ShadOT. Green boxes on the left side show the input data needed for ShadOT operation. In the red boxes, the elementary components of ShadOT are visualized. The main algorithm “shade modelling step” is described in detail in the Pseudocode section. The time controller provides the required time intervals (e.g. 60 years in 20 min-intervals) and initiates a modelling request. Output of ShadOT are georeferenced shadow maps and Potential Incoming Solar Radiation (PISR) reduction analyses.Fig 1Algorithm 1Shade Modelling Step.Algorithm 1:1: FUNCTION shadOT:2: INPUT: DigitalElevationModel -> dem3: INPUT: 2DTreePositions -> tpos2d4: INPUT: TreeGrowthPattern -> tgp5: INPUT: Moment -> moment6:7: CONVERT dem TO 3DTriangleMesh -> surface #[1]8: CONVERT tpos2d TO 3DTreePosition on surface -> tpos3d #[2]9:10:11: CALC PISR FROM moment,dem -> pisr #[3]12: CALC SunAltitude,SunAzimut FROM moment-> alti,azi #[4]13: CALC 3DSunDirectionVector FROM alti,azi -> ray #[5]14: CALC TreeOcupacity FROM moment,tgp -> treeOcupacity15: IF alti LESSTHEN 0:16: RETURN pisr17: CREATE 3DTreeMesh WITH moment, tgp, tpos3d -> trees3d18:19: FOREACH p IN Points FROM surface:20: IF ray FROM p INTERSECTS trees3d: #[2]21: # Point in Treeshade22: PISR_TreeShade[p] = pisr[p] * treeOcupacity23: ELSE:24: # Point not in Treeshade25: PISR_TreeShade[p] = pisr[p]26:27: RETURN PISR_TreeShade#[1] See BlenderGIS-addon[8]#[2] See Blender Python APIray_cast[8]#[3] See SAGA Python APIta_lighting_2[9]#[4] See Python PackagePysolar[27]#[5] See chapter Sun position",
+  "content_type": "likely_not_protocol",
+  "content_type_score": 16,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

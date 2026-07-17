@@ -24,11 +24,15 @@ import json
 import os
 import re
 import shutil
+import sys
 from datetime import datetime, date
 from pathlib import Path
 from collections import defaultdict
 
 from datasketch import MinHash, MinHashLSH
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from normalise import score_credibility
 
 # ---------------------------------------------------------------------------
 # Config
@@ -146,7 +150,10 @@ def build_output(protocol: dict, parent_id: str | None, version_count: int) -> d
         "estimated_time_mins":protocol.get("estimated_time_mins"),
         "materials":          protocol.get("materials") or [],
         "steps":              steps,
-        "verification_status":protocol.get("verification_status", "verified" if protocol.get("license_verified") else "unverified"),
+        "media":              protocol.get("media") or [],
+        "content_type":       protocol.get("content_type", "protocol"),
+        "content_type_score": protocol.get("content_type_score"),
+        "verification_status":protocol.get("verification_status") or score_credibility(protocol.get("source_url", ""), protocol.get("author", "")),
         "merged_at":          date.today().isoformat(),
     }
 
@@ -277,7 +284,7 @@ def write_outputs(groups: list[list[dict]]) -> int:
         shutil.rmtree(PROTOCOLS_DIR)
     PROTOCOLS_DIR.mkdir(parents=True, exist_ok=True)
 
-    written = 0
+    written = published = withheld_blank = 0
     for group in groups:
         parent = group[0]
         version_count = len(group)
@@ -298,11 +305,21 @@ def write_outputs(groups: list[list[dict]]) -> int:
                 pid = f"{parent_pid}_v{i}_{src}"
                 out["protocol_id"] = pid
 
+            # Always write to data/merged/ for traceability/debugging, but
+            # withhold zero-step protocols from the public protocols/ folder —
+            # a blank protocol is a direct credibility hit, not a coverage gap.
             path = MERGED_DIR / f"{pid}.json"
             path.write_text(json.dumps(out, ensure_ascii=False, indent=2))
-            shutil.copy2(path, PROTOCOLS_DIR / f"{pid}.json")
             written += 1
 
+            if out.get("steps"):
+                shutil.copy2(path, PROTOCOLS_DIR / f"{pid}.json")
+                published += 1
+            else:
+                withheld_blank += 1
+
+    print(f"  Withheld (zero-step, not published): {withheld_blank}")
+    print(f"  Published to protocols/: {published}")
     return written
 
 

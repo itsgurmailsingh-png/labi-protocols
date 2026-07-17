@@ -19,7 +19,7 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 9.0,
+  "quality_score": 8.5,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 108,
   "materials": [
@@ -45,157 +45,246 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "The original data generated with PacBio...",
-      "instruction": "The original data generated with PacBio and Nanopore platforms were base-called, quality controlled, combined and transferred to FASTA format for assembly.",
+      "title": "Prepare Raw Sequencing Data",
+      "instruction": "Process raw data from PacBio and Nanopore platforms.",
+      "substeps": [
+        {
+          "instruction": "Base-call the data",
+          "title": ""
+        },
+        {
+          "instruction": "Perform quality control",
+          "title": ""
+        },
+        {
+          "instruction": "Combine the datasets",
+          "title": ""
+        },
+        {
+          "instruction": "Transfer data to FASTA format for assembly",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Run Canu (v1",
-      "instruction": "Run Canu (v1.5) for long reads correction, triming and assembly. correctedErrorRate=0.045, corOutCoverage=6.",
+      "title": "Perform Initial Long Read Assembly",
+      "instruction": "Run Canu (v1.5) for long reads correction, trimming, and assembly using correctedErrorRate=0.045 and corOutCoverage=6.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Run Wtdbg (v1",
-      "instruction": "Run Wtdbg (v1.1) for further assembly of the data obtained in step 2. -k 21(Kmer size:21), -e 3(Min cov of edges=3q), the other parameter was set as default.",
+      "title": "Perform Secondary Assembly",
+      "instruction": "Run Wtdbg (v1.1) on the data obtained from the Canu assembly using -k 21 (Kmer size: 21) and -e 3 (Min cov of edges=3), with all other parameters set to default.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "to combine assembled results of step...",
-      "instruction": "to combine assembled results of step 2 and 3, then run Numer (v4.0.",
-      "substeps": [],
+      "title": "Merge and Polish Assembly",
+      "instruction": "Combine and refine the assembled results from the previous steps.",
+      "substeps": [
+        {
+          "instruction": "Run Quickmerge (v0.2.2) with parameters: -hco 5.0 (overlap cutoff for anchor contigs), -c 1.5 (overlap cutoff for extension of anchor contig), -l 400000 (length cutoff for anchor contigs), and -ml 5000 (minimum alignment length for merging).",
+          "title": ""
+        },
+        {
+          "instruction": "Run Numer (v4.0.0) using default parameters to remove redundancy.",
+          "title": ""
+        },
+        {
+          "instruction": "Run Pilon (v1.22) using Illumina reads to correct sequencing errors with -mindepth 10 and other parameters set to default.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "to remove the redundancy, and finally run Pilon (v1",
-      "instruction": "to remove the redundancy, and finally run Pilon (v1.",
-      "substeps": [],
+      "title": "Evaluate Assembly Quality",
+      "instruction": "Assess the quality of the assembly using mapping and conserved gene searches.",
+      "substeps": [
+        {
+          "instruction": "Run SAMTools (v0.1.18) to map 360,937,442 Illumina reads for genome survey to the assembly (no specific parameters).",
+          "title": ""
+        },
+        {
+          "instruction": "Run BUSCO (v2.0) using default parameters to search for 303 eukaryotic and 978 metazoan conserved genes.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "to correct sequencing errors in the assembly with Illumina reads",
-      "instruction": "to correct sequencing errors in the assembly with Illumina reads. Quickmerge: -hco 5.0 (controls the overlap cutoff used in selection of anchor contigs. Default is 5.0) -c 1.5 （controls the overlap cutoff for contigs used for extension of the anchor contig. Default is 1.5) -l 400000 (controls the length cutoff for anchor contigs) -ml 5000 (controls the minimum alignment length to be considered for merging); Numer: default parameters; Pilon: -mindepth 10, the other parameter was set as default.",
+      "title": "Build De Novo Repeat Library",
+      "instruction": "Construct a repeat library using LTR FINDER (v1.05), RepeatScout (v1.0.5), and PILER-DF (v2.4) with default parameters.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "&#34;Run SAMTools (v0",
-      "instruction": "&#34;Run SAMTools (v0.1.18) to evaluate the assembly quality by mapping the 360,937,442 Illumina reads for genome survey to the assembly. Run BUSCO (v2.0) to evaluate the assembly quality by searching the 303 eukaryotic and 978 metazoan conserved genes in the assembly.&#34; SAMTools: no parameter; BUSCO: default parameters.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 7,
-      "title": "Run LTR FINDER (v1",
-      "instruction": "Run LTR FINDER (v1.05), RepeatScout (v1.0.5) and PILER-DF (v2.4) to build a de novo library. All with default parameters.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
-      "title": "Run PASTEClassifier (V1",
-      "instruction": "Run PASTEClassifier (V1.0) to classify the repetitive sequences in the library constructed in step 5, and cnmbined with Repbase database to creat the final library. Default parameters",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 9,
-      "title": "Basing on the library constructed in...",
-      "instruction": "Basing on the library constructed in step 6 as database, run RepeatMasker (v4.0.6) to identify repeats in the genome. -nolow -no_is -norna -engine wublast -qq -frag 20000",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "Mask these repetitive regions obtained above (step 5-7) with &#39;N&#39;s",
-      "instruction": "Mask these repetitive regions obtained above (step 5-7) with &#39;N&#39;s. Preparation for gene prediction.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "and Stringtie (v1",
-      "instruction": "and Stringtie (v1.2.3); Pacbio data was full-length transcripts obtained after quality control; Run TransDecoder v2.0 (http://transdecoder.github.io) and GeneMark (v5.",
+      "title": "Classify and Finalize Repeat Library",
+      "instruction": "Classify repetitive sequences using PASTEClassifier (V1.0) with default parameters and combine with the Repbase database to create the final library.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
+      "step_id": 7,
+      "title": "Identify and Mask Repeats",
+      "instruction": "Identify and mask repetitive regions in the genome to prepare for gene prediction.",
+      "substeps": [
+        {
+          "instruction": "Run RepeatMasker (v4.0.6) using the library from the previous step as a database with parameters: -nolow -no_is -norna -engine wublast -qq -frag 20000.",
+          "title": ""
+        },
+        {
+          "instruction": "Mask the identified repetitive regions with 'N's.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Predict Genes via Transcriptome Data",
+      "instruction": "Predict gene functions using transcriptome data.",
+      "substeps": [
+        {
+          "instruction": "Download S. broughtonii transcriptome data from NCBI.",
+          "title": ""
+        },
+        {
+          "instruction": "Assemble Illumina data using Trinity (v.r20140413p1) with min_kmer_cov:2 and default parameters; reassemble using Hisat (v2.0.4) and Stringtie (v1.2.3) with default parameters.",
+          "title": ""
+        },
+        {
+          "instruction": "Process PacBio data as full-length transcripts after quality control.",
+          "title": ""
+        },
+        {
+          "instruction": "Run TransDecoder v2.0 and GeneMark (v5.1) with default parameters to predict gene functions.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Perform Homology-Based Gene Prediction",
+      "instruction": "Run GeMoMa (v1.3.1) with default parameters for homology-based prediction by aligning the assembled genome against four closely related species (Danio rerio, Crassostrea gigas, Mizuhopecten yessoensis, and Mytilus galloprovincialis) downloaded from NCBI.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Perform De Novo Gene Prediction",
+      "instruction": "Run the following tools with default parameters to predict genes in the repeat-masked genome sequence: Augustus (v. 2.4), Genscan (v. 3.1), GlimmerHMM (v3.0.4), GeneID (v1.4), and SNAP (version 2006-07-28).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Integrate Gene Predictions",
+      "instruction": "Run EVM (v1.1.1) to obtain a consensus gene set by integrating predictions from previous steps using a STANDARD S-ratio of 1.13 and score > 1000.",
+      "substeps": [
+        {
+          "instruction": "Apply the following weights: PROTEIN OTHER (50), PROTEIN GeMoMa (50), TRANSCRIPT assembler-PASA (50), TRANSCRIPT Stringtie (20), ABINITIO_PREDICTION genscan (0.3), ABINITIO_PREDICTION AUGUSTUS (0.3), ABINITIO_PREDICTION GlimmerHMM (0.3), ABINITIO_PREDICTION SNAP (0.3), ABINITIO_PREDICTION geneID (0.3), ABINITIO_PREDICTION GeMoMa (0.3), and OTHER_PREDICTION OTHER (100).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
       "step_id": 12,
-      "title": "to predict the gene functions. Trinity",
-      "instruction": "to predict the gene functions. Trinity: min_kmer_cov:2, and set the other parameters as default; Hisat: default parameters; Stringtie: default parameters; TransDecoder: default parameters; GeneMark: default parameters.",
+      "title": "Refine Predicted Genes",
+      "instruction": "Run PASA v2.0.2 with default parameters to modify the genes predicted in the consensus set.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "Run GeMoMa (v1",
-      "instruction": "Run GeMoMa (v1.3.1) for homology-based prediction by aligning the assembled genome against those of 4 closely related species (Danio rerio, Crassostrea gigas, Mizuhopecten yessoensis and Mytilus galloprovincialis) downloaded from NCBI. Default parameters",
+      "title": "Annotate Gene Functions and Motifs",
+      "instruction": "Map the final gene set protein sequences to databases to identify functions or motifs.",
+      "substeps": [
+        {
+          "instruction": "Use BLAST (v2.2.31) with -max_target_seqs 100 for Nr (downloaded 2017.04.05), Nt (downloaded 2017.04.05), SwissProt, TrEMBL, KOG, and KEGG (others downloaded 2017.02.13).",
+          "title": ""
+        },
+        {
+          "instruction": "Use HMMer (v3.0) for Pfam with -E 0.00001 and --domE 0.00001, and other default parameters.",
+          "title": ""
+        },
+        {
+          "instruction": "Use BLAST2GO (v2.5) with default parameters for GO.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "Run Augustus (v",
-      "instruction": "Run Augustus (v. 2.4), Genscan (v. 3.1), GlimmerHMM (v3.0.4), GeneID (v1.4) and SNAP (version 2006-07-28) to de novo predict genes in the repeat-masked genome sequence. All with default parameters",
+      "title": "Identify Pseudogenes",
+      "instruction": "Search for and identify pseudogenes.",
+      "substeps": [
+        {
+          "instruction": "Run genBlastA (v1.0.4) based on homology using -e 1e-5.",
+          "title": ""
+        },
+        {
+          "instruction": "Run GeneWise (v2.4.1) based on mutations using -both -pseudo.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "Run EVM (v1",
-      "instruction": "Run EVM (v1.1.1) to obtain the consensus gene set by integrating genes predicted in step 10-12. STANDARD S-ratio: 1.13 score&gt;1000 Weights used for predicted genes by different softers are list below: PROTEIN OTHER 50 PROTEIN GeMoMa 50 TRANSCRIPT assembler-PASA 50 TRANSCRIPT Stringtie 20 ABINITIO_PREDICTION genscan 0.3 ABINITIO_PREDICTION AUGUSTUS 0.3 ABINITIO_PREDICTION GlimmerHMM 0.3 ABINITIO_PREDICTION SNAP 0.3 ABINITIO_PREDICTION geneID 0.3 ABINITIO_PREDICTION GeMoMa 0.3 OTHER_PREDICTION OTHER 100",
+      "title": "Predict tRNA",
+      "instruction": "Run tRNAscan-SE (v1.3.1) with default parameters to predict tRNA.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "Run PASA v2",
-      "instruction": "Run PASA v2.0.2 to modify the genes predicted in step 13. Default parameters",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 17,
-      "title": "&#34;Map protein sequences of the final...",
-      "instruction": "&#34;Map protein sequences of the final gene set to existing databases to identify their functions or motifs, such as Nr, Nt, SwissProt, TrEMBL, KOG, KEGG, Pfam and GO. Nr and Nt were downed on 2017.04.05, the other databases were downed on 2017.02.13. Nr, Nt, SwissProt, TrEMBL, KOG and KEGG: using BLAST (v2.2.31); Blast: -max_target_seqs 100 Pfam: using HMMer (v3.0), -E 0.00001 --domE 0.00001, , the other parameter was set as default; GO: using BLAST2GO (v2.5) with default parameters.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 18,
-      "title": "Run genBlastA (v1",
-      "instruction": "Run genBlastA (v1.0.4) to search for putative pseudogenes based on homology, and run GeneWise (v2.4.1) to identify pseudogenes based mutations. genBlastA: -e 1e-5GeneWise: -both -pseudo",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 19,
-      "title": "Run tRNAscan-SE (v1",
-      "instruction": "Run tRNAscan-SE (v1.3.1) to predict tRNA. Default parameters",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 20,
-      "title": "Run Infernal (v1",
-      "instruction": "Run Infernal (v1.1) to predict miRNA and rRNA based on Rfam v12.1 and miRBase v21.0 databases. Default parameters",
+      "title": "Predict miRNA and rRNA",
+      "instruction": "Run Infernal (v1.1) with default parameters to predict miRNA and rRNA based on Rfam v12.1 and miRBase v21.0 databases.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [
+    {
+      "type": "image",
+      "filename": "bf4n5thn-5DAF3EEF687311F08F960A58A9FEAC02.jpg",
+      "local_path": "data/media/protocols_io/the-pipeline-of-assembly-and-annotation-of-the-sca-z7zf9p6/bf4n5thn-5DAF3EEF687311F08F960A58A9FEAC02.jpg",
+      "source_url": "https://files.protocols.io/external/bf4n5thn-5DAF3EEF687311F08F960A58A9FEAC02.jpg",
+      "caption": "",
+      "bytes": 82295,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/the-pipeline-of-assembly-and-annotation-of-the-sca-z7zf9p6/bf4n5thn-5DAF3EEF687311F08F960A58A9FEAC02.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 61,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

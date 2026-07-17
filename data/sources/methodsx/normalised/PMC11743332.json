@@ -11,85 +11,165 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11743332/",
   "doi": "10.1016/j.mex.2024.103130",
   "citation": "10.1016/j.mex.2024.103130",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [],
   "estimated_time_mins": 54,
   "materials": [],
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "Our technique utilizes an automated data processing pipeline to get segmented line images from old scanned books and fetch corresponding labels from web. The existing and datasets are either collected manually by handwriting and taking images of the text already available in Unicode or by manually typing in the text labels for available handwritten images. The presented method introduces a pipeline that not only automatically extracts images for handwritten text but also gets the corresponding labels from web sources automatically. Thus, the unique contributions of the dataset can be listed are as follows:1.A method is developed to automatically segment images with handwritten sentences2.The method automatically aligns the images with the corresponding text labels scraped from web3.A sample dataset has been collected for Urdu poetry, comprising works from the two most famous Urdu poets.4.The dataset, along with the code for automatically collecting the dataset have been made public [7,8].",
+      "title": "Split PDF into page images",
+      "instruction": "Use Python PDF libraries to convert each page of the scanned Urdu poetry PDF into an individual image file.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Method details",
-      "instruction": "Initially, the PDF pages are split into individual images then image processing is utilized to segment the images into individual text lines. The images were extracted from PDF copies of scanned handwritten books by two famous Urdu poets using Python libraries for PDF segmentation.",
-      "substeps": [],
+      "title": "Segment pages into line images",
+      "instruction": "Apply OpenCV with the Neighborhood Connected Component Analysis (NCCA) algorithm to each page image to obtain separate line‑level images.",
+      "substeps": [
+        {
+          "instruction": "Load the page image with OpenCV.",
+          "title": ""
+        },
+        {
+          "instruction": "Run an eight‑way Connected Component Labeling (CCL) to label all components.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the average component height and width.",
+          "title": ""
+        },
+        {
+          "instruction": "Ignore components that are significantly smaller or larger than the averages during preprocessing.",
+          "title": ""
+        },
+        {
+          "instruction": "Split large components that could cause line merging.",
+          "title": ""
+        },
+        {
+          "instruction": "Define each component’s neighbourhood using the average height and width to group components on the same line.",
+          "title": ""
+        },
+        {
+          "instruction": "After initial line formation, reconsider previously ignored small components in post‑processing and assign them to the appropriate lines.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Method details",
-      "instruction": "Then images were segmented into text lines using the Python OpenCV library employing the Neighborhood Component Analysis algorithm. Particularly the Neighborhood Connected Component Analysis is used to split the page into text line segments [5]. The algorithm involves several key steps. First, it uses an eight-way Connected Component Labeling algorithm to label and identify components. It calculates the average heights and widths of these components and ignores those that are significantly smaller or larger during preprocessing. Large components that might cause line merging are split. Each component's neighborhood is defined based on the average height and width to find other components on the same line. Initially ignored small components are reconsidered in post-processing and assigned to the appropriate text lines, ensuring accurate text line formation from scanned document images.",
+      "title": "Manually trim and clean line images",
+      "instruction": "Inspect each segmented line image and manually remove noise, markings, or extraneous text to ensure a clean line image.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Method details",
-      "instruction": "The data then underwent some manual trimming, and cleaning, to ensure the image isn't hampered by noise, markings, or extraneous text. Every divided line is stored as a distinct image file and is titled using the page and line number segmented from the page (e.g., page_1_line_1.png) although not each segmented line by the algorithm contained text hence the line numbers are not contiguous. Fig. 1 depicts an explanation for the segmentation and manual adjustment process for each image.Fig. 1Sentence images segmentation pipeline.Fig. 1",
+      "title": "Save line images with systematic names",
+      "instruction": "Store every cleaned line image as a separate PNG file named with its source page and line number (e.g., page_1_line_1.png); note that line numbers may be non‑contiguous because some segments contain no text.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Method details",
-      "instruction": "Finally, the annotations for the images were found by web scraping and employing available OCR models using Python libraries besides manual intervention for typing. Each of the images was translated to text using the best Urdu OCR model available i.e. UTRNET [3,9]. UTRNet is a CNN-RNN hybrid architecture that has achieved state-of-the-art results for Urdu OCR after being trained on two datasets, UTRSet-Real and UTRSet-Synth.",
-      "substeps": [],
+      "title": "Generate text labels via OCR and web lookup",
+      "instruction": "Obtain Unicode text labels for each line image by running OCR and selecting the best matching reference from an online Urdu text bank.",
+      "substeps": [
+        {
+          "instruction": "Run the UTRNET Urdu OCR model (CNN‑RNN hybrid) on each line image to produce a predicted transcription.",
+          "title": ""
+        },
+        {
+          "instruction": "Scrape the online Unicode text bank for the two poets (Mirza Ghalib and Allama Iqbal) to collect candidate reference texts.",
+          "title": ""
+        },
+        {
+          "instruction": "For each candidate reference, compute the Character Error Rate (CER) = (substitutions + deletions + insertions) / total reference characters.",
+          "title": ""
+        },
+        {
+          "instruction": "Select the reference text with the lowest CER as the label for the image.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Method details",
-      "instruction": "In order to look up the corresponding text from the Unicode text bank available for the poets online [10], we computed the Character Error Rate (CER) with reference to each of the available Unicode references for the poet and selected the nearest one. CER refers to the percentage of characters that the OCR model improperly recognizes. It is computed by adding the number of character substitutions, deletions, and insertions required to match the predicted text with the reference text and dividing by the number of characters in the reference text. Consequently, reference text with minimum CER was selected as the label for each image.",
+      "title": "Manually verify and correct annotations",
+      "instruction": "Review each OCR‑derived label, correct any errors, and ensure the text accurately reflects the content of the image.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Method validation",
-      "instruction": "All the automatically extracted texts were then manually verified and rectified to be representative of the text within the image to be saved as the Unicode annotations. The Unicode text annotations for the images were saved within the annotations.csv file with the first column indicating the image file name and the second column indicating the Unicode text for the file. Fig. 2 illustrates few examples of predicted texts and adjusted reference texts as final annotations.Fig. 2Automated reference text lookup for raw predictions.Fig. 2",
+      "title": "Save annotations to CSV file",
+      "instruction": "Create an annotations.csv file where column 1 contains the image file name and column 2 contains the verified Unicode text for that image.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Method validation",
-      "instruction": "The final compiled Urdu Poetry dataset comprises 2888 images of Urdu poetry lines by Mirza Ghalib and Allama Iqbal. Every image is a segmented single-line photo and is accompanied by corresponding Unicode text within an annotations file for the dataset. The poetry lines are stored as distinct image files named using the page and line numbers from the scanned book (e.g., Ghalib_page_1_line_1.png, Iqbal_Nazms_0_page_1_line_1.png, Iqbal_Ghazals_0_page_1_line_1.png). The text annotations are added against these file names within an annotations.csv file accompanied by the dataset. However, it is noteworthy that the line numbers represent the segmented line contours from the book, and not each contour necessarily had a text line hence the line numbers within the file names in the dataset aren't sequential and might have some missing number. Fig. 2 shows a screenshot of the annotations file. Fig. 3Fig. 3Final dataset structure.Fig. 3",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
-      "title": "Method validation",
-      "instruction": "Finally, CER has been computed for the complete dataset using UTRNET without any finetuning. The trained model achieved a notably lower Character Error Rate (CER) of 11.13 % and a Word Error Rate (WER) of 46.22 % which is quite impressive as the model wasn't finetuned on this dataset and hence hadn't seen any example of the images.",
+      "title": "Compile final dataset and report metrics",
+      "instruction": "Collect all 2 888 line images (from Mirza Ghalib and Allama Iqbal) with their annotations; report that the UTRNET model achieved a Character Error Rate of 11.13 % and a Word Error Rate of 46.22 % on this dataset without fine‑tuning.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T02:27:51.338881Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "protocol",
+  "content_type_score": 46,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC11743332/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11743332/",
+      "caption": "",
+      "bytes": 40698,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11743332/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC11743332/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11743332/",
+      "caption": "",
+      "bytes": 52317,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11743332/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC11743332/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11743332/",
+      "caption": "",
+      "bytes": 76872,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11743332/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC11743332/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11743332/",
+      "caption": "",
+      "bytes": 130556,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11743332/gr3.jpg"
+    }
+  ]
 }

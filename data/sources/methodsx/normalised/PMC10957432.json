@@ -23,10 +23,765 @@
     "Image application 2",
     "Image application 3",
     "Image application 4",
-    "Image application 5"
+    "Image application 5",
+    "or infant gas (BD ≥",
+    "The KPNC Data Science Team further processed the GE tracing files to remove all personal health information (PHI). For each tracing file, the original MRN identifier was replaced with a new GUID which was linked via a crosswalk to a separate infant GUID. Furthermore, the original timestamps which included actual dates and times were replaced by the time, in milliseconds, before birth.",
+    "In principle, the tracing files contained data for three measurements of interest: fetal heart rate (FHR), uterine pressure (UP), and maternal heart rate (MHR). However, in practice there were some added complexities. First, the fetal monitors had two receptacles (HR1, HR2) for FHR, one for MHR, and one for UP sensors. The two FHR receptacles could accept input from either an external ultrasound-based FHR sensor or an internal fetal scalp electrode-ECG based sensor. Thus, FHR could be found on HR1 or HR2. Furthermore, when both FHR sensors were connected simultaneously, slightly different FHR readings could be present on both HR1and HR2.",
+    "As mentioned previously, the EFM signals were rarely contiguous but contained frequent gaps resulting from sensor disconnects, communication problems, or noise. Thus, the EFM signals comprised a series of contiguous segments separated by gaps of different length. The nldat class can deal with such signals by filling the gaps with NaNs, a symbol indicating not a number. But this is a problem since it is inefficient, and the analysis methods designed for contiguous samples do not manage the NaNs correctly. To address this, the nlid_toolbox provides the segdat data class, a child of the nldat class, designed for the efficient storage and processing of such segmented signals. Thus, the segdat class stores signals as a continuous set of samples while keeping track of the start and length of each segment. Furthermore, the class supports a wide range of analysis methods that have been modified to work correctly with segdat objects. Fig. 10 shows a plot a typical segdat object while Table 17 shows the properties of the corresponding segdat object.Fig. 10Plot of a segdat object for a typical FHR signal. Each segment is shown in a different color.Fig 10Table 17Properties of the segdat object for the FHR signal of Fig. 10.Table 17PropertyValueDescriptionsegInfo{1×5 cell}A cell array summarizing the monitor and sensor used for each segment.parameterSet[1×2 param]chanNames{‘HR2’}Names of the signalchanUnits‘BPM’Units of the signaldomainIncr0.25sSampling increment of the signaldomainName‘Hours before Birth’domainStart[-16.5108 -14.6275 -13.0372 -9.5442 -7.6442]Start time of each segment.domainValuesNaNNot useddataSet[161,696×1 double]Concatenated amplitude values of all signal segments.dataSize[193892 1]comment‘0037A085D58C4CA4AB44DC923F390EBEComment for the signalversion‘2.01’Software versionparameterSetonsetPointer1 26,137 37,841 68,605 95,485Pointer to the sample number that starts each segment.segLength26,136 11,704 30,764 26,880 66,212Number of samples in segment.",
+    "Publications using the Database."
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Overview of the database",
+      "instruction": "The overall design of our database is similar in principle to that described by Chudáček [1]. This database linked EFM signals and clinical data for a limited number of selected cases for mostly vaginal births. However, our objective was to build a database that was more comprehensive than that of Chudáček [1]. Thus, we wished to include as many records as possible from vaginal and cesarean births with both normal and pathological outcomes. Secondly, we wanted to expand the clinical information available to include clinical information about the progress of labor. Third, we wanted to include EFM records for as much of the labor as possible. Finally, we wanted to include information about important features of the EFM files. Fig. 1 illustrates the overall structure of the fetal/maternal database comprising four main components.Fig. 1The components of the fetal monitoring database. Three schemas implemented in an SQL database: The EARLY schema holds clinical information about the mother, infant, pregnancy, and delivery. The CTG schema holds information about the processing of the EFM files, and their contents. The PATTERNS schema holds information about FHR and UA patterns. The EFM files stored on the server disk contain the raw and processed fetal heart rate (FHR), uterine activity (UA), and maternal heart rate (MHR) signals as function of time.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Overview of the database",
+      "instruction": "Three components were implemented as SQL schemas. These included:1.The EARLY schema contains clinical information about the mother, the infant, the progress of the pregnancy and labor. The primary index of this schema is the INFANT_GUID, the infant identifier. It also contains a foreign key, TRACE_GUID, which identifies the corresponding trace file.2.The CTG (CardioTocoGraphy) schema contains information about the location and contents of the EFM tracing files, their processing status, and some of the features computed from the EFM tracings.3.The PATTERNS schema contains information about the processing of the EFM files to identify and quantify clinically relevant patterns in the fetal heart rate and uterine pressure signals.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Overview of the database",
+      "instruction": "The fourth component comprised the EFM trace files which were stored on the server file system.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Overview of database construction",
+      "instruction": "The construction of the database was carried out in two parallel workflows: One for the EARLY database and one for the EFM files. These two workflows are summarized in the following two sections. A detailed description of the various workflows then follows.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "EARLY",
+      "instruction": "The workflow for constructing the EARLY schema is illustrated in Fig. 2 comprised the construction of the EARLY database containing a wide variety of clinical data for the mother, child, pregnancy, and labor. To achieve this the Kaiser Permanente (KP) staff first identified all singleton pregnancies with a gestational age of 35 weeks or greater. They then drew data from ten different KP databases to provide a comprehensive picture of the mother, infant, pregnancy. All personal health information was removed from the database and unique, deidentified identifiers were assigned to the mother, infant, and EFM trace files. The deidentified results were entered into the EARLY schema and made available to the EARLY/MEASTRA team. Subsequently, this information was used to generate views describing the study group for each infant, the indication for cesarean section, and long-term outcome.Fig. 2The EARLY database workflow.Fig 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "EFM workflow",
+      "instruction": "The EFM files were acquired, preprocessed, repaired, and patterns identified using the workflow shown in Fig. 3. This workflow is similar in principle, although different in detail, from that described in [2]. The workflow proceeded as follows:1)GE retrieved all EFM files from the various KP sites. Files were identified by the mother's MRN and recording date.2)KP used the MRN and recording date to associate each file with a specific pregnancy and infant. KP staff removed all personal health information by assigning the file a random TRACE_GUID and transforming the timestamp from absolute time to time before birth. The deidentified file was stored in CVS form with one sample per row and transferred to the EARLY/MEASTRA team for subsequent processing.3)The KP CVS file was processed to eliminate duplicate samples, identify gaps, and stored as a RAW EFM file with one channel for each unique sensor/signal combination.4)FHR, UA, and MHR signals from different sensors were combined to generate a Combined EFM file with one channel for each of the three signals.5)The Combined EFM file was then processed to generate a Repaired EFM file in which short gaps were interpolated and segments containing artifacts or excessive noise were identified as uninterpretable.6)The Repaired EFM file was processed using PeriCALM Patterns software to identify clinically important patterns in the FHR (i.e. baseline, decelerations, accelerations) and UA (contractions).7)The Repaired EFM files and patterns information were used to estimate a wide range of FHR and UA features for classification.Fig. 3EFM workflow indicating the analyses performed by the GE, the KP staff, and EARLY MEASTRA staff. Information about the processing and contents of the EFM files was stored in the CTG and PATTERNS schemas The EFM files themselves were stored on disk.Fig 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "EFM workflow",
+      "instruction": "As each stage of the workflow information about the processing status, contents of the EFM file, and analysis results were stored in the CTG or PATTERNS schemas. The different EFM files were stored on the server disk for further analysis or to develop machine-learning models.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Detailed description of the database construction",
+      "instruction": "This section provides a more detailed description of the tools and methods used to generate the Fetal Monitoring database.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Computing infrastructure",
+      "instruction": "For legal and ethical reasons, KPNC imposed two restrictions on the project team:1.No individual data would be allowed outside of the firewall of the KPNC network computing environment; all computation and analysis would have to be done within the KPNC firewall.2.Even within the firewall, no personal health information (PHI) would be available to members of the team who were not KPNC employees.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Computing infrastructure",
+      "instruction": "These restrictions had important implications for how the database was built. Thus, two groups of personnel were involved in building the EFM database:1.The KPNC Data Science Team comprises KPNC employees with full access to all data including PHI.2.The Analysis Team comprising members of the research collaboration with access only to de-identified data.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Computing infrastructure",
+      "instruction": "The computing environment available behind the KPNC firewall to the Analysis Team comprised the following:1.Each member of the Analysis Team was provided with a virtual Citrix Windows 10 workstation equipped with key software tools including Microsoft Office and Teams, MATLAB with selected toolboxes, Git Extensions for source code revision control, Python, and PyCharm for Python development. Remote access to these machines was through a two-stage KPNC security protocol.2.All members of the Analysis Team had access to a Unix server system which acted as a file server for the Windows machines, a containerized MySQL database server, and provided NVidia GPU support for deep learning applications. The KPNC Data Science group also had access to this machine and used it to transfer deidentified EFM signals and expose database tables to the Analysis Team.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Target population",
+      "instruction": "The target population for the database included all pregnancies with an onset date in the range January 1, 2011–December 31, 2018, which led to singleton births at 15 Kaiser Permanente Northern California (KPNC) hospitals with a gestational age greater than or equal to 35 weeks, and for whom electronic fetal monitoring (EFM) data was available.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Early schema",
+      "instruction": "The EARLY schema contains clinical information describing the pre-pregnancy period, the pregnancy, and the delivery encounter. It comprises the data tables listed in Table 1. A complete data dictionary for the EARLY schema is provided as supplementary material.Table 1Tables in the EARLY schema.Table 1TableDescriptionAnesthesiaMaternal anesthesia types during the delivery encounterAnomalyInfant anomaly/birth defect diagnosesBlood gasInformation about timing, nature, and values of blood gas measurements.Cervical examDilatation, effacement, and station dataDeliveryCharacteristics of the delivery encounterEDOCHourly summary measures of maternal features during the delivery encounter including vital sign data, lab data, labor stageescoreIndividual elements of the modified SARNAT (neurologic) examInfantInfant characteristics and outcomesInfant labsAdditional infant laboratory values including CBC, transaminases, serum creatinine, coagulation studiesInpatient MedicationsMedication, dosage, administrationLabor timesDuration, onset, second stageMaternalStatic maternal variablesMaternal diagnosesDiagnoses pre-pregnancy, during the pregnancy, and during the delivery encounterMaternal diagnosis timingFor selected diagnoses, specific timing of diagnosisNMDSNeonatal diagnoses and procedures including stroke, seizure, seizure medications, imaging, therapeutic hypothermiaOutpatient medicationsMaternal medication, dosage, dispensedPregnancyMaternal characteristics unique to each pregnancyResuscitationResuscitation received in the delivery roomUDSResults of urine drug screening during pregnancy",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Early schema",
+      "instruction": "Data were abstracted from linked maternal and infant electronic medical records. To develop this database, we leveraged existing data resources which include the KPNC Division of Research Virtual Data Warehouse, a formal instance of the Health Care Systems Research Network's Virtual Data Warehouse [3] an independent multi-institutional standardized data model containing tables for diagnostic codes on all inpatient and outpatient encounters, inpatient electronic medication administration records, outpatient pharmacy records, and inpatient and outpatient labs; the infant cohort database which contains basic demographic, administrative, and clinical data of infant/mother dyads; the Neonatal Minimum Data Set (NMDS), a research database of curated outcomes and interventions of infants admitted to the neonatal intensive care unit [4]; and the Perinatal research unit Obstetric Database (POD), a curated obstetric research database of pregnancy diagnoses, outcomes and complications. In addition, we abstracted data directly from the electronic health record (EHR) including nursing flowsheet data (vital signs, cervical exam), neuroimaging reports, and clinical notes.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Early schema",
+      "instruction": "These clinical data allow us to determine a pregnancy's baseline risk for an adverse neonatal outcome based upon the maternal medical history and pregnancy. A unique feature of the dataset is the hourly record of information on maternal physiological variables (vital signs, lab data) and labor stage during the delivery encounter. These data can pair with EFM data to provide a dynamic estimation of risk as labor progresses. In addition, we will be able to evaluate the individual contribution to risk prediction of clinical data and EFM data as well as the effect of combining these two predictors.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Early schema",
+      "instruction": "An important function of the EARLY database was to link the tables describing the mother's and infant's clinical data with the tables for corresponding tracing files for a delivery. We used field values with globally unique identifiers (GUIDs) to provide these “crosswalk” linkages.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Study group definition",
+      "instruction": "Each infant in the EARLY schema was assigned to one of eight mutually exclusive study groups based on their outcome. Fig. 4 shows the logic associated with this assignment while Table 2 provides a detailed description of or each study group.Fig. 4Flow chart for study group definition.Fig 4Table 2Study group definitions.Table 2Study GroupDefinitionPerinatal HIEAcidosis on cord gas (pH 0 AND one or more of the following:•Received therapeutic hypothermia.•Abnormal neurologic exam ≥6 hours•Confirmed seizures in first 24 hours of lifeAcidosis, No HIEAcidosis on cord gas (pH 0•Required intubation/chest compressions during newborn resuscitation.•Evidence of seizures or seizure medications•Therapeutic hypothermia (passive, active, or transient)Nenonatal Intervention, no acidosis:Cord gas pH ≥7 BD 0•Required intubation/chest compressions during newborn resuscitation.•Evidence of seizures or seizure medications•Therapeutic hypothermia (passive, active, or transient)Atypical/Distant HIEALL the following:•Does not meet criteria for perinatal or intrapartum HIE.•Evidence on radiographic study (Head CT or Brain MRI) of injury pattern suggestive of hypoxic/ischemic injury (e.g., injury to the deep grey matter [basal ganglia, thalamus] or watershed regions)Death under 6 hInfant died within 6 hours of birth",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Study group definition",
+      "instruction": "We took particular care with the assignment of infants to the HIE study group. Thus, HIE was defined as the presence of both neonatal acidosis and neonatal encephalopathy.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Define acidosis criteria and extract data",
+      "instruction": "Neonatal acidosis was defined as a pH <7.0 or base deficit ≥10 mmol/L on cord blood, or a base deficit ≥10 mmol/L on the first infant gas before 2 h of age [5], [6], [7]. To identify infants with acidosis, we electronically extracted all cord and infant blood gas data from the KPNC laboratory database. We used the lowest pH of all available umbilical cord gases, whether they were arterial or venous. Similarly, we used the first infant blood gas regardless of source (arterial, capillary, or venous),",
+      "substeps": [
+        {
+          "instruction": "Define neonatal acidosis: pH <7.0 OR base deficit ≥10 mmol/L on cord blood, OR base deficit ≥10 mmol/L on first infant gas before 2 h of age",
+          "title": ""
+        },
+        {
+          "instruction": "Electronically extract all cord and infant blood‑gas data from the KPNC laboratory database",
+          "title": ""
+        },
+        {
+          "instruction": "Select the lowest pH among all available umbilical cord gases (arterial or venous)",
+          "title": ""
+        },
+        {
+          "instruction": "Select the first infant blood‑gas sample regardless of source (arterial, capillary, or venous)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Study group definition",
+      "instruction": "Neonatal encephalopathy was defined as an abnormal neurologic exam between 1 and 6 h of age that either persisted beyond 6 h of age; was accompanied by electrographic or focal-clonic seizures; or was treated with therapeutic hypothermia. At KPNC, clinicians are prompted in the electronic health record to perform and document a templated “encephalopathy score” or enhanced neurologic exam (ENE) for all infants with a 10-minute Apgar 72 h; death within 72 h of age; discharge diagnosis of HIE or seizures; receipt of anti-epileptic medication before 72 h of age; or receipt of therapeutic hypothermia.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Study group definition",
+      "instruction": "The severity of HIE was determined by the worst neurologic exam documented between 1 and 6 h of age. We defined moderate to severe HIE as three or more abnormalities on the ENE or seizures, and mild HIE as < 3 abnormalities on the ENE and the absence of seizures.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "EFM processing",
+      "instruction": "Retrieving the electronic fetal monitoring (EFM) records and converting them into form suitable for analysis involved the complex multi-stage procedure outlined in Fig. 3. The following section provides a detailed description of each stage.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Stage 1: Retrieval of tracing files",
+      "instruction": "The EFM records from the KPNC facilities were stored on multiple General Electric (GE) Healthcare servers distributed throughout the KPNC system. GE was contracted to locate and extract EFM records from these multiple sources, including legacy systems. Extracted records (henceforth referred to as tracing files), were placed on a shared GE-KPNC server as text files in comma-separated-values (CSV) format with a unique tracing identifier. GE provided a crosswalk linking the tracing identifier to the maternal medical record numbers (MRNs). These files were formatted as repeating records with the fields shown in Table 3 GE provided the team with 19 batches of records comprising a total of 756,012 tracings.Table 3Record format of EFM files retrieved by GE at.Table 3FieldDescriptionTrace IdentifierLink to the Maternal MRNTrace DTTime when monitor recorded the dataRecorded DTTime when the data record was received by the serverMeasurementName of the signal recordedMonitorName of the monitor used to record the signalSensorName of the sensor used to record the signal240 sample valuesOne minute of samples at 4 samples/s",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "Stage 2: Linking tracing files to infants",
+      "instruction": "The tracing files produced by GE had unique identifiers that were linked by a crosswalk directly to the maternal medical record numbers (MRN) which identified the mothers. However, linking the tracing files to the infants within the study group posed some difficulties.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Stage 2: Linking tracing files to infants",
+      "instruction": "First, the MRN field in the crosswalk was expected to contain a string of 12 digits containing the prefix ‘110’ followed by an 8-digit identifier. However, in 3% of the records, this field included nonnumeric characters; these records were not further processed. In the 99% of the remaining records, the MRNs were 7, 8, or 12 digits long. Eight digits MRNs lacked the “1100” prefix while seven-digit MRNs were missing leading zeroes. These MRNs were padded with leading zeroes as needed and the “1100” prefix added. MRNs with more than 12 digits or less than 7 were not further processed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Stage 2: Linking tracing files to infants",
+      "instruction": "A second problem was that mothers could have had more than one pregnancy and delivery within the study cohort. Therefore, after linking each EFM tracing file to a specific mother, we determined which of the mother's pregnancies was associated with the tracing by matching the tracing timestamp to the infant's birthdate.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "Stage 2: Linking tracing files to infants",
+      "instruction": "Inspection of the resulting infant/tracing linkages revealed several special cases which were handled as follows:1.Tracing files linked to pregnancies with stillborn infants were set aside for later analysis, since these were not in the study population. They will be the topic for future analysis once methods are developed to determine the timing of the infant's demise.2.Tracing files linked to multiple liveborn (“multiples”) were set aside and not further processed since they could not be linked to individual infants and so were excluded from the study group.3.Some tracing files were associated with maternal MRNs linked to pregnancies spanning multiple years. Investigation revealed that these files contained concatenated data from several pregnancies during the study period. In such cases, we used the timestamps to split the tracing file into separate files for each pregnancy, and then matched them to infants according to the same criteria as previously described.4.Occasionally multiple tracings were linked to the same pregnancy. Potential duplicates were identified by comparing the minimum and maximum timestamps in the tracings. When the minimum and maximum were identical, the individual values from the files themselves were compared. This identified 7500 pregnancies having one or more exact duplicates. In such cases, one file was retained, and the others removed from the analysis set. There were also about 600 pregnancies with more than one successfully matched non-duplicate tracing files; these were removed from analysis.5.Tracings containing only data for more than 72 hours before birth were not analyzed. Portions of traces which occurred earlier than 72 hours before birth were not retained.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "Replace IDs and timestamps",
+      "instruction": "The KPNC Data Science Team further processed the GE tracing files to remove all personal health information (PHI). For each tracing file, the original MRN identifier was replaced with a new GUID which was linked via a crosswalk to a separate infant GUID. Furthermore, the original timestamps which included actual dates and times were replaced by the time, in milliseconds, before birth.",
+      "substeps": [
+        {
+          "instruction": "Remove all PHI from each GE tracing file",
+          "title": ""
+        },
+        {
+          "instruction": "Replace each original MRN with a new GUID and link it via a crosswalk to the infant GUID",
+          "title": ""
+        },
+        {
+          "instruction": "Replace original timestamps with time in milliseconds before birth",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "Convert file to tall CSV",
+      "instruction": "Then, the original wide file structure provided by GE was transformed to a tall CVS format with one record for each sample. The transformed record structure is described in Table 4. These reformatted, deidentified records were then transferred to the EARLY server where they could be accessed by the Analysis Team.Table 4Transformed tracing file record structure.Table 4Field NameDefinitionTracing GUIDUnique identifier for tracingTrace DTTime before birth when the monitor recorded the dataRecorded DTTime before birth when the data as received by the serverMeasurementName of the signalSensorSensor used to measureMonitorMonitor used to record the sensor outputReadingSample Value",
+      "substeps": [
+        {
+          "instruction": "Transform the original wide file to a tall CSV format with one record per sample (see Table 4 for field definitions).",
+          "title": ""
+        },
+        {
+          "instruction": "Transfer the reformatted, deidentified records to the EARLY server for access by the Analysis Team.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 29,
+      "title": "Signal definition",
+      "instruction": "In principle, the tracing files contained data for three measurements of interest: fetal heart rate (FHR), uterine pressure (UP), and maternal heart rate (MHR). However, in practice there were some added complexities. First, the fetal monitors had two receptacles (HR1, HR2) for FHR, one for MHR, and one for UP sensors. The two FHR receptacles could accept input from either an external ultrasound-based FHR sensor or an internal fetal scalp electrode-ECG based sensor. Thus, FHR could be found on HR1 or HR2. Furthermore, when both FHR sensors were connected simultaneously, slightly different FHR readings could be present on both HR1and HR2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 30,
+      "title": "Signal definition",
+      "instruction": "Secondly, The UP receptacle could receive information from either an external toco-based sensor or from an internal pressure sensor placed within the uterine cavity.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 31,
+      "title": "Signal definition",
+      "instruction": "As a result, there were two measurement names FHR, yielding a total of four possible measurements as shown in Table 5.Table 5EFM measurement definitions.Table 5MeasurementDefinitionHR1Fetal heart rate, in beats per minute, recorded on monitor channel #1HR2Fetal heart rate, in beats per minute, recorded on monitor channel #2MHRMaternal heart rate in beats per minuteUPUterine pressure uncalibrated measurement ranging from 0–100",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 32,
+      "title": "Signal definition",
+      "instruction": "Moreover, the measurements could be derived from the different sensors shown in Table 6Table 6Types of EFM sensors.Table 6MeasurementSensorDescriptionHR1, HR2ExternalExternal ultrasonic deviceFECGFetal ECG from internalUPTOCOExternal sensorInternalInternal pressure sensorMHRECGMaternal heart rate",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 33,
+      "title": "Signal definition",
+      "instruction": "Finally, there were four different types of monitors used in the study as defined in Table 7. Since different monitors could process signals differently, we felt it important to document the monitor associated with each signal.Table 7Monitor definitions.Table 7MonitorDescription120 SeriesGE Healthcare Corometrics 120 Series fetal monitor170 SeriesGE Healthcare Corometrics 170 Series fetal monitorCoro 250GE Healthcare Corometrics 250 Series fetal monitorHP 135XHewlett Packard 135X fetal monitor",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 34,
+      "title": "Signal definition",
+      "instruction": "Consequently, each signal was defined by three parameters: the measurement, sensor, and monitor.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 35,
+      "title": "Stage 4: Raw EFM files",
+      "instruction": "In the next stage of processing, the tracing files resulting from Stage 3 were parsed and reformatted to group the samples for each signal defined by a unique monitor/sensor/measurement combination. Two issues were uncovered during this processing:",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 36,
+      "title": "Stage 4: Raw EFM files",
+      "instruction": "First, there were many cases for which there were multiple samples of the same signal with the same timestamp. This likely resulted when the communication between the monitor and server was interrupted and a packet of signals had to be resent with the same timestamp. There were three distinct cases which handled as follows:1.If none of the samples were valid, the sample was dropped.2.If one sample was valid and the others not, the valid sample was kept.3.If multiple samples were valid but not equal, the value from the highest row was kept since it was likely a corrected value.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 37,
+      "title": "Stage 4: Raw EFM files",
+      "instruction": "Second, in many cases, the timestamps for a signal were not continuous; there were frequent time periods (gaps) for which there were no samples. Likely causes for this included sensor disconnection from the patient and/or communication problems between the monitor and server. Fig. 5 illustrates this for a typical FHR signal. Each color corresponds to a separate segment, contiguous sets of samples separated by gaps before and after it. It should also be noted that the FHR signals also suffered from frequent dropouts–samples where the monitor was unable to estimate the heart rate because of noise or movement artifact. In such cases, the monitor stored a value of zero for the heart rate.Fig. 5An FHR signal from a typical EFM file showing gaps and dropouts. Gaps are periods for which no samples are available. There are five contiguous segments, each shown in a different color. Dropouts are FHR samples values of zero due to noise or other monitoring problems. Each segment is shown in a different color. Note this is a compressed view showing more than 16 h of signal.Fig 5",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 38,
+      "title": "Stage 4: Raw EFM files",
+      "instruction": "Thus, each signal comprised a series of segments of contiguous samples separated by gaps of varying length. To store this efficiently, we created a MATLAB class called segdat to store the samples and track the start and length of each segment. The segdat objects for all signals in a tracing file were then stored in a second custom MATLAB efm class. Fig. 6 shows the EFM object for a typical tracing file. The resulting data files will be referred to hence forth as “RAW EFM” files.Fig. 6A typical “raw” EFM record showing the signals from a tracing file. Early in the record FHR is measured externally and UA with TOCO. Closer to birth the FHR is measured with FECG and UA with an internal transducer.Fig 6",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 39,
+      "title": "Stage 5: Combined EFM files",
+      "instruction": "We found that the RAW EFM files often contained the same measurement (e.g., FHR) from different sensors or monitors during the same labor. Thus, FHR was usually recorded via a US transducer early in the delivery but often changed to fetal ECG near the end. Similarly, uterine pressure was typically measured using a TOCO early in delivery and then replaced by an intrauterine pressure (IUP) transducer near the time of birth. Fig. 6 illustrates one such record. In addition, FHR was usually recorded using the monitors’ HR2 receptacle but in some cases both receptacles were used at different times during labor.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 40,
+      "title": "Combine sensor signals into file",
+      "instruction": "Therefore, to provide a single signal for each measurement, the measurements for the same signal from different sensors monitors were concatenated. For times where more than one measurement was available for the same signal, the signal from the most accurate sensor (i.e., fetal ECG for FHR and IUP for UP) was given precedence. Information about the sensor used for of each signal segment was stored in the EFM file, so that the sensor used for each signal could be determined on a sample-by-sample basis if needed. The result was an “Combined EFM file with UP, HR, and MHR signals. Fig. 7 illustrates the Combined EFM file resulting from applying this procedure to the RAW EFM file of Fig. 6.Fig. 7The “combined” EFM record after combining signals shown in Fig. 6.Fig 7",
+      "substeps": [
+        {
+          "instruction": "Concatenate measurements of the same signal from different sensor monitors.",
+          "title": ""
+        },
+        {
+          "instruction": "When multiple measurements exist for a time point, select the measurement from the most accurate sensor (use fetal ECG for FHR, use IUP for UP).",
+          "title": ""
+        },
+        {
+          "instruction": "Record the sensor identity for each signal segment in the EFM file.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the resulting dataset as a Combined EFM file containing UP, HR, and MHR signals.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 41,
+      "title": "Stage 5: Combined EFM files",
+      "instruction": "A review of the links between the Combined EFM files and the associated infant ID demonstrated that there were cases where Combined EFM files with different tracing GUIDS were linked to the same infant. Comparison of the EFM files revealed two cases.1.In the first case, the files were identical, indicating that the original dataset provided by GE was duplicated. In such cases, one of the Combined EFM files was retained and the other(s) were labeled as a duplicate and removed from consideration.2.In the second case, the Combined EFM files were not identical but contained overlapping versions of the signals. These records were labelled as “SPECIAL” and set aside for further analysis.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 42,
+      "title": "Stage 6: FHR repair",
+      "instruction": "Finally, the FHR tracings in the Conbined EFM files were processed by Perigen's “PeriCalm Patterns” software to repair them [9]. This software repaired short (<15 s) FHR gaps using linear interpolation. It also recognized and removed “uninterpretable” segments. These comprised segments that were too noisy, contained interference from maternal heart rate (MHR), or suffered from long sensor dropouts. We stored the results as “repaired” EFM files which were used for subsequent signal processing and machine learning inputs. Fig. 8 illustrates the results of repairing the FHR record from the tracing file shown in Fig. 7 Note that the repair operation has corrected the frequent, short dropouts evident in Fig. 7.Fig. 8Repaired EFM files. A) Fetal heart rate B) Uterine activity. Note that the dropouts in the FHR signal have been repaired.Fig 8",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 43,
+      "title": "Process EFM files with PeriCALM",
+      "instruction": "The repaired EFM files were processed using PeriCALM Patterns, a software system from PeriGen Inc. that identified and quantified FHR and UP patterns typically considered by clinicians [10,11]. The FHR signals were first preprocessed using an ensemble of low-pass, high-pass, median and Karhunen-Loève filters. Then, PeriCALM Patterns used a long short-term memory (LSTM) network to identify FHR events and logistic regression to identify uterine contractions [10,11]. Patterns identified the events shown in Table 8.Table 8CTG events identified by patterns.Table 8EventDefinitionFHR Baseline (BAS)Relatively flat FHR segment with a typical range of 110–160 bpm, and a peak-to-peak variability of 5–15 bpm.FHR Acceleration (ACC)Segment where the FHR transiently increases more than 15 bpm for more than 15 seconds and then returns to baseline.FHR Deceleration (DEC)Segment where the FHR transiently decreases more than 15 bpm for more than 15 seconds and then returns to baseline.Uninterpretable FHR (NOI)Segment with noise or artifact PeriCALM PatternsUP: Uterine Contraction (CON)UP segment where the UP amplitude increases before returning to resting tone.",
+      "substeps": [
+        {
+          "instruction": "Load repaired EFM files into PeriCALM Patterns",
+          "title": ""
+        },
+        {
+          "instruction": "Preprocess FHR signals with low‑pass, high‑pass, median, and Karhunen‑Loève filters",
+          "title": ""
+        },
+        {
+          "instruction": "Apply the LSTM network to identify FHR events",
+          "title": ""
+        },
+        {
+          "instruction": "Apply logistic regression to identify uterine contractions",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 44,
+      "title": "Identification of clinically relevant patterns",
+      "instruction": "Fig. 9 shows examples of these features, identified by PeriCALM Patterns software for a typical 20-minute epoch.Fig. 9EFM patterns identified by perigen patterns: BAS – FHR baseline; DEC – FHR deceleration: FHR Acceleration; CON: Uterine Activity: contraction.Fig 9",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 45,
+      "title": "Identification of clinically relevant patterns",
+      "instruction": "Decelerations were further classified into the subtypes shown in Table 9Table 9Deceleration subtypes.Table 9SubtypeCharacteristicsVariableVisually apparent abrupt decrease in FHR. The decrease in FHR is 15 beats per minute or greater, lasting 15 seconds or greater, and less than 2 minutes in duration. When variable decelerations are associated with uterine contractions, their onset, depth, and duration commonly vary with successive uterine contractions.EarlyVisually apparent, usually symmetrical, gradual decrease and return of the FHR associated with a uterine contraction. In most cases, the onset, nadir, and recovery of the deceleration coincide with the beginning, peak, and ending of the contraction, respectively.LateVisually apparent, usually symmetrical, gradual decrease and return of the FHR associated with a uterine contraction. In most cases, the onset, nadir, and recovery of the deceleration occur after the beginning, peak, and ending of the contraction, respectively.ProlongedDeceleration lasting at least two minutes",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 46,
+      "title": "Identification of clinically relevant patterns",
+      "instruction": "Each pattern detected was quantified in terms of its start and end time and the additional attributes show in Table 10.Table 10CTG pattern attributes.Table 10EventAttributesCommentUP: ContractionHeightAreaUP is uncalibratedFHR: BaselineLevel (bpm)Variability (bpm)SlopeLevel and slope computed by linear regressionFHR: AccelerationHeight (bpm)Area (beats)FHR: DecelerationHeight (bpm)Area (beats)Decel subtype as described in Table 9",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 47,
+      "title": "Process EFM epochs and extract features",
+      "instruction": "We divided the EFM signals into non-overlapping 20-minute-long epochs and discarded any samples within the epoch labeled as uninterpretable by PeriCALM Patterns within that epoch. If the remaining samples comprised less than 80% of the epoch length (less than 3840 samples), we discarded the epoch from analysis. Finally, the features listed in Table 11 were estimated from the FHR and UP signals for each of the remaining epochs. These features assess the events as marked-point processes where we quantified the sequence of events and their timing:Table 11Properties associated with a pattern.Table 11FeatureDefinitionDwell timeThe length of time that the signal spends in one event before transitioning into the next. We estimated the total length of each event type within each epoch.Number of transitionsThe number of times that an event A transitions to event B within each epoch.Cumulative dwell timeFor an event type, the sum of all previous dwell times from the beginning of clinical monitoring to the beginning of the present epoch.Rate per 10 minutesThe number of contractions in each epoch converted to the rate per 10-minutes. This corresponds to the clinical practice where contraction rate is assessed as the number of contractions in a 10-minute period.DEC subtype frequencyWithin each epoch, the number of decelerations of each subtype expressed as their frequency.",
+      "substeps": [
+        {
+          "instruction": "Divide EFM signals into non‑overlapping 20‑minute epochs.",
+          "title": ""
+        },
+        {
+          "instruction": "Within each epoch, discard samples labeled uninterpretable by PeriCALM Patterns.",
+          "title": ""
+        },
+        {
+          "instruction": "If remaining samples <80 % of epoch length (i.e., <3840 samples), discard that epoch.",
+          "title": ""
+        },
+        {
+          "instruction": "Estimate the Table 11 features from FHR and UP signals for each retained epoch.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 48,
+      "title": "Sequential pattern features",
+      "instruction": "Table 12 lists the features estimated for each event type.Table 12Features estimated for each event.Table 12BASACCDECCONRINDwell time√▪√▪√▪√▪√▪Cumulative dwell time√▪√▪Number of transitions to BAS√▪√▪Number of transitions to ACC√▪√▪Number of transitions to DEC√▪√▪Rate per 10 minutes√▪Frequency of late DEC√▪Frequency of abrupt DEC√▪Frequency of others DEC√▪",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 49,
+      "title": "Fetal heart rate variability",
+      "instruction": "Features describing heart rate variability were estimated from the FHR signal for each epoch. To do so, the FHR signal was first decomposed into low and high frequency components. To do so we computed the Fourier transform of the FHR and decomposed it into a low-frequency component with power from 0–30 mHz range and a high frequency component with power from 30 mHz–2 Hz. Then, the inverse Fourier transforms were computed to obtain the two components in the time domain. Finally, the two time-domain components were separated according to their corresponding event types: BAS, ACC, or DEC. Thus, the FHR was decomposed into 6 signals: three (BAS 0–30 mHz, ACC 0–30 mHz, and DEC 0–30 mHz) describing the low frequency (slow) trends of the FHR events, and three (BAS 30 mHz–2 Hz, ACC 30 mHz–2 Hz, and DEC 30 mHz–2 Hz) describing the higher frequency variability of the FHR events Table 13 summarizes the features computed for each signal.Table 13Heart rate variability features estimated.Table 13FeatureDefinitionIn all cases the features is the mean value for each epochStandard deviationThe standard deviation of the FHR values within each epochAreaSpecific to the ACC and DEC events. We removed the average baseline from the ACC and DEC components and then estimated the area of the resulting components.SlopeThe slope obtained by performing linear regression on the event samples with time.HeightSpecific to the ACC and DEC events. We removed the average baseline from the ACC and DEC components. For the ACC height, we estimated the maximum value of the resulting component. For the DEC height, we estimated the minimum value of the resulting component.Phase rectified signal averaging (PRSA)PRSA is a nonparametric measure of the tendency of a signal to increase or decrease [12], We computed the acceleration capacity (AC), deceleration capacity (DC), and deceleration reserve (DR) features defined by PRSA Using a time scale parameter of T=2.5 s and an averaging window length of L=25 s.Power spectral density (PSD)The PSD of the events estimated using the Lomb-Scargle periodogram which is robust to gaps in signals [13]. From the estimated PSD, we focused on the powers contained in the three main bands used in fetal heart rate assessment [14]: the low-frequency (LF) band from 30–150 mHz, the movement frequency (MF) band from 150–500 mHz, and the high frequency (HF) from 0.5- 1 Hz. The LF, MF, and HF power estimates were normalized by the variance of the signal. The LF/(MF+HF) power ratio was also computed.Approximate entropy (ApEn)Approximate entropy is a nonlinear measure of signal complexity. Regular or periodic signals have low ApEn, while random or chaotic signals have high ApEn. ApEn(m,r) depends on the parameters m, which is the embedding dimension to compare signal regularity, and r, which is the similarity tolerance criterion and is given as a fraction of the standard deviation of the signal [15]. We used values of m=2 and values of r= (0.1, 0.2; 0.3)Sample entropy (SampEn)Sample entropy has a similar definition to the approximate entropy but does not count self-similarities in the signal, making it more robust to variations in signal length. The parameters used to compute SampEn(m,r) were the same than as for ApEn [16].Hurst exponentA measure of fractal behavior of a signal [17]. Estimated using the rescaled range analysis method [18].Lyapunov exponentA measure of chaos within a signal that quantifies the dependence on initial conditions [19], Estimated using an embedding dimension of 2 and delay of 1 using the Lyapunov Exponent function in MATLAB.Correlation dimensionA measure of the fractality of the signal that has been used in previous FHR studies [20]. Estimated used an embedding dimension of 2 and a delay of 1 using the correlationDimension function in MATLAB.Short-term variabilityA measure of the variability of the signal in 2.5 s steps. It is the mean of the absolute difference of samples separated by 2.5 s in the signal [21].Long-term irregularityA measure of the deviations caused by slow trends in the signal [21].DeltaThe average peak-to-peak range of a signal in one-minute-long intervals It is estimated using the minimum to maximum range [21].Interval indexThe ratio of the short-term variability to the standard deviation of the samples separated by 2.5 s in the signal [21]",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 50,
+      "title": "Fetal heart rate variability",
+      "instruction": "Table 14 summarizes the features computed for each pattern.Table 14FHR features computed by pattern.Table 14Component 0–30 mHzComponent 30 mHz–2 HzBASACCDECBASACCDECMean√▪√▪√▪Standard deviation√▪√▪√▪Slope√▪Height√▪√▪Area√▪√▪PRSA AC√▪√▪√▪PRSA DC√▪√▪√▪PRSA DR√▪√▪√▪LF power√▪√▪√▪MF power√▪√▪√▪HF power√▪√▪√▪LF/(MF+HF) ratio√▪√▪√▪ApEn (2,0.1)√▪√▪√▪SampEn (2,0.1)√▪√▪√▪ApEn (2,0.2)√▪√▪√▪SampEn (2,0.2)√▪√▪√▪ApEn (2,0.3)√▪√▪√▪SampEn (2,0.3)√▪√▪√▪Hurst exponent√▪√▪√▪Lyapunov exponent√▪√▪√▪Correlation dimension√▪√▪√▪Short-term variability√▪√▪√▪Long-term irregularity√▪√▪√▪Delta√▪√▪√▪Interval index√▪√▪√▪",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 51,
+      "title": "EFM schemas",
+      "instruction": "Two linked database schemas were used: the CTG Schema to track the processing of the EFM files, and the PATTERNS schema to hold the results of the patterns processing. Each schema is described in more detail below. Data dictionaries for each schema are provided as supplementary material.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 52,
+      "title": "CTG schema",
+      "instruction": "The CTG schema is used to track the pre-processing of the tracing files, store the locations of the resulting files, save statistics of the resulting EFM files, and hold information about estimated labor onset time and how labor onset was detected. Table 15 lists the tables in the CTG schema. The data dictionary for these tables is appended in the supplementary materialTable 15Tables in the CTG schema.Table 15Table NameFunctionsCTG_StatusTracks the processing of a tracing file through its various stages including the name of the original tracing file.signalCoverageCoverage of each signal in a tracing file in 20 minutes epochs.signalStatsDetailed information about each signal in a tracing file including monitor, sensor, start time and percentual coverage information about each segment.segmentStatsInformation about each segment in a tracing file.guidStatsSummary information about each tracing file.features4epochFHR and UP features are available for each epoch for each subject.Labor_onsetLabor onset information and timing.Labor_onset_reasonDictionary of reasons for determining labor onset.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 53,
+      "title": "Patterns schema",
+      "instruction": "The patterns schema is used to track the processing of the combined files by the Patterns software, store the location of the resulting repaired files, and hold information about the FHR and UP patterns identified in each tracing file. Table 16 lists the tables in the Patterns schema and the data dictionary for these tables is provided in the supplementary material.Table 16Tables in the patterns schema.Table 16ProcessingProcessing status of combined files including their location.DatasetAnalysis dataset (study group with and without CS).Event_TypeIdentifies the type of event (BAS, ACC, DEC, CON, and NOI).EventPatterns event type and time extent in samples (foreign key: tracing_guid, event_type_id). For BAS attributes: FHR level and variability. ACC/DEC attributes: height and area.TracingLinks the patterns tracing_id with EFM tracing_guid.ProcessingFor each completed major processing step, one row is generated per tracing_guid .DomainStartTracing begins times with respect to the time of delivery.Event_viewContains all events and attributes identified from a repaired tracing file. Times expressed as time before delivery using Domainstart information.Tracing_Epoch_EventCountProvides number of FHR and UP events within epochs defined as non-overlapping 20-min windows.PercentilesFor selected event metrics (e.g., DEC duration), the percentile values in increments of five percentiles.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 54,
+      "title": "MATLAB support",
+      "instruction": "The pre-processing and much of the subsequent analysis was pe.rformed using MATLAB and a set of novel classes designed to facilitate this work. All code is publicly available through GitHub.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 55,
+      "title": "NLID_TOOLBOX",
+      "instruction": "The nlid_toolbox is an object-oriented toolbox for the analysis and nonlinear identification of biological signals and system. It provides a convenient platform for the signal analysis and incorporates methods for a wide range of parametric and non-parametric methods for signal analysis and system identification [22]. The primary data class used in the nlid_toolbox is the nldat class designed to contain contiguous samples of one or more channels of the same size while tracking their domain values, channel names, and other valuable information.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 56,
+      "title": "NLID_TOOLBOX",
+      "instruction": "As mentioned previously, the EFM signals were rarely contiguous but contained frequent gaps resulting from sensor disconnects, communication problems, or noise. Thus, the EFM signals comprised a series of contiguous segments separated by gaps of different length. The nldat class can deal with such signals by filling the gaps with NaNs, a symbol indicating not a number. But this is a problem since it is inefficient, and the analysis methods designed for contiguous samples do not manage the NaNs correctly. To address this, the nlid_toolbox provides the segdat data class, a child of the nldat class, designed for the efficient storage and processing of such segmented signals. Thus, the segdat class stores signals as a continuous set of samples while keeping track of the start and length of each segment. Furthermore, the class supports a wide range of analysis methods that have been modified to work correctly with segdat objects. Fig. 10 shows a plot a typical segdat object while Table 17 shows the properties of the corresponding segdat object.Fig. 10Plot of a segdat object for a typical FHR signal. Each segment is shown in a different color.Fig 10Table 17Properties of the segdat object for the FHR signal of Fig. 10.Table 17PropertyValueDescriptionsegInfo{1×5 cell}A cell array summarizing the monitor and sensor used for each segment.parameterSet[1×2 param]chanNames{‘HR2’}Names of the signalchanUnits‘BPM’Units of the signaldomainIncr0.25sSampling increment of the signaldomainName‘Hours before Birth’domainStart[-16.5108 -14.6275 -13.0372 -9.5442 -7.6442]Start time of each segment.domainValuesNaNNot useddataSet[161,696×1 double]Concatenated amplitude values of all signal segments.dataSize[193892 1]comment‘0037A085D58C4CA4AB44DC923F390EBEComment for the signalversion‘2.01’Software versionparameterSetonsetPointer1 26,137 37,841 68,605 95,485Pointer to the sample number that starts each segment.segLength26,136 11,704 30,764 26,880 66,212Number of samples in segment.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 57,
+      "title": "NLID_TOOLBOX",
+      "instruction": "Table 18 summarizes some of the important methods available for segdat objects.Table 18Important methods for segdat objects.Table 18sortDescriptioncatConcatenate segdat objects.domainReturns domains values for all segments.filterFilter a segdat object.findGapsReturns a list of gaps in a segdat object giving start and end times of each gap.intersectReturns the intersection of two segdat objects.nl2segConvert a nldat object to a segdat using NaNs as segment separators.nldatConverts a segdat object into a nldat object filling gaps with NaNs.segCountReturns number of segments in a segdat object.segdatCreate a segdat object. Converts a nldat object or MATLAB vector to a segdat object using NaNs as separators.segGetReturns a segment of a segdat object as a nldat object.segPlotPlots a segdat object using a distinct color for each segment.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 58,
+      "title": "EFM class",
+      "instruction": "We developed the EFM class to serve as a container for the multiple segdat objects associated with a tracing file. Fig. 11 illustrates a typical repaired EFM record. Table 19 lists the properties of the EFM class.Fig. 11Plot of a typical EFM object. It shows the FHR and UA signal for more than 16 h before birth.Fig 11Table 19Properties of an EFM object.Table 19PropertyContentsCommentsGUID‘0037A085D58C4CA4AB44DC923F390EBE’Tracing GUIDsourceFile\\processing\\rerun\\dataset14_results\\ 0037A085D58C4CA4AB44DC923F390EBE.zip’Source file from Stage 3 of EFM processing.createDate‘19-Jul-2023’Date file createdsignals[1×2 struct]Structure containing the segdat files for each signal.comment‘Created by emReadFile 2.01]’Commentversion‘2.01’Software versionsSignal (1)HR2Name of first signalmeasure‘HR2’Measuresensor‘external’Sensormonitor‘HP 135x’Monitorsegdat[161,696×1×1 segdat]Segdat objectSignal (2)UAName of second signalmeasure‘UA’Measuresensor‘TOCO’Sensormonitor‘HP 135x’Monitorsegdat[134,148×1×1 segdat]Segdat object",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 59,
+      "title": "ctg class",
+      "instruction": "The ctg class provides a programable interface to the ctg database, tools to track the preprocessing, retrieve EFM files linked to one or more study groups. Table 20 summarizes some of the key methods for the class.Table 20Important methods of the ctg class.Table 20MethodDescriptioncombineSensorsCombine the same signal from multiple sensors into a single signal.combinedGuid4groupRetrieves a table of EFM GUIDs and associated information after Stage3 processing (e.g., combined files ready for repair). Optionally limit the selection to the study group, cesearean section, and minimum coverage.coverage4allEpochsReturns percentage coverage for one or more signals for all epochs as a function of trace_guid.coverageDetermine the coverage of each signal in an EFM object as a function of epoch.ctgConnect to one of the schemas in the database: ctg, EARLY, or PATTERNS.EpochReturn data from one or more epochs in EFM objectloadFileLoad an EFM file given the file specification.loadGUIDLoad an EFM file for a specified trace_guid and process stage.multiplotPlot multiple EFM files in the same window.plotPlot a signal in an EFM file in separate panels.readFileRead a stage 3 CSV file, parse, convert to a EFM object.repairedGuid4groupRetrieves table of repaired EFM GUIDs and associated information, optionally limited by studygroup and/or cesarean section status.status4guidReturns the pre-process status of one or more trace_guids.traceStatus4guidReturns status of one or more trace_guids after stage 3 processing.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 60,
+      "title": "Processing of GE files",
+      "instruction": "Table 21 summarizes the results of the first stage of processing, A total of 270,179 files were matched to infants meeting the study entrance requirements and for which there was EFM information available. The large number of files outside the study range was to be expected since GE provided all files available in the KPNC system regardless of date.Table 21Summary of KPNC file processing.Table 21CategoryN%Successful matched to pregnancy270,17935.7Outside study range (prior)261,66434.6No data within 72 hours of delivery54,7287.2Empty data file51,6586.8No matching maternal MRN41,3545.5Outside window range (beyond)37,8115.0Maternal MRN is in cohort, but pregnancy is not16,0912.1Other rare/ fatal processing errors (e.g., part of timestamp is missing)96221.3Associated with pregnancy of multiples68440.9Invalid MRN56270.7Pregnancy associated with stillborn infant4340.1Total756,012100.0",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 61,
+      "title": "Babies with EFM records",
+      "instruction": "Table 22 summarizes the number of records in the EARLY and CTG schemas stratified by study group. Note that:•The “Births” column lists the number of infants in the EARLY database that meet the study requirements. It provides the upper limit on the number of EFM files that could possibly be retrieved.•The “KPNC files” column gives the number of files linked to births in the EARLY database that were provided to the analysis team in Stage 2 of the EFM processing. The total number of files is less than the total indicated in the top row of Table 21 since 7302 of the KPNC files were found to refer to births outside of the study acceptance criteria.•The “EFM Files” column gives the number of combined EFM files resulting from Stage 5 of the processing. These numbers were lower than the “KPNC files” due to files that were found to be duplicate, special, or to have no data.•The “Repaired-Files” column lists the number of files after repair by PeriCalm. There is again a reduction in the numbers since some of the combined EFM had too few FHR samples to process.•The final two rows of the table give the total number of files available at each stage and as a percentage of total births. It demonstrates that EFM files were retrieved for almost 85% of infants born during the study period. The final column of the table gives the number of repaired tracings for each group as percentage of number of births in each group. These indicated that we have EFM and clinical data for almost 80% of all births in the three study groups of most interest: ACIDOSIS-NO_HIE, HEALTHY-NO-ACIDOSIS, and HIE. This shows that all study groups were sampled equally and that there was no sampling bias.Table 22EFM file recovery.Table 22Study GroupBirthsKPNC FilesEFM FilesRepaired FilesPercent of Births in Group with Repaired FilesACIDOSIS, NO HIE392737013337322382.1DEATH < 68888100.0DISTANT HIE10185838281.2HEALTHY, NO ACIDOSIS48,25142,25241,54939,21381.3HEALTHY, NO BG224,811198,792188,728177,20978.9HIE52145242739676.0INTERVENTION, NO ACIDOSIS901780707812741582.2INTERVENTION, NO BG10,64495179009854980.3Total297,280262,877250,959236,095Percent of Total Births88.484.479.4",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 62,
+      "title": "Babies with EFM records",
+      "instruction": "Table 23 presents some baseline data regarding the patients, labor outcomes, and infants in the database.Table 23Patient and labor outcome statistics in the fetal monitoring database.Table 23MedianMinimumMaximumMaternal age (years)311256Parity1.00.015.0Gravidity2.0031.0pH*7.246.477.71Base*-3.60-33.4127.70Apgar 1 minute8010Apgar 5 minute9010Gestational age (weeks)393544Neonate weight (g)3400.1300.6090.pH and Base values were only recorded for 45,823 AND 49,733 Infants respectively.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 63,
+      "title": "EFM coverage",
+      "instruction": "We retrieved EFM records for up to 72 h before birth. Fig. 12 plots the percentage of records having both UP and FHR data as a function of time from 72 h before birth to recorded birth. Separate curves are shown for three main groups of interest: ACIDOSIS, NO HIE, HEALTHY, NO ACIDOSIS, and HIE. The three curves are similar, increasing gradually from low values at 72 h to a maximum just before birth and then falling dramatically. Indeed, more than 80% of all records had data within one hour of birth. Interestingly, the curve for HIE lies above that for the acidosis infants, which is in turn above the curve for the normal cases. This suggests that monitoring tended to be longer for the more severe groups.Fig. 12Percentage of EFM records with data as a function of time before birth.Fig 12",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 64,
+      "title": "Limitations & directions for future work",
+      "instruction": "There are some limitations to the database in its current configuration:1.The current database contains no long-term outcome data. However, we plan to add long-term neurologic outcomes to the database in the future. The database also does not include detailed information regarding neuroimaging findings.2.The database does not include any information regarding individual practice preferences or clinical behaviors of care providers. This is a limitation of what is available from KP.3.Some of the FHR records may be corrupted by maternal heart rate. We currently address this issue by using the Repair process which identifies transitions from fetal to maternal heart rate and tags all episodes of maternal heart rate as artifactual. In the future, we plan to develop a more comprehensive approach to dealing with this problem using the maternal heart rate signal as a reference.4.The database currently uses time of birth as the time reference. This is convenient but has the limitation that the time of birth is not known during labor. In future analyses, we will investigate will whether other time references, such as time at the onset of labor, might be more useful in building a HIE prediction algorithm.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 65,
+      "title": "Additional Information",
+      "instruction": "Publications using the Database.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 66,
+      "title": "Additional Information",
+      "instruction": "As of October 2023, the database described in this paper has led to one journal publication [23], seven refereed conference papers [24], [25], [26], [27], [28], [29], [30], and eight conference abstracts [31], [32], [33], [34], [35], [36], [37].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 67,
+      "title": "CRediT author statement",
+      "instruction": "Robert E Kearney*: conceptualization, investigation, resources, data curation, Writing - Original Draft. writing - review and editing, funding acquisition, project administration; supervision; Yvonne Wu: conceptualization, investigation, resources, data curation, writing - review and editing, funding acquisition, project administration; Johann Vargas-Calixto: methodology, software, visualization, writing, formal analysis; Michael Kuzniewicz: conceptualization, investigation, resources, data curation, writing - review and editing; Marie-Coralie Cornet: Data Curation; Writing - review and editing; Heather Forquer Data Curation; Lawrence Gerstley Data Curation, Software; Emily Hamilton: Data Curation; Writing - review and editing; Philip A. Warrick methodology, database design, analysis and database software, visualization; writing - review and editing, supervision",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:58:53.458057Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "The overall design of our database is similar in principle to that described by Chudáček [1]. This database linked EFM signals and clinical data for a limited number of selected cases for mostly vaginal births. However, our objective was to build a database that was more comprehensive than that of Chudáček [1]. Thus, we wished to include as many records as possible from vaginal and cesarean births with both normal and pathological outcomes. Secondly, we wanted to expand the clinical information available to include clinical information about the progress of labor. Third, we wanted to include EFM records for as much of the labor as possible. Finally, we wanted to include information about important features of the EFM files. Fig. 1 illustrates the overall structure of the fetal/maternal database comprising four main components.Fig. 1The components of the fetal monitoring database. Three schemas implemented in an SQL database: The EARLY schema holds clinical information about the mother, infant, pregnancy, and delivery. The CTG schema holds information about the processing of the EFM files, and their contents. The PATTERNS schema holds information about FHR and UA patterns. The EFM files stored on the server disk contain the raw and processed fetal heart rate (FHR), uterine activity (UA), and maternal heart rate (MHR) signals as function of time.Fig 1 Three components were implemented as SQL schemas. These included:1.The EARLY schema contains clinical information about the mother, the infant, the progress of the pregnancy and labor. The primary index of this schema is the INFANT_GUID, the infant identifier. It also contains a foreign key, TRACE_GUID, which identifies the corresponding trace file.2.The CTG (CardioTocoGraphy) schema contains information about the location and contents of the EFM tracing files, their processing status, and some of the features computed from the EFM tracings.3.The PATTERNS schema contains information about the processing of the EFM files ",
+  "content_type": "protocol",
+  "content_type_score": 26,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 91103,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 66678,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr9.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 103597,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 99087,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 157921,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 51642,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 80831,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 94876,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 94750,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 35018,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 78222,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC10957432/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10957432/",
+      "caption": "",
+      "bytes": 105834,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10957432/gr7.jpg"
+    }
+  ]
 }

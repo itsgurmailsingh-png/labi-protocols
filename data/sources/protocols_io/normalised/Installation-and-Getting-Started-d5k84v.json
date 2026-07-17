@@ -26,94 +26,83 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Download and Decompress Source Code",
-      "instruction": "Download source code from here: http://metavelvet.dna.bio.keio.ac.jp/src/. Decompress the tar ball using: ~$ tar zxvf MataVelvet-v1.1.01.tgz",
+      "title": "Download and decompress source tarball",
+      "instruction": "Download the MetaVelvet source tarball from http://metavelvet.dna.bio.keio.ac.jp/src/ and decompress it with the command: `tar zxvf MataVelvet-v1.1.01.tgz`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "Alternative: Clone from GitHub",
-      "instruction": "Alternatively, up-to-date source code is available from the GitHub MetaVelvet project: https://github.com/hacchy/MetaVelvet. Clone it using: ~$ git clone git://github.com/hacchy/MetaVelvet.git",
+      "title": "Clone source from GitHub (alternative)",
+      "instruction": "Alternatively, obtain the latest source code by cloning the GitHub repository: `git clone git://github.com/hacchy/MetaVelvet.git`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "Navigate to MetaVelvet Directory",
-      "instruction": "Change directory to the MetaVelvet directory: ~$ cd MetaVelvet-v1.1.01",
+      "title": "Enter MetaVelvet directory",
+      "instruction": "Change into the MetaVelvet source directory with: `cd MetaVelvet-v1.1.01`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "Compile MetaVelvet",
-      "instruction": "Compile MetaVelvet execution files. In the MetaVelvet directory, run: make ['MAXKMERLENGTH = k'] ['CATEGORIES = cat']. 'k' is the maximum k-mer size you like to use. 'cat' is the maximum number of read categories (i.e., maximum number of libraries in different insert lengths).",
+      "title": "Compile MetaVelvet executables",
+      "instruction": "Compile the program by running `make ['MAXKMERLENGTH = k'] ['CATEGORIES = cat']` where **k** is the maximum k‑mer size you wish to use and **cat** is the maximum number of read categories (i.e., number of libraries with different insert lengths). After a successful build, the executable `meta-velvetg` (version ≥ 1.1.01) will be created.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "Verify Executable Creation",
-      "instruction": "Then, an executable file, meta-velvetg, will be created (for versions >= 1.1.01).",
+      "title": "Install executables",
+      "instruction": "Copy the generated executable(s) to a directory in your PATH, e.g.: `cp meta-velvetg /usr/bin/`. You may choose another install location if preferred.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "Install Executables",
-      "instruction": "Copy the executable files to /usr/bin or a directory you prefer for installation. Example: ~/MetaVelvet-v1.1.01$ cp meta-velvetg /usr/bin/",
+      "title": "Download and decompress example dataset",
+      "instruction": "Download the small test dataset from http://metavelvet.dna.bio.keio.ac.jp/data/ and unpack it with: `tar zxvf HMP.small.tar.gz`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "Understand MetaVelvet Dependencies",
-      "instruction": "MetaVelvet (for versions >= 1.1.01) uses velveth and velvetg outputs for metagenomics assembly. Three files: \"Sequences\", \"Roadmaps\", and \"Graph2\" are needed for running meta-velvetg.",
+      "title": "Run velveth to build k‑mer hash",
+      "instruction": "Execute velveth to import reads and create the k‑mer hash table, checking that the files `out-dir/Sequences` and `out-dir/Roadmaps` are produced. Use a k‑mer size of 51 (recommended for reads longer than 65 bp):\n`velveth out-dir 51 \\\n  -fasta -shortPaired \\\n  HMP.small/SRR041654_shuffled.fasta \\\n  HMP.small/SRR041655_shuffled.fasta`",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "Download and Decompress Sample Dataset",
-      "instruction": "Download a small dataset from here: http://metavelvet.dna.bio.keio.ac.jp/data/. Decompress the tar ball using: ~$ tar zxvf HMP.small.tar.gz",
+      "title": "Run velvetg to build initial graph",
+      "instruction": "Execute velvetg to construct the initial de Bruijn graph, ensuring the file `out-dir/Graph2` appears. Include the `-exp_cov auto` option (required for later meta‑velvetg) and specify the insert length:\n`velvetg out-dir -exp_cov auto -ins_length 260`",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "Execute velveth",
-      "instruction": "Execute velveth to import read sequences and construct the k-mer hash table. Please check that \"out-dir/Sequences\" and \"out-dir/Roadmaps\" files are created. Note that k-mer size has an important effect on assembly results. If your short read data is longer than 65bp, we recommend a k-mer longer than 51. Example: ~$ velveth out-dir 51 \\ -fasta -shortPaired \\ HMP.small/SRR041654_shuffled.fasta \\ HMP.small/SRR041655_shuffled.fasta",
-      "is_critical": true,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 9,
-      "title": "Execute velvetg",
-      "instruction": "Execute velvetg to construct an initial de Bruijn graph. Please check that \"out-dir/Graph2\" file is created. Please use the -exp_cov auto option, otherwise meta-velvetg cannot be executed. Example: ~$ velvetg out-dir -exp_cov auto -ins_length 260",
-      "is_critical": true,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 10,
-      "title": "Execute meta-velvetg",
-      "instruction": "Execute meta-velvetg to output scaffold sequences. Please check that \"out-dir/meta-velvetg.contigs.fa\" file is created. This FASTA file contains the main assembly results. Example: ~$ meta-velvetg out-dir [-ins_length 260] | tee logfile",
-      "is_critical": true,
-      "timers": [],
-      "substeps": []
+      "title": "Run meta‑velvetg to generate scaffolds",
+      "instruction": "Run meta‑velvetg to produce scaffold sequences, optionally providing the same insert length. Pipe the output to `tee` to save a log file and verify that `out-dir/meta-velvetg.contigs.fa` is created:\n`meta-velvetg out-dir [-ins_length 260] | tee logfile`",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T10:15:08.390516Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 32,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

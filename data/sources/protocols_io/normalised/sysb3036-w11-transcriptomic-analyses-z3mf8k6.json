@@ -27,78 +27,166 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "First let's get the data from GitHub and move inside the new folder we download: git clone https://github.com/faylward/transcriptomics_tutorial cd transcriptomics_tutorial ls You should see two files: \"homework_rnaseq_data.txt\" and counts <- as.matrix(read.table(file=\"homework_rnaseq_data.txt\", sep=\"\\t\", header=T, row.names=1))\". We will be using the second one for the tutorial today.",
+      "title": "Download and Prepare Data",
+      "instruction": "Clone the tutorial repository from GitHub and navigate into the directory.",
+      "substeps": [
+        {
+          "instruction": "Run `git clone https://github.com/faylward/transcriptomics_tutorial`",
+          "title": ""
+        },
+        {
+          "instruction": "Run `cd transcriptomics_tutorial`",
+          "title": ""
+        },
+        {
+          "instruction": "Run `ls` to verify files 'homework_rnaseq_data.txt' and 'test_rnaseq_data.txt' are present",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "For the rest of the tutorial we will be working in the R console, so move to that and read in the \"test_rnaseq_data.txt\" file. This file is a transcriptomic data matrix with Samples as columns and Genes as rows. The values indicate the abundance of different genes in different samples, as determined by a read-mapping analysis (as we went over last week). counts <- as.matrix(read.table(\"week11/transcriptomics_tutorial/test_rnaseq_data.txt\", sep=\"\\t\", header=T, row.names=1)) Note that you will need to make sure the full path to the file is given, not just the file name. Note that we are also using the \"as.matrix\" command, since we want R to know this is a numeric matrix of numbers.",
+      "title": "Import Transcriptomic Data into R",
+      "instruction": "Load the transcriptomic data matrix into the R console, ensuring the full path to the file is provided.",
+      "substeps": [
+        {
+          "instruction": "Import the data using: `counts <- as.matrix(read.table(\"week11/transcriptomics_tutorial/test_rnaseq_data.txt\", sep=\"\\t\", header=T, row.names=1))`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "To get the general size of the new matrix we just loaded we can use \"dim\": dim(counts) and for the first few lines: head(counts)",
+      "title": "Inspect Matrix Dimensions and Content",
+      "instruction": "Verify the size and initial entries of the loaded counts matrix.",
+      "substeps": [
+        {
+          "instruction": "Check dimensions using `dim(counts)`",
+          "title": ""
+        },
+        {
+          "instruction": "View the first few lines using `head(counts)`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "One useful thing we can visualize in these tables is the Rank Abundance Distribution. This tells us how abundant the different genes are when we order them from most-least abundant. The shape of this curve can help us see the discrepency between the abundance of the different genes, which is often quite severe. rankAbundance <- sort(rowSums(counts), decreasing=T) Here we are creating one vector which contains the summed abundance of all rows. To plot this we can use: plot(rankAbundance, type=\"l\") Typically this shows quite a dropoff after the first few genes. To get the standard deviation we can use: sd(rankAbundance)",
+      "title": "Analyze Rank Abundance Distribution",
+      "instruction": "Calculate and visualize the abundance of genes ordered from most to least abundant.",
+      "substeps": [
+        {
+          "instruction": "Create a vector of summed abundance for all rows: `rankAbundance <- sort(rowSums(counts), decreasing=T)`",
+          "title": ""
+        },
+        {
+          "instruction": "Plot the distribution: `plot(rankAbundance, type=\"l\")`",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the standard deviation: `sd(rankAbundance)`",
+          "title": ""
+        },
+        {
+          "instruction": "Create a histogram: `hist(rankAbundance, breaks=20, col=\"blue\")`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "We can also get an idea of the gene abundance distribution by making a histogram: hist(rankAbundance, breaks=20, col=\"blue\")",
+      "title": "Log-Transform the Data",
+      "instruction": "Apply a log10 transformation to the raw counts using a pseudocount of 1 to handle zero values.",
+      "substeps": [
+        {
+          "instruction": "Transform the matrix: `log <- as.matrix(log10(counts+1))`",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat the rank abundance analysis for the log-transformed data: `rankAbundance <- sort(rowSums(log), decreasing=T)`",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate standard deviation: `sd(rankAbundance)`",
+          "title": ""
+        },
+        {
+          "instruction": "Plot the distribution: `plot(rankAbundance, type=\"l\")`",
+          "title": ""
+        },
+        {
+          "instruction": "Create a histogram: `hist(rankAbundance, breaks=20, col=\"blue\")`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Now as it turns out analyzing raw counts can be problematic. The abundance between the different gene expression values varies greatly between genes, and this can compromise downstream statistical analyses and visualization. So we will want to transform our data so it can be more useful. One common approach is to log-transform the data, so we will do that here. log <- as.matrix(log10(counts+1)) Note that we need to add 1 first, since log10(0) is undefined. These added values are called \"pseudocounts\". After this we can do the same things we did above with the regular count table. rankAbundance <- sort(rowSums(log), decreasing=T) sd(rankAbundance) plot(rankAbundance, type=\"l\") hist(rankAbundance, breaks=20, col=\"blue\")",
+      "title": "Generate Heatmaps",
+      "instruction": "Install necessary visualization packages and create heatmaps for both raw and log-transformed data.",
+      "substeps": [
+        {
+          "instruction": "Install packages: `install.packages(\"gplots\")` and `install.packages(\"RColorBrewer\")`",
+          "title": ""
+        },
+        {
+          "instruction": "Load libraries: `library(gplots)` and `library(RColorBrewer)`",
+          "title": ""
+        },
+        {
+          "instruction": "Define a color palette: `palette = brewer.pal(9, \"GnBu\")`",
+          "title": ""
+        },
+        {
+          "instruction": "Plot raw counts heatmap: `heatmap.2(counts, trace=\"none\", col=palette)`",
+          "title": ""
+        },
+        {
+          "instruction": "Plot log-transformed heatmap: `heatmap.2(log, trace=\"none\", col=palette)`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Next we will want to visualize the data with clustering and a heatmap. For this we will need to R packages, \"gplots\" and \"RColorBrewer\", which you will need to install in your workspace. install.packages(\"gplots\") and install.packages(\"RColorBrewer\") and then load the packages: library(gplots) library(RColorBrewer) Now with RColorBrewer we can choose a color palette to use when plotting a heatmap: palette = brewer.pal(9, \"GnBu\") And then we can plot the heatmap: heatmap.2(counts, trace=\"none\", col=palette)",
+      "title": "Plot Individual Gene Expression",
+      "instruction": "Visualize the expression of a specific gene over time to identify patterns such as diel cycles.",
+      "substeps": [
+        {
+          "instruction": "Plot Gene1: `plot(counts[\"Gene1\",], type=\"l\", lwd=2, axes=F, xlab=NA)`",
+          "title": ""
+        },
+        {
+          "instruction": "Add x-axis labels: `axis(1, at=c(1:25), colnames(counts), las=2)`",
+          "title": ""
+        },
+        {
+          "instruction": "Add y-axis: `axis(2)`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 7,
-      "title": "",
-      "instruction": "And we can do the same for the log-transformed data: heatmap.2(log, trace=\"none\", col=palette)",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 8,
-      "title": "",
-      "instruction": "In this particular dataset the samples belong to different time-points, so we are measuring changes in gene expression over time. Samples were taken every 4 hours over the course of 3 days in a microbial community. To get an idea of how the gene expression changes over time, we can plot individual genes: plot(counts[\"Gene1\",], type=\"l\", lwd=2, axes=F, xlab=NA) axis(1, at=c(1:25), colnames(counts), las=2) axis(2) Note that many genes appear to have a periodic gene expression pattern that peaks once every 24 hours (a \"diel cycle\").",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-18T22:01:08.253848Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 42,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

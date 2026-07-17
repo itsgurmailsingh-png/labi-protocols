@@ -19,7 +19,7 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 2.0,
+  "quality_score": 6.0,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 24,
   "materials": [
@@ -28,42 +28,109 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "We employed Trinity v2",
-      "instruction": "We employed Trinity v2.11.0 for de novo assembly of 63 transcriptomes using default settings, except CPU and memory allocation. Each assembly was functionally annotated and enriched using Trinoatate v3.2.",
+      "title": "Trim and filter reads",
+      "instruction": "Run fastp v20.0 on all 63 RNA‑seq samples, setting the average PHRED quality score threshold to 20, to trim and filter reads for quality.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "against the Swiss-Prot, Pfam SignalIP and...",
-      "instruction": "against the Swiss-Prot, Pfam SignalIP and TMHMM databases to transcriptome annotation (each set of the transcriptome coding sequences was previously translated into amino acid sequences using TransDecoder v5.5.0).For every Trinity gene , we retained the longest isoform for downstream analysis.",
+      "title": "Assemble transcriptomes",
+      "instruction": "Assemble each of the 63 trimmed read sets with Trinity v2.11.0 using default parameters (adjust CPU and memory as needed for the HPC environment).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Ortholog identification and phylogenetic inference We...",
-      "instruction": "Ortholog identification and phylogenetic inference We employed the Orthofinder program v2.4.0 to construct orthologs for a subset of 30 taxa (30 transcriptomes). The program allows to identify orthologous and paralogous genes, and identify orthogroups, ie., gene families of conserved protein domains (which feed the subsequent evolutionary analysis). At the same time, the program can run multiple alignments for gene and species phylogenetic inference. Orthofinder was run with DIAMOND v.0.9.14, for protein alignment, we used MAFFT v7.471 and IQ-TREE v.2.0.3 for gene tree inference. The analysis was conducted using 28 threads and run on the Stony Brook University SeaWulf HPC cluster using the Slurm workload manager. Note that each proteome of each species must be in fasta format We build a concatenated phylogeny using a subset of 1,017 orthogroups of single-copy genes, which were aligned using MAFFT v7.471, and IQ-TREE v.2.0.3 for maximum likelihood phylogenetic inference. Node confidence was assessed using 1000 ultrafast bootstrap replicates by specifying the ‘-B 1000 -bnni’ flags.",
+      "title": "Translate and annotate transcripts",
+      "instruction": "Translate each Trinity assembly with TransDecoder v5.5.0, then annotate the resulting protein sequences with Trinotate v3.2.1 using blastp v2.5.0 (e‑value 1e‑5) against Swiss‑Prot, Pfam, SignalP and TMHMM databases.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Constructing an ultrametric tree The ultrametric...",
-      "instruction": "Constructing an ultrametric tree The ultrametric tree (time-calibrated) can be done with diverse programs such as the R package Ape and its Cronos function. We employed the r8s v1.8.1 module of the Computational Analysis of gene Family Evolution (CAFE) program for making the ML tree of single-copy genes ultrametric.",
+      "title": "Select longest isoform",
+      "instruction": "For every Trinity gene, retain only the longest isoform for downstream analyses.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Gene family analysis We employed the...",
-      "instruction": "Gene family analysis We employed the CAFE programs to estimate protein family expansion and contractions. CAFE needs two files to run; the ultrametric species tree (netwick format) and the gene count of each orthogroup, which is an output from Orthofinder (Orthogroups.GeneCount.cvs). From the last file the column TOTAL needs to be removed and a first column with the header “descriptions” should be added. Columns on this file should be separated by TAB. Before running the program the GeneCount database needs to be filtered. Gene families with lower counts (e.g. &lt; three genes per protein family) should be removed. In addition, a parameter model for lambda should be provided. The parameter model represents the species topology without branch lengths. This is the example of the input files for CAFE #specify data file, p-value threshold, # of threads to use, and log file load -i 23526_subset.tab -filter -t 1 -l log_run_scriptCAFE_filter.txt # the phylogenetic tree structure with branch lengths Tree (((((filiformis:8.9,gaura:8.9):173.8,suffulta:182.7):531.3,(rosea:506.4,speciosa:506.4):207.7):252.3,((((argillicola:75.8,parviflora:75.8):30.4,oakesiana:106.2):34.1,(((grandiflora:4.4,nutans:4.4):1,biennis:5.5):100.2,(((((elataajbk:52.1,wolfii:52.1):9,((elataoeee:43.9,villosa:43.9):10.2,longissima:54.1):7):4.8,(hirsuti:55.8,jamesii:55.8):10.2):14.6,glazioviana:80.7):12.9,stuchii:93.6):12.1):34.6):109.8,(((clelandii:90.1,rhombipetala:90.1):90.7,(grandis:12,laciniata:12):168.9):44.9,(((longituba:75.4,nana:75.4):27.2,villaricae:102.6):19.5,(affinis:69.1,picensis:69.1):53.1):103.6):24.3):716.2):524.2,berlandieri:1490.8) # search for 1 parameter model lambda -s -t (((((1,1)1,1)1,(1,1)1)1,((((1,1)1,1)1,(((1,1)1,1)1,(((((1,1)1,((1,1)1,1)1)1,(1,1)1)1,1)1,1)1)1)1,(((1,1)1,(1,1)1)1,(((1,1)1,1)1,(1,1)1)1)1)1)1,1)",
+      "title": "Identify orthologs",
+      "instruction": "Run Orthofinder v2.4.0 on the 30 selected taxa (30 transcriptomes) with DIAMOND v0.9.14 for protein similarity searches; ensure each species proteome is provided in FASTA format.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Align orthogroups and infer trees",
+      "instruction": "For each orthogroup, perform multiple‑sequence alignment with MAFFT v7.471 and infer gene trees with IQ‑TREE v2.0.3. Execute Orthofinder on the Stony Brook University SeaWulf HPC cluster using 28 threads under the Slurm workload manager.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Build concatenated phylogeny",
+      "instruction": "Select the 1,017 single‑copy orthogroups, align them again with MAFFT v7.471, concatenate the alignments, and infer a maximum‑likelihood species tree with IQ‑TREE v2.0.3. Assess node support with 1,000 ultrafast bootstrap replicates using the flags ‘-B 1000 -bnni’.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Create ultrametric tree",
+      "instruction": "Convert the maximum‑likelihood tree to an ultrametric (time‑calibrated) tree using the r8s v1.8.1 module of the CAFE program.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Prepare CAFE input files",
+      "instruction": "Generate two required files for CAFE: (1) the ultrametric species tree in Newick format (example tree provided below) and (2) the gene‑count table from Orthofinder (Orthogroups.GeneCount.cvs). In the gene‑count file, delete the column named TOTAL and prepend a first column with the header “descriptions”. Ensure the file is TAB‑delimited.",
+      "substeps": [
+        {
+          "instruction": "Example Newick tree: ((((((filiformis:8.9,gaura:8.9):173.8,suffulta:182.7):531.3,(rosea:506.4,speciosa:506.4):207.7):252.3,((((argillicola:75.8,parviflora:75.8):30.4,oakesiana:106.2):34.1,(((grandiflora:4.4,nutans:4.4):1,biennis:5.5):100.2,(((((elataajbk:52.1,wolfii:52.1):9,((elataoeee:43.9,villosa:43.9):10.2,longissima:54.1):7):4.8,(hirsuti:55.8,jamesii:55.8):10.2):14.6,glazioviana:80.7):12.9,stuchii:93.6):12.1):34.6):109.8,(((clelandii:90.1,rhombipetala:90.1):90.7,(grandis:12,laciniata:12):168.9):44.9,(((longituba:75.4,nana:75.4):27.2,villaricae:102.6):19.5,(affinis:69.1,picensis:69.1):53.1):103.6):24.3):716.2):524.2,berlandieri:1490.8)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Filter gene families",
+      "instruction": "In the CAFE gene‑count file, remove any orthogroup with fewer than three genes across all species (i.e., families with < 3 genes).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Define lambda model",
+      "instruction": "Create a one‑parameter lambda model representing the species topology without branch lengths. Use the following command syntax (example):\n\nload -i 23526_subset.tab -filter -t 1 -l log_run_scriptCAFE_filter.txt\n\nsearch for 1‑parameter model lambda with:\n\n-s -t (((((1,1)1,1)1,(1,1)1)1,((((1,1)1,1)1,(((1,1)1,1)1,(((((1,1)1,((1,1)1,1)1)1,(1,1)1)1,1)1,1)1)1)1,(((1,1)1,(1,1)1)1,(((1,1)1,1)1,(1,1)1)1)1)1)1,1)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Run CAFE analysis",
+      "instruction": "Execute the CAFE program with the prepared ultrametric tree, filtered gene‑count file, and lambda model to estimate protein‑family expansions and contractions.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 43,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

@@ -9,7 +9,69 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "Public participation GIS (PPGIS) is a kind of spatial data that is collected through map-based surveys in which participants create map features and express their experiences and opinions associated with various places. PPGIS is widely used in urban and environmental research. PPGIS is often implemented through online surveys and points are the most common mapped features. PPGIS data provide invaluable experiential spatial knowledge. Nevertheless, collection of this data for purely methodological purposes may be costly and unnecessary. Therefore, we developed a context-aware method that can learn from previously collected PPGIS data and create a realistic dataset that can be used for methodological development purposes. The synthetic data can be generated for any desired geographical extent in both 2D and 3D, i.e. with Z coordinates. The latter is particularly important as 3D PPGIS is an emerging frontier and limited infrastructures currently exist for collection of such data. Hence, while the relevant technology is developing, spatial analytical developments can also advance using such synthetic data. This method:•Learns from existing 2D and 3D PPGIS data in relation to the geographical context.•Creates a realistic and context-aware simulated PPGIS point dataset.The paper concludes by addressing the limitations and envisioning future research directions.",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "3D PPGIS data simulator",
+      "instruction": "We designed a step-by-step algorithm to create the synthetic data. In summary, the algorithm goes through a set of previously collected PPGIS data and learns how the point distributions are associated with the terrain elevation and physical structure i.e., building and population density, and percentage of green area (Fig. 1: Phase 1-2). Next, what is learned in this stage is used to replicate a new dataset in the desired area roughly simulating the distribution patterns in the learning datasets (Fig. 1: Phase 3-4). A more detailed explanation of the process follows.Fig. 1Process flow of the algorithm to create synthetic PPGIS data.Fig 1"
+    },
+    {
+      "title": "3D PPGIS data simulator",
+      "instruction": "In the first phase the algorithm goes through a horizontal learning process. As a first step in this phase, the learning area is divided into grid cells (for example 1km x 1km). The size of cell should be chosen based on availability of computational resources, scale of contextual data available, extents of the area, and the density of learning data. For each grid cell, the percentage of green areas, building, and population density are calculated. Subsequently, the association between number of learning points in each cell and these variables are calculated using a multiple linear regression model."
+    },
+    {
+      "title": "3D PPGIS data simulator",
+      "instruction": "The second phase involves vertical learning. As a first step in this phase, the 3D learning data is overlain with the digital elevation model (DEM) and the respective absolute elevation is recorded for each point. Next, the 3D learning data is overlain with the topographical data. If a point is located in a building, the relative position of the point compared to the building height will be measured. Finally, the vertical distribution of learning data will be captured statistically in terms of mean and standard deviation values."
+    },
+    {
+      "title": "3D PPGIS data simulator",
+      "instruction": "In the third phase, the algorithm plans the synthetic data placement using what it has learned from the previous two phases. As a first step in this phase, the desired area is divided into smaller grid cells of for example 200m x 200m. The cell dimensions should be determined based on computational resources, extents of area, number of points needed, scale of contextual data available, and the desired output resolution. The geographical extent of output data does not have to be the same as the learning data as long as the context is reasonably consistent with that of the learning area. Inaccessible areas, such as large bodies of water, are excluded from the grid. Next, the three physical structural variables of building density, population density, and percentage of green area are calculated for each cell. Next, the number of points to be created in each cell is calculated based on the following equation:Ni=CpPi+CbBi+CgGi+b"
+    },
+    {
+      "title": "3D PPGIS data simulator",
+      "instruction": "Where N is the number of points, P population density, B building density, G green percentage, each for the given cell i. The C values are the regression coefficients for each of these variables from the learning phase. The constant b can be calculated using the summation of the same equation for all grid cells as follows:∑i=1nNi=Cp∑i=1nPi+Cb∑i=1nBi+Cg∑i=1nGi+n×b⇒b=NT−CPPT−CBBT−CGGTn"
+    },
+    {
+      "title": "3D PPGIS data simulator",
+      "instruction": "Where PT is the total population, BT is the total amount of buildings, and GT is the total amount of green areas for the area, and n is the total number of grid cells. Fig. 2 illustrates an example of how number of points are calculated for each grid cell.Fig. 2An example of calculating number of points for a six-cell grid. The coefficient values are arbitrarily chosen for the purpose of demonstration.Fig 2"
+    },
+    {
+      "title": "3D PPGIS data simulator",
+      "instruction": "In the fourth phase, synthetic data is created. Number of points in each cell are determined using the equations described above and a sigmoid normalization. Each point is randomly generated within the cell in 2D. The 2D point layer is subsequently overlain with the topographic data and DEM to determine the type of location. Depending on whether the place is a building or not, the altitude is randomly estimated approximately replicating the standard deviation and average values from the vertical learning phase. When located in a building, the building height is taken into consideration in Z allocation so that the point's altitude is within the building. Optionally, some noise is added at the end to the altitude to introduce more variation to the values and simulate the imprecision and inaccuracy of user generated data."
+    },
+    {
+      "title": "Algorithm's functionality and output: 3D synthetic PPGIS data for city of Turku",
+      "instruction": "The algorithm was implemented in Python using a number of open source libraries including Geopandas (pseudocode provided as appendix). The learning data consisted of 758 points with X, Y, and Z coordinates and 2270 2D points with only X and Y coordinates. The two datasets were both collected from city of Turku in Finland but in different occasions and as part of different projects (Fig. 3). Building data was obtained from the topographic data provided by the national land survey of Finland 1. Population data was available in 1km x 1km grids by Statistics Finland2. Land use data were obtained from the European CORINE Land Cover data3.Fig. 3Learning data from city of Turku and the output extent.Fig 3"
+    },
+    {
+      "title": "Algorithm's functionality and output: 3D synthetic PPGIS data for city of Turku",
+      "instruction": "The output extent was set to a rectangle area with the total area of approximately 18.7 km2 in Turku city center. The extent was divided into grid cells of 150×150 m. A total of 500 points were requested as the output, 447 of which were successfully generated. The small difference is due to the rounding effect as the algorithm rounds down the number of points allocated to each cell to the closest integer. Fig. 4 illustrates a comparison of the output synthetic data and learning data for the same area.Fig. 4A comparison of the synthetic versus real PPGIS data in the same area.Fig 4"
+    },
+    {
+      "title": "Algorithm's functionality and output: 3D synthetic PPGIS data for city of Turku",
+      "instruction": "As expected, the clusters around green areas, densely populated areas, and areas with high building density reappear in the synthetic data. However, clusters of points around the river or other attractive geographical features are not reproduced simply because these factors were not included in the model."
+    },
+    {
+      "title": "Limitations and ideas for further improvement",
+      "instruction": "The method described in this paper follows a simple and intuitive approach to deliver what it is intended for, which is to generate a synthetic point dataset based on a set of learning data. For doing so, the algorithm learns from the input data by examining its distribution in relation to the population density, building density, and the amount of green areas in the geographical context. While this list of contextual variables may be enough for generating realistic data in some urban contexts, in other urban areas where other strong factors may be in force this may not be sufficient. This could be seen in the example provided above as the presence of water bodies, a river in this case, is an important factor that may influence the distribution of certain types of place-based experiential data marked by participants. Therefore, future research using this method is encouraged to investigate the main geographical characteristics of the study area and determine which contextual variables need to be added to the model for a better synthetic data generation. In addition, PPGIS data frequently includes attribute data that describes the mapped places. However, our method did not attempt to generate synthetic attribute data for the points. Hence, this requires further exploration and research in future."
+    },
+    {
+      "title": "Limitations and ideas for further improvement",
+      "instruction": "Another limitation of this method is the use of multiple linear regression for the learning process. While this has the benefit of simplicity, it may not capture the spatial autocorrelation that is typical in PPGIS data [14]. While the use of high-resolution grid network can ameliorate the effect, this is something that needs to be taken into consideration specially when synthetic attribute data are also generated. Future research is encouraged to fill this gap and also consider use of other modeling techniques such as a spatial autoregressive model to tackle potential issues with spatial autocorrelation."
+    },
+    {
+      "title": "Limitations and ideas for further improvement",
+      "instruction": "Another limitation of this method is in how the altitudes are modeled and generated. The algorithm described in this study assumes a normal distribution which may not be always realistic. The main reason why this was used is due to 3D learning data that was available. The 3D data used in this study was only available from one city block and, hence, was lacking the required size and variation to create a more realistic distribution model. Future research is encouraged to investigate the distribution of Z values in the learning phase and choose a model that would best capture it."
+    },
+    {
+      "title": "Appendix",
+      "instruction": "#This program generates synthetic PPGIS in 2D and 3D inputs: output extents, output resolution, learning data, population data, landuse data, building data, elevation model, need3D (Boolean) function formGrid(output extents, output resolution, landuse data):form grids based on the extent and resolutionexclude inaccessible areas such as waterreturn GridLearning and GridOutput function learn2D (learning data, population data, landuse data):do spatial join between learning data and contextual datalearn associations and form the linear function1 function allocatePoints (GridOutput, population data, landuse data, building data, elevation model):measure contextual variables for each celldetermine the estimated point count for each cell using function1 generate random 2D points for each cell according to estimated counts if need3D is “True”:function learn3D (learning data, elevation model, building data):read the ground elevation at each earning data pointmeasure the height from ground for each pointdo a spatial join and determine whether the point is located in a building or in an unbuilt areaif “building”:estimate what floor it is located onlearn vertical distributionsassign a Z to each point so that the overall Z distribution matches learning data's Z distributionAdd random noise to Z values [optional]"
+    },
+    {
+      "title": "Appendix",
+      "instruction": "Export the output data as shapefile"
+    }
+  ],
   "materials": [],
-  "fetched_at": "2026-06-19T00:37:04.131753+00:00"
+  "fetched_at": "2026-06-19T00:37:04.131753+00:00",
+  "media": []
 }

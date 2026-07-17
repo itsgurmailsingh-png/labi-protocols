@@ -9,7 +9,96 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "AbstractWith antimicrobial resistance emerging as a top global health concern, new approaches to prevent and treat infections are urgently needed. Antimicrobial peptides are recognized as a promising alternative to conventional antibiotics. Considering the costly, labor‐intensive, and time‐consuming nature of wet lab screening, in recent years, proteomics research has increasingly relied on in silico methods to predict physicochemical, structural, and biological properties of candidate peptides. Here, we present the AMPSeek protocol to enable scientists to screen peptides and predict their potential antimicrobial activity, toxicity, and associated three‐dimensional structure with a single command. The AMPSeek framework integrates AMPlify, tAMPer, and LocalColabFold, scales efficiently with increasing sample size, and produces an interactive HyperText Markup Language report to facilitate result interpretation. We provide step‐by‐step instructions for installing and running AMPSeek on a ten‐peptide test set, along with two additional datasets (n = 20 and n = 100; mean peptide length ≈121.3) to demonstrate AMPSeek's near‐linear scalability. AMPSeek is available on GitHub under the GPLv3 software license agreement: https://github.com/bcgsc/AMPSeek. © 2026 The Author(s). Current Protocols published by Wiley Periodicals LLC.\nBasic Protocol: Prediction of antimicrobial peptide activity, three‐dimensional structure, and toxicity",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "Necessary Hardware",
+      "instruction": "AMPSeek is a single‐protocol proteomics pipeline that can be run on 64‐bit Linux and Mac machines with sufficient available random‐access memory (RAM)—e.g., up to 10 GB RAM in our tests (Table 1). The required RAM and processing time vary based on the number of peptides evaluated, their lengths, and their three‐dimensional structures. Tables 1 and 2 document the mean RAM usage and wall clock time of the pipeline when running the basic protocol peptide datasets with 30 threads. AMPSeek requires ∼19 GB of storage as it uses container images to create the required environments for each software component (Table 3). For benchmarking, the containers were pre‐downloaded, and the download time and memory usage were not measured."
+    },
+    {
+      "title": "Software Installation",
+      "instruction": "AMPSeek is publicly distributed via GitHub (https://github.com/bcgsc/AMPSeek). The pipeline relies on Nextflow (Di Tommaso et al., 2017) as the pipeline manager and either Singularity (Kurtzer et al., 2017) or Docker (Merkel, 2014) as the container platform. We recommend that users follow the instructions listed on these software platforms’ official websites for their native operating system."
+    },
+    {
+      "title": "Software Installation",
+      "instruction": "Nextflow manages the installation of the software dependencies required to run AMPSeek through Singularity. This automated approach means users are not required to perform any additional steps for software installation."
+    },
+    {
+      "title": "Installing Nextflow",
+      "instruction": "Nextflow installation can be done in three ways, as described in their official installation procedure (https://www.nextflow.io/docs/latest/install.html#install‐page). We recommend that users install Nextflow via the Conda package manager, which is distributed freely and can be installed using the steps explained at https://www.anaconda.com/docs/getting‐started/miniconda/install. After installing Conda, users should run the following commands to create a new environment, install Nextflow into it, and activate the environment: conda create ‐n ampseek ‐c bioconda nextflow"
+    },
+    {
+      "title": "Installing Nextflow",
+      "instruction": "This environment must be activated whenever running the AMPSeek pipeline, using the command: conda activate ampseek"
+    },
+    {
+      "title": "Installing Singularity or Docker",
+      "instruction": "Users can run the AMPSeek pipeline using either Singularity or Docker. On non‐Linux machines, we recommend that users run the pipeline with Docker, as Singularity does not natively run on them. Please refer to the installation instructions for Docker (https://docs.docker.com/engine/install/) or Singularity (https://docs.sylabs.io/guides/3.0/user‐guide/installation.html) to download a container platform depending on your system and preferences. To install Docker on MacOS machines, we recommend installing Docker Desktop (https://docs.docker.com/desktop/). To run AMPSeek on ARM64 chips with Docker, QEMU emulation (https://www.qemu.org/) is required, as the container images used only support AMD64 architecture. The following command is recommended to install QEMU emulation for Docker: docker run ‐‐privileged ‐‐rm tonistiigi/binfmt ‐‐install amd64"
+    },
+    {
+      "title": "Cloning AMPSeek Repository",
+      "instruction": "Because AMPSeek uses Nextflow's interpreted workflow language, users simply need to clone the AMPSeek repository. Using git for this purpose is recommended. Please follow the installation instructions at https://git‐scm.com/downloads if git is not already installed on your system. git clone\nhttps://github.com/bcgsc/AMPSeek.git"
+    },
+    {
+      "title": "Cloning AMPSeek Repository",
+      "instruction": "The procedure will also download three shared datasets with 10, 20, and 100 peptides with a mean peptide length of 121.3 amino acids (Table 1c). These peptides are a subset derived from AMPlify's balanced and imbalanced datasets (Li et al., 2023). All the datasets can be found in the “data” folder of AMPSeek in FASTA format."
+    },
+    {
+      "title": "Runtime Downloads",
+      "instruction": "During runtime, AMPSeek manages the process dependencies for AMPlify, tAMPer, LocalColabfold, and the visualization step internally. For dependency management, we use containerization, which is handled in the background by Nextflow. Table 3 shows the container images that will be downloaded to the user's local storage and their specifications."
+    },
+    {
+      "title": "PREDICTION OF ANTIMICROBIAL PEPTIDE ACTIVITY, THREE‐DIMENSIONAL STRUCTURE, AND TOXICITY",
+      "instruction": "The basic protocol describes running AMPSeek to predict the antimicrobial bioactivity, three‐dimensional structure, and toxicity of candidate AMPs input in FASTA file format. AMPlify generates a probability‐like prediction score for each sequence, denoting its potential AMP classification. An AMPlify prediction score of 1 indicates the highest confidence of antimicrobial activity, and a score of 0 indicates the lowest confidence (Li et al., 2022). If a peptide scores above 0.5, it is predicted to be an AMP; otherwise, it is predicted not to be an AMP (Li et al., 2022). In parallel, LocalColabFold is run to predict the three‐dimensional structure of peptides. The peptide sequences and their predicted structures are then input to tAMPer to generate protein toxicity probability scores. As with the AMPlify scores, the range from 0 to 1 indicates the lowest to highest confidence that a peptide is predicted to be toxic, and a threshold of 0.5 delineates between toxic and nontoxic classifications (Ebrahimikondori et al., 2024). Finally, AMPSeek generates a report that describes and visualizes the predicted bioactivity, structure, and toxicity of the candidate AMPs."
+    },
+    {
+      "title": "Hardware",
+      "instruction": "Server or machine running a 64‐bit Linux or Mac operating system with sufficient RAM (up to 10 GB; we benchmarked our protocol on a dedicated server‐class system with 144 core Intel Xeon Gold 6254 CPU at 3.1 GHz with 2.9 TB RAM)"
+    },
+    {
+      "title": "Software",
+      "instruction": "AMPSeek v1.0.0 (https://github.com/bcgsc/AMPSeek)Nextflow (https://www.nextflow.io/docs/latest/install.html#install‐page)Docker (https://docs.docker.com/engine/install/)Singularity (https://docs.sylabs.io/guides/3.0/user‐guide/installation.html)"
+    },
+    {
+      "title": "Files",
+      "instruction": "Peptide sequences in FASTA format"
+    },
+    {
+      "title": "Sample data",
+      "instruction": "Sample FASTA files with 10, 20, and 100 peptides are provided in the AMPSeek GitHub Repository (https://github.com/bcgsc/AMPSeek/tree/v1.0.0/data)"
+    },
+    {
+      "title": "Pipeline parameters",
+      "instruction": "Users can provide peptide sequences downloaded from the internet with the ‐‐download_from parameter. These peptides must be in FASTA format. If the flag is not specified, the workflow is run on the FASTA file stored in the AMPSeek/data/ folder. Users can specify the output directory by using the flag ‐‐output_path and the output file name with ‐‐output_file. As different systems have different amounts of computational power available, AMPSeek allows users to specify the number of threads/CPUs (based on system configuration) with the flag ‐‐threads. The default number of threads/CPUs used for execution is 30. Even though, by default, Nextflow does not set a time cap for the process execution, for some shared computational resources, the timeout may be set to 30 min or 1 hr. We provide users the option to modify this timeout by using the ‐‐time flag. Users need to follow the format Nextflow uses for timeout specifications (https://www.nextflow.io/docs/latest/reference/process.html#process‐time). If users require a specific amount of memory allocated for their processes, they can specify the memory usage with the ‐‐mem flag. Users are expected to use Nextflow's memory specification convention (https://www.nextflow.io/docs/latest/reference/process.html#process‐memory). If ‐‐mem is not provided, the workflow will use 90% of the total available memory for each process."
+    },
+    {
+      "title": "Pipeline parameters",
+      "instruction": "The parameters for AMPlify, LocalColabFold, and tAMPer are set automatically by the AMPSeek workflow. We recommend using these parameters as they were used and optimized during the development and testing of AMPlify and tAMPer. We do not provide any command‐line flags to modify the parameters of these tools. However, users can alter the AMPSeek.nf file to change these parameters. In that case, users can refer to the following sections to understand the critical parameters of this pipeline."
+    },
+    {
+      "title": "AMPlify parameters",
+      "instruction": "AMPSeek uses the default parameters of AMPlify. The only parameter that alters the predictions is ‐‐model, which controls the model weight variations to be used. AMPlify is trained on two datasets: a balanced and an imbalanced one. Based on the expected distribution of bioactivity in the input dataset, users can change this parameter. The imbalanced model is trained on data that contains a substantially higher number of inactive peptides than antimicrobial peptides, where bioactive peptides constitute ∼3.15% of the data."
+    },
+    {
+      "title": "LocalColabFold parameters",
+      "instruction": "As tAMPer is dependent on LocalColabFold output, the parameters used by AMPSeek for LocalColabFold are selected to be consistent with the procedure described in tAMPer's GitHub repository. AMPSeek uses the ‐‐amber flag, which refines the predicted structures using AMBER energy minimization to find atomic coordinates that minimize the system's potential energy and maximize structural stability (Case et al., 2005). Having the ‐‐zip flag specified during the LocalColabFold run is crucial because tAMPer specifically checks for ZIP files. Otherwise, the default parameters are used for LocalColabfold. As tAMPer was trained using this configuration of LocalColabFold, it is recommended that no parameters be changed other than those specified above to generate consistent predictions."
+    },
+    {
+      "title": "tAMPer parameters",
+      "instruction": "AMPSeek employs the default parameters of tAMPer. Troubleshooting parameters that change the predictions for tAMPer are dependent on the training of the model. Because AMPSeek uses the pretrained models published by Ebrahimikondori et al. (2024), changing the optimized parameters of hidden dimension size, the distance threshold for connecting two residues, or the protein embedding model type would create discrepancies and may negatively affect performance. Hence, we suggest users not change these parameters even though it is possible to run the workflow after modifying them."
+    },
+    {
+      "title": "tAMPer parameters",
+      "instruction": "AMPSeek should complete with a non‐zero exit code, and its output should show a written message that indicates a successful run. If an error occurs at any point within the workflow, it should immediately stop running. Users should carefully inspect the workflow log, output files, and error codes to identify the source(s) of error, if any. There may be problems that will result in the pipeline execution being prematurely aborted due to issues such as insufficient memory, lack of storage, or the Docker pull timeline. Refer to Table 4 for possible sources of error and their respective causes and potential solutions."
+    },
+    {
+      "title": "Understanding Results",
+      "instruction": "AMPSeek produces an interactive summary HTML file as its final output (Fig. 2 provides a screenshot of the report obtained when testing the AMPSeek workflow on two test sequences). The summary file displays the peptide sequences, their lengths, charges, AMPlify scores and predictions, three‐dimensional structures, and tAMPer scores and predictions. Users can optionally save these data in CSV format within the interactive HTML file."
+    },
+    {
+      "title": "",
+      "instruction": "Emily Zhang: Project administration; software; validation; manuscript writing. Berke Ucar: Conceptualization; data curation; methodology; project administration; software; validation; manuscript writing. Ali Salehi: Software; manuscript writing—review and editing. René L. Warren: AMPlify‐tAMPer framework idea, manuscript writing—review and editing. Inanc Birol: Funding acquisition; supervision; manuscript writing—review and editing."
+    }
+  ],
   "materials": [
     "Server or machine running a 64‐bit Linux or Mac operating system with sufficient RAM (up to 10 GB; we benchmarked our protocol on a dedicated server‐class system with 144 core Intel Xeon Gold 6254 CPU at 3.1 GHz with 2.9 TB RAM)",
     "AMPSeek v1.0.0 (https://github.com/bcgsc/AMPSeek)",
@@ -32,5 +121,6 @@
     "b.tAMPer attention directories: For each peptide, the pipeline creates a folder containing self‐attention maps of amino acid residues generated during the tAMPer analysis. These maps describe how much attention the model assigns to each amino acid in the sequence.",
     "c.Summary HTML file: This interactive file is the final output of AMPSeek. The report provides an overview of antimicrobial and toxic peptides through summary data visualizations, followed by detailed predictions and scores for each peptide's bioactivity and toxicity in a tabular format. Each row in the table contains prediction scores alongside embedded visualizations: a scatter plot of AMPlify versus tAMPer scores (with the peptide of interest highlighted), AMPlify context attention values showing the importance of each amino acid residue in bioactivity prediction, and an interactive three‐dimensional structure plot. Users can download the complete results table as a CSV file using the button located in the top right corner."
   ],
-  "fetched_at": "2026-06-19T00:20:43.673718+00:00"
+  "fetched_at": "2026-06-19T00:20:43.673718+00:00",
+  "media": []
 }

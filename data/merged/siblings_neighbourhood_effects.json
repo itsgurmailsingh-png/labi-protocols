@@ -19,11 +19,277 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 0.0,
+  "quality_score": 4.0,
   "category": "Other",
   "estimated_time_mins": null,
   "materials": [],
-  "steps": [],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Identify Initial Study Population",
+      "instruction": "Filter individuals from the IBF_IndData1990_2014.dta dataset who were aged 15-21 in 1990.",
+      "substeps": [
+        {
+          "instruction": "Calculate age in 1990 using birth year (FoddAr).",
+          "title": ""
+        },
+        {
+          "instruction": "Keep individuals where 15 <= age <= 21.",
+          "title": ""
+        },
+        {
+          "instruction": "Retain variables: IBFLopNr, IBFLopNrMor, IBFLopNrFar, sex, and FoddAr.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Determine Parental Home Residency and Departure",
+      "instruction": "Identify individuals living with parents in 1990 and determine the year they left the parental home.",
+      "substeps": [
+        {
+          "instruction": "Merge family IDs (FamLopNr) from annual files (ibf_bef) for the child, mother, and father for years 1990-2010.",
+          "title": ""
+        },
+        {
+          "instruction": "Identify those living with parents in 1990 (FamLopNr1990 matches mother or father's FamLopNr1990).",
+          "title": ""
+        },
+        {
+          "instruction": "Determine the first year of leaving the parental home (yrleavehome) between 1991 and 1997 by checking when the child's FamLopNr no longer matches the parents'.",
+          "title": ""
+        },
+        {
+          "instruction": "Keep only individuals who moved out between 1991 and 1997.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate yrleave_14 (yrleavehome + 13).",
+          "title": ""
+        },
+        {
+          "instruction": "Categorize which parent the individual lived with before moving (1=mother, 2=father, 3=both).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Construct Real Sibling Pairs",
+      "instruction": "Create same-sex sibling pairs based on shared parents and specific age/departure criteria.",
+      "substeps": [
+        {
+          "instruction": "Split the dataset into separate files for boys and girls.",
+          "title": ""
+        },
+        {
+          "instruction": "Identify siblings by grouping by IBFLopNrMor and IBFLopNrFar.",
+          "title": ""
+        },
+        {
+          "instruction": "Filter for siblings with an age difference <= 3 years.",
+          "title": ""
+        },
+        {
+          "instruction": "Filter for families where at least one child left home between 1991 and 1993.",
+          "title": ""
+        },
+        {
+          "instruction": "Filter for siblings who left home within 4 years of each other (leave_diff <= 4).",
+          "title": ""
+        },
+        {
+          "instruction": "Keep only the pair closest in age and those who lived with the same parent.",
+          "title": ""
+        },
+        {
+          "instruction": "Assign unique sibling IDs (2,000,000+ for females, 1,000,000+ for males) and merge into a single population file.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Enrich Individual Data",
+      "instruction": "Merge comprehensive socio-economic and geographic data for the selected individuals.",
+      "substeps": [
+        {
+          "instruction": "Merge basic data (Fland, FlandFar) and recode father's country of birth (cob_father) into 4 categories: Sweden, Western, Eastern Europe/Russia, and Africa/Asia/South America.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate annual age from 1990 to 2010.",
+          "title": ""
+        },
+        {
+          "instruction": "Merge neighborhood IDs (sams/SAMSomrade) for 1990-2010.",
+          "title": ""
+        },
+        {
+          "instruction": "Merge LISA data (Sun2000Niva, SyssStatJ, FamTypF) and recode into education (edu), employment (emp), couple status (couple), and children in household (child_hh).",
+          "title": ""
+        },
+        {
+          "instruction": "Merge income data (ForvErs) for 1990-2010, adjust for inflation using specific yearly KPI divisors (e.g., 1991/1.09, 2010/1.46), and create logged income variables (ln_inc).",
+          "title": ""
+        },
+        {
+          "instruction": "Merge tenure data (IBFFastLopNr, Typkod, JurFormGrp) and recode into tenure categories (1=home ownership, 2=cooperative, 3=rental).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Generate Neighborhood Income Data",
+      "instruction": "Calculate the share of low-income earners in each neighborhood (SAMS) per year.",
+      "substeps": [
+        {
+          "instruction": "For each year (1990-2010), identify individuals of working age (20-64).",
+          "title": ""
+        },
+        {
+          "instruction": "Determine the 30th and 70th percentiles of income (forvers) for the working-age population.",
+          "title": ""
+        },
+        {
+          "instruction": "Flag individuals as low-income (below 30th percentile) or high-income (above 70th percentile).",
+          "title": ""
+        },
+        {
+          "instruction": "Collapse data by SAMS to calculate the share of low-income earners (sh_low = numlow / total working age * 100).",
+          "title": ""
+        },
+        {
+          "instruction": "Merge these annual neighborhood shares back into the main individual dataset.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Construct Random Sibling Pairs",
+      "instruction": "Generate a control group of random pairs matched on neighborhood, sex, father's birth country, and father's income level.",
+      "substeps": [
+        {
+          "instruction": "Filter individuals born 1969-1975 and determine their 1990 residency and departure year.",
+          "title": ""
+        },
+        {
+          "instruction": "Categorize father's 1990 income (inc_fa): 1 (< 878), 2 (878-1609), 3 (>= 1610).",
+          "title": ""
+        },
+        {
+          "instruction": "Randomly pair individuals within the same 1990 SAMS, sex, cob_father, and inc_fa group.",
+          "title": ""
+        },
+        {
+          "instruction": "Filter random pairs to match real sibling criteria: at least one leaves home 1991-1993, leave_diff <= 4, and age_diff <= 3.",
+          "title": ""
+        },
+        {
+          "instruction": "Remove any pairs that are actually related (shared mother or father).",
+          "title": ""
+        },
+        {
+          "instruction": "Merge random pairs with the real sibling dataset, marking them as siblingtype 0.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Prepare Panel Data for Analysis",
+      "instruction": "Transform the dataset into a panel format and calculate cumulative neighborhood effects.",
+      "substeps": [
+        {
+          "instruction": "Reshape data to long format (by year).",
+          "title": ""
+        },
+        {
+          "instruction": "Identify the neighborhood of the parents at the time the child left home (sams_par).",
+          "title": ""
+        },
+        {
+          "instruction": "Keep only the window from the year of leaving home to 14 years later.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate 'yrsinceleave' as the sequence of years after departure.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate average income (inc_av) for the 12th-14th years since leaving.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the cumulative share of low-income neighbors (shlow_cum) from year 1 to year 11.",
+          "title": ""
+        },
+        {
+          "instruction": "Keep only the observation for year 11 since leaving.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate family mean (fammean_shlowc) and intra-family deviation (intrafammean_shlowc) for the cumulative share.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Perform Statistical Analysis",
+      "instruction": "Run descriptive statistics and mixed-effects models to analyze the impact of neighborhood income on individual income.",
+      "substeps": [
+        {
+          "instruction": "Run descriptives for inc_av, shlow_cum, and demographics, split by sibling type and sex.",
+          "title": ""
+        },
+        {
+          "instruction": "Execute mixed-effects models (xi:mixed) for males and females, comparing real vs. random siblings.",
+          "title": ""
+        },
+        {
+          "instruction": "Include covariates: age, cob_father, couple, child_hh, edu, emp, and tenure.",
+          "title": ""
+        },
+        {
+          "instruction": "Use random effects for the parental neighborhood (sams_par) and family ID (famID).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "pdf",
+      "filename": "Siblings_Neighbourhood_Effects_Stata_Code.pdf",
+      "local_path": "data/media/protocols_io_docs/siblings-neighbourhood-effects-z6af9ae/Siblings_Neighbourhood_Effects_Stata_Code.pdf",
+      "source_url": "https://content.protocols.io/bfzu6fg6.pdf",
+      "caption": "",
+      "bytes": 533816,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io_docs/siblings-neighbourhood-effects-z6af9ae/Siblings_Neighbourhood_Effects_Stata_Code.pdf"
+    }
+  ],
+  "content_type": "likely_not_protocol",
+  "content_type_score": 0,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

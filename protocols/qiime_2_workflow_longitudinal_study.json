@@ -19,11 +19,262 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 0.0,
+  "quality_score": 6.5,
   "category": "Bioinformatics",
   "estimated_time_mins": null,
   "materials": [],
-  "steps": [],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Import Sequences",
+      "instruction": "Import Ion Torrent single-end fastq sequences from the directory 'casava-18-single-end-demultiplexed' using the CasavaOneEightSingleLanePerSampleDirFmt format.",
+      "substeps": [
+        {
+          "instruction": "Run 'qiime tools import' to create demux-single-endL.qza",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Visualize Sequence Quality",
+      "instruction": "Generate a quality plot to inspect the imported sequences.",
+      "substeps": [
+        {
+          "instruction": "Run 'qiime demux summarize' on demux-single-endL.qza to produce demux-single-endL.qzv",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Denoise and Remove Chimeras",
+      "instruction": "Denoise, dereplicate single-end sequences, and remove chimeras using DADA2.",
+      "substeps": [
+        {
+          "instruction": "Set trim-left to 19 nucleotides",
+          "title": ""
+        },
+        {
+          "instruction": "Set trunc-len based on quality plot (median quality score > 30) and V4 region amplicon length of 245",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'qiime dada2 denoise-single' to produce rep-seqs-dada.qza and table-dada.qza",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Summarize Denoised Data",
+      "instruction": "Verify the denoising outputs through visualization.",
+      "substeps": [
+        {
+          "instruction": "Run 'qiime feature-table tabulate-seqs' on rep-seqs-dada.qza",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'qiime feature-table summarize' on table-dada.qza using metadata.tsv",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Assign Taxonomy",
+      "instruction": "Classify sequences using the Greengenes 13.8 reference database (99% OTU identity, trimmed to V4 region).",
+      "substeps": [
+        {
+          "instruction": "Run 'qiime feature-classifier classify-sklearn' using classifier_GG99.qza and rep-seqs-dada.qza",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'qiime metadata tabulate' on taxonomy-clas-dada.qza to produce taxonomy-clas-dada.qzv",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Filter Chloroplast Sequences",
+      "instruction": "Remove chloroplast sequences as potential contaminants from the feature table.",
+      "substeps": [
+        {
+          "instruction": "Run 'qiime taxa filter-table' excluding 'Chloroplast' to produce tableGG-noC-dada.qza",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'qiime feature-table summarize' on tableGG-noC-dada.qza",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Collapse and Export Taxonomy Table",
+      "instruction": "Collapse the taxonomy table to a specific level (e.g., Level 2) and export to TSV.",
+      "substeps": [
+        {
+          "instruction": "Run 'qiime taxa collapse' at level 2 to produce tableCOLL-L2.qza",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'qiime feature-table relative-frequency' to produce L2_relative.qza",
+          "title": ""
+        },
+        {
+          "instruction": "Export L2_relative.qza to directory 'exported-feature-table-L2'",
+          "title": ""
+        },
+        {
+          "instruction": "Convert the resulting biom file to TSV using 'biom convert' with header-key taxonomy",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Generate Phylogenetic Tree",
+      "instruction": "Create a rooted phylogenetic tree from the representative sequences.",
+      "substeps": [
+        {
+          "instruction": "Align sequences using 'qiime alignment mafft'",
+          "title": ""
+        },
+        {
+          "instruction": "Mask the alignment using 'qiime alignment mask'",
+          "title": ""
+        },
+        {
+          "instruction": "Generate an unrooted tree using 'qiime phylogeny fasttree'",
+          "title": ""
+        },
+        {
+          "instruction": "Root the tree using 'qiime phylogeny midpoint-root' to produce rooted-tree.qza",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Calculate Core Metrics",
+      "instruction": "Compute alpha and beta diversity metrics using a sampling depth of 9500 sequences.",
+      "substeps": [
+        {
+          "instruction": "Run 'qiime diversity core-metrics-phylogenetic' using rooted-tree.qza, tableGG-noC-dada.qza, and metadata.tsv",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Analyze Longitudinal Alpha Diversity",
+      "instruction": "Calculate pairwise differences for alpha diversity metrics between time points T0 and T5.",
+      "substeps": [
+        {
+          "instruction": "Run 'qiime longitudinal pairwise-differences' for the 'shannon' metric using shannon_vector.qza",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'qiime longitudinal pairwise-differences' for the 'observed_otus' metric using observed_otus_vector.qza",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Analyze Longitudinal Beta Diversity",
+      "instruction": "Calculate pairwise distances for beta diversity between time points T0 and T5.",
+      "substeps": [
+        {
+          "instruction": "Run 'qiime longitudinal pairwise-distances' using unweighted_unifrac_distance_matrix.qza",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'qiime longitudinal pairwise-distances' using weighted_unifrac_distance_matrix.qza",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Analyze PCoA Pairwise Differences",
+      "instruction": "Export PCoA results and calculate pairwise differences for PC1, PC2, and PC3.",
+      "substeps": [
+        {
+          "instruction": "Export unweighted and weighted UniFrac PCoA results to TSV",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'qiime longitudinal pairwise-differences' for PC1, PC2, and PC3 using PCOA_wei_pair.tsv",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'qiime longitudinal pairwise-differences' for PC1, PC2, and PC3 using PCOA_unwei_pair.tsv",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Perform Taxonomic Statistical Analysis in R",
+      "instruction": "Perform statistical comparisons of taxonomic abundance between time points.",
+      "substeps": [
+        {
+          "instruction": "For paired data: Load 'coin' package and use 'pairwise.wilcox.test' (paired=T, p.adj='none') for columns 6 to the end of the table, comparing against time (column 5)",
+          "title": ""
+        },
+        {
+          "instruction": "For unpaired data: Load 'dunn.test' package and use 'dunn.test' instead of the Wilcoxon test",
+          "title": ""
+        },
+        {
+          "instruction": "Export the resulting p-values to a CSV file",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "pdf",
+      "filename": "Workflow_Longitudinal_study_QIIME2.pdf",
+      "local_path": "data/media/protocols_io_docs/qiime-2-workflow-longitudinal-study-ucpesvn/Workflow_Longitudinal_study_QIIME2.pdf",
+      "source_url": "https://content.protocols.io/8cw3nfn.pdf",
+      "caption": "",
+      "bytes": 122780,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io_docs/qiime-2-workflow-longitudinal-study-ucpesvn/Workflow_Longitudinal_study_QIIME2.pdf"
+    }
+  ],
+  "content_type": "likely_not_protocol",
+  "content_type_score": 0,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

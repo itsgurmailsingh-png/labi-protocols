@@ -36,14 +36,41 @@
     "Sodium acetate trihydrate",
     "Glycogen",
     "Agencourt AMPure XP beads",
-    "NEBNext Ultra II Q5 master mix"
+    "NEBNext Ultra II Q5 master mix",
+    "Timing: 3–4 h",
+    "Related to step 92."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Preparation step 1: Cell culture",
+      "title": "Prepare and seed MCF7 cells",
       "instruction": "Timing: 1–2 days\n1.Set the incubator to 37°C, 5% CO2, at least 95% humidity. Culture MCF7 cells in RPMI media containing 10% FBS, Glutamine (SARTORIUS, 03-020-1B) and Penicillin-Streptomycin (SARTORIUS, 03-031-5B).2.Seed appropriate number of cells to achieve 70% confluency at the day of cell harvest.3.At harvesting, count the cells and make sure to have at least 1 × 106 cells for each sample.\nCRITICAL: Cellular viability is important for the success of sBLISS. Start with high-quality healthy cells characterized by at least 90% viability.\nNote: It is important to harvest cells during the exponential phase to ensure that cells maintain adequate levels of transcription and replication. Harvesting under- or over-confluent cells might bias the results.",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Total step duration: 1–2 days",
+          "title": ""
+        },
+        {
+          "instruction": "Set incubator to 37 °C, 5 % CO₂, ≥95 % humidity",
+          "title": ""
+        },
+        {
+          "instruction": "Culture MCF7 cells in RPMI with 10 % FBS, Glutamine (SARTORIUS 03‑020‑1B), and Penicillin‑Streptomycin (SARTORIUS 03‑031‑5B)",
+          "title": ""
+        },
+        {
+          "instruction": "Seed cells to achieve ~70 % confluency on harvest day",
+          "title": ""
+        },
+        {
+          "instruction": "Harvest cells, count, and collect ≥1 × 10⁶ cells per sample",
+          "title": ""
+        },
+        {
+          "instruction": "Use cells with ≥90 % viability",
+          "title": ""
+        }
+      ],
       "is_critical": true,
       "timers": []
     },
@@ -97,25 +124,116 @@
     },
     {
       "step_id": 7,
-      "title": "Analysis of the sequencing data",
+      "title": "Extract internal index and UMI",
       "instruction": "Timing: 2–10 days depending on sample size\nNote: Analysis is performed within Linux environment unless stated otherwise. In all snippets, the format is a description of the variable rather than the variable itself.\nNote: The outcome of standard Illumina sequencing may be a set of FASTQ files with several samples multiplexed within each FASTQ file. The internal index distinguishing between multiplexed samples and the Unique Molecular Identifier (UMI) are both embedded within the FASTQ sequences.\n1.Use the following Python3-based snippet as a guideline for extracting the internal index and UMI. # Run through FASTQ entries. For each entry create four # FASTQ component lines: line1 (header), line2 (sequence), # line3 and line4 (base quality). > UMI = line2[:8] > Internal_Index = line2[8:16] > line1 = line1 + “+” + Internal_Index + “+” + UMI > line2=line2[16:] > line4=line4[16:] # Write these modified four-line FASTQ as an entry to the sample # which is identified by the Internal_Index. CRITICAL: Of particular importance is the separator “+” between UMI and left-hand-side of the header line (line1). This separator will be used in downstream analysis for de-duplicating breaks based on location and UMI.\nNote: Base errors may occur within the Internal index. Depending on the list of possible internal indices, one or two errors may be acceptable. Calculate the number of discrepancies between the actual index and a target index with the following Python3 command: > discrepancies=sum(x1!=x2 for x1,x2 in zip(actual,target))",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Run the analysis in a Linux environment",
+          "title": ""
+        },
+        {
+          "instruction": "Allocate 2–10 days for processing, depending on sample size",
+          "title": ""
+        },
+        {
+          "instruction": "Iterate through FASTQ entries",
+          "title": ""
+        },
+        {
+          "instruction": "For each entry, extract UMI as the first 8 bases of line2 (UMI = line2[:8])",
+          "title": ""
+        },
+        {
+          "instruction": "Extract Internal_Index as bases 9‑16 of line2 (Internal_Index = line2[8:16])",
+          "title": ""
+        },
+        {
+          "instruction": "Append \"+Internal_Index+UMI\" to the header line (line1) using \"+\" separators (line1 = line1 + \"+\" + Internal_Index + \"+\" + UMI)",
+          "title": ""
+        },
+        {
+          "instruction": "Trim line2 and line4 to remove the first 16 bases (line2 = line2[16:], line4 = line4[16:])",
+          "title": ""
+        },
+        {
+          "instruction": "Write the modified four‑line FASTQ entry to the sample file identified by Internal_Index",
+          "title": ""
+        },
+        {
+          "instruction": "Allow up to one or two mismatches in the Internal_Index when matching to the allowed list",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the number of discrepancies between actual and target indices (discrepancies = sum(x1!=x2 for x1,x2 in zip(actual,target)))",
+          "title": ""
+        }
+      ],
       "is_critical": true,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Analysis of the sequencing data",
+      "title": "Process FASTQ files through QC and mapping",
       "instruction": "Apply steps 94–97 to evaluate, preprocess, filter, map and de-duplicate each of the FASTQ files.2.Use fastqc to assess base quality along the reads, sequencer tile quality, nucleotide content distribution, read length distribution, estimated duplication level and adapter contamination.> fastqc –outdir trim_galore -q 20 –length 20 --output_dir 4.Additionally, if required, enforce trimming of a specific adapter sequence with the “adapter” flag.> trim_galore -q 20 –length 20 --output_dir ∖--adapter Note: Optionally, perform post quality assessment with fastqc, either as a separate step or as part of trim_galore operation.5.Use hisat2 to map pre-processed sequencing reads to your reference genome. You can also use alternative genome aligners such as star, bowtie2 or BWA. Prior to mapping, prepare your assembly-specific index file. Preferably download the index file from https://daehwankimlab.github.io/hisat2/download/. For non-standard genomes, you can also prepare a custom index.> hisat2_build 6.Once index file is available, perform mapping to the genome and follow this step with the creation of a sorted and indexed BAM file. Use the following code snippet as a guideline.> hisat2 -x -U ∖--no-spliced-alignment --no-unal --new-summary ∖--summary-file > samtools view -bS | samtools sort -o > samtools index -b 7.Discard reads which are assumed to be artificial PCR duplicates (same position and same UMI) and create a deduplicated BAM file.> umi_tools dedup --output-stats= -I ∖-S --umi-separator=\"+\"",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Apply steps 94–97 to each FASTQ file.",
+          "title": ""
+        },
+        {
+          "instruction": "Run fastqc with -q 20, --length 20, and output to the designated directory.",
+          "title": ""
+        },
+        {
+          "instruction": "If required, run trim_galore with -q 20, --length 20, output_dir, and the --adapter flag.",
+          "title": ""
+        },
+        {
+          "instruction": "Optional: run fastqc again on trimmed files for post‑quality assessment.",
+          "title": ""
+        },
+        {
+          "instruction": "Build the HISAT2 index (download from https://daehwankimlab.github.io/hisat2/download/ or create a custom index) using hisat2-build.",
+          "title": ""
+        },
+        {
+          "instruction": "Map reads with hisat2 -x <index> -U <reads> --no-spliced-alignment --no-unal --new-summary --summary-file, pipe to samtools view -bS, then samtools sort -o <sorted.bam>, and finally samtools index -b <sorted.bam>.",
+          "title": ""
+        },
+        {
+          "instruction": "Deduplicate the BAM file with umi_tools dedup --output-stats=<stats> -I <input.bam> -S <dedup.bam> --umi-separator=\"+\".",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Analysis of the sequencing data",
+      "title": "Generate BED and BEDGRAPH files",
       "instruction": "Follow steps 100–101 to create other forms of BREAK files from the de-duplicated BAM file.8.Create A BED file from the de-duplicated BAM file.> bedtools bamtobed -i Note: The resulting BED file is “flat”, meaning each BAM line is reported separately irrespective of coordinates.9.The following R-based snippet performs four tasks:a.Creates a BREAK bed file of widths 1. This bed file is created from the start site of each entry (on the + strand) or from the end site (on the – strand).b.Aggregates all breaks falling at the same genomic location into a new score entry.c.Creates a new BREAK BED file.d.Aggregates breaks from both strands to create a new BREAK BEDGRAPH file.# bDF is a data frame holding the flat BED file with the# following columns: CHR, START, END, ID, SCORE, STRAND# BDF1 holds the final BED file and BDF2 holds the final# BEDGRAPH file.> bDF[bDF$STRAND==\"+\",]$END bDF[bDF$STRAND==\"-\",]$START bDF1 bDF2 bedGraphToBigWig Note: You may be required to pre-sort the BEDGRAPH file.> sort -k1,1 -k2,2n > CRITICAL: is two column table with the first column holding chromosome names and second column is the sizes per chromosome. For hg38 assembly, the table can be downloaded from: https://hgdownload.cse.ucsc.edu/goldenpath/hg38/bigZips/.11.Downstream analysis with BIGWIG files",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Run `bedtools bamtobed -i <de‑duplicated BAM>` to create a flat BED file (each BAM line reported separately).",
+          "title": ""
+        },
+        {
+          "instruction": "In R, execute the provided snippet (including `bDF[bDF$STRAND==\"+\",]$END`, `bDF[bDF$STRAND==\"-\",]$START`) to (i) create 1‑bp BREAK BED from strand‑specific start/end sites, (ii) aggregate identical locations into a new score, and (iii) output final BED (BDF1) and BEDGRAPH (BDF2).",
+          "title": ""
+        },
+        {
+          "instruction": "If required, sort the BEDGRAPH file by chromosome and start: `sort -k1,1 -k2,2n <BEDGRAPH> > <sorted.BEDGRAPH>`.",
+          "title": ""
+        },
+        {
+          "instruction": "Convert the sorted BEDGRAPH to BigWig: `bedGraphToBigWig <sorted.BEDGRAPH> <chrom.sizes> <output.bw>`.",
+          "title": ""
+        },
+        {
+          "instruction": "Download the hg38 two‑column chromosome sizes table (chromosome name, size) from UCSC if not already available.",
+          "title": ""
+        }
+      ],
       "is_critical": true,
       "timers": []
     },
@@ -153,22 +271,59 @@
     },
     {
       "step_id": 14,
-      "title": "Problem 4: No library appears at final analysis",
+      "title": "Verify TapeStation analysis result",
       "instruction": "As mentioned, final library should look like the above example (Figure 2). If the TapeStation analysis shows no result, the protocol failed to produce a library. Figure 4 for example.Figure 4TapeStation analysis of DNA fragment size of undetected sBLISS library",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Compare library to Figure 2 example",
+          "title": ""
+        },
+        {
+          "instruction": "Check TapeStation analysis for result",
+          "title": ""
+        },
+        {
+          "instruction": "Refer to Figure 4 for undetected sBLISS library analysis",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "Problem 4: No library appears at final analysis",
+      "title": "Analyze leftover RNA concentration",
       "instruction": "This can be a result of problems at various steps, such as: unsuccessful ligation of BLISS adapter or mistakes during ampure bead cleanup. Usually, to distinguish which of the two is at fault, you can analyze the 2 μL of RNA leftover from step 68 (preforming the non-mandatory step 69). The expected RNA concentration should be around 100 ng/μL and at least higher than 50 ng/μL. If the RNA concentration is good, it means the problem was probably during PCR/cleanup. Otherwise, the problem occurred at the time of ligation. The other half of the cDNA left behind can be tested as well if desired. This will distinguish whether the problem occurred during PCR or cleanup.",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Pipette 2 µL of RNA leftover from step 68 (before optional step 69) into a measurement tube",
+          "title": ""
+        },
+        {
+          "instruction": "Measure RNA concentration (e.g., Qubit or NanoDrop)",
+          "title": ""
+        },
+        {
+          "instruction": "Compare measured value to expected ~100 ng/µL and ensure it is ≥50 ng/µL",
+          "title": ""
+        },
+        {
+          "instruction": "If concentration ≥50 ng/µL, infer problem likely during PCR/cleanup; if lower, infer ligation issue",
+          "title": ""
+        },
+        {
+          "instruction": "Optionally, test the other half of the cDNA similarly to distinguish PCR vs cleanup problems",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T00:24:12.282180Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 76,
+  "exclude_low_confidence": false
 }

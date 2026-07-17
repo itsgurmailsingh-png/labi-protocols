@@ -26,62 +26,98 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "This is an advanced cherrypicking protocol that allows for liquid transfers, aspirating and parking tips, pauses, and dispensing parked tips. The protocol allows for fine tuning how the instructions are carried out by specifying air gap volumes, tip touching and blow outs in the target wells. Explanation of complex parameters below: * `Transfer .csv File`: Here, you should upload a .CSV file formatted as shown below, making sure to include headers in your csv file. * `Pipette type in the left mount`: Select which pipette you will use in the left mount for this protocol. * `Pipette type in the right mount`: Select which pipette you will use in the right mount for this protocol. * `Tip type for the left pipette`: Specify whether you want to use filter tips. * `Tip type for the right pipette`: Specify whether you want to use filter tips. * `Tip Usage Strategy`: Specify whether you'd like to use a new tip for each transfer, or keep the same tip throughout the protocol. **CSV Format** Example CSV input: *Part 1 of an example CSV* *Part 2 of an example CSV* **Explanation of CSV Headers:** *step_id:* Succesive natural number that gives each instruction an identity *instruction:* What type of operation that this row specifies. There are four different instructions. **transfer:** Transfer a volume from the source well to the destination well. **aspirate_and_park_tip:** Aspirates from the source well and parks the tip, the tip can later be retrieved through its step_id. **pause:** Pause for some specified amount of time. **dispense_parked_tip** Dispense a parked tip into a destination well, specify the tip by identifying the step id from a previous aspirate_and_park_tip instruction. *instruction_parameters:* Some instructions like pause have parameters, in the case of pause it is `time` (see below). *source_labware:* The source labware used in this instruction, should be a valid Opentrons API name. The API name only needs to be specified the first time a slot is specified in",
+      "title": "Prepare CSV file",
+      "instruction": "Create a .CSV file with the required headers (step_id, instruction, instruction_parameters, source_labware, etc.) and format it exactly as shown in the protocol examples, ensuring each row defines a single instruction.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "The protocol will validate the Transfer CSV and the parameters before executing any instructions. The protocol validates the fields in the CSV, and makes sure that no well will be filled more than 80 % of the max volume. If the protocol detects overflow it will report in which steps the errors occur, warn the user and exit.",
+      "title": "Select pipettes for mounts",
+      "instruction": "In the protocol setup, choose the pipette type to mount on the left side and the pipette type to mount on the right side.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Transfer instructions: Pipette will aspirate a user-specified volume at the designated labware and well according to the instructions on that CSV row. If the well is a tube the protocol calculates the height of aspiration in order to avoid plunging the pipette into the liquid. The pipette then dispenses into the target well. If the target well is also a tube the pipette will dispense above the liquid level. The user can specifty an air gap volume, tip touching, and blow out.",
+      "title": "Choose tip types",
+      "instruction": "Specify for each pipette whether to use filter tips or standard tips.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Aspirate and park tip instructions: The pipette aspirates a given volume of liquid from a source well and then parks the tip. The tip can be retrieved subsequently.",
+      "title": "Set tip usage strategy",
+      "instruction": "Decide if a new tip will be used for each transfer or if the same tip will be kept throughout the protocol, and set this option in the protocol parameters.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Dispsense parked tip instructions: By specifying the step ID in which a tip was parked the protocol can pick up the same tip and dispense it somewhere else.",
+      "title": "Upload CSV to protocol",
+      "instruction": "Load the prepared CSV file into the protocol interface and start the run.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Pause instruction: The user can specify a pause in the protocol at that step, e.g. 5m30s.",
+      "title": "Validate CSV and volumes",
+      "instruction": "The protocol automatically checks that all CSV fields are valid and that no well will be filled beyond 80 % of its maximum volume; if any overflow is detected, the protocol reports the offending step IDs, warns the user, and aborts execution.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "The protocol proceeds until each instruction in the CSV is finished.",
+      "title": "Execute transfer instructions",
+      "instruction": "For each row with instruction = transfer, the pipette aspirates the specified volume from the source labware/well (calculating aspiration height for tubes), optionally adds an air gap, optionally touches the tip to the source well, then dispenses the liquid into the destination well (dispensing above the liquid level for tubes) and performs any requested blow‑out.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Execute aspirate‑and‑park instructions",
+      "instruction": "For each row with instruction = aspirate_and_park_tip, the pipette aspirates the indicated volume from the source well and parks the tip for later retrieval.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Execute pause instructions",
+      "instruction": "For each row with instruction = pause, the protocol pauses for the specified time (e.g., 5 m 30 s).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Execute dispense‑parked‑tip instructions",
+      "instruction": "For each row with instruction = dispense_parked_tip, the protocol retrieves the tip that was previously parked (identified by its step_id) and dispenses its contents into the designated destination well.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Complete protocol run",
+      "instruction": "Continue processing rows until all instructions in the CSV have been executed, then finish the run.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-18T20:59:12.158610Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 50,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

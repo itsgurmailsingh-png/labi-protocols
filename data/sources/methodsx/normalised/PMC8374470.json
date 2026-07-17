@@ -11,45 +11,124 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374470/",
   "doi": "10.1016/j.mex.2021.101379",
   "citation": "10.1016/j.mex.2021.101379",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [],
   "estimated_time_mins": 24,
   "materials": [],
   "steps": [
     {
       "step_id": 0,
-      "title": "Automated feature extraction",
-      "instruction": "We individually reviewed each tile for the presence of conifers and processed tiles with conifers using the Feature Analyst™ Supervised Learning Wizard, which applies a supervised learning algorithm that extracts features meeting spectral and contextual specifications via a set of training polygons. We digitized a representative sample of conifer image objects across the entire tile to create this polygon training set. We distinguished conifers from other vegetation based on the hue of red under traditional false-color settings, and verified identification using Google Earth™ (version 7.1.2.2041 2013)[7]. We digitized clearly identifiable individual conifers for the training polygons to ensure the classification of isolated trees in low canopy density areas and used the spectral properties of the cells under false-color settings to delineate the conifer crown. This process trained the OBIA algorithm to distinguish trees from shadows and other vegetation types, minimizing misclassification. Each digitized image object consisted of at least three cells, a canopy area that corresponds to tree height (≥ 3m) readily tall enough to break through the sagebrush canopy. The number of samples per tile varied according to image quality and color variation, but always consisted of a minimum of five training polygons. We then used the training set as the input for Feature Analyst™’s Supervised Learning Wizard to generate conifer features from the four-band NAIP image.",
+      "title": "Create training polygons",
+      "instruction": "Review each NAIP tile for conifers, then digitize a representative sample of conifer image objects to build a training polygon set (minimum five polygons per tile; each polygon must contain at least three cells and represent a canopy height of ≥ 3 m). Distinguish conifers by the hue of red in traditional false‑color settings and verify identifications with Google Earth™ version 7.1.2.2041 (2013).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Automated feature extraction",
-      "instruction": "In Feature Analyst™’s Supervised Learning Wizard, we specified parameters that best represented trees in the supervised machine learning algorithm. We defined our search neighborhoods using the \"Natural Feature\" feature selector with the \"Bullseye 3\" parameter over a 25-m2 moving window to define the spatial and spectral context used by the algorithm to extract features. \"Natural Shape\" discouraged the algorithm from using hard lines to generate image objects. The Bullseye search window reduced processing time by reducing the number of cells supplied to the learning algorithm while still representing the neighborhood. We specified a \"pattern width\" of 5 m to match the Bullseye moving window, and we chose 5 m in both instances because this width was larger than our minimum mapping unit, allowing the algorithm to discern features based on collective spectral qualities while still small enough to extract individual trees. Additionally, it allowed us to exclude smaller vegetation with similar spectral signatures and reduce the chance for errors of commission. Detected features > 3-m2 were aggregated. These parameters were determined to best classify trees after several rounds of tests.",
+      "title": "Set wizard parameters and classify",
+      "instruction": "In Feature Analyst™ Supervised Learning Wizard, load the training polygons and specify: “Natural Feature” selector with “Bullseye 3” over a 25‑m² moving window; enable “Natural Shape” to avoid hard‑line objects; set pattern width to 5 m (matching the Bullseye window). Run the supervised learning algorithm on the four‑band NAIP image to generate conifer features, aggregating any detected features larger than 3 m².",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Automated feature extraction",
-      "instruction": "We checked output conifer features for accuracy against the NAIP reference imagery. Typically, the initial results would be over- or under-classified. If the results were under-classified, more training polygons were added to the initial set and a new supervised classification was performed to replace the initial output. In some cases where a single learning algorithm could not be trained to recognize all conifer features (i.e., extremely dense stands), multiple algorithms were run on the same tile to target the variety of feature types and these outputs were merged together. If the results were over-classified, we digitized samples of incorrect, correct, and missed features, which were incorporated into a hierarchical supervised classification performed on the previous OBIA output. This hierarchical classification continued until misclassification errors were minimized based on visual comparison of feature outputs to the NAIP reference imagery. The \"Hierarchical Learning\" process in Feature Analyst™ is comprised of three sub-processes that retrain the algorithm and optimize the original output: (1) incorrect features are digitized for removal using the \"Begin Removing Clutter Tool.\" We included removal polygon samples of all possible misclassifications such as shadows, riparian vegetation, and other non-conifer features. (2) The correct output features are then identified to retrain the OBIA algorithm. (3) Features that were missed by the previous supervised learning run are digitized and added to the training set using the \"Begin Adding Missed Features Tool.\" After the hierarchical learning process was complete, we carried out additional geoprocessing to dissolve overlapping features, repair polygon geometry, and remove features < 3-m2. Any large misclassifications that occurred as a result of spectral overlap (e.g., algae in standing water, irrigated agricultural fields, wet meadows, riparian areas, or patches of other non-conifer vegetation) were removed using custom polygon masks. We then converted the clean shapefiles for each tile to 2- bit, binary VHSR rasters (1-m2).",
+      "title": "Assess initial classification",
+      "instruction": "Compare the output conifer features to the NAIP reference imagery. If the result is under‑classified, digitize additional training polygons and rerun the supervised classification. For extremely dense stands, execute multiple learning algorithms on the same tile and merge their outputs. If the result is over‑classified, digitize samples of incorrect, correct, and missed features for further refinement.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Automated feature extraction",
-      "instruction": "We carried out several post-processing steps on output feature layers for each tile to further improve results. We reviewed tiles for obvious errors of omission and commission. We also checked against neighboring tiles for acute seamlines, which were signs of classification disagreement resulting from tile-based analysis. Tiles were iteratively re-analyzed if seamlines were pervasive. Raster output was considered ‘clean’ at the completion of this process, and then mosaicked for each zone or PMU in ERDAS Imagine (2013, Leica Geosystems, Atlanta, Georgia) using the \"Automatic Most Nadir Seam\" setting to minimize seamlines by overlapping areas where the distance to the center point of each image is equal.",
+      "title": "Hierarchical learning and cleanup",
+      "instruction": "Perform hierarchical supervised classification using three sub‑processes: (1) digitize incorrect features for removal with the “Begin Removing Clutter Tool” (include shadows, riparian vegetation, and other non‑conifer features); (2) identify correct output features to retrain the OBIA algorithm; (3) digitize missed features and add them with the “Begin Adding Missed Features Tool.” After hierarchical learning, dissolve overlapping polygons, repair geometry, and delete features smaller than 3 m². Remove large misclassifications (e.g., algae, irrigated fields, wet meadows, riparian areas, other non‑conifer vegetation) using custom polygon masks, then convert the cleaned shapefiles to 2‑bit binary VHSR rasters with 1‑m² cells.",
+      "substeps": [
+        {
+          "instruction": "Digitize incorrect features and remove with “Begin Removing Clutter Tool”.",
+          "title": ""
+        },
+        {
+          "instruction": "Identify correct features and retrain the OBIA algorithm.",
+          "title": ""
+        },
+        {
+          "instruction": "Digitize missed features and add with “Begin Adding Missed Features Tool”.",
+          "title": ""
+        },
+        {
+          "instruction": "Dissolve overlapping features and repair polygon geometry.",
+          "title": ""
+        },
+        {
+          "instruction": "Delete features < 3 m².",
+          "title": ""
+        },
+        {
+          "instruction": "Mask large misclassifications using custom polygons.",
+          "title": ""
+        },
+        {
+          "instruction": "Convert cleaned shapefiles to 2‑bit binary VHSR rasters (1‑m² cells).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Final review and mosaic",
+      "instruction": "Review each tile for omission and commission errors and inspect neighboring tiles for seamlines; re‑analyze any tile with pervasive seamlines. Once raster outputs are deemed clean, mosaic the tiles for each zone or PMU in ERDAS Imagine (2013, Leica Geosystems, Atlanta, GA) using the “Automatic Most Nadir Seam” setting to minimize seamlines by overlapping areas equidistant from image centers.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T10:59:43.787256Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "protocol",
+  "content_type_score": 34,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC8374470/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374470/",
+      "caption": "",
+      "bytes": 89136,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374470/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC8374470/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374470/",
+      "caption": "",
+      "bytes": 132498,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374470/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC8374470/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374470/",
+      "caption": "",
+      "bytes": 198223,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374470/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC8374470/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374470/",
+      "caption": "",
+      "bytes": 238387,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374470/gr3.jpg"
+    }
+  ]
 }

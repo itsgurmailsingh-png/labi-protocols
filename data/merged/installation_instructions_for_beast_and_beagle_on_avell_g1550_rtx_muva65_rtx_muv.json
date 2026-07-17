@@ -19,52 +19,141 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 2.5,
+  "quality_score": 2.0,
   "category": "Bioinformatics",
   "estimated_time_mins": 30,
   "materials": [
     "terminal",
     "NVIDIA CUDA driver",
     "BEAGLE source repository",
-    "BEAST installer"
+    "BEAST installer",
+    "Create a directory called softwares to your HOME directory, switch to it and then download the Intel OpenCL implementations installer. Unpack the compressed .tar.gz file, switch to installer directory and install the Intel OpenCL implementations, accepting defaults. After installation, remove the Intel OpenCL implementations installer directory and installer. mkdir $HOME/softwarescd $HOME/softwareswget http://registrationcenter-download.intel.com/akdlm/irc_nas/vcp/16284/intel_sdk_for_opencl_applications_2020.0.270.tar.gztar -zxvf intel_sdk_for_opencl_applications_2020.0.270.tar.gzcd intel_sdk_for_opencl_applications_2020.0.270bash install.shcd ..rm -rf intel_sdk_for_opencl_applications_2020.0.270*"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Open a terminal (Ctrl + Alt + T). Update the package list and install the dependency packages for the BEAST and BEAGLE. sudo apt-get updatesudo apt-get install -y autoconf automake build-essential g++-8 gcc-8 git libcanberra-gtk-module libcanberra-gtk3-module libfreetype6-dev libgl1-mesa-dev libglew-dev libglm-dev libsdl2-dev libsdl2-image-dev libtool mesa-utils ocl-icd-opencl-dev ocl-icd-libopencl1 openjdk-8-jdk openjdk-8-jre pkg-configsudo apt-get update",
+      "title": "Open terminal and install dependencies",
+      "instruction": "Open a terminal (Ctrl + Alt + T), update the package list, install all required packages for BEAST and BEAGLE, then update the package list again.",
+      "substeps": [
+        {
+          "instruction": "sudo apt-get update",
+          "title": ""
+        },
+        {
+          "instruction": "sudo apt-get install -y autoconf automake build-essential g++-8 gcc-8 git libcanberra-gtk-module libcanberra-gtk3-module libfreetype6-dev libgl1-mesa-dev libglew-dev libglm-dev libsdl2-dev libsdl2-image-dev libtool mesa-utils ocl-icd-opencl-dev ocl-icd-libopencl1 openjdk-8-jdk openjdk-8-jre pkg-config",
+          "title": ""
+        },
+        {
+          "instruction": "sudo apt-get update",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Create a directory called softwares to your HOME directory, switch to it and then download the Intel OpenCL implementations installer. Unpack the compressed .tar.gz file, switch to installer directory and install the Intel OpenCL implementations, accepting defaults. After installation, remove the Intel OpenCL implementations installer directory and installer. mkdir $HOME/softwarescd $HOME/softwareswget http://registrationcenter-download.intel.com/akdlm/irc_nas/vcp/16284/intel_sdk_for_opencl_applications_2020.0.270.tar.gztar -zxvf intel_sdk_for_opencl_applications_2020.0.270.tar.gzcd intel_sdk_for_opencl_applications_2020.0.270bash install.shcd ..rm -rf intel_sdk_for_opencl_applications_2020.0.270*",
+      "title": "Add CUDA repository and install driver",
+      "instruction": "Download the CUDA repository pin file, place it in the apt preferences, download the CUDA repository .deb package, install it, add the repository key, refresh the package list, and install the CUDA toolkit.",
+      "substeps": [
+        {
+          "instruction": "wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin",
+          "title": ""
+        },
+        {
+          "instruction": "sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600",
+          "title": ""
+        },
+        {
+          "instruction": "wget http://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb",
+          "title": ""
+        },
+        {
+          "instruction": "sudo dpkg -i cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb",
+          "title": ""
+        },
+        {
+          "instruction": "sudo apt-key add /var/cuda-repo-10-2-local-10.2.89-440.33.01/7fa2af80.pub",
+          "title": ""
+        },
+        {
+          "instruction": "sudo apt-get update",
+          "title": ""
+        },
+        {
+          "instruction": "sudo apt-get -y install cuda",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Get the PPA repository and install the NVIDIA CUDA driver. wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pinsudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600wget http://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.debsudo dpkg -i cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.debsudo apt-key add /var/cuda-repo-10-2-local-10.2.89-440.33.01/7fa2af80.pubsudo apt-get updatesudo apt-get -y install cuda",
+      "title": "Build BEAGLE from source",
+      "instruction": "Clone the BEAGLE library repository, configure it with OpenCL and CUDA support, compile, install, run checks, and return to the previous directory.",
+      "substeps": [
+        {
+          "instruction": "git clone --depth=1 https://github.com/beagle-dev/beagle-lib.git",
+          "title": ""
+        },
+        {
+          "instruction": "cd beagle-lib",
+          "title": ""
+        },
+        {
+          "instruction": "./autogen.sh",
+          "title": ""
+        },
+        {
+          "instruction": "./configure --prefix=$HOME/softwares/beagle --with-opencl=/opt/intel/system_studio_2020/opencl/SDK --with-cuda=/usr/local/cuda",
+          "title": ""
+        },
+        {
+          "instruction": "make install",
+          "title": ""
+        },
+        {
+          "instruction": "make check",
+          "title": ""
+        },
+        {
+          "instruction": "cd ..",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Build the BEAGLE from the source repository. git clone --depth=1 https://github.com/beagle-dev/beagle-lib.gitcd beagle-lib./autogen.sh./configure --prefix=$HOME/softwares/beagle --with-opencl=/opt/intel/system_studio_2020/opencl/SDK --with-cuda=/usr/local/cudamake installmake checkcd ..",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 4,
-      "title": "",
-      "instruction": "Download the BEAST installer and unpack the compressed .tgz file. After install, remove the compressed .tgz file. cd $HOME/softwareswget https://github.com/beast-dev/beast-mcmc/releases/download/v1.10.5pre1/BEASTv1.10.5pre.tgztar -zxvf BEASTv1.10.5pre.tgzrm BEASTv1.10.5pre.tgz",
+      "title": "Download and install BEAST",
+      "instruction": "Navigate to the software directory, download the BEAST tarball, extract it, and delete the original compressed file.",
+      "substeps": [
+        {
+          "instruction": "cd $HOME/softwares",
+          "title": ""
+        },
+        {
+          "instruction": "wget https://github.com/beast-dev/beast-mcmc/releases/download/v1.10.5pre1/BEASTv1.10.5pre.tgz",
+          "title": ""
+        },
+        {
+          "instruction": "tar -zxvf BEASTv1.10.5pre.tgz",
+          "title": ""
+        },
+        {
+          "instruction": "rm BEASTv1.10.5pre.tgz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 77,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

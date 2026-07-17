@@ -9,7 +9,128 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "AbstractLong‐read sequencing platforms such as the Oxford Nanopore Technologies (ONT) and Pacific Biosciences (PacBio) platforms now offer sufficient read lengths, throughput, and accuracy at competitive costs to analyze polymorphic regions of the human genome, including the highly complex human leukocyte antigen (HLA) gene cluster—a cornerstone of human immunity. Here, we present a streamlined protocol for predicting HLA signatures from whole‐genome shotgun (WGS) long‐read sequencing data by directly streaming sequence alignments into HLAminer. This method is as simple as running minimap2, scales efficiently with the number of sequences, and works with any read aligner compatible with the SAM file format—eliminating the need to store bulky alignment files on disk. We provide a step‐by‐step guide for predicting HLA class I and class II alleles from third‐generation long‐read sequencing data and demonstrate the robustness of predictions even with older, less accurate WGS nanopore datasets and relatively low (10×) sequencing coverage. Code availability: HLAminer is available under the BC Cancer software license agreement (academic use) at https://github.com/bcgsc/HLAminer. © 2025 The Author(s). Current Protocols published by Wiley Periodicals LLC.\nBasic Protocol: HLA prediction from streamed ONT or PacBio long‐read alignments",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "Necessary Hardware",
+      "instruction": "The HLAminer protocol requires a 64‐bit Linux or Mac operating system with sufficient random‐access memory (RAM) to process large volumes of DNA sequencing data (e.g., up to 35 GB RAM in our tests; see below). RAM requirements will depend on the properties of the data, including the sequencing read coverage, and the alignment parameters used. Both runtime and peak memory usage are determined by the sequence aligner used."
+    },
+    {
+      "title": "Software Installation",
+      "instruction": "This protocol uses HLAminer (v1.4, https://github.com/bcgsc/hlaminer; Warren et al., 2012), a command‐line script that requires the PERL interpreter—typically pre‐installed on most Linux and Mac systems—and the minimap2 read‐aligner (2.28‐r1209, https://github.com/lh3/minimap2; Li, 2018). We recommend manually cloning and compiling the HLAminer source code from GitHub and installing minimap2 using the conda package manager."
+    },
+    {
+      "title": "Software Installation",
+      "instruction": "This protocol was tested with minimap2 (Li, 2018), as it is best in class for ONT and PacBio long‐read alignments at the time of this writing, but HLAminer will support any aligners capable of outputting a SAM (Sequence Alignment/Map)‐compatible output (i.e., .sam file) with MD tags (i.e., string encoding mismatched and deleted reference bases)."
+    },
+    {
+      "title": "Installing HLAminer",
+      "instruction": "Installation by cloning the GitHub repository is recommended, as HLAminer is not a compiled code base and does not have any code or library dependencies. Cloning the repository is simply achieved using this command on the terminal: git clone https://github.com/bcgsc/HLAminer/"
+    },
+    {
+      "title": "Installing HLAminer",
+      "instruction": "NOTE: To run HLAminer from any directory, its executables must be accessible via the PATH environment variable. To achieve this, add the following line to your shell configuration file (e.g., .bashrc or .bash_profile), replacing /path/to/hlaminer/installation below with your corresponding installation directory: export PATH=/path/to/hlaminer/installation/HLAminer/HLAminer‐1.4/bin:$PATH"
+    },
+    {
+      "title": "Installing HLAminer",
+      "instruction": "Alternatively, for users running commands from the installation directory, the following approach ensures reproducibility and simplifies protocol execution: export PATH=$(pwd)/HLAminer/HLAminer‐1.4/bin:$PATH\nexport HLAMINER_DBPATH=$(pwd)/HLAminer/HLAminer‐1.4/database"
+    },
+    {
+      "title": "Installing HLAminer",
+      "instruction": "More detailed instructions for installing the packages can be found in their respective GitHub repositories."
+    },
+    {
+      "title": "Installing minimap2",
+      "instruction": "Installation via the Conda package manager (Miniconda) is recommended. Conda allows easy installation of tools and their dependencies into stand‐alone environments. Miniconda is a minimal, lightweight installation for Conda and can be obtained freely from https://docs.conda.io/en/latest/miniconda.html. Once Miniconda is installed, create a new environment for the protocol with the following commands: conda create ‐n hlaminer python=3.8\nconda activate hlaminer"
+    },
+    {
+      "title": "Installing minimap2",
+      "instruction": "minimap2 can then be installed from the bioconda channel: conda install bioconda::minimap2"
+    },
+    {
+      "title": "Installing minimap2",
+      "instruction": "This command will install minimap2 into the hlaminer environment. This environment must be activated prior to running the streaming protocol with the command: conda activate hlaminer"
+    },
+    {
+      "title": "Downloading HLA Sequence Data and Preparing the Reference Genome",
+      "instruction": "HLAminer will work as‐is using the reference data files provided with the v1.4 distribution. However, new HLA alleles are continuously being discovered and reported and immunogenomics is an active field of research; the publicly available HLA sequence repositories that HLAminer relies on for its predictions must be updated for best results. To update the reference genome used for alignment, follow these steps at the terminal:"
+    },
+    {
+      "title": "Option 1: Running the master download and formatting script",
+      "instruction": "cd $HLAMINER_DBPATH\n./updateAll.sh"
+    },
+    {
+      "title": "Option 2: Executing the commands individually",
+      "instruction": "1.Download genomic HLA sequences: wget ftp://ftp.ebi.ac.uk/pub/databases/imgt/mhc/hla/fasta/*_gen.fasta 2.Concatenate HLA genomic sequences: cat A_gen.fasta B_gen.fasta C_gen.fasta F_gen.fasta G_gen.fasta H_gen.fasta DP*_gen.fasta DQ*_gen.fasta DR*_gen.fasta | perl ‐ne ‘chomp;if(/\\>\\S+\\s+(\\S+)/){print “>$1\\n”;}else{print “$_\\n”;}’ > HLA‐I_II_GEN.fasta 3.Prepare a reference genome for long‐read sequence alignment: cat GCA_000001405.15_GRCh38_genomic.chr‐only‐noChr6.fa HLA‐I_II_GEN.fasta | pigz ‐ > GCA_000001405.15_GRCh38_genomic.chr‐only‐noChr6‐HLA‐I_II_GEN.fa.gz 4.Update the p‐designation file: rm ‐rf hla_nom_p.txt\nwget http://hla.alleles.org/wmda/hla_nom_p.txt"
+    },
+    {
+      "title": "Option 3: Downloading a static version of the reference genome with updated HLA genomic loci (as of January 2025)",
+      "instruction": "wget https://www.bcgsc.ca/downloads/btl/hlaminer/GCA_000001405.15_GRCh38_genomic.chr‐only‐noChr6‐HLA‐I_II_GEN.fa.gz"
+    },
+    {
+      "title": "Option 4: Downloading a static version of all reference files from Zenodo (dated January 27, 2025)",
+      "instruction": "The static (January 2025) reference files we used in our protocol (below), and including hla_nom_p.txt, GCA_000001405.15_GRCh38_genomic.chr‐only‐noChr6‐HLA‐I_II_GEN.fa.gz, and HLA‐I_II_GEN.fasta, can be directly downloaded from Zenodo (https://doi.org/10.5281/zenodo.14751276)."
+    },
+    {
+      "title": "Option 4: Downloading a static version of all reference files from Zenodo (dated January 27, 2025)",
+      "instruction": "When running any of the above commands, and when pigz/wget are not installed with your operating system, you may consider using gzip/curl instead, respectively."
+    },
+    {
+      "title": "Option 4: Downloading a static version of all reference files from Zenodo (dated January 27, 2025)",
+      "instruction": "IMPORTANT: To be successful, HLA predictions from direct read alignments must include all known HLA alleles and unrelated genomic regions in one reference (i.e., GCA_000001405.15_GRCh38_genomic.chr‐onlynoChr6‐HLA‐I_II_GEN.fa.gz) to help prevent spurious off‐target long‐read alignments to HLA alleles. For each option listed above, verify that the file GCA_000001405.15_GRCh38_genomic.chr‐only‐noChr6‐HLA‐I_II_GEN.fa.gz has been successfully written to /path/to/hlaminer/installation/HLAminer/HLAminer‐1.4/database and is not empty or corrupted."
+    },
+    {
+      "title": "HLA PREDICTION FROM STREAMED ONT or PacBio LONG‐READ ALIGNMENTS",
+      "instruction": "This Basic Protocol outlines how to run HLAminer on ONT or PacBio long‐read sequencing data in a single terminal command by streaming the output of minimap2 directly into the HLAminer.pl script. This is achieved using the commonly‐used Unix pipe operator (|), which connects the standard output (STDOUT) of the first process (minimap2) to the standard input (STDIN) of the second process (HLAminer in ‐a stream mode). We demonstrate the steps using several datasets, including ONT and PacBio long reads with varying fold coverage, as well as different ONT pore chemistries and base‐caller combinations (Table 1)."
+    },
+    {
+      "title": "HLA PREDICTION FROM STREAMED ONT or PacBio LONG‐READ ALIGNMENTS",
+      "instruction": "NOTE: The software packages listed below and their dependencies must be installed and be referenced to in your PATH environment variable before you begin the protocol (see Strategic Planning)."
+    },
+    {
+      "title": "HLA PREDICTION FROM STREAMED ONT or PacBio LONG‐READ ALIGNMENTS",
+      "instruction": "NOTE: We illustrate the HLAminer streaming functionality on three cell lines (NA19240, NA12878, and NA24385/HG002) from human individuals with clinically typed HLA class I and II, provided for reference (Chin et al., 2020; Dilthey et al., 2016; Erlich et al., 2011; Lee & Kingsford, 2018). Nanopore long‐read WGS datasets for NA19240 (dataset A; ENA ERR2585115) and NA12878 (dataset B; ENA SRR10965087) and PacBio CCS data for individual NA24385 (dataset C; ENA SRX5327410) are used as demonstrations for HLA prediction below. We also demonstrated the application of the protocol to NA24385 guppy v5.0.6 (dataset D) and dorado kit14‐2022‐12 (dataset E) base‐called ONT datasets, downloaded as per the instructions provided in https://labs.epi2me.io/gm24385_2021.05/ and https://labs.epi2me.io/askenazi‐kit14‐2022‐12/, respectively (Table 1). Data for all five datasets are included in the tables below, but we only provide protocol steps for datasets A, B, and C, as the steps for both D and E are identical to those for A (i.e., ONT data)."
+    },
+    {
+      "title": "Hardware",
+      "instruction": "Server or machine running a 64‐bit Linux or Mac operating system with sufficient RAM (up to 35 GB); we benchmarked our protocol on a dedicated server‐class CentOS Linux release 7.6.1810 system with 144 core Intel Xeon Gold 6150 CPUs at 2.70 GHz with 2.1 TB RAM."
+    },
+    {
+      "title": "Software",
+      "instruction": "HLAminer v1.4 (https://github.com/bcgsc/HLAminer), commit:c00effaMinimap2 2.28‐r1209 (https://github.com/lh3/minimap2)"
+    },
+    {
+      "title": "Files",
+      "instruction": "Long sequencing reads can be provided in compressed (.gz) or uncompressed FASTQ format; the reference genome described in Strategic Planning (under “HLA sequence data download and reference genome preparation”), e.g., GCA_000001405.15_GRCh38_genomic.chr‐only‐noChr6‐HLA‐I_II_GEN.fa.gz, should be provided as is."
+    },
+    {
+      "title": "Sample data",
+      "instruction": "Nanopore long‐read WGS datasets for NA19240 (dataset A) and NA12878 (dataset B) and PacBio CCS data for individual NA24385 (dataset C), downloaded from the European Nucleotide Archive (ENA; https://www.ebi.ac.uk/ena) under accession codes ERR2585115, SRR10965087, and SRX5327410."
+    },
+    {
+      "title": "Critical Parameters and Troubleshooting",
+      "instruction": "When predicting HLA types from direct read alignments with HLAminer, the MD tag (e.g., minimap2 --MD) must be present in the resulting SAM alignment file (or stream), as otherwise HLA prediction output files are likely to be empty (Table 3). A low (<10×) sequencing read coverage may also be insufficient for predictions to be made, and lowering the minimum score threshold in HLAminer (‐s) may help resolve the issue of empty predictions. When joining the execution of a read aligner with HLAminer, HLAminer's ‐a stream must be specified. We recommend that users carefully inspect the logs, output files, and error codes if an error occurs. See Table 3 for a list of additional potential problems, along with their causes and solutions."
+    },
+    {
+      "title": "Understanding Results",
+      "instruction": "The final output of HLAminer is a set of HLA class I and class II allele predictions for each major gene. The output file will have the suffix .csv. HLAminer will also log HLA inference results (suffix .log) as it proceeds through the prediction stages, to inform the user of its process. These output files are described in further detail at the HLAminer GitHub repository (https://github.com/bcgsc/HLAminer) and in the article describing HLAminer (Warren et al., 2012). Briefly, the .log file tracks the process of HLA mining and contains the following information:\nHLAminer command and parameters utilized;Read alignment output, sequence identity to HLA, and best HLA hit for each;Initial HLA allele summary, score, and expect value;Final summary, listing all predictions by highest score (i.e., most likely HLA allele)."
+    },
+    {
+      "title": "Understanding Results",
+      "instruction": "The .csv file contains HLAminer predictions. Predictions are listed by HLA gene and ranked by highest score, with predictions for #1 and #2 representing the most likely HLA alleles (4‐digit resolution) for each major gene at the group (2‐digit resolution) level, respectively."
+    },
+    {
+      "title": "Understanding Results",
+      "instruction": "e.g., ---------------------------------------------\nSUMMARY\nMOST LIKELY HLA‐I ALLELES (Confidence (‐10 * log10(Eval)) >= 30, Score >= 500)\nAllele,Score,Expect (Eval) value,Confidence (‐10 * log10(Eval))\n---------------------------------------------\nHLA‐A Prediction #1 ‐ A*26 A*26:33,22158.02,1.78e‐12,117.5 Prediction #2 ‐ A*33 A*33:24,12384.00,2.23e‐05,46.5\nHLA‐B Prediction #1 ‐ B*15 B*15:63,17000.00,7.64e‐08,71.2 Prediction #2 ‐ B*55 B*55:29,11362.00,1.77e‐05,47.5\nHLA‐C Prediction #1 ‐ C*07 C*07:02P,27076.00,3.08e‐11,105.1 Prediction #2 ‐ C*04 C*04:61,10630.00,1.18e‐08,79.3"
+    },
+    {
+      "title": "Understanding Results",
+      "instruction": "For example, from these predictions, the individual is expected to be heterozygous with HLA‐I major gene A, groups A26 and A33, and alleles A*26:33 and A*33:24. The score, expect value and confidence are different representations of the same metric. The confidence represents the expect value (Eval) as a score (log10‐based, analogous to the phred score used to assess nucleotide base accuracy). Predictions are ambiguous when there are multiple predicted allele groups and/or protein‐coding alleles with the exact same score."
+    },
+    {
+      "title": "Understanding Results",
+      "instruction": "To evaluate HLA predictions with experimental long sequencing reads, we used HLAminer to identify the main HLA‐I and HLA‐II genes at the group and allele levels from four ONT and one PacBio HiFi human WGS datasets corresponding to three human individuals (NA12878, NA19240, and NA24385), directly from streamed minimap2 sequence alignments. These predictions closely matched clinically derived HLA types, demonstrating the tool's robustness even at lower sequencing coverage and with earlier base‐called datasets. Group‐level predictions matched all but one (94% accuracy) and three (88% accuracy) clinically derived types for HLA‐I and ‐II, respectively (Tables 4 and 5). Allele‐level predictions were largely consistent between HLAminer and clinically determined types for both HLA‐I and ‐II, and considering the low sequencing coverage (e.g., 10×) and low base accuracy of earlier base‐called dataset versions (guppy v1.4.0), they performed robustly well. High‐coverage (39×, 67×, and 72× for datasets B, D, and E, respectively) promethION datasets yield HLA class I and II predictions that are close to their clinically typed counterparts and were corroborated across sequencing runs and platforms (e.g., HLA‐I B*35:01 predicted from both ONTs and PacBio versus clinically typed as B*35:08, and HLA‐II DRB1*04:03P predicted from both ONTs and PacBio versus clinically typed as HLA‐II DRB1*04:02P, for NA24385). The run time for predictions varied between datasets and roughly scaled with the number of sequencing reads to align, with minimap2 being the primary pipeline bottleneck for both run time and RAM (Table 2)."
+    }
+  ],
   "materials": [
     "Server or machine running a 64‐bit Linux or Mac operating system with sufficient RAM (up to 35 GB); we benchmarked our protocol on a dedicated server‐class CentOS Linux release 7.6.1810 system with 144 core Intel Xeon Gold 6150 CPUs at 2.70 GHz with 2.1 TB RAM.",
     "HLAminer v1.4 (https://github.com/bcgsc/HLAminer), commit:c00effa",
@@ -17,5 +138,6 @@
     "Long sequencing reads can be provided in compressed (.gz) or uncompressed FASTQ format; the reference genome described in Strategic Planning (under “HLA sequence data download and reference genome preparation”), e.g., GCA_000001405.15_GRCh38_genomic.chr‐only‐noChr6‐HLA‐I_II_GEN.fa.gz, should be provided as is.",
     "Nanopore long‐read WGS datasets for NA19240 (dataset A) and NA12878 (dataset B) and PacBio CCS data for individual NA24385 (dataset C), downloaded from the European Nucleotide Archive (ENA; https://www.ebi.ac.uk/ena) under accession codes ERR2585115, SRR10965087, and SRX5327410."
   ],
-  "fetched_at": "2026-06-19T00:22:10.298486+00:00"
+  "fetched_at": "2026-06-19T00:22:10.298486+00:00",
+  "media": []
 }

@@ -1,0 +1,232 @@
+{
+  "protocol_id": "3d_volumetric_method_for_quantifying_porosity_in_suspended_sediments",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "3D Volumetric Method for Quantifying Porosity in Suspended Sediments",
+  "author": "Lawrence, Carr, et al.",
+  "doi": "10.1016/j.mex.2022.101975",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9830201/",
+  "citation": "10.1016/j.mex.2022.101975",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 4.0,
+  "category": "Environmental Science",
+  "estimated_time_mins": 126,
+  "materials": [
+    "plankton chamber",
+    "LabSFLOC system",
+    "agarose gel",
+    "micro-computed tomography",
+    "computer with ImageJ/Fiji",
+    "TIFF image stack",
+    "median 3D filter",
+    "thresholding tools",
+    "cropping tools",
+    "binarization tools"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Launch ImageJ and Import Data",
+      "instruction": "Launch ImageJ (v1.52p) and import the image stack data in TIFF format.",
+      "substeps": [
+        {
+          "instruction": "Select File > Import > Image Sequence",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Optimize Image Stack",
+      "instruction": "Process the image stack to reduce noise and isolate floc material.",
+      "substeps": [
+        {
+          "instruction": "Adjust brightness/contrast (Image > Adjust > Brightness/Contrast) setting min: 6000 and max: 10,000 GL to eliminate high attenuating artefacts and resin block material.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply a median 3D filter (Process > Filters > Median 3D) with a radius of 2 × 2 × 2 pixels.",
+          "title": ""
+        },
+        {
+          "instruction": "Threshold the image stack (Image > Adjust > Threshold), checking the 'stack histogram' box and setting the threshold value to 16,000 GL.",
+          "title": ""
+        },
+        {
+          "instruction": "Rotate the sample block (Image > Transform > Rotate) using the preview slider to an orientation suitable for encapsulation, draw a rectangle around all sample material, and select Image > Crop.",
+          "title": ""
+        },
+        {
+          "instruction": "Binarize the dataset (Process > Binary > Make Binary).",
+          "title": ""
+        },
+        {
+          "instruction": "Reduce noise by selecting Process > Binary > Erode followed by Process > Binary > Dilate, then save the image stack.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Label Floc Samples",
+      "instruction": "Using ImageJ v1.50e (2015), set the scale and label particles within the binarized stack.",
+      "substeps": [
+        {
+          "instruction": "Set the scale (Analyze > Set Scale) based on the μCT scan resolution.",
+          "title": ""
+        },
+        {
+          "instruction": "Run particle analysis (Plugins > BoneJ > Analyze > Particle Analyser), ticking 'enclosed volume' and 'show particle stack', and setting minimum voxels to 250 voxels/equivalent in μm to screen noise. Retain the results window.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Isolate and Identify Sub-sampling Targets",
+      "instruction": "Segment the labeled flocs and identify specific targets for sub-sampling.",
+      "substeps": [
+        {
+          "instruction": "Convert the labeled image stack to 8-bit (Image > Type > 8-bit) and run simple segmentation (Plugins > 3D > 3D Simple Segmentation).",
+          "title": ""
+        },
+        {
+          "instruction": "Set the scale (Analyze > Set Scale) and open the 3D manager (Plugins > 3D > 3D Manager).",
+          "title": ""
+        },
+        {
+          "instruction": "Click 'add image' to load each labeled floc as a separate image. In 3D Manager Options, tick 'Feret (unit)', 'Volume (unit)', and 'Centroid (unit)', then click 'Measure (3D)'.",
+          "title": ""
+        },
+        {
+          "instruction": "Combine the Particle Analyser and 3D manager results in spreadsheet software (e.g., MS Excel), ordering by the volume column and matching data by centroid values to select flocs for sub-sampling.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Crop Individual Flocs",
+      "instruction": "Extract individual flocs from the labeled stack into separate files.",
+      "substeps": [
+        {
+          "instruction": "Reopen the labeled floc stack from step 10, scroll to the end, and open thresholding (Image > Adjust > Threshold).",
+          "title": ""
+        },
+        {
+          "instruction": "Enter the specific floc ID number in both value boxes, click 'set', then 'apply' to isolate the selected floc.",
+          "title": ""
+        },
+        {
+          "instruction": "Use the Crop 3D plugin (Plugins > Stacks > Crop 3D) to narrow the selection to the floc material plus a small surrounding empty region using x, y, and z plane tools. Save the image stack.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Segment Porosity in Individual Flocs",
+      "instruction": "Using ImageJ v1.52, segment the floc into solid material, total pore space, effective pore space, and isolated pore space.",
+      "substeps": [
+        {
+          "instruction": "Open the binary volume of the floc (File > Import > Image Sequence).",
+          "title": ""
+        },
+        {
+          "instruction": "Apply a closing ball filter (Plugins > MorphoLibJ > Morphological Filters (3D)) with operation 'closing', element shape 'ball', and x/y/z radius of 4/4/4 (~10 μm). Save the output.",
+          "title": ""
+        },
+        {
+          "instruction": "Open the original cropped floc (File > Import > Image Sequence) and use Process > Image Calculator to subtract the binary stack from the closing ball output (Image1 = closing ball result, Image2 = binary stack). Save this as the total pore space.",
+          "title": ""
+        },
+        {
+          "instruction": "Open the cropped floc again, select Process > Binary > Fill Holes, save, and reopen. Invert the LUT (Image > Lookup Tables > Invert LUT) and save as an inverted fill holes stack.",
+          "title": ""
+        },
+        {
+          "instruction": "Merge the total pore space stack (C1) and the inverted fill holes stack (C2) using Image > Colour > Merge Channels (untick 'create composite', tick 'keep source images' and 'ignore source LUTs'). Convert the result to 8-bit (Image > Type > 8-bit).",
+          "title": ""
+        },
+        {
+          "instruction": "Use Process > Image Calculator to subtract the merged output (Image2) from the closing ball output (Image1). Save the resulting output containing the 4 phases: solid floc material, total pore space, effective pore space, and isolated pore space.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Quantify Bulk Porosity",
+      "instruction": "Calculate the volume fractions of the different floc phases.",
+      "substeps": [
+        {
+          "instruction": "Open the closing ball output (stage 17) and the 4-phase segmented output (stage 23).",
+          "title": ""
+        },
+        {
+          "instruction": "Use Plugins > BoneJ > Fraction > Volume Fraction to calculate the volume in μm[3] for: overall floc space, isolated pores, effective pores, and solid floc.",
+          "title": ""
+        },
+        {
+          "instruction": "Transfer results to a spreadsheet to calculate percentages (total, effective, and isolated porosity) as fractions of the total floc space.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Quantify Pore Space Morphology",
+      "instruction": "Analyze the diameter, shape, tortuosity, and connectivity of the pore volumes.",
+      "substeps": [
+        {
+          "instruction": "For each segmented volume (total, effective, and isolated pores), open the image stack and run Plugins > BoneJ > Analyze > Particle Analyser, ticking 'Thickness', 'Ellipsoids', and 'Enclosed Volume' to obtain pore diameter, shape, and volume.",
+          "title": ""
+        },
+        {
+          "instruction": "Open the volume again and run Plugins > Skeleton > Skeletonize (2D/3D). Save the skeletonized stack.",
+          "title": ""
+        },
+        {
+          "instruction": "Run Analyze > Skeleton > Analyze Skeleton (2D/3D) on the skeletonized stack, selecting 'lowest intensity voxel' for Prune cycle method and ticking 'prune ends' and 'show detailed info'.",
+          "title": ""
+        },
+        {
+          "instruction": "Use the resulting Euclidean and total running distances to calculate tortuosity, and the number of junctions/nodes and branches to calculate connectivity.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 65,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

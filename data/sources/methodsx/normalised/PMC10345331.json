@@ -18,9 +18,257 @@
     "road fuel combustion"
   ],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "Step 1: Input raw data",
+    "represents CO2 emissions (the dependant variable), and X2(0),…,XN(",
+    "should be highly correlated to X2(0),…,XN(0).",
+    "Step 2: Generate accumulated data with 1-AGO",
+    "Step 3: Design mean sequences",
+    "Step 4: Establish grey's differential equation",
+    "Step 5: Solve the system's differential equation",
+    "Step 1: Obtain the approximation and detail coefficients.",
+    "Step 1: Determine the\nξ\n-order accumulation",
+    "Step 2: Establish grey's differential equation",
+    "Step 3: Solve the system's differential equation",
+    "We know that,∫k−1kxi(ξ)(t)dt=zi(ξ)(k);k=2,3,...,nand from Eq. (13)∫k−1kdx1(ξ)(t)=x1(ξ)(k)−x1(ξ)(k−1)=(kξ−(k−1)ξ)x1(0)(k);k=2,3,...,n",
+    "Therefore, Eq. (15) is as follows:(16)−α1z1(ξ)(k)+∑i=2Nαizi(ξ)(k)+αN+1=(kξ−(k−1)ξ)x1(0)(k);k=2,3,...,n",
+    "Step 4: Generate forecast values",
+    "using mdwtdec function of MATLAB",
+    "Obtain the denoised data XD(",
+    "using mswden function of MATLAB/* Data filtration",
+    "of the population",
+    "Construct the population P={p1,p2,…,pnp}",
+    "Initialize the global population Q=P",
+    "WhileMAPEbest>MAPEmin",
+    "Ifrand < 0.5 then Q=P",
+    "Forcur = 1 to np",
+    "Ifrand < 0.5 then /* Local exploitation phase",
+    "Generate new individual p′cur using Eq. (A3)",
+    "Else/* Global exploration phase",
+    "Generate new individual p′cur using Eq. (A4)",
+    "Change p′cur to satisfy Eq. (24.2)",
+    "IfMAPE′cur<MAPEcur then pcur=p′cur",
+    "Ifiter≥Itermax then break while loop"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Select variables and collect data",
+      "instruction": "Gather annual data for CO₂ emissions, urban population (UP), GDP, road fuel consumption (RFC), fuel prices (PR) and vehicle fleet (VF) for Cameroon covering 1995‑2020; perform Pearson correlation analysis confirming high significance (CO₂‑GDP = 0.99, CO₂‑UP = 0.82, CO₂‑RFC = 0.94, CO₂‑PR = 0.90, CO₂‑VF = 0.92) at 5 %/1 %/0.1 % levels.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Split data into training and test sets",
+      "instruction": "Divide the dataset into a training set (1995‑2017) and a test set (2018‑2020) ensuring no leakage between the two subsets.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Create filtered and unfiltered copies",
+      "instruction": "Make two copies of the raw data: one will be denoised with wavelet transform, the other will remain unchanged for modelling the WTHGM(1,N) model.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Denoise data with discrete wavelet transform",
+      "instruction": "In MATLAB, apply a 5‑level discrete wavelet transform (DWT) using the sym6 mother wavelet: (1) decompose with `wavedec(f,5,'sym6')`; (2) select soft‑thresholding with the ‘rigrsure’ rule via `wden(f,'rigrsure','s','sln',5,'sym6')`; (3) reconstruct the denoised signal. This follows Eq. (9) and the sure‑shrink soft‑thresholding technique described in the text.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Implement conventional GM(1,N) model",
+      "instruction": "Apply the standard grey‑model steps to the (filtered or unfiltered) data.",
+      "substeps": [
+        {
+          "instruction": "Define observation sequence X(0) = {X₁(0); X₂(0), …, X_N(0)} where X₁(0) is CO₂ and X₂‑X_N are the independent variables; each Xi(0) = {xi(0)(1), …, xi(0)(n)}.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate 1‑AGO accumulated data X(1) where xi(1)(k)=∑_{p=1}^{k} xi(0)(p) for k=1…n.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute mean sequences Z(1) with zi(1)(k)=0.5·[xi(1)(k‑1)+xi(1)(k)] for k=2…n.",
+          "title": ""
+        },
+        {
+          "instruction": "Form matrix B (size (n‑1)×(N+1)) as shown in Eq. (5.1) and vector Y (size (n‑1)×1) as in Eq. (5.2).",
+          "title": ""
+        },
+        {
+          "instruction": "Estimate parameters α = [α₁,α₂,…,α_N,α_{N+1}]ᵀ by least‑squares: α = (BᵀB)⁻¹ Bᵀ Y, provided BᵀB is invertible.",
+          "title": ""
+        },
+        {
+          "instruction": "Set initial condition x̂¹(1)(t=1)=x¹(0)(1)=x₁(0)(1).",
+          "title": ""
+        },
+        {
+          "instruction": "Obtain fitted accumulated values by substituting α into Eq. (4) and (6); recover original‑sequence forecasts using x̂¹(0)(t)=x̂¹(1)(t)‑x̂¹(1)(t‑1) for t=2…n (Eq. 7).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Implement Hausdorff GM(1,N) model",
+      "instruction": "Apply the fractal‑order accumulation and differential equation formulation.",
+      "substeps": [
+        {
+          "instruction": "Choose a fractal order ξ>0. Compute ξ‑order accumulated data Xi(ξ) using Eq. (13): xi(ξ)(1)=xi(0)(1); for k≥2, xi(ξ)(k) = (k^ξ‑(k‑1)^ξ)·xi(0)(k) + xi(ξ)(k‑1).",
+          "title": ""
+        },
+        {
+          "instruction": "Form mean sequences z_i(ξ)(k)=0.5·[xi(ξ)(k‑1)+xi(ξ)(k)] for k=2…n.",
+          "title": ""
+        },
+        {
+          "instruction": "Build matrix B (Eq. 17.3) with rows [‑z₁(ξ)(k)  z₂(ξ)(k) … z_N(ξ)(k) 1] for k=2…n and vector Y (Eq. 17.4) with entries (k^ξ‑(k‑1)^ξ)·x₁(0)(k).",
+          "title": ""
+        },
+        {
+          "instruction": "If det(BᵀB)≠0, compute parameter vector A = [α₁,α₂,…,α_{N+1}]ᵀ via A = (BᵀB)⁻¹ Bᵀ Y (Eq. 17.5).",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate fitted accumulated values using Eq. (18): x̂¹(ξ)(t)=x₁(0)(1)·e^{α₁(1‑t)} + 0.5·∑_{τ=2}^{t}[f(τ)·e^{α₁(τ‑t)} + f(τ‑1)·e^{α₁(τ‑t‑1)}], where f(τ)=α_{N+1}+∑_{i=2}^{N} α_i·xi(ξ)(τ).",
+          "title": ""
+        },
+        {
+          "instruction": "Recover original‑sequence forecasts with Eq. (20): x̂¹(0)(1)=x₁(0)(1); for k≥2, x̂¹(0)(k)=x̂¹(ξ)(k)‑x̂¹(ξ)(k‑1) divided by (k^ξ‑(k‑1)^ξ).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Optimize ξ and ω_i with Rao algorithm",
+      "instruction": "Use the improved Rao meta‑heuristic to minimise MAPE (Eq. 23) and obtain optimal fractal order ξ and weighting coefficients ω_i (i=1…N+1).",
+      "substeps": [
+        {
+          "instruction": "Set algorithm parameters: population size np = 50, maximum iterations Itermax = 105, MAPE target MAPE_min (ε).",
+          "title": ""
+        },
+        {
+          "instruction": "Initialize population P = {p₁,…,p_np} where each individual p = (ξ, ω₁,…,ω_{N+1}) satisfies 0≤ω_i≤1 and ξ>0 (Eq. 24.2). Randomly generate using MATLAB’s `rand`.",
+          "title": ""
+        },
+        {
+          "instruction": "For each individual compute MAPE_cur = (1/n)∑_{k=1}^{n} |e_k|/x₁(0)(k)·100 % where e_k = x₁(0)(k)‑x̂¹(0)(k).",
+          "title": ""
+        },
+        {
+          "instruction": "Identify best (lowest MAPE) and worst (highest MAPE) individuals in P.",
+          "title": ""
+        },
+        {
+          "instruction": "Iterate while best MAPE > MAPE_min and iter ≤ Itermax:",
+          "title": ""
+        },
+        {
+          "instruction": "If rand < 0.5 → local‑exploitation phase:",
+          "title": ""
+        },
+        {
+          "instruction": "Compute local‑best‑mean L̄_BM and local‑worst‑mean L̄_WM using Eqs. (25) and (26) with random vectors r₁,r₂∈[0,1]^{N+2}.",
+          "title": ""
+        },
+        {
+          "instruction": "Select a random other individual p_sel; generate new candidate p′ = p + r₃·(L̄_BM‑L̄_WM) + r₄·[(p_or_p_sel)‑(p_sel_or_p)], Eq. (27), with r₃,r₄∈[0,1]^{N+2}.",
+          "title": ""
+        },
+        {
+          "instruction": "Else → global‑exploration phase:",
+          "title": ""
+        },
+        {
+          "instruction": "Shuffle global population Q (initially Q=P); generate p′ = p + r_n·(q‑p) using Eq. (28) with r_n∼N(0,1).",
+          "title": ""
+        },
+        {
+          "instruction": "Enforce constraints (Eq. 24.2) on p′, recompute MAPE′, and replace p with p′ if MAPE′ < MAPE_cur.",
+          "title": ""
+        },
+        {
+          "instruction": "After all individuals are processed, update best and worst individuals and increment iter.",
+          "title": ""
+        },
+        {
+          "instruction": "Output the best individual p_best = (ξ_opt, ω₁_opt,…,ω_{N+1}_opt).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Record optimum parameters",
+      "instruction": "The optimisation yields the following parameters (Table 3): ξ = 0.148; ω₁ = 0.376; ω₂ = 0.4258 × 10⁻⁴; ω₃ = 0.159 × 10⁻⁴; ω₄ = 0.026; ω₅ = 0.001; ω₆, ω₇ = 0.5 (default for GM(1,N) and WTHGM(1,N) for comparison).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Generate forecasts with OWTHGM(1,N)",
+      "instruction": "Using the filtered data, the Hausdorff accumulation (ξ = 0.148) and the optimal ω_i, compute forecasts for the training period (1995‑2017) and the test period (2018‑2020) via Eq. (20).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Evaluate forecasting performance",
+      "instruction": "Calculate for each model (GM(1,N), WTHGM(1,N), OWTHGM(1,N), MLR) the following metrics: APE = |e_i|/x₁(0)(i) (Eq. 29); MAPE = (1/n)∑ APE·100 % (Eq. 23); RMSE = √[ (1/(h‑1))∑ e_i² ] (Eq. 31); FD = 1‑MAPE (Eq. 30). Use the threshold table (Table 2): MAPE ≤ 0.5 % → Class I (very high), 0.5‑5 % → Class II (good), 5‑10 % → Class III (average), >10 % → Class IV (low).",
+      "substeps": [
+        {
+          "instruction": "Training results (Table 4): OWTHGM(1,N) MAPE = 4.97 %, FD = 0.95, RMSE = 142.67; GM(1,N) MAPE = 3.26 %, FD = 0.97, RMSE = 90.61; WTHGM(1,N) MAPE = 3.43 %, FD = 0.97, RMSE = 96.05; MLR MAPE = 3.65 %, FD = 0.97, RMSE = 102.60.",
+          "title": ""
+        },
+        {
+          "instruction": "Test results (Table 5): OWTHGM(1,N) MAPE = 1.27 %, FD = 0.99, RMSE = 79.99; GM(1,N) MAPE = 4.46 %, FD = 0.95, RMSE = 225.86; WTHGM(1,N) MAPE = 6.62 %, FD = 0.93, RMSE = 301.47; MLR MAPE = 2.45 %, FD = 0.98, RMSE = 136.87.",
+          "title": ""
+        },
+        {
+          "instruction": "Nigeria training (Table 6): OWTHGM(1,N) MAPE = 1.86 %, FD = 0.98, RMSE = 0.99; GM(1,N) MAPE = 4.70 %, FD = 0.95, RMSE = 2.34; WTHGM(1,N) MAPE = 4.23 %, FD = 0.96, RMSE = 2.62; MLR MAPE = 3.59 %, FD = 0.96, RMSE = 1.35.",
+          "title": ""
+        },
+        {
+          "instruction": "Nigeria test (Table 7): OWTHGM(1,N) MAPE = 1.74 %, FD = 0.983, RMSE = 1.89; GM(1,N) MAPE = 2.71 %, FD = 0.973, RMSE = 1.92; WTHGM(1,N) MAPE = 2.35 %, FD = 0.976, RMSE = 1.58; MLR MAPE = 1.95 %, FD = 0.980, RMSE = 1.13.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Project future CO₂ emissions 2021‑2030",
+      "instruction": "Using the OWTHGM(1,N) model with projected independent‑variable values (RFC, PR, GDP, UP, VF) obtained from simple regressions and the National Development Strategy forecasts, predict Cameroon road‑transport CO₂ for 2021‑2030. Results (Table 8) show an increase from 3 779 kt in 2020 to 4 600 kt in 2030 (≈ 120 % rise).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:33:43.056290Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 26,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

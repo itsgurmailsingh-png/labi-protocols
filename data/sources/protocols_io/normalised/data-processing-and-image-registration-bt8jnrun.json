@@ -13,290 +13,181 @@
   "citation": "dx.doi.org/10.17504/protocols.io.bt8jnrun",
   "category": "Imaging & Microscopy",
   "estimated_time_mins": 210,
-  "materials": [],
+  "materials": [
+    "Save the post-AF image.",
+    "Save the transformed and registered post-AF image."
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Extract peak intensity from the calibrated dataset using one of the available options: 1a. Extract ion images based on an untargeted feature list that has not been narrowed down by the previous step. 1b. Extract ion images based on the identified feature list generated using the previous step. Note: In either case, narrow 3-5 m/z bin extraction windows are created for each selected peak and the ion images are generated. The width of the extraction window is important because if it is too wide, several poorly resolved ions can be captured within one ion image.",
+      "title": "Convert Bruker raw files",
+      "instruction": "Convert each Bruker (.d) raw file into a custom binary data format in profile mode at the instrument's native spectral resolution.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Calculate ppm error associated with common lipids, such as [PC(32:0)+H] + and [PC(34:1)+H] + , for mass errors. If mass error is above 3 ppm, re-calibrate.",
+      "title": "Mass alignment and calibration",
+      "instruction": "Align and calibrate the dataset using the Python msalign package (https://github.com/lukasz-migas/msalign). Estimate spectral mis‑alignment per pixel and correct it with PCHIP interpolation or a linear shift. First align spectra based on automatically selected peaks, then recalibrate using at least three well‑characterized lipids:",
+      "substeps": [
+        {
+          "instruction": "Positive‑mode reference m/z: 703.5748, 734.5694, 760.5851, 810.6001",
+          "title": ""
+        },
+        {
+          "instruction": "Negative‑mode reference m/z: 673.4814, 744.5549, 834.5291, 885.5499",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "If LC-MS/MS has been performed, annotate each m/z value against the LC-MS/MS list, otherwise move to 7.1",
+      "title": "Create mean mass spectrum",
+      "instruction": "Generate a mean mass spectrum by averaging the intensity of each mass bin across all pixels in the aligned and calibrated dataset.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Perform peak picking on the mean mass spectrum and use LIPIDMAPS database to annotate each m/z value with the following search criteria: https://www.lipidmaps.org/resources/tools/bulk_structure_searches.php?database=COMP_DB 1a. Positive Mode Adducts: [M+H] + , [M+H-H 2 O] + , [M+Na] + , [M+K] + 1b. Negative Mode Adducts: [M+H] - , [M+Cl] - , [M+HCOO] - , [M+OAc] - 2. Specify Mass Tolerance: 0.005 m/z 3. Specify Chains: Even Chains Only 4. Sort: Delta",
+      "title": "Peak picking and LIPIDMAPS annotation",
+      "instruction": "Perform peak picking on the mean spectrum and annotate each m/z value using the LIPIDMAPS database with the following search criteria:",
+      "substeps": [
+        {
+          "instruction": "Positive‑mode adducts: [M+H]+, [M+H‑H2O]+, [M+Na]+, [M+K]+",
+          "title": ""
+        },
+        {
+          "instruction": "Negative‑mode adducts: [M+H]‑, [M+Cl]‑, [M+HCOO]‑, [M+OAc]‑",
+          "title": ""
+        },
+        {
+          "instruction": "Mass tolerance: 0.005 m/z",
+          "title": ""
+        },
+        {
+          "instruction": "Chains: even‑chain only",
+          "title": ""
+        },
+        {
+          "instruction": "Sort order: Delta",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Calculate ppm error associated with each assignment and remove assignments with errors larger than 5 ppm, although most have errors lower than 3 ppm.",
+      "title": "Calculate ppm errors and filter",
+      "instruction": "Calculate the ppm error for each assignment; discard any assignment with an error > 5 ppm (most assignments are < 3 ppm). Also calculate ppm error for common lipids [PC(32:0)+H]+ and [PC(34:1)+H]+; if the error exceeds 3 ppm, re‑calibrate the entire dataset using additional well‑characterized ions.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Convert Bruker (.d) raw file into a custom binary data format in profile mode at native spectral resolution.",
+      "title": "Optional LC‑MS/MS annotation",
+      "instruction": "If LC‑MS/MS data are available, annotate each m/z value against the LC‑MS/MS list; otherwise proceed to the next step.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Convert Bruker (.d) raw file into custom binary data format in profile mode at native spectral resolution.",
+      "title": "Extract ion images",
+      "instruction": "Extract peak intensities from the calibrated dataset using one of the following options:",
+      "substeps": [
+        {
+          "instruction": "1. Use an untargeted feature list that has not been narrowed down previously.",
+          "title": ""
+        },
+        {
+          "instruction": "2. Use the identified feature list generated in the previous step.",
+          "title": ""
+        },
+        {
+          "instruction": "In either case, create narrow 3‑5 m/z extraction windows for each selected peak; the window width must be kept small to avoid mixing poorly resolved ions.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Perform mass alignment and calibration of the dataset.",
+      "title": "TIC‑based normalization",
+      "instruction": "Compute total ion current (TIC)‑based normalization factors for each pixel after alignment and calibration.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Spectral misalignment is estimated for each pixel and corrected using PCHIP interpolation or linear shift. Alignment is carried out using a Python msalign package (https://github.com/lukasz-migas/msalign). All spectra are first aligned based on automatically selected peaks and then recalibrated using at least three of the following well-characterized lipids: 1. Positive mode: m/z 703.5748, 734.5694, 760.5851, 810.6001. 2. Negative mode: m/z 673.4814, 744.5549, 834.5291, 885.5499.",
+      "title": "Export intensities to CSV",
+      "instruction": "Export the extracted peak intensities to a columnar CSV file. Concatenate the x‑ and y‑coordinates from the registration step with the selected ions in the format: x, y, m/z₁, m/z₂, …, m/z_N.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Create a mean mass spectrum by taking the mean of each mass bin in the dataset.",
+      "title": "Convert CSV to imzML",
+      "instruction": "Read the CSV table into Python and export the peak intensities to an imzML file using the pyimzML library (https://github.com/lukasz-migas/pyimzML).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "Compute total ion current (TIC)-based normalization factors for each pixel after alignment and calibration.",
+      "title": "Generate IMS pixel map",
+      "instruction": "Create a MALDI imaging mass‑spectrometry pixel map using regToolboxMSRC (https://github.com/nhpatterson/regtoolboxmsrc).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
-      "instruction": "Export the extracted peak intensities to a columnar CSV file by concatenating the x and y-coordinates from the registration step with the preselected ions in the form: x, y, m/z 1, m/z 2 … m/z N.",
+      "title": "Select laser marks in FIJI",
+      "instruction": "In FIJI/ImageJ (https://fiji.sc), select the laser‑ablation marks in the post‑acquisition autofluorescence (post‑AF) image and the corresponding IMS pixels in the IMS pixel map.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
-      "instruction": "Read-in the table into Python and export the peak intensities to an imzML file using the Python pyimzML library (https://github.com/lukasz-migas/pyimzML).",
+      "title": "Compute affine transformation",
+      "instruction": "Run the “Landmark Correspondences” FIJI plugin to compute an affine transformation: set the post‑AF image as the source and the IMS pixel map as the template, then resample the post‑AF image to the IMS grid.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
-      "instruction": "Generate a MALDI imaging mass spectrometry (IMS) pixel map using regToolboxMSRC https://github.com/nhpatterson/regtoolboxmsrc",
+      "title": "Register other microscopy modalities",
+      "instruction": "Use wsireg (https://github.com/nhpatterson/wsireg) to align additional microscopy images (e.g., CODEX multiplexed IF, pre‑IMS AF, PAS) to the saved post‑AF image. wsireg will generate pyramidal OME‑TIFF files for each registered image.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
-      "instruction": "Using FIJI ImageJ, select corresponding laser ablation marks and IMS pixels in the post-acquisition autofluorescence (post-AF) and IMS pixel map, respectively. https://fiji.sc",
+      "title": "Finalize image overlay",
+      "instruction": "Confirm that all images are sampled in the same coordinate system as the IMS pixel map; overlay the IMS data onto microscopy images by scaling the IMS data to match the microscopy resolution.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 15,
-      "title": "",
-      "instruction": "Use a &#34;Landmark Correspondences&#34; FIJI plugin to find an affine transformation between the two images, resampling the post-AF image to the IMS pixel map by selecting post-AF image as source image, and IMS pixel map as the template image within the plugin.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 16,
-      "title": "",
-      "instruction": "Save the post-AF image.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 17,
-      "title": "",
-      "instruction": "Using wsireg (https://github.com/nhpatterson/wsireg) to align other microscopy modalities, such as CODEX multiplexed IF, preIMS AF, PAS or any other associated microscopy image, to the newly saved post-AF image. wsireg will generate pyramidal OME-TIFF images for all images after registration.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 18,
-      "title": "",
-      "instruction": "When complete, all images will be sampled in the same coordinates as the IMS pixel map and IMS can be overlaid onto microscopy by scaling the IMS data to the same resolution as the microscopy data.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 19,
-      "title": "",
-      "instruction": "Perform mass alignment and calibration of the dataset. Spectral misalignment is estimated for each pixel and corrected using PCHIP interpolation or linear shift. Alignment is carried out using a Python msalign package (https://github.com/lukasz-migas/msalign). All spectra are first aligned based on automatically selected peaks and then recalibrated using at least three of the following well-characterized lipids: 1. Positive mode: m/z 703.5748, 734.5694, 760.5851, 810.6001. 2. Negative mode: m/z 673.4814, 744.5549, 834.5291, 885.5499.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 20,
-      "title": "",
-      "instruction": "Create a mean mass spectrum by taking the mean of each mass bin in the dataset.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 21,
-      "title": "",
-      "instruction": "Calculate ppm error associated with common lipids, such as [PC(32:0)+H]+ and [PC(34:1)+H]+. If mass error is above 3 ppm, re-calibrate the entire dataset with additional well-characterized ions.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 22,
-      "title": "",
-      "instruction": "Compute total ion current (TIC)-based normalization factors for each pixel after alignment and calibration has been performed.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 23,
-      "title": "",
-      "instruction": "If LC-MS/MS has been performed, annotate each m/z value against the LC-MS/MS list, otherwise move to 6.1",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 24,
-      "title": "",
-      "instruction": "Use LIPIDMAPS database to annotate each m/z value with the following search criteria: https://www.lipidmaps.org/resources/tools/bulk_structure_searches.php?database=COMP_DB 1a. Positive Mode Adducts: [M+H]+, [M+H-H2O]+, [M+Na]+, [M+K]+ 1b. Negative Mode Adducts: [M+H]-, [M+Cl]-, [M+HCOO]-, [M+OAc]- 2. Specify Mass Tolerance: 0.005 m/z 3. Specify Chains: Even Chains Only 4. Sort: Delta",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 25,
-      "title": "",
-      "instruction": "Calculate the ppm error associated with each assignment and remove assignments with errors larger than 5 ppm, although most have errors lower than 3 ppm.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 26,
-      "title": "",
-      "instruction": "Extract peak intensity from the calibrated dataset using one of the available options: 1. Extract ion images based on an untargeted feature list that has not been narrowed down by the previous step. 2. Extract ion images based on the identified feature list generated using the previous step. Note: In either case, narrow 3-5 m/z bin extraction windows are created for each selected peak and the ion images are generated. The width of the extraction window is important because if it is too wide, several poorly resolved ions can be captured within one ion image.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 27,
-      "title": "",
-      "instruction": "Export the extracted peak intensities to a columnar CSV file by concatenating the x and y-coordinates from the registration step with the preselected ions in the form: x, y, m/z 1, m/z 2 … m/z N.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 28,
-      "title": "",
-      "instruction": "Read-in the table into Python and export the peak intensities to an imzML file using the Python pyimzML library (https://github.com/lukasz-migas/pyimzML).",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 29,
-      "title": "",
-      "instruction": "Generate a MALDI imaging mass spectrometry pixel map using regToolboxMSRC (https://github.com/nhpatterson/regtoolboxmsrc).",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 30,
-      "title": "",
-      "instruction": "Using FIJI ImageJ, select corresponding laser ablation marks and IMS pixels in the post-acquisition autofluorescence image map and IMS pixel map, respectively.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 31,
-      "title": "",
-      "instruction": "Use a &#34;Landmark Correspondences&#34; FIJI plugin to find an affine transformation between the two images, resampling the post-AF image to the IMS pixel map by selecting post-AF image as source image, and IMS pixel map as the template image within the plugin.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 32,
-      "title": "",
-      "instruction": "Save the transformed and registered post-AF image.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 33,
-      "title": "",
-      "instruction": "Using wsireg (https://github.com/nhpatterson/wsireg) to align other microscopy modalities, such as CODEX multiplexed IF, preIMS AF, PAS or any other associated microscopy image, to the newly saved post-AF image. wsireg will generate pyramidal OME-TIFF images for all images after registration.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 34,
-      "title": "",
-      "instruction": "When complete, all images will be sampled in the same coordinates as the IMS pixel map and IMS can be overlaid onto microscopy by scaling the IMS data to the same resolution as the microscopy data.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T14:13:03.955402Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 57,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

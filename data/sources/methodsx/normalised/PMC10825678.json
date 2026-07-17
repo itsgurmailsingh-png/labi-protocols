@@ -11,7 +11,7 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10825678/",
   "doi": "10.1016/j.mex.2024.102555",
   "citation": "10.1016/j.mex.2024.102555",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [
     "deep learning",
     "bearing machinery",
@@ -22,14 +22,176 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "In building a deep learning model for Remaining Useful Life (RUL) estimation, a significant challenge lies in determining the accurate reference truth RUL for the gathered data. As the machine approaches failure, RUL diminishes linearly [1]. However, estimating RUL beforehand is not straightforward. Many studies establish a maximum RUL threshold and assume a continuous RUL progression thereafter. Determining the optimal RUL is arbitrary, as various systems have different optimum values [2]. There is limited research on identifying anomalies and anticipating RUL from the time the abnormality arises. RUL calculations have dominated pertinent PHM research throughout the wear-out stage [3]. The detection of machinery degradation is not mentioned in most of the procedures. It's difficult to estimate the RUL while the machinery is in good shape, thus detecting the first signs of wear is a useful technique to undertake defect predicting. To have strong RUL estimations, most of these algorithms require a large quantity of data to comprehend prior examples [4]. As a result, these methodologies can only be employed to a limited extent when there isn't enough data. The crux of this research lies in devising an integrated framework termed as Anomaly-Informed Remaining Useful Life Estimation (AIRULE) ' grounded in deep learning. This system not only informs the inception of anomalies but also forecasts the remaining operational life of the machinery. To discern the most influential features, feature ranking and selection techniques are implemented [5]. Unsupervised clustering algorithms are employed for anomaly trend analysis, while supervised deep learning methods are harnessed for pinpointing anomaly information and estimating RUL. The RUL regressors are exclusively trained and fine-tuned on the clipped dataset following the anomaly's start, rather than the entire dataset [6]. Fig. 1 illustrates the methodology of the Anomaly-Informed Remaining Useful Life Estimation (AIRULE) framework. The framework can be divided in five stages as follows: (i) Dataset gathering (ii) Feature extraction and selection (iii) Clustering for pattern mining (iv) Anomaly inception detection and (v) RUL prediction.Fig. 1Anomaly-informed remaining useful life estimation (AIRULE) method.Fig 1",
-      "substeps": [],
+      "title": "Gather bearing vibration dataset",
+      "instruction": "Set up the experimental bearing test rig using 25 mm journal bearings, mount two accelerometer sensors (X and Y) on the bearing housing, run the motor at 1200 rpm and record baseline vibration at a sampling frequency of 1 kHz. Introduce a radial load of 100 N to create an artificial fault and operate the bearing continuously for 11 h (≈ 39 600 s) until failure, logging all vibration data with timestamps via a DAQ LabView interface.",
+      "substeps": [
+        {
+          "instruction": "Install 25 mm journal bearings in the test rig.",
+          "title": ""
+        },
+        {
+          "instruction": "Mount two accelerometer sensors on the bearing housing (channels X and Y).",
+          "title": ""
+        },
+        {
+          "instruction": "Set motor speed to 1200 rpm.",
+          "title": ""
+        },
+        {
+          "instruction": "Record normal vibration at 1 kHz sampling frequency.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply a radial load of 100 N to induce a fault.",
+          "title": ""
+        },
+        {
+          "instruction": "Run the bearing continuously for 11 h (≈ 39 600 s) until failure.",
+          "title": ""
+        },
+        {
+          "instruction": "Log vibration values from both accelerometers with timestamps using the DAQ LabView interface.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Extract and select vibration features",
+      "instruction": "From the raw vibration signals of both accelerometers, compute approximately 20 time‑domain features and 14 frequency‑domain features per sensor, yielding a total of 64 features. Apply the Low‑Variance filter, Spearman Correlation Coefficient, and Random Forest regressor to rank and select the most informative features for downstream analysis.",
+      "substeps": [
+        {
+          "instruction": "Compute ~20 time‑domain features for each sensor (X and Y).",
+          "title": ""
+        },
+        {
+          "instruction": "Compute 14 frequency‑domain features for each sensor (X and Y).",
+          "title": ""
+        },
+        {
+          "instruction": "Combine all features to obtain 64 descriptors per sample.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply a Low‑Variance filter to remove near‑constant features.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate Spearman correlation coefficients and discard highly correlated features.",
+          "title": ""
+        },
+        {
+          "instruction": "Train a Random Forest regressor to rank feature importance and retain the top‑ranked features.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Cluster features for pattern mining",
+      "instruction": "Perform K‑Means clustering on the selected feature set to separate normal and abnormal operating patterns, and evaluate cluster quality using the Silhouette Coefficient.",
+      "substeps": [
+        {
+          "instruction": "Run K‑Means clustering on the selected features.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute the Silhouette Coefficient to assess clustering quality.",
+          "title": ""
+        },
+        {
+          "instruction": "Label resulting clusters as normal or anomalous.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Detect anomaly onset with AE‑LSTM",
+      "instruction": "Train a hybrid Autoencoder‑Long Short‑Term Memory (AE‑LSTM) model on feature vectors from both normal and abnormal clusters using a sliding n‑timestep window. For each window, encode the data, decode it, and calculate the mean absolute error (MAE) reconstruction loss. Determine an anomaly‑detection threshold from the loss distribution; timestamps where the loss exceeds this threshold mark the start of an anomaly.",
+      "substeps": [
+        {
+          "instruction": "Prepare feature vectors from the clustered data.",
+          "title": ""
+        },
+        {
+          "instruction": "Define a sliding window of n timesteps over the sample space.",
+          "title": ""
+        },
+        {
+          "instruction": "Train the AE‑LSTM model on both typical and aberrant windows.",
+          "title": ""
+        },
+        {
+          "instruction": "For each window, compute the reconstruction loss (MAE).",
+          "title": ""
+        },
+        {
+          "instruction": "Derive a threshold from the reconstruction‑loss probability distribution.",
+          "title": ""
+        },
+        {
+          "instruction": "Identify the first timestamp where loss > threshold as the anomaly onset.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Predict RUL using LSTM variants",
+      "instruction": "Clip the dataset from the detected anomaly onset onward and segment the time‑series into fixed‑size windows (window‑size). Label each segment with a linearly decreasing RUL value. Train multiple LSTM‑based regressors (Vanilla LSTM, Stack LSTM, Bi‑LSTM, CNN‑1D LSTM, CNN‑2D LSTM, AE‑LSTM, Encoder‑Decoder LSTM) using the hyperparameters: activation = ReLU, epochs = 50, optimizer = Adam, loss = MSE, step_size = 10, kernel_size = 1, pool_size = 2, number_of_filters = 64. Predict RUL for the test set, evaluate performance with R² accuracy (%) and MSE, and note that the Encoder‑Decoder LSTM achieved the highest R² (90.64 %) and lowest MSE (0.00624).",
+      "substeps": [
+        {
+          "instruction": "Clip the dataset to start at the anomaly onset timestamp.",
+          "title": ""
+        },
+        {
+          "instruction": "Divide the continuous data into fixed‑size windows (window‑size).",
+          "title": ""
+        },
+        {
+          "instruction": "Assign each window a linearly decreasing RUL label.",
+          "title": ""
+        },
+        {
+          "instruction": "Configure model hyperparameters: ReLU activation, 50 epochs, Adam optimizer, MSE loss, step_size 10, kernel_size 1, pool_size 2, 64 filters.",
+          "title": ""
+        },
+        {
+          "instruction": "Train each LSTM variant on the windowed data.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate RUL predictions for the test set.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate R² accuracy (%) and MSE for each model.",
+          "title": ""
+        },
+        {
+          "instruction": "Report that Encoder‑Decoder LSTM achieved R² = 90.64 % and MSE = 0.00624, outperforming other variants.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:52:31.310415Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "In building a deep learning model for Remaining Useful Life (RUL) estimation, a significant challenge lies in determining the accurate reference truth RUL for the gathered data. As the machine approaches failure, RUL diminishes linearly [1]. However, estimating RUL beforehand is not straightforward. Many studies establish a maximum RUL threshold and assume a continuous RUL progression thereafter. Determining the optimal RUL is arbitrary, as various systems have different optimum values [2]. There is limited research on identifying anomalies and anticipating RUL from the time the abnormality arises. RUL calculations have dominated pertinent PHM research throughout the wear-out stage [3]. The detection of machinery degradation is not mentioned in most of the procedures. It's difficult to estimate the RUL while the machinery is in good shape, thus detecting the first signs of wear is a useful technique to undertake defect predicting. To have strong RUL estimations, most of these algorithms require a large quantity of data to comprehend prior examples [4]. As a result, these methodologies can only be employed to a limited extent when there isn't enough data. The crux of this research lies in devising an integrated framework termed as Anomaly-Informed Remaining Useful Life Estimation (AIRULE) ' grounded in deep learning. This system not only informs the inception of anomalies but also forecasts the remaining operational life of the machinery. To discern the most influential features, feature ranking and selection techniques are implemented [5]. Unsupervised clustering algorithms are employed for anomaly trend analysis, while supervised deep learning methods are harnessed for pinpointing anomaly information and estimating RUL. The RUL regressors are exclusively trained and fine-tuned on the clipped dataset following the anomaly's start, rather than the entire dataset [6]. Fig. 1 illustrates the methodology of the Anomaly-Informed Remaining Useful Life Estimation (AIRULE) ",
+  "content_type": "likely_not_protocol",
+  "content_type_score": 3,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

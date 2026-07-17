@@ -19,154 +19,338 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 10.0,
-  "category": "Bioinformatics",
-  "estimated_time_mins": 120,
+  "quality_score": 10.5,
+  "category": "Other",
+  "estimated_time_mins": 198,
   "materials": [
-    "three-button mouse"
+    "Sign in to your NMRbox account.",
+    "Execute the script by entering ./copy_csv_sand.sh"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Sign in to NMRbox",
-      "instruction": "Sign in to your NMRbox account.",
+      "title": "Start C-shell Terminal",
+      "instruction": "Open a terminal window, type `csh` and press Enter to start the C-shell.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Open terminal",
-      "instruction": "Open the terminal, type csh, and press Enter.",
+      "title": "Download sand_demo1 Archive",
+      "instruction": "Run the command `wget https://raw.githubusercontent.com/edisonomics/FLAnalyzer/main/sand/sand_demo1.tar` in the terminal to retrieve the sand_demo1 files.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Retrieve sand_demo1 files",
-      "instruction": "Paste the command provided below into the terminal window and press Enter. Retrieve sand_demo1 files wget https://raw.githubusercontent.com/edisonomics/FLAnalyzer/main/sand/sand_demo1.tar",
+      "title": "Extract sand_demo1 Archive",
+      "instruction": "Extract `sand_demo1.tar` to your home directory.",
+      "substeps": [
+        {
+          "instruction": "Option 1 (GUI): Open the File Manager, right‑click `sand_demo1.tar` and choose “Extract Here”.",
+          "title": ""
+        },
+        {
+          "instruction": "Option 2 (CLI): Run `tar -xvf sand_demo1.tar` in the terminal.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Extract sand_demo1.tar",
-      "instruction": "Open the File Manager and extract sand_demo1.tar to the home directory by right-clicking on sand_demo1.tar and selecting \"Extract Here.\"",
+      "title": "Copy .com Files to Data Directory",
+      "instruction": "Navigate into the extracted `sand_demo1` folder and copy each “.com” file into the directory that holds your unprocessed NMR data.",
+      "substeps": [
+        {
+          "instruction": "GUI method: drag the files.",
+          "title": ""
+        },
+        {
+          "instruction": "CLI method: `cp ./sand_demo1/*.com /path/to/unprocessed_data/`.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Copy .com files",
-      "instruction": "Navigate to the extracted sand_demo1 directory, then copy and paste each \".com\" file into the directory that contains your unprocessed data.",
+      "title": "Place and Edit meta.tab",
+      "instruction": "Create a copy of `meta.tab` in the same directory as the unprocessed data, then edit it:",
+      "substeps": [
+        {
+          "instruction": "Change the second column (DIR_NAME) to match the spectrum directories you will process.",
+          "title": ""
+        },
+        {
+          "instruction": "Change the third column (TITLE) to a descriptive name without spaces.",
+          "title": ""
+        },
+        {
+          "instruction": "Delete any rows that correspond to folders you do not want to process.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Copy meta.tab",
-      "instruction": "Create a copy of meta.tab and place it into the directory containing your unprocessed data.",
+      "title": "Run Batch Processing with all.com",
+      "instruction": "Open a new terminal, `cd` to the directory containing the unprocessed data, the “.com” files, and `meta.tab`, then execute `./all.com`.",
+      "substeps": [
+        {
+          "instruction": "Processing finishes when a graphical image of the spectra appears.",
+          "title": ""
+        },
+        {
+          "instruction": "The processed files are placed in a newly created folder named `interp`.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Update meta.tab",
-      "instruction": "Update meta.tab to match the data within your unprocessed directory. Specifically, change the \"DIR_NAME\" column (the second column of numbers) to match the directories of the spectra you wish to batch process. You should also change the \"TITLE\" column (the third column) to describe the spectra you are processing, ensuring that there are no spaces in the title name.",
-      "is_critical": true,
+      "title": "View Processed Spectra",
+      "instruction": "To view the spectra at any time, run `specView.tcl -in interp/*.ft1` from the directory that contains both the unprocessed and processed data.",
+      "substeps": [],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Navigate to data directory",
-      "instruction": "Using a new terminal window, navigate (cd) into the directory containing the unprocessed data, \".com\" files, and meta.tab.",
+      "title": "Automate meta.tab Creation (optional)",
+      "instruction": "Use the provided `metaTabCreate.sh` script to generate `meta.tab` automatically.",
+      "substeps": [
+        {
+          "instruction": "Place `metaTabCreate.sh` in the same folder as `meta.tab`.",
+          "title": ""
+        },
+        {
+          "instruction": "Make it executable (right‑click → Properties → Permissions → “Allow this file to run as a program”).",
+          "title": ""
+        },
+        {
+          "instruction": "Run `./metaTabCreate.sh` and supply a title for the dataset (no spaces).",
+          "title": ""
+        },
+        {
+          "instruction": "After creation, verify that `meta.tab` contains rows only for the spectra you intend to process.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Run batch processing",
-      "instruction": "Enter the command ./all.com The data processing is complete once a graphical image of the spectra appears on the screen. The final processed data will be located in the newly created folder named interp.",
+      "title": "Correct Phasing Errors (if needed)",
+      "instruction": "If automatic zero‑order phasing is imperfect, re‑phase the affected spectra:",
+      "substeps": [
+        {
+          "instruction": "Visualize the spectra and identify those with bad phase.",
+          "title": ""
+        },
+        {
+          "instruction": "In `meta.tab`, change the “P0” (and “P1” if needed) values for those spectra from `Auto` to `0.0`.",
+          "title": ""
+        },
+        {
+          "instruction": "Re‑run the batch processing with `./all.com`.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "View processed spectra",
-      "instruction": "To view the spectra at any time after processing, open a terminal, navigate to the directory containing the unprocessed and processed data, and enter the command specView.tcl -in interp/*.ft1",
+      "title": "Open Spectra in nmrDraw",
+      "instruction": "After processing, open a new terminal, `cd` to the `interp` folder, and run `nmrDraw` (best used with a three‑button mouse).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "Automate meta.tab creation",
-      "instruction": "Modifying meta.tab by hand is cumbersome, but you can use the script below to automate the process. metaTabCreate.sh 1. Place the metaTabCreate.sh script in the same directory as the meta.tab file you just moved. 2. Ensure the file is executable by right-clicking on metaTabCreate.sh, choosing \"Properties\", selecting \"Permissions,\" and checking \"Allow this file to run as a program\". 3. Using a terminal, navigate (cd) to the directory containing the files and enter the command ./metaTabCreate.sh 4. Provide a title for the dataset, ensuring you do not use spaces in the name.",
-      "is_critical": true,
+      "title": "Manually Adjust Phase and Update meta.tab",
+      "instruction": "Within nmrDraw, manually phase spectra and record the new phase values:",
+      "substeps": [
+        {
+          "instruction": "Select a spectrum: File → Select File.",
+          "title": ""
+        },
+        {
+          "instruction": "Scroll through spectra with the top sliding bar; double‑click the desired spectrum.",
+          "title": ""
+        },
+        {
+          "instruction": "Adjust zero‑order and first‑order phase using the sliders (drag left‑click).",
+          "title": ""
+        },
+        {
+          "instruction": "When satisfied, note the values shown in the red box.",
+          "title": ""
+        },
+        {
+          "instruction": "Replace the corresponding zero‑order and first‑order values in `meta.tab` for that spectrum.",
+          "title": ""
+        },
+        {
+          "instruction": "Re‑execute `./all.com` to apply the corrected phase.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "Verify meta.tab content",
-      "instruction": "Ensure that the rows in the meta.tab file contain metadata only for the files you intend to process. You should delete any rows corresponding to folders that do not contain data or should not be processed.",
-      "is_critical": true,
+      "title": "Download run_sand and copy_csv_sand Scripts",
+      "instruction": "From the FLAnalyzer GitHub repository (https://github.com/edisonomics/FLAnalyzer/tree/main/sand) download `run_sand` and `copy_csv_sand.sh`.",
+      "substeps": [],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "Troubleshoot phasing",
-      "instruction": "Sometimes, the automatic zero-order phasing does not phase the spectra perfectly. If this is the case, please follow the steps below.",
+      "title": "Prepare Scratch Directory on NMRbox",
+      "instruction": "Place `run_sand` in your NMRbox scratch directory (`/scratch/xxxx/username`). Determine `xxxx` by running `pwd` on NMRbox; the number appears before your username (e.g., `/home/nmrbox/0030/cesselman` → scratch path `/scratch/0030/cesselman`). If no number is present, the path is `/scratch/username`.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "Reprocess with manual phasing",
-      "instruction": "Visualize the spectra to identify which spectra are not phased correctly. Then, reprocess the chosen spectra with 0.0 zero-order phasing and 0.0 first-order phasing by changing the \"P0\" values for those spectra in meta.tab from Auto to 0.0 and then reexecuting ./all.com",
+      "title": "Make run_sand Executable",
+      "instruction": "Make `run_sand` executable using the same method described for `metaTabCreate.sh` (right‑click → Properties → Permissions → allow execution).",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "Open nmrDraw",
-      "instruction": "After processing is complete, open a new terminal, navigate to the interp folder, and enter the command nmrDraw Note that nmrDraw functions best when used with a three-button mouse. Further directions on spectral processing and use of NMRPipe can be found at: https://www.ibbr.umd.edu/nmrpipe/index.html",
+      "title": "Copy interp Folder to Scratch",
+      "instruction": "Copy the `interp` folder created during batch processing into the scratch directory.",
+      "substeps": [
+        {
+          "instruction": "`cp -r /path/to/interp /scratch/xxxx/username/`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "Select spectrum for phasing",
-      "instruction": "Select the spectrum you want to phase by first right-clicking on \"File\" and then left-clicking on \"Select File\".",
+      "title": "Edit run_sand Script Parameters",
+      "instruction": "Open `run_sand` in an editor and modify the indicated lines:",
+      "substeps": [
+        {
+          "instruction": "Line 4: `scratch_directory=\"/scratch/xxxx/username\"`",
+          "title": ""
+        },
+        {
+          "instruction": "Line 5: `interp_directory=\"/scratch/xxxx/username/interp\"`",
+          "title": ""
+        },
+        {
+          "instruction": "Line 8: `local_directory=\"/home/nmrbox/xxxx/username/Documents/\"` (ensure this local folder exists).",
+          "title": ""
+        },
+        {
+          "instruction": "Line 20: Adjust the ppm range to cover your peaks (replace `10ppm` and `-0.5ppm` with appropriate values).",
+          "title": ""
+        },
+        {
+          "instruction": "Save and close the file.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "Scroll and select spectrum",
-      "instruction": "Use the top sliding bar to scroll through the spectra, and double left-click on the specific spectrum you wish to phase.",
+      "title": "Distribute Work Across Multiple VMs",
+      "instruction": "On NMRbox you can run up to three VMs simultaneously; repeat steps 14‑17 on each VM, assigning different subsets of spectra to each (e.g., 1‑48 on VM 1, 49‑96 on VM 2, 97‑140 on VM 3). Delete any spectra in each VM’s `interp` folder that should not be processed by that VM.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "Phase spectra",
-      "instruction": "Use the sliders to phase the spectra by left-clicking and dragging them.",
+      "title": "Execute run_sand on Each VM",
+      "instruction": "On each VM, open a terminal, `cd` to the scratch directory, and run `./run_sand`.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "Record phasing values",
-      "instruction": "After the phasing looks correct, the values shown in the red box below will be the values used to replace the zero-order and first-order phase values for that spectrum in the meta.tab file.",
+      "title": "Assess Individual SAND Results",
+      "instruction": "In the local directory where SAND results are saved, navigate to a specific spectrum folder and run:",
+      "substeps": [
+        {
+          "instruction": "`specView.tcl -in ft/*.ft1 sim/0001.ft1 simAll/1/*.ft1`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "Reexecute after phasing",
-      "instruction": "After you have changed the phasing values in the meta.tab file, reexecute",
+      "title": "Gather All SAND CSV Tables",
+      "instruction": "Download `copy_csv_sand.sh` from the FLAnalyzer GitHub (Step 12) and make it executable.",
+      "substeps": [
+        {
+          "instruction": "Edit the script:",
+          "title": ""
+        },
+        {
+          "instruction": "Line 4: add the absolute path to the directory where CSV files will be copied.",
+          "title": ""
+        },
+        {
+          "instruction": "Line 7: add the absolute path to the destination directory for the SAND output folders (the same path used in line 8 of `run_sand`).",
+          "title": ""
+        },
+        {
+          "instruction": "Run `./copy_csv_sand.sh` to collect all CSV tables into a single directory for use with FLAnalyzer.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Alternative Extraction and Copy Commands",
+      "instruction": "If preferred, extract the demo archive and copy the `.com` files via the command line:",
+      "substeps": [
+        {
+          "instruction": "`tar -xvf sand_demo1.tar`",
+          "title": ""
+        },
+        {
+          "instruction": "`cp ./*.com ~/destination_folder/`",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 40,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

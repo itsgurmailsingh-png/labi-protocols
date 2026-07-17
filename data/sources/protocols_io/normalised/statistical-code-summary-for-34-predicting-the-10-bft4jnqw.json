@@ -18,9 +18,158 @@
     "statistical modeling"
   ],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "replace closestsrv=1 if inseer==1 & firstca==1 & numcabef==0",
+    "sort linkid srvdate srvseq",
+    "*follow up time information",
+    "gen tmfca2ed1=tmfca2ed",
+    "replace tmfca2ed1=. if tmfca2ed>200",
+    "*time between survey and cancer diagnosis",
+    "gen tsrvcadx= tmsv2end - tmfca2ed1",
+    "gen agedx=(age_srv + (tsrvcadx/12))",
+    "replace excludefutime=1 if tmfca2ed1==.",
+    "replace deathcause=0 if codpub == \"000\"",
+    "replace deathcause=2 if codpub == \"054\"",
+    "*generating 10 year outcomes",
+    "gen deathcause10=deathcause",
+    "replace deathcause10=0 if tmfca2ed1>120",
+    "gen tmfca2ed10=tmfca2ed1 if tmfca2ed1<=120",
+    "replace tmfca2ed10=120 if tmfca2ed1>120 & tmfca2ed1!=.",
+    "keep if inseer==1 & firstca==1 & numcabef==0",
+    "replace includeprimary=1 if inseer==1 & firstca==1 & numcabef==0",
+    "sort linkid includeprimary tsrvcadx",
+    "gen surv=1 if includeprimary==1",
+    "gen cumsurv=0 if includeprimary==1",
+    "replace cumsurv=surv if includeprimary==1",
+    "replace cumsurv=surv+cumsurv[_n-1] if linkid==linkid[_n-1] & includeprimary==1",
+    "*making comorbity groups",
+    "destring YRDX1 YRDX2, replace",
+    "replace caoth=1 if YRDX2==YRDX1 | YRDX2==(YRDX1+1) | anycan==1",
+    "replace chcmbcnt=chcmbcnt+1 if ami==1",
+    "replace chcmbcnt=chcmbcnt+1 if chf==1",
+    "replace chcmbcnt=chcmbcnt+1 if stroke==1",
+    "replace chcmbcnt=chcmbcnt+1 if COPD_E==1"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Select Patient Surveys",
+      "instruction": "Filter the dataset according to SEER-MHOS recommendations using the following criteria: inseer==1, firstca==1, numcabef==0, tsrvcadx < 36, agedx <= 80, and TYPEFU1 != \"1\".",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Define Localized Prostate Cancer",
+      "instruction": "Create a binary variable 'localpca' and set it to 1 if the following conditions are met: DAJCCT1 is not in {32, 33, 39, 40, 41, 42, 43, 44, 49, 88, 99}; SSS77V1 is not in {7, 9}; SSSM2Z1 is not in {2, 3, 4, 5, 7, 8, 9}; AJ3SR1 is not in {30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49}; and DAJCCN1 is not in {10, 99}.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Exclude Staging and Follow-up Data",
+      "instruction": "Filter the dataset further to exclude specific staging and missing follow-up time.",
+      "substeps": [
+        {
+          "instruction": "Set excludestaging=1 if (SSS77V1==\"8\" and AJ3SR1==\"88\") or (SSS77V1==\"8\" and AJ3SR1==\"90\") or (SSS77V1==\"8\" and AJ3SR1==\"99\").",
+          "title": ""
+        },
+        {
+          "instruction": "Filter for records where localpca==1, excludestaging==0, and excludefutime==0.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Clean Comorbidity Data",
+      "instruction": "Set chcmbcnt to missing (.) if all the following variables are missing or specific: ami, chf, stroke, COPD_E, GI_ETC, caoth, parlys are missing, and diabet==2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Generate Bootstrap Samples",
+      "instruction": "Load the model build version dataset from \"R:\\Frendl Files\\SEER-MHOS Data\\Model Build Version March 13\" and perform 100 iterations of bootstrap sample generation to assess c-index overestimation.",
+      "substeps": [
+        {
+          "instruction": "Calculate bhatbs using the linear combination of agedx, chcmbcnt, smk, umarried, genhthf, and genhthp (coefficients vary per iteration; e.g., Iteration 1: 0.05889607*agedx + 0.249165232*chcmbcnt + 0.522225992*smk + 0.253117025*umarried + 0.518689621*genhthf + 1.149656419*genhthp).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Perform Competing Risk Regression",
+      "instruction": "Execute a series of competing risk regressions (stcrreg) with deathcause10==2 as the competing risk to identify significant predictors of 10-year mortality.",
+      "substeps": [
+        {
+          "instruction": "Test models with varying combinations of agedx, chcmbcnt, smk, PCS12, MCS12, married, genhealth, and race variables (racenhb, raceasian, racehisp, raceothmultai).",
+          "title": ""
+        },
+        {
+          "instruction": "Evaluate the impact of homeowner (hmowner) and education level (edlev, where edlev=0 if educ is 3, 4, 5, or 6).",
+          "title": ""
+        },
+        {
+          "instruction": "Test specific health groups: genhthvg, genhthg, genhthf, and genhthp.",
+          "title": ""
+        },
+        {
+          "instruction": "Test comorbidities: ami, chf, stroke, COPD_E, diabet, GI_ETC, caoth, and parlys.",
+          "title": ""
+        },
+        {
+          "instruction": "Test interaction terms: agecmbint and agegenhthint.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Generate Final Model Outputs",
+      "instruction": "Produce the final risk curves and summary tables.",
+      "substeps": [
+        {
+          "instruction": "Generate a cumulative incidence function (CIF) curve using stcurve for the baseline trial build check (agedx=0, chcmbcnt=0, smk=0, married=0, genhealth=0).",
+          "title": ""
+        },
+        {
+          "instruction": "Create a summary table for frenre_qint containing the mean, min, max of frenre and the mean of deathcause10r.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-18T21:59:22.323817Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 0,
+  "exclude_low_confidence": false,
+  "docs_checked": true,
+  "media": [
+    {
+      "type": "document",
+      "filename": "Code_Summary_File.docx",
+      "local_path": "data/media/protocols_io_docs/statistical-code-summary-for-34-predicting-the-10-bft4jnqw/Code_Summary_File.docx",
+      "source_url": "https://content.protocols.io/public/9729ef1a689628ce4971cdbbc2411095a021fe4962900943543ac1eb0b3b0800/b7fibc9xp.docx",
+      "caption": "",
+      "bytes": 47736,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io_docs/statistical-code-summary-for-34-predicting-the-10-bft4jnqw/Code_Summary_File.docx"
+    }
+  ],
+  "description": "*****PLOS One Publication Code Edited STATA Brief Summary File***** ***** Code for background work to assess potential variables for model build.",
+  "_whole_protocol_attempted": true
 }

@@ -19,243 +19,273 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 16.5,
+  "quality_score": 7.0,
   "category": "Bioinformatics",
   "estimated_time_mins": 198,
-  "materials": [],
+  "materials": [
+    "Change directories to the containers. cd /rsgrps/hutchinsone/Singularity_Containers",
+    "Type: singularity run nklab-neurotools-v0.4.sif itksnap",
+    "Type: ReorientImage -i directory_name_DTI/file_name_blip_down.list -r RPS",
+    "Type: ExtractImage -i directory_name_DTI/file_name_blip_down_reoriented.nii"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "DIFFPREP is a distortion and motion correction module in TORTOISE. When processing MR images you will commonly start with DIFFPREP for corrections.",
+      "title": "Create processing directory and copy data",
+      "instruction": "In a terminal, make a new working directory for the DTI data and copy the raw Bruker files into it so that only the copied data will be processed.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Build your directory in the terminal, and make sure to use copied raw data for processing",
+      "title": "Navigate to data directory",
+      "instruction": "Change to the newly created directory that contains the copied raw data.",
+      "substeps": [
+        {
+          "instruction": "cd /path/to/your/new_directory",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "In the terminal go to your new directory with the data",
+      "title": "Import Bruker blip‑up and blip‑down",
+      "instruction": "Use the ImportBruker command to import the forward (blip‑up) and reverse (blip‑down) phase‑encoding scans.",
+      "substeps": [
+        {
+          "instruction": "ImportBruker -i directory/file_name_blip_up -c 1",
+          "title": ""
+        },
+        {
+          "instruction": "ImportBruker -i directory/file_name_blip_down -c 1",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Type the following command in your terminal to read information and options available: ImportBruker Type the following command to import your blip_up and blip_down data: ImportBruker -i directory/file_name_blip_up -c 1ImportBruker -i directory/file_name_blip_down -c 1",
+      "title": "Load singularity neurotools container",
+      "instruction": "Load the singularity module and start the neurotools container that provides TORTOISE and related utilities.",
+      "substeps": [
+        {
+          "instruction": "module load singularity",
+          "title": ""
+        },
+        {
+          "instruction": "singularity run nklab-neurotools-v0.4.sif",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Blip up is the forward phase encoding of a scan while blip down is the same exact scan but with reversed phase encoding. You may not always will have both blip up and blip down, but for the purpose of this protocol both will be shown.",
+      "title": "Inspect image orientation",
+      "instruction": "Open the imported DTI NIFTI file in ITKSNAP (or MIPAV / MRtrix mrview) and note the image orientation; the raw blip‑down image should be in RPS but you will need LPS for later steps.",
+      "substeps": [
+        {
+          "instruction": "Start ITKSNAP",
+          "title": ""
+        },
+        {
+          "instruction": "File → Import → select the DTI NIFTI file",
+          "title": ""
+        },
+        {
+          "instruction": "Record the orientation of the blip‑down image",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Change directories to the containers. cd /rsgrps/hutchinsone/Singularity_Containers",
+      "title": "Generate .list file with ImportNIFTI",
+      "instruction": "Create the .list file required by DIFFPREP by running ImportNIFTI with the appropriate phase‑encoding direction and auxiliary files.",
+      "substeps": [
+        {
+          "instruction": "ImportNIFTI -i directory/file_name.nii -p <vertical|horizontal> -o output_folder -b file_name.bval -v file_name.bvec",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Load the singularity containers module load singularity singularity run nklab-neurotools-v0.4.sif",
+      "title": "Reorient blip‑down image",
+      "instruction": "Run ReorientImage on the blip‑down .list file (located in the proc folder) to correct its inverse orientation.",
+      "substeps": [
+        {
+          "instruction": "ReorientImage -i directory/file_name_blip_down.list [additional options as needed]",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "You should be able to see the contents of the container.",
+      "title": "Verify reorientation",
+      "instruction": "Extract a 3‑D volume from the reoriented 4‑D image with ExtractImage and view it in ITKSNAP to confirm correct orientation.",
+      "substeps": [
+        {
+          "instruction": "ExtractImage -i directory/file_name_blip_down_reoriented.nii -t 0 -o extracted_image.nii",
+          "title": ""
+        },
+        {
+          "instruction": "Open extracted_image.nii in ITKSNAP",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Start by loading ITKSNAP and looking at the orientation of your image Note: You can also use MIPAV and MRtrix (mrview) to view your imags",
+      "title": "Create DIFF_PREP_WORK folder",
+      "instruction": "In your home directory, make a folder named DIFF_PREP_WORK and copy the appropriate settings template into it.",
+      "substeps": [
+        {
+          "instruction": "cd /home/u26/cjoy1895",
+          "title": ""
+        },
+        {
+          "instruction": "mkdir DIFF_PREP_WORK",
+          "title": ""
+        },
+        {
+          "instruction": "cp /rsgrps/hutchingsone/Programming/DIFF_PREP_WORK/IVmouse_2D.dmc /home/u26/cjoy1895/DIFF_PREP_WORK",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Type: singularity run nklab-neurotools-v0.4.sif itksnap",
+      "title": "Edit settings file for current scan",
+      "instruction": "Open IVmouse_2D.dmc with a text editor and modify the parameters to match your scan (e.g., correction mode, EPI correction, Gibbs ringing, up‑sampling, pre‑smoothing, FOV, resolution).",
+      "substeps": [
+        {
+          "instruction": "gedit /home/u26/cjoy1895/DIFF_PREP_WORK/IVmouse_2D.dmc",
+          "title": ""
+        },
+        {
+          "instruction": "Set \"Correction Mode\" to rigid registration",
+          "title": ""
+        },
+        {
+          "instruction": "Turn off \"EPI Correction\" unless DRBUDDI will not be used",
+          "title": ""
+        },
+        {
+          "instruction": "Turn off \"Pre‑Smoothing\"",
+          "title": ""
+        },
+        {
+          "instruction": "Enter the three values for FOV and Resolution from the methods file",
+          "title": ""
+        },
+        {
+          "instruction": "Adjust any other options required for the animal (ferret vs mouse, etc.)",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "On the ITKSNAP GUI, scroll over to file and import your DTI NIFTI file.",
+      "title": "Run DIFFPREP on both phase‑encodings",
+      "instruction": "Execute DIFFPREP separately for the blip‑up list and the reoriented blip‑down list, using the edited settings file.",
+      "substeps": [
+        {
+          "instruction": "DIFFPREP -i directory/file_name_blip_up.list --reg_settings IVmouse_2D.dmc",
+          "title": ""
+        },
+        {
+          "instruction": "DIFFPREP -i directory/file_name_blip_down_reoriented.list --reg_settings IVmouse_2D.dmc",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
-      "instruction": "View the raw data image, and make note of the orientation of the blip down image. This will become important in step 8. (Note: The image should naturally be in RPS, and for our purposes of DTI images you want LPS) Here are a couple sources for understanding orientation. https://www.slicer.org/wiki/Coordinate_systems http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm",
+      "title": "Organize multiple blip scan folders (if needed)",
+      "instruction": "If the blip‑up or blip‑down data are split across two scans each, create a parent folder for each phase‑encoding, move the raw scans into sub‑folders named 01 and 02, and point ImportBruker to the parent folder.",
+      "substeps": [
+        {
+          "instruction": "mkdir blip_up_folder && mkdir blip_down_folder",
+          "title": ""
+        },
+        {
+          "instruction": "mv raw_up_scan1 raw_up_scan2 blip_up_folder/01",
+          "title": ""
+        },
+        {
+          "instruction": "mv raw_up_scan2 blip_up_folder/02",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat for blip_down scans",
+          "title": ""
+        },
+        {
+          "instruction": "ImportBruker -i blip_up_folder -c 1   # uses the sub‑folders automatically",
+          "title": ""
+        },
+        {
+          "instruction": "ImportBruker -i blip_down_folder -c 1",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
-      "instruction": "This step is crucial for obtaining the .list file which will be used in DIFFPREP and DRBUDDI Type the following to get information and options of the command. ImportNIFTI",
+      "title": "Create bval and bvec files",
+      "instruction": "Generate the FSL‑compatible bval and bvec files from the TORTOISE b‑matrix file (only once, as both phase‑encodings share the same matrix).",
+      "substeps": [
+        {
+          "instruction": "TORTOISEBmatrixToFSLBVecs directory_to_bmatrix_file",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
-      "instruction": "The general full command is the following: ImportNIFTI -i directory/file_name.nii -p phase_direction -o output_folder -b file_name.bval -v file_name.bvec Note: directory: where your NIFTI file is stored phase_direction: can either be vertical or horizontal based upon what your phase encoding direction is output_folder: where you want your data to be stored when it&#39;s done importing",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
-      "title": "",
-      "instruction": "In the terminal type: ReorientImage This will give you information about the command, and the different options available.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 15,
-      "title": "",
-      "instruction": "Type: ReorientImage -i directory_name_DTI/file_name_blip_down.list -r RPS",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
-      "title": "",
-      "instruction": "Note: This should be done with the list file in your proc folder.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 17,
-      "title": "",
-      "instruction": "Note: You only need to reorient the blip down data. The blip down data is inverse when it is acquired form the scanner, changing the orientation of the image.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 18,
-      "title": "",
-      "instruction": "To check your reoriented image use the following command to extract from 4D image. ExtractImage This will give you information about the command, and the different options available. Yo",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 19,
-      "title": "",
-      "instruction": "Type: ExtractImage -i directory_name_DTI/file_name_blip_down_reoriented.nii",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 20,
-      "title": "",
-      "instruction": "You can view and edit your extracted image on ITKSNAP.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 21,
-      "title": "",
-      "instruction": "Before you run DIFFPREP, you must make sure your settings file is Compatible with size and resolution of your data In your user&#39;s directory Will give you the corrections needed in DIFFPREP",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 22,
-      "title": "",
-      "instruction": "In your user&#39;s directory make a folder titled &#34;DIFF_PREP_WORK&#34;. By doing it in the file browser GUI or by navigating in your terminal and typing: cd /home/u26/cjoy1895mkdir DIFF_PREP_WORK",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 23,
-      "title": "",
-      "instruction": "Copy the setting templates to YOUR OWN DIFF_PREP_WORK cp /rsgrps/hutchingsone/Programming/DIFF_PREP_WORK/IVmouse_2D.dmc /home/u26/cjoy1895/DIFF_PREP_WORK",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 24,
-      "title": "",
-      "instruction": "Only need to make the directory and copy the settings file if you haven&#39;t done it already There are multiple settings.dmc templates on the HPC, it would be a good idea to copy all of them to your DIFF_PREP_WORK directory",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 25,
-      "title": "",
-      "instruction": "In your home DIFF_PREP_WORK directory, right click on the IVmouse_2D.dmc and select Open With &gt; gedit",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 26,
-      "title": "",
-      "instruction": "You should see a bunch of text like the following: The DARK BLUE text tells you information about the sections and options you can use, the BLACK text is what you can edit. Correction Mode Change to the registration to rigid EPI Correction Make sure it is turned off. Only turn it on if you don&#39;t plan on using DRBUDDI later. Gibbs Ringing Correction on Denoising for_final Humanity 0 Basically is asking if your brain is human or not Upsampling all High B-value Registration You need to know the 3 values for the scan you are processing. If you don&#39;t know it, you can find it in the methods file. Enter your three values Pre-Smoothing Turn off!!! Very important! FOV You need to know the 3 values for the scan you are processing. If you don&#39;t know it, you can find it in the methods file. Resolution You need to know the 3 values for the scan you are processing. If you don&#39;t know it, you can find it in the methods file. These are the main settings you will need to change on a scan to scan basis, but keep in mind you may change other settings not mentioned here or will need different inputs than what are mentioned above.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 27,
-      "title": "",
-      "instruction": "Type in terminal: DIFFPREP -i directory/file_name_blip_up.list --reg_settings IVmouse_2D.dmcDIFFPREP -i directory/file_name_blip_down_reoriented.list --reg_settings IVmouse_2D.dmc The specific settings.dmc file will change based upon the animal and type of image you are processing. This specific .dmc file is for ferrets, but be aware mice will use a different settings file.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 28,
-      "title": "",
-      "instruction": "Note: Sometimes your blip up and blip down data will be split across four scans (two blip up scans and two blip down scans). If that is the case, simply make a new folders and move the all the blip up raw data into one folder, rename the first blip up raw folder as 01, and the second as 02. Do the same for the blip down data. In other words you should have two folders (one for blip up and down) each with two sub-folders labeled as 01 and 02 corresponding to their scan order. For the ImportBruker command, you only need to input UP to the blip up/down folder containing the subfolders for the path.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 29,
-      "title": "",
-      "instruction": "Note: If you want to control where InputBruker puts the output proc folder, use -o with the desired directory.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 30,
-      "title": "",
-      "instruction": "Type the following command to get your bval and bvec files. TORTOISEBmatrixToFSLBVecs directory_to_bmatrix_file",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 31,
-      "title": "",
-      "instruction": "Note: The blip down and blip up should have matching bmatrix files, so this command only needs to be done once.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 32,
-      "title": "",
-      "instruction": "If desired, to use MIPAV /rsgrps/hutchinsone/Programming/mipav/mipav Or type the following command to access mrview. singularity run nklab-neurotools-v0.4.sif mrview",
+      "title": "Optional visualization with MIPAV or mrview",
+      "instruction": "If desired, launch MIPAV or MRtrix’s mrview from within the singularity container for additional image inspection.",
+      "substeps": [
+        {
+          "instruction": "/rsgrps/hutchinsone/Programming/mipav/mipav   # launch MIPAV",
+          "title": ""
+        },
+        {
+          "instruction": "singularity run nklab-neurotools-v0.4.sif mrview   # launch mrview",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 45,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

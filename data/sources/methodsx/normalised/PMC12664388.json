@@ -11,191 +11,95 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12664388/",
   "doi": "10.1016/j.mex.2025.103702",
   "citation": "10.1016/j.mex.2025.103702",
-  "category": "Other",
+  "category": "Lab Automation & Robotics",
   "tags": [],
   "estimated_time_mins": 114,
-  "materials": [],
+  "materials": [
+    "Real-World Validation: tested in real human interaction.",
+    "Hardware-Independent and Flexible: requires no auxiliary sensors"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "This section presents the EEG-cleanse pipeline, structured into three sequential phases: (A) Raw Signal Examination, (B) Data Cleaning, and (C) Data Labeling. Each phase is modular, automated, and extensively logged to support transparency and reproducibility. The pipeline integrates tools from Python and MATLAB, using standard libraries and EEGLAB, to transform raw OpenBCI EEG data into clean, brain-labeled datasets.",
+      "title": "Load raw OpenBCI recordings",
+      "instruction": "Import the 308 EEG recordings collected with OpenBCI hardware from 14 participants; each recording contains a still‑baseline (GT) and an active‑movement (MVMT) stage. Exclude the two recordings with integrity issues, leaving 306 sessions (82 GT and 224 MVMT).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Method details",
-      "instruction": "Phases overview:1.Phase A: Raw Signal Examination – Preprocessing and segmenting raw EEG data from the OpenBCI software.2.Phase B: Data Cleaning – Multi-stage cleaning of EEG data using the EEGLAB tool in the MATLAB environment.3.Phase C: Data Labeling – ICA decomposition and classification of Independent Components (ICs).",
+      "title": "Prepare data for MATLAB",
+      "instruction": "Transpose each dataset to MATLAB’s column‑major format and save the transposed array as a .mat file named with the participant‑specific identifier.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Method details",
-      "instruction": "Fig. 1 illustrates the full EEG-cleanse pipeline and its modular steps.Fig. 1EEG-cleanse pipeline.Fig 1",
+      "title": "Raw signal examination (Phase A)",
+      "instruction": "Preprocess and segment the raw OpenBCI EEG data using the OpenBCI software tools as described for Phase A of the EEG‑cleanse pipeline.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Module B1.1 – data preparation",
-      "instruction": "The module:1.Transposes the data to match MATLAB's column-major data format.2.Saves the transposed data into .mat files, labeled with a participant-specific identifier.",
-      "substeps": [],
+      "title": "Data cleaning (Phase B)",
+      "instruction": "Apply the multi‑stage cleaning workflow in EEGLAB (MATLAB) as follows:",
+      "substeps": [
+        {
+          "instruction": "Remove high‑impedance channels (retained 407 channels, 58.67 % of the original 4896 channels).",
+          "title": ""
+        },
+        {
+          "instruction": "Remove flatline, low‑correlation, and noisy channels (retained 3520 channels, 71.43 % of the original; after this step 3520 channels remain).",
+          "title": ""
+        },
+        {
+          "instruction": "Apply Artifact Subspace Reconstruction (ASR) to the remaining 305 sessions (one session excluded for insufficient clean channels). On average 83.36 % of each session is identified as suitable for the clean reference; 102 sessions are fully clean (no reconstruction); overall 20.97 % of the data is reconstructed.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Method validation",
-      "instruction": "We designed and tested EEG-cleanse using 308 EEG signals from 14 participants collected with OpenBCI hardware during full-body interaction with the HapHop-Physio system [11]. Each session comprised a still baseline (GT) and an active movement stage (MVMT). Two recordings were excluded due to data integrity issues. The remaining 306 included 82 GT and 224 MVMT sessions.",
-      "substeps": [],
+      "title": "Data labeling via ICA (Phase C)",
+      "instruction": "Decompose the cleaned EEG data with Independent Component Analysis and classify the resulting components:",
+      "substeps": [
+        {
+          "instruction": "Run ICA on 290 sessions (15 sessions excluded due to insufficient variance or short duration after cleaning).",
+          "title": ""
+        },
+        {
+          "instruction": "Classify ICs and retain brain‑related components (3461 total ICs generated; 2440 brain ICs retained, 70.5 % retention; average ≈5 brain‑related ICs per session).",
+          "title": ""
+        },
+        {
+          "instruction": "Exclude the 5 sessions (1.7 %) that yielded no usable brain‑related ICs from the final dataset.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Method validation",
-      "instruction": "We tested EEG-cleanse through internal validation across key stages of the pipeline to determine its effectiveness in preserving a usable EEG signal while removing artifacts caused by full-body movement. We computed metrics for three areas: (1) channel-level signal after cleaning in Phase B, (2) artifact correction efficiency when applying ASR, and (3) preservation of brain-related ICs after ICA decomposition and classification.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 6,
-      "title": "Method validation",
-      "instruction": "The evaluation used internal metrics linked to signal quality and artifact suppression including spectral entropy, frequency band power, correlation to raw data, and IC classification rates. These metrics were chosen for their relevance to signal complexity, cognitive interpretability (for HapHop-Physio purposes), and benchmarking preprocessing fidelity in the absence of task-based EEG labels.1. Channel Cleaning Efficiency",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 7,
-      "title": "Method validation",
-      "instruction": "Across 306 sessions (16 electrodes by EEG signal), we recorded 4896 channels. After applying the two-step cleaning process, which first removed high-impedance channels followed by flatline, low-correlation, and noisy channels, 3520 channels were retained, corresponding to a channel retention rate of 71.43 % (Table 1). One session was excluded due to the insufficient number of clean channels.Table 1Channel retention after high-impedance and noise-based filtering.Table 1StepChannels Retained% of OriginalAfter High-Impedance Filtering407582.67 %After Flatline/Noise Filtering352071.43 %",
-      "substeps": [
-        {
-          "instruction": "Across 306 sessions (16 electrodes by EEG signal), we recorded 4896 channels. After applying the two-step cleaning process, which first removed high-impedance channels followed by flatline, low-correlation, and noisy channels, 3520 channels were retained, corresponding to a channel retention rate of",
-          "title": ""
-        },
-        {
-          "instruction": "% (Table 1). One session was excluded due to the insufficient number of clean channels.Table 1Channel retention after high-impedance and noise-based filtering.Table 1StepChannels Retained% of OriginalAfter High-Impedance Filtering",
-          "title": ""
-        },
-        {
-          "instruction": "%After Flatline/Noise Filtering",
-          "title": ""
-        }
-      ],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
-      "title": "Method validation",
-      "instruction": "High-impedance and noisy channel removal ensures that only reliable electrodes contribute to ICA decomposition, which is critical for accurate artifact separation in motion-rich recordings.2. ASR Effectiveness",
-      "substeps": [],
-      "is_critical": true,
-      "timers": []
-    },
-    {
-      "step_id": 9,
-      "title": "Method validation",
-      "instruction": "We applied ASR to the remaining 305 sessions. On average, 83.36 % of each session was identified as suitable for the clean reference signal used by ASR. In 102 sessions, ASR identified fully clean data and performed no reconstruction. Across all sessions, only 20.97 % of the data was reconstructed on average, indicating that ASR acted selectively and did not overcorrect the signal.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "Method validation",
-      "instruction": "These results show that EEG-cleanse preserves large portions of clean neural data during ASR while selectively suppressing contaminated segments. The low reconstruction rate confirms that ASR avoids unnecessary signal alteration.3. ICA Decomposition and Brain Component Retention",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "Method validation",
-      "instruction": "We performed ICA on 290 sessions; 15 sessions were excluded due to insufficient signal variance or short recording duration after cleaning. ICA decomposition produced 3461 ICs across sessions, of which, 2440 components (70.5 %) were retained as brain-related. Five sessions (1.7 %) failed to yield any usable brain-related ICs and were excluded from the final version of the signal (Table 2).Table 2ICA decomposition results and brain-related component retention.Table 2MetricValueSessions after filtering305Sessions included in ICA290Sessions retained after IC labeling285Total ICs generated3461Brain ICs retained2440Brain IC retention rate70.5 %",
-      "substeps": [
-        {
-          "instruction": "We performed ICA on 290 sessions; 15 sessions were excluded due to insufficient signal variance or short recording duration after cleaning. ICA decomposition produced 3461 ICs across sessions, of which, 2440 components (",
-          "title": ""
-        },
-        {
-          "instruction": "%) were retained as brain-related. Five sessions (",
-          "title": ""
-        },
-        {
-          "instruction": "%) failed to yield any usable brain-related ICs and were excluded from the final version of the signal (Table 2).Table 2ICA decomposition results and brain-related component retention.Table 2MetricValueSessions after filtering305Sessions included in ICA290Sessions retained after IC labeling285Total ICs generated3461Brain ICs retained2440Brain IC retention rate",
-          "title": ""
-        }
-      ],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "Method validation",
-      "instruction": "On average, each session retained approximately five brain-classified ICs, showing effective preservation of plausible neural sources in motion-rich environments. These findings demonstrate that the pipeline isolates neurophysiologically meaningful signal components despite substantial motion-related contamination.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 13,
-      "title": "Advantages of the EEG-cleanse method and practical tips",
-      "instruction": "The comparative analysis outlined above highlights key advantages of EEG-cleanse over conventional preprocessing methods, particularly when applied to EEG data recorded during full-body, real-world interaction. Although EEG-cleanse was validated on 16-channel OpenBCI data, the modular structure supports straightforward adaptation to high-density EEG caps (e.g., 64 or 128 channels). Channel configuration files and preprocessing parameters (e.g., impedance thresholds, ASR calibration) can be adjusted via the configuration script. Also, EEG-cleanse maintains temporal precision and spectral structure suitable for event-related potential (ERP) and time–frequency analyses. Its preservation of mixed ICs supports downstream cognitive or neuroergonomic tasks where motion and neural activity co-occur. EEG-cleanse was developed to meet transparency, flexibility, and ecological validity as core design goals.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
-      "title": "Advantages of the EEG-cleanse method and practical tips",
-      "instruction": "Full Transparency and Modularity: each step is explicitly defined and tunable.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 15,
-      "title": "Advantages of the EEG-cleanse method and practical tips",
-      "instruction": "Real-World Validation: tested in real human interaction.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
-      "title": "Advantages of the EEG-cleanse method and practical tips",
-      "instruction": "Balanced Signal Preservation: avoids aggressive removal of borderline ICs.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 17,
-      "title": "Advantages of the EEG-cleanse method and practical tips",
-      "instruction": "Hardware-Independent and Flexible: requires no auxiliary sensors",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 18,
-      "title": "Advantages of the EEG-cleanse method and practical tips",
-      "instruction": "Extensible Design: compatible with additional tools (e.g., CCA modules)",
+      "title": "Record validation outcomes",
+      "instruction": "Document the following validation metrics: 306 total sessions (16 electrodes each, 4896 channels); 3520 channels retained after cleaning (71.43 %); ASR clean‑reference proportion 83.36 % and reconstruction proportion 20.97 %; ICA produced 3461 ICs with 2440 brain ICs (70.5 %); average of five brain ICs per session; 5 sessions (1.7 %) excluded after labeling.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T04:44:39.859812Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "This section presents the EEG-cleanse pipeline, structured into three sequential phases: (A) Raw Signal Examination, (B) Data Cleaning, and (C) Data Labeling. Each phase is modular, automated, and extensively logged to support transparency and reproducibility. The pipeline integrates tools from Python and MATLAB, using standard libraries and EEGLAB, to transform raw OpenBCI EEG data into clean, brain-labeled datasets. Phases overview:1.Phase A: Raw Signal Examination – Preprocessing and segmenting raw EEG data from the OpenBCI software.2.Phase B: Data Cleaning – Multi-stage cleaning of EEG data using the EEGLAB tool in the MATLAB environment.3.Phase C: Data Labeling – ICA decomposition and classification of Independent Components (ICs). Fig. 1 illustrates the full EEG-cleanse pipeline and its modular steps.Fig. 1EEG-cleanse pipeline.Fig 1 We designed and tested EEG-cleanse using 308 EEG signals from 14 participants collected with OpenBCI hardware during full-body interaction with the HapHop-Physio system [11]. Each session comprised a still baseline (GT) and an active movement stage (MVMT). Two recordings were excluded due to data integrity issues. The remaining 306 included 82 GT and 224 MVMT sessions. We tested EEG-cleanse through internal validation across key stages of the pipeline to determine its effectiveness in preserving a usable EEG signal while removing artifacts caused by full-body movement. We computed metrics for three areas: (1) channel-level signal after cleaning in Phase B, (2) artifact correction efficiency when applying ASR, and (3) preservation of brain-related ICs after ICA decomposition and classification. The evaluation used internal metrics linked to signal quality and artifact suppression including spectral entropy, frequency band power, correlation to raw data, and IC classification rates. These metrics were chosen for their relevance to signal complexity, cognitive interpretability (for HapHop-Physio purposes), and benchmarking preprocessi",
+  "content_type": "protocol",
+  "content_type_score": 63,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

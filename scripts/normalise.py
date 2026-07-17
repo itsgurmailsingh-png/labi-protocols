@@ -71,12 +71,13 @@ CATEGORIES = [
     "Molecular Biology",
     "Genomics & Sequencing",
     "Cell Biology",
-    "Biochemistry",
+    "Biochemistry & In Vitro",
     "Protein Science",
     "Proteomics",
     "Metabolomics",
     "Immunology",
     "Virology",
+    "Cancer Biology",
     # Life Sciences — Organismal
     "Microbiology",
     "Neuroscience",
@@ -173,17 +174,24 @@ def _timer_label(secs: int) -> str:
 def _split_text_into_steps(text: str) -> list:
     """
     Split a free-text description into logical steps.
-    Handles: numbered lists (1. 2. 3.), paragraph breaks, or single block.
+    Handles: paragraph breaks, or single block.
+
+    DISABLED: numbered-list splitting ("1. ", "2. "). re.split() on
+    \\d+[.)]\\s+ discards the matched delimiter — found silently eating a
+    real museum catalog number ("MNHN-IM-2013-67177. Paratype...") because
+    "67177. " matched the same digit+period+whitespace pattern as a step
+    marker. Confirmed via the untouched raw source: "67177" is completely
+    gone from the final published protocol, not recoverable, not a display
+    artifact. Same bug class as split_inline_numbered() in
+    fix_broken_steps.py (also disabled today for the same reason) — any
+    digit-based split on free text risks eating real numbers that happen to
+    be followed by punctuation and whitespace. Paragraph-based splitting
+    below doesn't have this problem since newlines carry no semantic
+    content to lose.
     """
     text = strip_html(text).strip()
     if not text:
         return []
-
-    # Try numbered steps: "1.", "1)", "Step 1:", "Step 1."
-    numbered = re.split(r"(?<!\w)(?:step\s+)?\d+[\.\)]\s+", text, flags=re.IGNORECASE)
-    numbered = [s.strip() for s in numbered if len(s.strip()) > 20]
-    if len(numbered) >= 3:
-        return numbered
 
     # Try paragraph splits (double newline or single newline + capital letter)
     paras = re.split(r"\n{2,}|\n(?=[A-Z])", text)
@@ -242,6 +250,63 @@ def _extract_substeps(instruction: str) -> list | None:
     return None
 
 
+# Source-domain credibility tiers, mirroring the Labi app's own
+# score_credibility() spec (scripts/ingest_pipeline.py in the labi app repo) —
+# this is what AttributionSheet's badge switch actually keys on.
+_CREDIBILITY_RULES = [
+    ("bio-rad.com", "vendor_verified"),
+    ("thermofisher.com", "vendor_verified"),
+    ("qiagen.com", "vendor_verified"),
+    ("neb.com", "vendor_verified"),
+    ("sigmaaldrich.com", "vendor_verified"),
+    ("abcam.com", "vendor_verified"),
+    ("promega.com", "vendor_verified"),
+    ("invitrogen.com", "vendor_verified"),
+    ("millipore.com", "vendor_verified"),
+    ("roche.com", "vendor_verified"),
+    ("agilent.com", "vendor_verified"),
+    ("lonza.com", "vendor_verified"),
+    ("protocols.io", "community_trusted"),
+    ("addgene.org", "community_trusted"),
+    ("atcc.org", "community_trusted"),
+    ("jove.com", "community_trusted"),
+    ("openwetware.org", "community_trusted"),
+    ("nature.com/protocolexchange", "community_trusted"),
+    ("benchling.com", "community_trusted"),
+    ("ncbi.nlm.nih.gov", "literature_sourced"),
+    ("pubmed", "literature_sourced"),
+    ("doi.org", "literature_sourced"),
+    ("biorxiv.org", "literature_sourced"),
+    ("medrxiv.org", "literature_sourced"),
+    ("plos", "literature_sourced"),
+    ("frontiersin.org", "literature_sourced"),
+]
+
+
+def score_credibility(source_url: str, author: str = "") -> str:
+    """Map a protocol's source domain to the app's trust-badge tiers.
+
+    One of: vendor_verified | community_trusted | literature_sourced.
+    Falls back to literature_sourced for unrecognised domains (conservative default).
+    """
+    url_lower = (source_url or "").lower()
+    author_lower = (author or "").lower()
+    for domain_pattern, status in _CREDIBILITY_RULES:
+        if domain_pattern in url_lower or domain_pattern in author_lower:
+            return status
+    return "literature_sourced"
+
+
+def infer_timer_type(text: str) -> str:
+    """Infer the app's timer chip type from the surrounding instruction text."""
+    t = (text or "").lower()
+    if any(w in t for w in ["centrifuge", "spin down", "spin at"]):
+        return "centrifuge"
+    if any(w in t for w in ["shake", "shaker", "vortex", "agitat"]):
+        return "shaker"
+    return "incubation"
+
+
 def steps_from_raw(steps_raw) -> list:
     """Convert raw steps (list OR string) to canonical step dicts with sub-step detection."""
     # If steps_raw is a plain string (e.g. Zenodo description), split it first
@@ -272,7 +337,12 @@ def steps_from_raw(steps_raw) -> list:
             instruction = f"Wait {label}."
             if not title:
                 title = f"Wait {label}"
-            timers = [{"duration_secs": timer_secs, "label": label}]
+            timers = [{
+                "timer_id": "t1",
+                "label": label,
+                "duration_seconds": timer_secs,
+                "type": infer_timer_type(instruction),
+            }]
 
         # Detect sub-steps within this instruction
         substeps = []
@@ -454,7 +524,8 @@ def build_canonical(raw: dict, llm: dict | None) -> dict:
         "estimated_time_mins": estimated_time,
         "materials": materials,
         "steps": steps,
-        "verification_status": "verified" if raw.get("license_verified") else "unverified",
+        "media": raw.get("media") or [],
+        "verification_status": score_credibility(raw.get("source_url", ""), author),
         "normalised_at": datetime.datetime.utcnow().isoformat() + "Z",
         "llm_normalised": llm is not None,
     }

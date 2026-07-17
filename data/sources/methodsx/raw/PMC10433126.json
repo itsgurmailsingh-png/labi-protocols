@@ -9,9 +9,104 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "The biological effect of irradiation is not solely determined by the physical dose. Gamma knife radiosurgery may be influenced by dose rate, beam-on-time, numbers of iso-centers, the gap between the individual iso-centers, and the dose‒response of various tissues. The biologically effective dose (BED) for radiosurgery considers these issues. Millions of patients treated with Models B and C provide a vast database to mine BED-related information. This research aims to develop MatBED_B&C, a 3-dimensional (3D) BED analytic approach, to generate a BED for individual voxels in the calculation matrix with related parameters extracted from Gammaplan. This approach calculates the distribution profiles of the BED in radiosurgical targets and organs at risk. A BED calculated on a voxel-by-voxel basis can be used to show the 3D morphology of the iso-BED surface and visualize the BED spatial distribution in the target. A 200 × 200 × 200 matrix can cover a greater range of the organ at risk. The BED calculated by MatBED_B&C can also be used to form BED-volume histograms to generate plan quality metrics, which will be studied in a retrospective study of gamma knife radiosurgery to guide future BED planning.•We develop MatBED_B&C to calculate the 3D BED in radiosurgical targets.•The BED of MatBED_B&C can visualize the BED spatial distribution profiles.•The BED of MatBED_B&C will generate plan quality metrics studied in a retrospective study.",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "Fig. 1 shows a diagram of the computational pipeline. First, we set the coefficient L of ellipsoid expansion to form an association between dose falloff and 3D coordinate values. Then, for simplicity, the iso-dose contours are calculated in an expanding ellipsoidal around the iso-center. As a result, the ellipsoid equation can be written as follows:(3)(x−xi)2a2+(y−yi)2b2+(z−zi)2c2=1(x, y, z) and (xi, yi, zi) are the 3D coordinate values of one dose-distribution point and iso-center for the ith irradiation, respectively. a, b, and c are the lengths of the semimajor axis in the x-direction, y-direction, and z-direction, respectively. A coefficient L of ellipsoid expansion is set as:(4)a2=L2·FWHMx2FWHMx2·FWHMy2·FWHMz23=(xa−100)2(5)b2=L2·FWHMy2FWHMx2·FWHMy2·FWHMz23=(yb−100)2(6)c2=L2·FWHMz2FWHMx2·FWHMy2·FWHMz23=(zc−100)2Fig. 1A diagram of the computational pipeline. A: Examples show that the lengths of the semimajor axis, indicated by a, b, and c with horizontal solid black lines in a red square frame, in the x-direction, y-direction, and z-direction correspond to the 70% iso-dose in the dose profiles of an iso-center at coordinates (100, 100, 100). Next, xa, yb, and zc are the abscissa values at the dose percentage in the x-direction, y-direction, and z-direction, respectively. The curves in the dose profiles in the x-direction, y-direction, and z-direction are used to fit the dose falloff by a Gaussian function (blue curves indicated by black arrows). The dose falloff profiles show that the dose decays by its percentage on either side of the reference point (100% iso-dose). The a, b, and c are the abscissa differences between the reference point and any point of the dose decay curve in the x-direction, y-direction, and z-direction, respectively. Here, a, b, and c can take negative values due to the purpose of fitting the two-sided dose falloff. The percent dose at the point of the dose decay curve can be any percentage, for example, 90%, 70%, or 50% et al. Here we selected 70% as an example. B: L (indicated by horizontal solid black line in a green square frame) is the geometric mean of a, b, and c. L can take negative values to express dose falloff in another direction (with a portion indicated by a red square frame). The curve is also used to fit the dose falloff by a Gaussian function (red curves indicated by black arrows). N, ui, vi, and wi take respective values corresponding to xa, yb, zc, and L, respectively. C: An expanding ellipsoidal is used to represent the relationship between 3D coordinate values (x, y, z) and L. The expansion and contraction of the ellipsoidal (indicated by a black two-direction arrow) is controlled by LFWHMxFWHMyFWHMz3 (indicated by a red arrow). D: The relationship between dose falloff and 3D coordinate values (x, y, z) is used to calculate the physical dose distribution. 3D: 3-dimensional.Fig 1"
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "The xa, yb, and zc are the abscissa values at the dose percentage in the x-direction, y-direction, and z-direction, respectively. In the dose profiles of an iso-center at the Leksell® coordinates (100, 100, 100) described in the TMR10 [13], [14], [15], we can also use a radiochromic film dosimeter in the phantom to acquire data, forming a curve in the dose profiles for individualized GKRS instruments [16]. The reference point with coordinates (100,100,100) is the position of the central maximum dose. The coefficient of ellipsoid expansion, L, positively correlates with the distance between a point (xa, yb, zc) on an ellipsoid and the reference point (100,100,100). The ellipsoid expansion starts from the reference point and extends to cover the whole 3D space. The distance component in the x-direction, y-direction, and z-direction is (xa-100), (yb-100), and (zc-100), respectively. According to the ellipsoid equation Eq. (3)), a, b, and c are the lengths of the semimajor axis in the x-direction, y-direction, and z-direction, respectively. Consequently, we get: a=|xa−100|. Thus, in Eq. (4), a2=(xa−100)2. Similarly, in Eq. (5), b2=(yb−100)2, and in Eq. (6), c2=(zc−100)2. In the dose profiles, FWHM is the full width at half maximum dose percentage values of one shot caused by the 4, 8, 14, and 18 mm collimators. FWHMx, FWHMy, and FWHMz are the FWHM values in the x-direction, y-direction, and z-direction, respectively. Next, we use three relations: L=a·FWHMx·FWHMy·FWHMz3FWHMx, L=b·FWHMx·FWHMy·FWHMz3FWHMy, and L=c·FWHMx·FWHMy·FWHMz3FWHMz, respectively. Consequently, in Eqs. (4)–((6), a2=L2·FWHMx2FWHMx2·FWHMy2·FWHMz23, b2=L2·FWHMy2FWHMx2·FWHMy2·FWHMz23, and c2=L2·FWHMz2FWHMx2·FWHMy2·FWHMz23. Since the ellipsoid expansion can cover any point (x, y, z) of the whole 3D space, meanwhile, the reference point can be set as (xi, yi, zi), substituting Eqs. (4)–(6) into Eq. (3), we achieve the following:(7)L=((x−xi)2FWHMx2+(y−yi)2FWHMy2+(z−zi)2FWHMz2)·FWHMxFWHMyFWHMz3"
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "On the one hand, to express the dose profiles of collimators, the relationship between dose falloff and L can be fitted by the Gaussian function of the MATLAB Curve Fitting Tool."
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "First, the ellipsoid volume can be calculated as follows:(8)Vellipsoidal=43πabc"
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "Substituting Eqs. (4)–(6) into Eq. (8), when Eqs. (4)–(6) are multiplied, the FWHMx, FWHMy, and FWHMz elimination are completed. Thus, we achieve the following:(9)L=(xa−100)(yb−100)(zc−100)3where L becomes the geometric mean of the lengths of the semimajor axis in the x-direction, y-direction, and z-direction. As Eq. (8) shows, the geometric meaning (L) can indicate the radius of a sphere with an equal volume of ellipsoid expressed by Eq. (1)."
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "However, as Fig. 1A and B show, a, b, c, and L can take negative values due to the purpose of fitting the two-sided dose falloff. Since the dose falloff is on two sides, not one side in the x, y, and z directions, the negative values of a, b, c, and L here express dose falloff in another direction."
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "Next, we adopt the Gaussian function of the MATLAB Curve Fitting Tool to fit the dose profiles. The curve in the dose profiles is used to achieve the following relations:(10)isodose(%)Xa=Fx(xa)=∑i=1Nuie−(xa−viwi)2(11)isodose(%)yb=Fy(yb)=∑i=1Nuie−(yb−viwi)2(12)isodose(%)zc=Fz(zc)=∑i=1Nuie−(zc−viwi)2"
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "Then, we substitute Eqs. (10)–(12) into Eq. (9) to achieve the following relation:(13)isodose(%)L=FL(L)=∑i=1Nuie−(L−viwi)2"
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "Here, N is the number of terms (Gaussian function fitting dose falloff). Eqs. (10)–(13) express the corresponding dose profile for each collimator. During the curve fitting, parameters involving N, ui, vi, and wi assume different values corresponding to Eqs. (10)–(13) to fit the respective dose falloff. We thus resolve the dose profiles of the coefficient L for all collimators. ui, vi, and wi are fit coefficients of the Gaussian function. The details of the curve fitting are provided in Supplementary Material A."
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "On the other hand, the relationship between 3D coordinate values (x, y, z) and L is formed by Eq. (7), which is achieved by substituting Eqs. (4)–(6) into Eq. (3). Here, the implication of L is a correlation coefficient of gradually expanding an ellipsoid with 3D coordinate values as parameters (Fig. 1C). According to Eq. (7), we obtain:"
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "LFWHMxFWHMyFWHMz3=((x−xi)2FWHMx2+(y−yi)2FWHMy2+(z−zi)2FWHMz2), where LFWHMxFWHMyFWHMz3can be used to control the expansion of the ellipsoid (the length changes of semimajor axes). When LFWHMxFWHMyFWHMz3=1/2(alsomeans:L=(FWHMx/2)(FWHMy/2)(FWHMz/2)3), we can obtain (x−xi)2(FWHMx/2)2+(y−yi)2(FWHMy/2)2+(z−zi)2(FWHMz/2)2=1, which can form an ellipsoid indicating the 3D shape of a collimator shot with the corresponding FWHM."
+    },
+    {
+      "title": "Solver of the 3D dose profiles for the ellipsoid expansion coefficient",
+      "instruction": "Consequently, based on the relationships between dose falloff and L and between 3D coordinate values (x, y, z) and L, we obtain the relationship between dose falloff and 3D coordinate values (x, y, z). Finally, we calculate the physical dose distribution using the 3D coordinate values, dose rate, and beam-on time of each shot as follows."
+    },
+    {
+      "title": "BED calculation based on spatial distribution profiles of the physical dose",
+      "instruction": "Then, the dose distribution is calculated as follows:(14)di=d˙i·δti·FL(L)di, d˙i, and δti are the dose distribution, iso-center dose rate, and irradiation duration of the ith shot, respectively. A contour of one shot is expressed as an iso-dose of half the maximum dose. Thus, we visualize the spatial morphology and position of a shot using the 3D coordinate values of each iso-center of the B&C model during a retrospective study. If we input a 3D model of a radiosurgical target Fig. 2A), we achieve the spatial relationship between the shot and the irradiated objects (Fig. 2B). Then, the iso-dose surface visualizes the total dose of all iso-centers (Fig. 2C). Accordingly, we calculate a BED for individual voxels based on physical dose using Eqs. (1) and ((2) and visualize the spatial distribution of the BED in the radiosurgical target (Fig. 2D). Since the calculation grid size of the 200 × 200 × 200 matrix is 1 mm, the volume is calculated by summing the volume of voxels for the target. According to the 3D coordinate value of each voxel of the target, we generate BED-volume histograms according to the 3D BED distributions (Fig. 2E and F). The visualization details for the shot, iso-dose surface, iso-BED surface, and formation of the BED-volume histogram are provided in Supplementary Material B. The BED-volume histograms can be used to obtain plan quality metrics such as percentage volume BED, iso-BED volume, conformity index, and gradient index. These BED metrics will be studied in a retrospective study of gamma knife radiosurgery to guide future BED planning.Fig. 2A representative example of a 3D BED analytic approach. A: Target of a case with gamma knife radiosurgery. Layouts of shots (indicated by a blue circle and white arrow) in a lesion (magenta contour indicated by red arrow). A yellow contour and red arrow indicate the prescription iso-dose line. B: The example shows shot contours (indicated by black arrows) for 8 mm and 18 mm collimators. The spatial relationship between the shots and the irradiated object (indicated by red arrows) was visualized. C: 3D iso-surface (cyan contour indicated by black arrow) of 15 Gy enclosing the lesion. The contour of the iso-surface represents 15 Gy at the 40% iso-surface. D: Distribution of 3D iso-BED shows iso-surfaces of 35 Gy8.2 (red contour), 50 Gy8.2 (cyan contour), and 100 Gy8.2 (green contour). The contours of the three iso-surfaces represent the 3D distributions of the BED. E: Differential BED-volume histograms for the example. F: Cumulative BED-volume histograms for the example. BED: biologically effective dose, 3D: 3-dimensional.Fig 2"
+    },
+    {
+      "title": "BED calculation based on spatial distribution profiles of the physical dose",
+      "instruction": "When required to evaluate BED distribution in the organs at risk, such as the optic pathway (Fig. 3A) or pyramidal tract (Fig. 3B) adjacent to the radiosurgical targets, MatBED_B&C can be used to show the spatial relationship between the BED iso-surface and the organs at risk (Fig. 3C and D). The spatial range of the organ at risk may be much greater than that of the surgical target. The 200 × 200 × 200 matrix can cover the range of organs at risk. Accordingly, a BED-volume histogram scan was also generated (Fig. 3E and F). The BED-volume histograms can be used to obtain plan quality metrics such as percentage volume BED, iso-BED volume, conformity index, and gradient index. These BED metrics will be studied in a retrospective study of gamma knife radiosurgery to guide future BED planning. Since the Perfexion/Icon models have the 4, 8, and 16 mm collimators, each of which has 8 sectors. Different combinations of the sectors make the calculation approach of dose distribution more challenging. Further work on the analytic method for Perfexion/Icon models is pending. This study's 4C model analytical approach provides a foundation for future studies.Fig. 3Examples of a 3D BED analysis for organs at risk. A: A case with optic chiasm (indicated by yellow contour with white arrow) adjacent to a parasellar target. B: A case with a pyramidal tract (indicated by yellow contour with white arrow) adjacent to a target in the frontal lobe. C: 3D view shows the spatial relationship between the optic pathway (indicated by yellow contour with red arrow) and the BED iso-surface enclosing the lesion. The BED iso-surfaces of 40 Gy2.47 are indicated by red transparent contours with black arrows. D: 3D view shows the spatial relationship between the pyramidal tract (indicated by yellow contour with red arrow) and the BED iso-surface enclosing the lesion. The BED iso-surfaces of 40 Gy8.2 are indicated by red transparent contours with black arrows. E: Differential BED-volume histograms for the optic pathway. F: Differential BED-volume histograms for the pyramidal tract. BED: biologically effective dose, 3D: 3-dimensional.Fig 3"
+    },
+    {
+      "title": "Limitations and further works in this direction",
+      "instruction": "In the modern GK models (Perfexion, Icon, and Esprit), the radiation units consist of a fixed conical collimation system and 192 60Co sources equally distributed over 8 sectors in a cylindrical configuration. The three available collimation channels, labelled as 4, 8, and 16 mm, allow the use of composite shot [17]. It means there are numerous combinations of different sectors with different collimation channels. Therefore, the dose falloff profiles of each shot of the modern GK models are more obviously more complex than those of the B or C GK models. In contrast, the method of MatBED_B&C can directly calculate the dose falloff profiles of one shot caused by the 4, 8, 14, and 18 mm collimators of the B or C GK models without beam channel blocking. Under no channel blocking condition, the dose falloff profiles of each shot in the x-direction, y-direction, and z-direction approximately follow a normal distribution. Consequently, the Gaussian function can fit the dose profiles for MatBED_B&C. One limitation of MatBED_B&C is that it cannot calculate the dose profiles of shots with channel blocking. The computational pipeline of MatBED_B&C is also applicable to calculate the dose falloff profile of one collimator for Perfexion and Icon only if all 8 sectors open without using a composite shot. The current method does not apply to the composite shot of Perfexion and ICON with or without beam channel blocking. To solve this problem, further work is being carried out to calculate the dose falloff of each sector rather than each shot for Perfexion and ICON."
+    }
+  ],
   "materials": [
     "Image, application 1\nImage, application 2"
   ],
-  "fetched_at": "2026-06-19T00:33:37.213281+00:00"
+  "fetched_at": "2026-06-19T00:33:37.213281+00:00",
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10433126/gr2.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/4fc7/10433126/4c78710b7b09/gr2.jpg",
+      "caption": "",
+      "bytes": 209073
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10433126/gr3.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/4fc7/10433126/56396b116a38/gr3.jpg",
+      "caption": "",
+      "bytes": 136017
+    },
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC10433126/ga1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/4fc7/10433126/635b5152e94c/ga1.jpg",
+      "caption": "",
+      "bytes": 90131
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10433126/gr1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/4fc7/10433126/e55a6b4ca228/gr1.jpg",
+      "caption": "",
+      "bytes": 126711
+    }
+  ]
 }

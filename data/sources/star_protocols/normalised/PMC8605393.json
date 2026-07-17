@@ -23,10 +23,348 @@
   "materials": [
     "Python 3.7.4 or higher",
     "SciPy v1.3.1 or higher",
-    "custom codes for model simulation"
+    "custom codes for model simulation",
+    "Timing: 10 min",
+    "This study did not generate any unique reagents.",
+    "This study did not generate new experimental data."
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Install Python and SciPy",
+      "instruction": "Install Python ≥ 3.7.4 and the SciPy package required for ODE solving.",
+      "substeps": [
+        {
+          "instruction": "Download Python 3.7.4 or a newer version from https://www.python.org and verify with `python3 --version`.",
+          "title": ""
+        },
+        {
+          "instruction": "Install SciPy (v1.3.1 or newer) via `pip install scipy`.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Define ODE system for backward simulation",
+      "instruction": "Formulate the dynamical system as coupled ODEs and rewrite them to use a downstream observable Y(t).",
+      "substeps": [
+        {
+          "instruction": "a. For n variables y_i(t) and m time‑dependent parameters p_j(t), write dy_i/dt = F_i[p(t);y(t)] + G_i[p(t);y(t),t] (i=1…n), where Σ_i F_i = 0 and G_i represent source/sink terms.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Sum the equations over i to obtain d/dt Σ_i y_i(t) = Σ_i G_i[p(t);y(t),t]; intermediate terms cancel.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Impose fundamental non‑negativity constraints (e.g., y_i(t) ≥ 0 for all i; G_j ≥ 0 for net influx).",
+          "title": ""
+        },
+        {
+          "instruction": "d. Introduce an observable Y(t) = Σ_{i∈A} y_i(t) (A = set of experimentally available components). For a chosen component j∈A, rewrite y_j(t) = Y(t) – Σ_{i∈A\\{j}} y_i(t). Substitute this into the ODEs for i≠j (Equation 3) and combine with the j‑equation to obtain G_j = dY/dt – Σ_{k∈A\\{j}} dy_k/dt – F_j (Equation 4).",
+          "title": ""
+        },
+        {
+          "instruction": "e. In backward simulation, solve Equations 3 and 4 for G_j and the transformed state vector y_Y(t) given p(t), Y(t), and initial y_Y(t). Treat any solution violating the constraints as infeasible.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Write circadian protein degradation equations",
+      "instruction": "Specify the ODEs for the Lim et al. 2021 circadian protein degradation model and perform sanity checks.",
+      "substeps": [
+        {
+          "instruction": "a. Write the five differential equations (Equations 5‑9) for x0, xE,0, xE,ub, x0,ub, and xH,ub, using parameters a0, a1, a2, b0, b1, q, s, r0 and functions g(t), u(t), v(t).",
+          "title": ""
+        },
+        {
+          "instruction": "b. Verify by summing Equations 5‑9 that d/dt[x0+xE,0+xE,ub+x0,ub+xH,ub] = g(t) – r0·[xE,ub+x0,ub+xH,ub] (Equation 12).",
+          "title": ""
+        },
+        {
+          "instruction": "c. Define total protein concentration x(t) = x0 + xE,0 + xE,ub + x0,ub + xH,ub (Equation 13) and rewrite Equation 12 as dx/dt = g(t) – r(t)·x(t) with r(t) = r0·[xE,ub+x0,ub+xH,ub]/x(t) (Equations 14‑15).",
+          "title": ""
+        },
+        {
+          "instruction": "d. Enforce non‑negativity of all concentrations (Equation 16) and non‑negative synthesis rate g(t) ≥ 0 (Equation 17).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Convert equations using total protein profile",
+      "instruction": "Transform the model to use the experimentally measured total protein x(t) as the downstream observable.",
+      "substeps": [
+        {
+          "instruction": "a. Note that only the relative profile of x(t) is available; scaling does not affect the model.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Substitute x0(t) = x(t) – [xE,0 + xE,ub + x0,ub + xH,ub] (Equation 18) into Equations 5 and 6.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Rewrite the synthesis rate g(t) as g(t) = dx0/dt + a0·u(t)·x0(t) – a1·xE,0(t) – s·xH,ub(t) (Equation 19), using the expression for x0(t) from (b).",
+          "title": ""
+        },
+        {
+          "instruction": "d. The backward simulation now solves Equations 6‑9, 10‑11, 18, and 19 for g(t) and the internal states given the observed x(t).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Implement simulation code in Python",
+      "instruction": "Write and run Python scripts that read data, interpolate the observable, define the ODE system, and integrate it with scipy.solve_ivp.",
+      "substeps": [
+        {
+          "instruction": "a. Import required modules: `import scipy.integrate`, `from scipy.interpolate import interp1d`.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Load the time‑course data for total protein x(t). If the data cover less than one circadian period, repeat them to span multiple periods.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Create a cubic interpolation of x(t) with `interp1d(time, x, kind='cubic')` to obtain a continuous function.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Define a Python function `ode_system(t, y, params, x_interp)` that returns the derivatives according to Equations 6, 7, 8, 9, 10, 11, 18, and 19 using the interpolated x(t).",
+          "title": ""
+        },
+        {
+          "instruction": "e. Call `scipy.integrate.solve_ivp` with arguments:",
+          "title": ""
+        },
+        {
+          "instruction": "- `fun` = the ODE function,",
+          "title": ""
+        },
+        {
+          "instruction": "- `t_span` = (t_start, t_end),",
+          "title": ""
+        },
+        {
+          "instruction": "- `t_eval` = array of time points for output,",
+          "title": ""
+        },
+        {
+          "instruction": "- `y0` = initial values for the state vector,",
+          "title": ""
+        },
+        {
+          "instruction": "- optional settings:",
+          "title": ""
+        },
+        {
+          "instruction": "* `max_step` << 1 h (e.g., 0.1 h) to resolve ~24 h circadian dynamics,",
+          "title": ""
+        },
+        {
+          "instruction": "* `method` = 'LSODA' (or 'BDF'/'Radau' for stiff problems; 'RK45' for non‑stiff),",
+          "title": ""
+        },
+        {
+          "instruction": "* `atol` and `rtol` to control absolute/relative error tolerance,",
+          "title": ""
+        },
+        {
+          "instruction": "* `dense_output=True` if a continuous solution is needed.",
+          "title": ""
+        },
+        {
+          "instruction": "f. Choose the integration method based on smoothness of the interpolated x(t): use 'LSODA' for noisy profiles (see Problem 1).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Validate model behavior and constraints",
+      "instruction": "Run diagnostic scripts to test sensitivity, simulation length, physical feasibility, and debugging of the ODE model.",
+      "substeps": [
+        {
+          "instruction": "a. Test sensitivity to initial conditions by randomly sampling physiologically plausible initial values and running the simulation; execute `python check_initial_conditions_sensitivity.py` and verify that g(t) and r(t) converge regardless of the start (Figures 2B‑C).",
+          "title": ""
+        },
+        {
+          "instruction": "b. Determine the minimum simulation length needed for asymptotic behavior by increasing `t_span`/`t_eval`; run `python check_long_time.py` and look for saturated, sustained oscillations.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Verify that all solutions satisfy the constraints (Equations 16‑17) using `python check_physical_constraints.py`; the script reports any violations (Figure 2D).",
+          "title": ""
+        },
+        {
+          "instruction": "d. Debug the implementation by setting specific parameter regimes:",
+          "title": ""
+        },
+        {
+          "instruction": "- Set v̄ = 0 → expect xH,ub(t) = 0 (check Figure 2E).",
+          "title": ""
+        },
+        {
+          "instruction": "- Set a0, b0, ū, v̄ high and a2, b1 low → expect x0,ub(t) ≈ 0 (check Figure 2F).",
+          "title": ""
+        },
+        {
+          "instruction": "Run `python check_debugging.py` to confirm these behaviours.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Perform parallel parameter sampling",
+      "instruction": "Generate many random parameter sets and run the backward simulation on multiple CPU cores using multiprocessing or MPI.",
+      "substeps": [
+        {
+          "instruction": "a. Using the `multiprocessing` module:",
+          "title": ""
+        },
+        {
+          "instruction": "```python",
+          "title": ""
+        },
+        {
+          "instruction": "import multiprocessing as mp",
+          "title": ""
+        },
+        {
+          "instruction": "parameter_sets = [param_set_1, …, param_set_N]",
+          "title": ""
+        },
+        {
+          "instruction": "pool = mp.Pool(Number_of_CPU_cores)",
+          "title": ""
+        },
+        {
+          "instruction": "pool.map(wrapper, parameter_sets)   # wrapper runs one simulation",
+          "title": ""
+        },
+        {
+          "instruction": "```",
+          "title": ""
+        },
+        {
+          "instruction": "b. Using the `mpi4py` module:",
+          "title": ""
+        },
+        {
+          "instruction": "```python",
+          "title": ""
+        },
+        {
+          "instruction": "from mpi4py import MPI",
+          "title": ""
+        },
+        {
+          "instruction": "comm = MPI.COMM_WORLD",
+          "title": ""
+        },
+        {
+          "instruction": "num_processor = comm.Get_size()",
+          "title": ""
+        },
+        {
+          "instruction": "rank = comm.Get_rank()",
+          "title": ""
+        },
+        {
+          "instruction": "simulation_done = 0",
+          "title": ""
+        },
+        {
+          "instruction": "simulation_target = N",
+          "title": ""
+        },
+        {
+          "instruction": "while simulation_done < simulation_target:",
+          "title": ""
+        },
+        {
+          "instruction": "# each rank processes one parameter set",
+          "title": ""
+        },
+        {
+          "instruction": "simulation_done += 1",
+          "title": ""
+        },
+        {
+          "instruction": "```",
+          "title": ""
+        },
+        {
+          "instruction": "c. Ensure that each process writes to a separate output file to avoid race conditions.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:24:06.329093Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "REAGENT or RESOURCESOURCEIDENTIFIERSoftware and algorithmsCustom codes for model simulationThis paperhttps://git.io/JuAFtPython 3.7.4 or higher versionPython Software Foundationhttps://www.python.orgSciPy v1.3.1 or higher versionVirtanen et al. (2020)https://www.scipy.org The BS method allows us to identify the valid parameter sets for experimentally available downstream data and to inspect the internal dynamics of the system with the fixed profiles of particular components. The latter would be useful for rigorous mechanistic inspection of a dynamical system. For example, we controlled for the protein profile x(t) in Lim et al. (2021) and found that the degradation rate r(t) tends to be more rhythmic with a lower level of a ubiquitin ligase u¯. In addition, we identified a definite lower bound of u¯ for the establishment of a given profile of x(t) itself, along with other interesting phenomena. Without the help of the BS, these clear conclusions may not be drawn, because in the conventional simulation with a fixed profile of the protein synthesis rate g(t), the change of u¯ modifies the oscillatory form of x(t) itself and thus does not clearly separate the effect of u¯ from that of the x(t) profile on the generation of rhythmic r(t) (Lim et al., 2021). Our BS method is based on ODE models, and its applications beyond ODE models are not yet straightforward. In addition, it should be noticed that BS does not aim to infer unknown parameter values; rather, it infers the upstream dynamics with given parameter values, and thereby identifies the parameter values with feasible upstream states, compatible with the downstream observables. If the BS is implemented with randomly-sampled parameters, the large number of parameter sets may need to be sampled as the dimension of the parameter space increases ( dN parameter sets, where N is the number of parameters in the model and d is the number of different values sampled for each parameter). Obviously, this massive parameter sam",
+  "content_type": "protocol",
+  "content_type_score": 23,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/star_protocols/PMC8605393/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8605393/",
+      "caption": "",
+      "bytes": 424053,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8605393/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.gif",
+      "local_path": "data/media/star_protocols/PMC8605393/fx2.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8605393/",
+      "caption": "",
+      "bytes": 65371,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8605393/fx2.gif"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC8605393/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8605393/",
+      "caption": "",
+      "bytes": 200874,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8605393/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC8605393/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8605393/",
+      "caption": "",
+      "bytes": 286894,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8605393/gr2.jpg"
+    }
+  ]
 }

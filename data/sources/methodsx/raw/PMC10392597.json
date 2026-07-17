@@ -9,7 +9,262 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "The novel feature of the method of battery management under development and testing is that routine balancing of the cells is eliminated throughout the service life of the battery pack. This requires preparation of the battery cells and configuration of the rigs in such a way as to ensure that the cells are accurately balanced on assembly and that thereafter there is no cell-to-cell variation in charge current or load at any time, measured to a low microamp level. In addition, the method requires a special charge control algorithm which was devised in order to accommodate cell-to-cell variations in capacity and dynamic response.Comprehensive experimental testing of this method, which is fully described in the associated paper (Hardy et al., 2023), required the development of hardware and software which would combine the necessary functions of a battery test rig and a battery management system capable of carrying out the special method of charge control described below. These included:•The automated control of contactors, loads and chargers to perform multiple charge/discharge cycles to predetermined patterns of current and maximum and minimum cell voltages.•Monitoring of cell voltages, current and temperature and the provision of test and diagnostic data.•Performing the safety functions of a Battery Management System to ensure that no cell was permitted to exceed limitations of current, voltage or temperature.The hardware and software were developed through three phases of testing with the operational principles (but not all the hardware and software elements) carrying over from one phase to the next.",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "Phase 1",
+      "instruction": "This early experimental testing, which was aimed simply at assessing voltage drift in the absence of routine cell voltage balancing, used commercial off-the-shelf smart chargers which applied a modified Constant current/Constant voltage (CC/CV) charge profile to the whole pack. A generic Arduino microcontroller board working with a PC was used to supervise cycling and record cell voltage, pack current and ambient temperature data in .csv files (Fig. 1). Although this simple charging method allowed some cells to peak above their target voltage, this was monitored to ensure individual cells voltage peaks were not excessively high. There may however have been some adverse effect on cycle life.Fig. 1Phase 1 experimental testing - circuit diagram.Fig 1"
+    },
+    {
+      "title": "Phase 1",
+      "instruction": "For the purposes of cell voltage monitoring, the initial intention had been to connect a low-cost “Junsi Cell-Log 8S” voltage logger unit, designed for transmitting cell voltages to a PC via USB. It was recognised, however, that this device would draw a current of approximately 35µA from the positive terminal of each cell. The unbalancing effect would have been cumulative (Fig. 2) and over all eight cells in the experimental pack the variation in net current drain would have amounted to at least 280 µA. This would have unbalanced the pack by about 0.2 Ah per calendar month.Fig. 2Unbalancing effect of cell voltage logger.Fig 2"
+    },
+    {
+      "title": "Phase 1",
+      "instruction": "To overcome this, voltage followers based on operational amplifiers were placed between the logger and the cell terminals (Fig. 3). An operational amplifier wired in this way uses external power to replicate the input voltage at the output without drawing any current from the input.Fig. 3Operational Amplifier wired as voltage follower.Fig 3"
+    },
+    {
+      "title": "Phase 1",
+      "instruction": "Cycling was managed by switching the charger using a solid-state relay (SSR) in the mains supply to the charger."
+    },
+    {
+      "title": "Phase 1",
+      "instruction": "The load was resistive (Fig. 4), switched using a simple 24 V automotive relay which was in turn switched using a MOSFET.Fig. 4Phase 1 Resistive load.Fig 4"
+    },
+    {
+      "title": "Phase 1",
+      "instruction": "Current was measured using a Hall effect sensor. The Arduino microcontroller board was programmed using its own scripting language and communicated with the PC which was running code written in the Processing scripting language."
+    },
+    {
+      "title": "Phase 1",
+      "instruction": "The equipment used for Phase 1 is summarised in Table 1.Table 1Phase 1 Equipment summary.Table 1ControllerCell Voltage MonitoringChargerCurrent MeasurementLoadTemperature MonitoringArduino Mega off-the-shelf microcontroller board + PCJunsi Cell Log 8S plus bespoke operational amplifier boardUnbranded LiFePO4 29.2 V smart chargerLEM LTSR 15-NP Hall Effect SensorResistiveMaxim DS18B20"
+    },
+    {
+      "title": "Phase 2",
+      "instruction": "The test rigs for Phase 2 were refined, principally in order to apply the experimental CC/CCeV charging protocol This method, described in more detail below, modulates whole pack charge current to the maximum which at any time can be accommodated without causing any cell to go over voltage. The rigs also provided for an additional parameter, cell terminal temperature, to be monitored. The same combination of Arduino and PC was used, the load was resistive as before and the current measured using a Hall effect sensor as in Phase 1. The refinements over Phase 1 were:•A variable voltage laboratory power supply was used instead of a smart charger. This allowed for the fine control of charging current required to implement the experimental CC/CCeV charging protocol.•The Arduino was programmed to control the Power Supply, setting current and voltage to implement the charging protocol.•Cell positive and negative terminal temperatures were measured using thermistors (Fig. 5).Fig. 5Phase 2 Thermistor used to monitor terminal temperatures.Fig 5"
+    },
+    {
+      "title": "Phase 2",
+      "instruction": "Use of a Kunkin KL284A load was considered but it was concluded that this offered little advantage over the simpler resistive load since it could only be set manually."
+    },
+    {
+      "title": "Phase 2",
+      "instruction": "The equipment used for Phase 2 is summarised in Table 2.Table 2Phase 2 Equipment summary.Table 2ControllerCell Voltage MonitoringChargerCurrent MeasurementLoadAmbient TemperatureCell TemperaturesArduino Mega off-the-shelf microcontroller board + PCJunsi Cell Log 8S plus bespoke operational amplifier boardBK Precision 1687B Power SupplyACS712 Hall Effect SensorResistiveMaxim DS18B20NTCALUG03A103HC or similar thermistors read by 12-bit TI ADS1015 or 16-bit ADS1115 ADCs with I2C interface"
+    },
+    {
+      "title": "Phase 2",
+      "instruction": "Designing most of the required software was reasonably straightforward. The CC/CCeV algorithm provides that on charge during each loop of the software the voltage of the cell is checked and if the highest cell voltage exceeds a given target value, the current is decremented by a fixed value, which was determined by experimentation. Although this worked well for this cycle testing where charging always started from a discharged pack, it was recognised that a real-world BMS would need a more sophisticated implementation of the algorithm. This was developed for the prototype BMS used in Phase 3, as described below."
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "The Phase 3 experiment was conducted some time after Phases 1 and 2, during which period development had proceeded towards a reusable prototype BMS incorporating the operating principles developed and tested during Phases 1 and 2. An early embodiment of this was incorporated in a battery pack configured to simulate an airliner Auxiliary Power Unit battery. A more sophisticated version was used first in a converted electric Quad using Nissan cells. This latter version used cell boards to read cell voltages and terminal temperatures, and to broadcast them on CAN. A central master unit consisted of an STM32 Nucleo board with third party programming to control contactors, together with a Zivan SG3 charger, implementing the CC/CCeV protocol. Current and pack voltage was read using an Isabellenhutte CAN-enabled smart shunt (Figs. 6 and 7).Fig. 6Cell boards in Prototype battery pack for a Quad bike.Fig 6Fig. 7Smart Shunt (centre foreground), twin contactors (right foreground) and Nucleo Board (background) in the Quad bike pack.Fig 7"
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "The experience gained in this development work was used to specify a further design iteration providing a complete reusable prototype for use in the Phase 3 experiment. This was implemented in bespoke hardware and with software designed and programmed using STM32 microcontrollers. The overall architecture was the same as developed for the Quad bike, comprising a Master and Cell Boards connected via Controller Area Network (CAN) with a smart shunt to measure current. The function of the Cell Boards was to transmit cell voltage and terminal temperatures to the Master on a CAN bus. The electronics were isolated from cell voltage so that there were no high voltages outside the Cell Board (Fig. 8).Fig. 8Schematic of cell board isolation.Fig 8"
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "The Cell Boards were powered externally, not by the cell itself, in order to eliminate any risk of unbalancing loads resulting from running the electronics."
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "The Cell Boards were connected to the Master using a simple four-wire daisy chain (12v+/12V- to power the board electronics plus CAN High and CAN low for cell voltage and terminal temperature data). In a high voltage pack this arrangement is much simpler than the wiring required for a conventional centralised BMS which incorporates a separate connection to each cell used for cell voltage monitoring and balancing."
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "Eliminating these connections not only reduces cost and complexity, it also improves safety during maintenance by reducing high voltage wiring in the BMS. Fire risk is also reduced by the absence of opportunities for chafing of high voltage wires (Fig. 9).Fig. 9Cell Board installation in a test bed vehicle. The four-wire daisy-chain is power (positive and negative) and CAN (high and low).Fig 9"
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "The Cell Board CAN bus terminates at the Master which accumulates the cell voltages and terminal temperatures. The Master also takes current and total pack voltage data over CAN from the smart shunt, similar to the one in Fig. 7. It controls the pack contactor(s) and implements several fail-safe mechanisms to issue warnings, invoke limp mode or shut the pack down in the event of fault conditions such as a missing cell board, a mis-match between pack voltage and total cell board voltages, excessive current, low cell voltages or terminal temperatures outside limits."
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "The Master (Fig. 10) also controls the charging process, using a more sophisticated implementation of the CC/CCEV algorithm than was applied in the Phase 2 experiments, and outputs data on an external CAN bus.Fig. 10The Master board used in Phase 3.Fig 10"
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "The development of this hardware and software provided high precision charge control and more accurate data logging at shorter intervals. It also demonstrated the practicality of producing a fully functioning BMS applying the operating principles described in [1]."
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "As described in detail at [1] the test rig for the Phase 3 experiment was designed to enable comparative performance monitoring of two separate battery packs, one managed with the equipment described above, and the other using a commercial “Orion 2″ balancing BMS manufactured by Ewert Energy Systems. A single electronic load and a single electronic power supply were used for both packs, with cycles interleaved so that one pack was charging whilst the other was discharging (Fig. 11).Fig. 11Phase 3 Test rig wiring diagram (Fuses, plus control and data collection wiring, not shown).Fig 11"
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "It was essential to avoid the risk of occasional shut down mid-cycle that may occur using Windows PC's, for example when installing an operating system update. For most of Phase 3, therefore, a mini-PC running Linux was used in “headless” mode, without screen or keyboard. This was accessed via a Virtual Network Computing (VNC) graphical desktop-sharing app from a remote PC. A small Uninterruptible Power Supply (UPS) was used to avoid the risk of power outages."
+    },
+    {
+      "title": "Phase 3",
+      "instruction": "The complete rig included a 12 V power supply for the electronics, high current fuses, bus bars and contactors (Fig. 12). As well as scheduling charge and discharge, the Linux mini-PC was programmed to swap changeover relays and write data output by both BMSs to file at 1 s intervals.Fig. 12The final Phase 3 test rig. The Pack A experimental BMS master is top right. The Pack B conventional BMS is the finned aluminium box bottom centre-right.Fig 12"
+    },
+    {
+      "title": "Results",
+      "instruction": "Table 3 lists the cell types and other test metadata The results and analysis for all three phases are detailed in [1], and are not therefore repeated here.Table 3Test metadata.Table 3PhaseTest NumberCell TypeCyclesTotal CSV files (Mb)Sampling interval (seconds)Phase11Headway 38120S575*11.3302CALB CA40fi200810430Phase 23GP1865L220159*12304GP1865L22065928.2305Panasonic NCR18650A319*22.4306Samsung ICR18650–22P638482307Samsung ICR18650–22P71945.230Phase 38Nissan Gen 4100410,4001⁎A cell failure caused early termination of the test."
+    },
+    {
+      "title": "Results",
+      "instruction": "The raw data was collected in CSV (comma separated) files. Note that the file size depends on the sampling interval, the number of columns of data collected, the charge and discharge currents, length of rest periods, battery capacity and test duration. An example of the raw data collected forms Fig. 13.Fig. 13Sample CSV data.Fig 13"
+    },
+    {
+      "title": "Results",
+      "instruction": "Data were plotted using Microsoft Excel charts and annotated as required (Fig. 14).Fig. 14Sample of data plotted and annotated in Excel.Fig 14Note that Figure 14 illustrates a test that had two battery packs – one fitted with a conventional balancing BMS and one with the prototype non-balancing BMS"
+    },
+    {
+      "title": "Data validation",
+      "instruction": "Cell voltages were cross checked with a Volt-Ohm metre and currents with an in-line or clamp ammeter."
+    },
+    {
+      "title": "Data validation",
+      "instruction": "In Test 8, a precision power supply and load were used, and both returned pack voltage and pack current. These values could be compared with the equivalent values returned by the two BMSs in order to verify that the latter were correct."
+    },
+    {
+      "title": "Data validation",
+      "instruction": "In addition, the prototype BMS measured pack voltage independently of cell voltages so the total of all cell voltages could be compared with the reported pack voltage."
+    },
+    {
+      "title": "Bottom balancing",
+      "instruction": "In the absence of routine cell voltage balancing (apart from the conventional “Pack B” BMS used in Phase 3) pack performance depended on accurate balancing prior to assembly. Cells were “bottom balanced” (i.e. near full discharge) since at this point the higher rate of change of voltage against state of charge allowed greater precision."
+    },
+    {
+      "title": "Bottom balancing",
+      "instruction": "Since lithium-ion cells exhibit voltage recovery following cessation of current flow, with a voltage drop after charging ceases and voltage rise after discharge, balancing needs to be carried out with care. The approach used was to connect each cell to a balancing rig as shown schematically in Fig. 15. A microcontroller was configured to allow discharge through a resistor until a pre-determined voltage was reached, at which point it would switch the MOSFET off and on (initially very rapidly) to maintain the selected voltage. A PC was used to record data for analysis and trouble-shooting.Fig. 15Bottom balancer schematic.Fig 15"
+    },
+    {
+      "title": "Bottom balancing",
+      "instruction": "Several considerations apply to this process:•It is critical that the voltage sensing lines are independent of the main circuit: the effect otherwise would be to distort the voltage readings due to voltage drop in the main circuit.•Assuming that the cells start out at a similar state of charge, it was found that a balancing period of 15 min at the selected voltage was normally sufficient.•The charge history of the cells is important. If the cells in a pack had previously been held at significantly varying states of charge, the so-called “anode overhang” effect described in [1] could induce cell voltage drift, continuing over a prolonged period."
+    }
+  ],
   "materials": [],
-  "fetched_at": "2026-06-19T00:33:49.895946+00:00"
+  "fetched_at": "2026-06-19T00:33:49.895946+00:00",
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr6.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/28c2ddd8e390/gr6.jpg",
+      "caption": "",
+      "bytes": 145234
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr2.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/2a5b4c11db91/gr2.jpg",
+      "caption": "",
+      "bytes": 51673
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr13.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/2f3c57c65238/gr13.jpg",
+      "caption": "",
+      "bytes": 156374
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr7.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/40010c6c0182/gr7.jpg",
+      "caption": "",
+      "bytes": 126583
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr8.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/6ba73046e506/gr8.jpg",
+      "caption": "",
+      "bytes": 37381
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr5.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/7bc9fc9c93bb/gr5.jpg",
+      "caption": "",
+      "bytes": 94603
+    },
+    {
+      "type": "image",
+      "filename": "gr15.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr15.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/7fd81685c6ae/gr15.jpg",
+      "caption": "",
+      "bytes": 24485
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr10.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/8edd88945cc0/gr10.jpg",
+      "caption": "",
+      "bytes": 127074
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr3.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/aa8629406043/gr3.jpg",
+      "caption": "",
+      "bytes": 32998
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr4.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/af3df5ec2283/gr4.jpg",
+      "caption": "",
+      "bytes": 108782
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr12.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/b069bb65f732/gr12.jpg",
+      "caption": "",
+      "bytes": 148127
+    },
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/ga1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/b6b205b648a7/ga1.jpg",
+      "caption": "",
+      "bytes": 98723
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr9.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/bcd07b4b0ef1/gr9.jpg",
+      "caption": "",
+      "bytes": 168067
+    },
+    {
+      "type": "image",
+      "filename": "gr14.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr14.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/d2427314072a/gr14.jpg",
+      "caption": "",
+      "bytes": 58552
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr11.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/d920c5c44724/gr11.jpg",
+      "caption": "",
+      "bytes": 45992
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/79ac/10392597/fa30fc374da7/gr1.jpg",
+      "caption": "",
+      "bytes": 57373
+    }
+  ]
 }

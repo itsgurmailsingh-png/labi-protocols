@@ -1,0 +1,111 @@
+{
+  "protocol_id": "a_benfords_law_based_method_for_fraud_detection_using_r_library",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "A Benford's law based method for fraud detection using R Library",
+  "author": "Azevedo, Gonçalves, et al.",
+  "doi": "10.1016/j.mex.2021.101575",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8720889/",
+  "citation": "10.1016/j.mex.2021.101575",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 4.5,
+  "category": "Other",
+  "estimated_time_mins": null,
+  "materials": [
+    "P0 is the expected frequency under Benford´s law.",
+    "n is the number of records.",
+    "Data Samples: Bolsa Família Program",
+    "Exploratory analysis and data preparation",
+    "Another perspective"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Install software and packages",
+      "instruction": "Install RStudio Desktop version 1.2.1335 on Windows 10 Home (version 10.0.183363) on a notebook with Intel Core i7 1.8 GHz (8th gen) and 8 GB RAM; install R and the CRAN package benford.analysis; clone the GitHub repository https://github.com/cazevedo1977/brazilian-welfareprogram-bolsafamilia-dataanalysis to obtain the two analysis scripts.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Download raw withdrawal data",
+      "instruction": "On May 10 2020 download the Bolsa Família withdrawal CSV files for January and March of 2018 and 2019 from http://www.portaltransparencia.gov.br/download-de-dados/bolsa-familia-saques (select year/month and click “Baixar”). Files are semicolon‑separated CSV encoded Latin‑1; keep original names such as 201801_BolsaFamilia_Saques.csv. Also download the pre‑aggregated municipal files (BolsaFamilia_Municipalities_Jan_2018.csv, BolsaFamilia_Municipalities_Mar_2018.csv, BolsaFamilia_Municipalities_Jan_2019.csv, BolsaFamilia_Municipalities_Mar_2019.csv) from https://www.kaggle.com/caioazevedo/brazilian-welfareprogram-bolsafamilia-dataanalysis.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Set working directory and read raw file",
+      "instruction": "Open RStudio, set the working directory to the folder containing the CSV files, e.g. setwd(\"C:/Users/cazev/OneDrive/Desktop/docs/Mestrado/paper benford law/references/datasources\"); then read the raw withdrawal file with read.csv2(file=\"201801_BolsaFamilia_Saques.csv\", sep=';', header=TRUE, fileEncoding=\"latin1\").",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Run first‑approach Benford test on raw data",
+      "instruction": "Source and run the script Benford_BolsaFamilia_MethodsX.FirstApproach.R. The script analyses the variable VALOR.PARCELA (withdrawal value) using Z‑statistic, chi‑square and MAD. Record that the dataset contains 13,442,529 records. The observed chi‑square for first‑digit is 6,480,128.958, which exceeds the 5 % critical value 15.507, so the first‑digit test fails; first‑two‑digit chi‑square is not computed because the first‑digit test already failed.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Group data by municipalities",
+      "instruction": "In the same script, after the failed test, execute dataSet <- myGroupDataByMunicipalities(dataSet, \"BolsaFamilia_Municipalities_Jan_2018.csv\") to create a new CSV where each row corresponds to a municipality and the column “Withdrawal value” contains the total amount paid by that municipality.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Run final Benford analysis on aggregated data",
+      "instruction": "Open and run Benford_BolsaFamilia_MethosdsX.FinalAnalysis.R (ensure the working directory points to the municipal CSV files). The script computes Z‑statistic, chi‑square and MAD for both first‑digit and first‑two‑digit distributions of municipal withdrawal totals.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Compare results with statistical thresholds",
+      "instruction": "Use the following 5 % significance thresholds: Z‑statistic critical value 1.96 (also 2.57 for 1 % and 1.64 for 10 %); chi‑square critical values 15.507 for first‑digit and 112.022 for first‑two‑digit (89 degrees of freedom); MAD critical ranges – first digits: 0.000‑0.006 close, 0.006‑0.012 acceptable, 0.012‑0.015 marginally acceptable, >0.015 non‑conformity; first‑two digits: 0.000‑0.012 close, 0.012‑0.018 acceptable, 0.018‑0.022 marginally acceptable, >0.022 non‑conformity. The observed MAD = 0.0010 (below the 0.0022 limit). Aggregated chi‑square results are 11.932 (first‑digit) < 15.507 and 80.8485 (first‑two‑digit) < 112.022. Four Z‑statistics exceed 1.96: digit 48 (2.6486), 35 (2.3590), 17 (2.0468) and 34 (1.9683), which is within the expected 4‑5 spikes at a 5 % level.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Perform summation test",
+      "instruction": "Apply the summation test to the first‑two‑digit groups of the aggregated data. The theoretical proportion for each group is 1/90 = 0.011; with a 25 % upper tolerance the critical proportion is 0.01375. Identify all digit groups whose sum‑proportion exceeds 0.01375.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Select top digit groups and export municipalities",
+      "instruction": "Rank digit groups by their sum‑proportion and select the ten highest (example from Table 4: digit 10 – 23 434 municipalities – total BRL 109,877,366 – proportion 0.0456; digit 12 – 34 311 municipalities – total BRL 104,132,939 – proportion 0.0433; … digit 66 – 55 185 municipalities – total BRL 66,550,185 – proportion 0.0276). Use the final line of the script to write the list of municipalities belonging to those groups to a CSV file for further audit. Optionally merge this file with population data from IBGE for additional fraud‑risk assessment.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 24,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

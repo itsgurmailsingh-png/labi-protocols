@@ -28,142 +28,158 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Get sample data from github (requires git to be installed on your system). git clone https://github.com/hurwitzlab/mg-sample-data.git This can be downloaded to your shared supercomputers (job scheduler managed) or your own laptop. It&#39;s small enough data (&lt; 10mb) that it should be trivial to run on most systems.",
+      "title": "Clone sample data repository",
+      "instruction": "Clone the mg‑sample‑data repository from GitHub using: `git clone https://github.com/hurwitzlab/mg-sample-data.git`. The dataset is < 10 MB and can be placed on a shared supercomputer, a job‑scheduler‑managed directory, or a local laptop.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Get recipe for singularity image containing fastqc and solexaqa: (This must be downloaded to a system where you have sudo privileges) git clone https://github.com/hurwitzlab/singularity-fastqc.git",
+      "title": "Clone FastQC Singularity recipe",
+      "instruction": "Clone the Singularity recipe that contains FastQC and SolexaQA with: `git clone https://github.com/hurwitzlab/singularity-fastqc.git`. This must be done on a system where you have sudo privileges.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "From within /singularity-fastqc run ./create_and_bootstrap.sh (see example). This should create a &#39;fastqc.img&#39;. cd singularity-fastqc/ && ./create_and_bootstrap.sh Make sure there are no errors! E.g. &#34;ABORT: Aborting with RETVAL=255&#34; http://null",
+      "title": "Build FastQC Singularity image",
+      "instruction": "Enter the cloned directory and run the build script: `cd singularity-fastqc && ./create_and_bootstrap.sh`. The script should create a file named `fastqc.img`. Verify that no error appears (e.g., \"ABORT: Aborting with RETVAL=255\").",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "sftp or scp the created &#34;fastqc.img&#34; to your shared supercomputer directory OR put it in your &#34;/bin&#34; directory (or other dir in your PATH) Example:",
+      "title": "Transfer FastQC image",
+      "instruction": "Copy the resulting `fastqc.img` to a directory on your shared supercomputer (or any directory that is in your `$PATH`, such as `/bin`) using `scp` or `sftp`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Generate quality reports with fastqc (optional). Example script is mg-sample-data/scripts/00-fastqc-reports.shThis script is meant to be submitted to a PBS job scheduler by issuing the command Example script is mg-sample-data/scripts/00-fastqc-reports.sh This script is meant to be submitted to a PBS job scheduler by issuing the command &#34;./00-fastqc-reports.sh&#34; but can be edited to run with other job schedulers (must also edit ./workers/fastqc.sh). If you want to manually generate fastqc reports, the script you want is in &#39;scripts/workers/fastqc.sh&#39; This is true for most other steps.",
+      "title": "Generate FastQC quality reports (optional)",
+      "instruction": "Run the provided FastQC reporting script: `mg-sample-data/scripts/00-fastqc-reports.sh`. Submit it to a PBS scheduler with `./00-fastqc-reports.sh` (or edit `./workers/fastqc.sh` for another scheduler). For manual execution, run the worker script directly: `scripts/workers/fastqc.sh`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Run trim_galore (a wrapper script for cutadapt) to cut off low-quality bases and adapters (default is to cut off bases until the probability that the base call was correct is 99% or greater) Example script is mg-sample-data/scripts/01-trim-galore.shThis script is meant to be submitted to a PBS job array scheduler by running the command Example script is mg-sample-data/scripts/01-trim-galore.sh This script is meant to be submitted to a PBS job array scheduler by running the command &#34;./01-trim-galore.sh&#34; but can be edited to run with other job schedulers (must also edit &#34;./workers/trimgalore.sh&#34;)",
+      "title": "Run Trim Galore on reads",
+      "instruction": "Execute the Trim Galore wrapper (which calls cutadapt) to trim low‑quality bases and adapters. Use the example script: `mg-sample-data/scripts/01-trim-galore.sh` and submit it to a PBS job array with `./01-trim-galore.sh`. Edit `./workers/trimgalore.sh` if you use a different scheduler. The default trimming stops when the probability that a base call is correct reaches 99 % or greater.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Compare quality reports between steps 5 and 6. If you don&#39;t see much improvement, consider re-running step 6 with different parameters.",
+      "title": "Compare pre‑ and post‑trim reports",
+      "instruction": "Inspect the FastQC reports generated before step 5 and after step 6. If the quality improvement is minimal, consider re‑running Trim Galore with different parameters.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Get the github repos for building the images git clone https://github.com/hurwitzlab/singularity-tuxedo.gitgit clone https://github.com/hurwitzlab/singularity-taxoner.git git clone https://github.com/hurwitzlab/singularity-tuxedo.git git clone https://github.com/hurwitzlab/singularity-taxoner.git",
+      "title": "Clone Tuxedo and Taxoner recipes",
+      "instruction": "Clone the Singularity recipes for the Tuxedo suite and Taxoner: `git clone https://github.com/hurwitzlab/singularity-tuxedo.git` and `git clone https://github.com/hurwitzlab/singularity-taxoner.git`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "From within /singularity-tuxedo (Tuxedo is a suite of tools that contains bowtie and cuffdiff see http://software.broadinstitute.org/cancer/software/genepattern/rna-seq-analysis#tuxedo) run ./create_and_bootstrap.sh (see example). This should create a &#39;bowcuff.img&#39;. From within /singularity-taxoner run ./create_and_bootstrap.sh. This should create a &#39;taxoner.img&#39; Make sure there are no errors! E.g. &#34;ABORT: Aborting with RETVAL=255&#34; http://null cd singularity-tuxedo/ && ./create_and_bootstrap.sh",
+      "title": "Build Bowtie/Cufflinks image",
+      "instruction": "Enter the Tuxedo directory and run the build script: `cd singularity-tuxedo && ./create_and_bootstrap.sh`. This creates `bowcuff.img`. Confirm that no error such as \"ABORT: Aborting with RETVAL=255\" occurs.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "sftp or scp the created &#39;bowcuff.img&#39; and &#39;taxoner.img&#39; to your shared supercomputer directory OR put it in your &#39;/bin&#39; directory (or other dir in your PATH) Example:",
+      "title": "Build Taxoner Singularity image",
+      "instruction": "Enter the Taxoner directory and run: `cd singularity-taxoner && ./create_and_bootstrap.sh`. This creates `taxoner.img`. Verify that the script finishes without the abort error.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "Run 02-taxadb-prep.pbs to prepare the lineage file and genome fasta&#39;s for bowtie2 indexing Example script is mg-sample-data/scripts/02-taxadb-prep.pbsThis script is meant to be submitted to a PBS job scheduler by issuing the command Example script is mg-sample-data/scripts/02-taxadb-prep.pbs This script is meant to be submitted to a PBS job scheduler by issuing the command &#34;qsub 02-taxadb-prep.pbs&#34; but can be edited to run with other job schedulers.",
+      "title": "Transfer Bowtie and Taxoner images",
+      "instruction": "Copy `bowcuff.img` and `taxoner.img` to a directory on your shared supercomputer or to any location in your `$PATH` (e.g., `/bin`) using `scp` or `sftp`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
-      "instruction": "Make Bowtie2 indices of the split multi-genome fasta files. The example script will launch bowtie2 to run index building on two computers in parallel. This is why you split the giant fasta into files of ~4 Gb each. So if you had 40 gb worth of genomes in one big file, you could have 10 computers doing the bowtie2 indexing at once. Example script is mg-sample-data/scripts/03-bowtie2-build.shThis script is meant to be submitted to a PBS job scheduler by issuing the command Example script is mg-sample-data/scripts/03-bowtie2-build.sh This script is meant to be submitted to a PBS job scheduler by issuing the command &#34;./03-bowtie2-build.sh&#34; but can be edited to run with other job schedulers (must also edit ./workers/bowtie2-build.sh).",
+      "title": "Prepare taxonomy database for Bowtie2",
+      "instruction": "Submit the PBS script that builds the lineage file and genome FASTA files needed for Bowtie2 indexing: `mg-sample-data/scripts/02-taxadb-prep.pbs`. Use `qsub 02-taxadb-prep.pbs` (or edit for another scheduler).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
-      "instruction": "Edit config.sh with your favorite text editor to set variables (directories mainly) Example:",
+      "title": "Build Bowtie2 indices from split FASTA",
+      "instruction": "Run the Bowtie2 index‑building script: `mg-sample-data/scripts/03-bowtie2-build.sh`. Submit it with `./03-bowtie2-build.sh` (or edit `./workers/bowtie2-build.sh` for another scheduler). The script expects the multi‑genome FASTA to be split into ~4 GB files so that indexing can be parallelised across multiple computers.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
-      "instruction": "Get the singularity container for centrifuge a classifier program for bacterial/viral species (https://ccb.jhu.edu/software/centrifuge/) If doing this step for the species identification you can optionally skip QC and definitely skip Bowtie2 Prep git clone https://github.com/scottdaniel/singularity-centrifuge.git",
+      "title": "Edit configuration variables",
+      "instruction": "Open `config.sh` in your preferred text editor and set the required directory paths and other variables for the pipeline.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
-      "instruction": "Build the singularity container as before cd singularity-centrifuge && make img",
+      "title": "Clone Centrifuge Singularity recipe",
+      "instruction": "If you plan to use Centrifuge for species identification, clone its recipe: `git clone https://github.com/scottdaniel/singularity-centrifuge.git`. You may optionally skip the QC and Bowtie2 preparation steps when using this classifier.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
-      "instruction": "We need to build a couple more singularity images for this section: singularity-taxoner and singularity-tuxedo (named after the tuxedo suite of tools: bowtie2, cufflinks, etc.)",
+      "title": "Build Centrifuge Singularity image",
+      "instruction": "Enter the Centrifuge directory and build the image with: `cd singularity-centrifuge && make img`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
-      "instruction": "Run taxoner for the DNA reads to determine species composition Example script is mg-sample-data/scripts/04-taxoner.shThis script is meant to be submitted to a PBS job scheduler by issuing the command Example script is mg-sample-data/scripts/04-taxoner.sh This script is meant to be submitted to a PBS job scheduler by issuing the command &#34;./04-taxoner.sh&#34; but can be edited to run with other job schedulers (must also edit ./workers/runTaxoner.sh).",
+      "title": "Run Taxoner on DNA reads",
+      "instruction": "Execute the Taxoner script to determine species composition of the DNA reads: `mg-sample-data/scripts/04-taxoner.sh`. Submit it to PBS with `./04-taxoner.sh` (or edit `./workers/runTaxoner.sh` for another scheduler).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T14:03:43.258590Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 49,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "nb4c8pn-2359C183687311F08F960A58A9FEAC02.png",
+      "local_path": "data/media/protocols_io/combined-metagenomic-metatranscriptomic-pipeline-f-d7m9k5/nb4c8pn-2359C183687311F08F960A58A9FEAC02.png",
+      "source_url": "https://files.protocols.io/external/nb4c8pn-2359C183687311F08F960A58A9FEAC02.png",
+      "caption": "",
+      "bytes": 37908,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/combined-metagenomic-metatranscriptomic-pipeline-f-d7m9k5/nb4c8pn-2359C183687311F08F960A58A9FEAC02.png"
+    }
+  ]
 }

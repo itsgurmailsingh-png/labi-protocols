@@ -18,9 +18,200 @@
     "time series"
   ],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "Where(25)∂l(β,α)∂βj=∑t=2nΔ∁βjt′Δ∁t−(T−2)xj(26)∂l(β,α)∂l(α)=∑t=2TΔCt,α′ΔCt",
+    "WithΔCt=C(ut,vt;α)−C(ut,vt−;α)−C(ut−,vt;α)+C(ut−,vt−;α),ΔCt,β′=xj[ut[C(vt|ut;α)−C(vt−1|ut;α)]+vt[C(ut|vt;α)−C(ut−1|vt;α)]−(vt−1)[C(ut|vt−1;α)−C(ut−1|vt−1;α)]−(ut−1)[C(vt|ut−1;α)−C(vt−1|ut−1;α)]]",
+    "and α^0=2Function: Parameter Estimation ParEst(Y,X,size)(β^,α^)=argmaxβL(β,α)End FunctionAlgorithm",
+    "Furthermore, the interpretation of the dependency structure is in the form of autocorrelation. The best model for influenza data is copula-based Markov chain logistic regression model with Frank Copula function. Consequently, it can be concluded that the influenza data has a symmetrical time dependence and has no dependence on the lower and upper tails. In Table 4, the copula parameter value for the Frank copula model is 2.19288 and when expressed in the Kendals-tau value is 0.2320. It can be stated that today's influenza activity has a weak effect on tomorrow's influenza cases. Therefore, the conditional expectation Yt given Yt−1 in the copula-based Markov chain logistic regression model can be expressed in the following equation:(34)Pr(Yt=yt|Yt−1=yt−1)=e−2.19288v[(e−2.19288−1)(eθ2.19288−1)−1+(e2.19288v−1)]−1where v is the binomial cumulative distribution with the probability of success in Eq. (33).",
+    "Furthermore, the copula-based Markov chain model are compared with other binomial data models, namely the Binomial Logistic Regression (BLR) model for ordinary binomial response data which does not assume autocorrelation and GLMM for binomial time series models which assumes autocorrelation expressed by latent processes. The following are the results of parameter estimation from the BLR, GLMM and copula-based Markov Chain models using Frank Copula:"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Load input data",
+      "instruction": "Read the dependent vector Y, the total‑sample vector N (or n_t for each time point), and the covariate matrix X (including an intercept column).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Compute success probabilities",
+      "instruction": "For each time point t compute the logistic success probability π_t = exp(X_t β) / (1 + exp(X_t β)) using the logistic regression formula (Eq. 11).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Calculate marginal pdf and cdf",
+      "instruction": "For each t evaluate the binomial probability mass function f(y_t; n_t, π_t) = (n_t choose y_t) π_t^{y_t} (1‑π_t)^{n_t‑y_t} (Eq. 16) and the cumulative distribution F(y_t; n_t, π_t)=∑_{k=0}^{y_t} f(k; n_t, π_t) (Eq. 17).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Form marginal distribution values",
+      "instruction": "Set u_t = F(y_t; n_t, π_t), v_t = F(y_{t‑1}; n_{t‑1}, π_{t‑1}) for t=2…T and also compute u_{t‑1}=F(y_{t‑1}; n_t, π_t) and v_{t‑1}=F(y_{t‑1}‑1; n_{t‑1}, π_{t‑1}) as required by Eq. 15.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Choose copula and compute joint C",
+      "instruction": "Select one Archimedean copula (Clayton, Gumbel or Frank). Use its bivariate C(u,v;α) with the appropriate parameter α (Clayton α∈{0.5,2,8}; Gumbel α∈{2,6,20}; Frank α∈{1.25,2.5,5}) to obtain the joint cumulative C(u_t,v_t;α) and the four‑corner terms C(u_t,v_{t‑1};α), C(u_{t‑1},v_t;α), C(u_{t‑1},v_{t‑1};α).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Assemble log‑likelihood",
+      "instruction": "Compute L(β,α)=∑_{t=2}^{T} log[ C(u_t,v_t;α)‑C(u_t,v_{t‑1};α)‑C(u_{t‑1},v_t;α)+C(u_{t‑1},v_{t‑1};α) ] ‑ ∑_{t=2}^{T‑1} log[ f(y_{t‑1}; n_{t‑1}, π_{t‑1}) ] as given in Eq. 23.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Initialize parameters",
+      "instruction": "Set the logistic regression coefficient vector β^{(0)} = (0,0,…,0) (same length as X columns) and an initial copula parameter α^{(0)} (e.g., α^{(0)} = 2).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Maximize log‑likelihood",
+      "instruction": "Use a numerical optimizer (e.g., Newton‑Raphson, BFGS) to find (β̂,α̂)=argmax_{β,α} L(β,α). The optimizer should evaluate the score vector S(θ) (Eq. 24‑26) and the Hessian for convergence.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Obtain standard errors",
+      "instruction": "After convergence, compute the observed Fisher information matrix as the negative Hessian at (β̂,α̂); invert it to obtain variance‑covariance estimates and standard errors for each component.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Generate synthetic binomial series (simulation)",
+      "instruction": "For a chosen T (e.g., 200, 500 or 1000) repeat:",
+      "substeps": [
+        {
+          "instruction": "Draw v_t ∼ Uniform(0,1) for t=1…T.",
+          "title": ""
+        },
+        {
+          "instruction": "Draw X_{1t} ∼ Uniform(70,100) and X_{2t} ∼ Uniform(0,1) for each t; form X_t = (1, X_{1t}, X_{2t}).",
+          "title": ""
+        },
+        {
+          "instruction": "Draw n_t ∼ Uniform(200,500) for each t.",
+          "title": ""
+        },
+        {
+          "instruction": "Set U_1 = v_1; for t=2…T compute U_t = C^{-1}_{2|1}(v_t | U_{t‑1}; α) (inverse conditional copula).",
+          "title": ""
+        },
+        {
+          "instruction": "Compute π_t = exp(X_t β) / (1+exp(X_t β)).",
+          "title": ""
+        },
+        {
+          "instruction": "Obtain Y_t = F^{-1}(U_t; n_t, π_t) where F^{-1} is the inverse binomial CDF.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Run Monte‑Carlo assessment",
+      "instruction": "Choose a replication count B (e.g., B = 500). For each b = 1…B:",
+      "substeps": [
+        {
+          "instruction": "Generate a synthetic data set (Y^{(b)}, X^{(b)}, n^{(b)}) using the previous generation step with a preset β (e.g., β = (‑2, 0.3, ‑0.5)) and a chosen copula α.",
+          "title": ""
+        },
+        {
+          "instruction": "Estimate (β̂^{(b)}, α̂^{(b)}) by maximizing the log‑likelihood as described earlier.",
+          "title": ""
+        },
+        {
+          "instruction": "Store the estimates.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Summarize simulation results",
+      "instruction": "Compute the mean estimates β̄ = (1/B)∑_{b} β̂^{(b)} and ᾱ = (1/B)∑_{b} α̂^{(b)}. Compute mean‑squared errors MSE(β) = (1/B)∑_{b} (β̂^{(b)}‑β̄)^2 (component‑wise) and MSE(α) = (1/B)∑_{b} (α̂^{(b)}‑ᾱ)^2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Apply model to real data (influenza example)",
+      "instruction": "Load the Singapore influenza data (October 2011 – March 2014) containing monthly counts of positive samples, total specimens, temperature (°C), precipitation (mm/month) and vapor pressure (hPa). Fit the copula‑based Markov chain logistic regression using the steps above, compare Clayton, Gumbel and Frank copulas, and select the copula with the highest log‑likelihood (Frank in the reported study).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:50:06.425197Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 18,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC10758977/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10758977/",
+      "caption": "",
+      "bytes": 103940,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10758977/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10758977/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10758977/",
+      "caption": "",
+      "bytes": 64452,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10758977/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10758977/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10758977/",
+      "caption": "",
+      "bytes": 37147,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10758977/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10758977/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10758977/",
+      "caption": "",
+      "bytes": 37420,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10758977/gr3.jpg"
+    }
+  ]
 }

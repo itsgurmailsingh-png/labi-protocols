@@ -1,0 +1,194 @@
+{
+  "protocol_id": "an_iterative_deconvolution_model_to_extract_the_temporal_firing_properties_of_th",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "An iterative deconvolution model to extract the temporal firing properties of the auditory nerve fibers in human eCAPs",
+  "author": "Dong, Stronks, et al.",
+  "doi": "10.1016/j.mex.2021.101240",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374234/",
+  "citation": "10.1016/j.mex.2021.101240",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 2.5,
+  "category": "Other",
+  "estimated_time_mins": 54,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Baseline correction and extension",
+      "instruction": "Correct each raw eCAP waveform by subtracting the average amplitude of the tail section (≈1.5 ms after the stimulus artifact) and then extend the signal by 50 samples at both the start and end using linear extrapolation to baseline.",
+      "substeps": [
+        {
+          "instruction": "Identify the tail segment beginning ≈1.5 ms after the stimulus artifact.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute the mean amplitude of this tail segment.",
+          "title": ""
+        },
+        {
+          "instruction": "Subtract this mean from the entire eCAP waveform (baseline correction).",
+          "title": ""
+        },
+        {
+          "instruction": "Add 50 samples before the first point and 50 samples after the last point by linearly extrapolating from the baseline level.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Estimate human unit response (URh)",
+      "instruction": "Use the Deconvolution Model Reconstruction (DMR) to jointly optimise the parameters of the unit response model (URp) and the provisional CDLD model (CDLDp) so that the simulated eCAP (eCAPp) best matches the baseline‑corrected eCAP (eCAPc). After convergence, extract the UR and CDLD of the optimal eCAPp, average all URs across the whole dataset to obtain a representative human UR, and discard the provisional CDLDs.",
+      "substeps": [
+        {
+          "instruction": "Run DMR with URp (Eq. 3) and CDLDp (Eq. 4) parameters free.",
+          "title": ""
+        },
+        {
+          "instruction": "Iterate until eCAPp closely matches eCAPc.",
+          "title": ""
+        },
+        {
+          "instruction": "Record the final UR and CDLD from the optimal eCAPp.",
+          "title": ""
+        },
+        {
+          "instruction": "Average the URs obtained from every eCAP in the dataset (different electrodes, stimulus levels, subjects) to produce a single human URh.",
+          "title": ""
+        },
+        {
+          "instruction": "Discard the CDLDs derived in this step; they will be recomputed later with a fixed URh.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Set DMR parameter bounds and starts",
+      "instruction": "Define realistic search domains and initial guesses for all DMR parameters before optimisation; adjust manually if the eCAP morphology (peak amplitudes, latencies) requires wider limits.",
+      "substeps": [
+        {
+          "instruction": "UR model parameter limits: UN [0.02,0.25], σN [0.02,0.13], UP [0,0.12], σP [0.08,0.25], t0 [−0.25,0.06], α1 [0,0.35], μ1 [0.04,1.3], σ1 [0,0.3], α2 [0,0.35], μ2 [0.04,1.3], σ2 [0,0.3].",
+          "title": ""
+        },
+        {
+          "instruction": "UR model initial values: UN = 0.12, σN = 0.045, UP = 0.06, σP = 0.12, t0 = −0.06, α1 = 0.08, μ1 = 0.38, σ1 = 0.06, α2 = 0.05, μ2 = 0.5, σ2 = 0.14.",
+          "title": ""
+        },
+        {
+          "instruction": "Example human UR parameters (from prior study, optional reference): UN = 0.155 µV, σN = 0.038 ms, UP = 0.022 µV, σP = 0.155 ms, t0 = −0.128.",
+          "title": ""
+        },
+        {
+          "instruction": "If needed, manually broaden the bounds for α1/α2 (amplitude) or μ1/μ2 (latency) based on the largest and smallest eCAP peaks in the dataset.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Compute CDLDs with fixed URh",
+      "instruction": "With the representative URh fixed from step two, run DMR again allowing only the CDLD model parameters to vary, using the specified bounds and starting values, to obtain CDLDs that fully capture the temporal firing properties.",
+      "substeps": [
+        {
+          "instruction": "Fix URh to the averaged value obtained in step 2.",
+          "title": ""
+        },
+        {
+          "instruction": "Set CDLD model parameter limits: α1 [0,0.35], μ1 [0.15,1.35], σ1 [0,0.45], α2 [0,0.35], μ2 [0.15,1.35], σ2 [0,0.45].",
+          "title": ""
+        },
+        {
+          "instruction": "Set CDLD model initial values: α1 = 0.08, μ1 = 0.59, σ1 = 0.06, α2 = 0.05, μ2 = 0.6, σ2 = 0.14.",
+          "title": ""
+        },
+        {
+          "instruction": "Run DMR with recorded eCAPs as input; only CDLD parameters are adjusted.",
+          "title": ""
+        },
+        {
+          "instruction": "Collect the resulting CDLDs, which now reflect the temporal firing properties without negative phases.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Validate model fit",
+      "instruction": "Assess the quality of the fitted eCAPs using the normalized root‑mean‑square error (NRMSE) and record summary statistics of the validation dataset.",
+      "substeps": [
+        {
+          "instruction": "Calculate NRMSE for each fitted eCAP.",
+          "title": ""
+        },
+        {
+          "instruction": "Consider fits with NRMSE > 0.9 as successful (93.6 % of recordings in the validation set).",
+          "title": ""
+        },
+        {
+          "instruction": "Note that 322 out of 4982 eCAPs (6.4 %) had NRMSE < 0.9, typically those with small N1 and large P1 peaks.",
+          "title": ""
+        },
+        {
+          "instruction": "Validation dataset details: 4982 eCAPs from 111 cochlear‑implant recipients (HiRes90K device, Advanced Bionics, Valencia, CA), recorded on eight odd electrode contacts, stimulus levels ranging from 50 to 500 current units.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC8374234/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374234/",
+      "caption": "",
+      "bytes": 57948,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374234/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC8374234/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374234/",
+      "caption": "",
+      "bytes": 46160,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374234/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC8374234/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374234/",
+      "caption": "",
+      "bytes": 73271,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374234/gr2.jpg"
+    }
+  ],
+  "content_type": "likely_not_protocol",
+  "content_type_score": 17,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

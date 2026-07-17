@@ -19,7 +19,7 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 4.5,
+  "quality_score": 2.5,
   "category": "Bioinformatics",
   "estimated_time_mins": 54,
   "materials": [
@@ -34,54 +34,109 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "From your project directory on Oasis, open the RELION GUI",
-      "instruction": "From your project directory on Oasis, open the RELION GUI: $ relion",
+      "title": "Log into Comet",
+      "instruction": "Access the Comet cluster using a terminal.",
+      "substeps": [
+        {
+          "instruction": "Use the command: ssh -X [username]@comet.sdsc.edu",
+          "title": ""
+        },
+        {
+          "instruction": "Enter your XSEDE username and password",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Input parameters related to your job &amp; select &#39;Print command&#39;",
-      "instruction": "Input parameters related to your job &amp; select &#39;Print command&#39;. Copy the output text after the command relion_refine or relion_refine_mpi.",
+      "title": "Prepare Project Directory",
+      "instruction": "Navigate to your Oasis storage and create a directory for the dataset.",
+      "substeps": [
+        {
+          "instruction": "Navigate to storage: cd /oasis/projects/nsf/[XSEDE allocation ID]/[username]",
+          "title": ""
+        },
+        {
+          "instruction": "Create a new project directory: mkdir mysample",
+          "title": ""
+        },
+        {
+          "instruction": "Enter the directory: cd mysample",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Open file using &#39;vi&#39; to include this template information: #",
-      "instruction": "Open file using &#39;vi&#39; to include this template information: #!/bin/bash #SBATCH --job-name=&#39;reliongpu&#39; #SBATCH --output=&#39;reliongpu.%j.%N.out&#39; #SBATCH --partition=gpu #SBATCH --nodes=1 #For 1 node #SBATCH --ntasks-per-node=24 #SBATCH --no-requeue #SBATCH --gres=gpu:4 #SBATCH -t 2:00:00 #Edit to give approx. time in hours here #SBATCH --mail-type=begin,end #SBATCH --mail-user= #Input email address here #SBTACH --export=ALL #SBATCH -A [ID] #Input XSEDE Project ID here export MODULEPATH=/share/apps/compute/modulefiles/applications:$MODULEPATHmodule load relion/2.0.3dateibrun -np 5 --tpr 4 relion_refine_mpi [paste relion command here]",
+      "title": "Transfer Data",
+      "instruction": "Move datasets from your local machine to the Oasis storage directory.",
+      "substeps": [
+        {
+          "instruction": "Use globus.org for easy transfer, or use scp or rsync from the command line",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Click here for Cianfrocco Lab XSEDE...",
-      "instruction": "Click here for Cianfrocco Lab XSEDE Project ID number to include (need to be signed into UMich account &amp; need permission to be able to view file)",
+      "title": "Generate RELION Command",
+      "instruction": "Use the RELION GUI to obtain the specific job command.",
+      "substeps": [
+        {
+          "instruction": "Open the RELION GUI using the command: relion",
+          "title": ""
+        },
+        {
+          "instruction": "Input job parameters and select 'Print command'",
+          "title": ""
+        },
+        {
+          "instruction": "Copy the output text following the command relion_refine or relion_refine_mpi",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "To log onto Comet, ssh into...",
-      "instruction": "To log onto Comet, ssh into Comet using Terminal on Mac OSX (Forget name for Windows): $ ssh -X [username]@comet.sdsc.edu -&gt; You will use your xsede username &amp; password",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 5,
-      "title": "Navigate to your storage on Oasis...",
-      "instruction": "Navigate to your storage on Oasis &amp; create a new project directory for your current dataset / sample: $ cd /oasis/projects/nsf/[XSEDE allocation ID]/[username] $ mkdir mysample $ cd mysample",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 6,
-      "title": "To move your data onto Comet, you can use globus",
-      "instruction": "To move your data onto Comet, you can use globus.org for moving datasets easily from local machines / laptop to your Oasis storage directory. Alternatively, you can always use scp or rsync from the command line.",
+      "title": "Create Submission Script",
+      "instruction": "Create a bash script using 'vi' incorporating the SLURM template and the RELION command.",
+      "substeps": [
+        {
+          "instruction": "Include the following SBATCH headers: #!/bin/bash, #SBATCH --job-name='reliongpu', #SBATCH --output='reliongpu.%j.%N.out', #SBATCH --partition=gpu, #SBATCH --nodes=1, #SBATCH --ntasks-per-node=24, #SBATCH --no-requeue, #SBATCH --gres=gpu:4, #SBATCH -t 2:00:00 (edit for time), #SBATCH --mail-type=begin,end, #SBATCH --mail-user=[email], #SBTACH --export=ALL, #SBATCH -A [XSEDE Project ID]",
+          "title": ""
+        },
+        {
+          "instruction": "Add environment setup: export MODULEPATH=/share/apps/compute/modulefiles/applications:$MODULEPATH",
+          "title": ""
+        },
+        {
+          "instruction": "Load the module: module load relion/2.0.3",
+          "title": ""
+        },
+        {
+          "instruction": "Add the date command: date",
+          "title": ""
+        },
+        {
+          "instruction": "Add the execution command: ibrun -np 5 --tpr 4 relion_refine_mpi [paste relion command here]",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 31,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

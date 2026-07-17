@@ -1,0 +1,457 @@
+{
+  "protocol_id": "open_source_software_toolchain_for_automated_nontargeted_screening_for_toxins_in",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Open source software toolchain for automated non‐targeted screening for toxins in alternative foods",
+  "author": "Breuer, Toppen, et al.",
+  "doi": "10.1016/j.mex.2021.101551",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+  "citation": "10.1016/j.mex.2021.101551",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 4.0,
+  "category": "Bioinformatics",
+  "estimated_time_mins": 30,
+  "materials": [
+    "Raw Data Import:",
+    "Mass detection:",
+    "Mass detector:",
+    "Mass list name:",
+    "ADAP chromatogram builder:",
+    "Scans:",
+    "Mass list:",
+    "Min group size in # of scans:",
+    "Group intensity threshold:",
+    "Min highest intensity:",
+    "m/z tolerance:",
+    "ADAP peak deconvolution:",
+    "S/N threshold:",
+    "S/N estimator:",
+    "Min feature height:",
+    "Coefficient/Area threshold:",
+    "Peak duration range:",
+    "RT wavelet range:",
+    "m/z center calculation:",
+    "Select “AUTO”",
+    "m/z range for MS2 scan pairing (Da):",
+    "Not entered/needed",
+    "RT range for MS2 scan pairing (min):",
+    "Export data as csv file",
+    "Preparing data for MFAssignR:"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Import raw MS files",
+      "instruction": "In MZmine, choose Raw Data Methods → Raw Data Import, select the desired RAW output files from the computer, and confirm that they appear in the left‑hand panel labelled “Raw data files”.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "View initial TIC chromatogram",
+      "instruction": "Hover over each raw data file in the left panel, select “show TIC” from the dropdown, then in the parameter window set Plot type to “Total ion current”, set m/z to “Auto range”, and click OK to display the total ion current chromatogram.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Trim retention time window",
+      "instruction": "Inspect the initial chromatogram; if no peaks appear after 30 min retention time, set a retention‑time cut‑off at 30 min to reduce the data volume for subsequent steps.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Detect masses (mass detection)",
+      "instruction": "Select the imported files, then Raw Data Methods → Peak detection → Mass detection. In the parameter window set Mass detector to “Exact Mass”, open the noise‑level dialog (ellipsis) and choose a noise level that is roughly constant across the dataset, preview if needed, and accept. The Mass list name is auto‑generated (default “masses”). Click OK to run. After completion a green check appears; expand the file icon, then expand the profile spectra and the centroid spectra, double‑click the centroid list to view the profile (blue) and centroid (green) spectra and verify that green peaks align with blue peaks.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Build ADAP chromatograms",
+      "instruction": "With the same raw files selected, choose Raw Data Methods → Peak detection → ADAP chromatogram builder. Set the following parameters: • Scans: MS level 1 (use the same scan filters as in mass detection). • Mass list: enter the title used above (e.g., “masses”). • Min group size in # of scans: typical 3–5 (5 works in most cases; use 3 for very small, fast‑eluting peaks). • Group intensity threshold: set equal to the noise level determined earlier. • Min highest intensity: choose a value above the noise (e.g., if noise = 200, use 300–400; can be raised up to 20 000 depending on dataset). • m/z tolerance: absolute 0.015 m/z and relative 3 ppm (the larger of the two is used). Click OK to run the builder.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Deconvolute peaks with ADAP",
+      "instruction": "Select the chromatogram files on the left, then Peak List Methods → peak detection → chromatogram deconvolution. In the deconvolution window select the desired data lists, set suffix to “deconvoluted”, choose Algorithm “Wavelets (ADAP)”, and open the algorithm parameters (ellipsis). Set: • S/N threshold: ≥ 7 (typical 10). • S/N estimator: “intensity window SN” (used for LC‑MS). • Min feature height: match the “min start intensity” used in chromatogram building. • Coefficient/Area threshold: around 1–2 (can be up to 100). • Peak duration range: start with auto 0–10 min, then adjust to 0.0–1.0 min after inspecting the data. • RT wavelet range: auto 0–0.1 min (can be increased to 1–2 min if needed). • m/z center calculation: “AUTO”. • m/z range for MS2 scan pairing: leave blank (not needed). • RT range for MS2 scan pairing: leave blank (not needed). Click OK to run deconvolution; the resulting deconvoluted peak list appears in the Peak lists window.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Export peak list to CSV",
+      "instruction": "In the Peak lists window select the deconvoluted list, then Feature List Methods → Export/Import → Export .csv. In the export dialog set: • Feature lists: the selected peak list. • Filename: choose a location on a hard‑drive folder (optionally attach to a blank Excel sheet, but the file will remain .csv). • Field separator: comma (default). • Export common elements: check “row m/z” and optionally “row retention time”. • Export data file elements: check “Peak area”. • Export quantitation results: leave unchecked. • Filter rows: select “ALL”. Click OK to write the .csv file.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Format CSV for MFAssignR",
+      "instruction": "Open the exported .csv in LibreOffice Calc, verify that the columns are ordered left‑to‑right as: row m/z, peak area, row retention time. Save the file again as .csv (not .ods or .xlsx) in a defined folder; this path will be used by the MFAssignR script.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 115332,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 158204,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 63868,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 32986,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 65671,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 49179,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr14.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr14.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 40604,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr14.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr15.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr15.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 21282,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr15.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr16.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr16.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 49058,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr16.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr17.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr17.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 78331,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr17.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr18.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr18.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 76532,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr18.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr19.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr19.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 84836,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr19.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 52121,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr20.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr20.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 50255,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr20.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr21.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr21.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 38692,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr21.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr22.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr22.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 62329,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr22.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr23.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr23.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 52432,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr23.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr24.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr24.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 144121,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr24.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr25.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr25.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 71066,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr25.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr26.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr26.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 96916,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr26.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr27.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr27.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 155597,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr27.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr28.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr28.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 50178,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr28.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr29.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr29.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 35948,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr29.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 71138,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr30.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr30.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 16638,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr30.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr31.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr31.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 29346,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr31.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr32.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr32.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 56517,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr32.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr33.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr33.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 42992,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr33.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr34.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr34.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 25108,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr34.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr35.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr35.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 18238,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr35.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr36.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr36.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 70167,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr36.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 40566,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 55036,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 84615,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 59792,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 87108,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC8563852/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8563852/",
+      "caption": "",
+      "bytes": 38622,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8563852/gr9.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 35,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

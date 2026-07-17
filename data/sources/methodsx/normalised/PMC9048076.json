@@ -14,18 +14,118 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": 6,
-  "materials": [],
+  "materials": [
+    "Grooming, a characteristic rhythmic motor behavior observed during wake, can be mistakenly identified as non-REM sleep by novice scorers. Grooming specifically has strong rhythmic components and will sometimes appear on the spectrogram as a fragmented, wide band centered between 5 and 10 Hz (Fig. 5). Though these grooming patterns may share similarities with non-REM sleep voltage traces, the frequency pattern and context of grooming is distinct: the voltage trace amplitude and spectrogram frequencies are higher, more powerful, and more erratic than during non-REM sleep. Furthermore, grooming rarely lasts more than one minute before the animal pauses or continues performing other waking behavior. In contrast, an isolated non-REM event lasting less than one minute surrounded by large body movements is highly unusual.Fig. 5Grooming behavior. Grooming behavior (white boxes in the top row) often has strong rhythmic components which can be mistakenly scored as non-REM sleep by novice sleep scorers. Grooming is distinct from non-REM sleep because the voltage trace amplitude as well as the resulting spectrogram frequency band are larger and more erratic then during non-REM sleep. Furthermore, grooming behavior is commonly sandwiched between other large motor movements and rarely lasts more than 1 min before the animal pauses or changes behavior. Non-REM sleep is a less powerful, more consistent behavior that typically lasts more than 1 min before interruption.Fig. 5."
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "There are unique movement patterns for each arousal state that can be measured using several technologies [1], [2], [3], [4]. The sleep scoring method presented here uses movement-based detection of respiratory and gross body movements to distinguish between wake, rapid eye movement (REM) sleep, and non-REM sleep in mice without electroencephalogram (EEG), electromyogram (EMG) or video. Here, we describe sleep data collected using noncontact electric field (EF) sensors placed outside mouse home cages. The EF sensors translate movement-related disturbance in the local electric field into voltage traces that can be analyzed using time- and frequency-based approaches. Movement during the wake state is determined exclusively using the overt voltage signature of gross body movement, but the movement-based differences between REM and non-REM sleep are more subtle incorporating features from both respiration and gross body movement. Described here are the rules for scoring sleep into three stages of wake, non-REM and REM sleep using movement- and respiration-based data collected by EF sensors.",
+      "title": "Record EF sensor voltage trace",
+      "instruction": "Affix non‑contact electric field (EF) sensors to the exterior of each mouse home cage, set the acquisition system to sample at 1000 Hz, and record the continuous voltage trace while the mouse is freely behaving; optionally synchronize with EEG/EMG for validation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Import data into Spike2",
+      "instruction": "Open Spike2 (Version 8, Cambridge Electronic Design) on a PC and import the recorded voltage‑trace file (any supported format).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Create spectrogram from duplicated channel",
+      "instruction": "Duplicate the imported voltage‑trace channel, then select the duplicate and choose “Channel Draw Mode” → “Spectrogram” (called a sonogram in Spike2) to display the voltage trace and its spectrogram simultaneously.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Optimize spectrogram visualization settings",
+      "instruction": "Adjust the spectrogram variables for clear visual separation of wake, non‑REM, and REM: use an FFT Hanning filter, rainbow colour map, block size = 4096 samples, pixel size = 1, top dB = 60, range dB = 40 (for data sampled at 1000 Hz). Ensure the block size is 2–4 × the sampling rate (e.g., 2048–4096 for 1024 Hz). Sampling rates must be >30 Hz to capture respiration frequencies; rates <15 Hz cause aliasing artifacts.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Generate editable epoch channel with script",
+      "instruction": "Create an editable “textmark” channel by running the CED‑provided “sleepscore_705” script (downloadable from http://ced.co.uk/downloads/scriptspkanal). This script will subdivide the data into user‑defined epochs and allow manual state assignment.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Define epoch length and sleep states",
+      "instruction": "In the script GUI, set the epoch duration to 10 s, select the three arousal states (wake, non‑REM sleep, REM sleep), and confirm the epoch channel is created.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Score epochs using voltage and spectrogram criteria",
+      "instruction": "For each 10‑s epoch, assign a state according to the following rules, consulting both voltage trace and spectrogram:",
+      "substeps": [
+        {
+          "instruction": "1. Majority rule – the state occupying >50 % of the epoch is assigned; if exactly 50 % split, assign the state that preceded the epoch.",
+          "title": ""
+        },
+        {
+          "instruction": "2. REM cannot follow directly from wake; a non‑REM epoch must intervene.",
+          "title": ""
+        },
+        {
+          "instruction": "3. Non‑REM must appear in ≥2 consecutive epochs to be considered a state change; wake and REM may appear as single epochs if rules 1 and 2 are satisfied.",
+          "title": ""
+        },
+        {
+          "instruction": "4. Single‑epoch wake (brief arousal) is scored only when movement occupies the majority of the epoch and lasts ≥10 s; movements <10 s are not considered cortical arousal.",
+          "title": ""
+        },
+        {
+          "instruction": "5. Distinguish brief movement clusters (<1 s twitches) from continuous arousal by checking for consistent cyclic respiration between twitches on the voltage trace.",
+          "title": ""
+        },
+        {
+          "instruction": "6. Identify wake by large‑amplitude, erratic voltage peaks and a spectrogram with high power from 0 Hz to >15 Hz.",
+          "title": ""
+        },
+        {
+          "instruction": "7. Identify non‑REM by low‑amplitude, cyclic voltage peaks at 2–4 Hz and a narrow high‑power band on the spectrogram centered at 2–4 Hz (harmonics may appear).",
+          "title": ""
+        },
+        {
+          "instruction": "8. Identify REM by increased variability of the 2–4 Hz respiration band, fragmented/spotty spectrogram power from 2 Hz up to ~10 Hz, and absence of power <1 Hz (except occasional large twitches).",
+          "title": ""
+        },
+        {
+          "instruction": "9. Exclude grooming (often 5–10 Hz, higher amplitude, erratic, lasting <1 min) by noting its higher‑frequency, more powerful, and short‑duration pattern.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Export hypnogram and scored data",
+      "instruction": "Using the “sleepscore_705” script, click “mark stages and events”, hold the Control key and drag across the epoch channel to label each epoch, then export the hypnogram and the annotated epoch file for downstream analysis.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T11:41:25.678746Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "There are unique movement patterns for each arousal state that can be measured using several technologies [1], [2], [3], [4]. The sleep scoring method presented here uses movement-based detection of respiratory and gross body movements to distinguish between wake, rapid eye movement (REM) sleep, and non-REM sleep in mice without electroencephalogram (EEG), electromyogram (EMG) or video. Here, we describe sleep data collected using noncontact electric field (EF) sensors placed outside mouse home cages. The EF sensors translate movement-related disturbance in the local electric field into voltage traces that can be analyzed using time- and frequency-based approaches. Movement during the wake state is determined exclusively using the overt voltage signature of gross body movement, but the movement-based differences between REM and non-REM sleep are more subtle incorporating features from both respiration and gross body movement. Described here are the rules for scoring sleep into three stages of wake, non-REM and REM sleep using movement- and respiration-based data collected by EF sensors. In another study [4], EF sensors were validated against EEG and EMG to accurately quantify sleep with expert scorer agreement above 93%. Briefly, mice were implanted with EEG and EMG electrodes and single-housed in barrel-style acrylic cages. EF sensors were affixed to the exterior surface of the chamber to continuously translate animal movement into a voltage trace synced with EEG/EMG. From these synchronized data, criteria were created by expert scorers for scoring sleep according to Rechtschaffen and Kales [5]. Novices were able to score sleep from EF sensor-collected movement data with high agreement (> 87.6%) to expert scorers using only the reference training material provided (Supplemental Files 1, 2, 3, 4, and 5) and instructions described below. Once validated, the EF sensors were also placed on standard vivarium home cages of completely naïve mice as proof they could accura",
+  "content_type": "protocol",
+  "content_type_score": 25,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

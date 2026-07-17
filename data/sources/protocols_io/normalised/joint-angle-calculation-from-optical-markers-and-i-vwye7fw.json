@@ -20,9 +20,158 @@
     "motion analysis"
   ],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "Figure 1: Coordinate systems and biomechanical model."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Physical Setup and Marker Placement",
+      "instruction": "Prepare the participant and sensors for motion capture and inertial measurement.",
+      "substeps": [
+        {
+          "instruction": "Place retroreflective markers on the participant following the Leardini et al. protocol.",
+          "title": ""
+        },
+        {
+          "instruction": "Mount each IMU in a 3D printed casing containing four retroreflective markers.",
+          "title": ""
+        },
+        {
+          "instruction": "Define the reference frame G through initial OMC system calibration, leveled so that zG opposes gravity.",
+          "title": ""
+        },
+        {
+          "instruction": "Ensure marker rigid body coordinate systems are constructed so their origins coincide with the IMU coordinate frames.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Segment Pose Estimation from OMC Data",
+      "instruction": "Calculate the global position (S_i,t_G) and orientation (q_i,t_GS) of each segment i at time t using a constrained optimization approach.",
+      "substeps": [
+        {
+          "instruction": "Define n ≥ 3 linearly independent 3D point correspondences between local segment coordinate frames {p1:n_Si} and observed positions in G {pi,j,t_G}.",
+          "title": ""
+        },
+        {
+          "instruction": "Minimize the error sum for each segment: err(S_i,t) = Σ ||S_i,t_G + R_i,t_GS p_j_Si - p_i,j,t_G||^2 / n.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply joint constraints to ensure segments remain connected, where a joint J = {i, j, k, l} connects p_j_Si and p_l_Sk in frame G.",
+          "title": ""
+        },
+        {
+          "instruction": "Solve the constrained optimization problem for s segments and k joints over m frames using a weight parameter λ = 0.01 to adjust joint constraint influence.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Handeye Estimation",
+      "instruction": "Calculate the rigid transformation (orientation q_BI) between the IMU coordinate frame (I) and the OMC rigid body frame (B).",
+      "substeps": [
+        {
+          "instruction": "Mount the IMU casings on a bar and rotate the bar in all directions within the tracking volume.",
+          "title": ""
+        },
+        {
+          "instruction": "Collect a synchronized sequence of angular velocities measured by the IMUs (ω_I) and derived from the marker rigid body orientations (ω_B).",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate q_BI using the relationship ω_B = q_BI ω_I.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "IMU-to-Segment (I2S) Calibration",
+      "instruction": "Extract the relative orientation (q_SI) and position (I_S) between the IMU and the attached segment using a static neutral pose sequence.",
+      "substeps": [
+        {
+          "instruction": "Calculate the I2S orientation using the rotation sequence: R_SI = R_SG R_GB R_BI (where R_SG is OMC segment orientation, R_GB is OMC rigid body orientation, and R_BI is handeye orientation).",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the I2S position using: I_S = B_S = R_SG(B_G - S_G) (where B_G is global rigid body position and S_G is global segment position).",
+          "title": ""
+        },
+        {
+          "instruction": "Assume the calibration is fixed for subsequent calculations.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Segment Pose Estimation from IMU Data",
+      "instruction": "Estimate segment poses from IMU data using sensor fusion.",
+      "substeps": [
+        {
+          "instruction": "Utilize the known I2S calibrations.",
+          "title": ""
+        },
+        {
+          "instruction": "Obtain initial IMU poses from OMC data and the handeye transformation.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply the sensor fusion method as described in Teufl et al.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Joint Angle Decomposition",
+      "instruction": "Derive joint angles by decomposing the relative orientation between connected segments.",
+      "substeps": [
+        {
+          "instruction": "Calculate the relative joint orientation (e.g., for the right hip: q_RightHip_SS = q_Pelvis_SG ⊙ q_RightUpperLeg_GS).",
+          "title": ""
+        },
+        {
+          "instruction": "Decompose the relative joint orientations into Euler angles following the order: flexion (θz), then abduction (θx), then internal rotation (θy).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-18T21:26:38.047314Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 0,
+  "exclude_low_confidence": false,
+  "docs_checked": true,
+  "media": [
+    {
+      "type": "pdf",
+      "filename": "Protocol_attachment.pdf",
+      "local_path": "data/media/protocols_io_docs/joint-angle-calculation-from-optical-markers-and-i-vwye7fw/Protocol_attachment.pdf",
+      "source_url": "https://content.protocols.io/bahb2yve.pdf",
+      "caption": "",
+      "bytes": 650530,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io_docs/joint-angle-calculation-from-optical-markers-and-i-vwye7fw/Protocol_attachment.pdf"
+    }
+  ],
+  "_whole_protocol_attempted": true
 }

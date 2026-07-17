@@ -27,10 +27,147 @@
     "Docker",
     "Singularity",
     "Peptide sequences in FASTA format",
-    "Sample FASTA files with 10, 20, and 100 peptides"
+    "Sample FASTA files with 10, 20, and 100 peptides",
+    "AMPSeek is a single‐protocol proteomics pipeline that can be run on 64‐bit Linux and Mac machines with sufficient available random‐access memory (RAM)—e.g., up to 10 GB RAM in our tests (Table 1). The required RAM and processing time vary based on the number of peptides evaluated, their lengths, and their three‐dimensional structures. Tables 1 and 2 document the mean RAM usage and wall clock time of the pipeline when running the basic protocol peptide datasets with 30 threads. AMPSeek requires ∼19 GB of storage as it uses container images to create the required environments for each software component (Table 3). For benchmarking, the containers were pre‐downloaded, and the download time and memory usage were not measured.",
+    "as the pipeline manager and either Singularity (Kurtzer et al.,",
+    "or Docker (Merkel,",
+    "as the container platform. We recommend that users follow the instructions listed on these software platforms’ official websites for their native operating system.",
+    "Nextflow manages the installation of the software dependencies required to run AMPSeek through Singularity. This automated approach means users are not required to perform any additional steps for software installation.",
+    "Server or machine running a 64‐bit Linux or Mac operating system with sufficient RAM (up to 10 GB; we benchmarked our protocol on a dedicated server‐class system with 144 core Intel Xeon Gold 6254 CPU at 3.1 GHz with 2.9 TB RAM)",
+    "AMPSeek v1.0.0 (https://github.com/bcgsc/AMPSeek)Nextflow (https://www.nextflow.io/docs/latest/install.html#install‐page)Docker (https://docs.docker.com/engine/install/)Singularity (https://docs.sylabs.io/guides/3.0/user‐guide/installation.html)"
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Verify hardware requirements",
+      "instruction": "Confirm the computer runs a 64‑bit Linux or macOS OS, has at least 10 GB of RAM available (up to 10 GB was used in benchmarking), and ≥19 GB of free storage for container images.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Install Conda and create environment",
+      "instruction": "If Conda is not installed, download Miniconda from the official site and install it. Then create a new Conda environment named ampseek that includes Nextflow from the bioconda channel.",
+      "substeps": [
+        {
+          "instruction": "conda create -n ampseek -c bioconda nextflow",
+          "title": ""
+        },
+        {
+          "instruction": "conda activate ampseek",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Install container platform",
+      "instruction": "Choose Docker or Singularity based on the operating system and install it following the official documentation.",
+      "substeps": [
+        {
+          "instruction": "For non‑Linux machines (e.g., macOS), install Docker Desktop from https://docs.docker.com/desktop/.",
+          "title": ""
+        },
+        {
+          "instruction": "If running on an ARM64 chip with Docker, install QEMU emulation with: docker run --privileged --rm tonistiigi/binfmt --install amd64",
+          "title": ""
+        },
+        {
+          "instruction": "For Linux systems, install Singularity following https://docs.sylabs.io/guides/3.0/user-guide/installation.html if Docker is not preferred.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Clone AMPSeek repository",
+      "instruction": "Download the AMPSeek source code and example datasets using git.",
+      "substeps": [
+        {
+          "instruction": "git clone https://github.com/bcgsc/AMPSeek.git",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Confirm example datasets",
+      "instruction": "After cloning, verify that the “data” folder contains the three FASTA datasets (10, 20, and 100 peptides) with a mean peptide length of 121.3 aa.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Run AMPSeek pipeline",
+      "instruction": "Execute the workflow with Nextflow, supplying any desired flags; defaults are 30 threads, 90 % of available memory per process, and no explicit timeout.",
+      "substeps": [
+        {
+          "instruction": "nextflow run AMPSeek/main.nf \\",
+          "title": ""
+        },
+        {
+          "instruction": "--input_path data/your_peptides.fasta \\",
+          "title": ""
+        },
+        {
+          "instruction": "--output_path results/ \\",
+          "title": ""
+        },
+        {
+          "instruction": "--output_file summary.html \\",
+          "title": ""
+        },
+        {
+          "instruction": "--threads 30 \\",
+          "title": ""
+        },
+        {
+          "instruction": "[--download_from <FASTA URL>] \\",
+          "title": ""
+        },
+        {
+          "instruction": "[--time 30m] \\",
+          "title": ""
+        },
+        {
+          "instruction": "[--mem 90%]",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Check for successful completion",
+      "instruction": "The run should finish with a non‑zero exit code and print a message indicating success; if it stops early, inspect the Nextflow log, output files, and error codes for memory, storage, or container‑pull issues.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Inspect and export results",
+      "instruction": "Open the generated interactive HTML summary (e.g., results/summary.html) to view peptide sequences, lengths, charges, AMPlify scores, predicted 3‑D structures, and tAMPer toxicity scores; use the built‑in option to save the data as a CSV file if needed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:32:04.133428Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Emily Zhang: Project administration; software; validation; manuscript writing. Berke Ucar: Conceptualization; data curation; methodology; project administration; software; validation; manuscript writing. Ali Salehi: Software; manuscript writing—review and editing. René L. Warren: AMPlify‐tAMPer framework idea, manuscript writing—review and editing. Inanc Birol: Funding acquisition; supervision; manuscript writing—review and editing.",
+  "content_type": "protocol",
+  "content_type_score": 29,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

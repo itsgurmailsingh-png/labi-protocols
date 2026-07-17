@@ -78,7 +78,20 @@ def layer3() -> bool:
     print(f" Layer 3 — Merge + Dedup")
     print(f"{'='*60}")
     rc = run(LAYER3_SCRIPT)
-    return rc == 0
+    if rc != 0:
+        return False
+
+    print(f"\n{'='*60}")
+    print(f" Layer 3b — Quality gate (verify_protocol_quality.py)")
+    print(f"{'='*60}")
+    gate_rc = run(SCRIPTS / "verify_protocol_quality.py")
+    if gate_rc != 0:
+        print("\n[BLOCKED] Quality gate failed — protocols/ was rebuilt but has "
+              "regressions above tolerance. NOT proceeding to layer 4 (index rebuild). "
+              "Fix the flagged issue, re-run layer 3, and confirm the gate passes "
+              "before publishing.")
+        return False
+    return True
 
 
 def layer4() -> bool:

@@ -30,70 +30,210 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Support Protocol 1: Browsing public data online",
-      "instruction": "The most important factor when browsing BossDB's public datasets is careful attention to details provided in each project page. Each project page contains unique information including URIs, Neuroglancer links, and channel identifiers that are required for subsequent protocols. If users skip this step or copy identifiers incorrectly, subsequent attempts to access data programmatically or via the API will fail.",
-      "substeps": [],
+      "title": "Browse public datasets and record identifiers",
+      "instruction": "Open each BossDB project page, locate and copy the collection, experiment, and channel identifiers, as well as the Neuroglancer link and URI; verify every alphanumeric value for accuracy before proceeding.",
+      "substeps": [
+        {
+          "instruction": "Navigate to the project page in a web browser.",
+          "title": ""
+        },
+        {
+          "instruction": "Copy the collection ID, experiment ID, channel ID, Neuroglancer link, and URI.",
+          "title": ""
+        },
+        {
+          "instruction": "Paste the values into a notebook or text file for later use.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Basic Protocol 1: Accessing data with Python",
-      "instruction": "When using the Python SDK, intern, accuracy of alphanumeric values in specifying the collection, experiment, and channel identifiers is essential. A single mismatch will result in an error or an empty dataset. Another critical parameter is coordinate selection, as many datasets include padded or empty space at their edges. Thus, it is recommended that initial test subvolumes should be chosen near the center of the dataset. Users should also remember that intern uses ZYX ordering, not XYZ, which is a common source of confusion. Stable Python environments with the correct package versions are necessary to avoid dependency conflicts.",
-      "substeps": [],
-      "is_critical": true,
+      "title": "Access data with Python SDK",
+      "instruction": "Create a stable Python environment with the required intern package versions, configure the API token, and request a test subvolume using exact collection/experiment/channel strings; remember that intern expects Z‑Y‑X coordinate ordering and choose a region near the dataset centre.",
+      "substeps": [
+        {
+          "instruction": "Install the intern SDK (e.g., pip install intern) in a clean virtual environment.",
+          "title": ""
+        },
+        {
+          "instruction": "Add your API token to the intern configuration (intern.cfg).",
+          "title": ""
+        },
+        {
+          "instruction": "Specify the collection, experiment, and channel identifiers exactly as recorded.",
+          "title": ""
+        },
+        {
+          "instruction": "Select a subvolume near the centre of the dataset to avoid padded edges.",
+          "title": ""
+        },
+        {
+          "instruction": "Provide coordinates in ZYX order when calling intern.cutout.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Basic Protocol 2: Accessing data with data API",
-      "instruction": "When retrieving data through the data API, properly constructed cutout requests determine whether an image loads successfully. Errors most often occur when coordinate ranges extend beyond the dataset bounds or when the collection, experiment, or channel names are mistyped. Users must also include the correct authorization header for private datasets, since even small token errors will block access.",
-      "substeps": [],
+      "title": "Retrieve data via Data API",
+      "instruction": "Build a cutout request to the data API using the same identifiers, ensure start and end coordinates are within dataset bounds, and include the correct Authorization header for private datasets before sending the request.",
+      "substeps": [
+        {
+          "instruction": "Form the request URL: https://api.bossdb.io/v1/... with collection/experiment/channel.",
+          "title": ""
+        },
+        {
+          "instruction": "Set start and end coordinates that do not exceed the dataset limits.",
+          "title": ""
+        },
+        {
+          "instruction": "Add an HTTP header: Authorization: Bearer <your_token> (required for private data).",
+          "title": ""
+        },
+        {
+          "instruction": "Send the request (e.g., using curl or requests) and retrieve the image data.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Basic Protocol 3: Metadata querying via metadata API",
-      "instruction": "For metadata queries using the metadata API, completeness and accuracy of metadata fields are critical. Submissions that omit required information, such as voxel size, imaging modality, or species, will not pass validation and cannot be registered. Similarly, users querying metadata must ensure they are using the correct schema definitions to avoid failed query requests.",
-      "substeps": [],
-      "is_critical": true,
+      "title": "Query dataset metadata via API",
+      "instruction": "Compose a metadata query that includes all required fields such as voxel size, imaging modality, and species, using the correct schema definition, then submit the query and verify the response.",
+      "substeps": [
+        {
+          "instruction": "Create a JSON payload containing voxel size, imaging modality, species, and any other required fields.",
+          "title": ""
+        },
+        {
+          "instruction": "Select the appropriate schema version for the dataset.",
+          "title": ""
+        },
+        {
+          "instruction": "POST the payload to the metadata endpoint (e.g., https://api.bossdb.io/v1/metadata).",
+          "title": ""
+        },
+        {
+          "instruction": "Check the returned status and data for successful validation.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Basic Protocol 4: Creating a Neuroglancer visualization",
-      "instruction": "Visualization success depends on properly formatting URIs for Neuroglancer. Users must remove the bossdb:// prefix and replace it with the correct boss://\nhttps://api.bossdb.io/ string. Failure to do so will prevent the dataset from loading. Internet bandwidth is another key parameter, as Neuroglancer streams downsampled data chunks that require stable connections. Slower connections may result in incomplete loading or significant latency.",
-      "substeps": [],
+      "title": "Create Neuroglancer visualization",
+      "instruction": "Modify the dataset URI by removing the leading “bossdb://” and replacing it with “boss://https://api.bossdb.io/”, then open the resulting Neuroglancer URL in a browser with a stable high‑bandwidth connection to ensure full loading of downsampled chunks.",
+      "substeps": [
+        {
+          "instruction": "Take the original URI (e.g., bossdb://mycollection/experiment/channel).",
+          "title": ""
+        },
+        {
+          "instruction": "Replace the prefix with boss://https://api.bossdb.io/ to form the Neuroglancer link.",
+          "title": ""
+        },
+        {
+          "instruction": "Paste the new link into a web browser.",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm that the connection is fast enough for streaming data.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Support Protocol 2: Creating a BossDB account",
-      "instruction": "The critical parameter for account creation is careful handling of API tokens. These tokens grant full access to private data and must be kept confidential. Any misplaced or expired token will prevent further access until replaced, and users should be aware that tokens can be regenerated if compromised.",
-      "substeps": [],
+      "title": "Create BossDB account and token",
+      "instruction": "Register for a BossDB account, generate an API token, store the token securely (do not share), and note that compromised tokens can be regenerated.",
+      "substeps": [
+        {
+          "instruction": "Sign up on the BossDB website.",
+          "title": ""
+        },
+        {
+          "instruction": "Navigate to the token management page and create a new token.",
+          "title": ""
+        },
+        {
+          "instruction": "Copy the token to a secure location (e.g., password manager).",
+          "title": ""
+        },
+        {
+          "instruction": "If the token is ever exposed or expires, regenerate a new one.",
+          "title": ""
+        }
+      ],
       "is_critical": true,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Basic Protocol 5: Uploading data and metadata",
-      "instruction": "Public uploads of new data are sensitive to metadata accuracy and data formatting. Datasets must be correctly structured in supported formats and paired with comprehensive metadata including acquisition parameters and voxel units. Missing or inconsistent metadata will delay ingestion and may require manual correction. Large datasets >50 GB also require coordination with the BossDB team, making planning and communication important parameters for success.",
-      "substeps": [],
+      "title": "Upload public dataset with metadata",
+      "instruction": "Prepare the dataset in a supported format, assemble complete metadata including acquisition parameters and voxel units, and submit the upload; for datasets larger than 50 GB, coordinate with the BossDB team before ingestion.",
+      "substeps": [
+        {
+          "instruction": "Convert raw data to a supported format (e.g., N5, Zarr).",
+          "title": ""
+        },
+        {
+          "instruction": "Create a metadata file containing voxel size, units, acquisition details, etc.",
+          "title": ""
+        },
+        {
+          "instruction": "Use the public upload portal or API to submit the data and metadata.",
+          "title": ""
+        },
+        {
+          "instruction": "If the total size exceeds 50 GB, email the BossDB team to arrange ingestion.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Basic Protocol 6: Uploading a small dataset for private use",
-      "instruction": "Private uploads depend heavily on correct URI construction and metadata entry. Users should select logical and unique URIs such as bossdb://username/test/images to avoid conflicts. The dataset's voxel size, shape, and units must be specified correctly at the time of dataset creation since errors here can render the dataset unusable in Neuroglancer or downstream tools. Correct configuration of the intern SDK, including placement of the token in the intern.cfg file, is also essential for reproducible results.",
-      "substeps": [],
+      "title": "Upload private small dataset",
+      "instruction": "Choose a unique URI such as “bossdb://username/test/images”, specify voxel size, shape, and units accurately when creating the dataset, place the API token in the intern.cfg file, and upload the dataset using the intern SDK.",
+      "substeps": [
+        {
+          "instruction": "Define a unique URI (e.g., bossdb://johnDoe/test/images).",
+          "title": ""
+        },
+        {
+          "instruction": "When creating the dataset, enter the correct voxel dimensions, shape, and unit strings.",
+          "title": ""
+        },
+        {
+          "instruction": "Edit intern.cfg to include your private token.",
+          "title": ""
+        },
+        {
+          "instruction": "Use intern's upload functions to send the small dataset to BossDB.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:28:03.966012Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 32,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

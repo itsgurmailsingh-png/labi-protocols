@@ -29,10 +29,176 @@
     "ggplot2 v.3.5.1",
     "ggrepel v.0.9.5",
     "RANN v.2.6.2",
-    "scales v.1.3.0"
+    "scales v.1.3.0",
+    "Hardware: RAM >= 16 GB.",
+    "Software: R (>=4.4), RStudio and PathwaySpace.",
+    "Timing: ∼30 min",
+    "In this step, we download and install R and RStudio, followed by the PathwaySpace package.1.Download and install R and RStudio.a.To download R: https://cran.r-project.org/b.To download RStudio: https://rstudio.com/products/rstudio/2.Download and install PathwaySpace in RStudio:> install.packages(\"PathwaySpace\")Note: Additional R dependencies will be automatically downloaded during installation, including RGraphSpace, igraph, ggplot2, ggrepel, RANN, and scales packages.",
+    "Timing: ∼5 min",
+    "Timing: ∼2 min",
+    "No materials were generated in this study."
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Prepare computational environment",
+      "instruction": "Ensure the computer has at least 16 GB RAM. Install R (version ≥ 4.4) from https://cran.r-project.org and RStudio (v.2023.06.1) from https://posit.co/products/open-source/rstudio/. Then install the PathwaySpace package (v.1.0.0) in RStudio; all required dependencies (RGraphSpace, igraph, ggplot2, ggrepel, RANN, scales) will be installed automatically.",
+      "substeps": [
+        {
+          "instruction": "Download and install R (≥ 4.4).",
+          "title": ""
+        },
+        {
+          "instruction": "Download and install RStudio (v.2023.06.1).",
+          "title": ""
+        },
+        {
+          "instruction": "In RStudio run: `install.packages(\"PathwaySpace\")`.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Load packages and Pathway Commons graph",
+      "instruction": "Load the necessary R libraries, import the pre‑processed Pathway Commons v12 igraph object, verify its size, identify top‑connected hub genes, and display the graph layout with hub annotations.",
+      "substeps": [
+        {
+          "instruction": "Load libraries: `library(PathwaySpace)`, `library(RGraphSpace)`, `library(ggplot2)`, `library(igraph)`. (≈ 5 min)",
+          "title": ""
+        },
+        {
+          "instruction": "Load the igraph object: `data(\"PCv12_pruned_igraph\", package = \"PathwaySpace\")`.",
+          "title": ""
+        },
+        {
+          "instruction": "Check number of vertices: `length(PCv12_pruned_igraph)  # → 129904`.",
+          "title": ""
+        },
+        {
+          "instruction": "Inspect a few vertex names: `head(V(PCv12_pruned_igraph)$name)` → \"A1BG\", \"AKT1\", \"CRISP3\", \"GRB2\", \"PIK3CA\", \"PIK3R1\".",
+          "title": ""
+        },
+        {
+          "instruction": "Identify the top‑10 hub genes (highest degree centrality) and store in `top10hubs` (e.g., \"GNB1\", \"TRIM28\", \"RPS27A\", \"CTNNB1\", \"TP53\", \"ACTB\").",
+          "title": ""
+        },
+        {
+          "instruction": "Plot the graph layout with hub genes highlighted in blue: `plotGraphSpace(PCv12_pruned_igraph, marks = top10hubs, mark.color = \"blue\")`.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Build PathwaySpace object and create gene lists",
+      "instruction": "Construct a PathwaySpace object from the loaded graph, load the Hallmark P53 gene set, intersect it with the graph, and generate two random 50‑gene lists (L1 and L2) with reproducible seeds; then assess their overlap with a hypergeometric test and note alternative flat‑file loading.",
+      "substeps": [
+        {
+          "instruction": "Run the constructor: `pspace_PCv12 <- buildPathwaySpace(PCv12_pruned_igraph)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Load Hallmark gene sets: `data(\"Hallmarks_v2023_1_Hs_symbols\", package = \"PathwaySpace\")`.",
+          "title": ""
+        },
+        {
+          "instruction": "Extract the P53 Hallmark pathway: `HALLMARK_P53_PATHWAY <- Hallmarks_v2023_1_Hs_symbols$HALLMARK_P53_PATHWAY` and confirm its length: `length(HALLMARK_P53_PATHWAY)  # → 173`.",
+          "title": ""
+        },
+        {
+          "instruction": "Intersect the Hallmark set with the PathwaySpace object (implicit in subsequent steps).",
+          "title": ""
+        },
+        {
+          "instruction": "Create two random 50‑gene lists:",
+          "title": ""
+        },
+        {
+          "instruction": "- Set seed 12 and sample 50 genes: `set.seed(12); L1 <- sample(HALLMARK_P53_PATHWAY, 50)`.",
+          "title": ""
+        },
+        {
+          "instruction": "- Set seed 34 and sample another 50 genes: `set.seed(34); L2 <- sample(HALLMARK_P53_PATHWAY, 50)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm sizes: `length(L1)  # → 50`, `length(L2)  # → 50`.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate overlap: `length(intersect(L1, L2))  # → 11`.",
+          "title": ""
+        },
+        {
+          "instruction": "Perform a one‑sided hypergeometric test: `phyper(q = 11, m = 50, n = 173-50, k = 50, lower.tail = FALSE)  # → 0.86` (p‑value).",
+          "title": ""
+        },
+        {
+          "instruction": "Optional: download the provided CSV file (DataS1) and load with `GeneList <- read.csv(\"path/to/file.csv\")`; then verify membership with `all(L1 %in% names(pspace_PCv12))` and `all(L2 %in% names(pspace_PCv12))` (both return TRUE).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Visualize gene‑list densities in pathway space",
+      "instruction": "Assign a signal of 1 to the genes in each list (0 to all others) and generate density plots for L1 and L2 within the PathwaySpace object.",
+      "substeps": [
+        {
+          "instruction": "Set signal for L1: `vertexSignal(pspace_PCv12)[L1] <- 1` (all other vertices remain 0).",
+          "title": ""
+        },
+        {
+          "instruction": "Plot L1 density: `plotPathwaySpace(pspace_PCv12, marks = \"TP53\", mark.size = 2, theme = \"th3\", title = \"Density of L1 genes in PathwaySpace\")`.",
+          "title": ""
+        },
+        {
+          "instruction": "Set signal for L2: `vertexSignal(pspace_PCv12)[L2] <- 1`.",
+          "title": ""
+        },
+        {
+          "instruction": "Plot L2 density: `plotPathwaySpace(pspace_PCv12, marks = \"TP53\", mark.size = 2, theme = \"th3\", title = \"Density of L2 genes in PathwaySpace\")`.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Compute and plot pathway‑space distances",
+      "instruction": "Calculate a vertex‑wise distance matrix for the graph, use the pathDistances() function to obtain the distance between L1 and L2 and between 10 000 random gene lists of equal size, and visualise the null distribution with the observed distance.",
+      "substeps": [
+        {
+          "instruction": "Compute the vertex‑wise distance matrix: `gdist <- vertexDist(pspace_PCv12)` (or the appropriate function name).",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate distances: `pdist <- pathDistances(pspace_PCv12, geneLists = list(L1, L2), nRandom = 10000)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Plot the distance results: `plotPathDistances(pdist = pdist)`.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T00:37:46.286607Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "We generated a general method by which gene features that are identified through machine learning (ML) algorithms can classify non-TCGA tumors into TCGA subtypes.1 We found that ML algorithms often produced non-overlapping classifier feature sets that had similar accuracy profiles. We showed that distinct ML classifier features tended to reflect coregulated genes from the same pathways, and the pathways carry comparable biological information for subtype classification. Here, we present a protocol that allows comparing pathway distances between lists of genes. We describe steps involved in constructing a two-dimensional (2D) 'pathway space' in order to visualize and quantify the degree to which different gene sets are related. The R package PathwaySpace provides the data and source code required to execute all steps of this protocol. REAGENT or RESOURCESOURCEIDENTIFIERDeposited dataPruned Pathway Commons v.12Ellrott et al.1https://gdc.cancer.gov/about-data/publications/CCG-TMP-2022PathwaySpace sourceThis paperhttps://github.com/sysbiolab/PathwaySpaceSoftware and algorithmsR 4.4.1CRANhttps://cran.r-project.orgRStudio v.2023.06.1Posithttps://posit.co/products/open-source/rstudio/PathwaySpace v.1.0.0CRANhttps://cran.r-project.org/package=PathwaySpaceRGraphSpace v.1.0.7CRANhttps://cran.r-project.org/package=RGraphSpaceigraph v.2.0.3CRANhttps://cran.r-project.org/package=igraphggplot2 v.3.5.1CRANhttps://cran.r-project.org/package=ggplot2ggrepel v.0.9.5CRANhttps://cran.r-project.org/package=ggrepelRANN v.2.6.2CRANhttps://cran.r-project.org/package=RANNscales v.1.3.0CRANhttps://cran.r-project.org/package=scales The current protocol is expected to generate density plots for a given gene set in a pathway space, as shown in Figures 2B and 2C. This representation should be useful for visualizing density patterns on large graphs. A user should also be able to assess distances between two gene sets in pathway space, as shown in Figure 2D. The pathDistances() function returns dis",
+  "content_type": "protocol",
+  "content_type_score": 28,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

@@ -1,0 +1,139 @@
+{
+  "protocol_id": "reconstruction_of_axonal_projections_of_single_neurons_using_pointtree",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Reconstruction of Axonal Projections of Single Neurons Using PointTree",
+  "author": "Lin Cai",
+  "doi": "10.21769/BioProtoc.5616",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.5616",
+  "citation": "10.21769/BioProtoc.5616",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 6.5,
+  "category": "Neuroscience",
+  "estimated_time_mins": 12,
+  "materials": [
+    "Create the following directory structure: “./Test/Save/train/image” “./Test/Save/train/mask” Step"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Verify input data specifications",
+      "instruction": "Ensure your raw image stacks have a resolution of 0.35 × 0.35 × 1.0 µm, voxel size of 10,000 × 10,000 × 2,000 (tested also on 10,739 × 11,226 × 3,921 and 11,226 × 8,791 × 1,486), signal‑to‑noise ratio > 2 (tested range 2–14), file format TIFF with 8‑bit or 16‑bit depth, and are partitioned into overlapping cubes of 512 × 512 × 512 voxels with a 25‑voxel overlap between adjacent cubes.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Install PointTree software",
+      "instruction": "Download the PointTree package for Windows, decompress it, and launch the program by double‑clicking PointTree.exe.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Optional: Install GTree software",
+      "instruction": "Clone the GTree repository from https://github.com/GTreeSoftware/GTree/wiki and follow the provided installation instructions; GTree is used only for manual annotation to generate training data for Seg_Net.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Install Seg_Net environment",
+      "instruction": "Install Python 3.9, clone the Seg_Net repository (git clone https://github.com/FateUBW0227/Seg_Net.git), optionally create a virtual environment (python -m venv .venv && .venv\\Scripts\\activate), upgrade pip, and install all dependencies listed in requirements.txt with pip install -r requirements.txt (relax version constraints if needed).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Install pytorch‑3dunet package",
+      "instruction": "Extract the provided pytorch‑3dunet‑master.zip inside the Seg_Net working directory, then run cd pytorch-3dunet-master && pip install -e . to install the package.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Prepare training dataset for Seg_Net",
+      "instruction": "Select 20 data blocks of size 512 × 512 × 512 voxels (10 densely‑axoned, 10 sparsely‑axoned) from your image volume, manually annotate neuronal skeletons with GTree, and generate 3‑D distance‑field maps as ground‑truth masks. Unzip the provided dataset_ for_training.zip to obtain three folders: Raw_images (original .tif files), Mask images (ground‑truth masks), and swc_files (SWC skeletons). Optionally create mask images from SWC files using PreMakeData.py from the Seg_Net repository.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Preprocess training data (crop to 128³ patches)",
+      "instruction": "Place raw images into ./Test/raw_image/ and mask images into ./Test/mask/. Create directories ./Test/Save/train/image and ./Test/Save/train/mask. Run Cut_data.exe from the ./preprocess folder using the supplied config.txt (Image_dir ./Test/raw_image/; Mask_dir ./Test/mask/; Save_dir ./Test/Save/). Wait until the terminal shows continuous “0 100 DONE” and then finishes. The program will generate train.txt and test.txt and produce the following structure: ./Test/Save/train/image (cropped raw patches), ./Test/Save/train/mask (cropped mask patches), ./Test/Save/train/train.txt, ./Test/Save/train/test.txt.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Train Seg_Net model",
+      "instruction": "Edit Train.py to set the training set folder path to ./Seg_Net/preprocess/Test/Save/train. Execute Train.py; the script will split data into training and validation sets according to train.txt and test.txt, write logs to ./logs, and automatically checkpoint the best model (minimal loss) to ./ModelSave/.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Predict segmentation on full images",
+      "instruction": "In BigImgPredict.py set imgPath to the folder containing the original .tif images, savePath to the desired output folder, and modelPath to the trained weight file in ./ModelSave/. Run the script; segmentation results are saved as .tif binary masks (foreground voxels = white).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Cluster foreground points with PointTree",
+      "instruction": "Open PointTree, click the second button (local patch generation). Set Save Directory to a folder for results, set Image Data to the segmentation .tif files (e.g., segment folder). Click the GPU button, select a CUDA 11.1‑compatible GPU with 6–10 GB VRAM, then click Confirm. Wait for the “Patch generation done” message; the resulting .swc files (clustered cylindrical regions) can be visualized by dragging them into the Shape View window.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Perform local axon tracing",
+      "instruction": "In PointTree, click the third button (axon tracing). Choose a Save Directory, select the clustered .swc file(s) under Image Data, and click Trace. Upon completion a message box “Local Tracing Done” appears and .swc skeleton files are saved in the skeleton folder for 3‑D viewing.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Perform long‑range axon tracing",
+      "instruction": "In PointTree, click the fourth button (long‑range tracing). Set a Save Directory, select the start‑point file (e.g., head.txt in the skeleton folder) as Image Data, and provide a .txt list (list.txt) containing paths to all local .swc skeleton files to be merged. Click Trace; when finished the terminal shows “SAVE ‘save_path/Global_res/res.swc’ SAVE COST TIME Merge done” and a message box “Long range tracing done”. The final reconstruction is saved as Global_res/res.swc.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Visualize and interpret results",
+      "instruction": "Load the segmentation .tif files into PointTree or GTree for 3‑D inspection, and open the final .swc reconstruction (res.swc) to view the complete neuronal morphology. The output formats are: Seg_Net – binary .tif mask; PointTree – .swc file with node ID, type, x, y, z, radius, parent_ID. Expected runtimes (from Table 2) are: for 254 blocks, points clustering ≈ 23 min, axon tracing ≈ 18 min, long‑range tracing ≈ 3 min; for 821 blocks, points clustering ≈ 22 min, axon tracing ≈ 35 min, long‑range tracing ≈ 3 min.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 47,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

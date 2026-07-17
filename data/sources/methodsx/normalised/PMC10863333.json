@@ -19,8 +19,250 @@
   ],
   "estimated_time_mins": null,
   "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Define geometry and boundary conditions",
+      "instruction": "Create a 2‑D rectangular cavity with horizontal walls moving in the positive X‑direction and vertical side walls stationary. Set the top wall velocity UT and bottom wall velocity UB such that the speed ratio S = UT/UB is varied from 0.05 to 1.0. Vary the aspect ratio K = H/L from 0.5 to 2.0 and the Reynolds number Re = U0 L/ν from 1 × 10⁴ to 2 × 10⁵. Apply the boundary conditions listed in Table 1: bottom (y=0): u = UB, v = 0, k = 0, ε = 0; top (y=H): u = UT, v = 0, k = 0, ε = 0; left (x=0) and right (x=L): u = 0, v = 0, k = 0, ε = 0.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Specify governing equations and model constants",
+      "instruction": "Use the incompressible 2‑D RANS equations with the Boussinesq approximation and the two‑equation k‑ε turbulence model. Include continuity (∂U/∂X+∂V/∂Y=0) and momentum equations with eddy viscosity (ν_t). Employ the k‑ε model equations (7)–(8) with constants σ_k = 1.0, σ_ε = 1.30, C1_ε = 1.44, C2_ε = 1.92, C_μ = 0.09. Non‑dimensionalise variables as described (U¯=U/U0, etc.) for implementation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Generate computational mesh",
+      "instruction": "Create a uniform rectangular mesh with equal numbers of cells in the X and Y directions. Perform a grid‑convergence test using mesh sizes 81 × 81, 121 × 121, 161 × 161 and 201 × 201 at K = 1.0. Select the 161 × 161 mesh for all subsequent simulations because it balances accuracy and computational cost.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Apply wall‑function treatment",
+      "instruction": "Use a y⁺ wall function to bridge the turbulent log‑law region to the wall. Compute the friction velocity U_τ at the first off‑wall point (y_p) with: y⁺_p = y_p U_τ/ν, U_p = U_τ / [k ln(E y⁺_p + 1)], k = 0.41, E = 9.0, then k_p = U_τ² / C_μ and ε_p = U_τ³ / (k y_p).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Configure numerical solver",
+      "instruction": "Run the commercial C++ CFD code using a staggered‑grid finite‑volume method. Couple momentum and continuity with the SIMPLE algorithm. Discretise diffusion terms with the Hybrid scheme and convection terms with QUICK. Solve the momentum and pressure‑correction equations with TDMA and Gauss‑Seidel solvers. Linearise the nonlinear discretised equations and iterate to update all dependent variables.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Set convergence criteria",
+      "instruction": "Continue iterations until the residual criterion Σ_{i,j}|x_{i,j}^{new} – x_{i,j}^{old}| / Σ_{i,j}|x_{i,j}^{new}| ≤ 1 × 10⁻⁸ is satisfied for all solved variables. Record that all final results achieve a maximum residual of 10⁻⁸.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Perform parametric simulation study",
+      "instruction": "For each combination of aspect ratio K (0.5, 1.0, 2.0), speed ratio S (0.05, 0.25, 0.5, 1.0) and Reynolds number Re (1 × 10⁴, 5 × 10⁴, 1 × 10⁵, 1.5 × 10⁵, 2 × 10⁵), run the solver on the 161 × 161 mesh until the convergence criterion is met. Store the steady‑state fields of velocity, pressure, turbulent kinetic energy (k), dissipation rate (ε), turbulent viscosity (ν_t) and Reynolds stress (u'v').",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Validate numerical implementation",
+      "instruction": "Simulate the classic lid‑driven cavity (only the top wall moving, UT = 1) at Re = 1 × 10⁴ and K = 1.0. Compare the computed mid‑plane u‑ and v‑velocity profiles with published data (references [31,52‑55]) to confirm agreement.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Post‑process and analyse results",
+      "instruction": "Generate streamline contour plots for each S‑Re‑K case. Extract and plot distributions of turbulent kinetic energy, dissipation rate, turbulent viscosity and Reynolds stress on horizontal mid‑planes. Compute average values of these quantities and quantify percentage changes with respect to S, Re and K as described in the results sections. Produce figures analogous to Figs 5‑14 for documentation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:55:55.892399Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Method details The single lid-driven flow is simulated using the FVM code to validate the current numerical research. Fig. 4 shows the evaluation of mid-plane u-velocity and v-velocity profiles at Re=1 × 104 and K = 1.0, presenting numerical results compared with earlier literature [31,[52], [53], [54], [55] for top wall only moving with a velocity of UT=1. The excellent agreement between the existing and current studies establishes the simulation's validity.Fig. 4Centreline velocity profiles with uniform top wall motion compared with various literature at Re=1 × 104, K = 1.0.Fig 4",
+  "content_type": "likely_not_protocol",
+  "content_type_score": 12,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 69174,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 28481,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 120895,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 120528,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 122696,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 124791,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr14.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr14.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 132994,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr14.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 164170,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 87706,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 67605,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 470481,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 343071,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7a.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr7a.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 331256,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr7a.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7b.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr7b.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 192427,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr7b.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8a.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr8a.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 236819,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr8a.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8b.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr8b.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 288032,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr8b.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8c.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr8c.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 163302,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr8c.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC10863333/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10863333/",
+      "caption": "",
+      "bytes": 107920,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10863333/gr9.jpg"
+    }
+  ]
 }

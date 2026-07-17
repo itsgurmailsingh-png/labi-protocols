@@ -36,108 +36,233 @@
     "CQ1 microscope",
     "384-well cell culture microplate",
     "ECHO 550 Acoustic Liquid Handler",
-    "Cytomat2C24 incubator"
+    "Cytomat2C24 incubator",
+    "Timing: 5 min per compound",
+    "Timing: 1 h",
+    "Timing: 4–5 h",
+    "Hoechst33342 (DNA detection): Ex 405 nm/Em 447/60 nm.b.CH",
+    "BioTracker™ 488 Green Microtubule Cytoskeleton Dye (tubulin stain): Ex 488/Em 525/50 nm.c.CH",
+    "MitoTracker red (mitochondrial mass detection): Ex 561 nm/Em 617/73 nm.d.CH",
+    "Annexin V (apoptosis marker): Ex 640 nm/Em 685/40.e.CH",
+    "brightfield, DCP Fluor Type Simple Mode, Contrast 0.06.f.CH",
+    "brightfield, DCP Phase Type Simple Mode, Contrast 0.04.26.Channels 5 and 6 are set on DCP to create the best digital phase contrast (see Figure 5C).Note: The “fluortype” setting of the digital phase contrast (DPC) in CH5 provides better segmentation of the cells against the background while the phase setting in CH6 can be used to generate high contrast cell images for visual inspection or publication figures.a.For both digital phase contrast channels, two Z stacks should be used to be overlaid and get the best contrast image to detect cellular shape. Here, we used Top Z 5 and Bottom Z",
+    "Depending on the plate, these Z stacks might differ.27.For Object assembly open “Object”. Here we created 2 different objects (“Nucleus” and “Cell body”).a.“Nucleus”: Ex 405 nm/Em 447/60 nm, Finder: Nuclear, Recognition: Advance.b.“Cell body”: brightfield, Finder: Cell, Recognition: Advance.28.A process based on the defined objects was created (Figure 5D). The aim of the algorithm is to detect cellular shape “Cell body”, based on the brightfield and cell nuclei “Nucleus” based on fluorescent signal of the Hoechst channel. For the Cell body we used the brightfield channel with the fluor-type (CH5).29.The Nuclei and the Cells are linked in the “Link” section.a.Included nucleus in cell body.b.One in one (1:1).30.To proceed with the protocol in the CellPathfinder software, you have to first pre-analyze your data. This step includes image processing and object detection and is inevitable to later use the machine learning-based functions for the cellular gating. For an easier and faster workflow, you can pre-analyze just wells with reference compounds important for training of the machine learning (ML)-based functions as well as non-treated cells (see preparation of compounds and plate layout).a.The pre-analyzing of important wells should secure the detection of cell bodies as well as cell nuclei. Check if the cell bodies and nuclei are correctly detected in 5–10 example wells.b.Click on “Pre-Analyze” and select the wells including the reference compounds (N5 to N12 and O5 to O12) (see preparation of compounds and plate layout).31.After pre-analysis, the ML based gating algorithm can be trained by opening the “Gate” section.32.All features we used can be found in the Table S2 (Zenodo: https://zenodo.org/record/7092795#.YyhponZByUk).33.The machine learning based workflow of the analysis is shown in Figure 6.Note: To detect the phenotypic changes based on healthy nuclei, a tree principle is used. For a detailed explanation on the gating principle and all features used, see (Tjaden et al., 2022).a.The cells will be gated first into the categories Hoechst High Intensity Objects “HighIntObj” or normal cells “Normal”.b.All cells that are gated “Normal” will then be gated into cells containing a healthy nucleus “HealthyNuc”, a pyknosed nucleus “PyknoNuc” or a fragmented nucleus “FragNuc”.c.A pyknosed nucleus can either appear due to mitosis or apoptosis. Thus, cells with pyknosed nuclei will be gated further into “mitosis” or “apoptosis”.d.To investigate the phenotypic properties of interest (tubulin effect, mitochondrial mass increased, membrane permeabilized), cells showing a healthy nucleus will be gated further in “tubulin effect” or “tubulin normal”, “mito mass high” or “mito mass normal” and “membrane permeabilized” or “membrane intact”.Figure 6Workflow of machine learning based analysis using the CellPathfinder softwareThe cell bodies and cell nuclei are detected in the pre-analysis of the software. Afterwards the machine learning based algorithm can be trained based on the reference compounds (see preparation of compounds and plate layout). With the trained protocol, the whole plate and all time points can be analyzed based on the tree principle explained in Tjaden et al. (Tjaden et al., 2022).34.Use the reference compounds with known phenotypes to train the machine learning -based analysis (see Table 2).a.For each gating step, individual cells (minimum 10 images) are selected to serve as an example for the gating phenotype (Figure 7). This can be done by a trained scientist or the example images provided here can be used.Figure 7Machine Learning based algorithm training imagesFor every gating step, 10 example images of the chosen cells are shown here. The images show the most relevant fluorescent channels for the related gating step. The cells were selected by a trained scientist.35.After selecting the example images for the ML-based analysis, safe your analysis and run it once on all other wells containing reference compounds.36.Ensure that the example images worked appropriately to create a robust analysis by comparing the results of all reference compound treated wells (see problem 9). The results should be consistent with the known biological mode of action of the reference compounds and should not differ from each other by more than 10%.37.If you are sure that the machine learning-based analysis has been well trained (no deviation of the results of the reference compounds by more than 10%), the whole plate can be analyzed.38.Your results in from of separated csv files can be found in the folder containing the data under “…\\PFAnalysis” from where it can then be further evaluated (see evaluate your data)."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "Here, we describe a high content multiplex screen, able to characterize generic effects regarding basic cell properties and cell viability in a multi-dimensional way, using phenotypic characterization to annotate compounds on their suitability for further phenotypic and mechanistic screening.",
+      "title": "Prepare compound source plates",
+      "instruction": "Dissolve each test and reference compound in DMSO to a 1000‑fold higher concentration than the intended assay concentration (1 µM → 1 mM, 10 µM → 10 mM) so that the final DMSO concentration in the assay is ≤0.1 % (v/v). Add at least 3 µL of each 1000× stock to a well of a 384‑well LDV source plate (Labcyte), centrifuge the plate at 500 × g for 3 min, seal with VWR DMSO‑resistant seals, and store at –20 °C (up to 2 years). Before reuse, thaw the plate at room temperature for ≥1 h, inspect for precipitation, verify sufficient volume with the Echo 550 survey detection function, and use polypropylene plates to minimise wall absorption.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "The present protocol describes the workflow for 135 test compounds, screened at two concentrations (1 and 10 μM) in addition to 6 control compounds in a single 384 well plate, measured for a total of 48 h at 4 different time points.",
+      "title": "Prepare reference compounds",
+      "instruction": "Dissolve staurosporine, paclitaxel, milciclib, daunorubicin, digitonin and berzosertib in DMSO to 10 mM (final assay concentration 10 µM). Add a minimum of 3 µL of each reference compound to an individual well of the LDV source plate.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Before you begin",
-      "instruction": "The protocol below describes the specific steps for testing osteosarcoma cells (U-2 OS). However, we have adapted this protocol to other cell lines including human embryonic kidney cells (HEK293T) and human fibroblasts (MRC-9) (see problem 1).",
-      "substeps": [],
+      "title": "Create Echo 550 pick list",
+      "instruction": "Use the Echo 550 “Pick list” program (Agilent manual) to generate a CSV file that transfers the desired nanoliter volumes from source to destination plate. Include all test compounds, reference compounds (in technical quadruplicate), and DMSO blank wells (5–10 % of plate). Save the list as “.csv”.",
+      "substeps": [
+        {
+          "instruction": "Define source plate name, source well, destination plate name, destination well, and transfer volume (nL).",
+          "title": ""
+        },
+        {
+          "instruction": "Example entries: 250 nL from Source A01 → Destination B02 for Compound 1, 50 nL DMSO for blank wells.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Preparation of compounds and plate layout",
-      "instruction": "Timing: 5 min per compound",
-      "substeps": [],
+      "title": "Dispense compounds to assay plate",
+      "instruction": "Using the Echo 550 and the prepared pick list, transfer compounds into a 384‑well assay plate so that each well contains 50 µL total volume. For 10 µM test wells transfer 50 nL of 10 mM stock (or 5 nL of 1 mM stock for 1 µM wells); the remaining ~45 nL DMSO is negligible, keeping final DMSO at 0.1 % (v/v). Add reference compounds in technical quadruplicate, test compounds in technical duplicate, and DMSO blanks (50 nL DMSO per well).",
+      "substeps": [
+        {
+          "instruction": "Verify that the Echo reports successful dispensing for each well.",
+          "title": ""
+        },
+        {
+          "instruction": "Avoid compounds with limited DMSO solubility; if precipitation occurs, re‑dissolve in water and dispense manually or with the Echo aqueous protocol (384LDV_aq).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Preparation of compounds and plate layout",
-      "instruction": "The compounds of interest as well as specific reference compounds necessary for the experiment can be prepared in advance. If using the Echo 550 automated liquid handler, we recommend preparing a source plate and a “pick list”. The reference compounds are necessary to train the machine learning algorithm. For each cell property, at least one reference compound must be tested. As part of the assay development, we tested the described reference compounds in U-2 OS cells (Tjaden et al., 2022) and confirmed their suitability to generate a training dataset (see data analysis CellPathfinder software).6.All compounds should be dissolved and/or diluted in a suitable solvent such as DMSO to a 1000-fold higher concentration than the final assay concentration. This ensures a minimal final concentration of 0.1% DMSO which has been found to produce no measurable effect (Brayton 1986) on the proliferation of U-2 OS cells.Note: If other cell lines are used, the DMSO sensitivity should be tested beforehand (see problem 4).7.If using an automated acoustic liquid handler, such as an Echo 550 (LabCyte) the compounds should be added to a compatible source plate, e.g., 384-well LDV Source plate (Labcyte).a.Add a minimum 3 μL of 1000× compound solution into each well of the source plate.b.Centrifuge the LDV source plate once at 500 × g for 3 min.c.To minimize compound contamination, the plates should be sealed with DMSO resistance seals (VWR) after each usage.d.The plates can be stored at -20°C over a longer time period (for at least 2 years on average).i.One compound plate can be used multiple times, when stored correctly.ii.Before reusing the plate, ensure that the compounds are completely thawed. We recommend leaving the compound plate at least one hour at room temperature before pipetting. Also, precipitation of compounds should be checked by eye, because precipitation of compounds within the source plate can lead to false negative results (see problem 4).iii.Check also if there is enough compound solution left for your experiment. You can check that using the survey detection function included in the Echo550 Labcyte software.iv.To minimize absorption of the compound into the wall of the storage plate, use polypropylene plates or other plates recommended for compound storage.8.For the analysis, use the following reference compounds at a final concentration of 10 μM: staurosporine, paclitaxel, milciclib, daunorubicin, digitonin and berzosertib (see Table 2).a.Dissolve reference compounds in DMSO to a final concentration of 10 mM.b.Add a minimum 3 μL of each of these reference compounds to an individual well of your LDV source plate when pipetting with the Echo 550.Table 2Reference compounds with mode of actions and gating steps they are used forReference compoundMode of actionUsed for what gating stepstaurosporinepromiscuous kinase inhibitor (Bruno et al., 1992)apoptotic cells, pyknosed nucleipaclitaxeltargets tubulin/no disassembly of mitotic spindle (Wang et al. 2000)Change of tubulin structuremilciclibCDK inhibitor (Sanchez-Martinez et al., 2015)Increase of mitochondrial massdaunorubicinanthracycline antibiotic, intercalation of DNA strands, ROS production (Al-Aamri et al., 2019)Increase of mitochondrial mass, fragmented nuclei, apoptotic cellsdigitoninDetergent (Styrt et al. 1985)Permeabilization of plasma membranesberzosertibATR/ATM-inhibitor (Fokas et al., 2012)Hoechst high intensity objects9.Prepare a pick list by using the “Pick list” program for the Echo 550 according to the manufacture’s manual (manual can be found here: https://www.agilent.com/cs/library/usermanuals/Public/G5415-90026_DDUG_EN.pdf).a.A possible layout of the pick list is shown in Table 3.Table 3Layout Pick list for Echo550 Liquid Handling SystemSource plate nameSource plate wellDestination plate nameDestination plate wellTransfer volume (nL)Compound descriptionSource Plate 1A01Destination Plate 1B0250Compound 1Source Plate 1A02Destination Plate 1B0350Compound 2Source Plate 1A03Destination Plate 1B0450Compound 3Source Plate 1A04Destination Plate 1B0550Compound 410.For an example of a pick list refer to Table S1 (Zenodo: https://zenodo.org/record/7092795#.YyhponZByUk).11.Add the compounds as well as the reference compounds to your pick list so that they will be added to your destination plate.a.The reference compounds should be added in technical quadruplicates (see Figure 2) to get a sufficient validation set for the analysis protocol (see data analysis CellPathfinder software).Figure 2Possible Layout of one 384-well plate to test 135 compounds at two different concentrationsb.Compounds should be pipetted to the destination plate at the concentration of interest in a final volume of 50 μL. The standard protocol assesses compounds at 10 μM and 1 μM. Thus, 50 nL and 5 nL of inhibitor stock solution should be transferred, respectively (see example in Table S1 (Zenodo: https://zenodo.org/record/7092795#.YyhponZByUk)). Due to the large dilution factor, the volume of 45 nL DMSO can be neglected and a final concentration of 0.1 vol% of DMSO is not affecting cell (Brayton 1986) proliferation.c.Compounds are tested in technical duplicates.d.5%–10% of the plate should be “blank” wells filled with DMSO 0.1% i.e., by transferring 50 nL of DMSO per well. This is similar to the dilution factor for compounds from 10 mM -> 10 μM.12.A possible layout of the plate can be found in Figure 2.13.Save your picklist as “.csv” on your local storage space.CRITICAL: Compounds with limited solubility in DMSO can precipitate in the source wells and will therefore not be dispensed to the cells. Pay attention to minimize freeze-thaw-cycles, because this can affect the stability of the compound solutions. Test DMSO solubility of the compound stock solutions before testing the compound. If not soluble in DMSO, try diluting in water and pipet by hand or with ECHO LabCyte protocol for aqueous solvents (384LDV_aq). (See problem 4).",
+      "title": "Set CQ1 imaging parameters",
+      "instruction": "Program the Yokogawa CQ1 microscope with the following settings: 10× objective (alternatives: 20× for higher detail, 2× not recommended); five fluorescence channels – Ex 405 nm/Em 447/60 nm (500 ms, 50 %); Ex 561 nm/Em 617/73 nm (100 ms, 40 %); Ex 488 nm/Em 525/50 nm (50 ms, 40 %); Ex 640 nm/Em 685/40 nm (50 ms, 20 %); brightfield (300 ms, 100 % transmission). Acquire 7 Z‑stacks spanning a total of 55 µm (e.g., bottom –20.2 µm, top +39.7 µm) with a focus height of 14.4 ± 0.1 mm and a focus offset of –15.5 µm. Use the same plate type in the CQ1 software as in the assay.",
       "substeps": [],
-      "is_critical": true,
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Determination of channels and scan parameters for imaging protocol",
-      "instruction": "Timing: 1 h",
+      "title": "Install Python analysis environment",
+      "instruction": "Download and install Anaconda (Python 3) from https://www.anaconda.com, follow the Getting Started guide, and note the displayed root path (to be used later). Then create the analysis environment by following the instructions on Zenodo (https://doi.org/10.5281/zenodo.6325622) and record the exact software version (e.g., v1.0.1, DOI https://doi.org/10.5281/zenodo.6327204).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Determination of channels and scan parameters for imaging protocol",
-      "instruction": "For image acquisition, the protocol for the CQ1 can be found under the name “Measurement protocol for the Multiplex assay using the CQ1 and files containing the settings to operate the CQ1 microscope with Momentum” at Zenodo: https://doi.org/10.5281/zenodo.6394521. However, for every change in the assay protocol (different plate, different cell line, different conditions etc.) or when using a different microscope, the protocol should be adjusted accordingly.14.Here are the standard settings in detail:a.Magnification: A 10× objective is used, as it will capture a large surface area while retaining resolution to capture cell morphology. Higher magnifications like 20× can also be used to obtain a more detailed image, but with the consideration that fewer cells can be imaged. Lower magnification of 2× might not detect detailed phenotypic properties.b.Five channels are used for image acquisition: Ex 405 nm/Em 447/60 nm, 500 ms, 50%; Ex 561 nm/Em 617/73 nm, 100 ms, 40%; Ex 488/Em 525/50 nm, 50 ms, 40%; Ex 640 nm/Em 685/40, 50 ms, 20%; brightfield, 300 ms, 100% transmission.c.Focus and Z-stacks: The area where the Z-stacks will be set can vary from plate to plate. Use 7 Z-stacks for optimal cell imaging with a total of 55 μm spacing to ensure the compensation of potential plate variations and generation of a robust readout. If using the autofocus for your experiment, it may happen that the microscope will sometimes focus on dust and will lose focus (see problem 6), so we recommend to set the focus area for 384-well plates with a height of 14,4±0,1 mm at -15.5 μm for the lowest (-20.2 μm) and highest focus of 39.7 μm (51.6 μm), respectively.Note: All parameters should be adjusted when details in the set-up are changed e.g., when other cells, plates or other dyes are used. Also, the time frame can freely be adapted depending on the experiment. For viability studies an incubation time of at least 24 h is recommended.CRITICAL: Use the same plates that are implemented in the CQ1 measuring software. If the plate differs, the focus area might not be as accurate as intended (see problem 6). The specific plate parameters must be implemented in the CQ1 software (refer to the manufacturer’s manual, which can be found here: https://www.ibios.uni-osnabrueck.de/index.php?cat=Light%20Microscopy/Yokogawa%20CQ1&file=CQ1_User_Manual.pdf).",
-      "substeps": [
-        {
-          "instruction": "For image acquisition, the protocol for the CQ1 can be found under the name “Measurement protocol for the Multiplex assay using the CQ1 and files containing the settings to operate the CQ1 microscope with Momentum” at Zenodo: https://doi.org/10.5281/zenodo.6394521. However, for every change in the assay protocol (different plate, different cell line, different conditions etc.) or when using a different microscope, the protocol should be adjusted accordingly.14.Here are the standard settings in detail:a.Magnification: A 10× objective is used, as it will capture a large surface area while retaining resolution to capture cell morphology. Higher magnifications like 20× can also be used to obtain a more detailed image, but with the consideration that fewer cells can be imaged. Lower magnification of 2× might not detect detailed phenotypic properties.b.Five channels are used for image acquisition: Ex 405 nm/Em 447/60 nm, 500 ms, 50%; Ex 561 nm/Em 617/73 nm, 100 ms, 40%; Ex 488/Em 525/50 nm, 50 ms, 40%; Ex 640 nm/Em 685/40, 50 ms, 20%; brightfield, 300 ms, 100% transmission.c.Focus and Z-stacks: The area where the Z-stacks will be set can vary from plate to plate. Use 7 Z-stacks for optimal cell imaging with a total of 55 μm spacing to ensure the compensation of potential plate variations and generation of a robust readout. If using the autofocus for your experiment, it may happen that the microscope will sometimes focus on dust and will lose focus (see problem 6), so we recommend to set the focus area for 384-well plates with a height of 14,4±0,1 mm at -",
-          "title": ""
-        },
-        {
-          "instruction": "μm for the lowest (-",
-          "title": ""
-        },
-        {
-          "instruction": "μm) and highest focus of",
-          "title": ""
-        },
-        {
-          "instruction": "μm), respectively.Note: All parameters should be adjusted when details in the set-up are changed e.g., when other cells, plates or other dyes are used. Also, the time frame can freely be adapted depending on the experiment. For viability studies an incubation time of at least 24 h is recommended.CRITICAL: Use the same plates that are implemented in the CQ1 measuring software. If the plate differs, the focus area might not be as accurate as intended (see problem 6). The specific plate parameters must be implemented in the CQ1 software (refer to the manufacturer’s manual, which can be found here: https://www.ibios.uni-osnabrueck.de/index.php?cat=Light%20Microscopy/Yokogawa%20CQ1&file=CQ1_User_Manual.pdf).",
-          "title": ""
-        }
-      ],
-      "is_critical": true,
+      "title": "Load CellPathfinder protocol",
+      "instruction": "Open CellPathfinder (Yokogawa), click the “Data” tab, browse to the folder containing the CQ1 measurement files and press “Convert”. In the “Protocol” tab load the pre‑made analysis protocol for U‑2 OS multiplex (CellPathfinder_AnalysisProtocol_U2OS_Multiplex) from Zenodo (https://doi.org/10.5281/zenodo.6415330).",
+      "substeps": [],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Preparation of the data analysis workflow",
-      "instruction": "Timing: 2 h\n15.Install Python 3 on your computer, preferentially via the distribution Anaconda.a.Anaconda can be downloaded from https://www.anaconda.com.b.Follow the Getting started instructions at https://docs.anaconda.com/anaconda/user-guide/getting-started/ to open the Anaconda Prompt.c.Note the path displayed in the Prompt. This will be named “root path” in this protocol.16.To set up your Python environment and prepare the analysis scripts, visit Zenodo: https://doi.org/10.5281/zenodo.6325622 and follow the instructions given.\nNote: The exact version and specific DOI of the software you will be using by checking the “Versions” box in Zenodo, and cite the Zenodo record correspondingly in your work (e.g., v1.0.1 of the scripts has the DOI: Zenodo: https://doi.org/10.5281/zenodo.6327204).",
+      "title": "Configure channels and objects",
+      "instruction": "In the “Channels” section define six channels: CH1 – Hoechst 33342 (Ex 405/Em 447/60); CH2 – BioTracker 488 Green Microtubule Dye (Ex 488/Em 525/50); CH3 – MitoTracker Red (Ex 561/Em 617/73); CH4 – Annexin V (Ex 640/Em 685/40); CH5 – brightfield DCP Fluor Type Simple Mode (Contrast 0.06); CH6 – brightfield DCP Phase Type Simple Mode (Contrast 0.04). For CH5 and CH6 select two Z‑stacks (Top Z5 and Bottom Z3) to overlay for optimal digital phase contrast. In the “Object” section create two objects: “Nucleus” (Ex 405/Em 447/60, Finder Nuclear, Recognition Advance) and “Cell body” (brightfield, Finder Cell, Recognition Advance). Link each nucleus to one cell body (1:1).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Data analysis CellPathfinder software",
-      "instruction": "Timing: 4–5 h",
+      "title": "Pre‑analyze reference wells",
+      "instruction": "Select wells containing the reference compounds (e.g., N5‑N12 and O5‑O12) and click “Pre‑Analyze” to generate object detection for nuclei and cell bodies. Verify correct detection in 5–10 example wells.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Data analysis CellPathfinder software",
-      "instruction": "This step describes the image analysis using the CellPathfinder software (Yokogawa) and is specific to the CQ1 microscope. Similar high-content microscopes with their own built-in software for analysis or open-source analysis software should be compatible with this protocol, however will require hard- and software related adaptation. For more comprehensive instructions regarding the Pathfinder software, consult the Yokogawa’s product specialists and technical documents. The resulting data and processed images will be evaluated afterwards (see evaluate your data) to obtain a phenotypical annotation of each tested compound. The protocol we used to analyze U-2 OS cells “CellPathfinder_AnalysisProtocol_U2OS_Multiplex” can be found here: Zenodo: https://doi.org/10.5281/zenodo.6415330.Note: The generated protocol is specific to the cell type and magnification. Experiments with different components will require generating a new protocol.20.Open the CellPathfinder software (see Figure 5A).Figure 5Protocol generation in CellPathfinder software(A) Operation window for CellPathfinder software.(B) Channels used for analysis.(C) Z-stacks used for digital phase contrast (DCP) and DCP as fluo- and phase type.(D) Algorithm used to detect nucleus and cell body, as well as example images.21.In the Data tab you can see the measurement details of your experiment.22.Open the data you want to analyze first.a.Open the folder on your computer where you saved the CQ1 measurement data.b.Select the data that you want to analyze first.c.Convert the CQ1 image data by clicking “convert”.23.It is recommended to create an analysis for each cell line individually.24.Open the Protocol tab and click on “Load” and select the analysis protocol for U-2 OS cells “CellPathfinder_AnalysisProtocol_U2OS_Multiplex”.Now you can go step by step through the parameters by clicking on the process buttons at the top of the operation window (see Figure 5A).25.Open the “Channels” section. We are using 6 different channels (CH) (see Figure 5B), based on our study design. The brightfield is used twice.a.CH1: Hoechst33342 (DNA detection): Ex 405 nm/Em 447/60 nm.b.CH2: BioTracker™ 488 Green Microtubule Cytoskeleton Dye (tubulin stain): Ex 488/Em 525/50 nm.c.CH3: MitoTracker red (mitochondrial mass detection): Ex 561 nm/Em 617/73 nm.d.CH4: Annexin V (apoptosis marker): Ex 640 nm/Em 685/40.e.CH5: brightfield, DCP Fluor Type Simple Mode, Contrast 0.06.f.CH6: brightfield, DCP Phase Type Simple Mode, Contrast 0.04.26.Channels 5 and 6 are set on DCP to create the best digital phase contrast (see Figure 5C).Note: The “fluortype” setting of the digital phase contrast (DPC) in CH5 provides better segmentation of the cells against the background while the phase setting in CH6 can be used to generate high contrast cell images for visual inspection or publication figures.a.For both digital phase contrast channels, two Z stacks should be used to be overlaid and get the best contrast image to detect cellular shape. Here, we used Top Z 5 and Bottom Z 3. Depending on the plate, these Z stacks might differ.27.For Object assembly open “Object”. Here we created 2 different objects (“Nucleus” and “Cell body”).a.“Nucleus”: Ex 405 nm/Em 447/60 nm, Finder: Nuclear, Recognition: Advance.b.“Cell body”: brightfield, Finder: Cell, Recognition: Advance.28.A process based on the defined objects was created (Figure 5D). The aim of the algorithm is to detect cellular shape “Cell body”, based on the brightfield and cell nuclei “Nucleus” based on fluorescent signal of the Hoechst channel. For the Cell body we used the brightfield channel with the fluor-type (CH5).29.The Nuclei and the Cells are linked in the “Link” section.a.Included nucleus in cell body.b.One in one (1:1).30.To proceed with the protocol in the CellPathfinder software, you have to first pre-analyze your data. This step includes image processing and object detection and is inevitable to later use the machine learning-based functions for the cellular gating. For an easier and faster workflow, you can pre-analyze just wells with reference compounds important for training of the machine learning (ML)-based functions as well as non-treated cells (see preparation of compounds and plate layout).a.The pre-analyzing of important wells should secure the detection of cell bodies as well as cell nuclei. Check if the cell bodies and nuclei are correctly detected in 5–10 example wells.b.Click on “Pre-Analyze” and select the wells including the reference compounds (N5 to N12 and O5 to O12) (see preparation of compounds and plate layout).31.After pre-analysis, the ML based gating algorithm can be trained by opening the “Gate” section.32.All features we used can be found in the Table S2 (Zenodo: https://zenodo.org/record/7092795#.YyhponZByUk).33.The machine learning based workflow of the analysis is shown in Figure 6.Note: To detect the phenotypic changes based on healthy nuclei, a tree principle is used. For a detailed explanation on the gating principle and all features used, see (Tjaden et al., 2022).a.The cells will be gated first into the categories Hoechst High Intensity Objects “HighIntObj” or normal cells “Normal”.b.All cells that are gated “Normal” will then be gated into cells containing a healthy nucleus “HealthyNuc”, a pyknosed nucleus “PyknoNuc” or a fragmented nucleus “FragNuc”.c.A pyknosed nucleus can either appear due to mitosis or apoptosis. Thus, cells with pyknosed nuclei will be gated further into “mitosis” or “apoptosis”.d.To investigate the phenotypic properties of interest (tubulin effect, mitochondrial mass increased, membrane permeabilized), cells showing a healthy nucleus will be gated further in “tubulin effect” or “tubulin normal”, “mito mass high” or “mito mass normal” and “membrane permeabilized” or “membrane intact”.Figure 6Workflow of machine learning based analysis using the CellPathfinder softwareThe cell bodies and cell nuclei are detected in the pre-analysis of the software. Afterwards the machine learning based algorithm can be trained based on the reference compounds (see preparation of compounds and plate layout). With the trained protocol, the whole plate and all time points can be analyzed based on the tree principle explained in Tjaden et al. (Tjaden et al., 2022).34.Use the reference compounds with known phenotypes to train the machine learning -based analysis (see Table 2).a.For each gating step, individual cells (minimum 10 images) are selected to serve as an example for the gating phenotype (Figure 7). This can be done by a trained scientist or the example images provided here can be used.Figure 7Machine Learning based algorithm training imagesFor every gating step, 10 example images of the chosen cells are shown here. The images show the most relevant fluorescent channels for the related gating step. The cells were selected by a trained scientist.35.After selecting the example images for the ML-based analysis, safe your analysis and run it once on all other wells containing reference compounds.36.Ensure that the example images worked appropriately to create a robust analysis by comparing the results of all reference compound treated wells (see problem 9). The results should be consistent with the known biological mode of action of the reference compounds and should not differ from each other by more than 10%.37.If you are sure that the machine learning-based analysis has been well trained (no deviation of the results of the reference compounds by more than 10%), the whole plate can be analyzed.38.Your results in from of separated csv files can be found in the folder containing the data under “…\\PFAnalysis” from where it can then be further evaluated (see evaluate your data).",
+      "title": "Train machine‑learning gating",
+      "instruction": "Using the reference‑compound wells, train the ML‑based gating tree: (1) Separate Hoechst High‑Intensity Objects (“HighIntObj”) from “Normal” cells; (2) Split “Normal” into HealthyNuc, PyknoNuc, FragNuc; (3) Split PyknoNuc into “mitosis” or “apoptosis”; (4) From HealthyNuc branch further gate into tubulin effect/normal, mito mass high/normal, and membrane permeabilized/intact. For each gating node select at least 10 representative images (provided or chosen by a trained scientist).",
+      "substeps": [
+        {
+          "instruction": "Consult Table S2 on Zenodo for the full feature list.",
+          "title": ""
+        },
+        {
+          "instruction": "After training, run the analysis on all reference‑compound wells and confirm that the phenotype frequencies differ by ≤10 % from expected values.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Run full‑plate analysis and export data",
+      "instruction": "If the reference‑well validation passes, execute the trained protocol on the entire 384‑well plate (all time points). Upon completion, locate the output CSV files in the “…\\PFAnalysis” subfolder and proceed to downstream data evaluation.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:36:42.772553Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Here, we describe a high content multiplex screen, able to characterize generic effects regarding basic cell properties and cell viability in a multi-dimensional way, using phenotypic characterization to annotate compounds on their suitability for further phenotypic and mechanistic screening. The present protocol describes the workflow for 135 test compounds, screened at two concentrations (1 and 10 μM) in addition to 6 control compounds in a single 384 well plate, measured for a total of 48 h at 4 different time points. The protocol below describes the specific steps for testing osteosarcoma cells (U-2 OS). However, we have adapted this protocol to other cell lines including human embryonic kidney cells (HEK293T) and human fibroblasts (MRC-9) (see problem 1).",
+  "content_type": "protocol",
+  "content_type_score": 39,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 1017731,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/gr9.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 305816,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 267398,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 108927,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 164696,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 249061,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 767850,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 370442,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 336260,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/star_protocols/PMC9617200/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9617200/",
+      "caption": "",
+      "bytes": 666583,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC9617200/gr7.jpg"
+    }
+  ]
 }

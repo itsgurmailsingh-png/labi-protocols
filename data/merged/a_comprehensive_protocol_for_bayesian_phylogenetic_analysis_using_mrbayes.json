@@ -1,0 +1,404 @@
+{
+  "protocol_id": "a_comprehensive_protocol_for_bayesian_phylogenetic_analysis_using_mrbayes",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "A Comprehensive Protocol for Bayesian Phylogenetic Analysis Using MrBayes",
+  "author": "Jinxing Wang",
+  "doi": "10.21769/BioProtoc.5276",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.5276",
+  "citation": "10.21769/BioProtoc.5276",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 3.0,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 12,
+  "materials": [
+    "Access the GUIDANCE2 Server.",
+    "Basic operation of the GUIDANCE2 website",
+    "Import a NEXUS file using the Execute mode",
+    "model_data['lnL'] = float(model_parts[1]) if len(model_parts) >",
+    "model_data['K'] = int(model_parts[2]) if len(model_parts) >",
+    "model_data['AIC'] = float(model_parts[3]) if len(model_parts) >",
+    "model_data['Delta'] = float(model_parts[4]) if len(model_parts) >",
+    "The iTol website"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Align sequences with GUIDANCE2",
+      "instruction": "Perform a MAFFT alignment via the GUIDANCE2 web server, ensuring proper FASTA formatting and optional parameter tuning.",
+      "substeps": [
+        {
+          "instruction": "Open the GUIDANCE2 server in a web browser.",
+          "title": ""
+        },
+        {
+          "instruction": "Upload your multi‑sequence FASTA file; verify that each header starts with \">\" and that sequence names contain only letters, numbers, or underscores.",
+          "title": ""
+        },
+        {
+          "instruction": "Select MAFFT as the alignment method.",
+          "title": ""
+        },
+        {
+          "instruction": "Configure advanced MAFFT options if desired (default settings are recommended). Optional tuning:",
+          "title": ""
+        },
+        {
+          "instruction": "• Max‑Iterate values: 0, 1, 2, 5, 10, 20, 50, 80, 100, 1,000.",
+          "title": ""
+        },
+        {
+          "instruction": "• Pairwise method choice:",
+          "title": ""
+        },
+        {
+          "instruction": "– 6mer (fast, short sequences)",
+          "title": ""
+        },
+        {
+          "instruction": "– localpair (local similarity, handles indels)",
+          "title": ""
+        },
+        {
+          "instruction": "– genafpair (global alignment for longer sequences)",
+          "title": ""
+        },
+        {
+          "instruction": "– globalpair (global alignment for similar‑length sequences).",
+          "title": ""
+        },
+        {
+          "instruction": "Click **Submit** and wait for the job to finish.",
+          "title": ""
+        },
+        {
+          "instruction": "Download the resulting alignment file (FASTA format).",
+          "title": ""
+        },
+        {
+          "instruction": "Visually inspect the alignment to confirm correct placement of residues.",
+          "title": ""
+        },
+        {
+          "instruction": "On the GUIDANCE2 results page, identify and remove unreliable columns as indicated; download the cleaned alignment.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Convert alignment to NEXUS",
+      "instruction": "Transform the FASTA alignment into NEXUS format and ensure it is non‑interleaved for downstream tools.",
+      "substeps": [
+        {
+          "instruction": "Open MEGA, import the FASTA alignment, and export it as a NEXUS file.",
+          "title": ""
+        },
+        {
+          "instruction": "Launch PAUP*.",
+          "title": ""
+        },
+        {
+          "instruction": "In PAUP*, use **File → Open** and select the NEXUS file exported from MEGA.",
+          "title": ""
+        },
+        {
+          "instruction": "Enter the following PAUP command to produce a non‑interleaved NEXUS file and execute it:",
+          "title": ""
+        },
+        {
+          "instruction": "export file=filename.nex format=nexus interleaved=no",
+          "title": ""
+        },
+        {
+          "instruction": "Replace *filename.nex* with your desired output name (often the same as the input).",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm that all sequence names contain only letters, numbers, or underscores.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Select protein model with ProtTest",
+      "instruction": "Identify the best‑fit amino‑acid substitution model using ProtTest and extract the result automatically.",
+      "substeps": [
+        {
+          "instruction": "Prepare the protein alignment in FASTA or PHYLIP format.",
+          "title": ""
+        },
+        {
+          "instruction": "Install Java (if not present) and download the latest ProtTest release from its GitHub repository.",
+          "title": ""
+        },
+        {
+          "instruction": "Open a terminal, navigate to the ProtTest directory, and run:",
+          "title": ""
+        },
+        {
+          "instruction": "java -jar prottest-3.4.2.jar -i <input_alignment> -o <output_file> -all-distributions -F -AIC -BIC -tc 0.5 -threads 12",
+          "title": ""
+        },
+        {
+          "instruction": "Replace <input_alignment> and <output_file> with your filenames.",
+          "title": ""
+        },
+        {
+          "instruction": "Install required Python packages:",
+          "title": ""
+        },
+        {
+          "instruction": "pip install pandas tqdm",
+          "title": ""
+        },
+        {
+          "instruction": "Create a Python script (e.g., *parse_prottest_output.py*) with the provided code, setting:",
+          "title": ""
+        },
+        {
+          "instruction": "file_path = r\"<ProtTest_output_file>\"",
+          "title": ""
+        },
+        {
+          "instruction": "output_path = r\"<desired_CSV_path>\"",
+          "title": ""
+        },
+        {
+          "instruction": "Run the script:",
+          "title": ""
+        },
+        {
+          "instruction": "python parse_prottest_output.py",
+          "title": ""
+        },
+        {
+          "instruction": "Open the generated CSV and locate the model with the lowest AIC or BIC score; this model will be used for MrBayes.",
+          "title": ""
+        },
+        {
+          "instruction": "Optional: keep the original ProtTest output for reference.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Select nucleotide model with MrModeltest",
+      "instruction": "Determine the optimal nucleotide substitution model using MrModeltest and parse the scores automatically.",
+      "substeps": [
+        {
+          "instruction": "Ensure your nucleotide alignment is saved as a non‑interleaved NEXUS file (.nex).",
+          "title": ""
+        },
+        {
+          "instruction": "Open PAUP*, load the NEXUS file, and then load the *MrModelblock* file found in the *MrModeltest2‑v.2.4/doc/* directory.",
+          "title": ""
+        },
+        {
+          "instruction": "PAUP* will generate a *mrmodel.scores* file in the current working directory.",
+          "title": ""
+        },
+        {
+          "instruction": "From a command‑line terminal, execute:",
+          "title": ""
+        },
+        {
+          "instruction": "mrmodeltest2 out.txt",
+          "title": ""
+        },
+        {
+          "instruction": "This reads *mrmodel.scores* and writes the model‑selection results to *out.txt* (rename as desired).",
+          "title": ""
+        },
+        {
+          "instruction": "Create a Python script (e.g., *parse_mrmodeltest_output.py*) using the supplied code. Set:",
+          "title": ""
+        },
+        {
+          "instruction": "file_path = \"out.txt\"",
+          "title": ""
+        },
+        {
+          "instruction": "output_csv = \"model_results.csv\"",
+          "title": ""
+        },
+        {
+          "instruction": "Install the required Python package:",
+          "title": ""
+        },
+        {
+          "instruction": "pip install chardet",
+          "title": ""
+        },
+        {
+          "instruction": "Run the script:",
+          "title": ""
+        },
+        {
+          "instruction": "python parse_mrmodeltest_output.py",
+          "title": ""
+        },
+        {
+          "instruction": "Open the resulting CSV and select the model with the highest lnL (log‑likelihood) value; this model will be used for MrBayes.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Run MrBayes analysis",
+      "instruction": "Execute Bayesian phylogenetic inference in MrBayes using the selected substitution model.",
+      "substeps": [
+        {
+          "instruction": "Copy the final NEXUS file into the folder containing *mb.exe* (or ensure *mb* is in your PATH).",
+          "title": ""
+        },
+        {
+          "instruction": "Open a command prompt (or PowerShell with ./ prefix) in that folder and start MrBayes:",
+          "title": ""
+        },
+        {
+          "instruction": "mb",
+          "title": ""
+        },
+        {
+          "instruction": "At the MrBayes prompt, load the NEXUS file:",
+          "title": ""
+        },
+        {
+          "instruction": "execute your_file_name.nexus",
+          "title": ""
+        },
+        {
+          "instruction": "Optionally disable the Beagle library to avoid compatibility issues:",
+          "title": ""
+        },
+        {
+          "instruction": "set usebeagle=no",
+          "title": ""
+        },
+        {
+          "instruction": "Open the supplemental Word file (Table S1 or S2) and locate the desired model/parameter combination (e.g., LG + I+G+F).",
+          "title": ""
+        },
+        {
+          "instruction": "Enter the corresponding MrBayes commands, for example:",
+          "title": ""
+        },
+        {
+          "instruction": "prset aamodelpr = fixed(LG);",
+          "title": ""
+        },
+        {
+          "instruction": "prset statefreqpr = fixed(empirical);",
+          "title": ""
+        },
+        {
+          "instruction": "lset rates = invgamma;",
+          "title": ""
+        },
+        {
+          "instruction": "Start the MCMC run with the recommended settings:",
+          "title": ""
+        },
+        {
+          "instruction": "mcmc ngen=1000000 samplefreq=100 printfreq=1000 diagnfreq=1000 nchains=4;",
+          "title": ""
+        },
+        {
+          "instruction": "• ngen=1,000,000 (adjustable if convergence is poor)",
+          "title": ""
+        },
+        {
+          "instruction": "• samplefreq=100 (keep default)",
+          "title": ""
+        },
+        {
+          "instruction": "• printfreq=1000 and diagnfreq=1000 (output only)",
+          "title": ""
+        },
+        {
+          "instruction": "• nchains=4 (standard parallel chains).",
+          "title": ""
+        },
+        {
+          "instruction": "After the run finishes, summarize the tree and parameters:",
+          "title": ""
+        },
+        {
+          "instruction": "sumt burnin=250;",
+          "title": ""
+        },
+        {
+          "instruction": "sump burnin=250;",
+          "title": ""
+        },
+        {
+          "instruction": "Export the posterior tree for visualization:",
+          "title": ""
+        },
+        {
+          "instruction": "sumptrees filename=your_tree.t burnin=250;",
+          "title": ""
+        },
+        {
+          "instruction": "Open the resulting *.t* file with iTol (https://itol.embl.de) by clicking **Upload a tree**.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Validate phylogenetic trees",
+      "instruction": "Confirm the workflow by reproducing the benchmark analyses described in the protocol.",
+      "substeps": [
+        {
+          "instruction": "Obtain the validation datasets (LBP nucleotide sequences and BPI protein sequences) from the supplementary Materials (Datasets S1 and S2).",
+          "title": ""
+        },
+        {
+          "instruction": "For the LBP nucleotide set, run MrBayes with 1,000,000 MCMC generations (as in step 5).",
+          "title": ""
+        },
+        {
+          "instruction": "For the BPI protein set, run MrBayes with 2,000,000 MCMC generations.",
+          "title": ""
+        },
+        {
+          "instruction": "After each run, inspect posterior probabilities on the resulting trees; high values indicate strong support and confirm protocol reproducibility.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 42,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

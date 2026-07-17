@@ -25,195 +25,304 @@
     "H-MAGMA codes",
     "GRCh37/hg19 plink file",
     "gene location file",
-    "Miniconda"
+    "Miniconda",
+    "Timing: 30 minto1 h",
+    "In the console, type in:free -h",
+    "Timing: 15–30 min"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "Timing: hours to days; factors that affect the timing include the number of samples/GWAS cohorts and available computing resources. For each step, intermediate data can be stored for more flexible scheduling on human and computing resources allocation.\n1.The user is expected to have performed the gene expression analysis (or other gene enrichment analyses) and prepared one or more lists of genomic intervals of interest a priori. Such lists are usually the results of differential gene expression (DE) analysis packages such as EdgeR (Robinson et al., 2010) and DESeq2 (Anders and Huber, 2010) in R; GO term analysis topGO in R (Alexa et al., 2006), online tools Gene Ontology (GO) knowledgebase (Ashburner et al., 2000; The Gene Ontology Consortium, 2021), DAVID (Huang da et al., 2009); or ChIP-seq/ATAC-seq-specific analysis packages DiffBind (Ross-Innes et al., 2012). When using intervals (peaks), the user should take extra caution to ensure the consistency of the genome version used in the intervals and GWAS association files since most human-based GWAS association data files are still based on the somewhat antiquated GRCh37/hg19 version.2.This protocol requires a Unix-like environment to run. For computers with Unix-like operation systems installed, most distributions after the Fedora 19 or Debian 7 branches would work. Computers with at least MacOS 10.10 Yosemite installed would work. For computers pre-installed with Windows 10, users can install Ubuntu 20.04 LTS from the in-built Microsoft Store and deploy packages/run commands from within.3.Steps 1 and 2 will generally require a minimum of 8 GB memory. For Step 3 and later, see the detailed instructions associated with the section itself.4.Before commencing, it is strongly recommended to use a Python distribution/package manager such as venv/Miniconda/Anaconda to install and manage any dependencies that are used by creating virtual environments.5.Download MAGMA and H- cAGMA from a credible source, preferably from its distributor site. The distributor sites have been listed in the key resource table.\nOptional: If the user wants to generate graphs as shown in Figure 1, an R environment (R > 4.0) with appropriate libraries (readr > 1.3.1, ggplot2 > 3.3.0, RColorBrewer > 1.1) will be required.",
-      "substeps": [],
+      "title": "Set up software environment",
+      "instruction": "Install a Unix‑like operating system (Linux ≥ Fedora 19/Debian 7, macOS 10.10+, or Ubuntu 20.04 LTS on Windows 10). Create a Python virtual environment with venv, Miniconda, or Anaconda. Install GNU Parallel. Download MAGMA and H‑MAGMA from the distributor sites listed in the key‑resource table. (Optional) Install R > 4.0 with libraries readr > 1.3.1, ggplot2 > 3.3.0, and RColorBrewer > 1.1 for plotting.",
+      "substeps": [
+        {
+          "instruction": "Verify OS version meets requirements.",
+          "title": ""
+        },
+        {
+          "instruction": "Create and activate a Python virtual environment.",
+          "title": ""
+        },
+        {
+          "instruction": "Run `conda install -c conda-forge parallel` or equivalent to install GNU Parallel.",
+          "title": ""
+        },
+        {
+          "instruction": "Download the MAGMA binary and the H‑MAGMA annotation package from the official website.",
+          "title": ""
+        },
+        {
+          "instruction": "If plotting is desired, install R and the required packages.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "Figure 1Comparison of H-MAGMA and standard MAGMA analysis results showing the enrichment of schizophrenia risk (PGC wave 3) in MIR137 target genes in each neuronal cell type but not in the gene set shared with iPS cellsXY plots depict each gene set’s corresponding effect sizes (BETA) and enriched p-values (in -log10 scale).(A and B) Analysis output of H-MAGMA using iPSC-derived neuron Hi-C gene annotation; (B) Analysis output of standard MAGMA using a slide window size of [-100 kb, 20 kb] and PGC wave 3 gene annotation. Note that the H-MAGMA annotation results have a higher enrichment level than the standard MAGMA analysis using the PGC wave 3 GWAS data, showing its advantage.",
-      "substeps": [],
+      "title": "Prepare input data files",
+      "instruction": "Gather the genomic‑interval list(s) or peak files from your differential expression or ChIP‑seq analysis, ensuring they use the same genome build as the GWAS (typically GRCh37/hg19). Obtain the SNP‑p‑value file (e.g., PGC 3 Schizophrenia wave 3 TSV) and the gene annotation file (standard or H‑MAGMA) that matches your cell‑type of interest.",
+      "substeps": [
+        {
+          "instruction": "Confirm genome version consistency between interval files and GWAS association files.",
+          "title": ""
+        },
+        {
+          "instruction": "Place the SNP‑p‑value file (e.g., `PGC3_SCZ_wave3_public.2021.v2.tsv`) in an accessible directory.",
+          "title": ""
+        },
+        {
+          "instruction": "Place the gene annotation file (e.g., `miR137_100k_20k.genes.annot`) in an accessible directory.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Step-by-step method details",
-      "instruction": "We will recapitulate the H-MAGMA analysis in Figure 4C of Yao et al. (2021), with an added section of standard MAGMA analysis using a user-generated annotation file instead of the gene annotation file provided by H-MAGMA from Hi-C data.",
-      "substeps": [],
+      "title": "Check system CPU and memory",
+      "instruction": "Determine available computational resources. In a terminal run `lscpu | grep \"CPU\"` to note the number of logical CPUs/threads. Then run `free -h` to see total usable memory (GiB).",
+      "substeps": [
+        {
+          "instruction": "Record the number of logical CPUs (e.g., 64).",
+          "title": ""
+        },
+        {
+          "instruction": "Record the total memory (e.g., 458 GiB).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Gene analysis",
-      "instruction": "Timing: 30 minto1 h",
-      "substeps": [],
-      "is_critical": false,
+      "title": "Determine parallel thread count",
+      "instruction": "Calculate the maximum number of parallel MAGMA threads: each thread uses ~1 GiB of RAM, so max threads = floor(available GiB / 1). Do not exceed the number of logical CPUs. Reserve resources for the OS and cap threads at 10 if the machine has < 16 logical cores, or at 40 for larger clusters, provided memory permits.",
+      "substeps": [
+        {
+          "instruction": "Compute `max_threads = min(floor(memory_GiB), logical_CPUs)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply the cap: if logical_CPUs < 16, set `threads = min(max_threads, 10)`; otherwise `threads = min(max_threads, 40)`.",
+          "title": ""
+        }
+      ],
+      "is_critical": true,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Gene analysis",
-      "instruction": "During this step, we will calculate the p-values and associate metrics of each gene and store them in the generated .genes.out and .genes.raw files for subsequent gene-level analysis uses. Moreover, we will take advantage of the parallel computing ability of modern computers/clusters to boost the process to a significantly faster degree.3.Identify and confirm the available system resources to use.a.Identify the numbers of system CPUs/threads.In the console, type in:lscpu | grep \"CPU\"Then the system should return a few lines of system information. The content may vary depending on the computer/cluster model and configuration. Nevertheless, the general format should look like this:What we are looking at here is the second line. Here we have 64 logical CPUs/threads at our disposal for the subsequent parallel run.CPU op-mode(s): 32-bit, 64-bitCPU(s): 64On-line CPU(s) list: 0-63CPU family: 6Model name: Intel(R) Xeon(R) Gold 6226R CPU @ 2.90GHzCPU MHz: 3019.667CPU max MHz: 3900.0000CPU min MHz: 1200.0000NUMA node0 CPU(s): 0-15,32-47NUMA node1 CPU(s): 16-31,48-63b.Identify the size of available memory to use.",
-      "substeps": [],
+      "title": "Create gene analysis script",
+      "instruction": "Make a temporary directory and write a Bash script (`gene_analysis.sh`) containing the MAGMA parallel command. Replace placeholder paths with your actual file locations and set `Output_Prefix` as desired.",
+      "substeps": [
+        {
+          "instruction": "Run `mkdir temp_annot` to create a folder for intermediate files.",
+          "title": ""
+        },
+        {
+          "instruction": "Create `gene_analysis.sh` with the following content (adjust paths):",
+          "title": ""
+        },
+        {
+          "instruction": "#!/bin/bash\nmkdir temp_annot\nData_File=\"/data/your-name/magma/aux-files/g1000_eur\"\nAnnot_File=\"miR137_100k_20k.genes.annot\"\nSNP_Pval_File=\"/data/your-name/PGC3/PGC3_SCZ_wave3_public.2021.v2.tsv\"\nOutput_Prefix=\"miR137_PGC_SCZ_w3\"\nparallel magma \\ \n  --batch {} $threads \\ \n  --bfile $Data_File \\ \n  --gene-annot $Annot_File \\ \n  --gene-model snp-wise=mean \\ \n  --pval $SNP_Pval_File ncol=Nca \\ \n  --out temp_annot/$Output_Prefix \\ \n  ::: {1..$threads}\n\nmagma \\ \n  --merge temp_annot/$Output_Prefix \\ \n  --out temp_annot/$Output_Prefix\n\ncp temp_annot/$Output_Prefix.genes.* .\nrm -r temp_annot",
+          "title": ""
+        },
+        {
+          "instruction": "Save and close the file.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Gene analysis",
-      "instruction": "In the console, type in:free -h",
-      "substeps": [],
+      "title": "Run gene analysis",
+      "instruction": "Make the script executable (optional) and execute it to produce `.genes.raw`, `.genes.out`, and `.log` files.",
+      "substeps": [
+        {
+          "instruction": "Run `chmod +x gene_analysis.sh` (optional).",
+          "title": ""
+        },
+        {
+          "instruction": "Execute `bash ./gene_analysis.sh`.",
+          "title": ""
+        },
+        {
+          "instruction": "Verify that files `miR137_PGC_SCZ_w3.genes.raw`, `miR137_PGC_SCZ_w3.genes.out`, and `miR137_PGC_SCZ_w3.log` appear.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Gene analysis",
-      "instruction": "The console returns: total used free shared buff/cache availableMem: 503Gi 40Gi 5.7Gi 920Mi 456Gi 458GiSwap: 35Gi 3.8Gi 32Gi",
-      "substeps": [],
+      "title": "Specify sample size for p-values",
+      "instruction": "Inspect the header of the SNP‑p‑value file to identify the sample‑size column name (e.g., `Nca`, `Neff`, `Ngt`). If the column is absent, obtain the sample size from the accompanying README and plan to use `N = <value>` in the MAGMA command instead of `ncol`.",
+      "substeps": [
+        {
+          "instruction": "Open the SNP‑p‑value TSV file and view the first line.",
+          "title": ""
+        },
+        {
+          "instruction": "Note the column name that contains the effective sample size.",
+          "title": ""
+        },
+        {
+          "instruction": "If missing, locate the sample size in the README and record it (e.g., N = 25350).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Gene analysis",
-      "instruction": "So we can see there are 458 GiB of memory at our disposal.4.Compose the main code part for gene analysis using SNP p-value data with parallel processing.a.Verify GNU Parallel is installed on the system.In the console, type in:parallel --versionSee if the console successfully returns the current version of the parallel installed.b.Calculate the appropriate number of parallel threads to use.As a general rule, each MAGMA session would use approximately 1 GiB of memory. Hence, the maximum theoretical parallel thread numbers we can set will be the size of available memory divided by 1 GiB. However, we should also consider the fact that the number of parallel threads cannot exceed the count of logical cores of the system, i.e., the number we collected from step 3a. Also, we need to reserve some resources for system use. Hence, it is generally recommended that the number of parallel threads to use should not exceed 10 on computers < 16 logical cores and not exceed 40 in mainframe clusters, as long as the user-available memory permits.c.Prepare a temp working folder for storing intermediate batch files and write the code. Here we will use the data file from the Psychiatric Genomics Consortium Schizophrenia Wave 3 (scz2021) (The Schizophrenia Working Group of the Psychiatric Genomics Consortium et al., 2020) as the SNP_Pval_File). The download link has been included in the key resource table.",
+      "title": "Select appropriate annotation file",
+      "instruction": "If performing H‑MAGMA, replace the standard `Annot_File` with the H‑MAGMA cell‑type‑specific annotation provided by the H‑MAGMA package; otherwise keep the standard annotation used in step 5.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Gene analysis",
-      "instruction": "In a text editor, type in the following code and save it as gene_analysis.sh#!/bin/bashmkdir temp_annot # make a temporary directory to host the intermediate filesData_File=\"/data/your-name/magma/aux-files/g1000_eur\"Annot_File=\"miR137_100k_20k.genes.annot\"SNP_Pval_File=\"/data/your-name/PGC3/PGC3_SCZ_wave3_public.2021.v2.tsv\"Output_Prefix=\"miR137_PGC_SCZ_w3\"# run magma in parallel, 8 threads in this caseparallel magma \\ --batch {} 8 \\ --bfile $Data_File \\ --gene-annot $Annot_File \\ --gene-model snp-wise=mean \\ --pval $SNP_Pval_File ncol=Nca \\ --out temp_annot/$Output_Prefix \\ ::: {1..8}# merge all intermediate files generated under the temp_annot files# and send out for one single file setmagma \\ --merge temp_annot/$Output_Prefix \\ --out temp_annot/$Output_Prefix# extract merged files for subsequent analysiscp temp_annot/$Output_Prefix.genes.∗ .# remove the temporary directoryrm -r temp_annot",
-      "substeps": [],
+      "title": "Create gene set annotation file",
+      "instruction": "Prepare a gene‑set list file (`Set_Annot_File`) in column‑based format (column 2 = gene ID, column 1 = set name). Use ENSEMBL IDs without version suffixes (e.g., `ENSG00000153266`). Ensure each line ends with a Unix newline (`\\n`) only, not Windows carriage return (`\\r\\n`).",
+      "substeps": [
+        {
+          "instruction": "Write the file in a text editor or export from Excel and strip `\\r` characters.",
+          "title": ""
+        },
+        {
+          "instruction": "Save as, for example, `miR137_gene_set_list_4_magma.txt`.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Gene analysis",
-      "instruction": "Then execute the following command in the console.bash ./gene_analysis.sh",
-      "substeps": [],
+      "title": "Create gene set analysis script",
+      "instruction": "Write a Bash script (`gene_set_analysis.sh`) that calls MAGMA with the gene‑level results and the gene‑set annotation file.",
+      "substeps": [
+        {
+          "instruction": "Create `gene_set_analysis.sh` with the following content (adjust paths):",
+          "title": ""
+        },
+        {
+          "instruction": "#!/bin/bash\nGene_Results_File=\"miR137_PGC_SCZ_w3.genes.raw\"\nSet_Annot_File=\"/data/your-name/analysis-results/miR137_gene_set_list_4_magma.txt\"\nOutput_Prefix=\"miR137_100k_20k_gene_set_results\"\n\nmagma \\ \n  --gene-results $Gene_Results_File \\ \n  --set-annot $Set_Annot_File col=2,1 \\ \n  --out $Output_Prefix",
+          "title": ""
+        },
+        {
+          "instruction": "Save and close the file.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "Gene analysis",
-      "instruction": "This snippet will automatically perform a series of operations as the in-line comments have noted. Finally, it will generate three files started with the Out_Prefix: a .genes.raw file contains the raw permutation results, a .genes.out file contains the per-gene statistics, and a .log file records the commands used.",
-      "substeps": [],
+      "title": "Run gene set analysis",
+      "instruction": "Execute the gene‑set script to generate the `.gsa.out` results file.",
+      "substeps": [
+        {
+          "instruction": "Run `chmod +x gene_set_analysis.sh` (optional).",
+          "title": ""
+        },
+        {
+          "instruction": "Execute `bash ./gene_set_analysis.sh`.",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm creation of `miR137_100k_20k_gene_set_results.gsa.out`.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "Gene analysis",
-      "instruction": "Users may want to tweak the gene analysis model used during analysis and see if which one fits their data better. Indeed, there are three base analysis models in MAGMA: the principal components regression (linreg) model, the SNP-wise mean (snp-wise-mean) model, and the SNP-wise Top 1 (snp-wise=top) model.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "Gene analysis",
-      "instruction": "Here we choose the SNP-wise mean model for our PGC Schizophrenia analysis since we know that mental disorders tend to be of cumulative, non-mendelian inheritance, therefore a model that is more attuned to the mean SNP association and skews towards associations in areas of higher LD in individual genes is preferable. However, the in-depth discussion on the statistical basis and their associated disease application would be too complex and beyond the scope of this protocol. For further discussion on all the modifiers, their statistical basis, and the potential impact on the performance, we recommend the user read the official MAGMA manual and original publications.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 13,
-      "title": "Gene analysis",
-      "instruction": "Users should also note the N/ncol modifier under the --pval option that is used to specify the sample size. First, not all the SNP_Pval_File has the sample size column. In these cases, the sample size is usually stated in the associated README file and users should specify N = [sample_size] (e.g., N = 25350) instead of using the ncol modifier. Secondly, SNP_Pval_File from different sources may have different names for their sample size column (e.g., Nca, Neff, Ngt). User should manually check the first few lines of the SNP_Pval_File file and confirm the column name before applying in code.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
-      "title": "Gene analysis",
-      "instruction": "The MAGMA user manual contains a detailed explanation of the structures and columns of the generated .genes.out file. Users may want to refer to the corresponding section for the information contained in each column if interested.CRITICAL: If performing H-MAGMA analysis instead of standard MAGMA analysis, it is crucial to use the H-MAGMA provided Annot_File corresponding to your cell/tissue of interest instead of the one generated in step 2.",
-      "substeps": [],
-      "is_critical": true,
-      "timers": []
-    },
-    {
-      "step_id": 15,
-      "title": "Gene set analysis",
-      "instruction": "Timing: 15–30 min",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
-      "title": "Gene set analysis",
-      "instruction": "In this section, we will integrate the gene-level analysis results derived from the previous section together with a list containing one or more gene sets for a linear regression model-based test.Note: the original H-MAGMA package provided input files using gene names in ENSEMBL gene ID without the sub-version numbers, which are different from the record in most GENCODE or ENSEMBL GTF annotation files (e.g., ENSG00000153266 instead of ENSG00000153266.13). Users are advised to verify their own gene list to make sure they are compatible.5.Prepare the gene set list file.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 17,
-      "title": "Gene set analysis",
-      "instruction": "The gene set (Set_Annot_File) could be written in either row-based or column-based format (see Appendix A of the MAGMA manual for details). From our experience, the column-based format allows greater versatility and better clarity when working in conjunction with other bioinformatic package outputs, although using the column-based input file format does require the addition of the “col” modifier (see below). Another note is each line of the Set_Annot_File needs to terminate with the newline (\\n) character only but not the Windows carriage return (\\r\\n), hence, some tab-delimited files exported directly from Microsoft Excel in Windows may not work before having their \\r character stripped.6.In a text editor, type in the following code and save it as gene_set_analysis.sh#!/bin/bashGene_Results_File=\"miR137_PGC_SCZ_w3.genes.raw\"Set_Annot_File=\"/data/your-name/analysis-results/miR137_gene_set_list_4_magma.txt\"Output_Prefix=\"miR137_100k_20k_gene_set_results\"magma \\ --gene-results $Gene_Results_File \\ --set-annot $Set_Annot_File col=2,1 \\ --out $Output_Prefix",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 18,
-      "title": "Gene set analysis",
-      "instruction": "Then execute the following command in the console.bash ./gene_set_analysis.sh",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 19,
-      "title": "Gene set analysis",
-      "instruction": "We also provided another file set for the readers to recapitulate the analysis in the Figure 4C of Yao et al. (2021) using the iPS-derived neuron Hi-C data from H-MAGMA (Figure 2A). The corresponding file set can be found in the GitHub repository of this article.Figure 2Data from Figure 1 shown in bubble plot format(A and B) Analysis output of H-MAGMA using iPSC-derived neuron Hi-C gene annotation; the diameter of points corresponds to each BETA value and the shade of points corresponds to each -log10P value of the sample shown. Note that the iPS have a negative beta value hence no point was plotted in the panel.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 20,
-      "title": "Gene set analysis",
-      "instruction": "The structure and columns of the output .gsa.out file has been well-documented in the MAGMA manual. Essentially, we will need the beta (regression coefficient) and P values to see if our different gene sets are more concordant to our disease model (PGC3 schizophrenia here).Optional: Make bubble plots using R and ggplot2 to show beta and enrichment value.Timing: 15–30 min#!/usr/bin/Rscript# initlibrary(readr)library(ggplot2)library(RColorBrewer)# plot panel Bdf_raw <- read_table2(\"Apr122021_set_analysis.gsa.out\", skip = 4)df_raw$`-log10P` <- 0 - log10(df_raw$P)df_raw$VARIABLE <- factor(df_raw$VARIABLE,levels = c(\"Glut\", \"NPC\", \"DA\", \"GABA\", \"iPS\"))df_raw$TYPE <- \"PGC_SCZ_w3\"ggplot(df_raw, aes(x = VARIABLE, y = TYPE, size = BETA, fill = `-log10P`)) +scale_fill_gradient(low = \"white\", limits = c(0, 7), high = \"darkred\") +scale_size_area(limits = c(0, 0.5)) +geom_point(shape = 21) +xlab(\"Cell type\") +ylab(\"\") +theme_bw() +theme(legend.position = \"bottom\", legend.box = \"horizontal\", axis.text = element_text(size = 14), axis.title = element_text(size = 16))",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 21,
-      "title": "Gene set analysis",
-      "instruction": "To replot the Figure 4C of Yao et al. (2021), create a new R project and a new R code window in RStudio. Ensure that library ggplot2and RColorBrewer has been installed. Then type in:",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 22,
-      "title": "Gene set analysis",
-      "instruction": "Then execute the whole code block in RStudio (select-all then ctrl + ENTER) or execute line-by-line (ctrl + ENTER). The generated ggplot2 graph will appear in the plot window of the RStudio. This will generate panel B in Figure 2. To generate Figures 1 and 2A, use the code provided in the GitHub repository.",
-      "substeps": [],
+      "title": "Optional: Plot results in R",
+      "instruction": "Generate bubble‑plot visualizations of beta coefficients and -log10 P values using R. Install required packages, create an R script with the provided code, and run it in RStudio.",
+      "substeps": [
+        {
+          "instruction": "In R, install packages: `install.packages(c('readr','ggplot2','RColorBrewer'))`.",
+          "title": ""
+        },
+        {
+          "instruction": "Create an R script (e.g., `plot_gsa.R`) containing:",
+          "title": ""
+        },
+        {
+          "instruction": "# init\nlibrary(readr)\nlibrary(ggplot2)\nlibrary(RColorBrewer)\n\ndf_raw <- read_table2(\"Apr122021_set_analysis.gsa.out\", skip = 4)\ndf_raw$`-log10P` <- -log10(df_raw$P)\ndf_raw$VARIABLE <- factor(df_raw$VARIABLE, levels = c('Glut','NPC','DA','GABA','iPS'))\ndf_raw$TYPE <- 'PGC_SCZ_w3'\n\nggplot(df_raw, aes(x = VARIABLE, y = TYPE, size = BETA, fill = `-log10P`)) +\n  scale_fill_gradient(low = 'white', high = 'darkred', limits = c(0,7)) +\n  scale_size_area(limits = c(0,0.5)) +\n  geom_point(shape = 21) +\n  xlab('Cell type') + ylab('') +\n  theme_bw() +\n  theme(legend.position = 'bottom', legend.box = 'horizontal',\n        axis.text = element_text(size = 14), axis.title = element_text(size = 16))",
+          "title": ""
+        },
+        {
+          "instruction": "Open the script in RStudio, select all, and press Ctrl+Enter (or run line‑by‑line).",
+          "title": ""
+        },
+        {
+          "instruction": "The bubble plot will appear in the RStudio Plots pane.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:26:45.823485Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Timing: hours to days; factors that affect the timing include the number of samples/GWAS cohorts and available computing resources. For each step, intermediate data can be stored for more flexible scheduling on human and computing resources allocation.\n1.The user is expected to have performed the gene expression analysis (or other gene enrichment analyses) and prepared one or more lists of genomic intervals of interest a priori. Such lists are usually the results of differential gene expression (DE) analysis packages such as EdgeR (Robinson et al., 2010) and DESeq2 (Anders and Huber, 2010) in R; GO term analysis topGO in R (Alexa et al., 2006), online tools Gene Ontology (GO) knowledgebase (Ashburner et al., 2000; The Gene Ontology Consortium, 2021), DAVID (Huang da et al., 2009); or ChIP-seq/ATAC-seq-specific analysis packages DiffBind (Ross-Innes et al., 2012). When using intervals (peaks), the user should take extra caution to ensure the consistency of the genome version used in the intervals and GWAS association files since most human-based GWAS association data files are still based on the somewhat antiquated GRCh37/hg19 version.2.This protocol requires a Unix-like environment to run. For computers with Unix-like operation systems installed, most distributions after the Fedora 19 or Debian 7 branches would work. Computers with at least MacOS 10.10 Yosemite installed would work. For computers pre-installed with Windows 10, users can install Ubuntu 20.04 LTS from the in-built Microsoft Store and deploy packages/run commands from within.3.Steps 1 and 2 will generally require a minimum of 8 GB memory. For Step 3 and later, see the detailed instructions associated with the section itself.4.Before commencing, it is strongly recommended to use a Python distribution/package manager such as venv/Miniconda/Anaconda to install and manage any dependencies that are used by creating virtual environments.5.Download MAGMA and H- cAGMA from a credible source, preferably from it",
+  "content_type": "protocol",
+  "content_type_score": 33,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx2.gif",
+      "local_path": "data/media/star_protocols/PMC8761752/fx2.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8761752/",
+      "caption": "",
+      "bytes": 4451,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8761752/fx2.gif"
+    },
+    {
+      "type": "image",
+      "filename": "fx3.gif",
+      "local_path": "data/media/star_protocols/PMC8761752/fx3.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8761752/",
+      "caption": "",
+      "bytes": 4299,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8761752/fx3.gif"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC8761752/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8761752/",
+      "caption": "",
+      "bytes": 218416,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8761752/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC8761752/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8761752/",
+      "caption": "",
+      "bytes": 147326,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8761752/gr2.jpg"
+    }
+  ]
 }

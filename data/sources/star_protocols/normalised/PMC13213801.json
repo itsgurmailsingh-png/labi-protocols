@@ -36,107 +36,319 @@
     "Hisat2 v2.2.1",
     "Samtools v1.20",
     "HTSeq v0.11.3",
-    "DESeq2"
+    "DESeq2",
+    "1.All tests are conducted on a system running the CentOS Linux 7 (Core) operating system with Intel® Xeon® Gold 6348H CPUs operating at 2.30 GHz and supported by 1 TB of RAM.",
+    "Timing: 1–2 h",
+    "In this protocol, all tests are conducted utilizing software, as detailed in the key resources table, with download links provided for access. It is recommended to store all software files in a designated folder. Additionally, software can be downloaded and installed either manually or through Conda using the default settings (Figure 1).2.Prior to the bioinformatics analysis, install all software specified in the key resources table.Note: Installation instructions for each program are available on their official websites.Figure 1Screenshot displaying the help message of GenomeAnalysisTKThe figure displays the help information for GATK4, including the version, background details, and usage instructions for the package.",
+    "Timing: 6 days"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "Introgressed segments derived from exogenous species often encompass gene clusters that play a significant role in shaping the evolutionary trajectories of recipient species as they adapt to new habitats.2 However, the rapid degradation of archaic DNA and RNA in nature,3 along with the fact that many introgressed genes may be selected against and gradually lost over time,4 limits functional genomic insights into recipient species. Nevertheless, the ancient introgressed genomic segments retained in contemporary species provide a valuable opportunity to investigate the functional implications of introgression, particularly in perennial herbaceous plants.1",
+      "title": "Configure computational hardware",
+      "instruction": "Use a workstation running CentOS Linux 7 (Core) equipped with Intel® Xeon® Gold 6348H CPUs at 2.30 GHz and 1 TB of RAM.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "Apart from introgression, most eukaryotic genomes contain a substantial fraction of duplicated genes.5,6 According to previous studies, the mechanisms driving the retention of duplicated genes or paralogs may be influenced by gene dosage effects or by functional divergence through asymmetric evolution.7 Retention of duplicates may result from subfunctionalization, leading to a pair of genes that together perform the full range of functions of the single ancestral gene.8,9 Evidence of functional partitioning of ancestral functions includes, but is not limited to, biochemical functions10 and gene expression regulatory elements.11 Considering the potential functional similarity among introgressed genes, their paralogs, and alleles in recipient species, it is necessary to identify their paralogs and alleles and compare their relative expression under abiotic stress conditions. The protocol outlines the steps for detecting ancient introgressed genes between distantly related species and introduces a flexible method for identifying paralogs and alleles of these introgressed genes.",
+      "title": "Install required bioinformatics software",
+      "instruction": "Download and install every program listed in the key resources table, either manually or via Conda using default settings; refer to each program’s official website for installation details.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Preparation 1: Hardware",
-      "instruction": "1.All tests are conducted on a system running the CentOS Linux 7 (Core) operating system with Intel® Xeon® Gold 6348H CPUs operating at 2.30 GHz and supported by 1 TB of RAM.",
+      "title": "Install SRA Toolkit and download data",
+      "instruction": "Install the SRA Toolkit, then download the publicly available RAD‑seq datasets for Dendrobium catenatum and D. huoshanense and the transcriptomic data of D. catenatum under cadmium stress; store all raw files in a dedicated directory.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Preparation 2: Setting up the software",
-      "instruction": "Timing: 1–2 h",
+      "title": "Organize raw sequencing files",
+      "instruction": "Create a clear folder hierarchy (e.g., /home/[user]/Workfiles/Raw_data/) and place each .bam file (Sample01.realign.bam, Sample02.realign.bam, …, SampleXX.realign.bam) in that directory.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Preparation 2: Setting up the software",
-      "instruction": "In this protocol, all tests are conducted utilizing software, as detailed in the key resources table, with download links provided for access. It is recommended to store all software files in a designated folder. Additionally, software can be downloaded and installed either manually or through Conda using the default settings (Figure 1).2.Prior to the bioinformatics analysis, install all software specified in the key resources table.Note: Installation instructions for each program are available on their official websites.Figure 1Screenshot displaying the help message of GenomeAnalysisTKThe figure displays the help information for GATK4, including the version, background details, and usage instructions for the package.",
-      "substeps": [],
+      "title": "Call variants with GATK HaplotypeCaller",
+      "instruction": "Run GATK 4 (v4.6.2.0‑114) HaplotypeCaller on all samples using the D. catenatum reference genome:",
+      "substeps": [
+        {
+          "instruction": "gatk4 HaplotypeCaller \\",
+          "title": ""
+        },
+        {
+          "instruction": "-R /home/[user]/Workfiles/SNP_Calling/reference.fasta \\",
+          "title": ""
+        },
+        {
+          "instruction": "-O /home/[user]/Workfiles/SNP_Calling/example.raw.vcf \\",
+          "title": ""
+        },
+        {
+          "instruction": "-I /home/[user]/Workfiles/Raw_data/Sample01.realign.bam \\",
+          "title": ""
+        },
+        {
+          "instruction": "-I /home/[user]/Workfiles/Raw_data/Sample02.realign.bam \\",
+          "title": ""
+        },
+        {
+          "instruction": "-I /home/[user]/Workfiles/Raw_data/Sample03.realign.bam \\",
+          "title": ""
+        },
+        {
+          "instruction": "… \\",
+          "title": ""
+        },
+        {
+          "instruction": "-I /home/[user]/Workfiles/Raw_data/SampleXX.realign.bam",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Preparation 3: Dataset",
-      "instruction": "Timing: Variable (affected by dataset size and computational resources)\n3.Obtain raw resequencing data.",
-      "substeps": [],
+      "title": "Select SNPs from raw VCF",
+      "instruction": "Extract only SNP records from the raw VCF using GATK SelectVariants:",
+      "substeps": [
+        {
+          "instruction": "gatk4 SelectVariants \\",
+          "title": ""
+        },
+        {
+          "instruction": "-select-type SNP \\",
+          "title": ""
+        },
+        {
+          "instruction": "-V /home/[user]/Workfiles/SNP_Calling/example.raw.vcf \\",
+          "title": ""
+        },
+        {
+          "instruction": "-O /home/[user]/Workfiles/SNP_Calling/example.raw.SNP.vcf",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Preparation 3: Dataset",
-      "instruction": "To facilitate more efficient downloading and management of raw resequencing data, install the SRA Toolkit and organize the raw data files within a designated directory. This protocol utilizes Restriction Site-Associated DNA sequencing (RAD-seq) datasets from populations of Dendrobium catenatum and D. huoshanense, as well as transcriptomic data of D. catenatum subjected to various cadmium stress conditions, all obtained from publicly available sources. Details regarding the download of these data can be found in the key resources table.",
-      "substeps": [],
+      "title": "Filter SNPs and parse VCF",
+      "instruction": "Apply hard filters with GATK VariantFiltration, then parse the filtered VCF with the provided Python script:",
+      "substeps": [
+        {
+          "instruction": "gatk4 VariantFiltration \\",
+          "title": ""
+        },
+        {
+          "instruction": "-R /home/[user]/Workfiles/SNP_Calling/reference.fasta \\",
+          "title": ""
+        },
+        {
+          "instruction": "-V /home/[user]/Workfiles/SNP_Calling/example.raw.SNP.vcf \\",
+          "title": ""
+        },
+        {
+          "instruction": "--filter-expression \"QD 60.0 || SOR > 3.0 || MQRankSum\" \\",
+          "title": ""
+        },
+        {
+          "instruction": "-O /home/[user]/Workfiles/SNP_Calling/example.filtered.vcf.gz",
+          "title": ""
+        },
+        {
+          "instruction": "python parseVCF.py \\",
+          "title": ""
+        },
+        {
+          "instruction": "-i /home/[user]/Workfiles/SNP_Calling/example.filtered.vcf.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "--minQual 30 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--skipIndels \\",
+          "title": ""
+        },
+        {
+          "instruction": "--gtf flag=DP min=3 | gzip > /home/[user]/Workfiles/SNP_Calling/output.example.filtered.vcf.geno.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Prepare input genotype data for analysis",
-      "instruction": "Timing: 6 days",
+      "title": "Generate .geno file",
+      "instruction": "The parseVCF.py script produces a .geno file with 22 columns, including CHROM, POS, and unphased genotypes for each individual; missing data are coded as “N” and heterozygous genotypes as “/”.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Prepare input genotype data for analysis",
-      "instruction": "This step involves SNP calling for all individuals studied and prepares a VCF file for downstream analysis.1.Variant calling with GATK HaplotypeCaller.Figure 2Screenshot displaying information about the SNP calling processThe figure displays the process and summary information of SNP calling for all twenty tested individuals using GATK4.>gatk4 HaplotypeCaller -R /home/[user name]/Workfiles/SNP_Calling/reference.fasta -O /home/[user name]/Workfiles/SNP_Calling/example.raw.vcf -I /home/[user name]/Workfiles/Raw_data/Sample01.realign.bam -I /home/[user name]/Workfiles/Raw_data/Sample02.realign.bam -I /home/[user name]/Workfiles/Raw_data/Sample03.realign.bam … -I /home/[user name]/Workfiles/Raw_data/SampleXX.realign.bamNote: This section identifies variants for each individual using the HaplotypeCaller module in GATK4 v4.6.2.0-114 (Figure 2). To conduct a preliminary evaluation of this protocol, we obtained and analyzed genotype data files from twenty samples across three species: D. catenatum (ten individuals), D. huoshanense (five individuals), and Flickingeria albopurpurea (five individuals). We selected the D. catenatum genome as the reference genome. Troubleshooting 1.2.Selecting SNP variations using GATK.>gatk4 SelectVariants -select-type SNP -V /home/[user name]/Workfiles/SNP_Calling/example.raw.vcf -O /home/[user name]/Workfiles/SNP_Calling/example.raw.SNP.vcf3.Variant filtering with GATK.Figure 3Screenshot displaying information about the SNP filtering processThe figure displays the process and summary information of SNP filtering for all twenty tested individuals using GATK4.>gatk4 VariantFiltration -R /home/[user name]/Workfiles/SNP_Calling/reference.fasta -V /home/[user name]/Workfiles/SNP_Calling/example.raw.SNP.vcf --filter-expression \"QD 60.0 || SOR > 3.0 || MQRankSum python parseVCF.py -i /home/[user name]/Workfiles/SNP_Calling/example.filtered.vcf.gz --minQual 30 --skipIndels --gtf flag=DP min=3 | gzip > /home/[user name]/Workfiles/SNP_Calling/output.example.filtered.vcf.geno.gz",
+      "title": "Perform differential expression analysis",
+      "instruction": "Run DESeq2 on the transcriptomic data; the output table must contain eight columns: baseMean, log2FoldChange, lfcSE, stat, p‑value, padj, sig, and an indicator of statistical significance.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Geno-format file preparation",
-      "instruction": "The script’s output file contains 22 columns, including the chromosome (CHROM), SNP position (POS), and unphased genotypes for each individual (Figure 10).15 Missing data are represented by ‘N’, while unphased genotypes are indicated by ‘/’.15Figure 10The formation and composition of the geno fileThe figure displays the loci information from the.geno file for all tested individuals, generated by parseVCF.py. The script’s output file contains 22 columns, including chromosome (CHROM), SNP position (POS), and unphased genotypes for each individual. Missing data are represented by ‘N’, while unphased genotypes are indicated by ‘/’.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "Differential expression analysis",
-      "instruction": "The DESeq2 output file comprises eight columns, which include the mean of normalized counts across all samples (baseMean), the log2 fold change (log2FoldChange) representing the comparison groups under treated and untreated conditions, the standard error associated with the log2 fold change (lfcSE), the Wald test statistic (stat), the p-value derived from the Wald test (p-value), the Benjamini-Hochberg adjusted p-value for controlling the false discovery rate (padj), and an indicator denoting statistical significance (sig).25",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "The limited application of D-statistic analysis",
-      "instruction": "The D statistic is derived from a model comprising four species or populations, which incorporates an outgroup species.15 This method requires four species or populations: P1, P2, P3 and O. Importantly, it assumes that individuals sampled from the outgroup population have experienced negligible admixture from the archaic source.15 Moreover, the model designs limitations—typically confined to four taxa—make it unsuitable for identifying introgression across broader evolutionary scales, especially in large, complex phylogenies.",
+      "title": "Conduct D‑statistic introgression test",
+      "instruction": "Prepare four‑taxon input (P1, P2, P3, and outgroup O) ensuring the outgroup shows negligible admixture, then apply the D‑statistic method to assess introgression among the species.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:14:17.133148Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Introgressed segments derived from exogenous species often encompass gene clusters that play a significant role in shaping the evolutionary trajectories of recipient species as they adapt to new habitats.2 However, the rapid degradation of archaic DNA and RNA in nature,3 along with the fact that many introgressed genes may be selected against and gradually lost over time,4 limits functional genomic insights into recipient species. Nevertheless, the ancient introgressed genomic segments retained in contemporary species provide a valuable opportunity to investigate the functional implications of introgression, particularly in perennial herbaceous plants.1 Apart from introgression, most eukaryotic genomes contain a substantial fraction of duplicated genes.5,6 According to previous studies, the mechanisms driving the retention of duplicated genes or paralogs may be influenced by gene dosage effects or by functional divergence through asymmetric evolution.7 Retention of duplicates may result from subfunctionalization, leading to a pair of genes that together perform the full range of functions of the single ancestral gene.8,9 Evidence of functional partitioning of ancestral functions includes, but is not limited to, biochemical functions10 and gene expression regulatory elements.11 Considering the potential functional similarity among introgressed genes, their paralogs, and alleles in recipient species, it is necessary to identify their paralogs and alleles and compare their relative expression under abiotic stress conditions. The protocol outlines the steps for detecting ancient introgressed genes between distantly related species and introduces a flexible method for identifying paralogs and alleles of these introgressed genes.",
+  "content_type": "protocol",
+  "content_type_score": 24,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.gif",
+      "local_path": "data/media/star_protocols/PMC13213801/fx1.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 3464,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/fx1.gif"
+    },
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 356600,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 460494,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 170878,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 310926,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 259886,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 376343,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 445704,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 194491,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 182549,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 179462,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 211650,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 160375,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/star_protocols/PMC13213801/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13213801/",
+      "caption": "",
+      "bytes": 155287,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13213801/gr9.jpg"
+    }
+  ]
 }

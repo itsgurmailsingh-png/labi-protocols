@@ -11,61 +11,66 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9144035/",
   "doi": "10.1016/j.mex.2022.101733",
   "citation": "10.1016/j.mex.2022.101733",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [],
   "estimated_time_mins": 36,
   "materials": [],
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "In recent years, machine learning (ML) methods have been used in genome-wide association studies (GWAS), showing to be efficient in identifying a subset of SNPs underlying a trait of interest [1,2]. Therefore, we present herein a workflow consisting, firstly, in the construction of predictive models using machine learning algorithms, for the identification of genomic regions that best explain the variance in milk traits of dairy cattle. Once relevant loci are identified, bioinformatics tools and online available software are used to retrieve the genes flanking those loci and explore the metabolic pathways, biological processes and/or molecular functions overrepresented by them. The method workflow is schematically represented in Fig. 1. This method could be suitable to use as an alternative to GWAS performed through the implementation of different software fitting linear, multivariate and Bayesian linear mixed models.Fig. 1Method workflow. EBVM: estimated breeding values for milk production; EBVF: estimated breeding values for milk fat content; EBVP: estimated breeding values for milk protein content; XGB: XGBoost; LGB: LightGBM; RF: Random Forest; MAE: mean absolute error; RMSE: root mean square error.Fig 1",
+      "title": "Retrieve flanking genes via BioMart",
+      "instruction": "Use Ensembl BioMart to download all protein‑coding genes located within ±30 kb of each relevant SNP, selecting the bovine genome assembly ARS‑UCD1.2 (Ensembl release 104).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Analysis post relevant SNP identification",
-      "instruction": "Protein-coding genes flanking relevant SNPs in +/- 30 Kb were retrieved by the Ensembl BioMart tool using the bovine genome assembly ARS-UCD1.2 (Ensembl release 104). Then, to assess the biological relevance of the loci identified by each ML algorithm, overrepresentation tests were performed on the gene sets retrieved for each of the nine combinations trait/algorithm, using the program PANTHER (protein annotation through evolutionary relationship) [10]. The parameters used were Bos taurus (for organism); statistical overrepresentation test (for analysis method); PANTHER Pathways, PANTHER GO-Slim Biological Process, and PANTHER GO-Slim Molecular Function (for annotation data set); all genes in Bos taurus database (for reference list); and Fisher's Exact with FDR multiple test correction (for test type). Results with FDR p-value < 0.05 were considered statistically significant.",
+      "title": "Run PANTHER overrepresentation analysis",
+      "instruction": "For each of the nine trait/algorithm gene sets, perform a statistical overrepresentation test in PANTHER with the following parameters: organism = Bos taurus; analysis method = statistical overrepresentation test; annotation data sets = PANTHER Pathways, PANTHER GO‑Slim Biological Process, PANTHER GO‑Slim Molecular Function; reference list = all Bos taurus genes; test type = Fisher's Exact with FDR multiple‑test correction. Record results with FDR p‑value < 0.05 as significant.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Analysis post relevant SNP identification",
-      "instruction": "Protein coding genes containing or flanking relevant SNPs obtained by XGB, LGB, and RF algorithms were 2770, 3334, and 3002 for EBVM; 1426, 1889, and 137 for EBVF; and 2224, 2804, and 1972 for EBVP, respectively. Among those genes and common to the three traits and ML algorithms assayed, signaling pathways and channel activities were detected as overrepresented.",
+      "title": "Record gene counts per algorithm/trait",
+      "instruction": "Count the number of protein‑coding genes containing or flanking the relevant SNPs for each machine‑learning algorithm (XGB, LGB, RF) and each estimated breeding value trait (EBVM, EBVF, EBVP):\n- EBVM: XGB 2770, LGB 3334, RF 3002\n- EBVF: XGB 1426, LGB 1889, RF 137\n- EBVP: XGB 2224, LGB 2804, RF 1972\nNote that signaling pathways and channel activities are overrepresented among genes common to all three traits and algorithms.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Method validation",
-      "instruction": "Validation was performed through comparison with previous results. The location of relevant SNPs for EBVM, EBVF, and EBVP obtained in this study was compared to previously reported relevant 10-adjacent SNP windows that explained more than 10 times genetic variance than expected for milk production, milk fat content, and milk protein content, respectively, obtained using BLUPf90 package of programs for the same population [11]. Then, the number and percentage of relevant windows and top windows (explaining more than 1.0, 0.7, and 0.8% of the genetic variance for milk production, milk fat content, and milk protein content, respectively) containing SNPs with positive gain was determined (Table 1).Table 1Matching with previous results. The number and percentage of previously reported relevant and top windows for each trait containing SNPs with positive gain obtained in this study is indicated.Table 1TraitComparisonXGBLGBRFEBVMrelevant windows40 (76.9%)46 (88.5%)40 (76.9%)top windows10 (100%)10 (100%)8 (80%)EBVFrelevant windows33 (57.9%)33 (57.9%)3 (5.3%)top windows8 (80%)6 (60%)1 (10%)EBVPrelevant windows44 (78.6%)47 (83.9%)27 (48.2%)top windows6 (60%)9 (90%)4 (40%)",
+      "title": "Compare SNPs to previous windows",
+      "instruction": "Obtain the list of previously reported relevant 10‑adjacent SNP windows (identified with the BLUPf90 package) that explain >10 × the expected genetic variance for milk production, milk fat content, and milk protein content. Compare the genomic locations of the SNPs identified in the current study to these windows.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Method validation",
-      "instruction": "In general, higher percentages of matching between previous and actual results were obtained with models using XGB and LGB algorithms, than with models using RF. The lower matching reached with RF, mainly evidenced with models trained for EBVF and EBVP traits, can be ascribed to the need to impute missing genotypes when using this algorithm.",
+      "title": "Calculate match percentages (Table 1)",
+      "instruction": "For each trait and algorithm, determine the number and percentage of previously reported relevant windows and top windows (top windows defined as those explaining >1.0 % of genetic variance for milk production, >0.7 % for milk fat, and >0.8 % for milk protein) that contain SNPs with positive gain. Record the values as shown in Table 1:\n- EBVM relevant windows: XGB 40 (76.9 %), LGB 46 (88.5 %), RF 40 (76.9 %); top windows: XGB 10 (100 %), LGB 10 (100 %), RF 8 (80 %).\n- EBVF relevant windows: XGB 33 (57.9 %), LGB 33 (57.9 %), RF 3 (5.3 %); top windows: XGB 8 (80 %), LGB 6 (60 %), RF 1 (10 %).\n- EBVP relevant windows: XGB 44 (78.6 %), LGB 47 (83.9 %), RF 27 (48.2 %); top windows: XGB 6 (60 %), LGB 9 (90 %), RF 4 (40 %).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Method validation",
-      "instruction": "Supplementary material and/or Additional information:",
+      "title": "Interpret validation results",
+      "instruction": "Summarize that models built with XGB and LGB show higher percentages of matching to previous results than RF models. Attribute the lower matching observed for RF (especially for EBVF and EBVP) to the need for genotype imputation when using this algorithm.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T11:51:23.690804Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "In recent years, machine learning (ML) methods have been used in genome-wide association studies (GWAS), showing to be efficient in identifying a subset of SNPs underlying a trait of interest [1,2]. Therefore, we present herein a workflow consisting, firstly, in the construction of predictive models using machine learning algorithms, for the identification of genomic regions that best explain the variance in milk traits of dairy cattle. Once relevant loci are identified, bioinformatics tools and online available software are used to retrieve the genes flanking those loci and explore the metabolic pathways, biological processes and/or molecular functions overrepresented by them. The method workflow is schematically represented in Fig. 1. This method could be suitable to use as an alternative to GWAS performed through the implementation of different software fitting linear, multivariate and Bayesian linear mixed models.Fig. 1Method workflow. EBVM: estimated breeding values for milk production; EBVF: estimated breeding values for milk fat content; EBVP: estimated breeding values for milk protein content; XGB: XGBoost; LGB: LightGBM; RF: Random Forest; MAE: mean absolute error; RMSE: root mean square error.Fig 1 Validation was performed through comparison with previous results. The location of relevant SNPs for EBVM, EBVF, and EBVP obtained in this study was compared to previously reported relevant 10-adjacent SNP windows that explained more than 10 times genetic variance than expected for milk production, milk fat content, and milk protein content, respectively, obtained using BLUPf90 package of programs for the same population [11]. Then, the number and percentage of relevant windows and top windows (explaining more than 1.0, 0.7, and 0.8% of the genetic variance for milk production, milk fat content, and milk protein content, respectively) containing SNPs with positive gain was determined (Table 1).Table 1Matching with previous results. The number and percentage of p",
+  "content_type": "likely_not_protocol",
+  "content_type_score": 10,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

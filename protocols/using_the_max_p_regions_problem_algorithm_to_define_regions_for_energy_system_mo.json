@@ -1,0 +1,166 @@
+{
+  "protocol_id": "using_the_max_p_regions_problem_algorithm_to_define_regions_for_energy_system_mo",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Using the max-p regions problem algorithm to define regions for energy system modelling",
+  "author": "Fleischer",
+  "doi": "10.1016/j.mex.2021.101211",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
+  "citation": "10.1016/j.mex.2021.101211",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 6.0,
+  "category": "Bioinformatics",
+  "estimated_time_mins": 60,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Load NUTS2 spatial dataset",
+      "instruction": "Download the Eurostat NUTS‑2 shapefile for all EU countries plus Norway, Switzerland and the UK, load it into a GeoDataFrame, keep the columns NUTS_ID, CNTR_CODE and geometry, and set the coordinate reference system (CRS) of the geometry to EPSG:3035.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Add population attributes",
+      "instruction": "Download the GPWv4 2015 GeoTIFF (CRS WGS84), re‑project the NUTS2 geometries to WGS84, use rasterstats.zonal_stats to compute the total population within each NUTS2 polygon, attach the population values to the GeoDataFrame, then re‑project the geometries back to EPSG:3035.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Add pumped‑storage capacity",
+      "instruction": "Load the Joint Research Centre (JRC) hydropower plants database, filter rows where the type column equals \"HPHS\", re‑project the latitude/longitude coordinates from EPSG:4326 to EPSG:3035, sum the electricity storage capacity of HPHS plants that fall inside each NUTS2 area; for any HPHS plant with missing or zero storage, set its storage to six times its installed power capacity, and store the summed capacity as an attribute of the NUTS2 dataset.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Determine eligible land and offshore area",
+      "instruction": "Run the Geospatial Land Availability for Energy Systems (GLAES) framework using the med scenario on each NUTS2 geometry to obtain eligible land; exclude (i) areas listed in the World Database on Protected Areas, (ii) marine zones deeper than 60 m, (iii) zones where 2017 ship traffic averaged >1 h km⁻² month⁻¹, (iv) zones within 12 nautical miles of the coast, and (v) zones within 1 nautical mile of gas or oil pipelines; allocate 30 % of the remaining eligible area proportionally to NUTS2 units according to the length of their coastal border with the exclusive economic zone.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Calculate installation capacity potential",
+      "instruction": "Multiply the eligible offshore area by a capacity density of 5.36 MW km⁻² to obtain offshore‑wind installed capacity; multiply the eligible on‑shore land area by 4 MW km⁻² for on‑shore wind capacity; multiply the eligible land area by 12 MW km⁻² for solar capacity. Store these three capacity values for each NUTS2 area.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Obtain full‑load hours",
+      "instruction": "Download the annual normalised maximum power output profiles for on‑shore wind, offshore wind and solar from the renewables.ninja platform, extract the full‑load hours (annual sum of the profiles) for each technology and associate them with the corresponding NUTS2 area.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Compute electricity generation potential",
+      "instruction": "For each technology, multiply its installed capacity (MW) by its full‑load hours (h) to obtain electricity generation potential (MWh) per NUTS2 area; assign to the NUTS2 record the technology that yields the highest generation potential and store that value as the region’s electricity generation potential.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Prepare attributes for max‑p regions",
+      "instruction": "Ensure the GeoDataFrame now contains three numeric attributes for every NUTS2 polygon: (1) population, (2) the maximum electricity generation potential among wind‑offshore, wind‑on‑shore and solar, and (3) pumped‑hydro storage capacity. These will be supplied as the feature matrix to the MaxPHeuristic function.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Create contiguity weight matrix",
+      "instruction": "Using libpysal, compute queen‑contiguity weights for the NUTS2 polygons; pass this weight matrix to MaxPHeuristic as the contiguity constraint.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Run MaxPHeuristic for energy regions",
+      "instruction": "Import spopt.MaxPHeuristic, set the objective to maximise heterogeneity of the three features, select the simulated‑annealing local‑search option, define an area‑factor threshold that is less than (sum of all NUTS2 areas) / (median of NUTS2 areas), provide the feature matrix, queen‑contiguity weights and threshold to MaxPHeuristic, execute the algorithm, and record the returned partition label for each NUTS2 area (areas sharing a label belong to the same region).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Generate random regions (optional)",
+      "instruction": "Assign each NUTS2 area a unique random value between 0 and 1, use these random values as the feature input to the same MaxPHeuristic configuration (including queen contiguity and simulated annealing) to obtain a random‑region partition that still respects contiguity.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Filter for specific country (e.g., Germany)",
+      "instruction": "If the analysis should focus on a subset of NUTS2 areas, filter the GeoDataFrame to the desired country codes (e.g., all German NUTS2 codes) before executing steps 8‑11.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC8374210/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
+      "caption": "",
+      "bytes": 34978,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374210/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC8374210/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
+      "caption": "",
+      "bytes": 119228,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374210/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC8374210/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
+      "caption": "",
+      "bytes": 72963,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374210/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC8374210/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8374210/",
+      "caption": "",
+      "bytes": 48579,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC8374210/gr3.jpg"
+    }
+  ],
+  "content_type": "likely_not_protocol",
+  "content_type_score": 17,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

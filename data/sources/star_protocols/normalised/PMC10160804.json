@@ -24,19 +24,218 @@
     "AMD Ryzen 7",
     "Data.xlsx",
     "DrugXData.xlsx",
-    "Data_user.xlsx"
+    "Data_user.xlsx",
+    "Timing: 5 min",
+    "Timing: 10 min",
+    "Timing: 2 h (approx. 15 min per sample)",
+    "Timing: 15 min",
+    "Timing: 12 h",
+    "This study did not generate new unique reagents."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Step-by-step method details",
-      "instruction": "Here, the described step-by-step methods are for two purposes as demonstrated in Liang et al.1 First, a generic Markov model is fitted to the glycomic profiles (glycoprofiles) of a glycoprotein drug produced by different glycoengineered cell lines. By visualizing the biosynthetic models of N-glycosylation, users gain insights into the glycoengineering impact on theoretical glycosylation reactions. Second, one may use the fitted models of single-glycosyltransferase-knockout (single-GT-KO) cell lines to predict the theoretical glycoprofiles of a glycoprotein produced by the cell lines with combinatorial GT knockouts. The glycoprotein whose glycoprofiles are predicted can be a different protein from the glycoprotein whose single-GT-KO glycoprofiles are used for fitting. As examples, we generated sample-specific models for 7 glycoprofiles of glycoengineered erythropoietin (EPO) produced by different single-GT-KO CHO-K1 or wildtype cell lines.22 We then use a few fitted single-GT-KO EPO models to predict 2 glycoprofiles of EPO produced by the cell lines with combinatorial glycosyltransferase (GT) knockouts. Lastly, we use a few fitted single-GT-KO EPO models to predict 2 glycoprofiles of Enbrel produced by similar CHO cell lines with the knockout impact learned from the EPO models.",
+      "title": "Download and unzip GlycoMME toolkit",
+      "instruction": "Download the GlycoMME toolkit from https://github.com/LewisLabUCSD/N-Glycosylation-Markov-Models by clicking the green “Code” button and selecting “Download Zip”. Unzip the downloaded archive so that all files are placed in a single master folder (default name: N-Glycosylation-Markov-Models-main). In the master folder, delete or move all contents of the Data folder (including the OptimizationResults subfolder) except for Data.xlsx and Data_user.xlsx if you plan to use your own datasets.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Set up MATLAB working folder",
+      "instruction": "Install MATLAB (e.g., version 2020b) beforehand. Open MATLAB, set the master folder as the “Current Folder” (if it is not already). Click the red‑square icon in MATLAB, navigate to the master folder, and select it.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Prepare raw glycomic data in Data_user.xlsx",
+      "instruction": "Enter your experimental glycomic data into the Excel file Data_user.xlsx following one of the two scenarios below. Keep the sheet names exactly as described.",
+      "substeps": [
+        {
+          "instruction": "Scenario a – Glycomics data with known monosaccharide composition (with or without structure annotations):\n  i. Open the sheet “MS Raw”.\n  ii. Column 1: list each unique m/z value where a glycan is detected.\n  iii. Column 2: enter the corresponding glycan composition strings (see Step0_Data_Preprocessing.pptx slide 1 for format).\n  iv. From column 3 onward, enter the relative MS signal (area under the curve) for each sample; the top cell of each column must contain the sample name (alphanumeric characters and forward slashes only). For knockout predictions, the WT sample name must be “WT” and knockout symbols are separated by forward slashes.\n  v. If the same composition appears at multiple m/z values, sum the signals and keep the smallest m/z.\n  vi. If structure annotations are available, switch to the sheet “Annotation”.\n  vii. Column 1: list the m/z values.\n  viii. Column 2: enter unique Linear Code strings for each glycan annotation (see the reference list in Step0_Data_Preprocessing.xlsx slides 2‑4).\n  ix. From column 3 onward, enter “1” if the annotation is present in the sample, otherwise “0”. Sample names must match those used in “MS Raw”.\nScenario b – Known glycan structure annotations but no composition strings:\n  i. Open the sheet “MS Raw”.\n  ii. Column 2: enter unique Linear Code strings for each annotation.\n  iii. From column 3 onward, enter the relative abundance for each annotation in each sample (or “0” if absent). Sample naming rules are the same as above.\n  iv. Run the script Sup1_Get_compositions_from_linearcodes.m (located in the master folder) to automatically generate composition strings and fill the appropriate columns in Data_user.xlsx.\nAfter completing the preprocessing, compare Data_user.xlsx with the example Data.xlsx to verify correct formatting.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Visualize and preprocess dataset (Step 1A)",
+      "instruction": "Timing: 5 min. After the MATLAB working environment is ready, open the script Step1A_Load_Preprocessed_Data_Fitting.m. In the script editor, set the dataset name at line 5 (DatafileName = 'Data.xlsx' for the example or DatafileName = 'Data_user.xlsx' for your data). Run the entire script. The script creates the structure variable DataSet, saves Data.mat in the Data folder, and generates a figure of relative glycomic signals and, if annotations are present, a figure of glycan structures for each sample. Advanced users may edit the inputs to visualize only selected annotations (see comments in the script).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Create generic N‑glycosylation Markov model (Step 2A)",
+      "instruction": "Timing: 10 min. Open the script Step2A_Create_Generic_Glycan_Network_Fitting.m. At line 4 set the dataset to load (load Data.mat – use Data.xlsx or Data_user.xlsx as appropriate). Run the script. The generic network (structure variable GenericNetwork) and fitting parameters are saved as GenericNetwork.mat in the Data folder. For advanced users, the reaction set can be altered via the variable RxnSel and the function CreateGlycanRxnList (see script comments). Keep the network complexity ≤ 23 (maximum number of modifications of a core Man9 glycan).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Fit sample‑specific Markov models (Step 3A)",
+      "instruction": "Timing: up to 40 h (≈1 h per fitted model; 15 models per sample × 7 samples or 30 models for WT). This step fits the generic network to each experimental glycoprofile.\n1. Open the script Step3A_Fit_Markov_Models_with_WT_Glycoprofile.m from the Current Folder panel.\n2. At line 4 set the dataset to load (load Data.mat).\n3. At line 13 define the profiles to fit, e.g., ProfSel = {'WT','B4galt1','St3gal3','St3gal4','St3gal6','B3gnt2','Mgat2'}; or use ProfSel = DataSet.ProfNames to fit all profiles.\n4. At line 23‑25 set the number of models per profile, e.g.,\n   num = 5; % for each non‑WT profile\n   if strcmp(ProfSel{a},'WT')\n       num = 10; % for WT profile\n   end\n   (In the demonstration three MATLAB sessions ran in parallel, giving 5 × 3 = 15 models for each KO profile and 10 × 3 = 30 models for WT.)\n5. At line 97 assign an arbitrary ID number, e.g., IDNum = 1; savedFileName = ['OptimizationResults_',num2str(IDNum),'.mat'];\n6. Run the script. The results are stored in the structure OptimizationResults and saved as OptimizationResults_#.mat in Data/OptimizationResults.\n7. Optional parallelisation: open additional MATLAB sessions and repeat steps 1‑6, using a unique IDNum for each session so files do not overwrite. Each session requires ≈8 GB RAM; total RAM usage across sessions should stay ≤ 95 % of system memory.\n8. When a session finishes, a message box appears. Close all but one MATLAB window after all sessions complete.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Visualize fitted glycoprofiles (Step 4A)",
+      "instruction": "Timing: ≈2 h (≈15 min per sample). Click Step4A_Visualize_Fitted_Glycoprofiles.m in the Current Folder panel, set the dataset at line 4 (load Data.mat), and run the script. Figures are generated for each sample showing:\n- Boxplots of log10 transition probabilities by reaction type and Golgi compartment (Figure 5A).\n- Comparison of average fitted glycoprofile vs. experimental data, with RMSE, random RMSE, and leakage metrics (Figure 5B). Good fits have random RMSE ≥ 10 × fitted RMSE and leakage < 10 %.\n- Predicted major glycoforms at each m/z (Figure 5C).\n- Network visualizations of important intermediate glycans (Figure 6) and additional network statistics (Figure 7).\nThe computed model features are added as subfields of OptimizationResults and saved as ProcessedModels.mat in the Data folder.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Predict EPO glycoprofiles for combinatorial knockouts",
+      "instruction": "Timing: 15 min.\n1. Open Step5A_Conduct_Comparative_Analytics.m, set the dataset at line 4 (load Data.mat), and run the script.\n2. Open Step6A_Predict_glycoprofiles_of_combinatorial_KOs.m, set the dataset at line 4 (load Data.mat).\n3. At line 13‑14 define the knockout combinations and the wild‑type base profile, e.g.,\n   KnockoutSel = {{'St3gal4','St3gal6'}; {'Mgat2','St3gal4','St3gal6'}};\n   BaseProfSel = 'WT';\n   (The example predicts profiles for a St3gal4/St3gal6 double KO and a Mgat2/St3gal4/St3gal6 triple KO.)\n4. Run the script. Figures similar to Figure 8 are produced, showing fitted model parameters, average predicted glycoprofiles, major predicted glycoforms, and heatmaps of glycoform ratios.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Predict Enbrel glycoprofiles using WT DrugX data",
+      "instruction": "Timing: ≈12 h (including fitting of WT Enbrel models). Follow these substeps:\n1. Prepare the wild‑type Enbrel glycoprofile as an Excel file named DrugXData.xlsx (place it in the Data folder).\n2. Open and run Step1B_Load_Preprocessed_Data_for_WT_DrugX.m.\n3. Open and run Step2B_Create_Generic_Glycan_Network_Prediction_for_WT_DrugX.m.\n4. Open Step3B_Fit_Markov_Models_with_WT_Glycoprofile_for_DrugX.m.\n   a. At line 17 set the number of models, e.g., num = 10; (10 models per profile).\n   b. At line 31 assign an ID number, e.g., IDNum = 1; savedFileName = ['OptimizationResults_DrugXWT_',num2str(IDNum),'.mat'];\n   c. Run the script. Results are saved in Data/OptimizationResults.\n   d. Optional: run additional MATLAB sessions in parallel as described in Step 3A (≈8 GB RAM each, keep total RAM ≤ 95 %).\n5. When fitting finishes, a message box appears (Figure 9). Close extra MATLAB windows.\n6. Open and run Step4B_Visualize_Fitted_WT_Glycoprofiles_for_DrugX.m to generate figures for the fitted WT Enbrel profile (interpret as described for Step 4A).\n7. Open Step6B_Predic_glycoengineered_glycoprofiles_of_DrugX.m.\n   a. At line 13‑14 define the knockout combinations based on the EPO single‑KO models, e.g.,\n      KnockoutSel = {{'B3gnt2'}; {'B3gnt2','St3gal3','St3gal4','St3gal6'}};\n   b. Run the script. Three figures are produced for each predicted profile (analogous to Figure 10), showing transition‑probability boxplots, average predicted glycoprofiles, and major predicted glycoforms.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T00:40:31.893063Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Timing: variable (<45 min with preprocessed data; <5 min if MATLAB and relevant toolboxes have been pre-installed). Additionally, undetermined amounts of time will be needed for data curation depending on the total numbers of glycoforms or signals in users’ glycomic datasets, the curators’ familiarity with LinearCode, and any additional steps to normalize and organize glycomics data into the required matrix form as shown in the Data.xlsx file. Glycans coat most cells and decorate most proteins a cell uses to interact with its environment.2,3,4 Importantly, these glycans frequently modulate protein-protein interactions and participate in self-non-self recognition.5,6 Small changes in glycan structure can result in major impacts on protein function and organismal phenotypes.5,7 Thus, there is particular interest in understanding the genetic basis of any changes in glycosylation. Furthermore, the modulation of glycosylation on therapeutic proteins can increase potency and safety, and biosimilar development requires the achievement of glycans that are equivalent to the innovator drug.8,9,10,11 However, glycans are complex and their control is challenging since they are synthesized in complex pathways. Thus, there is a need to develop computational models of glycosylation to enable the use of systems glycobiology to control glycan structures.12 Many types of models have been constructed for glycosylation.13,14,15,16,17,18,19 While many require the enumeration of large numbers of kinetic parameters, which are difficult to obtain, more recently a different approach has been taken wherein glycan biosynthesis is modeled as a Markov process,1,16,20 wherein only a glycoprofile is needed for a sample of interest to parameterize a detailed and comprehensive model of glycosylation. Such models show great potential in being used to guide the glycoengineering of cells to obtain desired glycoprofiles on therapeutic proteins and biosimilars.16 They could further provide insights into",
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/fx1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/39023eb2e105/fx1.jpg",
+      "caption": "",
+      "bytes": 350708,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.gif",
+      "local_path": "data/media/star_protocols/PMC10160804/fx2.gif",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/51ca064f7ff6/fx2.gif",
+      "caption": "",
+      "bytes": 4451,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/fx2.gif"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr5.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/5464ac70f71c/gr5.jpg",
+      "caption": "",
+      "bytes": 227927,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr8.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/6f92b85d53f6/gr8.jpg",
+      "caption": "",
+      "bytes": 337780,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr4.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/76c9da340d9c/gr4.jpg",
+      "caption": "",
+      "bytes": 122638,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr10.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/7dfe9c487527/gr10.jpg",
+      "caption": "",
+      "bytes": 193388,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx3.gif",
+      "local_path": "data/media/star_protocols/PMC10160804/fx3.gif",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/83e6728c8b52/fx3.gif",
+      "caption": "",
+      "bytes": 4299,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/fx3.gif"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr7.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/8fb086e703de/gr7.jpg",
+      "caption": "",
+      "bytes": 669708,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/a1e39f3a186f/gr1.jpg",
+      "caption": "",
+      "bytes": 246416,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr2.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/a695bbc14f47/gr2.jpg",
+      "caption": "",
+      "bytes": 297008,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr3.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/c775b988e27b/gr3.jpg",
+      "caption": "",
+      "bytes": 236186,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr9.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/c7836805004c/gr9.jpg",
+      "caption": "",
+      "bytes": 114962,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr9.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/star_protocols/PMC10160804/gr6.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/2f25/10160804/dd64a416ec3d/gr6.jpg",
+      "caption": "",
+      "bytes": 232097,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC10160804/gr6.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 29,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

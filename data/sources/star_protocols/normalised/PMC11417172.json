@@ -40,70 +40,304 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "Astrocytes, a main type of non-neuronal cells, display fluctuations of intracellular calcium concentrations ([Ca2+]i) that are responsive to ambient conditions and neuroactive molecules.1,2,3 Fluorescence imaging of Ca2+ indicators is thus a popular means to probe astrocyte activity in vitro, ex vivo and in vivo.1,2,3 Proven methods of neuronal Ca2+ imaging and analysis have been widely adapted to astrocytes for this purpose. However, important differences between neurons and astrocytes mean that key operational assumptions are not transferable. For instance, in neurons, Ca2+ activity is driven by depolarization-induced transmembrane Ca2+ fluxes. By contrast, the origins and mechanisms of astrocytes Ca2+ signals are diverse and still largely elusive, limiting our ability to functionally interpret Ca2+ events. Astrocytic [Ca2+]i fluctuations also primarily occur outside of the soma, within highly localized micro/nano-domains, and seldom propagate or merge at the cell body.4,5,6,7 Concomitantly, the complexity of astrocyte morphology and its sub-diffraction limit scale also make it difficult to register areas of Ca2+ activity to identifiable morphological features in live fluorescence imaging. Hence, there is a growing need to enrich the astrocyte Ca2+ toolbox with analysis methods tailored to astrocytes. Owing to the constrains listed above, such methods need to be 1) holistic, to capture all activities in the cell, 2) unbiased, rather than restricted to user-defined regions of interest, 3) agnostic, to make no or minimal assumptions regarding the rules of Ca2+ propagation or integration, and 4) with instrument-limited accuracy, to favor detailed investigations consistent with the nanoscale nature of astrocytes architecture.8",
+      "title": "Motion‑correct raw recordings",
+      "instruction": "Using MATLAB and the NoRMCorre plugin, apply motion correction to the raw GCaMP and tdTomato .tif recordings (steps 1‑3 of Part 1). Save the motion‑corrected GCaMP file as “motion‑corrected GCaMP recording.tif” and the motion‑corrected tdTomato file as “motion‑corrected tdTomato recording.tif” (the tdTomato file should receive the same transformation as the GCaMP file).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "Here, we introduce STARDUST, a pipeline that captures Ca2+ dynamics in confined, local micro-domains across the territory of all astrocytes in 2-photon imaging recordings. STARDUST builds upon AQuA, a popular open-source platform,9 to yield maps of regions of activity (ROAs) from patches of active pixels, which can be combined with cell-segmentation and/or correlated to cellular morphology. Importantly, STARDUST makes no assumptions regarding Ca2+ propagation across ROAs, in line with the seemingly static nature of astrocyte Ca2+ activity.4,5,6,7 Instead, STARDUST treats ROAs as independent units and focuses on decomposing Ca2+ dynamics in a regionalized fashion, yielding as many as 30 ROAs per cell, or thousands across a 400 × 400 μm2 field of view, and extracting fluorescence time-series, signals and signal features from each of them. A particular instantiation of the usefulness of STARDUST is in pharmacology experiments, where it can distinguish “stable ROAs” (active throughout the recording), from “ON ROAs” (inactive at baseline epoch and turned on during drug application), and “OFF ROAs” (active at baseline and turned off during drug application). Together, this makes STARDUST a user-friendly complement or alternative to the small number of publicly available algorithms and tools recently developed to tackle astrocyte Ca2+ activity.4,6,9,10,11 This protocol includes step-by-step guidelines, tips on how to use STARDUST and outlines multiple output examples, providing a systematic walkthrough of its core functionalities, limitation, and tunability.",
+      "title": "Detect active pixels with AQuA",
+      "instruction": "In MATLAB run AQuA on the motion‑corrected GCaMP .tif (steps 4‑13 of Part 2). Export the AQuA overlay video as “AQuA overlay video.tif” and the MATLAB project file as “AQuA.mat”.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Step-by-step method details",
-      "instruction": "This section describes the step-by-step process for 1) Part 1: image preprocessing (including motion correction and noise filtering), 2) Part 2: active pixels detection using AQuA, 3) Part 3: map of region-of-activity (ROA) generation, 4) Part 4: time-series data extraction, 5) Part 5: cell mask acquisition, and finally 6) Part 6: signal detection and feature extraction with a Python pipeline. Together, this permits the analysis of calcium signals extracted from raw recordings, illustrated using two-photon laser scanning microscopy (2-PLSM) recordings of the calcium sensor lck-GCaMP6f and static tdTomato reference marker expressed in astrocytes (AAV5-gfaABC1D::lck-GCaMP6f, AAV5-gfaABC1D::tdTomato, micro-injected at P70) in acute hippocampal slices obtained from adult mice.Note: The goal of STARDUST is to analyze regional activity in astrocytes (Figure 1). However, to allow a more versatile use of the pipeline, we implemented three versions of STARDUST best suited for three types of analysis (1) STARDUST cell-based analysis (2) STARDUST ROA-based analysis, and (3) STARDUST cell-assigned ROA analysis (Figure 2). Each type of analysis comprises its own code for Part 6: Signal detection and feature extractions.Figure 1Illustration of the STARDUST workflowNote that STARDUST permits three types of analysis (see main text): ROA-based analysis, wherein the cell boundaries and identity of the cells to which individual ROAs belong are ignored (top raw), cell-based analysis, consisting of overall fluorescence analysis within entire cell boundaries with no ROA definition, and cell-assigned ROA analysis, wherein ROA-based analysis is combined with cell-segmentation to yield a readout of average ROA activity within individual cells. Scale bar: 50 μm.Figure 2Flowchart for all three version of STARDUST, indicating the major steps, file outputs (in gray) and software required",
+      "title": "Export ROA masks from AQuA",
+      "instruction": "Open the AQuA overlay video in ImageJ (steps 14‑17 of Part 3) and export the ROA set as a zip file “ROA RoiSet.zip” and the binary mask as “ROA mask.tif”.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "STARDUST cell-assigned ROA analysis version",
-      "instruction": "If regional activity is to be combined with cellular correlations (i.e., cell-segmentation will be required for a readout of average ROA activity within individual cells), follow the steps below as they are described and use Jupyter Notebook file STARDUST.ipynb to perform Part 6. Parts and steps required for this version of analysis are summarized in Table 3.Table 3Input and output files for STARDUST cell-assigned ROA analysis pipelinePart & stepSoftwareInputInput formatOutputOutput formatpart 1steps 1–3ImageJRaw GCaMP recording and raw tdTomato recordingtifN/AN/Apart 1step 2b (optional)MATLABNoRMCorreRaw GCaMP recording.tifMotion-corrected GCaMP recording.tifRaw tdTomato recording.tifMotion-corrected tdTomato recording. Same motion correction from the GCaMP recording should be applied.tifpart 2steps 4–13MATLABAQuARaw GCaMP recordingormotion-corrected GCaMP recording.tifAQuA overlay video. Contains colorful ROAs detected from AQuA.tifAQuA MATLAB file. MATLAB project file in case output parameters need to be changed later.matpart 3steps 14–17ImageJAQuA overlay video.tifROA RoiSet. A ImageJ zip file containing all ROAs detected from AQuA.zipROA mask.tifpart 4steps 18–21ImageJRaw GCaMP recording or motion-corrected GCaMP recording.tifTime series csv file. Extracts fluorescence intensity time-series from each ROA.csvROA RoiSet.zippart 5steps 22–25ImageJRaw tdTomato recording or motion-corrected tdTomato recording.tifCell RoiSet. A ImageJ zip file containing all cells delineated.zipCell mask.tifpart 6steps 26–41Jupyter NotebookSTARDUSTTime series csv file.csvMetadata. Metadata associated with the recording and analysis.csvdff traces. The ΔF/F0 traces from the current analysis.csvROA mask.tifSignal features. Each row represents one active signal detected by STARDUST.csvROA based analysis. Each row represents one ROA and its summarized signal features.csvCell mask.tifCell-assigned ROA analysis. Each row represents one cell and its summarized signal features.csvROA summary. Type of ROA and count based on pharmacology application and calcium activity.csvFor details in part 6, read instructions from the steps specified in the table and from the Jupyter Notebook STARDUST.ipynb.",
+      "title": "Extract ROA fluorescence time‑series",
+      "instruction": "Using ImageJ (steps 18‑21 of Part 4), load the motion‑corrected GCaMP .tif and the ROA mask.tif, then extract the fluorescence intensity time‑series for each ROA. Save the results as “time series.csv” and also export the ROA RoiSet.zip (same as above).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Part 6: Signal detection and feature extraction",
-      "instruction": "This section introduces an interactive and user-friendly Jupyter Notebook Python script for signal detection and analysis. Here, we take users though the “STARDUST cell-assigned ROA analysis”, which comprises all steps common to all three versions of STARDUST (Figure 2; Table 3, and code annotations). Code segments shown here thus come from the “STARDUST.ipynb” version, which includes signal preprocessing, baseline fluorescence (F0) determination and signal detection, signal feature extraction, cell assignment, ROA-based analysis, cell-assigned ROA-based analysis, and data output.Note: When running the analysis pipeline, the script will take users through the analysis flow semi-automatically, with interactive prompts, stopping at steps that require user inputs or provide output graphs for visual inspection. To streamline the process, the Jupyter Notebook is equipped with custom-defined functions stored in util.py. All scripts are available on https://github.com/papouinlab/STARDUST.Note: This section provides explanations for the inputs required by each code block, the underlying computation, and the outputs they give. For more detailed explanation of arguments and outputs, users can use the help documentation for each function by executing help(function_name) in the interactive environment. Notes on how to optimize key parameters are also detailed in this section.CRITICAL: Unless explicitly noted, the users do not need to edit the content of the code.Note: Code blocks are referred to as “cells” in the Jupyter Notebook ecosystem. To avoid confusion, we will be referring to these as code blocks in this protocol.Note: In the STARDUST pipeline, each non-optional code block needs to be run before executing the next block. To execute a code block, select it by clicking anywhere inside it, and click the “Run” button on the top of the Jupyter Notebook page or use Shift + Enter. There will be a set of empty brackets [ ] on the left side of each code block. When the code is running, the brackets will show an asterisk sign [∗]. When the code completes running, a number will show up in the bracket, marking the order of executed code blocks.Note: Some code blocks, upon running, will prompt users for input in a text box under the code block. Input the prompted information and press Enter to proceed to the next step.26.Download the STARDUST repository from GitHub. On the top right of the repository webpage, click the green “Code” button, click “Download ZIP” to a local directory. Extract all files.Note: Because online Jupyter Notebook navigates to the C Drive in Windows system by default, we recommend downloading the Zip file into the C Drive.Optional: Although it is possible to run STARDUST in the base environment in Anaconda, we recommend setting up a designated environment for STARDUST to avoid module version conflicts with other pipelines. We provide a YAML file with required software and module versions for STARDUST in the GitHub repository. YAML is a human-friendly data serialization language that can be directly read by the Anaconda navigator.a.To import the STARDUST environment in Anaconda, open the Anaconda navigator and click “Environments” in the left panel to navigate to the environments page.b.In bottom of the middle panel, click the “Import” button. A “Import Environment” window will appear and “Local drive” will be selected by default under “Import from”.c.Click the file icon next to the empty text box under “Local drive”, navigate to the STARDUST-main folder downloaded earlier in this step, select the “STARDUSTreq.yml” file and click “Open”. The text box should now show the path to the YAML file.d.Change the “New environment name” if needed.e.Click the “Import” button.27.Launch the Jupyter Notebook version of choice from the Anaconda navigator home page. This will open a browser tab showing the Notebook Dashboard. The Dashboard is similar to a file explorer.a.Navigate to open the STARDUST GitHub folder “STARDUST-main”.b.Select and open one version of .ipynb file that matches the type of analysis. If performing STARDUST cell-based ROA analysis, open “STARDUST.ipynb”. If performing STARDUST ROA-based analysis, open “STARDUST ROA-based.ipynb”. If performing STARDUST cell-based analysis, open “STARDUST cell-based.ipynb”.28.Execute the following code block by clicking “Run”, which will import modules and custom-defined functions.>import pandas as pd, numpy as np, seaborn as sns, scipy, matplotlib, PIL>from src.STARDUST.util import ∗29.Run the follow code block to check that the environment is equipped with the required version for modules used.>check_modules()Note: For how to set up the environment, refer to the optional note in step 26.30.Run the next code block to read in input files and information about the experiment. Upon running, the code will prompt users to input the path to the folder that contains all input files, the file names, and information about the experiment including timing of pharmacology application, frame rate, and spatial resolution of the recording. Enter the information accordingly in the prompted text boxes.Note: To find the path to a folder in a Windows system machine, navigate to the folder, click on the address bar in the file navigator and copy the path. For example, the path to a folder named “example folder” under the Documents folder should look like “C:∖Users∖YourUserName∖Documents∖example folder”.CRITICAL: The input files, including the time series csv file (step 21), the ROA mask tiff file (step 17), and the cell mask tiff file (step 25) must all be under the same folder.>time_series_path, ROA_mask_path, cell_mask_path, output_path = prompt_input()>drug_frame, frame_rate, spatial_resolution = get_metadata()31.Run the code block below to read in the ROA mask and cell mask. This also labels ROAs and cells to allow ROA assignment to a specific cell.>ROA_map_array, ROA_map_labeled, ROA_map_count = read_tif(ROA_mask_path, “ROA”)>cell_map_array, cell_map_labeled, cell_count = read_tif(cell_mask_path, “cell”)CRITICAL: This code block outputs the total number of ROAs or cells being analyzed. The number should match the number of ROAs or cells generated in earlier steps in ImageJ (troubleshooting 2).Optional: To visualize the ROA and cell map, run the following code block.>visualize_map(ROA_map_array = ROA_map_array, cell_map_array = cell_map_array)",
+      "title": "Generate cell segmentation mask",
+      "instruction": "In ImageJ (steps 22‑25 of Part 5), load the motion‑corrected tdTomato .tif, segment individual astrocyte somata, and export the cell set as a zip file “Cell RoiSet.zip” and the binary mask as “Cell mask.tif”.",
       "substeps": [],
-      "is_critical": true,
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Signal feature extraction",
-      "instruction": "Timing: 30 s\n36.Run the code block to extract the signal features with the analyze_signal function and generate a dataframe stored in signal_stats, with each row representing one active signal.Table 4Signal features output dictionaryFeatureUnitCommentROA_IDNAROA ID for the signal.signal_start_frameNAThe frame number of signal onset (F0 crossing).signal_start_timesTime of signal onset (t = 0 being the start of the recording).signal_end_frameNAThe frame number at which the signal ends (F0 crossing).signal_end_timesTime in seconds at which the signal ends.peak_frameNAThe frame number at which signal peak amplitude occurs.peak_timesTime when signal peak amplitude occurs.AUCΔF/F0·sArea under curve for the selected signal, calculated using Simpson’s rule.amplitudeΔF/F0Peak amplitude of the signal.signal_to_noiseNARatio of signal peak amplitude to noise peak amplitude of the baseline fluorescence of the selected ROA.rise_timesTime elapsed between the 10% and 90% peak crossing points in the signal rise phase.decay_timesTime elapsed between the 90% and 10% peak crossing points in the signal decay phase.half_widthsTime elapsed between the 50% peak crossing points in the rise phase and the 50% peak crossing points in the decay phase.durationsTime elapsed between the signal initiation and signal termination.inter_event_intervalsTime, at the initiation point of a new signal, elapsed since the termination point of the previous signal in the same ROA. Returns “NA” if the signal is the first (or only) signal on the time-series.epochNAIn experiments with pharmacology treatments, will return “baseline” if the signal peak occurs before the input drug_frame, and “drug” if it occurs after input drug_frame). Returns “NA” when input drug_frame was not inputted.Also see Figure 5E. >signal_features = analyze_signal(dff_traces, signal_frames, signal_boundaries, frame_rate, drug_frame) Note: These definitions in Table 4 depart slightly (but importantly) from those typically employed for neuronal recordings. For instance, in neuronal recordings, the decay time is often the time constant of the exponential fit applied to the “90%–10% of peak amplitude” portion of the trace, and the inter-event interval is determined from signal onset to signal onset. However, few astrocyte Ca2+ signals appear to display EPSC (excitatory postsynaptic current)- or EPSP (excitatory postsynaptic potential)-like kinetics. Additionally, in most Ca2+ recordings of astrocyte activity, the sampling rate (∼1 Hz) is often too low for an adequate exponential regression, and the duration of astrocyte Ca2+ transients are highly variable, prompting these minor differences.",
-      "substeps": [],
+      "title": "Download and extract STARDUST repository",
+      "instruction": "From https://github.com/papouinlab/STARDUST click the green “Code” button, choose “Download ZIP”, and save the zip file to the C: drive (recommended). Extract all files to a local directory.",
+      "substeps": [
+        {
+          "instruction": "a. Open the GitHub page and click the green “Code” → “Download ZIP”.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Save the zip file to a folder on the C: drive (e.g., C:\\STARDUST‑main).",
+          "title": ""
+        },
+        {
+          "instruction": "c. Extract the zip archive, preserving the folder structure.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "ROA-based analysis",
-      "instruction": "Timing: 1 min\n39.Run the next code block to perform the ROA-based analysis, which will summarize the averaged signal features per ROA (Table 4) and the ROA specific features (Table 5). This step also categorizes each ROA according to its activity in response to pharmacological treatments (when applicable).Table 5ROA-based analysis output dictionaryOutputUnitCommentROA_IDNAROA ID.cell_IDNACell ID of selected ROA.size_um2μm2Size of the selected ROA.ROA_typeNAROA categorization based on its activity with regards to the drug_frame input.If signals were detected in the baseline and drug perfusion epochs of the time-series of the selected ROA, the ROA is categorized as “stable”. If the time-series contain signals during ‘baseline’ epoch but non during the ‘drug’ epoch, it is listed as an “off” ROA. If the time-series contains signals in the ‘drug’ epoch but none in the ‘baseline’ epoch, it is listed as “on” ROA. If no signals are detected, the ROA is listed as “inactive” (See troubleshooting 5 if a recording contains a high proportion of “inactive” ROAs). Returns “NA” if no value was inputted for drug_frame.epochNAEpoch from which average measurements were obtained.signal_countNANumber of signals in the indicated epoch.frequency_perminmin–1Number of signals per min in the selected ROA during the indicated epoch. >ROA_based, ROA_info = ROA_analysis(signal_features, ROA_info, frame_count, frame_rate, drug_frame, cell_segmentation = True)",
-      "substeps": [],
+      "title": "Create dedicated conda environment (optional)",
+      "instruction": "Import the provided YAML file (STARDUSTreq.yml) into Anaconda Navigator to create an isolated environment with the required module versions.",
+      "substeps": [
+        {
+          "instruction": "a. Open Anaconda Navigator, select “Environments”.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Click “Import”, ensure “Local drive” is selected, and browse to the extracted STARDUST‑main folder to choose “STARDUSTreq.yml”.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Optionally rename the new environment.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Click “Import” to create the environment.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Cell-assigned ROA analysis",
-      "instruction": "Timing: 1 min\n40.Run the next code block to generate the cell-assigned ROA analysis. >cell_assigned = cell_analysis(signal_features, ROA_info)",
+      "title": "Launch appropriate Jupyter Notebook",
+      "instruction": "From the Anaconda Navigator home page launch Jupyter Notebook, navigate to the extracted STARDUST‑main folder, and open the notebook that matches the desired analysis type:",
+      "substeps": [
+        {
+          "instruction": "a. For cell‑assigned ROA analysis open “STARDUST.ipynb”.",
+          "title": ""
+        },
+        {
+          "instruction": "b. For ROA‑based analysis open “STARDUST ROA‑based.ipynb”.",
+          "title": ""
+        },
+        {
+          "instruction": "c. For cell‑based analysis open “STARDUST cell‑based.ipynb”.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Import Python modules and utilities",
+      "instruction": "Run the first code block in the notebook to import pandas, numpy, seaborn, scipy, matplotlib, PIL and all custom functions from src/STARDUST/util.py.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Verify module versions",
+      "instruction": "Execute the code block `check_modules()` to confirm that the installed packages match the required versions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Provide input paths and experiment metadata",
+      "instruction": "Run the code block that calls `prompt_input()` and `get_metadata()`. When prompted, enter:",
+      "substeps": [
+        {
+          "instruction": "• Path to the folder containing the three required input files (time series.csv, ROA mask.tif, cell mask.tif).",
+          "title": ""
+        },
+        {
+          "instruction": "• File names of each input.",
+          "title": ""
+        },
+        {
+          "instruction": "• Drug application frame number (drug_frame).",
+          "title": ""
+        },
+        {
+          "instruction": "• Frame rate of the recording (frame_rate).",
+          "title": ""
+        },
+        {
+          "instruction": "• Spatial resolution of the imaging (spatial_resolution).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Load ROA and cell masks",
+      "instruction": "Execute `read_tif(ROA_mask_path, \"ROA\")` and `read_tif(cell_mask_path, \"cell\")` to obtain the mask arrays, labeled maps, and counts. Verify that the reported numbers of ROAs and cells match those generated in ImageJ.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Visualize masks (optional)",
+      "instruction": "If desired, run `visualize_map(ROA_map_array=ROA_map_array, cell_map_array=cell_map_array)` to display the ROA and cell segmentation overlays.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Extract signal features",
+      "instruction": "Run the code block `signal_features = analyze_signal(dff_traces, signal_frames, signal_boundaries, frame_rate, drug_frame)`. This computes for each detected signal the start/end frames, times, peak frame, AUC, amplitude, SNR, rise/decay times, half‑width, duration, inter‑event interval, and epoch classification (baseline/drug). Expected runtime ≈ 30 s.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Perform ROA‑based analysis",
+      "instruction": "Execute `ROA_based, ROA_info = ROA_analysis(signal_features, ROA_info, frame_count, frame_rate, drug_frame, cell_segmentation=True)`. The function summarizes average signal features per ROA, computes frequency per minute, and categorizes each ROA as “stable”, “on”, “off”, “inactive”, or “NA”. Expected runtime ≈ 1 min.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Perform cell‑assigned ROA analysis",
+      "instruction": "Run `cell_assigned = cell_analysis(signal_features, ROA_info)`. This assigns each ROA to its corresponding cell and generates a table where each row represents a cell with summarized ROA activity features. Expected runtime ≈ 1 min.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T00:27:52.267917Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Astrocytes, a main type of non-neuronal cells, display fluctuations of intracellular calcium concentrations ([Ca2+]i) that are responsive to ambient conditions and neuroactive molecules.1,2,3 Fluorescence imaging of Ca2+ indicators is thus a popular means to probe astrocyte activity in vitro, ex vivo and in vivo.1,2,3 Proven methods of neuronal Ca2+ imaging and analysis have been widely adapted to astrocytes for this purpose. However, important differences between neurons and astrocytes mean that key operational assumptions are not transferable. For instance, in neurons, Ca2+ activity is driven by depolarization-induced transmembrane Ca2+ fluxes. By contrast, the origins and mechanisms of astrocytes Ca2+ signals are diverse and still largely elusive, limiting our ability to functionally interpret Ca2+ events. Astrocytic [Ca2+]i fluctuations also primarily occur outside of the soma, within highly localized micro/nano-domains, and seldom propagate or merge at the cell body.4,5,6,7 Concomitantly, the complexity of astrocyte morphology and its sub-diffraction limit scale also make it difficult to register areas of Ca2+ activity to identifiable morphological features in live fluorescence imaging. Hence, there is a growing need to enrich the astrocyte Ca2+ toolbox with analysis methods tailored to astrocytes. Owing to the constrains listed above, such methods need to be 1) holistic, to capture all activities in the cell, 2) unbiased, rather than restricted to user-defined regions of interest, 3) agnostic, to make no or minimal assumptions regarding the rules of Ca2+ propagation or integration, and 4) with instrument-limited accuracy, to favor detailed investigations consistent with the nanoscale nature of astrocytes architecture.8 Here, we introduce STARDUST, a pipeline that captures Ca2+ dynamics in confined, local micro-domains across the territory of all astrocytes in 2-photon imaging recordings. STARDUST builds upon AQuA, a popular open-source platform,9 to yield maps",
+  "content_type": "protocol",
+  "content_type_score": 51,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/star_protocols/PMC11417172/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 334178,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.gif",
+      "local_path": "data/media/star_protocols/PMC11417172/fx2.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 3426,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/fx2.gif"
+    },
+    {
+      "type": "image",
+      "filename": "fx3.gif",
+      "local_path": "data/media/star_protocols/PMC11417172/fx3.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 3281,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/fx3.gif"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC11417172/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 401612,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC11417172/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 263654,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC11417172/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 267903,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC11417172/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 332897,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC11417172/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 240766,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/star_protocols/PMC11417172/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 404006,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/star_protocols/PMC11417172/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 416573,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/star_protocols/PMC11417172/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11417172/",
+      "caption": "",
+      "bytes": 146057,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11417172/gr8.jpg"
+    }
+  ]
 }

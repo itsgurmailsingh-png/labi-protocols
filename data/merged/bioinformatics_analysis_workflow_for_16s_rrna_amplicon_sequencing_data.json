@@ -19,89 +19,224 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 5.5,
+  "quality_score": 5.0,
   "category": "Bioinformatics",
   "estimated_time_mins": 66,
-  "materials": [],
+  "materials": [
+    "## Pick the representative sequences. mothur&#34;#unique.seqs(fasta=vagina/02.processing.data/vagina.trim.fasta)&#34;",
+    "## Pick the representative sequences. mothur\"#unique.seqs(fasta=vagina/02.processing.data/vagina.trim.fasta)\""
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "## Convert the bam files to fastq files ../bam2fastq-1.1.0/bam2fastq -o vagina/01.trim.data/16_s1.fq ../rawdata/RFEMpxjMAADGAAPGM-47.bam",
+      "title": "Convert BAM to FASTQ",
+      "instruction": "Run bam2fastq to convert the raw BAM file to a FASTQ file.",
+      "substeps": [
+        {
+          "instruction": "bam2fastq -o vagina/01.trim.data/16_s1.fq ../rawdata/RFEMpxjMAADGAAPGM-47.bam",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "## Trim the poly-A/T, multi-N and low-quality sequences. mothur &#34;#trim.seqs(fasta= vagina/01.trim.data/16_s1.fa, qfile= vagina/01.trim.data/16_s1.qual, minlength=200,maxambig=1,maxhomop=10,qwindowaverage=25,qwindowsize=50,processors=8)&#34; mothur &#34;#reverse.seqs(fasta= vagina/01.trim.data/16_s1.trim.fasta, qfile=vagina/01.trim.data/16_s1.trim.qual)&#34; perl ../creat.group.pl vagina/01.trim.data/16_s1.trim.rc.fasta 16_s1 &gt;&gt; /vagina/02.processing.data/vagina.groups cat vagina/01.trim.data/16_s1.trim.rc.fasta &gt;&gt; vagina/02.processing.data/vagina.trim.fasta cat vagina/01.trim.data/16_s1.trim.rc.qual &gt;&gt; vagina/02.processing.data/vagina.trim.qual",
+      "title": "Trim low-quality sequences and generate group files",
+      "instruction": "Trim poly‑A/T, ambiguous bases and low‑quality regions, reverse‑complement the reads, create a group file, and concatenate trimmed FASTA and QUAL files.",
+      "substeps": [
+        {
+          "instruction": "mothur \"#trim.seqs(fasta=vagina/01.trim.data/16_s1.fa, qfile=vagina/01.trim.data/16_s1.qual, minlength=200, maxambig=1, maxhomop=10, qwindowaverage=25, qwindowsize=50, processors=8)\"",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#reverse.seqs(fasta=vagina/01.trim.data/16_s1.trim.fasta, qfile=vagina/01.trim.data/16_s1.trim.qual)\"",
+          "title": ""
+        },
+        {
+          "instruction": "perl ../creat.group.pl vagina/01.trim.data/16_s1.trim.rc.fasta 16_s1 >> /vagina/02.processing.data/vagina.groups",
+          "title": ""
+        },
+        {
+          "instruction": "cat vagina/01.trim.data/16_s1.trim.rc.fasta >> vagina/02.processing.data/vagina.trim.fasta",
+          "title": ""
+        },
+        {
+          "instruction": "cat vagina/01.trim.data/16_s1.trim.rc.qual >> vagina/02.processing.data/vagina.trim.qual",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "## Pick the representative sequences. mothur&#34;#unique.seqs(fasta=vagina/02.processing.data/vagina.trim.fasta)&#34;",
+      "title": "Filter high-quality sequences and summarize",
+      "instruction": "Screen sequences for high scores, filter, make them unique, and generate a summary report.",
+      "substeps": [
+        {
+          "instruction": "mothur \"#screen.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.align, name=vagina/02.processing.data/vagina.trim.names, group=vagina/02.processing.data/vagina.groups, optimize=start-end, criteria=90, processors=8)\"",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#filter.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.align, vertical=T, trump=., processors=8)\"",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#unique.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.fasta, name=vagina/02.processing.data/vagina.trim.good.names)\"",
+          "title": ""
+        },
+        {
+          "instruction": "rm vagina/02.processing.data/vagina.trim.unique.good.align vagina/02.processing.data/vagina.trim.unique.align",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#summary.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.names)\" > vagina/02.processing.data/vagina.trim.unique.good.filter.unique.fasta.summary.log",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "## Pick the high-scoring sequences mothur &#34;#screen.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.align, name=vagina/02.processing.data/vagina.trim.names,group=vagina/02.processing.data/vagina.groups, optimize=start-end, criteria=90,processors=8)&#34; mothur &#34;#filter.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.align, vertical=T,trump=.,processors=8)&#34; mothur &#34;#unique.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.fasta, name=vagina/02.processing.data/vagina.trim.good.names)&#34; rm vagina/02.processing.data/vagina.trim.unique.good.align vagina/02.processing.data/vagina.trim.unique.align mothur &#34;#summary.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.names)&#34; &gt; vagina/02.processing.data/vagina.trim.unique.good.filter.unique.fasta.summary.log",
+      "title": "Pre‑cluster and remove chimeric sequences",
+      "instruction": "Pre‑cluster sequences, detect chimeras with UCHIME, remove chimeric reads, and produce a summary of the cleaned dataset.",
+      "substeps": [
+        {
+          "instruction": "mothur \"#pre.cluster(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.names, group=vagina/02.processing.data/vagina.good.groups, diffs=2)\"",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#chimera.uchime(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.names, group=vagina/02.processing.data/vagina.good.groups, processors=8)\"",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#remove.seqs(accnos=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.devono.uchime.accnos, fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.names, group=vagina/02.processing.data/vagina.good.groups)\"",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#summary.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.names)\" > vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.fasta.summary.log",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "##Check chimera and delete chimeric sequences mothur &#34;#pre.cluster(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.names,group=vagina/02.processing.data/vagina.good.groups,diffs=2)&#34; mothur &#34;#chimera.uchime(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.names,group=vagina/02.processing.data/vagina.good.groups,processors=8)&#34; mothur &#34;#remove.seqs( accnos=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.devono.uchime.accnos, fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.names,group=vagina/02.processing.data/vagina.good.groups)&#34; mothur &#34;#summary.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.names)&#34; &gt; vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.fasta.summary.log",
+      "title": "Classify sequences using Greengenes reference",
+      "instruction": "Create symbolic links to Greengenes reference files and classify the sequences against them.",
+      "substeps": [
+        {
+          "instruction": "ln -s ../database/greengenes/gg_13_5_99.fasta vagina/02.processing.data/gg_13_5_99.fasta",
+          "title": ""
+        },
+        {
+          "instruction": "ln -s ../database/greengenes/gg_13_5_99.gg.tax vagina/02.processing.data/gg_13_5_99.gg.tax",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#classify.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.fasta, template=vagina/02.processing.data/gg_13_5_99.fasta, taxonomy=vagina/02.processing.data/gg_13_5_99.gg.tax, cutoff=50, processors=8)\"",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "## Classify according to the Greengene reference sequences (gg_13_8_otus) ln -s ../database/greengenes/gg_13_5_99.fasta vagina/02.processing.data/gg_13_5_99.fasta ln -s ../database/greengenes/gg_13_5_99.gg.tax vagina/02.processing.data/gg_13_5_99.gg.tax mothur &#34;#classify.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.fasta, template=vagina/02.processing.data/gg_13_5_99.fasta,taxonomy=vagina/02.processing.data/gg_13_5_99.gg.tax,cutoff=50,processors=8)&#34;",
+      "title": "Remove mitochondrial and chloroplast reads",
+      "instruction": "Delete any sequences assigned to mitochondria, cyanobacteria‑chloroplast, or unknown taxa.",
+      "substeps": [
+        {
+          "instruction": "mothur \"#remove.lineage(fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.names, group=vagina/02.processing.data/vagina.good.pick.groups, taxonomy=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.gg.wang.taxonomy, taxon=Mitochondria-Cyanobacteria_Chloroplast-unknown)\"",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "## Delete reads of Mitochondria and Chloroplast mothur &#34;#remove.lineage( fasta=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.fasta, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.names,group=vagina/02.processing.data/vagina.good.pick.groups,taxonomy=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.gg.wang.taxonomy,taxon=Mitochondria-Cyanobacteria_Chloroplast-unknown)&#34;",
+      "title": "Build OTU table and assign taxonomy",
+      "instruction": "Cluster sequences into OTUs at 97% similarity, format the OTU table, compute taxonomy statistics, create shared files, classify OTUs, and generate a summary of singletons.",
+      "substeps": [
+        {
+          "instruction": "python ../bin/pick_otus.py -i vagina/03.otu.data/vagina.final.uclu.fasta -o vagina/03.otu.data",
+          "title": ""
+        },
+        {
+          "instruction": "perl ../bin/OTU_format_trans.pl vagina/03.otu.data/vagina.final.uclu_otus.txt vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.names 0.03 > vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.an.list",
+          "title": ""
+        },
+        {
+          "instruction": "perl ../bin/tags_taxonomy.stat.v2.pl vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.names vagina/02.processing.data/vagina.good.pick.pick.groups vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.gg.wang.pick.taxonomy.pick vagina/03.otu.data/vagina.raw.data.info",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#make.shared(list=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.an.list, group=vagina/02.processing.data/vagina.good.pick.pick.groups, label=0.03)\"",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#classify.otu(list=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.an.list, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.names, taxonomy=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.gg.wang.pick.taxonomy.pick, label=0.03)\"",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#summary.single(shared=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.an.shared, groupmode=t)\"",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "## Make the otu table python ../bin/pick_otus.py -i vagina/03.otu.data/vagina.final.uclu.fasta -o vagina/03.otu.data perl ../bin/OTU_format_trans.pl vagina/03.otu.data/vagina.final.uclu_otus.txt vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.names 0.03 &gt; vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.an.list perl ../bin/tags_taxonomy.stat.v2.pl vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.names vagina/02.processing.data/vagina.good.pick.pick.groups vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.gg.wang.pick.taxonomy.pick vagina/03.otu.data/vagina.raw.data.info mothur &#34;#make.shared( list=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.an.list, group=vagina/02.processing.data/vagina.good.pick.pick.groups,label=0.03)&#34; mothur &#34;#classify.otu(list=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.an.list, name=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.names,taxonomy=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.gg.wang.pick.taxonomy.pick,label=0.03)&#34; mothur &#34;#summary.single( shared=vagina/02.processing.data/vagina.trim.unique.good.filter.unique.precluster.pick.pick.an.shared,groupmode=t)&#34;",
+      "title": "Convert FASTQ to FASTA and quality files",
+      "instruction": "Generate FASTA and QUAL files from the original FASTQ.",
+      "substeps": [
+        {
+          "instruction": "perl ../fq2qual.pl vagina/01.trim.data/16_s1.fq vagina/01.trim.data/16_s1",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "## Reverse fastq to fasta and quality perl ../fq2qual.pl vagina/01.trim.data/16_s1.fq vagina/01.trim.data/16_s1",
+      "title": "Remove primer sequences from FASTQ",
+      "instruction": "Trim primer sequences using the provided primer file.",
+      "substeps": [
+        {
+          "instruction": "perl ../iontorrent/re-primers.pl ../v4-v5_primers.fa 2 vagina/01.trim.data/16_s1.fq",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "## Delete the primer perl ../iontorrent/re-primers.pl ../v4-v5_primers.fa 2 vagina/01.trim.data/16_s1.fq",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "",
-      "instruction": "## Assign to the SAILVA mothur &#34;#align.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.fasta, reference=../bin/16s/database/silva.bacteria.fasta, processors=8)&#34; mothur &#34;#summary.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.align, name=vagina/02.processing.data/vagina.trim.names)&#34; &gt; vagina/02.processing.data/vagina.trim.unique.align.summary.log",
+      "title": "Align sequences to SILVA reference and summarize",
+      "instruction": "Align the trimmed sequences to the SILVA bacterial reference and produce a summary report.",
+      "substeps": [
+        {
+          "instruction": "mothur \"#align.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.fasta, reference=../bin/16s/database/silva.bacteria.fasta, processors=8)\"",
+          "title": ""
+        },
+        {
+          "instruction": "mothur \"#summary.seqs(fasta=vagina/02.processing.data/vagina.trim.unique.align, name=vagina/02.processing.data/vagina.trim.names)\" > vagina/02.processing.data/vagina.trim.unique.align.summary.log",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 90,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

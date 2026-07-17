@@ -19,11 +19,225 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 0.0,
+  "quality_score": 4.5,
   "category": "Imaging & Microscopy",
   "estimated_time_mins": null,
   "materials": [],
-  "steps": [],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Prepare Raw Imaging Data",
+      "instruction": "Organize and clean the raw serial two-photon tomography (STPT) data before processing.",
+      "substeps": [
+        {
+          "instruction": "Verify that all sections (.tiff) are saved in both ch1 (red channel) and ch2 (green channel).",
+          "title": ""
+        },
+        {
+          "instruction": "Remove ch3 (blank channel) tiffs acquisition data using the 'move_test.bat' script.",
+          "title": ""
+        },
+        {
+          "instruction": "Transfer ch1 and ch2 raw data to the IBM SONAS server.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Set Up Processing Scripts",
+      "instruction": "Configure the processing environment and reconstruction scripts on the processing server.",
+      "substeps": [
+        {
+          "instruction": "Create a process folder with the project ID in the processing server (e.g., /data/<user>/STP_processed_data/<cell_type>/<group>/).",
+          "title": ""
+        },
+        {
+          "instruction": "Copy the reconstruction script into the process folder.",
+          "title": ""
+        },
+        {
+          "instruction": "Edit the 'runReconstruction_part1.sh' script using gedit to input relevant data paths.",
+          "title": ""
+        },
+        {
+          "instruction": "Update the Mosaic text file located in the ch1 raw data folder.",
+          "title": ""
+        },
+        {
+          "instruction": "Update the CH2_TIF_DIR and CH3_TIF_DIR paths.",
+          "title": ""
+        },
+        {
+          "instruction": "Update SECTION_STARTNUMBER and SECTION_ENDNUMBER (e.g., 270) based on the imaging data.",
+          "title": ""
+        },
+        {
+          "instruction": "Verify advanced parameters are set to default: IMAGE_CORRECTION=1 and FUSION_METHOD=4 (no blending).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Execute Image Reconstruction",
+      "instruction": "Run the reconstruction script to stitch image tiles into coronal sections.",
+      "substeps": [
+        {
+          "instruction": "Open the Terminal and change the directory to the processed data folder.",
+          "title": ""
+        },
+        {
+          "instruction": "Run the reconstruction script from the Terminal.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Perform Image Reconstruction Quality Control",
+      "instruction": "Verify the quality of the reconstructed images and the folder structure.",
+      "substeps": [
+        {
+          "instruction": "Visualize stitched images in Fiji to check overall acquisition quality.",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm the presence of 'stitchedImage_ch1' and 'stitchedImage_ch2' folders (1 µm resolution, 50 µm spacing, LZW compressed 16-bit tif).",
+          "title": ""
+        },
+        {
+          "instruction": "Check the 'warping' folder for 5% downsized images for quick visualization.",
+          "title": ""
+        },
+        {
+          "instruction": "Review the 'Log' folder for missing tiles information.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Implement Signal Detection Networks",
+      "instruction": "Use Convolutional Neural Networks (CNN) on a CUDA-enabled GPU to detect cells and axons.",
+      "substeps": [
+        {
+          "instruction": "Select the appropriate network ID: 164 (c-fos/nuclear), 10 (Mecp2-GFP/intra-nuclear), 313 (subtraction channel c-fos/nuclear), or 320 (Rabies/Somatic labeling).",
+          "title": ""
+        },
+        {
+          "instruction": "Identify the anterior commissure region in the stitched images.",
+          "title": ""
+        },
+        {
+          "instruction": "Use MATLAB to calculate the image intensity mean and standard deviation of the anterior commissure region for both channels.",
+          "title": ""
+        },
+        {
+          "instruction": "Determine the warpable range of the stitched brain by comparing start and end coordinates against the 25 micron Allen reference atlas.",
+          "title": ""
+        },
+        {
+          "instruction": "Input these values and the channel directories into the prediction script and run predictions.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Register Data to CCF Space",
+      "instruction": "Register the downsampled sample brain to the Common Coordinated Framework (CCF) space using a two-step process (affine followed by b-spline registration) via the elastix toolbox.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Perform Detection and Registration Quality Control",
+      "instruction": "Qualitatively assess the accuracy of cell masks and registration.",
+      "substeps": [
+        {
+          "instruction": "Open cell mask images alongside reconstructed sections in Fiji using a synchronized mouse pointer to assess detection quality.",
+          "title": ""
+        },
+        {
+          "instruction": "Open the registration result file in the 'elastixOutput' folder in 'warping' alongside the fixed downsized warpable image; synchronize slices and pointers to check for congruous edges and corners.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Calculate Region-Wise Cell Counts",
+      "instruction": "Transform detected cell coordinates to CCF space to determine counts per brain region using C++ and R code.",
+      "substeps": [
+        {
+          "instruction": "Create a Project folder in the processing server containing designated groups for brains and the MATLAB script.",
+          "title": ""
+        },
+        {
+          "instruction": "Organize point list text files into appropriate groups (e.g., Group 1 for female, Group 2 for male).",
+          "title": ""
+        },
+        {
+          "instruction": "Run the MATLAB script 'runROI_all' on the processing server.",
+          "title": ""
+        },
+        {
+          "instruction": "Extract summary text files for both hemispheres from the output folder and copy them into a spreadsheet (.csv) for visualization.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Compress Data for Archival",
+      "instruction": "Compress raw STPT data for R24 archival to reduce storage requirements.",
+      "substeps": [
+        {
+          "instruction": "Run the compression script on the processing server (CPU-intensive, no GPU required).",
+          "title": ""
+        },
+        {
+          "instruction": "Document the raw data size before compression (~145 GB) and after compression (~65-75 GB).",
+          "title": ""
+        },
+        {
+          "instruction": "Optional: Convert Level 1 reconstructed images to JP2 format or compress Level 2 cell masks as binary tif images.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "pdf",
+      "filename": "SerialTwoPhotonDataProcessingCellTypes081618_KUV3KM_180817.pdf",
+      "local_path": "data/media/protocols_io_docs/stp-imaging-protocol-sqcedsw/SerialTwoPhotonDataProcessingCellTypes081618_KUV3KM_180817.pdf",
+      "source_url": "https://content.protocols.io/5q62bx6.pdf",
+      "caption": "",
+      "bytes": 1411950,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io_docs/stp-imaging-protocol-sqcedsw/SerialTwoPhotonDataProcessingCellTypes081618_KUV3KM_180817.pdf"
+    }
+  ],
+  "content_type": "likely_not_protocol",
+  "content_type_score": 0,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

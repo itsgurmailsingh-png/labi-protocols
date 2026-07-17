@@ -1,0 +1,631 @@
+{
+  "protocol_id": "purification_characterization_and_functional_site_prediction_of_the_vaccinia_rel",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Purification, characterization and functional site prediction of the vaccinia-related kinase 2A small transmembrane domain",
+  "author": "Puja, Chakraborty, et al.",
+  "doi": "10.1016/j.mex.2022.101704",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9062753/",
+  "citation": "10.1016/j.mex.2022.101704",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 13.0,
+  "category": "Bioinformatics",
+  "estimated_time_mins": 9355,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Retrieve models and blind docking",
+      "instruction": "Download the AlphaFold predicted structures VRK2 (AF‑Q86Y07‑F1) and TAK1 (AF‑O43318‑F1) and perform blind protein‑protein docking using Bioluminate (PIPER) to generate 45 583 poses.",
+      "substeps": [
+        {
+          "instruction": "Retrieve AlphaFold models from the AlphaFold database.",
+          "title": ""
+        },
+        {
+          "instruction": "Load both models into Bioluminate (Schrödinger, LLC).",
+          "title": ""
+        },
+        {
+          "instruction": "Run blind docking with the PIPER algorithm, requesting 45 583 output structures.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Cluster and rank docked poses",
+      "instruction": "Cluster the 45 583 docking structures into 120 poses based on electrostatic, hydrophobic and van‑der‑Waals interactions and rank them by cluster size.",
+      "substeps": [
+        {
+          "instruction": "Use Bioluminate’s clustering tool to group the poses into 120 clusters.",
+          "title": ""
+        },
+        {
+          "instruction": "Rank clusters by the number of members (cluster size).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Calculate binding energies",
+      "instruction": "Select the top five largest clusters and evaluate their binding free energies and Kd values with Prime MM‑GBSA.",
+      "substeps": [
+        {
+          "instruction": "Take the representative pose from each of the five largest clusters.",
+          "title": ""
+        },
+        {
+          "instruction": "Run Prime MM‑GBSA (Schrödinger) on each pose to obtain ΔG and estimated Kd.",
+          "title": ""
+        },
+        {
+          "instruction": "Choose the complex with the best (most negative) docking score for further analysis.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Prepare MD simulation system",
+      "instruction": "Set up the chosen VRK2A‑TAK1 complex for molecular dynamics using Desmond with the OPLS3e force field.",
+      "substeps": [
+        {
+          "instruction": "Generate topology and parameter files with OPLS3e.",
+          "title": ""
+        },
+        {
+          "instruction": "Place the protein in a cubic TIP3P water box leaving at least 10 Å to the box edge.",
+          "title": ""
+        },
+        {
+          "instruction": "Add counter‑ions to neutralize the system.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Energy‑minimize and equilibrate",
+      "instruction": "Energy‑minimize the system for 5 000 ps using the conjugate‑gradient algorithm, then equilibrate under NVT and NPT ensembles with restraints.",
+      "substeps": [
+        {
+          "instruction": "Minimization: 5 000 ps, conjugate‑gradient.",
+          "title": ""
+        },
+        {
+          "instruction": "NVT restrained: 24 ps followed by 2 000 ps.",
+          "title": ""
+        },
+        {
+          "instruction": "NPT restrained: 24 ps, then NPT unrestrained: 5 000 ps.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply LINCS constraints to all bonds during equilibration.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Run production MD",
+      "instruction": "Perform a 200 ns unrestrained NPT simulation, saving coordinates every 10 ps to generate 20 000 frames for analysis.",
+      "substeps": [
+        {
+          "instruction": "Run Desmond at constant pressure and temperature (no restraints).",
+          "title": ""
+        },
+        {
+          "instruction": "Write trajectory snapshots at 10 ps intervals.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Analyse MD clusters",
+      "instruction": "Cluster the 20 000 frames, identify H‑bonding residues with PDBsum, and compute the percentage survival index (PSI) for each interaction.",
+      "substeps": [
+        {
+          "instruction": "Cluster trajectories (10 ps interval) using the built‑in Desmond clustering tool.",
+          "title": ""
+        },
+        {
+          "instruction": "For each cluster representative, run PDBsum to list H‑bonds, salt‑bridges and non‑bonded contacts.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate PSI = (number of frames showing a given interaction) / 20 000 × 100 %.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Construct full‑length VRK2A plasmid",
+      "instruction": "Clone VRK2A (aa 1‑508, 1 532 bp) from Addgene (pDONR223) into pGEX‑4T vector using BamHI and HindIII, verify by restriction digest and sequencing.",
+      "substeps": [
+        {
+          "instruction": "Obtain pDONR223‑VRK2A (Addgene).",
+          "title": ""
+        },
+        {
+          "instruction": "Digest VRK2A insert and pGEX‑4T vector with BamHI and HindIII.",
+          "title": ""
+        },
+        {
+          "instruction": "Ligate insert into vector, transform, and screen colonies.",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm correct construct by restriction analysis and Sanger sequencing.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Transform and grow Rosetta cells",
+      "instruction": "Introduce pGEX‑4T‑VRK2A into Rosetta pLysS (Novagen) cells, grow a 5 ml LB starter with ampicillin (100 µg/ml) and chloramphenicol (34 µg/ml) at 37 °C for 18 h.",
+      "substeps": [
+        {
+          "instruction": "Electroporate or chemically transform Rosetta pLysS cells.",
+          "title": ""
+        },
+        {
+          "instruction": "Plate on LB‑agar containing ampicillin and chloramphenicol.",
+          "title": ""
+        },
+        {
+          "instruction": "Pick a single colony to inoculate 5 ml LB with the same antibiotics; incubate 18 h, 37 °C, shaking.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Scale‑up expression culture",
+      "instruction": "Inoculate 700 ml pre‑warmed LB (ampicillin + chloramphenicol) in a 2 L flask, grow at 37 °C, 180 rpm to OD₆₀₀ = 0.5.",
+      "substeps": [
+        {
+          "instruction": "Add 5 ml starter to 700 ml media.",
+          "title": ""
+        },
+        {
+          "instruction": "Monitor OD₆₀₀; when it reaches 0.5, proceed to induction.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Induce protein expression",
+      "instruction": "Add IPTG to a final concentration of 0.1 mM, shift temperature to 14 °C and incubate 4–12 h.",
+      "substeps": [
+        {
+          "instruction": "Prepare a 1 M IPTG stock; add 0.7 ml to 700 ml culture.",
+          "title": ""
+        },
+        {
+          "instruction": "Cool shaker to 14 °C, continue shaking for the desired time.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Prepare samples for SDS‑PAGE",
+      "instruction": "Collect 1 ml aliquots of uninduced and induced cultures, add 6× SDS Laemmli buffer, sonicate induced cells for 12 h sample, centrifuge and keep supernatant for analysis.",
+      "substeps": [
+        {
+          "instruction": "Mix cell pellets with 6× Laemmli buffer (final 1×).",
+          "title": ""
+        },
+        {
+          "instruction": "Sonicate induced cells (e.g., 3 × 30 s on/off).",
+          "title": ""
+        },
+        {
+          "instruction": "Centrifuge at 13 000 rpm, 4 °C, 10 min; load supernatant on 12 % SDS‑PAGE.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Western blot verification",
+      "instruction": "Transfer proteins from 12 % SDS‑PAGE to a PVDF membrane pre‑equilibrated in 50 mM Tris‑Cl, 150 mM NaCl (TBS), block with 5 % BSA 1 h, probe with anti‑GST (1:2000) then anti‑rabbit HRP (1:10 000), wash with 0.1 % Tween‑20/TBS, develop with SuperSignal™ West Pico.",
+      "substeps": [
+        {
+          "instruction": "Transfer at 100 V for 1 h.",
+          "title": ""
+        },
+        {
+          "instruction": "Block 1 h at room temperature in 5 % BSA/TBS.",
+          "title": ""
+        },
+        {
+          "instruction": "Incubate with primary anti‑GST (1:2000) 1 h.",
+          "title": ""
+        },
+        {
+          "instruction": "Wash 3 × 5 min with 0.1 % Tween‑20/TBS.",
+          "title": ""
+        },
+        {
+          "instruction": "Incubate with HRP‑conjugated anti‑rabbit (1:10 000) 1 h.",
+          "title": ""
+        },
+        {
+          "instruction": "Wash as above and add chemiluminescent substrate.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "GST‑VRK2A affinity purification",
+      "instruction": "Lyse induced cells by sonication (3 × 30 s on/off) in ice‑cold lysis buffer (20 mM Na₂HPO₄/NaH₂PO₄, 100 mM NaCl, pH 7.0 PBS, 0.2 % Triton X‑100, protease inhibitor 1:50, 5 mM β‑mercaptoethanol), centrifuge 22 000 rpm, 4 °C, 30 min, incubate supernatant with 5 column volumes pre‑equilibrated GST‑Sepharose for 1 h at 4 °C, wash 5 column volumes PBS, elute with PBS containing 15 mM reduced glutathione, analyse eluates on 12 % SDS‑PAGE.",
+      "substeps": [
+        {
+          "instruction": "Sonicate lysate as described.",
+          "title": ""
+        },
+        {
+          "instruction": "Centrifuge and collect supernatant.",
+          "title": ""
+        },
+        {
+          "instruction": "Add GST‑Sepharose resin (pre‑equilibrated with 5 CV PBS).",
+          "title": ""
+        },
+        {
+          "instruction": "Rotate 1 h at 4 °C.",
+          "title": ""
+        },
+        {
+          "instruction": "Wash resin with 5 CV PBS.",
+          "title": ""
+        },
+        {
+          "instruction": "Elute bound protein with PBS + 15 mM reduced glutathione.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "In‑gel digestion for mass spectrometry",
+      "instruction": "Excise the three upper VRK2A bands from the 12 % SDS‑PAGE, mince, dehydrate twice with 100 µl acetonitrile, re‑hydrate with 50 µl 5 ng/µl modified trypsin in 50 mM ammonium bicarbonate, incubate on ice 40 min, add 50 mM ammonium bicarbonate and incubate 37 °C overnight.",
+      "substeps": [
+        {
+          "instruction": "Transfer gel pieces to microcentrifuge tubes.",
+          "title": ""
+        },
+        {
+          "instruction": "Wash with 100 µl ACN, centrifuge, discard supernatant; repeat.",
+          "title": ""
+        },
+        {
+          "instruction": "Add trypsin solution, ice 40 min.",
+          "title": ""
+        },
+        {
+          "instruction": "Add 50 mM NH₄HCO₃, incubate 16–18 h at 37 °C.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Peptide extraction and MALDI‑TOF/TOF",
+      "instruction": "Extract peptides with 50 µl 0.1 % formic acid/water, then three times with 50 µl 0.1 % formic acid/50 % acetonitrile, dry, spot on MALDI plate and acquire spectra on Ultraflex II MALDI‑TOF/TOF; identify by Mascot against SwissProt.",
+      "substeps": [
+        {
+          "instruction": "Centrifuge gel pieces, collect supernatant.",
+          "title": ""
+        },
+        {
+          "instruction": "Perform three extractions as described.",
+          "title": ""
+        },
+        {
+          "instruction": "Pool extracts, dry in a SpeedVac.",
+          "title": ""
+        },
+        {
+          "instruction": "Resuspend in matrix solution, spot, acquire spectra.",
+          "title": ""
+        },
+        {
+          "instruction": "Search spectra with Mascot (Matrix Sciences) against human SwissProt.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Construct VTMD (aa 480‑508) plasmid",
+      "instruction": "Introduce a second BamHI site after residue 479 in pGEX‑4T‑VRK2A by site‑directed mutagenesis PCR, digest with BamHI, gel‑extract the 5 043 bp fragment (pGEX4T‑HindIII‑VRK2A‑480‑508‑BamHI) and self‑ligate to generate the VTMD clone.",
+      "substeps": [
+        {
+          "instruction": "Perform PCR with primers adding BamHI after 479.",
+          "title": ""
+        },
+        {
+          "instruction": "Digest PCR product and vector with BamHI.",
+          "title": ""
+        },
+        {
+          "instruction": "Run 1 % agarose gel; excise the 5 043 bp band.",
+          "title": ""
+        },
+        {
+          "instruction": "Purify gel slice, ligate (T4 DNA ligase) and transform.",
+          "title": ""
+        },
+        {
+          "instruction": "Screen colonies by restriction analysis.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Express GST‑VTMD",
+      "instruction": "Transform Rosetta pLysS cells with the VTMD construct, grow and induce exactly as for full‑length VRK2A (0.1 mM IPTG, 14 °C, 4–12 h).",
+      "substeps": [
+        {
+          "instruction": "Follow steps 5‑8 using the VTMD plasmid.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Purify GST‑VTMD",
+      "instruction": "Lyse cells (10 × 30 s sonication) in PBS + 0.2 % Triton X‑100, protease inhibitor 1:50, 5 mM β‑mercaptoethanol, centrifuge, bind supernatant to GST‑Sepharose (5 CV) for 1 h at 4 °C, wash with PBS, elute with PBS + 15 mM reduced glutathione; verify 29.7 kDa band on 12 % SDS‑PAGE.",
+      "substeps": [
+        {
+          "instruction": "Sonication as described (10 cycles).",
+          "title": ""
+        },
+        {
+          "instruction": "Centrifuge 22 000 rpm, 4 °C, 30 min.",
+          "title": ""
+        },
+        {
+          "instruction": "Incubate with resin, wash, elute.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Thrombin cleavage of GST tag",
+      "instruction": "Dialyze pooled GST‑VTMD eluate against PBS (3 column volumes), add 100 µl thrombin (100 NIH units) to 16 ml protein solution (~2 mg total), incubate 20 °C for 16 h.",
+      "substeps": [
+        {
+          "instruction": "Dialysis: 3 × PBS exchanges, 4 °C.",
+          "title": ""
+        },
+        {
+          "instruction": "Add thrombin (100 µl, 100 NIH units).",
+          "title": ""
+        },
+        {
+          "instruction": "Incubate 16 h at 20 °C.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Remove GST and thrombin",
+      "instruction": "Pass the cleavage mixture through a fresh GST‑Sepharose column; collect flow‑through (FT) containing VTMD and thrombin, wash column with PBS, elute bound GST with 15 mM reduced glutathione.",
+      "substeps": [
+        {
+          "instruction": "Load cleavage mixture onto GST resin pre‑equilibrated with PBS.",
+          "title": ""
+        },
+        {
+          "instruction": "Collect FT (VTMD + thrombin).",
+          "title": ""
+        },
+        {
+          "instruction": "Wash resin with PBS, elute GST with glutathione.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Centrifugal filtration of VTMD",
+      "instruction": "First filter the FT through a 10 kDa MWCO Centricon (pre‑equilibrated with 10 ml PBS) to retain thrombin (36 kDa) and collect 8 ml flow‑through containing VTMD at 0.06 mg/ml (13.5 µM); then concentrate the VTMD using a 1 kDa MWCO Centricon to 24 µM.",
+      "substeps": [
+        {
+          "instruction": "Load FT onto 10 kDa filter, centrifuge as per manufacturer’s protocol.",
+          "title": ""
+        },
+        {
+          "instruction": "Collect filtrate (VTMD).",
+          "title": ""
+        },
+        {
+          "instruction": "Transfer filtrate to 1 kDa filter, spin to desired volume, measure concentration.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Analyze VTMD by Tris‑Tricine SDS‑PAGE",
+      "instruction": "Run all fractions (uncut GVTMD, cleaved VTMD, FT, concentrated VTMD) on 15 % Tris‑Tricine gels at 4 °C (anode 2.1 M Tris, cathode 1 M Tris + 1 M Tricine), stain with silver ammonia method.",
+      "substeps": [
+        {
+          "instruction": "Prepare 15 % Tris‑Tricine gel, pre‑run at 4 °C.",
+          "title": ""
+        },
+        {
+          "instruction": "Load samples, run electrophoresis.",
+          "title": ""
+        },
+        {
+          "instruction": "Fix gels 50 % methanol 3 h, wash 3 × 10 min with autoclaved water.",
+          "title": ""
+        },
+        {
+          "instruction": "Prepare staining solution: 48 ml solution A (10 M NaOH + 700 µl NH₃ in water) titrated with 2 ml solution B (20 % AgNO₃).",
+          "title": ""
+        },
+        {
+          "instruction": "Incubate gels 20 min on rocker, wash 2 × 15 min with water.",
+          "title": ""
+        },
+        {
+          "instruction": "Develop with 1 % citric acid + 38 % formaldehyde, monitor band appearance.",
+          "title": ""
+        },
+        {
+          "instruction": "Stop reaction with 40 % methanol + 1 % acetic acid.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "Thermal stability CD measurement",
+      "instruction": "Measure far‑UV CD at 208 nm for 17.5 µM GVTMD, VTMD and GST‑only in PBS pH 7.0 while increasing temperature from 20 °C to 90 °C; record mean residual ellipticity to determine melting temperatures (Tm ≈ 64 °C for GVTMD, 55 °C for GST, 54 °C for VTMD).",
+      "substeps": [
+        {
+          "instruction": "Prepare each protein at 17.5 µM in PBS pH 7.0.",
+          "title": ""
+        },
+        {
+          "instruction": "Load into CD cuvette, set wavelength 208 nm.",
+          "title": ""
+        },
+        {
+          "instruction": "Ramp temperature 20 → 90 °C, record ellipticity at each point.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Intrinsic fluorescence spectroscopy",
+      "instruction": "Record emission spectra (300‑400 nm) of 17.5 µM protein solutions (GVTMD, VTMD, GST) in PBS pH 7.0 at 25 °C with excitation at 275 nm, both in native buffer and after addition of 6 M urea; use 5 nm excitation and emission slits.",
+      "substeps": [
+        {
+          "instruction": "Prepare protein samples (17.5 µM) in quartz cuvette (1 mm path).",
+          "title": ""
+        },
+        {
+          "instruction": "Measure native spectra (excite 275 nm, record 300‑400 nm).",
+          "title": ""
+        },
+        {
+          "instruction": "Add 6 M urea, incubate briefly, repeat measurement.",
+          "title": ""
+        },
+        {
+          "instruction": "Note λmax shifts (≈ 339 nm native, 347‑354 nm with urea).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Surface hydrophobicity ANS assay",
+      "instruction": "Add ANS to each protein sample (17.5 µM in PBS pH 7.0, final ANS 10 µM), incubate 60 min at 25 °C, record fluorescence emission 450‑550 nm with excitation at 390 nm (5 nm slits, 0.5 nm resolution).",
+      "substeps": [
+        {
+          "instruction": "Prepare protein solutions at 0.05 mg/ml (≈ 17.5 µM).",
+          "title": ""
+        },
+        {
+          "instruction": "Add ANS to 10 µM final concentration.",
+          "title": ""
+        },
+        {
+          "instruction": "Incubate 60 min at 25 °C.",
+          "title": ""
+        },
+        {
+          "instruction": "Measure emission spectrum as described.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 35,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

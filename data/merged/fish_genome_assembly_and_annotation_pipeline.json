@@ -19,7 +19,7 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 6.0,
+  "quality_score": 8.0,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 72,
   "materials": [
@@ -35,94 +35,146 @@
     "transcriptome data",
     "protein sequences",
     "k-mer analysis software",
-    "data integration tools"
+    "data integration tools",
+    "to assemble our genome.",
+    "and Gapcloser (v. 1.",
+    "using reads from all insert-size libraries.",
+    "to find and then classify the repetitive sequences.",
+    "using parameters &#34;-nolow -no_is -norna -parallel 1&#34;"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Get raw sequencing data in Fastq format. Filter the input raw sequences by using SOAPnuke (v.1.5.6). using parameters &#34; -l 5 -q 0.5 -n 0.1 -Q 2 --seqType 0&#34;",
+      "title": "Obtain raw FASTQ data",
+      "instruction": "Collect raw sequencing reads in FASTQ format.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Estimate the genome size (650 Mb) with k-mer analysis. k=17; about 27.7Gb reads from as input; the genome size with the formula: G = N*(L − 17 + 1)/K_depth, where N and L are the total number of reads and the length of reads, respectively, and K_depth indicates the frequency of k-mers occurring more frequently than the others.",
+      "title": "Filter reads with SOAPnuke",
+      "instruction": "Run SOAPnuke v1.5.6 on the FASTQ files using parameters \"-l 5 -q 0.5 -n 0.1 -Q 2 --seqType 0\" to filter low‑quality sequences.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "1) Run SOAPdenovo2(v. 2.04.4) to assemble our genome. 2) Perform krskgf (v. 1.19) and Gapcloser (v. 1.10) to further close gaps in our genome obtained in step3. 1) performing &#34;pregraph ( -K 57 -p 10)-&gt;contig (-g)-&gt;map (-p 10 -k 39)-&gt;scaff(-p 10)&#34; modes in turn; 2) using reads from all insert-size libraries.",
+      "title": "Estimate genome size via k‑mer",
+      "instruction": "Perform 17‑mer analysis on ~27.7 Gb of filtered reads; calculate genome size (~650 Mb) using G = N*(L‑17+1)/K_depth, where N and L are total read count and read length, and K_depth is the peak k‑mer depth.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "1) Run RepeatModeler to build de novo library based on the input assembled genome sequence. 2) Basing on the library constructed in step 5 as database, run RepeatMasker (v. 3.3.0) to find and then classify the repetitive sequences. 2) using parameters &#34;-nolow -no_is -norna -parallel 1&#34;",
+      "title": "Assemble genome with SOAPdenovo2",
+      "instruction": "Execute SOAPdenovo2 v2.04.4 on the filtered reads using all insert‑size libraries. Run the modules sequentially: pregraph with -K 57 -p 10, contig with -g, map with -p 10 -k 39, and scaff with -p 10.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Run TRF (v. 4.09), RepeatMasker and RepeatProteinMask (v. 3.3.0) to identify repeats in the genome at DNA and protein level, respectively, by aligning sequences against Repbase library (v. 17.01). using parameters &#34;-noLowSimple -pvalue 0.0001&#34; when running RepeatProteinMask",
+      "title": "Close gaps with krskgf and Gapcloser",
+      "instruction": "Apply krskgf v1.19 followed by Gapcloser v1.10 to the SOAPdenovo2 assembly to close remaining gaps.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Mask these repetitive regions obtained above (step 5-7) with &#39;N&#39;s. Before gene prediction, mask the TEs in genome.",
+      "title": "Build repeat library with RepeatModeler",
+      "instruction": "Run RepeatModeler on the assembled genome to generate a de‑novo repeat library.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Run Augustus (v. 2.5.5) and Genscan (v. 2.1) to de novo predict genes in the repeat-masked genome sequences. using parameters &#34;--species=Lateolabrax_maculatus --uniqueGeneId=true --noInFrameStop=true --gff3=on --strand=both&#34; when running Augustus; using default parameters when runing Genescan.",
+      "title": "Mask repeats with RepeatMasker",
+      "instruction": "Run RepeatMasker v3.3.0 using the library from step 6 as database, with parameters \"-nolow -no_is -norna -parallel 1\" to mask identified repeats.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Download protein sequences of teleost species (Danio rerio (NCBI, GenBank ID:50), D. labrax (NCBI, GenBank ID:2659), Gasterosteus aculeatus (NCBI, GenBank ID:146), Lates calcarifer (NCBI, GenBank ID:14180), Oreochromis niloticus (NCBI, GenBank ID:197), Oryzias latipes (NCBI, GenBank ID:542), Tetraodon nigroviridis (NCBI, GenBank ID:191) and Takifugu rubripes (NCBI, GenBank ID:63)), then align these against our masked genome sequences with BLAT, and then based on the BLAT mapping results, run GeneWise (v. 2.2.0 ) to predict genes. with parameters &#34;--max divergence rate 0.3 --extend length for both sides of regions 2000&#34;",
+      "title": "Identify repeats with TRF and RepeatProteinMask",
+      "instruction": "Run TRF v4.09, RepeatMasker and RepeatProteinMask v3.3.0 against Repbase v17.01; for RepeatProteinMask use parameters \"-noLowSimple -pvalue 0.0001\" to detect DNA‑ and protein‑level repeats.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Download transcriptome data of the spotted sea bass from NCBI. The data was assembled by Trinity (v.2013.11). Mapp this sequence to our genome with BLAT and then based on the BLAT results, reduced redundancy genes. default parameters",
+      "title": "Mask repetitive regions with Ns",
+      "instruction": "Replace the repeat regions identified in steps 6‑8 with Ns in the genome sequence before gene prediction.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Integrate genes predicted in step 9-11 to obtain the consensus gene set by using GLEAN. filtering with criterion &#34;overlap cutoff 0.8 and at least one homolog support&#34;",
+      "title": "Predict genes with Augustus",
+      "instruction": "Run Augustus v2.5.5 on the repeat‑masked genome using parameters \"--species=Lateolabrax_maculatus --uniqueGeneId=true --noInFrameStop=true --gff3=on --strand=both\".",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "Added the genes which were supported by the transcriptome data and D. labrax’s based prediction after manual evolution to the GLEAN gene set.",
+      "title": "Predict genes with Genscan",
+      "instruction": "Run Genscan v2.1 on the same repeat‑masked genome with default parameters.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
-      "instruction": "Map protein sequences of the final gene set to existing databases to identify their functions or motifs, such as SwissProt, TrEMBL, KEGG, InterPro. SwissProt, TrEMBL and KEGG: using BLASTP; Interpro: using InterProScan (version 4.7) with seven different models (Profilescan, blastprodom, HmmSmart, HmmPanther, HmmPfam, FPrintScan and Pattern-Scan)",
+      "title": "Homology‑based prediction with BLAT and GeneWise",
+      "instruction": "Download teleost protein sequences (Danio rerio, D. labrax, Gasterosteus aculeatus, Lates calcarifer, Oreochromis niloticus, Oryzias latipes, Tetraodon nigroviridis, Takifugu rubripes; NCBI IDs provided). Align them to the masked genome using BLAT, then run GeneWise v2.2.0 on the alignments with parameters \"--max divergence rate 0.3 --extend length for both sides of regions 2000\" to predict genes.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Transcriptome‑based prediction with Trinity data",
+      "instruction": "Download spotted sea bass transcriptome assembled by Trinity v2013.11 from NCBI, map the transcripts to the genome with BLAT, and collapse redundant gene models using default parameters.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Combine predictions with GLEAN",
+      "instruction": "Integrate gene models from Augustus, Genscan, GeneWise, and transcriptome‑based predictions using GLEAN; filter results with overlap cutoff 0.8 and require at least one homolog support.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Add manually curated genes",
+      "instruction": "Incorporate genes supported by transcriptome data and D. labrax prediction after manual curation into the GLEAN consensus set.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Functional annotation of final gene set",
+      "instruction": "Map the final protein sequences to SwissProt, TrEMBL and KEGG using BLASTP; run InterProScan v4.7 with seven models (Profilescan, blastprodom, HmmSmart, HmmPanther, HmmPfam, FPrintScan, Pattern‑Scan) to assign motifs and domains.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 64,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

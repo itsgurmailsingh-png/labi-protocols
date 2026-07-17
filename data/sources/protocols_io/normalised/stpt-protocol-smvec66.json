@@ -14,9 +14,246 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "Cell type distribution - data processing and structure",
+    "This document describes the materials and methods used to process data generated from a Serial 2-photon microscope to quantify the molecular cell types",
+    "Each dataset is associated with the following METADATA:",
+    "Cre-reporter (e.g Ai75, H2BGFP etc)",
+    "Mice derivate strain (e.g. C57BL/6 etc.)",
+    "Mice Origin (JAX etc)",
+    "Imaging machine id (e.g. Godzilla)",
+    "PMT value for channel1",
+    "PMT value for channel 2",
+    "Voltage under objective",
+    "Surface measured on piezo",
+    "Imaging plane measured on piezo",
+    "Total number of sections",
+    "Data processing server (e.g. brain2, brain5 etc.)",
+    "STP Image Reconstruction",
+    "Processing scripts setup",
+    "/data/<user>/STP_processed_data/<cell_type>/<group1_male>/",
+    "/data/<user>/STP_processed_data/<cell_type>/<group2_female>/",
+    "FUSION_METHOD=4 (no blending)",
+    "Level 0 Data desciption",
+    "The intermediate data are the following:",
+    "It has the raw tile file names",
+    "Their stage positions in each section",
+    "Imaging parameters like laser power etc.",
+    "Processing parameters, intermediate processing file names",
+    "Missing tiles during imaging",
+    "Log folder has missing tiles info",
+    "Cell Type detection & Registration to CCF space",
+    "Registration to CCF space",
+    "320 – Rabies/Somatic labeling quantification"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Prepare Raw Data",
+      "instruction": "Organize and clean the raw serial two-photon tomography (STPT) image files.",
+      "substeps": [
+        {
+          "instruction": "Verify that all sections (.tiff) are saved in both ch1 (red channel) and ch2 (green channel).",
+          "title": ""
+        },
+        {
+          "instruction": "Remove ch3 (blank channel) acquisition data using the 'move_test.bat' script.",
+          "title": ""
+        },
+        {
+          "instruction": "Transfer ch1 and ch2 raw data to the IBM SONAS server.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Configure Reconstruction Environment",
+      "instruction": "Set up the processing directory and scripts on the processing server (e.g., brain2, brain3, or brain5).",
+      "substeps": [
+        {
+          "instruction": "Create a process folder named with the project ID.",
+          "title": ""
+        },
+        {
+          "instruction": "Copy the reconstruction script into the process folder.",
+          "title": ""
+        },
+        {
+          "instruction": "Edit the 'runReconstruction_part1.sh' script using the gedit editor to input relevant data paths.",
+          "title": ""
+        },
+        {
+          "instruction": "Update the Mosaic text file located in the ch1 raw data folder.",
+          "title": ""
+        },
+        {
+          "instruction": "Update the CH2_TIF_DIR and CH3_TIF_DIR paths.",
+          "title": ""
+        },
+        {
+          "instruction": "Update the SECTION_STARTNUMBER and SECTION_ENDNUMBER (e.g., 270) based on the imaging data.",
+          "title": ""
+        },
+        {
+          "instruction": "Verify that advanced parameters are set to default.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Execute Image Reconstruction",
+      "instruction": "Run the reconstruction script to generate stitched mosaic files from PMT data.",
+      "substeps": [
+        {
+          "instruction": "Open the terminal application and change the directory to the processed data directory.",
+          "title": ""
+        },
+        {
+          "instruction": "Run the reconstruction script from the terminal command.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Perform Reconstruction Quality Control",
+      "instruction": "Verify the quality of the reconstructed images and the resulting folder structure.",
+      "substeps": [
+        {
+          "instruction": "Visualize stitched images in Fiji to check overall acquisition quality.",
+          "title": ""
+        },
+        {
+          "instruction": "Inspect the 'warping' folder containing 5% downsized image stacks in ImageJ to check for imaging artifacts.",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm the presence of 'stitchedImage_ch1' and 'stitchedImage_ch2' folders (1 micron resolution, 50 micron spacing, LZW compressed 16-bit tif).",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm the presence of 'averageTile_ch1.tif' and 'averageTile_ch2.tif' used for illumination correction.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Perform Image Registration",
+      "instruction": "Register the downsampled sample brain to the Common Coordinated Framework (CCF) space using elastix.",
+      "substeps": [
+        {
+          "instruction": "Identify the anterior commissure region in the stitched images.",
+          "title": ""
+        },
+        {
+          "instruction": "Use MATLAB to calculate the image intensity mean and standard deviation of the anterior commissure region for both channels.",
+          "title": ""
+        },
+        {
+          "instruction": "Determine the warpable range of the stitched brain by comparing start and end coordinates against the 25 micron Allen reference atlas.",
+          "title": ""
+        },
+        {
+          "instruction": "Input these values into the prediction script, update channel directories, and run predictions.",
+          "title": ""
+        },
+        {
+          "instruction": "Open the registration result file in the 'elastixOutput' folder within 'warping' using the fixed downsized warpable image; synchronize stack slices and mouse pointers to verify congruous edges and corners.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Detect Cells and Generate Masks",
+      "instruction": "Use Convolutional Neural Networks (CNN) on a CUDA-enabled GPU to detect cells and structures.",
+      "substeps": [
+        {
+          "instruction": "Select the appropriate network ID based on the signal: '164' for c-fos/nuclear signals, '10' for Mecp2-GFP/intra-nuclear signals, or '313' for subtraction channel based c-fos/nuclear signals.",
+          "title": ""
+        },
+        {
+          "instruction": "Locate detected cell masks in the directory: 'statichedImage_ch[n]/[Network ID]'.",
+          "title": ""
+        },
+        {
+          "instruction": "Qualitatively assess detection quality by opening cell mask images alongside reconstructed sections with synchronized mouse pointers.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Analyze ROI Statistics",
+      "instruction": "Calculate region-wise cell counts and statistics using MATLAB.",
+      "substeps": [
+        {
+          "instruction": "Create a Project folder on the processing server containing designated groups for brains and the MATLAB script.",
+          "title": ""
+        },
+        {
+          "instruction": "Organize point list text files into appropriate groups (e.g., Group 1 for female brains, Group 2 for male brains).",
+          "title": ""
+        },
+        {
+          "instruction": "Run the 'runROI_all' MATLAB script on the processing server to generate a spreadsheet with sample IDs as rows and regions as columns.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Compress Raw Data",
+      "instruction": "Compress the original raw tile folders to save storage space.",
+      "substeps": [
+        {
+          "instruction": "Run the compression script from MATLAB on the processing server (CPU-intensive, no GPU required).",
+          "title": ""
+        },
+        {
+          "instruction": "Document the raw data size before compression (~145 GB) and after compression (~65-75 GB).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-18T21:59:34.173991Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 0,
+  "exclude_low_confidence": false,
+  "docs_checked": true,
+  "media": [
+    {
+      "type": "document",
+      "filename": "SerialTwoPhotonDataProcessingCellTypes020718.docx",
+      "local_path": "data/media/protocols_io_docs/stpt-protocol-smvec66/SerialTwoPhotonDataProcessingCellTypes020718.docx",
+      "source_url": "https://content.protocols.io/5jx2ym6.docx",
+      "caption": "",
+      "bytes": 1132871,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io_docs/stpt-protocol-smvec66/SerialTwoPhotonDataProcessingCellTypes020718.docx"
+    }
+  ],
+  "description": "Few examples of the troubleshooting are below (fig.4) Extract all (right and left hemisphere) summary text file from the output folder and copy it in spreadsheet (*.csv) format to visualize region wise cell count.",
+  "_whole_protocol_attempted": true
 }

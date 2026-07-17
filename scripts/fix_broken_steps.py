@@ -6,11 +6,24 @@ Fixes:
   2. Materials sections treated as steps → materials field
   3. Mega-step: procedure crammed into one step → split into individual steps
   4. Decimal number false-positive in sub-step detection
+
+Targets data/sources/{source}/normalised/*.json — NOT protocols/. protocols/
+and data/merged/ are derived artifacts that merge_and_dedup.py deletes and
+rebuilds from normalised/ on every run, so any fix applied directly to
+protocols/ gets silently wiped the next time Layer 3 runs. Re-run
+merge_and_dedup.py after this script to publish the fixes.
 """
+import argparse
 import json, re
 from pathlib import Path
 
-PROTOCOLS_DIR = Path("protocols")
+SOURCES_DIR = Path("data/sources")
+KNOWN_SOURCES = [
+    "bio_protocol", "pubmed_central", "vendor",
+    "protocols_io", "zenodo", "figshare",
+    "openwetware", "github_opentrons", "star_protocols",
+    "methodsx", "biological_procedures", "current_protocols",
+]
 
 BACKGROUND_HEADERS = {
     "before you begin", "background", "overview", "introduction",
@@ -24,6 +37,7 @@ MATERIALS_HEADERS = {
     "materials and reagents", "reagents", "materials", "equipment",
     "solutions", "recipes", "lab supplies", "laboratory supplies",
     "supplies", "buffers", "antibodies", "chemicals",
+    "hardware", "software",
 }
 
 BACKGROUND_HEADERS.update({
@@ -56,18 +70,17 @@ def classify_header(title: str) -> str:
 
 
 def split_inline_numbered(text: str) -> list[str]:
-    """Split 'wall of text' procedure into individual steps by numbered list."""
-    parts = re.split(r'(?<!\d)(?:step\s+)?(\d+)[\.:\)]\s+(?=[A-Z\w])', text, flags=re.IGNORECASE)
-    if len(parts) < 5:
-        return []
-    steps = []
-    i = 1
-    while i + 1 < len(parts):
-        step_text = parts[i + 1].strip()
-        if len(step_text) > 15:
-            steps.append(step_text)
-        i += 2
-    return steps if len(steps) >= 3 else []
+    """
+    DISABLED. This regex matches ANY "(N) " or "N. " pattern anywhere in the
+    text, including inline enumeration inside a single running sentence
+    (e.g. "...tools (eg, PROBAST) [25]; and (6) narrative synthesis...") and
+    numbers inside formulas/citations. It silently ate the (N) marker and
+    scrambled/truncated real content into fake "steps" — confirmed on
+    published data (see scripts/revert_steps_to_raw.py). Do not re-enable
+    without requiring the match to sit at a real paragraph/sentence
+    boundary (start of text or after ". "/"\\n"), not just anywhere.
+    """
+    return []
 
 
 def is_material_item(text: str) -> bool:
@@ -199,7 +212,17 @@ def fix_protocol(data: dict) -> tuple[dict, bool]:
 
 
 def main():
-    files = list(PROTOCOLS_DIR.glob("*.json"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", choices=KNOWN_SOURCES, help="Process one source only")
+    args = parser.parse_args()
+
+    sources = [args.source] if args.source else KNOWN_SOURCES
+    files = []
+    for source in sources:
+        norm_dir = SOURCES_DIR / source / "normalised"
+        if norm_dir.exists():
+            files.extend(sorted(norm_dir.glob("*.json")))
+
     fixed = 0
     errors = 0
 
@@ -216,6 +239,7 @@ def main():
     print(f"Fixed:  {fixed:,}")
     print(f"Errors: {errors}")
     print(f"Total:  {len(files):,}")
+    print("Run scripts/merge_and_dedup.py to publish these fixes to protocols/.")
 
 
 if __name__ == "__main__":

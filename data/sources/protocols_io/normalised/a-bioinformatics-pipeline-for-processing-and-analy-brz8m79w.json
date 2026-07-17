@@ -13,9 +13,179 @@
   "citation": "dx.doi.org/10.17504/protocols.io.brz8m79w",
   "category": "Bioinformatics",
   "estimated_time_mins": 0,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "Equipment\n1. Computer\nIdeal configuration: 32/64 GB RAM with 64 core CPUs in an Ubuntu operating system (16.04.4 LTS\nmachine)\nSoftware\nAll the softwares were downloaded from the following locations:\n1. FastQC https://www.bioinformatics.babraham.ac.uk/projects/FastQC\n2. Bowtie2 https://bowtie-bio.sourceforge.net/Bowtie2\n3. HISAT2 https://github.com/infphilo/Hisat2\n4. Samtools http://samtools.sourceforge.net\n5. Cufflinks https://github.com/cole-trapnell-lab/cufflinks\n6. DeSeq2 https://bioconductor.org/packages/release/bioc/html/DESeq2.html\n7. FeatureCounts-apt-get install featurecounts\n8. 1000 genomes dataset: http://www.internationalgenome.org/\nDataset Information\nFor benchmarking, we have downloaded publicly available 1000 genome datasets\n(http://www.internationalgenome.org/) with three different population accessions, viz. East Asian (ERR1050076\nand ERR1050078), American (HG00731 and HG00733) and African ancestry (NA19238 and NA19240)\n(Table1). Each population contains an individual as parent and child and type of RNA sequencing is strand\nspecific using Illumina platform. The files were downloaded either using FTP link or fasterq-dump\n(https://www.internationalgenome.org/data-portal/sample) [5].\n2"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Prepare computational environment",
+      "instruction": "Use an Ubuntu 16.04.4 LTS machine with at least 16 GB RAM (64 GB RAM and 64 cores recommended) and create a shell script (extension .sh) to hold all commands.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Run quality check with FastQC",
+      "instruction": "Execute FastQC on each raw FASTQ file to generate quality reports.",
+      "substeps": [
+        {
+          "instruction": "./FastQC ~/samples/sample1.fastq",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Build genome indices",
+      "instruction": "Create Bowtie2 and HISAT2 indices for the human hg38 reference genome.",
+      "substeps": [
+        {
+          "instruction": "./bowtie2 -build reference_inbt2_index_base",
+          "title": ""
+        },
+        {
+          "instruction": "./hisat2 -build reference_inht2_index_base",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Align reads to reference",
+      "instruction": "Map paired‑end (or single‑end) reads to the indexed hg38 genome using HISAT2 or Bowtie2, directing output to a SAM file.",
+      "substeps": [
+        {
+          "instruction": "./hisat2 -x reference_hisat_filename -1 path/filename1 -2 path/filename2 > filename.sam",
+          "title": ""
+        },
+        {
+          "instruction": "./bowtie2 -x reference_filename -1 path/filename1 -2 path/filename2 > filename.sam",
+          "title": ""
+        },
+        {
+          "instruction": "# For single‑end data, omit the -2 option and use -U instead.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Convert SAM to BAM",
+      "instruction": "Convert the SAM alignment file to BAM format with samtools.",
+      "substeps": [
+        {
+          "instruction": "./samtools import reference.fa ~/samples/sample1.sam > sample1.bam",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Sort BAM file",
+      "instruction": "Sort the BAM file to prepare for downstream analysis.",
+      "substeps": [
+        {
+          "instruction": "~/samtools sort ~/samples/sample1.bam -o sample1.sorted",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Index sorted BAM",
+      "instruction": "Create an index for the sorted BAM file to enable rapid random access.",
+      "substeps": [
+        {
+          "instruction": "~/samtools index ~/samples/sample1.sorted",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Assemble transcripts with Cufflinks",
+      "instruction": "Run Cufflinks on the sorted BAM to assemble transcripts and estimate their abundances.",
+      "substeps": [
+        {
+          "instruction": "./cufflinks in.sorted.bam -o sample.out",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Merge assemblies with cuffmerge",
+      "instruction": "Combine assemblies from all replicates using cuffmerge, providing the reference GTF and FASTA.",
+      "substeps": [
+        {
+          "instruction": "./cuffmerge -g reference.gtf -s reference.fa sample.merged",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Identify DEGs with Cuffdiff",
+      "instruction": "Perform differential expression analysis with Cuffdiff using the merged transcript GTF and the sorted BAM files.",
+      "substeps": [
+        {
+          "instruction": "./Cuffdiff ~/samples/sample1.out/transcripts.gtf ~/samples/sample1.sorted ~/samples/reference_genome > sample_result",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Generate read counts with featureCounts",
+      "instruction": "Count reads per gene using featureCounts to enable downstream DESeq2 analysis.",
+      "substeps": [
+        {
+          "instruction": "FeatureCounts -B -p -g gene_id -a ~/reference.gtf -o ~/sample.sorted.bam ~/sample.sorted.bam",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T12:22:07.849036Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 0,
+  "exclude_low_confidence": false,
+  "docs_checked": true,
+  "media": [
+    {
+      "type": "pdf",
+      "filename": "RNA-seq_Pipeline.pdf",
+      "local_path": "data/media/protocols_io_docs/a-bioinformatics-pipeline-for-processing-and-analy-brz8m79w/RNA-seq_Pipeline.pdf",
+      "source_url": "https://content.protocols.io/files/cybrgsn6.pdf",
+      "caption": "",
+      "bytes": 924493,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io_docs/a-bioinformatics-pipeline-for-processing-and-analy-brz8m79w/RNA-seq_Pipeline.pdf"
+    }
+  ],
+  "description": "Figure 2: Summary plots obtained from a standard FastQC run, containing information on statistics,\nquality, read coverage, depth, yield, based per read call, etc From the FASTQC results, per sequence quality score plots the total number of reads vs the average\nquality score over full length reads. The Phred score of above 25 is considered good wherein from the y\n5",
+  "_whole_protocol_attempted": true
 }

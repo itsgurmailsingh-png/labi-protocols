@@ -17,70 +17,99 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Platanus (version 1.2.4), an de novo and high heterozygous genome assembler, was carried out to assemble the fragment PE reads into contigs by constructing De Bruijn Graphs with automatically optimized k-mer size. Platanus 1.2.4 Linux Centos 6",
+      "title": "Filter low-quality reads",
+      "instruction": "Use NGS QC Toolkit version 2.3.3 on Linux CentOS 6 with default parameters to discard any read where more than 40 % of bases have quality score Q < 13.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Then, the corrected PacBio reads and the assembled contigs were thrown into DBG2OLC (release 20150611) to construct scaffolds with the parameters: DBG2OLC Contigs contig.fa LD 0 K 17 KmerCovTh 4 MinOverlap 25 AdaptiveTh 0.007 RemoveChimera 1 f scaffold.fa. DBG2OLC release 20150611 Linux Centos 6",
+      "title": "Correct PacBio reads",
+      "instruction": "Run MECAT (release 20170627) on Linux CentOS 6 with parameters -x 0 -i 0 -t 60 -r 0.8 -a 1000 -c 5 -l 2000 to generate error‑corrected PacBio reads.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Low-quality reads (the proportion of the base of Q&lt;13 more than 40% in a given reads) were filtered using NGS QC Toolkit (version 2.3.3) with default parameters. NGS QC Toolkit 2.3.3 Linux Centos 6",
+      "title": "Assemble Illumina PE reads",
+      "instruction": "Execute Platanus version 1.2.4 on Linux CentOS 6 using the filtered paired‑end Illumina reads; allow automatic k‑mer size optimization to produce contig.fa.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "For PacBio data, we used MECAT (release 20170627) to correct errors with the following parameters: -x 0 -i 0 -t 60 -r 0.8 -a 1000 -c 5 -l 2000. MECAT released 2017062 Linux Centos 6",
+      "title": "Build hybrid scaffolds with DBG2OLC",
+      "instruction": "Run DBG2OLC (release 20150611) on Linux CentOS 6, providing the corrected PacBio reads and the Platanus contigs (contig.fa) with the following options: LD 0, K 17, KmerCovTh 4, MinOverlap 25, AdaptiveTh 0.007, RemoveChimera 1, output file scaffold.fa.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "A polish process before the SSPACE process referred to consensus analysis of DBG2OLC, which were contributed to enhance the quality of the genome assembly and reduce errors in the SSPACE process.",
+      "title": "Polish DBG2OLC consensus",
+      "instruction": "Perform consensus polishing of the DBG2OLC assembly (as described in the DBG2OLC documentation) to improve assembly quality before downstream scaffolding.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "The assemblies were elongated by SSPACE (version 3.0) using the MP reads and some gaps were filled using the Illumina and PacBio data by GapCloser (version 1.12) and PBJelly (release 20150824). GapCloser 1.12 Linux Centos 6 PBJelly release 20150824 Linux Centos 6 SSPACE 1 Linux Centos 6",
+      "title": "Extend scaffolds with SSPACE",
+      "instruction": "Apply SSPACE version 3.0 on Linux CentOS 6 using the mate‑pair (MP) reads to elongate the polished scaffolds.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "The valid Hi-C data together with the above assembly were processed by 3D-DNA pipeline (version 170123) to produce chromosome-level scaffolds. Then, the contact maps were visualized by JuiceBox (version 1.5.2). 3D-DNA pipeline released 170123 Linux Centos 6 JuiceBox 1.5.2 Linux Centos 6",
+      "title": "Close gaps with GapCloser",
+      "instruction": "Run GapCloser version 1.12 on Linux CentOS 6 with the Illumina data to fill gaps in the SSPACE‑extended scaffolds.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Valid HiC data were were evaluated and qualified using HiC-Pro (version 2.8.0_devel). HiC-Pro 2.8.0_devel Linux Centos 6",
+      "title": "Fill remaining gaps with PBJelly",
+      "instruction": "Execute PBJelly (release 20150824) on Linux CentOS 6 using the PacBio data to further close gaps in the GapCloser output.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Evaluate Hi‑C data quality",
+      "instruction": "Assess and filter the Hi‑C dataset with HiC‑Pro version 2.8.0_devel on Linux CentOS 6 to obtain a set of valid Hi‑C contacts.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Generate chromosome‑level scaffolds",
+      "instruction": "Process the validated Hi‑C data together with the assembled scaffolds using the 3D‑DNA pipeline (version 170123) on Linux CentOS 6 to produce chromosome‑level scaffolds.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Visualize contact maps in JuiceBox",
+      "instruction": "Load the 3D‑DNA output into JuiceBox version 1.5.2 on Linux CentOS 6 to visualize Hi‑C contact maps and manually curate scaffolds if needed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T15:23:17.126990Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 17,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

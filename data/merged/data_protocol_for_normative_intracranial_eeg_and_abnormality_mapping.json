@@ -1,0 +1,403 @@
+{
+  "protocol_id": "data_protocol_for_normative_intracranial_eeg_and_abnormality_mapping",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Data Protocol for Normative Intracranial EEG and Abnormality Mapping",
+  "author": "Heather Woodhouse",
+  "doi": "10.21769/BioProtoc.5321",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.5321",
+  "citation": "10.21769/BioProtoc.5321",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 7.5,
+  "category": "Neuroscience",
+  "estimated_time_mins": 12,
+  "materials": [
+    "Co-register the post-implantation CT scan to the orig.mgz file. This may require conversion from mgz format to nifti (nii.gz) format. For this, the FreeSurfer mri_convert command can be used. Registration should be rigid body (6 degrees of freedom), without deformation. The ANTS toolbox [29] contains a highly effective set of tools for this purpose. The following command can be used from the toolbox: /usr/local/ANTs/bin/antsRegistration --verbose 1 --dimensionality 3 --float 0 --collapse-output-transforms 1 --output [ ] --interpolation Linear --use-histogram-matching 0 --winsorize-image-intensities [ 0.005,0.995 ] --initial-moving-transform [ , , 1 ] --transform Rigid[ 0.1 ] --metric MI[ , ,1,32,Regular,0.25 ] --convergence [ 1000x500x250x100,1e-6,10 ] --shrink-factors 8x4x2x1 --smoothing-sigmas 3x2x1x0vox The rigid registration uses mutual information (MI) to measure concordance between the images. Since the images are from different modalities, contrast for specific tissues will be altered. MI compares histograms of the two images and aligns them, detecting similar anatomical patterns between the images, even if they have contrasting intensities. This method is widely used for multi-modal registration. Quality control: Following registration, visually inspect that the images are correctly aligned using software for viewing 3D imaging data, such as FSLeyes or ITK-Snap (see Figure 4A for an example of a correctly aligned image). Figure"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Identify clean interictal periods",
+      "instruction": "For each subject, locate all icEEG periods that match the chosen state of consciousness, then sequentially discard periods that violate interictal, sampling, length, and artifact criteria, finally retain only clean periods.",
+      "substeps": [
+        {
+          "instruction": "Locate all periods where the subject is in the required state of consciousness (e.g., relaxed wakefulness) using icEEG annotations (Decision point A1).",
+          "title": ""
+        },
+        {
+          "instruction": "Discard any periods that are less than 2 h from any seizure activity (Decision point A2).",
+          "title": ""
+        },
+        {
+          "instruction": "Discard periods whose sampling frequency is below 200 Hz (Decision point A3).",
+          "title": ""
+        },
+        {
+          "instruction": "Discard periods shorter than the chosen segment length (e.g., 70 s; Decision point A5).",
+          "title": ""
+        },
+        {
+          "instruction": "Visually inspect the remaining periods for artefacts or non‑physiological noise (e.g., channel disconnections) and discard noisy periods.",
+          "title": ""
+        },
+        {
+          "instruction": "Retain only the clean periods that occur in the desired consciousness state; avoid the first 24 h post‑implantation if sufficient alternative data exist.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Select fixed‑length interictal segments",
+      "instruction": "From the clean periods, extract the required number of fixed‑length segments while respecting separation constraints and noting any unsuitable channels.",
+      "substeps": [
+        {
+          "instruction": "Select the required number of segments per subject (e.g., three 70‑s segments; Decision point A6).",
+          "title": ""
+        },
+        {
+          "instruction": "Ensure each selected segment is at least 4 h apart from any other segment from the same exam (Decision point A7).",
+          "title": ""
+        },
+        {
+          "instruction": "Check power spectral densities (PSDs) of each segment; mark channels with abnormal PSDs (e.g., excessive 60 Hz power, non‑1/f shape) as unsuitable.",
+          "title": ""
+        },
+        {
+          "instruction": "If any channels show epileptic spikes, note them for later exclusion.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Create subject folder for segments",
+      "instruction": "Make a dedicated directory for the subject’s extracted segments following the recommended folder hierarchy (see Figure 1).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Extract and save segment data",
+      "instruction": "For each selected segment, extract the raw data and metadata from the original file (e.g., .edf) and store them as a .mat (or equivalent) file together with a metadata table.",
+      "substeps": [
+        {
+          "instruction": "Save channel names.",
+          "title": ""
+        },
+        {
+          "instruction": "Save names of channels marked as unsuitable.",
+          "title": ""
+        },
+        {
+          "instruction": "Save names of channels marked as spiking.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the time‑series matrix (channels × time points).",
+          "title": ""
+        },
+        {
+          "instruction": "Save the segment start date‑time (precision to seconds).",
+          "title": ""
+        },
+        {
+          "instruction": "Save the segment duration.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the sampling frequency.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the state of consciousness label.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the subject ID and hospital abbreviation.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the segment number.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Repeat temporal processing for all subjects",
+      "instruction": "Iterate the above steps (1–5) for every subject in the cohort, excluding any subject that lacks data meeting the criteria.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Run FreeSurfer recon‑all on T1 MRI",
+      "instruction": "Process each subject’s pre‑implantation 3 D T1‑weighted MRI with FreeSurfer’s recon‑all to obtain a 1 mm isotropic reference volume and the aparc+aseg parcellation.",
+      "substeps": [
+        {
+          "instruction": "Execute recon‑all (default parameters).",
+          "title": ""
+        },
+        {
+          "instruction": "Verify that mri/orig.mgz (1 mm voxels) and mri/aparc+aseg.mgz are generated.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Co‑register post‑implant CT to MRI",
+      "instruction": "Rigidly align the post‑implantation CT scan to the orig.mgz MRI space, converting formats as needed.",
+      "substeps": [
+        {
+          "instruction": "If necessary, convert CT from .mgz to NIfTI (.nii.gz) using FreeSurfer’s mri_convert.",
+          "title": ""
+        },
+        {
+          "instruction": "Run ANTs rigid registration (6 DOF) with the following command:",
+          "title": ""
+        },
+        {
+          "instruction": "/usr/local/ANTs/bin/antsRegistration --verbose 1 --dimensionality 3 --float 0 --collapse-output-transforms 1 --output [output_prefix] --interpolation Linear --use-histogram-matching 0 --winsorize-image-intensities [0.005,0.995] --initial-moving-transform [fixed_image,moving_image,1] --transform Rigid[0.1] --metric MI[fixed_image,moving_image,1,32,Regular,0.25] --convergence [1000x500x250x100,1e-6,10] --shrink-factors 8x4x2x1 --smoothing-sigmas 3x2x1x0vox",
+          "title": ""
+        },
+        {
+          "instruction": "Visually inspect the registration (e.g., with FSLeyes or ITK‑Snap) to confirm correct alignment.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Mark electrode contacts in co‑registered space",
+      "instruction": "Using the img_pipe GUI (or equivalent), manually place markers on each electrode contact in the CT‑aligned MRI space to obtain Cartesian coordinates.",
+      "substeps": [
+        {
+          "instruction": "Launch the img_pipe GUI as described in Hamilton et al. [28].",
+          "title": ""
+        },
+        {
+          "instruction": "Navigate to the deepest contact of an electrode (channel 1) and press ‘n’ to name the electrode.",
+          "title": ""
+        },
+        {
+          "instruction": "Press ‘e’ at each contact location, moving from deepest to most superficial, to create markers; ensure crosshairs are centered on the contact in all three views.",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat for all electrodes in the brain.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Export channel coordinates",
+      "instruction": "Save the marked channel coordinates in the same space as orig.mgz and generate a visual rendering to confirm placement.",
+      "substeps": [
+        {
+          "instruction": "Export the coordinates using the img_pipe export function.",
+          "title": ""
+        },
+        {
+          "instruction": "Render the electrodes (e.g., with custom code) and compare to implantation notes for quality control.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Generate optional resection mask",
+      "instruction": "If resection information is available, create a binary mask of the resected tissue in orig.mgz space using the RAMPS pipeline.",
+      "substeps": [
+        {
+          "instruction": "Register post‑surgery T1w MRI to the pre‑implantation T1w MRI with ANTs.",
+          "title": ""
+        },
+        {
+          "instruction": "Segment the resection cavity using ANTs ATROPOS.",
+          "title": ""
+        },
+        {
+          "instruction": "Iteratively dilate/erode to refine the mask.",
+          "title": ""
+        },
+        {
+          "instruction": "Run the RAMPS command, e.g.:",
+          "title": ""
+        },
+        {
+          "instruction": "python /Path_to/RAMP.py <hemisphere> <lobe>",
+          "title": ""
+        },
+        {
+          "instruction": "Overlay the mask on orig.mgz to verify correct location.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Create channel information table",
+      "instruction": "Assemble a table for each subject containing channel metadata and, optionally, resection‑related data.",
+      "substeps": [
+        {
+          "instruction": "For each channel, record:",
+          "title": ""
+        },
+        {
+          "instruction": "• Channel name (e.g., HIPP1).",
+          "title": ""
+        },
+        {
+          "instruction": "• Electrode type (e.g., G for grid, D for depth).",
+          "title": ""
+        },
+        {
+          "instruction": "• Hemisphere (Left/Right).",
+          "title": ""
+        },
+        {
+          "instruction": "• Cartesian coordinates (x, y, z) in orig.mgz space.",
+          "title": ""
+        },
+        {
+          "instruction": "• ROI index from the Desikan–Killiany atlas (aparc+aseg.mgz).",
+          "title": ""
+        },
+        {
+          "instruction": "• (Optional) Binary flag for recording from resected tissue (if mask generated).",
+          "title": ""
+        },
+        {
+          "instruction": "• (Optional) Binary flag for spikes, structural abnormality, and SOZ (if available).",
+          "title": ""
+        },
+        {
+          "instruction": "Save the table using the subject identifier in the filename.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Localise channels to cortical ROIs",
+      "instruction": "Assign each channel to the nearest grey‑matter region while respecting distance and hemisphere constraints.",
+      "substeps": [
+        {
+          "instruction": "Load channel coordinates and the aparc+aseg.mgz volume (MATLAB: MRIread.m or equivalent).",
+          "title": ""
+        },
+        {
+          "instruction": "For each channel, compute Euclidean distances to all grey‑matter voxels in the same hemisphere.",
+          "title": ""
+        },
+        {
+          "instruction": "Assign the channel to the ROI with the minimum distance; if the minimum distance exceeds the allowed threshold (e.g., >5 mm; Decision point B1) or the channel lies in white matter, label it ‘n/a’.",
+          "title": ""
+        },
+        {
+          "instruction": "If a resection mask exists, compute the Euclidean distance from the channel to the nearest mask voxel and store the minimum distance.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Compile final subject channel table",
+      "instruction": "Merge the coordinate/ROI localisation data with the metadata table and, if applicable, resection distances, then save.",
+      "substeps": [
+        {
+          "instruction": "Load the channel‑metadata table (step 9) and the localisation results (step 11).",
+          "title": ""
+        },
+        {
+          "instruction": "Combine into a single table containing all required columns (name, coordinates, electrode type, hemisphere, ROI ID, optional resection flag, optional spike/abnormality/SOZ flags).",
+          "title": ""
+        },
+        {
+          "instruction": "Save the final table using the subject ID.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Repeat spatial processing for all subjects",
+      "instruction": "Iterate steps 6–12 for every subject, excluding any subject lacking required imaging data.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Create normative database",
+      "instruction": "Aggregate all subjects’ temporal‑processing segment files and spatial‑processing channel tables into a unified database (e.g., MongoDB) following the described schema.",
+      "substeps": [
+        {
+          "instruction": "Choose database software (MongoDB recommended for flexibility; relational DB or spreadsheets possible).",
+          "title": ""
+        },
+        {
+          "instruction": "Define classes/collections: Subject, Exam, Channel, icEEG Segment, etc., with required and optional fields as illustrated in Figure 5.",
+          "title": ""
+        },
+        {
+          "instruction": "Import each subject’s segment metadata (from step 5) and channel table (from step 13) into the appropriate collections.",
+          "title": ""
+        },
+        {
+          "instruction": "Verify that required fields (e.g., subject ID, segment start time, channel coordinates, ROI ID) are present and that optional fields conform to constraints.",
+          "title": ""
+        },
+        {
+          "instruction": "Index the database as needed for efficient querying.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 31,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

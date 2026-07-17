@@ -19,54 +19,139 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 3.0,
+  "quality_score": 4.0,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 36,
-  "materials": [],
+  "materials": [
+    "Following protocols of https://www.nature.com/protocolexchange/protocols/6335",
+    "a"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Following protocols of https://www.nature.com/protocolexchange/protocols/6335",
+      "title": "Run EWAS meta‑analysis",
+      "instruction": "Combine discovery and replication EWAS summary statistics using METAL (version 2010‑02‑08) to perform a fixed‑effects, inverse‑variance meta‑analysis with sample size and standard error weighting; obtain effect sizes and p‑values for each probe from cohort 1 and cohort 2; assess heterogeneity between the two sample sets with the I² statistic.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "We conducted an EWAS meta-analysis by combining the data from the discovery and replication samples. Effect size and p-values for each probe were obtained from analyses in cohort 1 and cohort 2 samples, respectively. We performed fixed-effects, inverse-variance meta-analysis, with scheme parameters of sample size and standard error by implementing the METAL (ver: 2010-02-08) program, combining summary statistics in two sample sets. We investigated heterogeneity in two sample sets using the I2-statistic.",
+      "title": "Remove batch effects",
+      "instruction": "Apply the removeBatchEffect function from the R limma package (version 3.32.10) to the methylation data to correct for batch effects arising from different processing times and platforms before any machine‑learning prediction.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "We developed an in-house ensemble-based feature selection R package, SmartFeatureSelction ( https://bitbucket.org/starrcofly/smartfeatureselection.git ) to link smoking-associated CpG sites to HIV outcomes. SmartFeatureSelection used a supervised machine learning approach and merges EWAS with step-wise feature selection. The protocol included: 1) filtering of irrelevant probes based on methylation association analysis; 2) consideration of the relative attribution of each probe to rank the importance of the probes; 3) application of multiple machine learning methods to optimize the model; 4) building a model based on greedy ensemble by applying a weighted average of 4 machine learning models; 5) validation of the model in two independent samples. Considering the samples were processed at different times and platforms, batch effects were removed using Function removeBatchEffect in R limma (ver. 3.32.10) library before performing machine learning prediction. To reduce redundant DNA methylation signals and noise for improving the prediction accuracy of HIV frailty, CpG sites with FDR &lt; 0.5 from EWAS in cohort 1 were selected for machine learning. The samples in cohort 1 were randomly divided into a training set and a test setwith ratio of 8:2. We first built a model using the training set, in which each sample was labeled poor (VACS index &gt;50) or good prognosis (VACS index &lt;=50). We then tested the model by performing 10-fold cross validation in the testing set, and the best-performed model was tested in an independent replication set.",
+      "title": "Select informative CpG probes",
+      "instruction": "Use the SmartFeatureSelection R package (https://bitbucket.org/starrcofly/smartfeatureselection.git) to filter irrelevant probes, rank probes by relative attribution, and reduce redundant signals by keeping CpG sites with false‑discovery‑rate (FDR) ≤ 0.05 or associated with good prognosis (VACS index ≤ 50).",
+      "substeps": [
+        {
+          "instruction": "Filter probes based on methylation‑association analysis results.",
+          "title": ""
+        },
+        {
+          "instruction": "Rank probes according to their contribution to outcome prediction.",
+          "title": ""
+        },
+        {
+          "instruction": "Retain only CpG sites meeting FDR ≤ 0.05 or VACS ≤ 50 criteria.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "To examine whether the select CpG site methylation was associated with mortality, we constructed a methylation index from the selected smoking-associated CpG sitesfollowing the previous formula[34]. A separate index was constructed for hypomethylated and hypermethylated CpG sites, respectively. The association of the DNA methylation risk index with all-cause mortality was examined by Kaplan–Meier plots and log-rank tests in all samples. Cox regression model was then used to adjust for age, antiretroviral therapy, HIV-1 loads, and CD4 counts. In the Cox regression model, the DNA methylation index score was a categorical variable (using the highest quartiles as the reference category) or a continuous variable (calculating HR for a decrease in DNA methylation by one standard deviation). Index hypo and index hyper were evaluated for the prediction of mortality separately.",
+      "title": "Build greedy ensemble model",
+      "instruction": "Apply four distinct machine‑learning algorithms to the filtered CpG set, then combine their predictions using a weighted average (greedy ensemble) to create a single predictive model.",
+      "substeps": [
+        {
+          "instruction": "Train each of the four machine‑learning models on the training data.",
+          "title": ""
+        },
+        {
+          "instruction": "Determine optimal weights for each model based on performance.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute the weighted average of the four model outputs to obtain the ensemble prediction.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Pathway and network analysis was conducted for the selected CpG sites on the nearest genes by employing Ingenuity Pathway Analysis (IPA). For genes with multiple CpG sites, the lowest p-value at the CpG site within a gene was used to represent the gene level significance. Significant pathways were defined at a FDR &lt;0.05.",
+      "title": "Validate predictive model",
+      "instruction": "Perform 10‑fold cross‑validation on the testing set to identify the best‑performing ensemble model, then evaluate that model on an independent replication cohort.",
+      "substeps": [
+        {
+          "instruction": "Split the testing set into ten folds and iteratively train/validate.",
+          "title": ""
+        },
+        {
+          "instruction": "Select the model with the highest cross‑validation performance.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply the selected model to the replication sample for external validation.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "a",
+      "title": "Construct methylation risk indices",
+      "instruction": "Create separate DNA‑methylation risk indices for hypomethylated and hypermethylated CpG sites using the published formula, then treat each index as either a categorical variable (highest quartile as reference) or a continuous variable (per‑standard‑deviation decrease).",
+      "substeps": [
+        {
+          "instruction": "Calculate the index for hypomethylated CpGs.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the index for hypermethylated CpGs.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Test association with mortality",
+      "instruction": "Assess the relationship between each methylation index and all‑cause mortality using Kaplan–Meier survival curves with log‑rank tests, followed by Cox proportional‑hazards regression adjusting for age, antiretroviral therapy, HIV‑1 viral load, and CD4 count.",
+      "substeps": [
+        {
+          "instruction": "Generate Kaplan–Meier plots for each index and perform log‑rank tests.",
+          "title": ""
+        },
+        {
+          "instruction": "Fit Cox models with the index as categorical (quartiles) and as continuous (per SD) predictors, adjusting for covariates.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Perform pathway and network analysis",
+      "instruction": "Analyze genes nearest to the selected CpG sites with Ingenuity Pathway Analysis (IPA); for genes with multiple CpGs, use the lowest CpG p‑value to represent gene‑level significance; consider pathways significant if FDR < 0.05.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 34,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

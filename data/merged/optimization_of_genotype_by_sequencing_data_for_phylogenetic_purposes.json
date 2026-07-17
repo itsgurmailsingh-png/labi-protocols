@@ -1,0 +1,167 @@
+{
+  "protocol_id": "optimization_of_genotype_by_sequencing_data_for_phylogenetic_purposes",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Optimization of Genotype by Sequencing data for phylogenetic purposes",
+  "author": "Loureiro, Engstrom, et al.",
+  "doi": "10.1016/j.mex.2020.100892",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7195544/",
+  "citation": "10.1016/j.mex.2020.100892",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 6.5,
+  "category": "Bioinformatics",
+  "estimated_time_mins": 84,
+  "materials": [
+    "We obtained tissues from a total of 189 specimens including all the currently recognized species of Molossus\n[8] and representatives of two other species of molossid bats, Promops centralis and Eumops auripendulus, that were used as outgroups following Ammerman et al. [9] and Gregorin and Cirranello (2016) [10]. Genomic DNA was isolated using a Qiagen DNeasy extraction kit (Qiagen, Inc. Valencia, CA, USA) following the manufacturer's instructions. Genomic DNA quality was checked by visual inspection on agarose gels and quantified using a Nanodrop spectrophotometer (Nanodrop Technologies). Thirty microlitres of high quality (>100 ng/ul) DNA per sample was used for the library preparation. We submitted the samples to the Cornell Institute of Genomic Diversity (IGD) to obtain SNP datasets through the GBS approach following the protocol described by Elshire et al. [11]. All libraries were sequenced on an Illumina HiSeq 2000."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Collect tissues and extract DNA",
+      "instruction": "Obtain tissue samples from 189 specimens (all Molossus species plus outgroups) and isolate genomic DNA using the Qiagen DNeasy extraction kit according to the manufacturer’s protocol.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Quantify and select high‑quality DNA",
+      "instruction": "Inspect DNA on agarose gels, quantify with a Nanodrop spectrophotometer, and select samples with concentration >100 ng/µL; use 30 µL of each qualifying DNA sample for library preparation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Prepare GBS libraries and sequence",
+      "instruction": "Send the 30 µL DNA aliquots to the Cornell Institute of Genomic Diversity for GBS library construction following Elshire et al., then sequence all libraries on an Illumina HiSeq 2000.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Trim reads and generate tags",
+      "instruction": "Convert raw Illumina paired‑end files to genotypes with TASSEL 3.0 (Discovery and UNEAK pipelines), trimming each read to 64 bp after the barcode and discarding any shorter reads; cluster identical reads into tags and merge duplicate tags.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Align tags with reference and de novo pipelines",
+      "instruction": "Run two parallel pipelines: (1) Discovery – align tags to the Myotis brandtii genome, discarding 96.6 % of tags that do not align, 0.9 % that align multiple times, and retaining 2.5 % of short tags; (2) UNEAK – perform de novo pairwise alignment of tags, treating tag pairs with a 1 bp mismatch as candidate SNPs.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Assess tag quality and genotype quality",
+      "instruction": "Use FastQC to evaluate paired‑tag quality and compute Genotype Quality (GQ) as the likelihood difference between the most likely and second‑most likely genotype for each pipeline.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Demultiplex and filter missing data",
+      "instruction": "Import the data into TASSEL, demultiplex samples, remove invariant sites, and discard markers with >50 % missing data (i.e., keep markers present in ≥50 % of specimens).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Apply minimum allele frequency filter",
+      "instruction": "Test MAF thresholds from 0.01 to 0.06; retain SNPs with MAF ≥0.02 (optimal value). Note that MAF <0.02 removed 58 % of SNPs in the de novo alignment and 49 % in the reference‑based alignment.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Apply heterozygosity filter",
+      "instruction": "Filter out SNPs with heterozygosity ≤0.01; this step eliminated approximately two‑thirds of SNPs in the de novo pipeline and about half of the SNPs in the reference‑based pipeline.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Filter by sequencing depth",
+      "instruction": "Calculate mean depth with VCFtools (mean depth =7 for de novo, =6 for reference). Remove all tags with depth lower than the respective mean; this removal reduced SNP counts by 44 % (de novo) and 43 % (reference).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Remove linked SNPs",
+      "instruction": "Discard SNPs that are less than 128 bp apart (twice the 64 bp tag length). After this step, manually delete the remaining linked pairs (9 pairs in de novo, 2 pairs in reference). Note that this filter also removed >34 000 non‑linked SNPs in the de novo set and >300 in the reference set.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Construct phylogenetic trees",
+      "instruction": "Build a Maximum Likelihood tree with FastTree using a GTR + gamma model (partitions defined by PartitionFinder 1.0.1). Also infer species trees with SVDquartets in PAUP 4.0, performing four independent runs each with 500 bootstrap replicates and exhaustive quartet sampling.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Summarize final SNP datasets",
+      "instruction": "After all filters, the de novo pipeline yields 71 801 SNPs and the reference pipeline 27 323 SNPs. Removing sites with >50 % missing data and those <128 bp apart leaves 29 448 unlinked SNPs (de novo) and 15 569 unlinked SNPs (reference).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC7195544/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7195544/",
+      "caption": "",
+      "bytes": 60661,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC7195544/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC7195544/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7195544/",
+      "caption": "",
+      "bytes": 88162,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC7195544/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC7195544/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7195544/",
+      "caption": "",
+      "bytes": 102999,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC7195544/gr2.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 36,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

@@ -16,59 +16,102 @@
   "materials": [
     "R Studio",
     "96-well Plate",
-    "BEAST software"
+    "BEAST software",
+    "Find the script needed to read your raw data-files. Format the file names like this: plate1-Rep1.txt, plate1-Rep3.txt, plate2-Rep2.txt, plate3-Rep1.txt, plate3-Rep3.txt, plate4-Rep2.txt, plate5-Rep1.txt, plate5-Rep3.txt, plate1-Rep2.txt, plate2-Rep1.txt, plate2-Rep3.txt, plate3-Rep2.txt, plate4-Rep1.txt, plate4-Rep3.txt, plate5-Rep2.txt. Make sure the different replicates are in different files. However, the location in the plate should be exactly the same (i.e., A5 should be A5, B2 should be B2). If this is not the case or replicates are on one plate, transform the original files to match this format. Furthermore, titles of the wells should exactly be the same!",
+    "Install BEAST software from CRAN into R studio. Documentation can be found at: https://rdrr.io/cran/beast/man/beast-package.html and https://cran.r-project.org/web/packages/beast/beast.pdf.",
+    "You can find the script below that you need in order to read your raw data-files, format the file names like this: plate1-Rep1.txt plate1-Rep3.txt plate2-Rep2.txt plate3-Rep1.txt plate3-Rep3.txt plate4-Rep2.txt plate5-Rep1.txt plate5-Rep3.txt plate1-Rep2.txt plate2-Rep1.txt plate2-Rep3.txt plate3-Rep2.txt plate4-Rep1.txt plate4-Rep3.txt plate5-Rep2.txt Make sure the different replicates are in different files. However, the location in the plate should be exactly the same (ie. A5 should be A5, B2 should be B2). If this is not the case or replicates are on one plate, transform the original files to match this format. Furthermore, titles of the wells should exactly be the same!",
+    "Install BEAST software from CRAN into R studio. https://rdrr.io/cran/beast/man/beast-package.html Manual can be found: https://cran.r-project.org/web/packages/beast/beast.pdf"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Import Data into R Studio",
-      "instruction": "Import the file from the previous protocol into R studio. R Studio Desktop 1.1.463 The R Studio, Inc. 96-well Plate Growth Curve Setup by Norman Van Rhijn.",
+      "title": "Import and format data",
+      "instruction": "Open R Studio Desktop version 1.1.463, import the file produced by the previous protocol, and run the supplied preprocessing code to create the list `myDataList`. Edit the top two lines of the code to set the desired number of replicates and plates (e.g., set `number_of_plates` to the appropriate integer; the example shows 0). Verify that `length(myDataList)` equals the number of variables/replicates (R) and that each element of `myDataList` is a T × N matrix (time‑points × series). The final object after this step is `myDataList`.",
+      "substeps": [
+        {
+          "instruction": "Open R Studio Desktop (v1.1.463).",
+          "title": ""
+        },
+        {
+          "instruction": "Import the data file from the previous protocol.",
+          "title": ""
+        },
+        {
+          "instruction": "Run the preprocessing script, adjusting the first two lines to set the correct number of replicates and plates (e.g., `number_of_plates <- 0`).",
+          "title": ""
+        },
+        {
+          "instruction": "Check that `length(myDataList) == R` and each `myDataList[[i]]` has dimensions T × N.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "Format Data Files",
-      "instruction": "Find the script needed to read your raw data-files. Format the file names like this: plate1-Rep1.txt, plate1-Rep3.txt, plate2-Rep2.txt, plate3-Rep1.txt, plate3-Rep3.txt, plate4-Rep2.txt, plate5-Rep1.txt, plate5-Rep3.txt, plate1-Rep2.txt, plate2-Rep1.txt, plate2-Rep3.txt, plate3-Rep2.txt, plate4-Rep1.txt, plate4-Rep3.txt, plate5-Rep2.txt. Make sure the different replicates are in different files. However, the location in the plate should be exactly the same (i.e., A5 should be A5, B2 should be B2). If this is not the case or replicates are on one plate, transform the original files to match this format. Furthermore, titles of the wells should exactly be the same!",
-      "is_critical": true,
-      "timers": [],
-      "substeps": []
+      "title": "Load BEAST package",
+      "instruction": "In the same R session load the BEAST CRAN package with `library('beast')`. If you wish to test the workflow, also load the example dataset using `data(\"FungalGrowthDataset\")`; otherwise skip this line and continue with your own `myDataList`.",
+      "substeps": [
+        {
+          "instruction": "Execute `library('beast')`.",
+          "title": ""
+        },
+        {
+          "instruction": "Optional: `data(\"FungalGrowthDataset\")` to load the example data.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "Preprocess 96-well Growth Data",
-      "instruction": "Apply the code below. Change the number of reps and plates to your experiment (top two lines). Make sure the data is formatted as described above. The final object returned after applying the code is the list `myDataList`. This preprocessing processes 96-well growth data to match formatting required for the BEAST CRAN package. Different replicates from different files are merged into one dataframe. Apply the provided script.",
-      "is_critical": true,
-      "timers": [],
-      "substeps": []
+      "title": "Set random seed (optional)",
+      "instruction": "Set a reproducible random seed, for example `set.seed(1)`, if desired.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "Install BEAST Software",
-      "instruction": "Install BEAST software from CRAN into R studio. Documentation can be found at: https://rdrr.io/cran/beast/man/beast-package.html and https://cran.r-project.org/web/packages/beast/beast.pdf.",
+      "title": "Run MCMC sampler",
+      "instruction": "Run the MCMC sampler on `myDataList` using the default number of iterations (`nIter = 70000`) with the command `run_mcmc <- beastRun(myDataList)`. The default settings include a complexity prior parameter `gammaParameter = 2`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "Run BEAST Analysis",
-      "instruction": "Run BEAST analysis. Do not run the example included in the package if you want to run your own data. An example dataset (FungalGrowthDataset) is attached to run; if you want an example first, run the top example and then reload your data with the code above. For your own data, only run the code from 'Run MCMC sampler' and 'Print and Plot output lines'. Assume that the observed data consists of N time-series, each with R variables (or replicates) measured at T consecutive time-points. The input of the main function 'beast' should be a list `myDataList` with the following attributes: length(myDataList) should be equal to R (the number of variables or replicates), and dim(myDataList)[[1]],..., dim(myDataList)[[R]] should all be T×N (rows and columns correspond to time-points and different series, respectively). Then, a basic usage of the package consists of the following commands: • beastRun <- beast( myDataList = myDataList ) • print(beastRun) • plot(beastRun). These correspond to running the MCMC sampler, printing, and plotting output summaries. A toy-example is given which reproduces Figure 1 of the paper: library('beast') # load package data(\"FungalGrowthDataset\") # load dataset myIndex <- c(392, 62, 3, 117) # run the sampler only for the # specific subset of time-series set.seed(1) # optional # Run MCMC sampler with the default number of iterations (nIter =70000): run_mcmc <- beast(myDataList = FungalGrowthDataset, subsetIndex = myIndex, zeroNormalization = TRUE) # Print output: print(run_mcmc) # Plot output to file: \"beast_plot.pdf\" plot(run_mcmc, fileName = \"beast_plot_fungal_data.pdf\", timeScale=1/6, xlab = \"hours\", ylab = \"growth\"). The complexity prior distribution with parameter gammaParameter = 2 is the default prior assumption. Smaller (larger) values of gammaParameter will a-priori support larger (respectively: smaller) number of change-points. Full documentation of the package is given in https://cran.r-project.org/web/packages/beast/beast.pdf.",
-      "is_critical": true,
-      "timers": [],
-      "substeps": []
+      "title": "Print MCMC results",
+      "instruction": "Display the MCMC output by executing `print(run_mcmc)`.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "Review Output",
-      "instruction": "This should result in a PDF file containing all curves combined, clustered in groups with different change-points, and individual curves for each isolate.",
+      "title": "Plot results to PDF",
+      "instruction": "Create a PDF file named `beast_plot_fungal_data.pdf` containing the growth‑curve plots by running `plot(run_mcmc, fileName = \"beast_plot_fungal_data.pdf\", timeScale = 1/6, xlab = \"hours\", ylab = \"growth\")`. The PDF will show all curves combined, clustered by change‑points, with individual curves for each isolate.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Adjust complexity prior (optional)",
+      "instruction": "If you want to influence the number of inferred change‑points, modify the `gammaParameter` argument when calling `beastRun`; the default is 2 (smaller values favor more change‑points, larger values favor fewer).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T10:05:37.793502Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 48,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

@@ -22,46 +22,63 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "This protocol uses single-channel P20 and P300 pipettes to normalize DNA concentrations of up to 96 input samples based on user input (input DNA sample concentration, target concentration, target volume) provided by csv file upload (see example file below). Intermediate dilutions are prepared as needed. A downloadable output file is generated to record calculated fold dilution, volume of sample and water transferred, if a sample was processed (or skipped due to insufficient input DNA concentration), and if an intermediate dilution was required. Links: * [example input csv](https://opentrons-protocol-library-website.s3.amazonaws.com/custom-README-images/04f310/normalization_example_input.csv) Values for CSV file input: * sample_id * dna_conc_initial (ng/ul) * dna_conc_target (ng/ul) 5-40 ng/uL * volume_target (ul) 30-100 uL Additional Calculated Values in CSV file output: * fold dilution * sample_transfer (ul) * water_transfer (ul) * processed (0 - sample was skipped, 1 - sample was processed) * intermediate_dilution (0 - intermediate dilution not required, 1 - intermediate dilution required) ---",
+      "title": "Prepare CSV input file",
+      "instruction": "Create a CSV file containing the columns: sample_id, dna_conc_initial (ng/µL), dna_conc_target (ng/µL, allowed range 5–40), and volume_target (µL, allowed range 30–100). Fill each row with the corresponding values for up to 96 samples.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "The protocol will calculate the fold dilution and volume of water and sample to be transferred to the output plate and will determine and record if an intermediate dilution is required (if calculated sample transfer volume is < 2 uL) or if a sample must be skipped (if calculated sample transfer volume is greater than the available input sample volume of 30 uL).",
+      "title": "Upload CSV and start protocol",
+      "instruction": "In the Opentrons app, load the custom normalization protocol, upload the prepared CSV file, and start the run. The robot will read the file, calculate for each sample the fold dilution, the volume of sample to transfer, the volume of water to add, and will flag whether an intermediate dilution is required (sample transfer < 2 µL) or the sample must be skipped (sample transfer > 30 µL).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "The p20 single and p300 single will transfer water to output plate wells and return tips for reuse.",
+      "title": "Transfer water to output plate",
+      "instruction": "Using the single‑channel P20 and P300 pipettes, dispense the calculated water volume into each designated output‑plate well. After each dispense, return the tip to the tip rack for reuse.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "The p20 single and p300 single will transfer sample to output plate wells. If required, an intermediate dilution (10X dilution - 2 uL sample + 18 uL water) will be prepared, mixed and used as the source of sample transfer to the output plate. Each tip will be rinsed 1X in 10 percent diluted bleach prior to being dropped in the trash bin.",
+      "title": "Transfer sample (or intermediate dilution)",
+      "instruction": "Using the single‑channel P20 and P300 pipettes, dispense the calculated sample volume into each output‑plate well. If the calculated sample volume is less than 2 µL, first prepare a 10X intermediate dilution by mixing 2 µL of the sample with 18 µL of water, mix thoroughly, and then use this dilution as the source for the transfer. After each tip use, rinse the tip once in 10 % diluted bleach before discarding it in the trash bin.",
+      "substeps": [
+        {
+          "instruction": "If sample_transfer < 2 µL, prepare intermediate dilution: add 2 µL sample + 18 µL water, mix.",
+          "title": ""
+        },
+        {
+          "instruction": "Transfer the appropriate volume (sample or intermediate dilution) to the output well.",
+          "title": ""
+        },
+        {
+          "instruction": "Rinse the used tip 1× in 10 % diluted bleach, then discard.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "The protocol will generate an output file which can be downloaded to the user's computer when the run is finished. Use the Opentrons app to locate and download the file (Devices tab, find your robot, with the three dots in the upper right corner - Robot Settings, use the Advanced tab, click Launch Juypter Notebook to open web browser, where you can view and download the output file).",
+      "title": "Download output CSV file",
+      "instruction": "When the run finishes, open the Opentrons app, go to the Devices tab, select your robot, click the three‑dot menu in the upper right → Robot Settings → Advanced → Launch Jupyter Notebook. In the opened browser window locate the generated output CSV file and download it to your computer.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-18T20:32:03.053482Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 74,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

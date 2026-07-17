@@ -18,14 +18,79 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Characterizing the statistical performance of a supergene method",
-      "instruction": "We can summarize the results of various supergene validation approaches (i.e., LRTs, TTTs, and/or BFs, Fig. 1b) to characterize the performance of a supergene method (Fig. 1c). This can be accomplished by exploring the supergene validation results both independently and collectively in a number of ways. Each approach has its own advantages and disadvantages, and one can use this information to understand and assess the supergene method according to different validation procedures (Fig. 1b). For example, the total percentage of false supergenes that appear to incorrectly inferred can be quantified using the LRTs, TTTs, or BFs. For LRTs and BFs, the overall performance of the supergene method can be assessed by quantifying the number of supergenes for which the best-fit model was comprised only of a single supergene tree (i.e., Fig. 1b). For example, in the case of the avian phylogenomic analyses, we found that >93% of supergenes inferred via statistical binning appeared to be false supergenes according to LRTs [15]. Similarly, the number of genes that reject the overall supergene tree topology can be quantified across the entire supergene set to understand whether the supergene method was reliable or not using TTTs. The results of the three different supergene validation approaches (i.e., LRTs, SH-tests, and BFs) can be compared to assess their agreement (or lack thereof). In any case, false supergenes can be effectively treated as suspect, and investigated further to understand their biological and evolutionary properties. Importantly, this supergene validation strategy allows the independent assessment of which supergenes adhere to the assumptions that all loci comprising a supergene share a common genealogy, and thus are appropriate for use in downstream species tree inference.",
+      "title": "Infer individual gene trees",
+      "instruction": "For each locus in the dataset, infer a maximum‑likelihood gene tree and obtain bootstrap support values using a phylogenetic program of choice.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Construct supergenes",
+      "instruction": "Use a non‑model‑based supergene method (e.g., statistical binning) to build an incompatibility graph from the gene‑tree bootstrap supports and partition the loci into a non‑overlapping set of supergenes.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Validate with Likelihood Ratio Tests",
+      "instruction": "Run the program Concatepillar to perform hierarchical likelihood‑ratio tests (LRTs) on each inferred supergene, testing models containing 1 to n trees (where n is the number of loci in the supergene). Compute LRT as L(D|Mtrue)/L(D|Mfalse) or log‑LRT = logL(D|Mtrue) – logL(D|Mfalse). Accept the supergene as true if the best‑fit model includes a single tree (n = 1); otherwise reject it as a false supergene (n ≥ 1).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Validate with Tree Topology Tests",
+      "instruction": "For each locus within a supergene, obtain its ML gene tree and the overall supergene tree, then perform a Shimodaira‑Hasegawa (SH) test (implemented in RAxML) to compare the two topologies. If any locus rejects the supergene topology, label the supergene as false; if all loci fail to reject, label it as true. (Other TTTs such as the AU test may be used similarly.)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Validate with Bayes Factors",
+      "instruction": "Estimate marginal likelihoods for two competing models using a Bayesian phylogenetic program (e.g., BEAST or MrBayes): (i) a “true supergene” model where all loci share a single tree, and (ii) a “false supergene” model where each locus has its own tree. Approximate marginal likelihoods with Harmonic Mean, Stepping‑Stone, or Thermodynamic Integration methods. Compute Bayes Factor BF = P(Mtrue|D) / P(Mfalse|D). A BF favoring the true‑supergene model indicates validation; a BF favoring the false‑supergene model indicates a false positive.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Summarize validation results",
+      "instruction": "Aggregate the outcomes of the LRT, SH‑test, and Bayes‑Factor analyses across all supergenes. Calculate the proportion of false supergenes (e.g., >93 % false supergenes were reported for the avian statistical‑binning analysis). Compare concordance among the three validation approaches and report overall performance of the supergene method.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T09:12:38.254498Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "Central to the purpose of supergene validation is assessing whether an inferred supergene is statistically justified using model-based topological congruency tests (Fig. 1b). In other words, after a supergene (or set of supergenes) has been inferred (either based on a priori assumptions or via a more formal supergene method; Fig. 1a), the goal is to test whether the individual loci placed within a supergene should be treated as a single concatenated locus with a single phylogenetic tree topology (i.e., “true supergene”) or not (i.e., “false supergene”). There are a number of techniques designed for testing phylogenetic congruency (for a recent review, see [10]), and our supergene validating protocol seeks to leverage these techniques for the propose of validating both inferred supergenes themselves, and in turn, the overall supergene method (i.e., Fig. 1c). We discuss our supergene validation protocol in light of three primary types of topological congruency tests that can be used for this purpose: (i) Likelihood Ratio Tests (LRTs), (ii) Tree Topology Tests (TTTs), and (iii) Bayes Factor model comparison (BFs). These techniques are discussed below and depicted in Fig. 1b alongside a handful of example tools and software that can be used for this purpose.(i)Likelihood Ratio TestsPhylogenetic tree models can be compared using hierarchical likelihood ratio tests (LRTs, Fig. 1b), which have been applied in a number of contexts for comparing the relative fit of statistical models of molecular evolution to sequence data [24,25], as well as for testing alternative tree hypotheses [9,10]. In the context of supergene validation, we can apply LRTs to test whether the fit of a “true supergene” model (M“true supergene”) containing only a single tree is significantly better than a “false supergene” model (M“false supergene”) that includes multiple distinct trees (Fig. 1b). The likelihood of a supergene alignment D given M“true supergene” is computed as L(D|M“true supergene”), an",
+  "content_type": "likely_not_protocol",
+  "content_type_score": 11,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC6812401/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6812401/",
+      "caption": "",
+      "bytes": 54197,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6812401/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC6812401/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6812401/",
+      "caption": "",
+      "bytes": 98022,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6812401/gr1.jpg"
+    }
+  ]
 }

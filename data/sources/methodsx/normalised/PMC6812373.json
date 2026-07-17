@@ -11,12 +11,185 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6812373/",
   "doi": "10.1016/j.mex.2019.09.013",
   "citation": "10.1016/j.mex.2019.09.013",
-  "category": "Other",
+  "category": "Lab Automation & Robotics",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "When designing a scientific experiment under controlled conditions, it is not only necessary to ensure that environmental conditions are actually controlled, but it is also needed to record these environmental conditions so that potential environmental conditions variation can be included in the analysis. In insects, temperature is the key driver of most physiological processes such as temperature-dependent development, which drives the timing of the insect phenological stages [1]. Furthermore, some insect species are very sensitive to variations in temperature, or to fluctuating temperature regimes [3]. Hence, there are many examples on why it is important to monitor and record temperature for experiments in rearing units with insects. If insects of the same population are kept in two different rearing units at the same constant temperature, it is required to be able to separate the effect of intraspecific variability of development in response to temperature [2], from the effect of unintended variations in temperature. If populations are to collapse it is required to quickly identify potential causes and put aside environmentally controlled factors such as temperature. Such monitoring can also be of importance in evaluating the impact of insect manipulation on temperature when opening and closing the rearing unit doors, or to test for the homogeneity of temperature inside the rearing unit. In mentioned examples, the temperature information needs i) to be monitored inside the temperature rearing unit and easily positioned at different places; ii) to be recorded at configurable time steps and stored over the duration of the experiment and beyond.",
+    "In case of failure of a rearing unit, it is convenient to dispose of the complete historical data on temperature inside the rearing unit to and an alarm is also needed. Indeed, it can be required to act quickly so as to maintain the biological material, especially in the case of the conservation of an endangered species or a strain. Furthermore, the system should be independent from the rearing unit electrical circuit to avoid a general blackout if the failure is associated with an electric malfunction.",
+    "The hardware used to collect and analyze the temperature information is a Raspberry Pi 3 model B + with a 16 Go micro SD card. The Raspberry Pi is a low-cost computer of the size of a credit card (approximately 40€, SD card included). The main advantage is that it operates using Linux, which is a common operating system to the scientific community. The official supported operating system (OS) is Raspbian which can be install in a micro SD card from the Raspberry Pi foundation (https://www.raspberrypi.org/; using another computer than the Raspberry Pi). Once the OS is installed on micro SD card, the Raspberry Pi can be started. The system should be updated from the terminal using:",
+    "sudo apt-get update",
+    "sudo apt-get upgrade",
+    "In the configuration menu (sudo raspi-config), from \"Interfaces\", SSH and 1-wire should be enabled. In \"Localization\", the time zone and Wi-Fi country (if required) should be updated to correspond to the computer localization. It is also advised to change the default password and reboot the computer so that changes can take effect. Setting a fix IP address is also advised to easily communicate with the computer from SSH protocol (an SSH connection allows to control the Raspberry Pi from any other computer so that it is no longer necessary to have a screen, mouse and keyboard plugged in to the Raspberry Pi). Depending on the network configuration, setting a fix IP address may require the intervention of the IT services. For convenience it is assumed in this article that the fix IP address of the Raspberry Pi is “192.168.0.30”. The Raspberry Pi need to be connected to Internet either through the Ethernet port or through Wi-Fi.",
+    "For the temperature monitoring, DS18B20 sensors (Maxim Integrated Products, Inc) are used. DS18B20 sensors are digital thermometers (slaves) that communicate with a central microprocessor (master: the Raspberry Pi) over a 1-Wire bus. Each DS18B20 has a unique 64-bit serial code which is practical to connect multiple sensors on the same 1-Wire bus. Temperature measurements range from -55 °C to +125 °C with a ±0.5 °C accuracy over a temperature range from −10 °C to +85 °C. A complete description can be found on the manufacturer web site (https://www.maximintegrated.com).",
+    "The sensors can be connected in parallel to the Raspberry Pi using the GPIO4, Ground, and 3V3 power pins, with a 4.7 k ohm resistor between the GPIO4 and the 3V3 power (see Fig. 1). DS18B20 sensors can be connected using jumper wires, but it is advised to solder the sensors to wires for long term usage.Fig. 1Schematic representation of the circuit. The Raspberry Pi is connected to Internet using the Ethernet port (note that Raspberry Pi 3 model B + has a Wi-Fi card).Fig. 1",
+    "An overall schematic representation of the monitoring system can be found in Fig. 2.Fig. 2Schematic representation of the monitoring system.Fig. 2",
+    "nano launcher.sh # create and edit bash file",
+    "chmod 755 launcher.sh",
+    "@reboot sh /home/pi/Documents/launcher.sh >/home/pi/Documents/logs/launcher_log 2 > &1",
+    "sudo apt-get install r-base",
+    "nano checker.sh # create and edit bash file",
+    "chmod 755 checker.sh",
+    "CRON job was created using \"sudo crontab -e\":"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Prepare Raspberry Pi hardware",
+      "instruction": "Obtain a Raspberry Pi 3 model B+ and a 16 GB micro‑SD card (≈ 40 € total). Download the official Raspbian OS image from https://www.raspberrypi.org/ and write it to the micro‑SD card using another computer.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Boot and update Raspberry Pi",
+      "instruction": "Insert the micro‑SD card, power the Pi, and log in. From a terminal run:\n```\nsudo apt-get update\nsudo apt-get upgrade\n```",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Configure system interfaces",
+      "instruction": "Run `sudo raspi-config`. In *Interfaces* enable **SSH** and **1‑wire**. In *Localization* set the correct time‑zone and Wi‑Fi country (if needed). Change the default password, then reboot. Optionally assign a fixed IP address (example 192.168.0.30) – this may require IT assistance.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Wire DS18B20 temperature sensors",
+      "instruction": "Connect each DS18B20 sensor in parallel to the Pi using the GPIO pins: GPIO4 (pin 7) → data line, Ground (pin 9), and 3.3 V (pin 1). Place a 4.7 kΩ resistor between GPIO4 and 3.3 V. Use jumper wires for prototyping or solder the wires for long‑term use.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Install required software packages",
+      "instruction": "Ensure Python 3.5.3 is available (default on Raspbian). Install R for the alert and dashboard scripts:\n```\nsudo apt-get install r-base\n```",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Deploy temperature‑logging Python script",
+      "instruction": "Copy the script `envColTemp_XX.py` (Supplementary S1) to the Pi’s `Documents` folder. The script reads temperatures from `/sys/bus/w1/devices/` directories beginning with `28-00`. It creates a CSV file named with the initialization date and with headers: year, month, day, hour, minute, second, sensorId, temperature. Measurements are taken every minute using `time.localtime()`. To limit SD‑card writes, readings are kept in RAM; after `RAMReadNumber` = 40 reads the data are flushed to the CSV. A new file is started when the current file exceeds `fileMaxSizeMo` = 10 Mo (megabytes).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Create launcher script",
+      "instruction": "Create a bash file `launcher.sh` in `Documents` (e.g., `nano launcher.sh`) containing the command to start the Python logger. Make it executable:\n```\nchmod 755 launcher.sh\n```",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Set up startup cron job",
+      "instruction": "Create a `logs` directory under `Documents`. Edit the root crontab (`sudo crontab -e`) and add:\n```\n@reboot sh /home/pi/Documents/launcher.sh >/home/pi/Documents/logs/launcher_log 2>&1\n```",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Configure email alert system",
+      "instruction": "Place the Python email script `emailSender_XX.py` (Supplementary S3) in `Documents`. Write an R script `envCheckTemp_XX.R` (Supplementary S4) that:\n- Loads all CSV files into a data frame.\n- Renames sensors from their 64‑bit codes to readable names.\n- Defines `paramMaxTemp` and `paramMinTemp` vectors for the 8 sensors.\n- Sets `paramDuration` = 60 min for the averaging window.\n- Computes the average temperature for each sensor over the last `paramDuration` minutes.\n- If the average exceeds the corresponding max or falls below the min, calls `python3 /home/pi/Documents/emailSender_XX.py <average> <sensorName>`.\nRun the R script automatically as part of the hourly checker (see next step).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Create hourly checker script",
+      "instruction": "Create `checker.sh` in `Documents` (e.g., `nano checker.sh`) that runs the R threshold script:\n```\nRscript /home/pi/Documents/envCheckTemp_XX.R\n```\nMake it executable:\n```\nchmod 755 checker.sh\n```",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Schedule hourly temperature check",
+      "instruction": "Edit the root crontab (`sudo crontab -e`) and add the line:\n```\n* * * * sh /home/pi/Documents/checker.sh >/home/pi/Documents/logs/checker_log 2>&1\n```\n(This entry runs the checker at the start of every hour; the five‑field syntax `* * * * *` means every minute, but the script itself can be written to act only when the minute equals 0.)",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Optional daily backup to server",
+      "instruction": "Create a Python backup script `copyToCommun.py` (Supplementary S6). Add a daily cron job (run at 07:00) on the server:\n```\n7 * * * python3 /xxx/copyToCommun.py >/xxx/copyFromCommun_log 2>&1\n```",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Optional daily HTML dashboard",
+      "instruction": "Install R packages `flexdashboard` and `ggplot2`. Place the R Markdown file `dashboard_MONTH.Rmd` and the rendering script `renderRMDtoHTML.R` (Supplementary S7‑S8) on the server. Add a cron job (run at 07:30) on the server:\n```\n7 * * * Rscript /xxx/renderRMDtoHTML.R >/xxx/dashboard_log 2>&1\n```",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T09:10:14.750884Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "protocol",
+  "content_type_score": 28,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC6812373/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6812373/",
+      "caption": "",
+      "bytes": 95869,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6812373/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.jpg",
+      "local_path": "data/media/methodsx/PMC6812373/fx2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6812373/",
+      "caption": "",
+      "bytes": 51567,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6812373/fx2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC6812373/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6812373/",
+      "caption": "",
+      "bytes": 53342,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6812373/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC6812373/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6812373/",
+      "caption": "",
+      "bytes": 55003,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6812373/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC6812373/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6812373/",
+      "caption": "",
+      "bytes": 114688,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6812373/gr3.jpg"
+    }
+  ]
 }

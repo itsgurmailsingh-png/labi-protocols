@@ -19,11 +19,248 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 0.0,
+  "quality_score": 4.0,
   "category": "Other",
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "materials": [
+    "Somato-dendritic cell morphology - data processing and structure",
+    "This document describes the materials and methods used to process data generated from Oblique Light Sheet Tomography (OLST) to quantify the somatodendritic morphology of molecularly defined cell types.",
+    "Each dataset is associated with the following METADATA:",
+    "Mice derivate strain (e.g. C57BL/6 etc.)",
+    "Mice Origin (JAX etc)",
+    "Virus injection (rAAV9/CAG-Flex-GFP, PHP.eB: CAG-DIO-mNeonGreen etc)",
+    "Virus titer (titer vg/ml)",
+    "Date of clearing (start and end date)",
+    "Date of gelatin embedding",
+    "Imaging machine id (e.g. OLST)",
+    "Camera (red or green)",
+    "Surface measured on z-stage",
+    "Imaging plane measured on z-stage",
+    "Total number of sections",
+    "Data processing server (e.g. brain2, brain5 etc.)",
+    "OLST Image Reconstruction",
+    "Reconstruction – part 1",
+    "Update the parameters in the matlab command line.",
+    "scaleFactor : The downsizing ratio (0.1624)",
+    "zStart : The z-section start number.",
+    "zEnd : The z-section end number.",
+    "startY : The y-section start number.",
+    "endY : The y-section end number.",
+    "seriesInputDirectory – the path to the Series_10um",
+    "Level 0 Data description",
+    "Cell morphology detection & Registration to CCF space",
+    "Registration to CCF space",
+    "Semantic Segmentation – a Matlab based image-processing toolbox.",
+    "Level 1 data description",
+    "Figure 4: swc file format description."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Acquire Serial Section Datasets",
+      "instruction": "Image brains using Oblique Light-Sheet Tomography (OLST) using a cell type specific Cre mouse line (e.g., Emx-Cre, Chat-Cre).",
+      "substeps": [
+        {
+          "instruction": "Acquire serial sections at x-y resolution = 0.4 micron and z resolution = 2.5 microns.",
+          "title": ""
+        },
+        {
+          "instruction": "Collect 54-56 sections (physical thickness 250 microns each) depending on the rostro-caudal axial length of the brain.",
+          "title": ""
+        },
+        {
+          "instruction": "Capture images using an Andor Zyla 4.2 sCMOS camera and stream via 10tap cameralink cable to be stored in proprietary *.dat (Mono-12packed bit) format.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Perform Initial Volume Reconstruction",
+      "instruction": "Use Matlab and the 'reconstructOPTVolume.m' script to process raw data into a coronal orientation.",
+      "substeps": [
+        {
+          "instruction": "Unpack proprietary .dat data and save as 16-bit TIFF format.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the average of all image tiles to determine the illumination field.",
+          "title": ""
+        },
+        {
+          "instruction": "Stitch images along the y-axis first and then the z-axis using either predetermined overlap or linear X and Y stage position information.",
+          "title": ""
+        },
+        {
+          "instruction": "Downsize the sequence to 16% of original size (resulting in 2.5x2.5um) for viewing/registration purposes.",
+          "title": ""
+        },
+        {
+          "instruction": "Shear and stitch the stack to achieve coronal orientation using the Stitching plugin in Fiji (options: blend, maximum intensity, no blending, mean, or median).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Configure Reconstruction Script Parameters",
+      "instruction": "Set the following variables in the Matlab reconstruction script:",
+      "substeps": [
+        {
+          "instruction": "Param_file_name: Path to the Metadata (ParameterFile.json) in the root folder.",
+          "title": ""
+        },
+        {
+          "instruction": "OutputDirectory: Path to store reconstructed data.",
+          "title": ""
+        },
+        {
+          "instruction": "outputImageBitDepth: Set to 0 for 16-bit or 1 for 8-bit TIFF.",
+          "title": ""
+        },
+        {
+          "instruction": "doIlluminationCorrection: Set to 0 for no correction or 1 for correction.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Generate Downsampled Image Stacks",
+      "instruction": "Organize the reconstruction root folder into subfolders: Stitched_2pt5um, MaxIntProj, Stitched_10um, and Keptstack_10um, then process using Fiji.",
+      "substeps": [
+        {
+          "instruction": "Create a Fiji macro to stitch the 2.5um individual stacks.",
+          "title": ""
+        },
+        {
+          "instruction": "Create a maximum intensity projection (MIP) of individual z-stacks and save in 'MaxIntProj'.",
+          "title": ""
+        },
+        {
+          "instruction": "Create downsized images (~10um) of individual z-sections and save in 'Stitched_10um'.",
+          "title": ""
+        },
+        {
+          "instruction": "Hard crop the volumetric image overlap along z using the Fiji substack option and save in 'Keptstack_10um' (resulting resolution: 10x10x1.76um).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Create Near-Isotropic Wholebrain Volume",
+      "instruction": "Process the kept stack to create a standardized wholebrain volume using Fiji and Matlab.",
+      "substeps": [
+        {
+          "instruction": "Load all z-sections from 'Keptstack_10um' into Fiji and save as an image sequence in 'Series_10um'.",
+          "title": ""
+        },
+        {
+          "instruction": "Subsample the series along z using the Matlab code 'zprojectseries.m' with 'projectEveryNthSlice' set to 6 and 'projectionType' set to 'max' to obtain a near-isotropic resolution of 10x10x10.6um; save as a TIFF stack in 'Wholebrain'.",
+          "title": ""
+        },
+        {
+          "instruction": "Further downsize this image using the Scale function in ImageJ to a resolution of 25x25x26.5um and save as a stack in 'Wholebrain'.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Perform Quality Control and Registration",
+      "instruction": "Verify acquisition quality and register the brain volume to the Common Coordinate Framework (CCF) space.",
+      "substeps": [
+        {
+          "instruction": "Visualize the 10x10x10.6um and 25x25x26.5um stacks in Fiji to check overall quality.",
+          "title": ""
+        },
+        {
+          "instruction": "Register the 25um voxel downsampled brain to CCF space using the elastix toolbox (ITK-based) in two steps: affine registration followed by b-spline registration, using Mattes mutual information as the similarity measure.",
+          "title": ""
+        },
+        {
+          "instruction": "Verify registration by opening the result file in the 'elastixOutput' folder, warping the fixed image, and checking for congruous edges and corners.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Extract Neuronal Morphologies",
+      "instruction": "Detect and segment cell morphologies to generate SWC files.",
+      "substeps": [
+        {
+          "instruction": "Use a Segnet framework (Matlab) requiring an NVIDIA CUDA-enabled GPU to detect cytoplasmic signals via CNNs.",
+          "title": ""
+        },
+        {
+          "instruction": "Alternatively, use the NeuroGPS package for automatic reconstruction of large-scale neuronal populations with dense neurites.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the resulting somatodendritic morphology information as .swc files.",
+          "title": ""
+        },
+        {
+          "instruction": "Qualitatively assess morphology by overlapping the .swc files with raw images using the Simple Neurite Tracer plugin in Fiji.",
+          "title": ""
+        },
+        {
+          "instruction": "Transform .swc files to CCF space using the registration parameters to determine region-wise morphology.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Archive and Compress Data",
+      "instruction": "Compress raw data using 7-zip File Manager to save storage space.",
+      "substeps": [
+        {
+          "instruction": "Use the LZMA2 compression method with 'Ultra' compression level on the raw folders containing OLST acquisition tiles.",
+          "title": ""
+        },
+        {
+          "instruction": "Document the raw data size before compression (~11 TB) and after compression (~5.2 TB).",
+          "title": ""
+        },
+        {
+          "instruction": "Optionally convert Data Level 0 reconstructed images to JP2 file format.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "document",
+      "filename": "OLST_DataProcessing.docx",
+      "local_path": "data/media/protocols_io_docs/olst-protocol-smwec7e/OLST_DataProcessing.docx",
+      "source_url": "https://content.protocols.io/5jy2ym6.docx",
+      "caption": "",
+      "bytes": 614494,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io_docs/olst-protocol-smwec7e/OLST_DataProcessing.docx"
+    }
+  ],
+  "content_type": "likely_not_protocol",
+  "content_type_score": 0,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

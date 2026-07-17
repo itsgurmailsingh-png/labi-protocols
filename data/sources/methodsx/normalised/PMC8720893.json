@@ -14,9 +14,413 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "In:",
+    "import matplotlib.pyplot as plt",
+    "from netflow import *",
+    "# load demo network",
+    "demonet = netflow.load_network_from('network.h5′)",
+    "_ = netflow.plot_network(demonet)",
+    "Out:\nUnlabelled image",
+    "print(netflow.Throat.__doc__)",
+    "Out:",
+    "Class of a throat connecting two pores.",
+    "simplenet = netgen.generate_simple_net(n_pores=1e2,\ntargetsize=[2,1.5,0.5], r_pore=0.01,",
+    "r_throat=0.001, coordinatnumb=4, Lmax=0.45, sd=1)",
+    "_ = netgen.plot_network(simplenet)",
+    "dendronet = netgen.generate_dendrogram(basenet=demonet, targetsize=[1,1,1],",
+    "sd=1, mute=True)",
+    "_ = netgen.plot_network(dendronet)",
+    "netflow.open_periodic_network(simplenet, c=1, inouts=inouts)",
+    "netflow.open_periodic_network(simplenet, c=2, inouts=inouts)",
+    "netflow.cut_network(simplenet, x=0.5, c=1)",
+    "netflow.erase_network(simplenet,\nx=0.5,\nc=1,\ndirect=True,\nlabel='inlet')",
+    "simplenet.add_pore(source)",
+    "for pore in simplenet.pores:",
+    "pore.label = ''",
+    "simplenet.connect_pores(pore1=source, pore2=pore, r=0.05) # connect to source",
+    "# plotting",
+    "# solve flow",
+    "inpores = {source}",
+    "(press,flux) = netflow.solve_flow_inout(simplenet, pin=1e4, pout=0, inpores=inpores,",
+    "outpores=outpores, mu=1e-3)",
+    "ax = plt.figure().add_subplot(111, projection='3d')"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Load and plot demo network",
+      "instruction": "Import matplotlib and the netflow package, load the demo network from the HDF5 file 'network.h5' using netflow.load_network_from, and plot it with netflow.plot_network.",
+      "substeps": [
+        {
+          "instruction": "import matplotlib.pyplot as plt",
+          "title": ""
+        },
+        {
+          "instruction": "from netflow import *",
+          "title": ""
+        },
+        {
+          "instruction": "demonet = netflow.load_network_from('network.h5')",
+          "title": ""
+        },
+        {
+          "instruction": "netflow.plot_network(demonet)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Generate simple periodic network",
+      "instruction": "Create a periodic cubical network with 1e2 uniformly distributed pores, target size [2,1.5,0.5], pore radius 0.01, throat radius 0.001, coordination number 4, maximum edge length 0.45, and random seed 1; then plot it.",
+      "substeps": [
+        {
+          "instruction": "simplenet = netgen.generate_simple_net(n_pores=1e2, targetsize=[2,1.5,0.5], r_pore=0.01, r_throat=0.001, coordinatnumb=4, Lmax=0.45, sd=1)",
+          "title": ""
+        },
+        {
+          "instruction": "netgen.plot_network(simplenet)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Generate dendrogram network from demo",
+      "instruction": "Generate a periodic network that preserves pore clusters from the previously loaded demo network using generate_dendrogram with target size [1,1,1], cutoff equal to half the base network length in the first dimension, seed 1, and mute=True; then plot it.",
+      "substeps": [
+        {
+          "instruction": "cutoff = 0.5 * (demonet.ub[0] - demonet.lb[0])",
+          "title": ""
+        },
+        {
+          "instruction": "dendronet = netgen.generate_dendrogram(basenet=demonet, targetsize=[1,1,1], cutoff=cutoff, sd=1, mute=True)",
+          "title": ""
+        },
+        {
+          "instruction": "netgen.plot_network(dendronet)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Open periodic throats in directions 1 and 2",
+      "instruction": "Open periodic throat connections crossing the domain faces in the c‑directions 1 and 2 for the simple network, using a dictionary to avoid duplicate pore copies, and plot the result.",
+      "substeps": [
+        {
+          "instruction": "inouts = {}  # dictionary to store copied pores",
+          "title": ""
+        },
+        {
+          "instruction": "netflow.open_periodic_network(simplenet, c=1, inouts=inouts)",
+          "title": ""
+        },
+        {
+          "instruction": "netflow.open_periodic_network(simplenet, c=2, inouts=inouts)",
+          "title": ""
+        },
+        {
+          "instruction": "netgen.plot_network(simplenet)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Cut network with planar plane",
+      "instruction": "Apply a cutting plane normal to the c‑axis (c=1) at position x=0.5 to the simple network, creating pores of radius 0 at intersection points, and plot the cut network.",
+      "substeps": [
+        {
+          "instruction": "netflow.cut_network(simplenet, x=0.5, c=1)",
+          "title": ""
+        },
+        {
+          "instruction": "netgen.plot_network(simplenet)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Erase network portion left of cut",
+      "instruction": "Remove all pores (and their throats) located to the left of x=0.5 along c=1, labeling the removed side as 'inlet', then plot the remaining network.",
+      "substeps": [
+        {
+          "instruction": "netflow.erase_network(simplenet, x=0.5, c=1, direct=True, label='inlet')",
+          "title": ""
+        },
+        {
+          "instruction": "netgen.plot_network(simplenet)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Add single inlet pore and connect to face pores",
+      "instruction": "Create a new pore at position [0,0.75,0.25] with radius 0 and label 'in1', add it to the simple network, then connect it to every pore whose label is 'inlet' (clearing their label) using throat radius 0.05, and plot the updated network.",
+      "substeps": [
+        {
+          "instruction": "source = netflow.Pore(pos=[0,0.75,0.25], r=0, label='in1')",
+          "title": ""
+        },
+        {
+          "instruction": "simplenet.add_pore(source)",
+          "title": ""
+        },
+        {
+          "instruction": "for pore in simplenet.pores:",
+          "title": ""
+        },
+        {
+          "instruction": "if pore.label == 'inlet':",
+          "title": ""
+        },
+        {
+          "instruction": "pore.label = ''",
+          "title": ""
+        },
+        {
+          "instruction": "simplenet.connect_pores(pore1=source, pore2=pore, r=0.05)",
+          "title": ""
+        },
+        {
+          "instruction": "netgen.plot_network(simplenet)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Solve flow for non‑periodic network",
+      "instruction": "Define the inlet pore set containing the source pore and the outlet pore set containing all pores labelled 'out1'; solve the steady‑state flow with inlet pressure 1e4 Pa, outlet pressure 0 Pa, and viscosity 1e-3 kg/(m·s); then plot pressure bubbles (size proportional to pressure/1e4 × 400), outlet pores (green), and flux throats (red) with linewidth max(0.5, |flux| × 2e6).",
+      "substeps": [
+        {
+          "instruction": "inpores = {source}",
+          "title": ""
+        },
+        {
+          "instruction": "outpores = {pore for pore in simplenet.pores if pore.label == 'out1'}",
+          "title": ""
+        },
+        {
+          "instruction": "(press, flux) = netflow.solve_flow_inout(simplenet, pin=1e4, pout=0, inpores=inpores, outpores=outpores, mu=1e-3)",
+          "title": ""
+        },
+        {
+          "instruction": "ax = plt.figure().add_subplot(111, projection='3d')",
+          "title": ""
+        },
+        {
+          "instruction": "# pressure bubbles (blue)",
+          "title": ""
+        },
+        {
+          "instruction": "pnts = [pore.pos for pore in press]; pnts = list(map(list, zip(*pnts)))",
+          "title": ""
+        },
+        {
+          "instruction": "size = [p/1e4 * 400 for pore, p in press.items()]",
+          "title": ""
+        },
+        {
+          "instruction": "ax.scatter(*pnts, s=size, marker='.', color='b', depthshade=False)",
+          "title": ""
+        },
+        {
+          "instruction": "# outlet pores (green)",
+          "title": ""
+        },
+        {
+          "instruction": "pnts = [pore.pos for pore in outpores]; pnts = list(map(list, zip(*pnts)))",
+          "title": ""
+        },
+        {
+          "instruction": "ax.scatter(*pnts, s=100, marker='.', color='g', depthshade=False)",
+          "title": ""
+        },
+        {
+          "instruction": "# flux throats (red)",
+          "title": ""
+        },
+        {
+          "instruction": "for throat in flux:",
+          "title": ""
+        },
+        {
+          "instruction": "p1 = throat.pore1.pos; p2 = throat.pore2.pos",
+          "title": ""
+        },
+        {
+          "instruction": "ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]],",
+          "title": ""
+        },
+        {
+          "instruction": "linewidth=max(0.5, abs(flux[throat]*2e6)), color='r', solid_capstyle='round')",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Check flux balance and plot results",
+      "instruction": "Compute the flux balance for all pores, print the total inflow through the source pore, remove the inlet and outlet pores from the balance dictionary, then plot outgoing, incoming, and net flux versus pore index with appropriate labels.",
+      "substeps": [
+        {
+          "instruction": "Qb = netflow.flux_balance(press, flux)",
+          "title": ""
+        },
+        {
+          "instruction": "print('the total inflow into the network is %e' % Qb[source][2])",
+          "title": ""
+        },
+        {
+          "instruction": "Qb = {pore: Qb[pore] for pore in Qb if (pore not in inpores) and (pore not in outpores)}",
+          "title": ""
+        },
+        {
+          "instruction": "x = range(len(Qb))",
+          "title": ""
+        },
+        {
+          "instruction": "Qp = [Qb[k][0] for k in Qb]; Qm = [Qb[k][1] for k in Qb]; Qs = [Qb[k][2] for k in Qb]",
+          "title": ""
+        },
+        {
+          "instruction": "plt.plot(x, Qp, x, Qm, x, Qs)",
+          "title": ""
+        },
+        {
+          "instruction": "plt.gca().set_xlabel('pore index (without in-/outpores)')",
+          "title": ""
+        },
+        {
+          "instruction": "plt.legend(['outgoing','incoming','sum'])",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Solve flow for periodic network",
+      "instruction": "Set viscosity mu=1e-3 kg/(m·s), pressure drop per length P2L=1e2 Pa/m, and direction c=3; solve the periodic flow on the dendrogram network; adjust each pore pressure by subtracting the mean pressure component P2L*(pore.pos[c‑1]‑dendronet.lb[c‑1]); then plot pressure bubbles colored by normalized pressure using the plasma colormap and plot non‑periodic throats (label == '') as thin black lines.",
+      "substeps": [
+        {
+          "instruction": "mu = 1e-3",
+          "title": ""
+        },
+        {
+          "instruction": "P2L = 1e2",
+          "title": ""
+        },
+        {
+          "instruction": "c = 3",
+          "title": ""
+        },
+        {
+          "instruction": "(press, flux) = netflow.solve_flow_periodic(dendronet, mu=mu, c=c, P2L=P2L)",
+          "title": ""
+        },
+        {
+          "instruction": "for pore in press:",
+          "title": ""
+        },
+        {
+          "instruction": "press[pore] = press[pore] - P2L * (pore.pos[c-1] - dendronet.lb[c-1])",
+          "title": ""
+        },
+        {
+          "instruction": "ax = plt.figure().add_subplot(111, projection='3d')",
+          "title": ""
+        },
+        {
+          "instruction": "pnts = [pore.pos for pore in press]; pnts = list(map(list, zip(*pnts)))",
+          "title": ""
+        },
+        {
+          "instruction": "col = [press[pore] for pore in press]",
+          "title": ""
+        },
+        {
+          "instruction": "col = (max(col) - col) / (max(col) - min(col))",
+          "title": ""
+        },
+        {
+          "instruction": "cmap = plt.cm.get_cmap('plasma')",
+          "title": ""
+        },
+        {
+          "instruction": "col = [cmap(v) for v in col]",
+          "title": ""
+        },
+        {
+          "instruction": "ax.scatter(*pnts, s=50, marker='.', color=col, depthshade=False)",
+          "title": ""
+        },
+        {
+          "instruction": "for throat in flux:",
+          "title": ""
+        },
+        {
+          "instruction": "if throat.label == '':",
+          "title": ""
+        },
+        {
+          "instruction": "p1 = throat.pore1.pos; p2 = throat.pore2.pos",
+          "title": ""
+        },
+        {
+          "instruction": "ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], linewidth=0.5, color='k')",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Save and load flow solutions",
+      "instruction": "Use netflow.save_flow_to to write pressure and flux data to an HDF5 file and netflow.load_flow_from to read them back.",
+      "substeps": [
+        {
+          "instruction": "netflow.save_flow_to('flow_solution.h5', network, press, flux)",
+          "title": ""
+        },
+        {
+          "instruction": "press_loaded, flux_loaded = netflow.load_flow_from('flow_solution.h5')",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T11:22:58.555903Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "In the netflow library, an object-oriented programming approach has been followed that enables compact implementations and intuitive use. The library relies besides a few standard Python components on the h5py package (hdf5 file support) and the PyAMG library (algebraic multi-grid solver for flow solutions) and is composed of the following two modules: netgen.py contains functionality to generate and manipulate pore or flow networks from an existing (typically smaller) base network. The generated networks are periodic in space and as such do not suffer from boundary effects in comparison to bounded networks produced by existing methods [e.g., 1]. This is because pores or network nodes are subject to the same conditions irrespective of whether they are located inside the network domain or close to domain boundaries. With periodic networks, the only limitation in comparison to infinite networks is the fact that the largest scale of representation is limited by the domain size aka the period. In case pore or node clusters are present in the base network, a dendrogram-based generator is available that preserves clustering. For the connection of pores with throats, the pore neighborhood needs to be explored in a computationally efficient way to avoid size-limitations of existing methods [e.g., 1]. To this end, the netflow implementations rely on an optimized Delaunay triangulation being part of the SciPy library. Algorithmic details about the construction of periodic throat connections are either available in the code or are provided in one of our earlier contributions (section 2.1 in [2]) or (steps 5 and 6 on page 3 of [3]). The second module netflow.py includes functions to determine flow and pressure distributions in bounded and periodic networks. Here, we make use of the algebraic multi-grid solver provided through the PyAMG library. The netflow library has been applied to compile the results contained in [2] and it has been compared against method [1] in our compani",
+  "content_type": "protocol",
+  "content_type_score": 57,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

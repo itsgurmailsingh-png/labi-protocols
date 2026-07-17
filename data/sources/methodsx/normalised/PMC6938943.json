@@ -11,12 +11,381 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
   "doi": "10.1016/j.mex.2019.10.037",
   "citation": "10.1016/j.mex.2019.10.037",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "context-aware design-specific data obtained from IVE experiments, (",
+    "computation, and (",
+    "indoor and outdoor illuminance (lux),",
+    "the light switch status (on and off), and",
+    "at arrival, bright illuminance and occupy, (",
+    "outdoor illuminance,",
+    "work area illuminance, and",
+    "occupancy status,",
+    "intermediate leaving,"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Generate existing BPM dataset",
+      "instruction": "Create a Monte‑Carlo (MC) simulation of the Hunt lighting Probit regression model to produce 5 000 IID data points of work‑area illuminance (lux) and corresponding probability of switching on.",
+      "substeps": [
+        {
+          "instruction": "Define work‑area illuminance (x) as the MC input.",
+          "title": ""
+        },
+        {
+          "instruction": "Sample x from a uniform distribution ranging from 200 lux to 700 lux (each value equally likely).",
+          "title": ""
+        },
+        {
+          "instruction": "For each sampled x, evaluate the Hunt Probit regression to obtain the probability of the light being on.",
+          "title": ""
+        },
+        {
+          "instruction": "Pair each illuminance value with its probability; the resulting set is the existing BPM dataset (5 000 points).",
+          "title": ""
+        },
+        {
+          "instruction": "Determine the number of points (5 000) using the learning‑curve knee‑point method.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Collect physical‑environment sensor data",
+      "instruction": "Instrument a 9′ × 12′ × 10′ office with four HOBO sensors and record indoor/outdoor illuminance, light‑switch status, and occupancy every 5 seconds from 23 Sep 2016 to 27 Oct 2016.",
+      "substeps": [
+        {
+          "instruction": "Install sensor #1 (Onset UX90‑005) above the entrance door to log occupancy and lighting status.",
+          "title": ""
+        },
+        {
+          "instruction": "Install sensor #2 (Onset UX90‑005) on the work‑area desk to log occupancy and lighting status.",
+          "title": ""
+        },
+        {
+          "instruction": "Install sensor #3 (Onset U12‑012) on the work‑area desk to log work‑area illuminance.",
+          "title": ""
+        },
+        {
+          "instruction": "Install sensor #4 (Onset U12‑012) at the window to log outdoor illuminance.",
+          "title": ""
+        },
+        {
+          "instruction": "Set each sensor to record a measurement every 5 seconds for the entire period (23 Sep 2016 – 27 Oct 2016).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Design and run IVE experiment",
+      "instruction": "Use an Immersive Virtual Environment (IVE) to collect context‑aware design‑specific data from one male faculty participant over two 140‑minute sessions, following 36 predefined event sequences.",
+      "substeps": [
+        {
+          "instruction": "Define contextual factors (Table 2): Occupancy (True/False), Intermediate leaving (None, Short < 1 h, Long ≥ 1 h), Outdoor illuminance (Dark/Normal/Bright), Work‑area illuminance (Dark 200 lux, Normal 500 lux, Bright 700 lux).",
+          "title": ""
+        },
+        {
+          "instruction": "Construct 36 event sequences by combining 3 arrival illuminance levels × 2 intermediate‑leave lengths × 3 return‑illumination levels × 2 departure illuminance levels.",
+          "title": ""
+        },
+        {
+          "instruction": "For each sequence, present visual and auditory cues indicating the current contextual factor values.",
+          "title": ""
+        },
+        {
+          "instruction": "At each event (arrival, intermediate leave, return, departure) ask the participant to choose one of three light‑switch actions: turn on, turn off, or maintain.",
+          "title": ""
+        },
+        {
+          "instruction": "Record for every event: occupancy status, work‑area illuminance, outdoor illuminance, intermediate‑leaving status, and the participant’s light‑switch choice.",
+          "title": ""
+        },
+        {
+          "instruction": "Total experiment duration: 140 minutes (two sessions).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Generate IID samples from IVE data using HMM",
+      "instruction": "Train a Hidden Markov Model (HMM) on the IVE observations to synthesize 5 000 IID data points matching the existing BPM size.",
+      "substeps": [
+        {
+          "instruction": "Encode each observation as an ordinal vector, e.g., “Occupy + No leave + Bright + Bright” → 1.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute initial‑state probabilities: assign light‑on and light‑off each with probability 0.5 (randomly at the start of every sequence).",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate transition probabilities from the 36 sequences (Table 5): S1→S1 = 0.35, S1→S2 = 0.65, S2→S1 = 0.96, S2→S2 = 0.04.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate observation probabilities for each state (Table 6), e.g., for State S1: Non‑occupy + No leave + Dark + Dark = 0.06, … Occupy + No leave + Bright + Bright = 0.24; for State S2: Non‑occupy + No leave + Dark + Dark = 0.29, … Occupy + No leave + Bright + Bright = 0.00.",
+          "title": ""
+        },
+        {
+          "instruction": "Train the HMM using the Baum‑Welch algorithm (HMMLearn Python library) on the 36 observation sequences.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate 5 000 synthetic IID samples consisting of: light‑switch status, the four independent variables (occupancy, intermediate‑leaving, outdoor illuminance, work‑area illuminance), and the corresponding probability of switching on.",
+          "title": ""
+        },
+        {
+          "instruction": "Pair each synthetic independent‑variable vector with its probability to form the synthetic IVE dataset (5 000 points).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Pre‑process data before ANN training",
+      "instruction": "Prepare both the existing BPM dataset and the synthetic IVE dataset for the ANN by handling missing factors, normalising, splitting, and adding noise.",
+      "substeps": [
+        {
+          "instruction": "Missing‑data generation: randomly copy contextual factor values from the synthetic IVE dataset to the existing BPM dataset for occupancy, intermediate‑leaving, and outdoor illuminance.",
+          "title": ""
+        },
+        {
+          "instruction": "Normalization: compute mean and standard deviation of each input variable from the synthetic IVE dataset; apply z‑score normalisation to the inputs of both datasets (outputs – probabilities of switching on – are left unnormalised).",
+          "title": ""
+        },
+        {
+          "instruction": "Data splitting: perform an 80 %‑20 % split on each normalised dataset, yielding training (80 %) and testing (20 %) subsets for both existing BPM and synthetic IVE data.",
+          "title": ""
+        },
+        {
+          "instruction": "Additive White Gaussian Noise (AWGN): replace 5 % of the synthetic IVE training records with AWGN‑perturbed versions (see Fig. 8 for the calculation steps).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Combine datasets and train ANN",
+      "instruction": "Build a three‑layer back‑propagation ANN in Keras and train it using a greedy mixture‑ratio algorithm for up to 400 000 epochs.",
+      "substeps": [
+        {
+          "instruction": "Network architecture: input layer with four features (occupancy, outdoor illuminance, work‑area illuminance, intermediate‑leaving); two hidden layers each with 300 neurons, ReLU activation; output layer with sigmoid activation producing probability of switching on.",
+          "title": ""
+        },
+        {
+          "instruction": "Regularisation: elastic‑net (L1 + L2) with total penalty 1 × 10⁻⁶; loss function = binary cross‑entropy.",
+          "title": ""
+        },
+        {
+          "instruction": "Initialisation: train the ANN on the existing‑BPM training set (DtrEX) for 60 000 epochs.",
+          "title": ""
+        },
+        {
+          "instruction": "Define mixture ratio α (0 ≤ α ≤ 1) to weight the contribution of synthetic IVE training data (DtrSI) versus existing BPM training data (DtrEX).",
+          "title": ""
+        },
+        {
+          "instruction": "For each subsequent epoch (up to a total of 400 000 epochs):",
+          "title": ""
+        },
+        {
+          "instruction": "Compute MAE_EX = (1/N_EX) ∑|OtsEX − PredEX| on the existing‑BPM testing set.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute MAE_SI = (1/N_SI) ∑|OtsSI − PredSI| on the synthetic‑IVE testing set.",
+          "title": ""
+        },
+        {
+          "instruction": "If MAE_SI > (1 − α)·α, train on DtrSI for this epoch (reducing MAE_SI, increasing MAE_EX).",
+          "title": ""
+        },
+        {
+          "instruction": "Otherwise, train on DtrEX for this epoch (increasing MAE_SI, reducing MAE_EX).",
+          "title": ""
+        },
+        {
+          "instruction": "Monitor MAE curves; stop after 400 000 epochs because MAE values stabilise (learning‑curve analysis).",
+          "title": ""
+        },
+        {
+          "instruction": "For each chosen α, the resulting trained network is an “updated BPM”. Evaluate each updated BPM against the physical‑building sensor data; select the one with the lowest error as the augmented BPM.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Perform feature ranking",
+      "instruction": "Assess the relative impact of each contextual factor by training single‑factor ANNs and computing R² between predicted and expected probabilities.",
+      "substeps": [
+        {
+          "instruction": "For each factor n (occupancy, intermediate‑leaving, work‑area illuminance, outdoor illuminance):",
+          "title": ""
+        },
+        {
+          "instruction": "Create a synthetic IVE training set Dtr_nSI containing only factor n as input (all other inputs removed).",
+          "title": ""
+        },
+        {
+          "instruction": "Create a corresponding testing set Dts_nSI.",
+          "title": ""
+        },
+        {
+          "instruction": "Train a three‑layer ANN (same architecture as above) on Dtr_nSI for 400 000 epochs.",
+          "title": ""
+        },
+        {
+          "instruction": "Predict probabilities on Dts_nSI to obtain Pred_nSI.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the coefficient of determination R² between Pred_nSI and the true outputs Ots_nSI.",
+          "title": ""
+        },
+        {
+          "instruction": "Rank factors by descending R²; higher R² indicates stronger influence on the switching‑on prediction.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T09:25:24.662490Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "During design, designers widely use building performance models (BPMs) to analyze, understand, and predict building systems, energy usages, occupancy comfort, safety, and health. BPMs are usually constructed based on data of human-building interactions obtained using traditional data collection methods (e.g., surveys, sensors, and laboratories). These methods are heavily reliant on existing buildings. Consequently, data of human-building interactions collected in such a manner does not effectively describe those interactions in new designs. This often contributes to the discrepancy between estimations and real building performance, which has often been cited as a major impediment towards the achievement of building performance objectives [[2], [3], [4]]. To that end, the authors have offered a computational framework to reduce the abovementioned discrepancy by improving the prediction accuracy of BPMs. The framework enhances the prediction accuracy of existing BPMs by incorporating context-aware design-specific data associated with new designs, which allows designers to finetune existing BPMs using the context information in new designs. Immersive virtual environments (IVEs) are used to simulate building contexts of building under design as well as observe and collect human-building interactions. Artificial neural networks (ANNs) combine an existing BPM with context-aware design-specific data acquired by using IVEs. The paper focuses on details of theories, algorithms, experimental designs, and data collections of the framework. Full research and validations of the framework can be found in [1].",
+  "content_type": "likely_not_protocol",
+  "content_type_score": 20,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 132553,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 72274,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr9.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 64891,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 183460,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 49422,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 44430,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 77698,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 101977,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 50059,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 98089,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 76899,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC6938943/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6938943/",
+      "caption": "",
+      "bytes": 59941,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6938943/gr7.jpg"
+    }
+  ]
 }

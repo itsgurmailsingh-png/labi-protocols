@@ -27,78 +27,86 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Login to the HPC and move over to the ocelote cluster. ssh hpcocelote ssh hpc ocelote",
+      "title": "Log into HPC and ocelote cluster",
+      "instruction": "Open a terminal and connect to the high‑performance computing system, then SSH to the ocelote cluster using the commands:\n```\nssh hpcocelote\nssh hpc ocelote\n```",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Create a class directory. Choose a user name for storing your project files. All files for the class project will be written to this directory. change &#34;username&#34; to YOUR user name. mkdir /rsgrps/bh_class/username",
+      "title": "Create class project directory",
+      "instruction": "Make a directory for the class project, replacing **username** with your own user name:\n```\nmkdir /rsgrps/bh_class/username\n```",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Go into your user directory. Change &#34;username&#34; to YOUR user name. cd /rsgrps/bh_class/username",
+      "title": "Enter user directory",
+      "instruction": "Change into the directory you just created:\n```\ncd /rsgrps/bh_class/username\n```",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Create directories for downloading fastq project files. We will download the paired reads from the SRA. mkdir fastqcd fastq mkdir fastq cd fastq",
+      "title": "Create FASTQ download directories",
+      "instruction": "Create two directories for the FASTQ files and move into one of them:\n```\nmkdir fastqcd fastq\nmkdir fastq\ncd fastq\n```",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Create a file called &#34;list&#34; with all of your SRR file names. nano list",
+      "title": "Create SRR list file",
+      "instruction": "Create a plain‑text file named **list** that contains all SRR accession numbers (one per line) using nano:\n```\nnano list\n```",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "using nano edit the get-fastq.sh script by adding the commands. This script runs on a node on the HPC (we will execute in a step below). The script uses the sra-tookit to download files from Genbank (a public sequence repository). It downloads the files as paired ends if applicable. #!/bin/bash#PBS -W group_list=bh_class#PBS -q standard#PBS -l select=9:ncpus=28:mem=27gb#PBS -l pvmem=235gb#PBS -l walltime=48:00:00#PBS -l cput=48:00:00#PBS -M username@email.arizona.edu#PBS -m beamodule load sratoolsecho “my job_id is: ${PBS_JOBID}”FASTQ_DIR= #!/bin/bash #PBS -W group_list=bh_class #PBS -q standard #PBS -l select=9:ncpus=28:mem=27gb #PBS -l pvmem=235gb #PBS -l walltime=48:00:00 #PBS -l cput=48:00:00 #PBS -M username@email.arizona.edu #PBS -m bea module load sratools echo “my job_id is: ${PBS_JOBID}” FASTQ_DIR=&#34;/rsgrps/bh_class/username/fastq&#34; export $FASTQ_DIR cd $FASTQ_DIR for file in `cat list`; do fastq-dump --outdir $FASTQ_DIR --gzip --skip-technical --readids --dumpbase --split-files --clip $file; done",
+      "title": "Create get‑fastq.sh script with PBS directives",
+      "instruction": "Edit a new file called **get‑fastq.sh** (e.g., with nano) and paste the exact script below, preserving every line and spacing:\n```\n#!/bin/bash\n#PBS -W group_list=bh_class\n#PBS -q standard\n#PBS -l select=9:ncpus=28:mem=27gb\n#PBS -l pvmem=235gb\n#PBS -l walltime=48:00:00\n#PBS -l cput=48:00:00\n#PBS -M username@email.arizona.edu\n#PBS -m bea\nmodule load sratools\necho \"my job_id is: ${PBS_JOBID}\"\nFASTQ_DIR=\"/rsgrps/bh_class/username/fastq\"\nexport FASTQ_DIR\ncd $FASTQ_DIR\nfor file in `cat list`; do\n  fastq-dump --outdir $FASTQ_DIR \\\n    --gzip --skip-technical --readids --dumpbase \\\n    --split-files --clip $file;\n done\n```",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Create a script for downloading the SRR files touch get-fastq.shchmod 755 get-fastq.sh touch get-fastq.sh chmod 755 get-fastq.sh",
+      "title": "Make get‑fastq.sh executable",
+      "instruction": "Create the script file (if not already present) and set execute permissions, as shown in the original text (the commands are repeated in the source):\n```\ntouch get-fastq.sh\nchmod 755 get-fastq.sh\ntouch get-fastq.sh\nchmod 755 get-fastq.sh\n```",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "mkdir std-err std-outqsub -o std-out -e std-err get-fastq.sh mkdir std-err std-out qsub -o std-out -e std-err get-fastq.sh you will see where the job runs: $ qsub -o std-out -e std-err get-fastq.sh815336.head1.cm.cluster",
+      "title": "Check job status",
+      "instruction": "Use the qstat command to see whether the job is still running. The original example filters the output with egrep and the job ID:\n```\nqstat\nqstat | egrep hur815336.head1\n```",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 8,
-      "title": "",
-      "instruction": "You can check if you job is running using the qstat command. qstat $ qstat | egrep hur815336.head1 get-fastq.sh bhurwitz 0 Q oc_standard",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T15:08:07.699628Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 29,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ncybvtw-374AD081687311F08F960A58A9FEAC02.jpg",
+      "local_path": "data/media/protocols_io/getting-started-on-your-project-jqrcmv6/ncybvtw-374AD081687311F08F960A58A9FEAC02.jpg",
+      "source_url": "https://files.protocols.io/external/ncybvtw-374AD081687311F08F960A58A9FEAC02.jpg",
+      "caption": "",
+      "bytes": 21131,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/getting-started-on-your-project-jqrcmv6/ncybvtw-374AD081687311F08F960A58A9FEAC02.jpg"
+    }
+  ]
 }

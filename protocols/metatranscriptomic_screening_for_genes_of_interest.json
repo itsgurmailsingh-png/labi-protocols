@@ -19,7 +19,7 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 11.5,
+  "quality_score": 4.0,
   "category": "Genomics & Sequencing",
   "estimated_time_mins": 138,
   "materials": [
@@ -29,152 +29,160 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Blast assembly against reference database you...",
-      "instruction": "Blast assembly against reference database you just created - e-value can be changed to your preference - final.txt will produce list of contigs from assembly that had blast hits, to be referred to as &#34;candidates&#34;",
+      "title": "Create Reference Database",
+      "instruction": "Create a database from the list of genes of interest (reference.fasta) using protein sequences in the command line window.",
+      "substeps": [
+        {
+          "instruction": "Run: makeblastdb -dbtype prot -in reference.fasta -parse_seqids",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": ">blastx -query assembly",
-      "instruction": ">blastx -query assembly.fasta -db reference.fasta -out final.txt -outfmt \"6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe\" -e-value 1E-10 >blastx -query assembly.fasta -db reference.fasta -out final.txt -outfmt \"6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe\" -e-value 1E-10",
+      "title": "Blast Assembly Against Reference",
+      "instruction": "Blast the assembly against the created reference database to produce a list of contigs (candidates) in a file named final.txt.",
+      "substeps": [
+        {
+          "instruction": "Run: blastx -query assembly.fasta -db reference.fasta -out final.txt -outfmt \"6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe\" -e-value 1E-10",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": ">makeblastdb -dbtype prot -in reference",
-      "instruction": ">makeblastdb -dbtype prot -in reference.fasta -parse_seqids >makeblastdb -dbtype prot -in reference.fasta -parse_seqids",
+      "title": "Trim Candidate Contigs",
+      "instruction": "Trim candidate contigs to the exact length of the reference gene based on the start and finish locations of the blast alignment using a custom python script.",
+      "substeps": [
+        {
+          "instruction": "Ensure the .txt file contains all columns listed in the blast output format",
+          "title": ""
+        },
+        {
+          "instruction": "Run the python script to trim sequences (if a contig hits multiple reference sequences, use the lowest start and highest end point)",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Make a database from the list...",
-      "instruction": "Make a database from the list of genes of interest (referred to as the reference.fasta) in command line window. Protein sequences are required for phylogenetic placement in later steps.",
+      "title": "Process and Filter Sequences in CLC Workbench",
+      "instruction": "Convert the trimmed data and filter by length using CLC Workbench.",
+      "substeps": [
+        {
+          "instruction": "Open the .txt file in Microsoft Excel and save it as a .csv file",
+          "title": ""
+        },
+        {
+          "instruction": "Import the .csv file into CLC Workbench as 'sequences in .csv format'",
+          "title": ""
+        },
+        {
+          "instruction": "Sort sequences by length and delete those smaller than 150 nucleic acids (or based on personal preference)",
+          "title": ""
+        },
+        {
+          "instruction": "Export the sequence list as a .fasta file and a .csv file (e.g., trimmed.fasta and trimmed.csv)",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Extract only the aligned portion of candidate contigs",
-      "instruction": "Extract only the aligned portion of candidate contigs. - Sometimes, contigs from assembly may be longer than a single gene. To accurately estimate transcript expression, we want to trim candidates to the exact length of the reference gene, by trimming it according to the start and finish locations of the blast alignment. Custom python script performs this trimming. Script relies on column order, so double-check that your .txt file contains all columns listed in 2.1. If a candidate contig hits to more than one reference sequence, the lowest start point and the highest end point from all hits will be used to capture the entire candidate sequence.",
+      "title": "Perform Diamond Blastx Quality Control",
+      "instruction": "Use Diamond blastx against the NCBI non-redundant database to identify and remove non-viral sequences.",
+      "substeps": [
+        {
+          "instruction": "Download the NCBI non-redundant database in .fasta format and rename to nonredundant.fasta",
+          "title": ""
+        },
+        {
+          "instruction": "Create diamond database: diamond makedb --in non-redundant.fasta -d non-redundant",
+          "title": ""
+        },
+        {
+          "instruction": "Run blast: diamond blastx -d nonredundant -q trimmed.fasta -o candidates.txt -f 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe stitle -k 1",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Convert",
-      "instruction": "Convert .txt file generated from step 3.1 to a .csv file -Open .txt file in Microsoft Excel and save as .csv",
+      "title": "Filter for Viral Sequences",
+      "instruction": "Filter the candidates to retain only those of viral origin.",
+      "substeps": [
+        {
+          "instruction": "Open candidates.txt and trimmed.csv in Excel",
+          "title": ""
+        },
+        {
+          "instruction": "Copy sequences from trimmed.csv to a new column in candidates.txt, ensuring sequence names match",
+          "title": ""
+        },
+        {
+          "instruction": "Delete all rows containing sequences that are not viral in origin based on the diamond blast hits",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Import",
-      "instruction": "Import .csv file into CLC Workbench as &#34;sequences in .csv format&#34;",
+      "title": "Organize Sequences by Query Frame",
+      "instruction": "Separate the viral sequences into files based on their query frames.",
+      "substeps": [
+        {
+          "instruction": "Create a new .csv file with 3 columns: sequence name, sequence, and query frame",
+          "title": ""
+        },
+        {
+          "instruction": "Sort by query frame and create a separate .csv file for each frame (e.g., CandidatesQF+1.csv)",
+          "title": ""
+        },
+        {
+          "instruction": "Import each query frame .csv file into CLC Workbench as separate sequence lists",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Sort sequences by length and delete...",
-      "instruction": "Sort sequences by length and delete sequences smaller than 150 nucleic acids or personal preference This length cutoff can be changed based on personal preference.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
-      "title": "Export sequence list as",
-      "instruction": "Export sequence list as .fasta file and .csv file (named trimmed.fasta/csv or something similar).",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 9,
-      "title": "Perform Diamond blastx against NCBI non-redundant database",
-      "instruction": "Perform Diamond blastx against NCBI non-redundant database. -This step is a quality control mechanism to identify sequences that may not be of viral origin. - Diamond is used to for expediting the process (faster than traditional blast)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "Download non-redundant database from NCBI in",
-      "instruction": "Download non-redundant database from NCBI in .fasta format -rename nonredundant.fasta",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "Make diamond database &gt;diamond makedb --in non-redundant",
-      "instruction": "Make diamond database &gt;diamond makedb --in non-redundant.fasta -d non-redundant",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "Blast >diamond blastx -d nonredundant -q trimmed",
-      "instruction": "Blast >diamond blastx -d nonredundant -q trimmed.fasta -o candidates.txt -f 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe stitle -k 1 >diamond blastx -d nonredundant -q trimmed.fasta -o candidates.txt -f 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qframe stitle -k 1",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 13,
-      "title": "Open candidates",
-      "instruction": "Open candidates.txt file and trimmed.csv file in Excel. Copy sequences from trimmed.csv to a new column in candidates.txt file in excel (make sure sequence names match up).",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
-      "title": "Delete sequences that are not viral...",
-      "instruction": "Delete sequences that are not viral in origin (refer to diamond blast hit in the candidates.txt file). Be sure to delete the entire row.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 15,
-      "title": "Create a new",
-      "instruction": "Create a new .csv file with viral sequences and query frames from candidates.txt file - 3 columns: sequence name, sequence, query frame",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
-      "title": "Sort by query frame",
-      "instruction": "Sort by query frame. Create a new .csv file for each query frame containing respective sequences Ex. CandidatesQF+1.csv",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 17,
-      "title": "Import each query frame",
-      "instruction": "Import each query frame.csv file into CLC workbench as separate sequence lists",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 18,
-      "title": "Create new sequence list and combine...",
-      "instruction": "Create new sequence list and combine all query frame sequence lists - rename &#34;FinalCandidatesNucleicAcid&#34;",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 19,
-      "title": "Translate individual query frame sequence list...",
-      "instruction": "Translate individual query frame sequence list to protein based on the query frame.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 20,
-      "title": "Create new sequence list and combine...",
-      "instruction": "Create new sequence list and combine all protein sequences - rename &#34;FinalCandidatesProtein&#34;",
+      "title": "Generate Final Nucleic Acid and Protein Lists",
+      "instruction": "Combine the filtered sequences and translate them into protein sequences.",
+      "substeps": [
+        {
+          "instruction": "Create a new sequence list combining all query frame sequence lists and rename as 'FinalCandidatesNucleicAcid'",
+          "title": ""
+        },
+        {
+          "instruction": "Translate each individual query frame sequence list to protein based on the specific query frame",
+          "title": ""
+        },
+        {
+          "instruction": "Create a new sequence list combining all resulting protein sequences and rename as 'FinalCandidatesProtein'",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 24,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

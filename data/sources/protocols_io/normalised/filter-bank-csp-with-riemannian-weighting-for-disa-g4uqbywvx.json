@@ -21,62 +21,130 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Brain-computer interfaces (BCI) based on motor imagery (MI) enable users to interact with externalsystems using only their brain activity, without muscle movement. Electroencephalography (EEG) is widely used in BCI applications due to itsnon-invasive nature . This protocol describes a comprehensive methodology for EEG signal processing using the Common Spatial Patterns (CSP) algorithm, combined with the OVR approach for multi-class context adaptation, in a non-Euclidean space. This is a Riemannian space with a variable metric for EEG signals. The approach includes multiband filtering of EEG signals, spatial feature extraction using modified CSP, named RWFBCSP, to improve class separability by incorporating Riemannian similarity weighting. We apply classification techniques such as Linear Discriminant Analysis (LDA), Random Forest Classifier (RFC) and Multilayer Perceptron (MLP) to distinguish motor imagery tasks. This methodology is validated using BCI Competition IV data (dataset 2a).",
+      "title": "Prepare Python environment",
+      "instruction": "Install and import Python 3.6 together with the libraries MNE, NumPy, scikit‑learn and SciPy.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "dataset : BCI Competition IV set 2a Langage : Python 3.6 libraries : MNE, NumPy, scikit-learn and SciPy",
+      "title": "Load EEG dataset",
+      "instruction": "Read the BCI Competition IV dataset 2a files (extension .gdf) into an MNE Raw object (e.g., raw_data = mne.io.read_raw_gdf('subjectX.gdf')).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "The development process in Python consists in loading the EEG data with the dataset extension (.gdf ). Segmentation of EEG data into epochs synchronized to the stimuli (tmin/tmax setting).as well as the choice of motor tasks (event_id) corresponding to each class. ```python epochs = mne.Epochs(raw_data, events, event_id=stims, tmin=-0.5, tmax=1.5, baseline=(-0.2, 0), preload=True) Band-pass filtering using a FIR butterworth filter",
+      "title": "Create epochs from raw data",
+      "instruction": "Segment the continuous EEG into epochs synchronized to stimulus events using the event dictionary (event_id=stims) and the following parameters: tmin = ‑0.5 s, tmax = 1.5 s, baseline = (‑0.2 s, 0 s), preload=True.",
+      "substeps": [
+        {
+          "instruction": "epochs = mne.Epochs(raw_data, events, event_id=stims, tmin=-0.5, tmax=1.5, baseline=(-0.2, 0), preload=True)",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "This step consists in developing a customized and optimized function, based on the classic CSP model, for the extraction of discriminating features related to different motor tasks. The function named RW-FBCSP (Riemannian-Weighting Filter Bank Common Spatial Pattern), due to the use of the CSP model with the OVR approach in a Riemannian space with Similarity Weighting. The filtered EEG signals are passed through this function to obtain a new, more compact and informative representation of the signals (reduced feature vector), suitable for the classification stage.",
+      "title": "Apply band‑pass FIR filter",
+      "instruction": "Filter each epoch with a FIR Butterworth band‑pass filter (frequency limits as defined in the study; implementation uses MNE’s filtering functions).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "The feature vectors obtained for each subject and the associated labels are used to train the three classifiers: LinearDiscriminantAnalysis , RandomForestClassifier and MLPClassifier. Each classifier is trained and tested with each person&#39;s data, and for each subject the Accuracy, Precision, Recal and F1-score values are calculated and stored in global lists. These values are averaged to obtain the average test results for the nine subjects. For better performance, a majority voting method is used. This technique consists in creating a pipeline to exploit the results of the 3 classifiers to give a final decision. Finally, a portion of the code displays a preview of the results of merging the predictions from the three classifiers. exemple of voting classifier",
+      "title": "Extract weighted CSP features",
+      "instruction": "Pass the filtered epochs to the custom function RW‑FBCSP (Riemannian‑Weighting Filter Bank Common Spatial Pattern) which implements CSP with an OVR scheme in a Riemannian space and returns a reduced, informative feature vector for each trial.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Metric used: Accuracy, Precision, Recal and F1-score Method: Cross-validation ```python kfold = KFold(n_splits=5, shuffle=True, random_state=42) Average scores for the 9 subjects",
+      "title": "Assemble feature matrix and labels",
+      "instruction": "Collect the feature vectors produced by RW‑FBCSP for each subject together with their corresponding class labels into X (features) and y (labels).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "The processing steps are applied independently to the training and test sets for each subject. The extracted training and test data are used to train the classifiers and evaluate their performance, respectively. A validation step is used to optimize the hyperparameters, so the data are divided as follows: all test data are for evaluation. The training set is divided into a subset used for classifier training (80%) and another dedicated to hyperparameter validation (20%). for KFold(n_splits=k) : Validation set =1/k (1 of k &#34;folds&#34;) = 1/5 = 20% ( if k=5) Training set =(k-1)/k = 4/5 = 20% ( if k=5) After each classification step (performed by one of the three classifiers), a piece of code is used to present the classification model&#39;s performance in a structured way. Pandas.DataFrame is used to present summary tables. Example of a summary table: test results obtained by RFC Summary of RFC results",
+      "title": "Partition data for training and validation",
+      "instruction": "For each subject, split X and y into a test set (held‑out for final evaluation) and a training set; within the training set further divide 80 % for classifier training and 20 % for hyper‑parameter validation using 5‑fold cross‑validation (KFold).",
+      "substeps": [
+        {
+          "instruction": "kfold = KFold(n_splits=5, shuffle=True, random_state=42)",
+          "title": ""
+        },
+        {
+          "instruction": "Training proportion = (k‑1)/k = 4/5 = 80 %",
+          "title": ""
+        },
+        {
+          "instruction": "Validation proportion = 1/k = 1/5 = 20 %",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Train three classifiers",
+      "instruction": "Fit the following classifiers on the training portion of each subject’s data:",
+      "substeps": [
+        {
+          "instruction": "LinearDiscriminantAnalysis (LDA)",
+          "title": ""
+        },
+        {
+          "instruction": "RandomForestClassifier (RFC)",
+          "title": ""
+        },
+        {
+          "instruction": "MLPClassifier (multilayer perceptron)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Evaluate classifiers and record metrics",
+      "instruction": "For each subject and each classifier, predict the labels of the held‑out test set, then compute Accuracy, Precision, Recall and F1‑score; store the values in global lists and later average them across the nine subjects.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Combine predictions with majority voting",
+      "instruction": "Create a voting‑classifier pipeline that takes the three individual predictions (LDA, RFC, MLP) and outputs the majority‑vote decision; display a preview of the merged predictions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Generate summary tables",
+      "instruction": "Use pandas.DataFrame to build summary tables that list the performance metrics for each classifier and for the voting ensemble (e.g., test results obtained by RFC).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T14:56:41.517372Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 40,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

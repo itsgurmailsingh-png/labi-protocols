@@ -19,7 +19,7 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 4.5,
+  "quality_score": 4.0,
   "category": "Bioinformatics",
   "estimated_time_mins": 54,
   "materials": [
@@ -32,66 +32,162 @@
     "metaphlan2krona.py script",
     "Profiled sample data (e.g., .txt)",
     "Merged abundance tables",
-    "The previous step will generate a GraPhlAn image."
+    "The previous step will generate a GraPhlAn image.",
+    "Here is the resulting image: a"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Generate GraPhlAn Input Files",
-      "instruction": "The \"metaphlan2graphlan.py\" script in the plotting_scripts folder can generate the two required input files for GraPhlAn: (i) a tree structure and (ii) graphical annotation options. Create a temporary directory and generate tree and annotation files from a profiled sample using the metaphlan2graphlan.py script. $ mkdir tmp $ plotting_scripts/metaphlan2graphlan.py profiled_samples/BM_SRS013506.txt --tree_file tmp/BM_SRS013506.tree.txt --annot_file tmp/BM_SRS013506.annot.txt",
+      "title": "Create temporary directory",
+      "instruction": "Make a temporary folder named tmp to hold intermediate files.",
+      "substeps": [
+        {
+          "instruction": "mkdir tmp",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Run GraPhlAn and Generate Image",
-      "instruction": "Run GraPhlAn using the generated tree and annotation files to create an XML representation, then convert it to a PNG image. Refer to the GraPhlAn project page for more details and additional customization options. $ graphlan_annotate.py --annot tmp/BM_SRS013506.annot.txt tmp/BM_SRS013506.tree.txt tmp/BM_SRS013506.xml $ graphlan.py --dpi 200 tmp/BM_SRS013506.xml output_images/BM_SRS013506.png",
+      "title": "Generate tree and annotation",
+      "instruction": "Run the metaphlan2graphlan.py script on a MetaPhlAn profile to produce a tree file and an annotation file for GraPhlAn.",
+      "substeps": [
+        {
+          "instruction": "plotting_scripts/metaphlan2graphlan.py profiled_samples/BM_SRS013506.txt --tree_file tmp/BM_SRS013506.tree.txt --annot_file tmp/BM_SRS013506.annot.txt",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Process Multiple Samples with Customization",
-      "instruction": "To process multiple samples, use a loop script similar to this example. The metaphlan2graphlan.py script offers customization options like --max_annot_clades (default 10), --min_annot_lev, and --max_annot_lev to control the visualization. $ mkdir -p tmp $ for file in profiled_samples/* $ do $ filename=`basename ${file}` $ samplename=${filename%.*} $ plotting_scripts/metaphlan2graphlan.py ${file} --tree_file tmp/${samplename}.tree.txt --annot_file tmp/${samplename}.annot.txt $ graphlan_annotate.py --annot tmp/${samplename}.annot.txt tmp/${samplename}.tree.txt tmp/${samplename}.xml $ graphlan.py --dpi 200 tmp/${samplename}.xml output_images/${samplename}.png $ done",
+      "title": "Annotate tree file",
+      "instruction": "Create an XML file by annotating the tree with the generated annotation file.",
+      "substeps": [
+        {
+          "instruction": "graphlan_annotate.py --annot tmp/BM_SRS013506.annot.txt tmp/BM_SRS013506.tree.txt tmp/BM_SRS013506.xml",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "View Customization Options",
-      "instruction": "To view all available customization options for metaphlan2graphlan.py, execute the help command. $ plotting_scripts/metaphlan2graphlan.py -h",
+      "title": "Render GraPhlAn image",
+      "instruction": "Render a PNG image from the XML file using graphlan at 200 DPI.",
+      "substeps": [
+        {
+          "instruction": "graphlan.py --dpi 200 tmp/BM_SRS013506.xml output_images/BM_SRS013506.png",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Manually Customize Annotation File",
-      "instruction": "For advanced customization, the annotation file can be manually edited or modified using ad-hoc scripts. Refer to the GraPhlAn readme and examples for additional information.",
+      "title": "Process all samples batch",
+      "instruction": "Loop over every MetaPhlAn profile in profiled_samples, generating tree, annotation, and PNG files for each sample.",
+      "substeps": [
+        {
+          "instruction": "mkdir -p tmp",
+          "title": ""
+        },
+        {
+          "instruction": "for file in profiled_samples/*; do",
+          "title": ""
+        },
+        {
+          "instruction": "filename=$(basename ${file})",
+          "title": ""
+        },
+        {
+          "instruction": "samplename=${filename%.*}",
+          "title": ""
+        },
+        {
+          "instruction": "plotting_scripts/metaphlan2graphlan.py ${file} --tree_file tmp/${samplename}.tree.txt --annot_file tmp/${samplename}.annot.txt",
+          "title": ""
+        },
+        {
+          "instruction": "graphlan_annotate.py --annot tmp/${samplename}.annot.txt tmp/${samplename}.tree.txt tmp/${samplename}.xml",
+          "title": ""
+        },
+        {
+          "instruction": "graphlan.py --dpi 200 tmp/${samplename}.xml output_images/${samplename}.png",
+          "title": ""
+        },
+        {
+          "instruction": "done",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Visualize Merged Abundance Data",
-      "instruction": "The GraPhlAn visualization workflow can also be applied to a merged relative abundance table. In this case, the abundances reported refer to the overall average of each clade across all the samples in the table. $ plotting_scripts/metaphlan2graphlan.py output/merged_abundance_table.txt --tree_file tmp/merged.tree.txt --annot_file tmp/merged.annot.txt $ graphlan_annotate.py --annot tmp/merged.annot.txt tmp/merged.tree.txt tmp/merged.xml $ graphlan.py --dpi 200 tmp/merged.xml output_images/merged.png",
+      "title": "View script options",
+      "instruction": "Display the help message of metaphlan2graphlan.py to see all available customization flags.",
+      "substeps": [
+        {
+          "instruction": "plotting_scripts/metaphlan2graphlan.py -h",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Generate Class Comparisons",
-      "instruction": "Manual and script-based modification of the annotation file can facilitate comparisons between different classes in the GraPhlAn visualization.",
+      "title": "Set annotation options",
+      "instruction": "When running metaphlan2graphlan.py, optional parameters can control the number and taxonomic depth of annotated clades.",
+      "substeps": [
+        {
+          "instruction": "--max_annot_clades (default 10)",
+          "title": ""
+        },
+        {
+          "instruction": "--min_annot_lev",
+          "title": ""
+        },
+        {
+          "instruction": "--max_annot_lev",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Export MetaPhlAn Output to Krona",
-      "instruction": "MetaPhlAn output can also be exported for visualization with Krona (another popular visualization tool) using the \"metaphlan2krona.py\" script, located in the \"conversion_scripts\" folder downloaded as part of the MetaPhlAn package.",
+      "title": "Visualize merged abundance",
+      "instruction": "Create GraPhlAn files from a merged abundance table and render the combined image.",
+      "substeps": [
+        {
+          "instruction": "plotting_scripts/metaphlan2graphlan.py output/merged_abundance_table.txt --tree_file tmp/merged.tree.txt --annot_file tmp/merged.annot.txt",
+          "title": ""
+        },
+        {
+          "instruction": "graphlan_annotate.py --annot tmp/merged.annot.txt tmp/merged.tree.txt tmp/merged.xml",
+          "title": ""
+        },
+        {
+          "instruction": "graphlan.py --dpi 200 tmp/merged.xml output_images/merged.png",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 31,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

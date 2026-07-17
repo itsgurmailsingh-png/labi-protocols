@@ -20,10 +20,269 @@
   "estimated_time_mins": null,
   "materials": [
     "Image, application 1",
-    "Image, application 2"
+    "Image, application 2",
+    "We considered a variety of different dashboard development software, however, our team decided to use the R coding language [10] and R Shiny package [11] to build the final dashboard. R Shiny was selected because it is open source, easily shareable, and widely used by our team members, including the research scientists handling wastewater data. This helped streamline the translation of the methods used for analysis into visuals suitable for a dashboard. In addition, the use of R allowed for rapid dashboard development that took advantage of our team's skillset. For a full list of all R packages used and their purpose, please see Table 1.Table 1R packages used to create the dashboard.Table 1:GroupPackageUseShiny app support packagesshiny [11]Package for building the interactive web components for the Shiny app.shinydashboard [12]Provides layout for the application with a sidebar, title space, as well as making it easy to layout content in the body of the application with default features.shinydashboardPlus [13]Adds functions to enhance the shinydashboard package.shinyBS [14]Adds mouse-over tooltips to figures, buttons, and features in the application.shinyjs [15]Allows the app to read and use JavaScript applications including the use of toggle buttons and hiding content until a button is activated.shinyalert [16]Assists with html code within the application.shinycssloaders [17]Adds loading icons for map and plots while the app is loading in the web browser and when generating new plots.htmltools [18]Use html code within the application. Used in creation of text sections and loading images.Data processing (spatial and nonspatial)sf [19]Load and manipulate spatial data.aws.s3 [20]Read in data from Amazon Web Services S3 bucket.dplyr [21]Manipulate data frames.tidyr [22]Wrangling data into correct formats for the application.magrittr [23]Adds additional functionality to the “pipe” operator and supports other packages like dplyrpurrr [24]Functions used to calculate rolling averages for case data.stringr [25]Edit and manipulate strings in the data.lubridate [26]Edit and manipulate dates to various formats.Leaflet packagesleaflet [27]Creation of the interactive map on the main page.leaflet.extras [28]Enables leaflet to work with plug-ins.Figure and table creationggplot2 [29]Creation of trend plots for wastewater and case data plots.plotly [30]Wrapper functions turn ggplots into interactive features in the dashboard.gt [31]Creation of tables within the application."
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Select software and packages",
+      "instruction": "Choose R as the programming language and install the R Shiny ecosystem and supporting packages listed in Table 1 (e.g., shiny, shinydashboard, shinydashboardPlus, shinyBS, shinyjs, shinyalert, shinycssloaders, htmltools, sf, aws.s3, dplyr, tidyr, magrittr, purrr, stringr, lubridate, leaflet, leaflet.extras, ggplot2, plotly, gt).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Create OneDrive inbox for lab results",
+      "instruction": "Set up a dedicated OneDrive folder named “LabResultsInbox” with write permission granted only to laboratory operators; configure a script to run at regular intervals that scans the inbox for new CSV files, moves processed files to permanent storage, and leaves the original email as a chain‑of‑custody record.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Configure SQLite database and S3 backup",
+      "instruction": "Create a single‑file SQLite database using the RSQLite package to store processed laboratory results; write R code to back up the database file and the original CSV reports to an Amazon S3 bucket via the aws.s3 package; manage AWS API keys in the AWS console with read‑only or write‑only permissions as needed.",
+      "substeps": [
+        {
+          "instruction": "Generate the SQLite file (e.g., lab_results.sqlite).",
+          "title": ""
+        },
+        {
+          "instruction": "Upload the SQLite file and CSV backups to the designated S3 bucket.",
+          "title": ""
+        },
+        {
+          "instruction": "Store the AWS access key ID and secret access key securely for the R session.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Implement quality‑control checks",
+      "instruction": "During processing of each laboratory CSV, verify that all reported testing values fall within the expected range; if a value is out of range, flag the record for manual review and exclude it from database insertion until approved.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Ingest laboratory data into database",
+      "instruction": "When a laboratory finishes testing (once to three times per week per site), receive the CSV via the OneDrive inbox, normalize raw gene‑copy values to gene copies per milliliter and to human fecal indicators, then insert the cleaned records into the SQLite database and trigger a backup to S3.",
+      "substeps": [
+        {
+          "instruction": "Normalize units to gene copies · mL⁻¹.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply fecal‑indicator normalization (e.g., crAssphage).",
+          "title": ""
+        },
+        {
+          "instruction": "Insert the normalized rows into the SQLite table.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Synchronize dashboard data with S3",
+      "instruction": "At dashboard startup, run R code that (1) lists all objects in the S3 bucket, (2) compares each object’s last‑modified timestamp with the timestamp of the locally stored RDS file, and (3) downloads the newer file and loads it into memory as an RDS object; store the data locally in compressed RDS format.",
+      "substeps": [
+        {
+          "instruction": "Call aws.s3::get_bucket() to retrieve object list.",
+          "title": ""
+        },
+        {
+          "instruction": "If S3 object is newer than local copy, download via aws.s3::save_object().",
+          "title": ""
+        },
+        {
+          "instruction": "Read the downloaded file with readRDS() and assign to a global variable.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Preprocess data for Shiny app",
+      "instruction": "Each time new data are detected, compute the two primary metrics (trend and alert) for every sampling location; store the resulting metric tables on the server for the Shiny app to retrieve.",
+      "substeps": [
+        {
+          "instruction": "Calculate a two‑week linear trend of normalized SARS‑CoV‑2 levels for each site (minimum 3 data points, maximum 9).",
+          "title": ""
+        },
+        {
+          "instruction": "Assign an alert level (Low, Moderate, High) based on predefined thresholds; split the High category into four quantiles.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the metric tables as RDS files for the dashboard.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Load spatial reference layers",
+      "instruction": "Download and import the following GIS layers: county boundaries from the U.S. Census TIGER/Line shapefiles, sewershed boundaries from the project‑specific collection, and wastewater‑treatment‑plant coordinates from the NY State DEC website; simplify sewershed geometries for performance and join each sample to its geographic coordinates and sewershed.",
+      "substeps": [
+        {
+          "instruction": "Read shapefiles with sf::st_read().",
+          "title": ""
+        },
+        {
+          "instruction": "Perform a spatial join between sample points and sewershed polygons.",
+          "title": ""
+        },
+        {
+          "instruction": "Create simplified geometry objects for Leaflet rendering.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Import case and test‑positivity data",
+      "instruction": "Use an API call to the New York State COVID‑19 database (https://coronavirus.health.ny.gov/covid-19-testing-tracker) to retrieve daily confirmed PCR case counts and test‑positivity percentages per county; merge these data with the wastewater dataset for display alongside the wastewater metrics.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Calculate public‑health metrics",
+      "instruction": "Based on the processed wastewater data, assign each sample to one of three alert categories (Low, Moderate, High) and compute the percent change over the preceding two weeks; ensure each site has at least three data points (once‑weekly sampling) up to nine points (three‑times‑weekly sampling).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Build Shiny UI with shinydashboard",
+      "instruction": "Create a dashboard layout using shinydashboard that includes a header, sidebar, and main body; add UI elements such as radio‑button selectors for metric choice, tooltips via shinyBS, and loading spinners via shinycssloaders.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Configure Leaflet map",
+      "instruction": "Add a Leaflet map (leaflet package) to the main page showing county outlines, simplified sewershed polygons, and treatment‑plant markers; enable zoom, pan, and click‑to‑popup functionality that displays the site’s alert level, two‑week trend, and metadata (e.g., estimated population served).",
+      "substeps": [
+        {
+          "instruction": "Add tile layer and set default view to New York State.",
+          "title": ""
+        },
+        {
+          "instruction": "Overlay simplified sewershed polygons with leaflet.extras.",
+          "title": ""
+        },
+        {
+          "instruction": "Bind pop‑ups to markers showing metric values.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Create interactive trend plots",
+      "instruction": "Generate static trend plots with ggplot2 for each site’s normalized SARS‑CoV‑2 levels; convert them to interactive plots with plotly and embed them in the Shiny UI so that selecting a map point updates the corresponding plot.",
+      "substeps": [
+        {
+          "instruction": "Use ggplot2::geom_line() for time‑series.",
+          "title": ""
+        },
+        {
+          "instruction": "Wrap the ggplot object with plotly::ggplotly().",
+          "title": ""
+        },
+        {
+          "instruction": "Link plot output to the selected site via reactive expressions.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Add UI interactivity",
+      "instruction": "Connect map clicks to reactive data objects that refresh the trend plot and metric tables; provide sidebar radio buttons to switch between available metric visualizations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Version‑control code on GitHub",
+      "instruction": "Initialize a private GitHub repository for the dashboard source code; push all R scripts, Shiny UI files, and supporting data; add a public duplicate repository for tutorial purposes; annotate functions with comments to mark start and end of each call.",
+      "substeps": [
+        {
+          "instruction": "git init; git add .; git commit -m \"Initial commit\";",
+          "title": ""
+        },
+        {
+          "instruction": "git remote add origin <private‑repo‑URL>;",
+          "title": ""
+        },
+        {
+          "instruction": "git push -u origin master.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Deploy to shinyapps.io with staging",
+      "instruction": "Create a staging app on shinyapps.io (private domain) to test new features; once verified, deploy the final version to the public app; configure the app to run the S3 sync code at startup and to use the RDS data files.",
+      "substeps": [
+        {
+          "instruction": "In the shinyapps.io dashboard, add a new application named \"dashboard‑staging\".",
+          "title": ""
+        },
+        {
+          "instruction": "Deploy the staging branch from GitHub.",
+          "title": ""
+        },
+        {
+          "instruction": "After testing, deploy the master branch to the public URL.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Optional: Set up web analytics",
+      "instruction": "Run a summary of site visits using SimilarWeb (or another analytics service) to capture total visits, device breakdown, average session duration, and referral sources for ongoing monitoring.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:34:10.411653Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 26,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

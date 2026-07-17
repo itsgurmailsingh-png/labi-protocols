@@ -20,107 +20,151 @@
     "IQTree",
     "MR Bayes",
     "MAFFT",
-    "FastML web portal"
+    "FastML web portal",
+    "Obtain protein-coding metagenome FASTA files."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Obtain protein-coding metagenome FASTA files.",
+      "title": "Collect Target Homolog Sequences",
+      "instruction": "Obtain a set of known or trusted target amino acid sequences, such as from UniProt.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Obtain a set of amino acid sequences that are known/trusted target homologs (Uniprot works well for this).",
+      "title": "Search Metagenome for Target Hits",
+      "instruction": "Search for target hits within metagenome sequences using DIAMOND (or blastx for smaller datasets) with a recommended e-value cutoff of at least 1e-20.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Use DIAMOND (blastx can also be used but will be slower for large datasets) to search for target hits from within the metagenome sequences. Recommend an e-value cutoff of at least 1e-20.",
+      "title": "Translate Protein-Coding Hits",
+      "instruction": "Translate the protein-coding target hits into amino acid sequences using TranslatorX.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Translate protein-coding target hits to amino acid sequences with TranslatorX.",
+      "title": "Annotate Hits",
+      "instruction": "Annotate the hits against a local copy of the NCBI nr database using DIAMOND or BLAST.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Use DIAMOND (or BLAST) to annotate hits against a local copy of the NCBI nr database.",
+      "title": "Select Sequences of Interest",
+      "instruction": "Choose the taxa of interest and select sequences of appropriate length for the protein from the metagenome hits.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Choose taxa of interest, and select sequences of appropriate length for the protein from the metagenome hits.",
+      "title": "Align Sequences",
+      "instruction": "Align the collected sequences and closely related complete outgroup sequence(s) using MAFFT.",
+      "substeps": [
+        {
+          "instruction": "Use recommended settings: --maxiterate 1000 --localpair",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Align the collected sequences and closely related complete outgroup sequence(s) with MAFFT. Recommend settings of --maxiterate 1000 --localpair",
+      "title": "Construct Phylogenetic Tree",
+      "instruction": "Generate a tree using RAxML and inspect the results for accuracy.",
+      "substeps": [
+        {
+          "instruction": "Use recommended settings: -f a -k -m PROTGAMMAAUTO",
+          "title": ""
+        },
+        {
+          "instruction": "Consult the alignment if any node appears out of place to determine if it should remain in the dataset",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Make tree with RAxML. Recommend settings -f a -k -m PROTGAMMAAUTO Inspect the tree to see if it makes sense. If a node looks out of place, consult the alignment and figure out why and if you want to keep it in the dataset.",
+      "title": "Verify Substitution Model and Support",
+      "instruction": "Check the RAxML amino acid substitution model and branch support using IQTree.",
+      "substeps": [
+        {
+          "instruction": "Use recommended settings: -m TEST -nt AUTO -alrt 10000",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Check RAxML amino acid substition model and branch support with IQTree. Recommend settings -m TEST -nt AUTO -alrt 10000",
+      "title": "Perform Branch Support Analysis",
+      "instruction": "Analyze branch support with MR Bayes, requiring the creation of a nexus and mbatch file.",
+      "substeps": [
+        {
+          "instruction": "Set mbatch settings: lset nst=6 rates invgamma; prset aamodelpr=fixed(lg); (ensure model matches RAxML and IQTree selections)",
+          "title": ""
+        },
+        {
+          "instruction": "Set MCMC parameters: mcmcp ngen=1000000 nruns=2 nchains=4 samplefreq=100 printfreq=10000 relburnin=yes burninfrac=0.25; mcmc; sumt; sump;",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Branch support with MR Bayes. Will need to create a nexus and mbatch file. Recommend mbatch settings: lset nst=6 rates invgamma; prset aamodelpr=fixed(lg); (The model choice here should match the model that RAxML and IQTree select. mcmcp ngen=1000000 nruns=2 nchains=4 samplefreq=100 printfreq=10000 relburnin=yes burninfrac=0.25; mcmc; sumt; sump;",
+      "title": "Perform Ancestral Sequence Reconstruction",
+      "instruction": "Submit the MAFFT alignment and RAxML best_tree to the FastML web portal (http://fastml.tau.ac.il/) or a local version.",
+      "substeps": [
+        {
+          "instruction": "Select 'Amino Acids' and the correct model from the tree building process",
+          "title": ""
+        },
+        {
+          "instruction": "Select 'Gamma Distribution' and 'Maximum Likelihood'",
+          "title": ""
+        },
+        {
+          "instruction": "Deselect 'Optimize Branch Lengths' and 'joint reconstruction'",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "Submit the MAFFT alignment and RAxML best_tree to the FastML web portal (http://fastml.tau.ac.il/). You can use the local version of this but I found it easier to just use the web portal. Be sure to select Amino Acids and the correct model from the tree building. Use Gamma Distribution and Maximum Liklihood. Deselect Optimize Branch Lengths and joint reconstruction.",
+      "title": "Extract and Visualize Results",
+      "instruction": "Obtain the 25 most probable ancestral sequences at the nodes of interest from the FastML results page.",
+      "substeps": [
+        {
+          "instruction": "Visualize the tree results using FigTree",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 11,
-      "title": "",
-      "instruction": "Obtain the 25 most probable ancestral sequences at the nodes of interest from the FastML results page and visualize the tree results in FigTree.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-18T10:08:13.689261Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 44,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

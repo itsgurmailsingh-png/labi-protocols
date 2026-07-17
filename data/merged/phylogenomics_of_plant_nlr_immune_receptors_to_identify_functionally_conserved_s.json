@@ -1,0 +1,213 @@
+{
+  "protocol_id": "phylogenomics_of_plant_nlr_immune_receptors_to_identify_functionally_conserved_s",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Phylogenomics of Plant NLR Immune Receptors to Identify Functionally Conserved Sequence Motifs",
+  "author": "Toshiyuki Sakai",
+  "doi": "10.21769/BioProtoc.5023",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.5023",
+  "citation": "10.21769/BioProtoc.5023",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 7.0,
+  "category": "Plant Biology",
+  "estimated_time_mins": 12,
+  "materials": [
+    "InterProScan software"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Install required bioinformatics tools",
+      "instruction": "Download and install each software at the specified version using the provided URLs or commands; ensure a 64‑bit Linux environment (or macOS for RAxML‑NG).",
+      "substeps": [
+        {
+          "instruction": "InterProScan 5.53‑87.0 – download from https://www.ebi.ac.uk/interpro/download/ and install per the site instructions.",
+          "title": ""
+        },
+        {
+          "instruction": "NLRtracker v1.0.3 – download from https://github.com/slt666666/NLRtracker and install following the repository README.",
+          "title": ""
+        },
+        {
+          "instruction": "NLR‑Annotator v2.1 – download from https://github.com/steuernb/NLR-Annotator and install (works without Linux).",
+          "title": ""
+        },
+        {
+          "instruction": "MAFFT v7 – download from https://mafft.cbrc.jp/alignment/software/ and install.",
+          "title": ""
+        },
+        {
+          "instruction": "RAxML v8.2.12 – download from https://cme.h-its.org/exelixis/resource/download/NewManual.pdf and install; alternatively install RAxML‑NG v1.2.1 from https://github.com/amkozlov/raxml-ng?tab=readme‑ov‑file.",
+          "title": ""
+        },
+        {
+          "instruction": "BLAST+ v2.12.0 – download from https://www.ncbi.nlm.nih.gov/books/NBK569861/ and install.",
+          "title": ""
+        },
+        {
+          "instruction": "MCL v14‑137 – run: wget http://www.micans.org/mcl/src/mcl-14-137.tar.gz; tar -zxvf mcl-14-137.tar.gz; cd mcl-14-137; ./configure --enable‑blast; make; make install.",
+          "title": ""
+        },
+        {
+          "instruction": "MEME Suite v5.5.5 – download from https://meme-suite.org/meme/doc/install.html (or use the web server at https://meme-suite.org/meme/tools/meme).",
+          "title": ""
+        },
+        {
+          "instruction": "HMMER v3.4 – download from https://github.com/EddyRivasLab/hmmer and install.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Download plant proteome protein files",
+      "instruction": "Obtain protein FASTA files for Arabidopsis thaliana (Araport11), Beta vulgaris (RefBeet‑1.2), Solanum lycopersicum (ITAG 2.4), Nicotiana benthamiana (v0.4.4), Oryza sativa (Release 7), and Hordeum vulgare (IBSC_v2) from the listed genome portals, then concatenate all files into a single FASTA named “NLRtracker_input_protein.fasta”.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Annotate NLRs with NLRtracker",
+      "instruction": "Run NLRtracker on the compiled protein file: ./NLRtracker -s NLRtracker_input_protein.fasta -o NLRtracker_output. The resulting NLR protein sequences are saved as “NLR.fasta” inside the NLRtracker_output folder (total 1,862 NLRs).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Create combined NLR set and align",
+      "instruction": "Add 31 functionally characterized CC‑NLR sequences to the NLR.fasta file, producing “NLR_set.fasta”. Align all sequences with MAFFT: mafft NLR_set.fasta > NLR_set_alignment_output.fasta.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Extract NB‑ARC domains and clean gaps",
+      "instruction": "Using Supplemental script 1, extract the NB‑ARC domain region (based on Arabidopsis ZAR1) from NLR_set_alignment_output.fasta, discard any protein lacking the intact p‑loop motif (G/AxxxxGKT/S), and remove alignment gaps. Save the cleaned sequences as “NLR_set_alignment_NBARC_RemGap.fasta”.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Build maximum‑likelihood tree with RAxML",
+      "instruction": "Run RAxML on the NB‑ARC alignment: raxmlHPC‑PTHREADS‑AVX2 -s NLR_set_alignment_NBARC_RemGap.fasta -n NLR_MLtree -m PROTGAMMAAUTO -f a -# 100 -x 1024 -p 121. Options –f a and –# 100 perform 100 bootstrap iterations; –x 1024 and –p 121 set random seeds.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Identify CC‑NLR clade and extract sequences",
+      "instruction": "Visualize the tree file “RAxML_bipartitions.NLR_MLtree” in iTOL, select the CC‑NLR subclade (1,305 protein IDs, Dataset S6), and extract the corresponding protein sequences from NLR_set.fasta using Supplemental script 2, saving them as “CCNLR_set.fasta”.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Extract N‑terminal domains of CC‑NLRs",
+      "instruction": "Align CCNLR_set.fasta with MAFFT (as in step B3), then cut each sequence at the start position of the ZAR1 NB‑ARC domain; the upstream region constitutes the N‑terminal domain. Save all N‑terminal sequences as “CCNLR_Ndomain_set.fasta”.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Perform BLASTP similarity search",
+      "instruction": "Create a protein BLAST database from the N‑terminal set and search it against itself:",
+      "substeps": [
+        {
+          "instruction": "makeblastdb -in CCNLR_Ndomain_set.fasta -dbtype prot",
+          "title": ""
+        },
+        {
+          "instruction": "blastp -query CCNLR_Ndomain_set.fasta -db CCNLR_Ndomain_set.fasta -out blast_results.txt -evalue 1e-8",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Cluster N‑terminal domains with MCL",
+      "instruction": "Run the MCL clustering on the BLAST output using an inflation value of 1.4:",
+      "substeps": [
+        {
+          "instruction": "mclblastline --mcl‑I=1.4 blast_results.txt",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Select tribe 3 N‑terminal sequences",
+      "instruction": "From the MCL output file “dump.out.blast_results.txt.l14”, identify tribe 3 (containing ZAR1, RPP13, R2, Rpi‑vnt1.3). Extract the IDs of its members with Supplemental script 4, then retrieve their sequences from CCNLR_Ndomain_set.fasta using Supplemental script 2, saving as “Nseq_Tribe3.fasta”.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Discover conserved motifs with MEME",
+      "instruction": "Run MEME on the tribe 3 sequences with the following parameters:",
+      "substeps": [
+        {
+          "instruction": "meme Nseq_Tribe3.fasta -protein -oc . -nostatus -time 14400 -mod zoops -nmotifs 5 -minw 6 -maxw 50 -objfun classic -minsites 62 -markov_order 0",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Build HMM for the MADA motif",
+      "instruction": "Extract the MADA motif alignment from the MEME output (file MEME_alignment.txt) and construct a hidden Markov model:",
+      "substeps": [
+        {
+          "instruction": "hmmbuild MADA.hmm MEME_alignment.txt",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Search NLR proteomes for MADA motif",
+      "instruction": "Query the full NLR set with the MADA HMM, using a score cutoff of 10.0 (high‑confidence) and reporting lower‑score hits as MADA‑like:",
+      "substeps": [
+        {
+          "instruction": "hmmsearch --max --tblout MADA.hmmsearch.tsv -o MADA.hmmsearch.txt MADA.hmm NLR_set.fasta",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 27,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

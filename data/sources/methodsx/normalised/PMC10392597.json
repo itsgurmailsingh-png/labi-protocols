@@ -19,8 +19,401 @@
   ],
   "estimated_time_mins": null,
   "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Configure Phase 1 charging circuit",
+      "instruction": "Connect a commercial 29.2 V LiFePO4 smart charger (CC/CV) to the whole pack, place a solid‑state relay (SSR) in the mains line to switch the charger, use a 24 V automotive relay driven by a MOSFET to switch a resistive load, measure pack current with a LEM LTSR‑15‑NP Hall‑effect sensor, record cell voltages, pack current and ambient temperature with an Arduino Mega linked to a PC (Processing) into CSV files, and monitor cell voltage peaks to avoid excessive over‑voltage.",
+      "substeps": [
+        {
+          "instruction": "Wire the smart charger to the pack.",
+          "title": ""
+        },
+        {
+          "instruction": "Insert SSR in mains to control charger power.",
+          "title": ""
+        },
+        {
+          "instruction": "Connect 24 V automotive relay to MOSFET for load switching.",
+          "title": ""
+        },
+        {
+          "instruction": "Attach Hall‑effect sensor for current measurement.",
+          "title": ""
+        },
+        {
+          "instruction": "Program Arduino Mega to log voltage, current, temperature to CSV via PC.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Buffer voltage logger with op‑amp followers",
+      "instruction": "Insert an operational‑amplifier voltage follower between each cell terminal and the Junsi Cell‑Log 8S logger to prevent the logger’s ~35 µA draw per cell (≈280 µA total) from unbalancing the pack by about 0.2 Ah per month.",
+      "substeps": [
+        {
+          "instruction": "Connect op‑amp input to cell terminal.",
+          "title": ""
+        },
+        {
+          "instruction": "Power op‑amp from external supply.",
+          "title": ""
+        },
+        {
+          "instruction": "Route op‑amp output to logger input.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Build Phase 2 charging rig",
+      "instruction": "Replace the smart charger with a BK Precision 1687B variable‑voltage laboratory power supply, program the Arduino to set current and voltage for the experimental CC/CCeV protocol, keep the resistive load and Hall‑effect sensor as in Phase 1, add NTC LUG03A103HC thermistors on each cell’s positive and negative terminals, and read them via a 12‑bit ADS1015 or 16‑bit ADS1115 I²C ADC.",
+      "substeps": [
+        {
+          "instruction": "Connect power supply to pack.",
+          "title": ""
+        },
+        {
+          "instruction": "Upload Arduino sketch implementing CC/CCeV control.",
+          "title": ""
+        },
+        {
+          "instruction": "Wire thermistors to ADS1015/ADS1115 ADCs.",
+          "title": ""
+        },
+        {
+          "instruction": "Maintain existing resistive load and current sensor.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Decide against Kunkin load",
+      "instruction": "Evaluate the Kunkin KL284A load and conclude it offers no advantage over the simpler resistive load, so retain the resistive load for Phase 2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Assemble Phase 3 cell boards and CAN",
+      "instruction": "Fabricate Cell Boards containing op‑amp voltage followers and thermistor inputs, power them from an external 12 V supply (not from the cells), connect each board in a four‑wire daisy‑chain (12 V+, 12 V‑, CAN‑H, CAN‑L) to an STM32 Nucleo Master board, and attach an Isabellenhutte CAN‑enabled smart shunt for pack current and voltage measurement.",
+      "substeps": [
+        {
+          "instruction": "Mount op‑amp followers on each Cell Board.",
+          "title": ""
+        },
+        {
+          "instruction": "Install NTC thermistors and route to ADCs.",
+          "title": ""
+        },
+        {
+          "instruction": "Supply Cell Boards with 12 V external power.",
+          "title": ""
+        },
+        {
+          "instruction": "Wire 12 V+, 12 V‑, CAN‑H, CAN‑L to Master.",
+          "title": ""
+        },
+        {
+          "instruction": "Connect smart shunt to CAN bus.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Program Master board control algorithm",
+      "instruction": "Load firmware on the STM32 Nucleo Master that implements the advanced CC/CCeV algorithm, continuously monitors cell voltages, terminal temperatures, pack voltage and current, controls contactors, and triggers warnings, limp‑mode or shutdown on fault conditions such as missing Cell Board, voltage mismatch, over‑current, low cell voltage or out‑of‑range temperature.",
+      "substeps": [
+        {
+          "instruction": "Implement CC/CCeV loop with voltage check and current decrement.",
+          "title": ""
+        },
+        {
+          "instruction": "Add fault‑detection routines for board loss, voltage mismatch, etc.",
+          "title": ""
+        },
+        {
+          "instruction": "Program contactor actuation and CAN data broadcast.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Set up Phase 3 test rig",
+      "instruction": "Install a 12 V power supply for electronics, high‑current fuses, bus bars and contactors, use a single electronic load and a single power supply for both Pack A (prototype BMS) and Pack B (commercial Orion 2 BMS), interleave cycles so one pack charges while the other discharges, run a headless Linux mini‑PC (accessed via VNC) on UPS power, and schedule the PC to toggle change‑over relays and log data from both BMSs at 1 s intervals into CSV files.",
+      "substeps": [
+        {
+          "instruction": "Wire both packs to common load and supply.",
+          "title": ""
+        },
+        {
+          "instruction": "Connect Mini‑PC to relays and CAN interfaces.",
+          "title": ""
+        },
+        {
+          "instruction": "Configure Linux scripts for relay control and 1 s data logging.",
+          "title": ""
+        },
+        {
+          "instruction": "Connect UPS to Mini‑PC for power continuity.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Bottom‑balance individual cells",
+      "instruction": "Connect each cell to a balancing rig consisting of a microcontroller‑controlled discharge resistor, program the controller to discharge until a predetermined voltage is reached, then use rapid MOSFET on/off cycling to maintain that voltage for 15 min, ensuring voltage‑sensing lines are isolated from the main circuit.",
+      "substeps": [
+        {
+          "instruction": "Attach discharge resistor and MOSFET to cell.",
+          "title": ""
+        },
+        {
+          "instruction": "Set target voltage in microcontroller.",
+          "title": ""
+        },
+        {
+          "instruction": "Discharge until target reached.",
+          "title": ""
+        },
+        {
+          "instruction": "Maintain voltage with fast MOSFET switching for 15 min.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Execute CC/CCeV charge cycles",
+      "instruction": "Run the charging protocol on both Phase 2 and Phase 3 rigs: continuously monitor the highest cell voltage, decrement current by the experimentally‑determined fixed step when the voltage exceeds the target, and repeat until the pack is fully charged, while logging all parameters at 1 s intervals.",
+      "substeps": [
+        {
+          "instruction": "Start with discharged pack.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply CC/CCeV loop as programmed.",
+          "title": ""
+        },
+        {
+          "instruction": "Adjust current as needed based on voltage feedback.",
+          "title": ""
+        },
+        {
+          "instruction": "Terminate when target voltage reached for all cells.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Collect and validate experimental data",
+      "instruction": "Gather the CSV files generated by the Arduino (Phase 1‑2) and the Linux Mini‑PC (Phase 3), note file sizes depend on 1 s sampling, plot the data in Microsoft Excel with appropriate annotations, cross‑check cell voltages with a Volt‑Ohm metre and currents with an inline or clamp ammeter, compare pack voltage/current from the smart shunt with BMS‑reported values, and verify that the sum of cell voltages matches the reported pack voltage.",
+      "substeps": [
+        {
+          "instruction": "Transfer CSV files to analysis workstation.",
+          "title": ""
+        },
+        {
+          "instruction": "Create Excel charts for voltage, current, temperature.",
+          "title": ""
+        },
+        {
+          "instruction": "Validate voltages with external metre.",
+          "title": ""
+        },
+        {
+          "instruction": "Validate currents with clamp ammeter.",
+          "title": ""
+        },
+        {
+          "instruction": "Compare smart‑shunt readings to BMS data.",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm total cell voltage equals pack voltage.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:34:03.925224Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Cell voltages were cross checked with a Volt-Ohm metre and currents with an in-line or clamp ammeter. In Test 8, a precision power supply and load were used, and both returned pack voltage and pack current. These values could be compared with the equivalent values returned by the two BMSs in order to verify that the latter were correct. In addition, the prototype BMS measured pack voltage independently of cell voltages so the total of all cell voltages could be compared with the reported pack voltage.",
+  "content_type": "likely_not_protocol",
+  "content_type_score": 18,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 98723,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 57373,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 127074,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 45992,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 148127,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 156374,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr14.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr14.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 58552,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr14.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr15.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr15.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 24485,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr15.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 51673,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 32998,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 108782,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 94603,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 145234,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 126583,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 37381,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC10392597/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10392597/",
+      "caption": "",
+      "bytes": 168067,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10392597/gr9.jpg"
+    }
+  ]
 }

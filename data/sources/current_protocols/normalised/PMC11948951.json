@@ -25,10 +25,211 @@
     "HLAminer v1.4",
     "Minimap2 2.28‐r1209",
     "Long sequencing reads in compressed or uncompressed FASTQ format",
-    "Reference genome for HLA sequence data"
+    "Reference genome for HLA sequence data",
+    "The HLAminer protocol requires a 64‐bit Linux or Mac operating system with sufficient random‐access memory (RAM) to process large volumes of DNA sequencing data (e.g., up to 35 GB RAM in our tests; see below). RAM requirements will depend on the properties of the data, including the sequencing read coverage, and the alignment parameters used. Both runtime and peak memory usage are determined by the sequence aligner used.",
+    "This protocol uses HLAminer (v1.4, https://github.com/bcgsc/hlaminer; Warren et al., 2012), a command‐line script that requires the PERL interpreter—typically pre‐installed on most Linux and Mac systems—and the minimap2 read‐aligner (2.28‐r1209, https://github.com/lh3/minimap2; Li, 2018). We recommend manually cloning and compiling the HLAminer source code from GitHub and installing minimap2 using the conda package manager.",
+    "This protocol was tested with minimap2 (Li, 2018), as it is best in class for ONT and PacBio long‐read alignments at the time of this writing, but HLAminer will support any aligners capable of outputting a SAM (Sequence Alignment/Map)‐compatible output (i.e., .sam file) with MD tags (i.e., string encoding mismatched and deleted reference bases).",
+    "cd $HLAMINER_DBPATH\n./updateAll.sh",
+    "wget https://www.bcgsc.ca/downloads/btl/hlaminer/GCA_000001405.15_GRCh38_genomic.chr‐only‐noChr6‐HLA‐I_II_GEN.fa.gz",
+    "and NA12878 (dataset B; ENA SRR",
+    "Server or machine running a 64‐bit Linux or Mac operating system with sufficient RAM (up to 35 GB); we benchmarked our protocol on a dedicated server‐class CentOS Linux release 7.6.1810 system with 144 core Intel Xeon Gold 6150 CPUs at 2.70 GHz with 2.1 TB RAM.",
+    "HLAminer v1.4 (https://github.com/bcgsc/HLAminer), commit:c00effaMinimap2 2.28‐r1209 (https://github.com/lh3/minimap2)"
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Confirm hardware requirements",
+      "instruction": "Ensure the computer runs a 64‑bit Linux or macOS OS and has sufficient RAM (up to 35 GB RAM was used in testing). For benchmarking, a server with CentOS 7.6.1810, 144 core Intel Xeon Gold 6150 CPUs at 2.70 GHz and 2.1 TB RAM was used.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Install Miniconda and create environment",
+      "instruction": "Download Miniconda from https://docs.conda.io/en/latest/miniconda.html, install it, then create and activate a dedicated conda environment for the protocol.",
+      "substeps": [
+        {
+          "instruction": "conda create -n hlaminer python=3.8",
+          "title": ""
+        },
+        {
+          "instruction": "conda activate hlaminer",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Install minimap2 in the environment",
+      "instruction": "With the “hlaminer” environment active, install minimap2 from the bioconda channel.",
+      "substeps": [
+        {
+          "instruction": "conda install bioconda::minimap2",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Clone HLAminer repository",
+      "instruction": "Obtain the HLAminer source code by cloning its GitHub repository.",
+      "substeps": [
+        {
+          "instruction": "git clone https://github.com/bcgsc/HLAminer/",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Configure PATH and database variables",
+      "instruction": "Make HLAminer executables globally accessible and point to the reference database.",
+      "substeps": [
+        {
+          "instruction": "Add to shell configuration (e.g., .bashrc): export PATH=/path/to/hlaminer/installation/HLAminer/HLAminer-1.4/bin:$PATH",
+          "title": ""
+        },
+        {
+          "instruction": "Alternatively, from the installation directory: export PATH=$(pwd)/HLAminer/HLAminer-1.4/bin:$PATH",
+          "title": ""
+        },
+        {
+          "instruction": "Set database path: export HLAMINER_DBPATH=$(pwd)/HLAminer/HLAminer-1.4/database",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Obtain long‑read sample data",
+      "instruction": "Download the demonstration datasets from ENA:",
+      "substeps": [
+        {
+          "instruction": "NA19240 (dataset A) – accession ERR2585115",
+          "title": ""
+        },
+        {
+          "instruction": "NA12878 (dataset B) – accession SRR10965087",
+          "title": ""
+        },
+        {
+          "instruction": "NA24385 (dataset C) – accession SRX5327410",
+          "title": ""
+        },
+        {
+          "instruction": "Datasets D and E (additional ONT runs) use the same commands as dataset A",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Prepare HLA reference genome",
+      "instruction": "Create a reference that contains the human genome (chr‑only, no Chr6) plus all HLA genomic loci. Four alternative methods are provided; choose one.",
+      "substeps": [
+        {
+          "instruction": "Option 1 – Master script: cd $HLAMINER_DBPATH && ./updateAll.sh",
+          "title": ""
+        },
+        {
+          "instruction": "Option 2 – Manual commands:",
+          "title": ""
+        },
+        {
+          "instruction": "1. wget ftp://ftp.ebi.ac.uk/pub/databases/imgt/mhc/hla/fasta/*_gen.fasta",
+          "title": ""
+        },
+        {
+          "instruction": "2. cat A_gen.fasta B_gen.fasta C_gen.fasta F_gen.fasta G_gen.fasta H_gen.fasta DP*_gen.fasta DQ*_gen.fasta DR*_gen.fasta | perl -ne 'chomp;if(/>(\\S+)\\s+(\\S+)/){print \">>$1\\n\";}else{print \"$_\\n\";}' > HLA-I_II_GEN.fasta",
+          "title": ""
+        },
+        {
+          "instruction": "3. cat GCA_000001405.15_GRCh38_genomic.chr-only-noChr6.fa HLA-I_II_GEN.fasta | pigz - > GCA_000001405.15_GRCh38_genomic.chr-only-noChr6-HLA-I_II_GEN.fa.gz",
+          "title": ""
+        },
+        {
+          "instruction": "4. rm -rf hla_nom_p.txt && wget http://hla.alleles.org/wmda/hla_nom_p.txt",
+          "title": ""
+        },
+        {
+          "instruction": "Option 3 – Download static updated reference:",
+          "title": ""
+        },
+        {
+          "instruction": "wget https://www.bcgsc.ca/downloads/btl/hlaminer/GCA_000001405.15_GRCh38_genomic.chr-only-noChr6-HLA-I_II_GEN.fa.gz",
+          "title": ""
+        },
+        {
+          "instruction": "Option 4 – Download all reference files from Zenodo (Jan 27 2025):",
+          "title": ""
+        },
+        {
+          "instruction": "wget https://doi.org/10.5281/zenodo.14751276",
+          "title": ""
+        },
+        {
+          "instruction": "If pigz or wget are unavailable, replace them with gzip or curl respectively.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Verify reference genome file",
+      "instruction": "Confirm that the file GCA_000001405.15_GRCh38_genomic.chr-only-noChr6-HLA-I_II_GEN.fa.gz exists in /path/to/hlaminer/installation/HLAminer/HLAminer-1.4/database, is non‑empty and not corrupted.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Run streaming alignment with minimap2 and HLAminer",
+      "instruction": "Execute minimap2 on the long‑read FASTQ (compressed or uncompressed) using the –MD flag so that MD tags are written, and pipe the SAM output directly into HLAminer in stream mode (‑a). The MD tag is required; otherwise HLAminer will produce empty output. Low coverage (<10×) may require lowering HLAminer’s minimum score threshold (‑s).",
+      "substeps": [
+        {
+          "instruction": "minimap2 [appropriate parameters, e.g., -ax map-ont --MD] reference.fa reads.fastq.gz | HLAminer.pl -a [additional HLAminer options]",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Review HLAminer output files",
+      "instruction": "Inspect the generated .csv file for allele predictions (ranked #1 and #2 per gene) and the .log file for processing details (command line, alignment statistics, scores, expect values, confidence). The .csv contains columns: Allele, Score, Expect (Eval) value, Confidence (‑10 * log10(Eval)).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Optional: record benchmark performance",
+      "instruction": "Note that runtime and peak memory scale with read count; minimap2 is the primary bottleneck. In the authors’ tests, runtimes varied per dataset and correlated with the number of reads (see Table 2 of the original article).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:24:08.563655Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "When predicting HLA types from direct read alignments with HLAminer, the MD tag (e.g., minimap2 --MD) must be present in the resulting SAM alignment file (or stream), as otherwise HLA prediction output files are likely to be empty (Table 3). A low (<10×) sequencing read coverage may also be insufficient for predictions to be made, and lowering the minimum score threshold in HLAminer (‐s) may help resolve the issue of empty predictions. When joining the execution of a read aligner with HLAminer, HLAminer's ‐a stream must be specified. We recommend that users carefully inspect the logs, output files, and error codes if an error occurs. See Table 3 for a list of additional potential problems, along with their causes and solutions.",
+  "content_type": "protocol",
+  "content_type_score": 30,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

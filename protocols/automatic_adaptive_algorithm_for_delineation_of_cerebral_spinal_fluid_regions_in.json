@@ -1,0 +1,202 @@
+{
+  "protocol_id": "automatic_adaptive_algorithm_for_delineation_of_cerebral_spinal_fluid_regions_in",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Automatic Adaptive Algorithm for Delineation of Cerebral-Spinal Fluid Regions in Mice",
+  "author": "Ryszard S. Gomolka",
+  "doi": "10.21769/BioProtoc.5148",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.5148",
+  "citation": "10.21769/BioProtoc.5148",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 4.5,
+  "category": "Imaging & Microscopy",
+  "estimated_time_mins": 12,
+  "materials": [
+    "Save acquired images in NIfTI format.",
+    "To correct for intensity inhomogeneities coming from the B0 field and the profile of the Tx/Rx coil (in original method surface profile of the CryoProbe [34]), perform N4 bias field correction in the brain-extracted parenchyma using FAST tool in FSL (0.5 sigma, 20 mm FWHM, 4 iterations)."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Perform mouse brain MRI",
+      "instruction": "Acquire mouse brain images on a 9.4 T Bruker BioSpec (BioSpec 94/30 USR) equipped with a 240 mT/m gradient coil (BGA‑12S) and a cryogenically cooled Tx/Rx quadrature CryoProbe. Use a T2‑weighted 2D RARE sequence for spatial planning and acquire two orthogonal 3D‑TrueFISP volumes (phase‑encoding 0° and 180°) for CSF space imaging. Refer to the original paper for full sequence parameters.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Install MATLAB and toolboxes",
+      "instruction": "Install MATLAB (Windows OS) from MathWorks and add the Image Processing Toolbox (functions: niftiread, bwboundaries, medfilt3, permute, imshow) and the Statistics and Machine Learning Toolbox (function: prctile).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Acquire 3D‑TrueFISP volumes",
+      "instruction": "Collect two 3D‑TrueFISP volumes of the mouse brain, one with phase‑encoding direction 0° and the other with 180°.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Save images as NIfTI",
+      "instruction": "Export the acquired 3D‑TrueFISP datasets to NIfTI format files.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Create 3D‑CISS image",
+      "instruction": "Generate a 3D‑CISS image from the two 3D‑TrueFISP volumes:",
+      "substeps": [
+        {
+          "instruction": "a. Motion‑correct each 3D‑TrueFISP volume (if multiple repetitions were acquired) using AFNI’s 3Dvolreg() up to 10 iterations or until no further improvement.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Average all repetitions for each phase‑encoding direction.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Rigid‑body register the 180° averaged volume to the 0° averaged volume (6 d.f., AFNI 3Dvolreg()).",
+          "title": ""
+        },
+        {
+          "instruction": "d. Compute a maximum‑intensity projection of the two co‑registered volumes to obtain the final 3D‑CISS image, which is largely free of banding artifacts.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Segment brain parenchyma",
+      "instruction": "Perform semi‑automatic segmentation of the brain parenchyma on the 3D‑CISS image using the Segment 3D tool in ITK‑SNAP (or any equivalent semi‑automatic/automatic method). Include the tissue surrounded by the skull and intracerebral vessels as defined in the reference.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Correct intensity bias",
+      "instruction": "Run N4 bias‑field correction on the brain‑extracted 3D‑CISS volume with FSL’s FAST tool using parameters: 0.5 sigma, 20 mm FWHM, 4 iterations.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Run CSF segmentation algorithm",
+      "instruction": "Execute the adaptive CSF‑space segmentation in MATLAB (CSF_volumetry() or CSF_volumetry_gui()). The pipeline consists of the following sub‑steps:",
+      "substeps": [
+        {
+          "instruction": "1. Compute brain bounding box and discard high‑intensity voxels not adjacent to the parenchyma. Remove isolated regions whose slice‑wise geometry satisfies eccentricity ≥ 0.5, roundness ≥ 0.5, and perimeter ≥ 4. Apply percentile thresholds based on image SNR:",
+          "title": ""
+        },
+        {
+          "instruction": "• SNR > 4: P = 95.5 + xp (xp limited so P stays between 92 % and 97 %).",
+          "title": ""
+        },
+        {
+          "instruction": "• 2 < SNR ≤ 4: P = 95.5.",
+          "title": ""
+        },
+        {
+          "instruction": "• SNR ≤ 2: P = 95.5 − xp (again limited to 92‑97 %).",
+          "title": ""
+        },
+        {
+          "instruction": "2. Enhance CSF seed regions (intensify_CSF):",
+          "title": ""
+        },
+        {
+          "instruction": "a. Flatten the bias‑corrected brain image to a vector, compute mean (µ_vect) and standard deviation (σ_vect) of non‑zero voxels.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Normalize each voxel: image_norm = (image − 1.33 × σ_vect) / σ_vect.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Determine the intensity at the P‑percentile (Px) of the positive‑intensity distribution; set voxels ≤ Px to 0.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Binarize remaining voxels (1 = CSF seed).",
+          "title": ""
+        },
+        {
+          "instruction": "e. OPTIONAL: Apply a 3‑D median filter (3 × 3 × 3 kernel) to the binary mask if low SNR produces spurious fragments.",
+          "title": ""
+        },
+        {
+          "instruction": "3. Region growing in sagittal plane (grow_regions):",
+          "title": ""
+        },
+        {
+          "instruction": "a. Dilation: keep voxels with intensity ≥ (97.5 th − xp) percentile (≈ µ_d + 2 σ_d) and with absolute relative contrast to the boundary ≤ α = 2 %.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Erosion: remove voxels with intensity ≤ (95.5 th − xp) percentile and contrast > α2 = 2.5 %.",
+          "title": ""
+        },
+        {
+          "instruction": "4. Region growing in axial and coronal planes (grow_regions2): repeat the dilation/erosion steps using the same percentile limits, with contrast evaluated over n = 1‑3 voxels (axial/coronal) and n = 1‑4 voxels (sagittal).",
+          "title": ""
+        },
+        {
+          "instruction": "a. OPTIONAL: Apply a 2‑D median filter (3 × 3 kernel) to each slice after this step if required.",
+          "title": ""
+        },
+        {
+          "instruction": "5. Save final masks:",
+          "title": ""
+        },
+        {
+          "instruction": "• Save the unfiltered mask as <original_name>_CSF_mask_final.nii.",
+          "title": ""
+        },
+        {
+          "instruction": "• If median filtering was used, also save <original_name>_CSF_mask_medfilt_final.nii.",
+          "title": ""
+        },
+        {
+          "instruction": "• Both files are written in NIfTI format to the same directory as the input image.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Verify completion",
+      "instruction": "After the algorithm finishes, a confirmation dialog appears. Optionally note that on a PC with an Intel Core i7‑10700U (6‑core) and 32 GB RAM, processing a whole‑brain 3D‑CISS image (33 µm isotropic voxels) takes ~3.5–4.5 min.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 46,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

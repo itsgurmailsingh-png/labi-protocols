@@ -18,26 +18,386 @@
     "model selection"
   ],
   "estimated_time_mins": 12,
-  "materials": [],
+  "materials": [
+    "Access the GUIDANCE2 Server.",
+    "Basic operation of the GUIDANCE2 website",
+    "Import a NEXUS file using the Execute mode",
+    "model_data['lnL'] = float(model_parts[1]) if len(model_parts) >",
+    "model_data['K'] = int(model_parts[2]) if len(model_parts) >",
+    "model_data['AIC'] = float(model_parts[3]) if len(model_parts) >",
+    "model_data['Delta'] = float(model_parts[4]) if len(model_parts) >",
+    "The iTol website"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Procedure This protocol provides a systematic workflow for Bayesian phylogenetic analysis, integrating automated tools to enhance accuracy and reproducibility. The procedure comprises five main stages: (1) robust sequence alignment using GUIDANCE2 with MAFFT to handle evolutionary complexities; (2) sequence format conversion via MEGA and PAUP* for downstream compatibility; (3) optimal evolutionary model selection via ProtTest (proteins) or MrModeltest (nucleotides) guided by statistical criteria (AIC/BIC); (4) execution of Bayesian inference in MrBayes under the selected model parameters, including MCMC diagnostics; and (5) validation and visualization of phylogenetic outputs. These stages form a cohesive pipeline ( Figure 1 ), minimizing manual intervention while ensuring biological rigor. Below, we detail each step with explicit command-line instructions, troubleshooting annotations, and Python scripts to streamline analysis. Figure 1. Integrated workflow for Bayesian phylogenetic analysis applying automated model selection A. Sequence alignment Perform sequence alignment using GUIDANCE2, selecting MAFFT as the alignment tool. 1. Access the GUIDANCE2 Server. 2. Upload sequence file. Upload your multi-sequence FASTA file to GUIDANCE2. Ensure the file format is correct (FASTA requires a header line starting with “>” followed by sequence lines; see FASTA format specifications for details ) and that sequence names do not contain special characters (only numbers, letters, and underscores “_” are allowed). 3. Select the alignment tool. In the alignment tool options, choose MAFFT as the alignment method. The GUIDANCE2 web interface, including sequence input fields and alignment configuration options, is illustrated in Figure 2 . 4. Configure alignment parameters. Users can adjust the advanced MAFFT options located at the bottom of the GUIDANCE2 webpage according to their specific needs. Note: Default MAFFT parameters are recommended for most datasets. However, parameter adjustments may enhance alignment accuracy for specialized cases, as follows: a. For datasets with high complexity, consider using the Max-Iterate option (0, 1, 2, 5, 10, 20, 50, 80, 100, 1,000) in GUIDANCE2 to optimize alignment iterations. b. When selecting a pairwise alignment method, it is crucial to consider the specific characteristics of the sequences and the objectives of the analysis. The 6mer method is suitable for shorter sequences or rapid preliminary analyses, utilizing short segments of six nucleotides for alignment, which offers speed but may compromise accuracy with complex sequences. The localpair approach is ideal for sequences with local similarities or conserved regions, effectively handling insertions and deletions (indels) and accommodating significant variability. In contrast, genafpair is best for longer sequences or when a global alignment is required, as it performs comprehensive alignments that can manage larger variations, making it particularly useful in phylogenetic analyses. The globalpair method is designed for global alignments, especially when sequences are of similar length, providing a holistic comparison. To choose the appropriate method, consider the sequence length—using 6mer or localpair for shorter sequences and genafpair or globalpair for longer ones—along with the degree of sequence similarity and the specific research objectives. By evaluating these factors, researchers can effectively select the most suitable pairwise alignment method for their analyses. Figure 2. Basic operation of the GUIDANCE2 website 5. Run alignment. Click the Submit button and wait for the process to complete. Once finished, download the alignment result file (in FASTA format). 6. Evaluate alignment results. Perform an initial review of the alignment to ensure that sequences are properly aligned. 7. Remove unreliable alignment columns. On the GUIDANCE2 website, identify and exclude unreliable alignment columns based on the preliminary experiments. Ensure that the final alignment is of high quality and biologically meaningful ( Figure 3 ). Figure 3. Remove unreliable columns operation Notes: 1. MAFFT is used in this protocol due to its strong performance; however, you may also consider PRANK, which explicitly models insertions and deletions as evolutionary events and can be advantageous for highly complex sequences. Note that its accuracy may occasionally be lower than MAFFT’s. We recommend conducting preliminary tests—using different alignment tools such as PRANK or ClustalW, followed by phylogenetic tree construction—to determine which approach best suits your data. Comparing these results will help you select the most appropriate alignment method. 2. For users with advanced expertise in sequence comparison, the MEGA program may be utilized to conduct sequence alignment, followed by manual elimination of unreliable columns. Caution: Ensure that the uploaded sequence files are correctly formatted to prevent alignment failures or inaccurate results. B. Sequence format conversion Both PAUP* and MrBayes require sequence data in NEXUS format (.nex). 1. Convert FASTA to NEXUS using MEGA. Prepare alignment: Ensure your multiple sequence alignment is in FASTA format. Open MEGA and import the FASTA file. Export the alignment as a NEXUS file. 2. To convert interleaved to non-interleaved NEXUS for nucleotide datasets, launch the PAUP software. Go to the File menu, click Open , and select the NEXUS file exported from MEGA using the Execute option, as shown in Figure 4 . Skip this step if using ProtTest for protein sequence model selection. Figure 4. Import a NEXUS file using the Execute mode 3. In the PAUP command line (displayed in Figure 5 ), type the following command and execute it: export file=filename.nex format=nexus interleaved=no Replace filename.nex with your desired output filename (typically the same as the original). After entering the command, click the Execute button to run. Figure 5. Convert interleaved format sequences to non-interleaved format sequences using PAUP* Note: Verify that all sequence names contain no illegal characters. Specifically, only letters, numbers, and underscores are supported. C. Protein model selection: ProtTest Section C is applicable to protein sequences. If working with nucleic acid sequences, the user should proceed directly to Section D. 1. Data preparation. Ensure your multiple sequence alignment is saved in FASTA or PHYLIP format. 2. Download and install ProtTest. Obtain the latest version of ProtTest from its GitHub repository. ProtTest requires Java to run. If not already installed, download and install Java from the official website. 3. Run ProtTest. Open a command-line terminal and navigate to the ProtTest installation directory. Execute the following command, replacing and with your specific filenames: java -jar prottest-3.4.2.jar -i -o -all-distributions -F -AIC -BIC -tc 0.5 -threads 12 Parameters explanation: -i : Specifies the input alignment file. -o : Defines the output file for results. -all-distributions: Tests all possible substitution model distributions. -F: Enables the empirical base frequencies. -AIC -BIC: Calculates Akaike information criterion and Bayesian information criterion scores. -tc 0.5: Sets the transition/transversion ratio. -threads 12: Utilizes 12 CPU threads for faster computation, decided by the user's own computer configuration. 4. Parse ProtTest output. To facilitate easier analysis, you can use the following Python script to extract model information and save it as a CSV file. \"\"\" Script Functionality: --------------------- Extracts model names, AIC, and BIC scores from ProtTest output and saves them as a CSV file. Dependencies: 1. pandas - For handling tabular data. - Installation: pip install pandas 2. tqdm - For displaying progress bars. - Installation: pip install tqdm Usage: ------ 1. Update `file_path` with the path to your ProtTest output file. 2. Update `output_path` with the desired path for the CSV output. 3. Run the script: python parse_prottest_output.py \"\"\" import pandas as pd from tqdm import tqdm # User-defined paths file_path = r\" \" # ProtTest output file output_path = r\" \" # Desired CSV output path # Initialize lists to store data models = [] aic_values = [] bic_values = [] # Count total lines for progress bar try: with open(file_path, \"r\") as file: total_lines = sum(1 for line in file) except Exception as e: print(f\"Error counting lines: {e}\") total_lines = 0 # Parse ProtTest output try: with open(file_path, \"r\") as file: for line in tqdm(file, total=total_lines, desc=\"Processing lines\"): if not line.strip() or line.startswith(\"#\"): continue if line.startswith(\"Model\") or not line[0].isalpha(): continue columns = line.split() if len(columns) >= 5: try: model = columns[0] aic = float(columns[2]) bic = float(columns[4]) models.append(model) aic_values.append(aic) bic_values.append(bic) except ValueError: print(f\"Skipping invalid line: {line.strip()}\") except Exception as e: print(f\"Error reading file: {e}\") # Verify data consistency if len(models) == len(aic_values) == len(bic_values): df = pd.DataFrame({ \"Model\": models, \"AIC\": aic_values, \"BIC\": bic_values }) df.to_csv(output_path, index=False) print(f\"Data successfully saved to {output_path}\") else: print(\"Error: Inconsistent data lengths. Please check the parsing logic.\") Instructions: Ensure Python is installed on your system and install the required libraries: pip install pandas tqdm Update the file_path and output_path variables in the script with your specific file paths. Save the script as parse_prottest_output.py and run it: python parse_prottest_output.py The script will generate a CSV file containing model names along with their corresponding AIC and BIC scores. 5. Select the best-fit model: Review the ProtTest output or the generated CSV file. Identify the model with the lowest AIC or BIC score. This model is recommended for subsequent phylogenetic analyses to ensure reliable results. D. Nucleotide model selection: MrModeltest 1. Prepare the NEXUS file. Ensure your nucleotide sequence alignment is saved in non-interleaved NEXUS format (.nex). 2. Run MrModeltest. Open PAUP and load your NEXUS file. In PAUP, open and select the MrModelblock file found in the MrModeltest2-v.2.4/doc/ directory within the extracted archive. This will generate a mrmodel.scores file in your current directory. Navigate to the directory containing mrmodel.scores from the command line. Execute the following command to perform model selection: mrmodeltest2 out.txt This command processes the scores and outputs the results to out.txt. You can rename out.txt as desired. 3. Parse MrModeltest output. Use the following Python script to extract and organize model selection results into a CSV file. import re import csv import chardet # Function to detect the encoding of a file def detect_encoding(file_path): \"\"\"Detect the encoding of the input file.\"\"\" with open(file_path, 'rb') as file: raw_data = file.read() result = chardet.detect(raw_data) return result['encoding'] # Function to read the MrModeltest output file def read_results(file_path): \"\"\"Read file content using the detected encoding.\"\"\" detected_encoding = detect_encoding(file_path) print(f\"Detected file encoding: {detected_encoding}\") with open(file_path, 'r', encoding=detected_encoding, errors='ignore') as file: return file.read() # Function to extract models from the MrModeltest output def extract_all_models(content): \"\"\"Extract all model information from MrModeltest output.\"\"\" models = [] # Extract data from the AIC weights table # Use a more specific pattern to match the table rows table_pattern = r\"Model\\s+-lnL\\s+K\\s+AIC\\s+delta\\s+Weight\\s+CumWeight\\s*\\n[-\\s]+\\n(.*?)[-]{5,}\" table_match = re.search(table_pattern, content, re.DOTALL) if table_match: print(\"AIC weights table found\") table_content = table_match.group(1) # Process each line for line in table_content.strip().split('\\n'): if not line.strip(): continue # Print the line for debugging print(f\"Table line: {line}\") # Try to extract model data using a specific pattern model_match = re.match(r\"(\\w+\\+?\\w*)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+([0-9.e-]+)\", line) if model_match: model_name = model_match.group(1) lnl = float(model_match.group(2)) k = int(model_match.group(3)) aic = float(model_match.group(4)) delta = float(model_match.group(5)) weight = float(model_match.group(6)) models.append({ 'Model': model_name, 'lnL': lnl, 'K': k, 'AIC': aic, 'Delta': delta, 'Weight': weight, 'Method': 'AIC table' }) # If no models found via table, extract the best models if not models: print(\"No models found in table, extracting best models\") # Extract hLRT selected model hLRT_match = re.search(r\"Model selected:\\s+(\\w+\\+\\w+).*?-lnL\\s+=\\s+(\\d+\\.\\d+)\", content, re.DOTALL) if hLRT_match: models.append({ 'Model': hLRT_match.group(1), 'lnL': float(hLRT_match.group(2)), 'Method': 'hLRT', 'AIC': None, # Add all possible fields with default values 'K': None, 'Delta': None, 'Weight': None }) # Extract AIC selected model aic_match = re.search(r\"Model selected:\\s+(\\w+\\+\\w+).*?-lnL\\s+=\\s+(\\d+\\.\\d+).*?AIC\\s+=\\s+(\\d+\\.\\d+)\", content, re.DOTALL) if aic_match: models.append({ 'Model': aic_match.group(1), 'lnL': float(aic_match.group(2)), 'AIC': float(aic_match.group(3)), 'Method': 'AIC selected', 'K': None, 'Delta': None, 'Weight': None }) # Try direct extraction of all model lines as last resort if len(models) = 4: model_data = { 'Model': model_parts[0], 'Method': 'Table extraction' } # Try to add all available fields try: if len(model_parts) > 1: model_data['lnL'] = float(model_parts[1]) if len(model_parts) > 2: model_data['K'] = int(model_parts[2]) if len(model_parts) > 3: model_data['AIC'] = float(model_parts[3]) if len(model_parts) > 4: model_data['Delta'] = float(model_parts[4]) if len(model_parts) > 5: model_data['Weight'] = float(model_parts[5]) models.append(model_data) except (ValueError, IndexError) as e: print(f\"Error parsing model line: {e}\") print(f\"Total models extracted: {len(models)}\") return models # Function to write all models to CSV file def write_all_models_to_csv(file_path, output_csv): \"\"\"Extract model information and write to CSV file.\"\"\" content = read_results(file_path) # Save raw content for debugging with open(output_csv + '.debug.txt', 'w', encoding='utf-8') as debug_file: debug_file.write(content) models = extract_all_models(content) if not models: print(\"No models were found in the file.\") return # Collect all unique fields from all models all_fields = set() for model in models: all_fields.update(model.keys()) fieldnames = sorted(list(all_fields)) print(f\"Using fields: {fieldnames}\") with open(output_csv, 'w', newline='') as csvfile: writer = csv.DictWriter(csvfile, fieldnames=fieldnames) writer.writeheader() for model in models: # Ensure all fields exist in each model for field in fieldnames: if field not in model: model[field] = None writer.writerow(model) print(f\"Successfully extracted {len(models)} models to {output_csv}\") # File paths file_path = \"out.txt\" # Replace with your MrModeltest output file path output_csv = \"model_results.csv\" # Desired CSV output path # Execute the script write_all_models_to_csv(file_path, output_csv) Instructions: Save the script as parse_mrmodeltest_output.py. Update the file_path and output_csv variables with your specific file paths. 4. Run the script: python parse_mrmodeltest_output.py The script will generate a CSV file (model_results.csv) containing the model names, lnL values, and corresponding parameters. 5. Select the best-fit model: Open the out.txt or the generated CSV file. Identify the model with the highest lnL (log-likelihood) value, which typically indicates the best-fit model for your nucleotide data. Use this model for subsequent phylogenetic tree construction to ensure accurate and reliable results. Notes: 1. Modify the file paths in the Python scripts to match your directory structure. 2. Ensure that input files are correctly formatted to prevent parsing errors. By following these optimized steps, you can efficiently select the most appropriate substitution models for both nucleotide and protein sequences, thereby enhancing the accuracy of your phylogenetic analyses. E. Running MrBayes with the optimal model 1. Place your NEXUS file in the same directory as mb.exe. Open a command line here by navigating to the directory (e.g., cd C:\\path\\to\\folder) or using Shift+Right-Click > Open command window, then launch MrBayes by typing mb and pressing Enter . Note: If using PowerShell, prefix the command with ./ (e.g., ./mb) to execute the program. 2. Load the NEXUS file. At the MrBayes prompt, load your NEXUS file by executing: execute your_file_name.nexus 3. To avoid compatibility issues, disable the use of the Beagle library (optional) by entering: set usebeagle=no 4. Access your model and parameter settings. Open the Word file containing the model and parameter settings in Table S1 or Table S2. Identify the desired model (e.g., LG, WAG, jones) and parameter combination (e.g., I+G+F, G+F) from the table. Each combination corresponds to specific prset and lset commands. 5. Copy and paste the commands into MrBayes. For example, users can select LG model with the I+G+F parameter combination: prset aamodelpr = fixed(LG); prset statefreqpr = fixed(empirical); lset rates = invgamma; 6. After setting the model and parameters, start the Markov chain Monte Carlo (MCMC) analysis by entering: mcmc ngen=1000000 samplefreq=100 printfreq=1000 diagnfreq=1000 nchains=4; Command breakdown: ngen=1000000: Number of generations (e.g., 1,000,000). It can be modified according to needs. samplefreq=100: Frequency of sampling the chain (every 100 generations). Not recommended to modify. printfreq=1000: Frequency of printing the log to the screen (every 1,000 generations). It has no effect on the results. diagnfreq=1000: Frequency of diagnostic output (every 1,000 generations). No impact on the results. nchains=4: Number of parallel chains (commonly set to 4). Note: The number of generations (ngen = 1,000,000) can be adjusted according to the user’s requirements. For instance, if convergence metrics (e.g., ASDSF) indicate inadequate sampling or instability, users may increase the ngen value to extend the MCMC run. The sampling frequency (samplefreq = 100) determines how often the chain is sampled; while smaller values improve effective sample size (ESS), frequent sampling may unnecessarily inflate file sizes. We recommend retaining the default settings unless explicitly required. Parameters printfreq = 1,000 and diagnfreq = 1,000 solely control the frequency of progress updates and diagnostic outputs on the screen, respectively, and do not impact the computational results. The number of parallel chains (nchains = 4) balances the exploration of parameter space and computational efficiency, where a higher number of chains facilitates improved convergence diagnostics while increasing resource demands. Users should verify convergence metrics (e.g., ASDSF 0.01. 8. Extract and summarize the results. After completing the MCMC run, summarize the tree topology and parameter estimates by entering: sumt burnin=250; This command discards the first 250 generations as burn-in. Next, use the following code to obtain a summary of the parameter estimates: sump burnin=250; This provides statistics like mean, standard deviation, and confidence intervals for model parameters. To export the posterior trees for visualization, use: sumptrees filename=your_tree.t burnin=250; Replace your_tree.t with your desired filename. 9. After the run is complete, the . tre file is the phylogenetic tree file generated from this run. This file cannot be opened with MEGA, so it is recommended to use the iTol website for viewing and editing. The interface of the iTol website is shown in Figure 6 , where users can quickly edit and visualize the generated evolutionary tree by clicking the Upload a tree button. Figure 6. The iTol website",
-      "is_critical": true,
-      "timers": [],
-      "substeps": []
+      "title": "Align sequences with GUIDANCE2",
+      "instruction": "Perform a MAFFT alignment via the GUIDANCE2 web server, ensuring proper FASTA formatting and optional parameter tuning.",
+      "substeps": [
+        {
+          "instruction": "Open the GUIDANCE2 server in a web browser.",
+          "title": ""
+        },
+        {
+          "instruction": "Upload your multi‑sequence FASTA file; verify that each header starts with \">\" and that sequence names contain only letters, numbers, or underscores.",
+          "title": ""
+        },
+        {
+          "instruction": "Select MAFFT as the alignment method.",
+          "title": ""
+        },
+        {
+          "instruction": "Configure advanced MAFFT options if desired (default settings are recommended). Optional tuning:",
+          "title": ""
+        },
+        {
+          "instruction": "• Max‑Iterate values: 0, 1, 2, 5, 10, 20, 50, 80, 100, 1,000.",
+          "title": ""
+        },
+        {
+          "instruction": "• Pairwise method choice:",
+          "title": ""
+        },
+        {
+          "instruction": "– 6mer (fast, short sequences)",
+          "title": ""
+        },
+        {
+          "instruction": "– localpair (local similarity, handles indels)",
+          "title": ""
+        },
+        {
+          "instruction": "– genafpair (global alignment for longer sequences)",
+          "title": ""
+        },
+        {
+          "instruction": "– globalpair (global alignment for similar‑length sequences).",
+          "title": ""
+        },
+        {
+          "instruction": "Click **Submit** and wait for the job to finish.",
+          "title": ""
+        },
+        {
+          "instruction": "Download the resulting alignment file (FASTA format).",
+          "title": ""
+        },
+        {
+          "instruction": "Visually inspect the alignment to confirm correct placement of residues.",
+          "title": ""
+        },
+        {
+          "instruction": "On the GUIDANCE2 results page, identify and remove unreliable columns as indicated; download the cleaned alignment.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Validation of protocol To validate the proposed protocol, lipopolysaccharide-binding protein (LBP) nucleotide sequences and bactericidal/permeability-increasing (BPI) protein sequences from various species were selected as validation materials. The specific sequences are provided in the supplementary materials (Datasets S1 and S2). Using these datasets, phylogenetic trees were constructed using the Bayesian method, as shown in Figure 1 . Specifically, Bayesian analyses utilized 1,000,000 MCMC iterations. Numbers above each branch represent the confidence values (posterior probability) of the current branch. The results demonstrated a high degree of reproducibility across all constructed trees, highlighting the robustness of the protocol in generating accurate and consistent phylogenetic analyses. This establishes the protocol as a reliable framework for evolutionary studies. Figure 7. Phylogenetic trees constructed from lipopolysaccharide-binding protein (LBP) nucleotide sequences and BPI protein sequences across different species using the Bayesian method. (A) Phylogenetic tree of LBP nucleotide sequences [Markov chain Monte Carlo (MCMC) iterations: 1,000,000]. (B) Phylogenetic tree of BPI protein sequences (MCMC iterations: 2,000,000). Numbers above each branch represent the confidence values (posterior probability) of the current branch.",
+      "title": "Convert alignment to NEXUS",
+      "instruction": "Transform the FASTA alignment into NEXUS format and ensure it is non‑interleaved for downstream tools.",
+      "substeps": [
+        {
+          "instruction": "Open MEGA, import the FASTA alignment, and export it as a NEXUS file.",
+          "title": ""
+        },
+        {
+          "instruction": "Launch PAUP*.",
+          "title": ""
+        },
+        {
+          "instruction": "In PAUP*, use **File → Open** and select the NEXUS file exported from MEGA.",
+          "title": ""
+        },
+        {
+          "instruction": "Enter the following PAUP command to produce a non‑interleaved NEXUS file and execute it:",
+          "title": ""
+        },
+        {
+          "instruction": "export file=filename.nex format=nexus interleaved=no",
+          "title": ""
+        },
+        {
+          "instruction": "Replace *filename.nex* with your desired output name (often the same as the input).",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm that all sequence names contain only letters, numbers, or underscores.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Select protein model with ProtTest",
+      "instruction": "Identify the best‑fit amino‑acid substitution model using ProtTest and extract the result automatically.",
+      "substeps": [
+        {
+          "instruction": "Prepare the protein alignment in FASTA or PHYLIP format.",
+          "title": ""
+        },
+        {
+          "instruction": "Install Java (if not present) and download the latest ProtTest release from its GitHub repository.",
+          "title": ""
+        },
+        {
+          "instruction": "Open a terminal, navigate to the ProtTest directory, and run:",
+          "title": ""
+        },
+        {
+          "instruction": "java -jar prottest-3.4.2.jar -i <input_alignment> -o <output_file> -all-distributions -F -AIC -BIC -tc 0.5 -threads 12",
+          "title": ""
+        },
+        {
+          "instruction": "Replace <input_alignment> and <output_file> with your filenames.",
+          "title": ""
+        },
+        {
+          "instruction": "Install required Python packages:",
+          "title": ""
+        },
+        {
+          "instruction": "pip install pandas tqdm",
+          "title": ""
+        },
+        {
+          "instruction": "Create a Python script (e.g., *parse_prottest_output.py*) with the provided code, setting:",
+          "title": ""
+        },
+        {
+          "instruction": "file_path = r\"<ProtTest_output_file>\"",
+          "title": ""
+        },
+        {
+          "instruction": "output_path = r\"<desired_CSV_path>\"",
+          "title": ""
+        },
+        {
+          "instruction": "Run the script:",
+          "title": ""
+        },
+        {
+          "instruction": "python parse_prottest_output.py",
+          "title": ""
+        },
+        {
+          "instruction": "Open the generated CSV and locate the model with the lowest AIC or BIC score; this model will be used for MrBayes.",
+          "title": ""
+        },
+        {
+          "instruction": "Optional: keep the original ProtTest output for reference.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Select nucleotide model with MrModeltest",
+      "instruction": "Determine the optimal nucleotide substitution model using MrModeltest and parse the scores automatically.",
+      "substeps": [
+        {
+          "instruction": "Ensure your nucleotide alignment is saved as a non‑interleaved NEXUS file (.nex).",
+          "title": ""
+        },
+        {
+          "instruction": "Open PAUP*, load the NEXUS file, and then load the *MrModelblock* file found in the *MrModeltest2‑v.2.4/doc/* directory.",
+          "title": ""
+        },
+        {
+          "instruction": "PAUP* will generate a *mrmodel.scores* file in the current working directory.",
+          "title": ""
+        },
+        {
+          "instruction": "From a command‑line terminal, execute:",
+          "title": ""
+        },
+        {
+          "instruction": "mrmodeltest2 out.txt",
+          "title": ""
+        },
+        {
+          "instruction": "This reads *mrmodel.scores* and writes the model‑selection results to *out.txt* (rename as desired).",
+          "title": ""
+        },
+        {
+          "instruction": "Create a Python script (e.g., *parse_mrmodeltest_output.py*) using the supplied code. Set:",
+          "title": ""
+        },
+        {
+          "instruction": "file_path = \"out.txt\"",
+          "title": ""
+        },
+        {
+          "instruction": "output_csv = \"model_results.csv\"",
+          "title": ""
+        },
+        {
+          "instruction": "Install the required Python package:",
+          "title": ""
+        },
+        {
+          "instruction": "pip install chardet",
+          "title": ""
+        },
+        {
+          "instruction": "Run the script:",
+          "title": ""
+        },
+        {
+          "instruction": "python parse_mrmodeltest_output.py",
+          "title": ""
+        },
+        {
+          "instruction": "Open the resulting CSV and select the model with the highest lnL (log‑likelihood) value; this model will be used for MrBayes.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Run MrBayes analysis",
+      "instruction": "Execute Bayesian phylogenetic inference in MrBayes using the selected substitution model.",
+      "substeps": [
+        {
+          "instruction": "Copy the final NEXUS file into the folder containing *mb.exe* (or ensure *mb* is in your PATH).",
+          "title": ""
+        },
+        {
+          "instruction": "Open a command prompt (or PowerShell with ./ prefix) in that folder and start MrBayes:",
+          "title": ""
+        },
+        {
+          "instruction": "mb",
+          "title": ""
+        },
+        {
+          "instruction": "At the MrBayes prompt, load the NEXUS file:",
+          "title": ""
+        },
+        {
+          "instruction": "execute your_file_name.nexus",
+          "title": ""
+        },
+        {
+          "instruction": "Optionally disable the Beagle library to avoid compatibility issues:",
+          "title": ""
+        },
+        {
+          "instruction": "set usebeagle=no",
+          "title": ""
+        },
+        {
+          "instruction": "Open the supplemental Word file (Table S1 or S2) and locate the desired model/parameter combination (e.g., LG + I+G+F).",
+          "title": ""
+        },
+        {
+          "instruction": "Enter the corresponding MrBayes commands, for example:",
+          "title": ""
+        },
+        {
+          "instruction": "prset aamodelpr = fixed(LG);",
+          "title": ""
+        },
+        {
+          "instruction": "prset statefreqpr = fixed(empirical);",
+          "title": ""
+        },
+        {
+          "instruction": "lset rates = invgamma;",
+          "title": ""
+        },
+        {
+          "instruction": "Start the MCMC run with the recommended settings:",
+          "title": ""
+        },
+        {
+          "instruction": "mcmc ngen=1000000 samplefreq=100 printfreq=1000 diagnfreq=1000 nchains=4;",
+          "title": ""
+        },
+        {
+          "instruction": "• ngen=1,000,000 (adjustable if convergence is poor)",
+          "title": ""
+        },
+        {
+          "instruction": "• samplefreq=100 (keep default)",
+          "title": ""
+        },
+        {
+          "instruction": "• printfreq=1000 and diagnfreq=1000 (output only)",
+          "title": ""
+        },
+        {
+          "instruction": "• nchains=4 (standard parallel chains).",
+          "title": ""
+        },
+        {
+          "instruction": "After the run finishes, summarize the tree and parameters:",
+          "title": ""
+        },
+        {
+          "instruction": "sumt burnin=250;",
+          "title": ""
+        },
+        {
+          "instruction": "sump burnin=250;",
+          "title": ""
+        },
+        {
+          "instruction": "Export the posterior tree for visualization:",
+          "title": ""
+        },
+        {
+          "instruction": "sumptrees filename=your_tree.t burnin=250;",
+          "title": ""
+        },
+        {
+          "instruction": "Open the resulting *.t* file with iTol (https://itol.embl.de) by clicking **Upload a tree**.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Validate phylogenetic trees",
+      "instruction": "Confirm the workflow by reproducing the benchmark analyses described in the protocol.",
+      "substeps": [
+        {
+          "instruction": "Obtain the validation datasets (LBP nucleotide sequences and BPI protein sequences) from the supplementary Materials (Datasets S1 and S2).",
+          "title": ""
+        },
+        {
+          "instruction": "For the LBP nucleotide set, run MrBayes with 1,000,000 MCMC generations (as in step 5).",
+          "title": ""
+        },
+        {
+          "instruction": "For the BPI protein set, run MrBayes with 2,000,000 MCMC generations.",
+          "title": ""
+        },
+        {
+          "instruction": "After each run, inspect posterior probabilities on the resulting trees; high values indicate strong support and confirm protocol reproducibility.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-18T21:05:52.361869Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Validation of protocol To validate the proposed protocol, lipopolysaccharide-binding protein (LBP) nucleotide sequences and bactericidal/permeability-increasing (BPI) protein sequences from various species were selected as validation materials. The specific sequences are provided in the supplementary materials (Datasets S1 and S2). Using these datasets, phylogenetic trees were constructed using the Bayesian method, as shown in Figure 1 . Specifically, Bayesian analyses utilized 1,000,000 MCMC iterations. Numbers above each branch represent the confidence values (posterior probability) of the current branch. The results demonstrated a high degree of reproducibility across all constructed trees, highlighting the robustness of the protocol in generating accurate and consistent phylogenetic analyses. This establishes the protocol as a reliable framework for evolutionary studies. Figure 7. Phylogenetic trees constructed from lipopolysaccharide-binding protein (LBP) nucleotide sequences and BPI protein sequences across different species using the Bayesian method. (A) Phylogenetic tree of LBP nucleotide sequences [Markov chain Monte Carlo (MCMC) iterations: 1,000,000]. (B) Phylogenetic tree of BPI protein sequences (MCMC iterations: 2,000,000). Numbers above each branch represent the confidence values (posterior probability) of the current branch.",
+  "content_type": "protocol",
+  "content_type_score": 42,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

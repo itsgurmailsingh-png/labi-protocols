@@ -9,7 +9,101 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "With the advancement of science and technology, the combination of the unmanned aerial vehicle (UAV) and camera surveillance systems (CSS) is currently a promising solution for practical applications related to security and surveillance operations. However, one of the biggest risks and challenges for the UAV-CSS is analysis, process, and transmission data, especially, the limitations of computational capacity, storage and overloading the transmission bandwidth. Regard to conventional methods, almost the data collected from UAVs is processed and transmitted that cost huge energy. A certain amount of data is redundant and not necessary to be processed or transmitted. This paper proposes an efficient algorithm to optimize the transmission and reception of data in UAV-CSS systems, based on the platforms of artificial intelligence (AI) for data processing. The algorithm creates an initial background frame and update to the complete background which is sent to server. It splits the region of interest (moving objects) in the scene and then sends only the changes. This supports the CSS to reduce significantly either data storage or data transmission. In addition, the complexity of the systems could be significantly reduced. The main contributions of the algorithm can be listed as follows;-The developed solution can reduce data transmission significantly.-The solution can empower smart manufacturing via camera surveillance.-Simulation results have validated practical viability of this approach.The experimental method results show that reducing up to 80% of storage capacity and transmission data.",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Each frame of original input video with the size of width, W and height, H has static blocks and might be contained moving blocks. In order to model the background without moving objects, an algorithm is shown in Fig. 2 is proposed. The background is modeled following the t-consecutive video frames, t can be varied based on specific scenes. The frames at time t=1 and time t+1 are denoted by Ft and Ft+1, respectively. At the first frame of the input video F1 or t = 1, the initial background frame Bt is defined as undefined and denotes as “black” blocks. For following frames, the frame t is compared with the previous frame t - 1 by a block matching algorithm to determine moving areas that can be refered as area contained moving objects and create motion maps, Rt. Block matching algorithm calculates the cost function at each possible location in the search window. This leads to the possible match of the macro-block in the reference frame with a block in another frame. The background, Bt are updated based on the previous initial background Bt−1 and motion frames Rt. The background updating procedure is performed until all undefined blocks are filled by background blocks.Fig. 2The flowchart of the background initializationFig. 2"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "As shown in Fig. 3, there are original frames Ft, motion frame Rt in which moving blocks are denoted as “black” blocks and “white” blocks as static blocks, and background initials at different frames. At the first frame, t = 1, the background initial, B1 is modeled with all “black” blocks, as shown in Fig. 3e. From t = 2, by applying block matching algorithm, if a frame includes moving objects, the motion map, Rt blocks will be marked with “black” blocks, otherwise will be a “white” block. The background modeling process is performed via Rt and the previous background, Bt−1. In addition, at this frame, if block in Rt that is “white” block and the corresponding block in the Bt−1 initial is “black” then those blocks in the background initial will be duplicated from the frame. Similarly, after all “black” blocks in background initial are replace by “white” blocks in Rt, the background initial is performed. Since then, the background initial will participate in the process of updating the background.Fig. 3Background initial at first few frames from ATON datasetFig. 3"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Each block in Ftcould be classified into four different categories as: “background”, “still object”, “environmental change”, and “moving object”. Motion map for each frame, Rt exits two states which are background marked in “white” block and movement marked in “black” block. Correlation coefficient CB, as shown in Eq. 1, is compared with threshold to determine the category of each block in two consecutive frames Ft, Ft−1. The block representation of video frame Ft is classified as “background” if the block represents of Rt is “background”, so if CB > THCB or “still object” if CB < THCB. Otherwise, for Rt, if CB > THCB the frame block represent is “environmental change”, else is “moving object”."
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Correlation coefficient:(1)CB(m,n)=∑|bm,nt−μbm,nt|×|b^m,nt−μb^m,nt|∑|bm,nt−μbm,nt|2×∑|b^m,nt−μb^m,nt|2"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Background and environment change updating(2)b˜m,nt=αb^m,nt+(1−α)bm,nt"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Still object updating:(3)b˜m,nt={bm,ntCount(m,n)≥THstillb^m,ntotherwise"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Moving object updating:(4)b˜m,nt={bm,ntSM(bm,nt)<SM(b^m,nt)b^m,ntotherwise"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Where bm,nt={I(mN+i,nN+j):i,j=0,1,2,...N−1t} denotes the block index of frame t, Ft, bm,nt−1={F(mN+i,nN+j):i,j=0,1,2,...N−1t−1} denote the block index of frame t-1, Ft−1 and b˜m,nt={B(mN+i,nN+j):i,j=0,1,2,...N−1t−1} is denote the block index of the background Bt, b^m,nt denote the block index of the initial background frames, µb is the mean of the pixel values in block bt. Additionally SM(bm,nt) and SM(b^m,nt) denote the side-match measures for block bm,nt from Ft embedded in B^t and that for block b^m,nt embedded in B^t, respectively. Note that if a block in R^t is determined as a “moving object” block two or more times continuously."
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "The next step is extracting moving objects in each frame and transmit to the sever sides. The metrics is applied for the model performance evaluation of ROIs extraction and D-CNN process: F-Measure, is defined as:(5)F−measure=2×precision×recallprecision+recall"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Where precision=TPTP+FP and recall=TPTP+FN. The range of F-measure is between 0 and 1 where if the result of F-measure = 1, that mean the predicted value is totally match the ground truth."
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "The videos used in this paper is taken from the ATON dataset which contains several videos captured from camera surveillance. By using this method, the time to create the background initial is approximate 30 frames, then 170 next frames for background updating that the blocks are “still object” or “illumination change” is updated. Finally, the updated backgrounds will be sent to the server side. Otherwise, it will use the previous background. THstill is a rate to update the background and it can vary for different scenes. The experimental results show that if setting THstill = 20, the background will be updated faster (at frame = 97 after has initialized “background initial”) and vice versa with THstill = 40 (at frame 173), however, the accuracy of THstill = 40 is higher as shown in Fig. 4.Fig. 4Still object updating for background estimate where a) raw frames t, (b) back- ground updated with THstill = 20 and (c) background updated with THstill = 40 at different times.Fig. 4"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "After having background model, the process which is shown in Fig. 5, is separate the foreground from the original frame. Only these foregrounds are sent to the server side. Our network is trained to be able to map raw pixel values from video frames to a set of binary values, between 0 and 1.Fig. 5Extracting Region of Interests.Fig. 5"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Based on the image resolution, it will see W×H×3 (W = Width, H = Height, 3 = RGB color channels). The CNNs models will receive each input frame to train and test. Table 1 depicts the processed steps of network architecture including two stages with many convolutional layers. At the first stage, each frame separated from the video is directly received by a modified CNN network. The 16 feature maps having the kernel size and the stride of 1 at the end of the first convolutional block are transformed from this frame. Next step, the output of the second block is the 32 feature maps of size W/2×H/2. These feature maps are made from the 16 feature maps at the end of the first convolutional block down sampling a max-pooling layer with a stride of 2. The following steps are repeated the same which present in Table 1.Table 1The Edge DCNN network configuration at the camera side. A modified CNNs (based on U-net network architecture [9]) is from block 1 to 4, where block 0 is RGB input image. In the other side, the edge Transpose-CNN is from block 5 to 9, where block 9 is the output probability mask from the network.Table 1Edge modified-CNNEdge Transposed CNN0W×H×3, RGB image10(Conv) W×H×16,F=3×3,S=1Final outputW×H×1,F=1×1,S=11(Conv) W×H×16,F=3×3,S=1(Conv) W×H×16,F=3×3,S=1Max-pooling, F=2×2,S=2Dropout rate = 0.12(Conv) W2×H2×32,F=3×3,S=1(Conv) W2×H2×32,F=3×3,S=1Max-pooling, F=2×2,S=2Dropout rate = 0.19(Trans) W×H×16,F=3×3,S=1Concatenate 9 & 1W×H×32,F=3×3,S=1Dropout rate = 0.1(Conv) W×H×16,F=3×3,S=1(Conv) W×H×16,F=3×3,S=13(Conv) W4×H4×64,F=3×3,S=1(Conv) W4×H4×64,F=3×3,S=1Max-pooling, F=2×2,S=2Dropout rate = 0.18(Trans) W2×H2×32,F=3×3,S=1Concatenate 8 & 2, W2×H2×64Dropout rate = 0.1(Conv) W8×H8×32,F=3×3,S=1(Conv) W8×H8×32,F=3×3,S=14(Conv) W8×H8×128,F=3×3,S=1(Conv) W8×H8×128,F=3×3,S=1Max-pooling, F=2×2,S=2Dropout rate = 0.17(Trans) W4×H4×64,F=3×3,S=1Concatenate 7 & 3, W4×H4×128Dropout rate = 0.1(Conv) W8×H8×64,F=3×3,S=1(Conv) W8×H8×64,F=3×3,S=15(Conv) W16×H16×256,F=3×3,S=1(Conv) W16×H16×256,F=3×3,S=16(Trans) W8×H8×128,F=3×3,S=1Concatenate 6 & 4, W8×H8×256Dropout rate = 0.1(Conv) W8×H8×128,F=3×3,S=1(Conv) W8×H8×128,F=3×3,S=1"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "Transposed convolution (TC) uses some learnable parameters to unsampled the input feature map into a desired output feature map. In this case, the input feature map of the TC is the output of the Edge Modified CNN. It is taken to the Transposed CNN (TCNN) to learn the weights for decoding the feature maps. Following the input of TCNN have the size of 16 times smaller than the original size and consists of 256 feature maps with the size of W16×H16×256. With respect to the block 6 of TCNN stage, the output of modified CNN is projected into W8×H8×128 by using 2×2 transposed convolution filter with stride of 2."
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "By applying sigmoid function and threshold the pixel values at the last layer, the output of the transpose CNN is the probability mask for each pixel with the value for noticed objects of 1 and background of 0."
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "The region of interest extraction with findContour is shown in Fig. 6.Fig. 6ROIs extraction with findContour at random frames.Fig. 6"
+    },
+    {
+      "title": "Data Processing at camera surveillance side",
+      "instruction": "About 50 to 200 training examples are employed in this proposed model. From the SBI dataset as training examples, the experiments select random 100 images. There are around 1.2 million parameters in total. The true label compares with the predicted value by using a binary cross-entropy loss function. The RMSProp optimizer with a batch size of 5, 100 epochs are applied to aim with training the network. Based on the description in Fig 7, the model checkpoint helps to improve the network performance and increase the precision of the model. This point does not update until training accuracy increases, or training losses decrease. Hence, this strategy helps the network keep training results better.Fig. 7Evaluate training performance at edge side.Fig. 7"
+    },
+    {
+      "title": "Data Processing at Server Side",
+      "instruction": "The server side receives the RoIs to train their own D-CNN network, as shown in Fig. 8. When the network bases on from those actual data, accuracy and relevance will significantly increase. The first default input size of RoIs is 64 × 64 pixels of RGB to meet the input image requirements from the various ROI size separated from the previous step. In addition, about 200 RoIs is deployed to train DCNN at the server side. This model system needs to go through several experiments to achieve the best performance with the optimal size. When the server receives well-defined RoIs, the system only needs to focus ROIs with the small size and no need for complex classification [11]. All RoIs with the default size selected manually classifies into two classes as “car” and \"truck\". The classification system consists of two convolution layers, two pooling layers arranged alternately, two fully connected layer and finally the output layer. The rectifier linear units (ReLU) in the final layer plays a role as the active function. The detailed custom classification of the network is given in Table 2.Fig. 8The D-CNN object classification.Fig. 8Table 2The D-CNN network configuration at the sever side.Table 21Input layer: 64*64 pixels2Convolution layer: W×H×256,F=3×3,S=1Active function: ReLUMax-pooling layer:W2×H2×256,F=2×2,S=13Convolution layer:W2×H2×256,F=2×2,S=2Active function: ReLUW4×H4×256,F=2×2,S=24Flatten layer5Fully connected layer: Dense 646Fully connected layer: Dense 17Active function: sigmoid"
+    },
+    {
+      "title": "Data Processing at Server Side",
+      "instruction": "The number of RoIs is divided following two classes 100 ROIs chosen as cars and 100 ROIs as trucks, all extracted from the video in the ATON dataset- 33 seconds of length with 25 frames per second, thus total frames are 825 frames (http://cvrr.ucsd.edu/aton/shad)."
+    },
+    {
+      "title": "Data Processing at Server Side",
+      "instruction": "To achieve the highest accuracy of the training process, the network need has experimented for several epochs, with an era range from 5 to 20. The best result got an epoch equaling 12 in which the trade-off between training Creating time and accuracy are the same. Fig. 9 shows that at epoch is 12, our DCNN took 13.18 seconds to finish with a loss: 0.0544 - acc: 0.9841 - lost val: 0.1650 - val acc: 0.8571.Fig. 9Evaluate training performance of the DCNN at the server side.Fig. 9"
+    },
+    {
+      "title": "Data Processing at Server Side",
+      "instruction": "In order to calculate the complexity, the number of parameters of each layer has been calculated, that is convolution layer as follow:(6)Numberofparameters=F2×C×K"
+    },
+    {
+      "title": "Data Processing at Server Side",
+      "instruction": "Where F is the filter size, C is the number of input channels, and K is the number of filters. As shown in Table 2, the number of parameters of the custom CNN on the server side can significantly reduce in the network compared to existing object classification and detection methods. At the server edges, the parameters in CNN customized has 209K compared to 66 million or approximately 0.3% of the YOLO method's parameters. In addition, the memory usage per image/frame is 1.7 MB compared to 53.1 MB of the YOLO method."
+    },
+    {
+      "title": "Data Processing at Server Side",
+      "instruction": "The classification of the noticed objects bases on evaluating the performance of the custom CNN. In addition, F-measure is also implemented as the measurement. The precision, recall, and F-measure are detailly calculated, as shown in Table 3. With respect to each input image size, the experiment was repeated 10 times using random sub-sampling. Because the size and volume of the data set is smaller, the performance of theis system is not high. In the future, when the amount of data is enhanced, this performance will certainly improve. The measure here is the average of 10 experiments with accuracy, precision and recall. The proposed network shows very good processing results with a smaller number of operations in both training and classification.Table 3Complexity and memory usage of approaching and a state-of-the-art.Table 3D-CNN modelYOLO modelInput size64 × 64224 × 224# of conv.layer224# of parameters209K66,000KMemory usage/image1690KB53,606KBAlgorithm 1Background updating algorithm.Algorithm 1Image, table 4"
+    }
+  ],
   "materials": [],
-  "fetched_at": "2026-06-19T00:40:34.255020+00:00"
+  "fetched_at": "2026-06-19T00:40:34.255020+00:00",
+  "media": []
 }

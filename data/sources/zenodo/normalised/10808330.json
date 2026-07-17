@@ -18,34 +18,88 @@
     "literature mining"
   ],
   "estimated_time_mins": 18840,
-  "materials": [],
+  "materials": [
+    "and PMC Open Access (as of November"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "RegulaTome corpus : this file contains the RegulaTome corpus in BRAT format. The directory \"splits\" has the corpus split based on the train/dev/test used for the training of the relation extraction system RegulaTome annodoc : The annotation guidelines along with the annotation configuration files for BRAT are provided in annodoc+config.tar.gz . The online version of the annotation documentation can be found here: https://katnastou.github.io/regulatome-annodoc/ The tagger software can be found here: https://github.com/larsjuhljensen/tagger . The command used to run tagger before large-scale execution of the RE system is: gzip -cd `ls -1 pmc/*.en.merged.filtered.tsv.gz` `ls -1r pubmed/*.tsv.gz` | cat dictionary/excluded_documents.txt - | tagger/tagcorpus --threads=16 --autodetect --types=dictionary/curated_types.tsv --entities=dictionary/all_entities.tsv --names=dictionary/all_names_textmining.tsv --groups=dictionary/all_groups.tsv --stopwords=dictionary/all_global.tsv --local-stopwords=dictionary/all_local.tsv --type-pairs=dictionary/all_type_pairs.tsv --out-matches=all_matches.tsv Input documents for large-scale execution, which is done on entire PubMed (as of March",
+      "title": "Set up resources and files",
+      "instruction": "Download and extract all required resources: the RegulaTome corpus in BRAT format, the \"splits\" directory, annotation guidelines (annodoc+config.tar.gz), the tagger software from its GitHub repository, the dictionary archive (tagger_dictionary_files.tar.gz), and the relation‑extraction model archives (relation_extraction_multi-label-best_model.tar.gz and the RoBERTa‑large‑PM‑M3‑Voc model).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "and PMC Open Access (as of November",
+      "title": "Run tagger on corpus",
+      "instruction": "Execute the tagger command to process the PMC and PubMed TSV files and produce a matches file.",
+      "substeps": [
+        {
+          "instruction": "Decompress and list all PMC files matching pmc/*.en.merged.filtered.tsv.gz and all PubMed files matching pubmed/*.tsv.gz using `gzip -cd` and `ls -1`.",
+          "title": ""
+        },
+        {
+          "instruction": "Concatenate the list of excluded documents (dictionary/excluded_documents.txt) with the decompressed streams via `cat`.",
+          "title": ""
+        },
+        {
+          "instruction": "Pipe the combined stream into `tagger/tagcorpus` with the following options: `--threads=16 --autodetect --types=dictionary/curated_types.tsv --entities=dictionary/all_entities.tsv --names=dictionary/all_names_textmining.tsv --groups=dictionary/all_groups.tsv --stopwords=dictionary/all_global.tsv --local-stopwords=dictionary/all_local.tsv --type-pairs=dictionary/all_type_pairs.tsv --out-matches=all_matches.tsv`.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "articles in BioC format. The files are converted to a tab-delimited format to be compatible with the RE system input (see below). Input dictionary files : all the files necessary to execute the command above are available in tagger_dictionary_files.tar.gz Tagger output : we filter the results of the tagger run down to gene/protein hits, and documents with more than 1 hit (since we are doing relation extraction) before feeding it to our RE system. The filtered output is available in tagger_matches_ggp_only_gt_1_hit.tsv.gz Relation extraction system input : combined_input_for_re.tar.gz : these are the directories with all the .ann and .txt files used as input for the large-scale execution of the relation extraction pipeline. The files are generated from the tagger tsv output (see above, tagger_matches_ggp_only_gt_1_hit.tsv.gz ) using the tagger2standoff.py script from the string-db-tools repository. Relation extraction models . The Transformer-based model used for large-scale relation extraction and prediction on the test set is at relation_extraction_multi-label-best_model.tar.gz The pre-trained RoBERTa model on PubMed and PMC and MIMIC-III with a BPE Vocab learned from PubMed (RoBERTa-large-PM-M3-Voc), which is used by our system is available here . Relation extraction system output : the tab-delimited outputs of the relation extraction system are found at large_scale_relation_extraction_results.tar.gz !!!ATTENTION this file is approximately 1TB in size, so make sure you have enough space to download it on your machine!!! The relation extraction system output files have 86 columns: PMID, Entity BRAT ID1, Entity BRAT ID2, and scores per class produced by the relation extraction model. Each file has a header to denote which score is in which column.",
+      "title": "Convert BioC to tab‑delimited format",
+      "instruction": "Obtain the full‑scale input documents (entire PubMed as of March 2024 and PMC Open Access as of November 2023) in BioC format and convert them to a tab‑delimited format compatible with the relation‑extraction system.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Filter tagger output for gene/protein hits",
+      "instruction": "From the tagger output (all_matches.tsv), keep only gene/protein matches and retain only those documents that contain more than one hit; compress the filtered table to tagger_matches_ggp_only_gt_1_hit.tsv.gz.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Create standoff files for RE input",
+      "instruction": "Run the `tagger2standoff.py` script from the string‑db‑tools repository on the filtered TSV (tagger_matches_ggp_only_gt_1_hit.tsv.gz) to generate the .ann and .txt files required by the relation‑extraction pipeline; the resulting directories are packaged in combined_input_for_re.tar.gz.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Execute relation extraction and retrieve results",
+      "instruction": "Run the relation‑extraction system using the provided Transformer‑based model (relation_extraction_multi-label-best_model.tar.gz) together with the pre‑trained RoBERTa‑large‑PM‑M3‑Voc model; the system writes tab‑delimited output files (86 columns: PMID, Entity BRAT ID1, Entity BRAT ID2, and per‑class scores) into the archive large_scale_relation_extraction_results.tar.gz (≈ 1 TB).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-18T22:08:01.167478Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 29,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "document",
+      "filename": "Error analysis full results - RegulaTome.xlsx",
+      "local_path": "data/media/zenodo/10808330/Error analysis full results - RegulaTome.xlsx",
+      "source_url": "https://zenodo.org/api/records/10808330/files/Error%20analysis%20full%20results%20-%20RegulaTome.xlsx/content",
+      "caption": "",
+      "bytes": 142981,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@media-batch-2/zenodo/10808330/Error analysis full results - RegulaTome.xlsx"
+    }
+  ]
 }

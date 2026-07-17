@@ -2,129 +2,34 @@
 
 Data infrastructure for [Labi](https://github.com/itsgurmailsingh-png/labi) — an offline-first lab protocol assistant.
 
-This repo runs a multi-source, license-verified pipeline that ingests raw protocol data, verifies every license via external registries, normalises to a canonical schema via LLM, deduplicates across sources, and publishes to a CDN consumed by the Flutter app.
+This repo runs a multi-source, license-verified pipeline that ingests raw protocol data, verifies every license via external registries, normalises to a canonical schema via LLM, recovers content from attached documents/media, restructures steps into bench-scannable titles + substeps, deduplicates across sources, gates everything through automated quality checks, and publishes to a CDN consumed by the Flutter app.
 
 ---
 
-## Graphical Abstract
+## Pipeline Overview
 
 ```
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                     LABI PROTOCOL DATA PIPELINE  v2                        ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║                                                                              ║
-║  SOURCE 1         SOURCE 2        SOURCE 3      SOURCE 4       SOURCE 5     ║
-║  protocols.io     PubMed Central  Zenodo        figshare       OpenWetWare  ║
-║  ⚠️ FROZEN        NCBI E-utils    REST API      REST API       MediaWiki    ║
-║  6,291 done       CC-BY XML       CC0+CC-BY     CC-BY          CC-BY-SA     ║
-║        │                       │                        │                   ║
-║        ▼                       ▼                        ▼                   ║
-║  ┌─────────────┐        ┌─────────────┐         ┌─────────────┐            ║
-║  │  fetch_     │        │  fetch_     │         │  fetch_     │            ║
-║  │  protocols  │        │  pubmed_    │         │  bio_       │            ║
-║  │  _io_       │        │  central.py │         │  protocol.py│            ║
-║  │  verified.py│        │             │         │             │            ║
-║  └──────┬──────┘        └──────┬──────┘         └──────┬──────┘            ║
-║         │                      │                        │                   ║
-║         │ CrossRef DOI         │ PMC XML                │ CC-BY             ║
-║         │ verification         │ <license> tag          │ (ToS default)     ║
-║         │ (per protocol)       │ (per article)          │                   ║
-║         │                      │                        │                   ║
-║         ▼                      ▼                        ▼                   ║
-║  ┌─────────────────────────────────────────────────────────────┐            ║
-║  │              LICENSE GATE  (hard filter)                    │            ║
-║  │                                                             │            ║
-║  │   creativecommons.org/licenses/by/4.0/  →  ✅  KEEP        │            ║
-║  │   .../by-nc/...   .../by-sa/...         →  ❌  DISCARD     │            ║
-║  │   No license / DOI not in CrossRef      →  ❌  DISCARD     │            ║
-║  └─────────────────────────────────────────────────────────────┘            ║
-║         │                      │                        │                   ║
-║         ▼                      ▼                        ▼                   ║
-║  data/sources/         data/sources/          data/sources/                 ║
-║  protocols_io/raw/     pubmed_central/raw/    bio_protocol/raw/             ║
-║                                                                              ║
-║  ─────────────────────────────────────────────────────────────────────────  ║
-║                                                                              ║
-║                        LAYER 2: NORMALISE                                   ║
-║                        scripts/normalise.py                                 ║
-║                                                                              ║
-║   raw source JSON  →  Gemini Flash (offline batch LLM)  →  Labi schema     ║
-║                                                                              ║
-║   Extracts: title · author · category · estimated_time_mins                 ║
-║             materials · steps (with is_critical + timers)                   ║
-║                                                                              ║
-║   data/sources/{source}/normalised/{id}.json                                ║
-║                                                                              ║
-║  ─────────────────────────────────────────────────────────────────────────  ║
-║                                                                              ║
-║                       LAYER 3: MERGE + DEDUP                                ║
-║                       scripts/merge_and_dedup.py                            ║
-║                                                                              ║
-║   MinHash LSH (128 permutations, Jaccard ≥ 0.80)                           ║
-║   Source priority:  bio_protocol > pubmed_central > vendor > protocols_io   ║
-║   Conflict rule:    license_verified=true wins · then more steps wins       ║
-║                                                                              ║
-║   data/merged/{protocol_id}.json                                            ║
-║   protocols/{protocol_id}.json   ← public CDN folder                       ║
-║                                                                              ║
-║  ─────────────────────────────────────────────────────────────────────────  ║
-║                                                                              ║
-║                       LAYER 4: INDEX                                        ║
-║                       scripts/pipeline.py --layer 4                         ║
-║                                                                              ║
-║   search_index.json  ← compact metadata only, bundled Flutter asset         ║
-║                                                                              ║
-║  ─────────────────────────────────────────────────────────────────────────  ║
-║                                                                              ║
-║                       DELIVERY                                              ║
-║                                                                              ║
-║   jsDelivr CDN  →  Flutter app                                              ║
-║   search_index.json   bundled asset   →  offline instant search             ║
-║   protocols/*.json    lazy CDN fetch  →  protocol detail (cached in Isar)   ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+LAYER 1 — FETCH                    12 sources, license-gated at fetch time (CC-BY only)
+    │
+LAYER 2 — NORMALISE                raw JSON → canonical schema via LLM (title/category/materials/steps)
+    │
+LAYER 2.5 — RECOVER                 pull content out of attached PDF/DOCX docs and PMC figures for
+    │                               protocols that came through with zero usable steps
+    │
+LAYER 2.6 — RESTRUCTURE             LLM pass gives every step a real title, breaks long steps into
+    │                               substeps — verified against a content-preservation check per step
+    │
+LAYER 3 — MERGE + DEDUP             MinHash LSH across sources, zero-step protocols withheld from publish
+    │
+LAYER 3.5 — QUALITY GATE            verify_protocol_quality.py + final_validation.py — structural
+    │                               integrity checks that must pass before layer 4 runs
+    │
+LAYER 4 — INDEX                     search_index.json (Flutter asset) + index.json (website)
+    │
+DELIVERY                            jsDelivr CDN ← this GitHub repo
 ```
 
----
-
-## Mermaid Diagram
-
-```mermaid
-flowchart TD
-    PIO[protocols.io API] -->|Bearer token| F1[fetch_protocols_io_verified.py]
-    PMC[PubMed Central\nE-utilities API] --> F2[fetch_pubmed_central.py]
-    BIO[bio-protocol.org\n⚠ WAF-blocked] --> F3[fetch_bio_protocol.py]
-
-    F1 -->|DOI → CrossRef API\nlicense verified| GATE{License Gate\nCC-BY only}
-    F2 -->|PMC XML\nlicense tag| GATE
-    F3 -->|CC-BY ToS default| GATE
-
-    GATE -->|✅ CC-BY 4.0| RAW1[data/sources/protocols_io/raw/]
-    GATE -->|✅ CC-BY 4.0| RAW2[data/sources/pubmed_central/raw/]
-    GATE -->|✅ CC-BY 4.0| RAW3[data/sources/bio_protocol/raw/]
-    GATE -->|❌ NC/SA/ND/unknown| SKIP[skipped_license.jsonl]
-
-    RAW1 --> NORM[normalise.py\nGemini Flash LLM]
-    RAW2 --> NORM
-    RAW3 --> NORM
-
-    NORM --> NR1[sources/protocols_io/normalised/]
-    NORM --> NR2[sources/pubmed_central/normalised/]
-    NORM --> NR3[sources/bio_protocol/normalised/]
-
-    NR1 --> DEDUP[merge_and_dedup.py\nMinHash LSH Jaccard ≥ 0.80]
-    NR2 --> DEDUP
-    NR3 --> DEDUP
-
-    DEDUP --> MERGED[data/merged/]
-    DEDUP --> PUB[protocols/*.json]
-
-    PUB --> IDX[pipeline.py --layer 4\nsearch_index.json]
-    PUB --> CDN[jsDelivr CDN]
-
-    IDX -->|Flutter asset| SEARCH[Offline Search]
-    CDN -->|lazy load + Isar cache| DETAIL[Protocol Detail Screen]
-```
+Each layer is a separate script under `scripts/`, chainable via `scripts/pipeline.py`. Layers 2.5/2.6/3.5 are newer additions (see "Data Quality" below for why they exist).
 
 ---
 
@@ -133,45 +38,68 @@ flowchart TD
 ```
 labi-protocols/
 │
-├── protocols/                          ← PUBLIC: CDN-served protocol JSONs
+├── protocols/                          ← PUBLIC: CDN-served protocol JSONs (zero-step protocols withheld)
 │   └── {protocol_id}.json
 │
-├── search_index.json                   ← PUBLIC: compact metadata index
+├── search_index.json                   ← PUBLIC: compact metadata index (Flutter asset)
+├── index.json                          ← PUBLIC: website-facing index (different key set)
 │
 ├── data/
 │   ├── archive/
 │   │   └── protocols_io_unverified/    ← OLD data, license unconfirmed, NOT distributed
-│   │       └── README.txt              ← explains why archived
+│   │
+│   ├── raw/                            ← untouched API/document caches, used for offline re-processing
+│   │   ├── protocols_io/               ← full protocols.io API responses (6,101 files)
+│   │   └── pmc/                        ← full JATS XML for every PMC-family article (4,809 files)
+│   │
+│   ├── media/                          ← downloaded images/PDFs/DOCX referenced by protocols
+│   │   ├── zenodo/{record_id}/
+│   │   ├── {pmc_source}/{pmcid}/       ← star_protocols, methodsx, biological_procedures, etc.
+│   │   └── protocols_io_docs/{slug}/   ← recovered document attachments
 │   │
 │   ├── sources/
-│   │   ├── protocols_io/
-│   │   │   ├── raw/                    ← CrossRef-verified CC-BY 4.0 raw JSON
-│   │   │   ├── normalised/             ← Labi schema, LLM-normalised
-│   │   │   └── skipped_license.jsonl  ← protocols that failed license check
-│   │   │
-│   │   ├── pubmed_central/
-│   │   │   ├── raw/                    ← CC-BY confirmed from PMC XML <license>
-│   │   │   └── normalised/
-│   │   │
-│   │   ├── bio_protocol/
-│   │   │   ├── raw/                    ← CC-BY per bio-protocol.org ToS
-│   │   │   └── normalised/
-│   │   │
-│   │   └── vendor/
-│   │       ├── raw/                    ← Vendor protocols (Thermo Fisher etc.)
-│   │       └── normalised/
+│   │   └── {source_name}/
+│   │       ├── raw/                    ← license-verified, source-native JSON
+│   │       ├── normalised/             ← Labi schema, LLM-normalised
+│   │       └── skipped_license.jsonl   ← protocols that failed license check
 │   │
-│   └── merged/                         ← post-dedup merged protocols
+│   └── merged/                         ← post-dedup merged protocols (includes withheld zero-step ones,
+│                                          for traceability — protocols/ is the filtered public subset)
 │
 ├── scripts/
-│   ├── pipeline.py                     ← orchestrator: run all 4 layers
-│   ├── normalise.py                    ← Layer 2: raw → Labi schema via Gemini
-│   ├── merge_and_dedup.py              ← Layer 3: MinHash LSH dedup across sources
+│   ├── pipeline.py                     ← orchestrator: layers 1-4, includes the quality gate (layer 3b)
+│   ├── normalise.py                    ← Layer 2: raw → Labi schema via LLM
+│   ├── merge_and_dedup.py              ← Layer 3: MinHash LSH dedup, withholds zero-step protocols
+│   ├── verify_protocol_quality.py      ← Layer 3.5: structural integrity gate (exit 1 on failure)
+│   ├── final_validation.py             ← last-mile check on the published artifact itself
+│   ├── restructure_steps_llm.py        ← Layer 2.6: title + substep generation via LLM
+│   ├── test_step_parsing.py            ← unit tests for the parsing functions themselves
+│   │
+│   ├── fetch_protocols_io_documents.py ← recovers steps from protocols.io's attached PDF/DOCX docs
+│   ├── extract_steps_from_media_pdf.py ← general-purpose PDF/DOCX text recovery, any source
+│   ├── backfill_pmc_family_steps.py    ← re-extracts steps from cached PMC XML (handles nested
+│   │                                      sections and body-level paragraphs outside <sec>)
+│   ├── backfill_protocols_io_steps.py  ← re-extracts steps from cached protocols.io API responses
+│   ├── detect_genuine_protocol.py      ← flags likely-not-a-protocol content (informational only,
+│   │                                      NOT wired into publish filtering — see Data Quality below)
+│   ├── fix_broken_steps.py             ← background/materials reclassification (safe part only —
+│   │                                      the regex-based step splitter is permanently disabled)
+│   ├── fix_percent_s_corruption.py     ← strips leftover %s template artifacts from protocols.io's
+│   │                                      own broken table-rendering API responses
+│   ├── revert_steps_to_raw.py          ← regenerates `steps` straight from raw, undoing any bad
+│   │                                      processing pass — the emergency-repair tool
+│   ├── recategorise_other.py           ← keyword-based reclassification out of the "Other" category
+│   ├── build_index.py                  ← builds index.json (website format)
 │   │
 │   └── sources/
-│       ├── fetch_protocols_io_verified.py  ← protocols.io + CrossRef gate
+│       ├── fetch_protocols_io_verified.py  ← protocols.io + CrossRef gate — FROZEN, do not re-run
 │       ├── fetch_pubmed_central.py          ← PMC E-utilities + XML license gate
-│       └── fetch_bio_protocol.py           ← bio-protocol.org scraper (WAF issue)
+│       ├── fetch_zenodo.py                  ← Zenodo REST API
+│       ├── fetch_zenodo_media.py            ← downloads image/PDF attachments for Zenodo records
+│       ├── fetch_figshare.py                ← figshare API (POST /articles/search, not GET)
+│       ├── fetch_openwetware.py             ← MediaWiki API — currently TLS-unreachable, unrelated to code
+│       ├── fetch_bio_protocol.py            ← WAF-blocked, unresolved
+│       └── fetch_pmc_figures.py             ← downloads figures for all PMC-family sources
 │
 ├── requirements.txt
 └── README.md
@@ -179,126 +107,61 @@ labi-protocols/
 
 ---
 
-## Scripts Reference
+## Sources (12 total)
 
-### `scripts/sources/fetch_protocols_io_verified.py`
-Fetches public protocols from the protocols.io v3 API and verifies each license via CrossRef DOI metadata before saving.
+| Source | Raw fetched | Normalised | Status |
+|---|---|---|---|
+| protocols.io | 6,291 | 6,291 | ✅ Complete — **frozen, do not re-fetch new protocols** |
+| Zenodo | 20,493 | 2,269 (11%) | ⏸️ **Backlog paused — 18,224 records unprocessed, revisit later** |
+| MethodsX | 2,658 | 2,658 | ✅ Complete — via PMC (real peer-reviewed methods journal, not related to Zenodo) |
+| STAR Protocols | 1,076 | 1,076 | ✅ Complete — via PMC |
+| bio-protocol | 1,114 | 435 | 🟡 Partial |
+| github_opentrons | 757 | 832 | ✅ Complete |
+| PubMed Central (general) | 280 | 53 | 🟡 Partial |
+| Biological Procedures Online | 247 | 247 | ✅ Complete — via PMC |
+| figshare | 213 | 213 | ✅ Complete (rate-limited by anti-abuse without an API token — could expand with one) |
+| Current Protocols | 113 | 113 | ✅ Complete — via PMC's open subset, NOT the paywalled Wiley platform |
+| OpenWetWare | 0 | 0 | ❌ TLS-unreachable from this network (not a code issue) |
+| bio-protocol.org (direct) | 0 | 0 | ❌ WAF-blocked (HTTP 468) |
+| vendor | 0 (archived) | 0 | ❌ Archived — old unverified data, not distributed |
 
-**How it works:**
-1. Searches protocols.io with 25 broad lab keywords (`extraction`, `PCR`, `RNA`, `western blot`, `ELISA`, `cloning`, etc.) — the API requires a search term, so broad keywords give full coverage
-2. For each protocol, extracts the DOI field
-3. Queries `api.crossref.org/works/{doi}` and reads the `license[0].URL` field
-4. Saves to `data/sources/protocols_io/raw/` **only** if license URL contains `creativecommons.org/licenses/by/` without `/nc`, `/sa`, or `/nd`
-5. Logs all discarded protocols to `skipped_license.jsonl` with reason
+**Sources evaluated and rejected** (checked their ToS/license directly, not assumed): Cold Spring Harbor Protocols (subscription + explicit ban on automated access), Addgene (ToS bans automated scraping + redistribution), Abcam (personal-use-only, no redistribution), Springer Protocols (subscription database), JoVE (institutional-login paywalled), Nature Protocols the journal (subscription — distinct from Protocol Exchange below, which is open).
 
-**License authority:** CrossRef DOI registry — the canonical permanent record of what license was declared at DOI registration time.
+### ⏳ Sources identified, confirmed usable, PENDING import (zero protocols fetched yet)
 
-**Key config:**
-```bash
-PROTOCOLS_IO_TOKEN=...   # from protocols.io/developers
-MAX_PROTOCOLS=2000       # default
-```
+| Source | License | Access | Notes |
+|---|---|---|---|
+| **The OLB (Open Lab Book)** | CC BY-SA 2.5 | GitHub-hosted (`mfitzp`), readthedocs | Share-alike — rank below pure CC-BY sources in dedup, same as OpenWetWare |
+| **Protocol Exchange** (Nature, via Research Square) | CC-BY 4.0, DOI-assigned | `protocolexchange.researchsquare.com` — direct fetch 403s (bot protection), need to request an official JSON API key at `researchsquare.com/request-api` first | Separate from the paywalled Nature Protocols journal — this one is genuinely open |
 
----
-
-### `scripts/sources/fetch_pubmed_central.py`
-Fetches open-access lab protocols from PubMed Central using NCBI E-utilities.
-
-**How it works:**
-1. ESearch for `protocol[Title] OR method[Title]` in PMC open access articles
-2. EFetch full XML for each article
-3. Parses `<ali:license_ref>` element (NISO ALI namespace) for license URL
-4. Keeps only `creativecommons.org/licenses/by/` (not NC/SA/ND)
-5. Extracts title, author, abstract, method section paragraphs as `steps_raw`
-
-**Rate limiting:**
-- Without `NCBI_API_KEY`: 3 req/sec (0.34s delay)
-- With `NCBI_API_KEY`: 10 req/sec (0.11s delay)
-
-**License authority:** The `<license>` element in the PMC article XML is deposited by the publisher at submission — it reflects what the authors/publisher declared.
+No fetchers built yet for either. See tasks #25/#26.
 
 ---
 
-### `scripts/sources/fetch_bio_protocol.py`
-Scraper for bio-protocol.org — a peer-reviewed, CC-BY 4.0 protocol journal.
-
-**Status: blocked by SafeLine WAF (HTTP 468).** The sitemap works (4,944 protocols found), but protocol pages return 468 for server-side requests. Headless browser (Playwright) approach pending.
-
-**License authority:** bio-protocol.org Terms of Service explicitly state all published content is CC-BY 4.0.
-
----
-
-### `scripts/normalise.py`
-Converts raw source JSON to the canonical Labi protocol schema using Gemini Flash.
-
-**Runs per-source or all at once:**
-```bash
-python3 scripts/normalise.py                         # all sources
-python3 scripts/normalise.py --source pubmed_central # one source
-```
-
-**What the LLM does:**
-- Extracts clean title, author, category (from 13 canonical options)
-- Estimates total time in minutes
-- Extracts materials list (reagents + equipment)
-- Converts raw step text into structured step objects with `is_critical` flags
-
-**Fallback:** If `GEMINI_API_KEY` is not set, uses regex-based fallback (wraps raw steps as-is).
-
----
-
-### `scripts/merge_and_dedup.py`
-Merges all normalised sources and removes duplicates using MinHash LSH.
-
-**How deduplication works:**
-1. Loads all `data/sources/*/normalised/*.json`
-2. For each protocol, builds a 128-permutation MinHash from `title + first 500 chars of steps`
-3. LSH index finds pairs with Jaccard similarity ≥ 0.80
-4. When duplicates found, keeps the winner by:
-   - `license_verified: true` > `false`
-   - If tied: more steps wins
-5. Source priority for tie-breaking: `bio_protocol > pubmed_central > vendor > protocols_io`
-
-**Output:** `data/merged/` and `protocols/` (CDN-facing)
-
----
-
-### `scripts/pipeline.py`
-Orchestrator that runs all 4 layers in order.
-
-```bash
-python3 scripts/pipeline.py                    # full pipeline, all sources
-python3 scripts/pipeline.py --layer 2,3,4     # skip fetch, run rest
-python3 scripts/pipeline.py --source pubmed_central --layer 1,2
-```
-
-Layer 4 (index rebuild) is also run by GitHub Actions CI on every push.
-
----
-
-## Protocol v1.0 JSON Schema
+## Protocol Schema (current)
 
 ```jsonc
 {
   "protocol_id": "trizol_rna_extraction_from_cultured_cells",
   "parent_protocol_id": null,
+  "version_count": 1,
   "title": "TRIzol RNA Extraction from Cultured Cells",
   "author": "Thermo Fisher Scientific",
 
-  // License — always verified, never assumed
   "license": "CC-BY 4.0",
   "license_verified": true,
   "license_url": "https://creativecommons.org/licenses/by/4.0/",
   "license_note": "Confirmed via CrossRef DOI metadata: 10.17504/protocols.io.xxxxx",
 
-  // Source tracking
-  "source_name": "protocols_io",      // "protocols_io" | "pubmed_central" | "bio_protocol" | "vendor"
-  "source_id": "12345",
+  "source_name": "protocols_io",
   "source_url": "https://www.protocols.io/view/...",
   "doi": "10.17504/protocols.io.xxxxx",
   "citation": "",
+  "peer_reviewed": false,
+  "stats": { "views": 0, "runs": 0, "bookmarks": 0, "comments": 0 },
+  "quality_score": 12.5,
 
-  "verification_status": "verified",  // "verified" | "unverified"
+  "verification_status": "verified",
   "category": "Molecular Biology",
   "estimated_time_mins": 90,
 
@@ -309,202 +172,159 @@ Layer 4 (index rebuild) is also run by GitHub Actions CI on every push.
       "step_id": 0,
       "title": "Lyse Cells",
       "instruction": "Add 1 mL TRIzol directly to the well...",
+      "substeps": [
+        { "title": "", "instruction": "Add 1 mL TRIzol" },
+        { "title": "", "instruction": "Incubate 5 minutes at room temperature" }
+      ],
       "is_critical": false,
       "timers": []
-    },
-    {
-      "step_id": 3,
-      "title": "Centrifuge for Phase Separation",
-      "instruction": "Centrifuge at 12,000 × g for 15 min at 4°C.",
-      "is_critical": false,
-      "timers": [
-        {
-          "timer_id": "t1",
-          "label": "Centrifugation",
-          "duration_seconds": 900,
-          "type": "centrifuge"         // "centrifuge" | "incubation" | "shaker"
-        }
-      ]
     }
-  ]
+  ],
+
+  // Media — images/PDFs/DOCX downloaded and locally hosted (see Data Quality: 11% gap remains)
+  "media": [
+    {
+      "type": "image",  // "image" | "pdf" | "document"
+      "filename": "fig2_western_blot.png",
+      "local_path": "data/media/zenodo/16731878/fig2_western_blot.png",
+      "source_url": "https://zenodo.org/api/records/16731878/files/fig2_western_blot.png",
+      "caption": "",
+      "bytes": 482113
+    }
+  ],
+
+  // Informational only — NOT used to filter what publishes (see Data Quality)
+  "content_type": "protocol",       // "protocol" | "likely_not_protocol"
+  "content_type_score": 66,
+
+  "merged_at": "2026-07-09"
 }
 ```
 
 ---
 
+## LLM Configuration
+
+Normalisation (title/category/materials) and step restructuring (titles + substeps) both call out to an LLM, in this fallback order:
+
+1. **Ollama Cloud** (`OLLAMA_API_KEY`, model `gpt-oss:120b-cloud` by default) — primary for restructuring
+2. **Groq** (`GROQ_API_KEY`) — fast, free-tier, rate-limits easily under sustained load
+3. **OpenAI** (`OPENAI_API_KEY`, `gpt-4o-mini`) — fallback
+
+```bash
+export OLLAMA_API_KEY="..."      # ollama.com
+export OLLAMA_MODEL="gpt-oss:120b-cloud"   # default; gpt-oss:20b-cloud for throughput over quality
+export GROQ_API_KEY="..."
+export OPENAI_API_KEY="..."
+```
+
+All LLM-touching scripts have a **hard content-preservation safety check**: every number/quantity/reagent name in the original text must survive verbatim in the restructured output, or the restructuring is rejected and the step is left untouched. See `scripts/restructure_steps_llm.py` for the implementation — this exists because a regex-based (non-LLM) attempt at the same problem shredded real content in production (see Data Quality below).
+
+---
+
+## Data Quality — read before trusting a number in this repo
+
+This pipeline has been through a serious quality audit. Real bugs were found and fixed; some things are known-open. Documenting both honestly:
+
+### Fixed (permanent regression tests exist for all of these — `scripts/test_step_parsing.py`)
+
+- **Eaten-marker regex corruption**: a numbered-list splitter matched digit+punctuation patterns *anywhere* in a sentence (not just real step boundaries), silently deleting the matched text. Shredded sentences like "...tools (eg, PROBAST) [25]; and (**6**) narrative synthesis..." into scrambled fragments. Disabled permanently in `fix_broken_steps.py` and `normalise.py`; 11,531+ files reverted to clean text.
+- **`%s %s` template leakage**: protocols.io's own API serves malformed HTML for table-type step components (primer/oligo tables) — confirmed against the untouched cached API response, not our bug, not recoverable, but no longer displayed. `scripts/fix_percent_s_corruption.py`.
+- **Zenodo catalog-number-eating bug**: the same class of regex-eats-real-numbers bug, found independently in `normalise.py`'s free-text splitter — was deleting real content (museum catalog numbers, specimen IDs) that happened to look like "digit. " step markers. Affected 358 zenodo protocols, fixed.
+- **PMC body-level content**: some MethodsX-style articles put real content as `<p>` directly under `<body>`, never wrapped in a `<sec>` — the section-walking extractor missed these entirely. Fixed in `backfill_pmc_family_steps.py`.
+- **Zero-step protocols with recoverable attachments**: ~400+ protocols_io protocols had zero steps not because the content didn't exist, but because the author put the real procedure in an attached PDF/DOCX that was never fetched. Recovery pipeline built (`fetch_protocols_io_documents.py`, `extract_steps_from_media_pdf.py`).
+
+### Known, open, unresolved
+
+- **11% of published protocols (1,488 of 13,318) reference a figure/table/file in their text with no matching media attached.** Real gap, not yet closed — media fetching is still in progress for several sources.
+- **~4,300 protocols flagged `content_type: likely_not_protocol`** (academic papers/reviews that got swept in, not real procedures) — **deliberately not excluded from publish**. Every exclusion rule tried (materials presence, step-count + score combined) produced real false positives on legitimate protocols (a genuine mouse anesthesia protocol, a real Patch-Seq neuroscience protocol, "Morris Water Maze" — a standard behavioral assay). The tag is informational only; do not build an auto-filter on it without a materially better signal.
+- **Materials/equipment lists sometimes get miscategorized as procedure steps**, inflating step counts and diluting quality signals (found via the Patch-Seq false-positive investigation) — not yet systematically fixed.
+- **1,561 protocols have a single unsplit "mega-step" (>800 chars)** — content is complete and correct, just not broken into individual actions. Deliberate tradeoff: the regex splitter that used to reduce this count was also the one causing the eaten-marker corruption above.
+- **2,013 protocols still categorized "Other"** — `recategorise_other.py`'s keyword rules only catch some of the backlog.
+- **Scientific/factual accuracy of protocol content is out of scope for this pipeline** — verified structural integrity (the JSON isn't corrupted, numbers/text survive processing intact), not whether the underlying procedure is itself correct. That's the original source's responsibility.
+
+Run `python3 scripts/verify_protocol_quality.py` (structural gate, exit code meaningful) and `python3 scripts/final_validation.py` (schema + numeric well-formedness + sentence coherence) before trusting any given snapshot of `protocols/`.
+
+---
+
 ## License Verification System
 
-Every protocol in this repo has a **hard-verified license**. Nothing is assumed.
+Every protocol has a **hard-verified license**, checked at fetch time, never assumed.
 
 | Source | Verification method | Authority |
 |---|---|---|
-| protocols.io | CrossRef DOI API → `license[0].URL` | DOI registry — permanent record |
-| PubMed Central | PMC article XML → `<ali:license_ref>` | Publisher deposit at submission |
-| bio-protocol.org | Terms of Service | ToS states all content is CC-BY 4.0 |
-| Vendor | Manual review + ToS | Vendor ToS per site |
+| protocols.io | CrossRef DOI API → `license[0].URL` | DOI registry |
+| PubMed Central (+ MethodsX, STAR Protocols, Biological Procedures, Current Protocols) | PMC article XML → `<ali:license_ref>` | Publisher deposit at submission |
+| Zenodo | Record metadata `license` field | Zenodo, CC0 metadata / CC-BY content |
+| figshare | Article detail endpoint `license.name` | figshare |
+| bio-protocol.org | Terms of Service | ToS states all content CC-BY 4.0 |
+| OpenWetWare | Terms of Use | **CC-BY-SA 3.0** — share-alike, ranked lowest in dedup priority |
 
-**Decision logic (same for all sources):**
 ```python
 def is_cc_by(url):
     return (
         "creativecommons.org/licenses/by" in url
-        and "/nc" not in url   # no commercial restriction
-        and "/sa" not in url   # no share-alike
-        and "/nd" not in url   # no no-derivatives
+        and "/nc" not in url and "/sa" not in url and "/nd" not in url
     )
 ```
 
-Protocols that fail this check are **never saved** — they go to `skipped_license.jsonl` only.
-
----
-
-## Source Legal Assessment
-
-Before running any pipeline, confirm the legal status of each source:
-
-| Source | ToS on API redistribution | License | Risk vs protocols.io |
-|---|---|---|---|
-| **protocols.io** | ❌ Prohibits using API content on third-party sites (explicit ToS clause) | CC-BY 4.0 (per DOI) | ⚠️ Baseline risk |
-| **PubMed Central** | ✅ NCBI E-utilities: explicitly permits bulk access and redistribution for research | CC-BY 4.0 (per XML) | ✅ Lower |
-| **bio-protocol.org** | ✅ ToS: all content CC-BY 4.0 | CC-BY 4.0 | ✅ Lower — WAF-blocked |
-| **Zenodo** | ✅ No prohibition. About page: *"API allows third-party tools to use Zenodo as a backend"* | CC0 metadata, CC-BY content | ✅ Effectively zero |
-| **figshare** | ✅ Public API open, no prohibition found (full ToS unconfirmed — 403 on fetch) | CC-BY per article | ✅ Low |
-| **OpenWetWare** | ✅ MediaWiki API, no access restrictions | ⚠️ **CC-BY-SA 3.0** (not CC-BY) | ✅ Zero ToS risk |
-
-### OpenWetWare CC-BY-SA note
-OpenWetWare uses **Creative Commons Attribution-ShareAlike 3.0** — confirmed.
-- ✅ You CAN redistribute and index these protocols
-- ✅ You CAN display them in the Labi app
-- ⚠️ If a user modifies an OpenWetWare protocol inside Labi and contributes it back, **that derivative must also be CC-BY-SA 3.0** — not CC-BY
-- **Labi the app is NOT affected** — the app itself is your own code, not a derivative of the protocol content
-- Stored with `"license": "CC-BY-SA 3.0"` in schema, ranked lowest in dedup priority
-
----
-
-## Pipeline Status
-
-| Source | Script | Raw fetched | License verified | Status |
-|---|---|---|---|---|
-| protocols.io | `fetch_protocols_io_verified.py` | 6,291 | CrossRef per-DOI | ✅ Complete — **freeze, no new fetches** |
-| PubMed Central | `fetch_pubmed_central.py` | 308 | PMC XML per-article | ✅ Complete (expandable) |
-| bio-protocol.org | `fetch_bio_protocol.py` | 0 | — | ❌ WAF-blocked |
-| **Zenodo** | `fetch_zenodo.py` | 0 | Zenodo record metadata | 🔜 Ready to run |
-| **figshare** | `fetch_figshare.py` | 0 | figshare article detail | 🔜 Ready to run |
-| **OpenWetWare** | `fetch_openwetware.py` | 0 | ToS (CC-BY-SA 3.0) | 🔜 Ready to run |
-| Vendor (manual) | — | 7 → archived | Unverified (old) | ❌ Archived |
-
-**⚠️ protocols.io is frozen.** 6,291 protocols already collected. Do not run `fetch_protocols_io_verified.py` again — the goal is to reduce protocols.io to <30% of the index, not grow it.
-
-**Archived data:** `data/archive/protocols_io_unverified/` contains 7 protocols from the original pipeline where license was assumed (not verified). Not distributed. See `data/archive/protocols_io_unverified/README.txt`.
+Protocols failing this check are never saved — logged to `skipped_license.jsonl` only.
 
 ---
 
 ## How to Run
 
-### Prerequisites
-
 ```bash
 pip install -r requirements.txt
 ```
 
-### Credentials
-
 ```bash
-export PROTOCOLS_IO_TOKEN="..."    # from protocols.io/developers — FROZEN, do not re-fetch
-export GEMINI_API_KEY="..."        # from Google AI Studio (for LLM normalisation)
-export NCBI_API_KEY="..."          # optional — raises PMC rate limit 3→10 req/sec
-export ZENODO_TOKEN="..."          # optional — raises Zenodo rate limit
-export FIGSHARE_TOKEN="..."        # optional — raises figshare rate limit
-# OpenWetWare: no token needed (public MediaWiki API)
-```
+# Full pipeline: fetch (only for sources not frozen) → normalise → merge → gate → index
+python3 scripts/pipeline.py --layer 2,3,4
 
-### Run full pipeline
-
-```bash
-cd labi-protocols
-
-# Layer 1: Fetch new clean sources (run in background)
-# ⚠️ Do NOT run fetch_protocols_io_verified.py — protocols.io is frozen at 6,291
-nohup python3 scripts/sources/fetch_zenodo.py > /tmp/zenodo.log 2>&1 &
-nohup python3 scripts/sources/fetch_figshare.py > /tmp/figshare.log 2>&1 &
-nohup python3 scripts/sources/fetch_openwetware.py > /tmp/oww.log 2>&1 &
-nohup python3 scripts/sources/fetch_pubmed_central.py > /tmp/pmc.log 2>&1 &
-
-# Layer 2: Normalise (after fetch complete)
-python3 scripts/normalise.py
-
-# Layer 3: Merge + dedup
+# Individual layers
+python3 scripts/normalise.py --source zenodo
+python3 scripts/restructure_steps_llm.py --source protocols_io
 python3 scripts/merge_and_dedup.py
-
-# Layer 4: Rebuild search index
+python3 scripts/verify_protocol_quality.py
+python3 scripts/final_validation.py
 python3 scripts/pipeline.py --layer 4
 ```
 
-Or use the orchestrator for layers 2–4:
-```bash
-python3 scripts/pipeline.py --layer 2,3,4
-```
-
-### Check progress
-
-```bash
-# How many verified protocols saved so far
-ls data/sources/protocols_io/raw/ | wc -l
-ls data/sources/pubmed_central/raw/ | wc -l
-
-# What got skipped (wrong license)
-cat data/sources/protocols_io/skipped_license.jsonl | python3 -m json.tool
-
-# Live log
-tail -f /tmp/pio.log
-```
+⚠️ **protocols.io is frozen** — do not run `fetch_protocols_io_verified.py` for new protocols.
+⚠️ **Zenodo backlog (18,224 unprocessed records) is intentionally paused** — do not resume without explicit confirmation.
 
 ---
 
 ## CDN Delivery
 
-Protocol JSONs are served via **jsDelivr**, mirroring this GitHub repo:
-
 ```
 https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols@main/protocols/{protocol_id}.json
 ```
 
-The Flutter app fetches individual protocols on demand (lazy load), caches them in Isar, and never re-fetches unless the cache is cleared.
-
-**Publishing new protocols:**
-
 ```bash
-git add protocols/ search_index.json
-git commit -m "data: add N CC-BY verified protocols"
+git add protocols/ search_index.json index.json
+git commit -m "data: ..."
 git push origin main
-# GitHub Actions rebuilds search_index.json automatically
-# jsDelivr cache refreshes within ~24h (use commit hash URL for immediate)
 ```
 
-**Cache purge (immediate):**
-```
-https://purge.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols@main/search_index.json
-```
+Cache purge (immediate): `https://purge.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols@main/search_index.json`
+
+**Nothing in this repo has been pushed since 2026-06-19** — all pipeline work described above is local, uncommitted, and not yet deployed to the CDN or the live app.
 
 ---
 
 ## Flutter Integration
 
-The app reads two things from this repo:
-
 | File | How used |
 |---|---|
-| `search_index.json` | Bundled Flutter asset, loaded at startup into memory for instant offline search |
-| `protocols/*.json` | Lazy-fetched from CDN when user opens a protocol, cached in Isar |
-
-**Relevant Flutter files:**
-- `flutter_app/lib/services/protocol_repository.dart` — singleton managing search + CDN fetch + Isar cache
-- `flutter_app/lib/models/isar/catalog_protocol_record.dart` — Isar schema matching v1.0 JSON
+| `search_index.json` | Bundled Flutter asset, loaded at startup for instant offline search |
+| `protocols/*.json` | Lazy-fetched from CDN on open, cached in Isar |
 
 ---
 
 ## License
 
-**Protocol data:** CC-BY 4.0 — attribution to original source required. The `source_url` field in every JSON provides the canonical attribution link.
+**Protocol data:** CC-BY 4.0 (or CC-BY-SA 3.0 for OpenWetWare-sourced entries) — attribution required, `source_url` provides the canonical link.
 
 **Pipeline code (`scripts/`):** MIT.

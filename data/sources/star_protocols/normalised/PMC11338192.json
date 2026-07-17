@@ -31,27 +31,273 @@
     "gplots package",
     "openxlsx package",
     "stringr package",
-    "reshape2 package"
+    "reshape2 package",
+    "Timing: few hours"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Downstream analysis of the data based on the zonation",
-      "instruction": "Timing: few hours",
-      "substeps": [],
+      "title": "Calculate differential expression per zone",
+      "instruction": "Compute median fold‑change (FC) for each gene in each compartmental zone, determine per‑gene minima, merge with per‑signature minima, and export the results to an Excel file.",
+      "substeps": [
+        {
+          "instruction": "Create a data frame of median FC per gene per zone: `crc.integrated@meta.data$Zones_unique %>% group_by(GeneID, Cluster, FC) %>% summarise(MedianMS = median(FC))`.",
+          "title": ""
+        },
+        {
+          "instruction": "For each gene, obtain the minimum median FC: `min_gene %>% group_by(GeneID) %>% summarise(geneMin = min(MedianMS))`.",
+          "title": ""
+        },
+        {
+          "instruction": "For each signature, compute median score and its minimum: `full_df_cor_group_genes %>% group_by(SigName, Zones, RNA_Group) %>% summarise(MedianMS = median(Sig))` then `min_sig %>% group_by(SigName) %>% summarise(SigMin = min(MedianMS))`.",
+          "title": ""
+        },
+        {
+          "instruction": "Merge the signature table with its minima: `full_df_cor_group <- merge(full_df_cor_group, min_sig, by = \"SigName\")`.",
+          "title": ""
+        },
+        {
+          "instruction": "Write the merged table (excluding the fifth column) to an Excel workbook named **Full_SignaturesMedianModScore.xlsx** in the output directory: `write.xlsx(x = list(\"MedianSig\" = full_df_cor_group[,-5]), file = paste(out_dir, \"Full_SignaturesMedianModScore.xlsx\", sep = \"/\"))`.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Downstream analysis of the data based on the zonation",
-      "instruction": "Here, we describe examples for downstream analysis of the VisualZoneR pipeline and visualization of the data. The methods described here are focusing on the differential expression of single genes, module score-based analysis or gene set enrichment analysis.Note: dependent on the user's needs other downstream analysis could be performed.8.Calculate the differential expression of all genes for each compartmental zone of each treatment cohort.Note: This code returns differential expression of all genes for all zones. If a more targeted approach is required, the 'FindMarkers' function can be modified according to the user's needs.crc.integrated@meta.data$Zones_unique % group_by(GeneID, Cluster, FC) %>% summarise(MedianMS = median(FC))min_gene % group_by(GeneID) %>% summarise(geneMin = min(MedianMS))full_df_cor_group_genes % group_by(SigName, Zones, RNA_Group) %>% summarise(MedianMS = median(Sig))min_sig % group_by(SigName) %>% summarise(SigMin = min(MedianMS))full_df_cor_group <- merge(full_df_cor_group, min_sig, by = \"SigName\")write.xlsx(x = list(\"MedianSig\" = full_df_cor_group[,-5]), file = paste(out_dir, \"Full_SignaturesMedianModScore.xlsx\", sep = \"/\"))# Figure 11.p <- ggplot(full_df_cor_group, aes(x = Zones, y = MedianMS, color = RNA_Group, fill = RNA_Group, group = RNA_Group, ymin = SigMin, ymax = MedianMS)) + theme_bw() + theme(legend.position = \"right\", legend.background = element_rect(color = \"black\"), axis.text.x = element_text(angle = 45, hjust = 1)) + geom_point() + geom_ribbon(position = 'identity', alpha = .1,) + xlab(\"\") + ylab(\"Median MScore\") + facet_wrap(.∼SigName, ncol = 3, scales = \"free\")ggsave(filename = paste(out_dir, \"Full_SignaturesMedianModScore.pdf\", sep = \"/\"), plot = p, width = 10, height = 7)11.Data representation using gene set enrichment analysis visualized in form of a heatmap (Figure 12).a.Perform gene set enrichment analysis for each compartmental zone and treatment group using the previously calculated list of differentially expressed genes.Note: The table can be downloaded from the following link:http://www.bioinfotiget.it/gitlab/custom/squadrito_livertumor2022/squadrito_livertumor2022_spatial/-/blob/main/data/GSEA_Zones_unique_integrated.res01.txt.b.Create a table for each treatment cohort containing the normalized enrichment score (NES) for all analyzed gene sets, sorted from the inside of the tumor towards the tumor-distant parenchyma. The NES value is set to 0 if the adjusted p-value is above 0.05.c.Choose manually selected pathways, create a table in which the NES for those pathways for all zones and treatment groups is listed and plot this as a heatmap.Note: The selection of pathways to be displayed can be adjusted according to the user's preferences.#11a:Clusters <- unique(cluster0degAll[,7])TopResultAllCluster <- NULLfor (i in Clusters) {df2 <- cluster0degAll[cluster0degAll[,7] == i, 2]names(df2) <- cluster0degAll[cluster0degAll[,7] == i, 6] df2 <- df2[order(df2)] test1 <- fgsea(pathways = miDB_sig2, stats = df2, minSize = 7, maxSize = 500) test1 <- test1[rev(order(NES))] TopResult <- as.data.frame(test1[,])[, c(1,2,3,4,5,6,7)] TopResult$Cluster <- i TopResultAllCluster <- rbind(TopResultAllCluster, TopResult)}write.table(x = TopResultAllCluster, file = paste(data_dir, \"GSEA_Zones_unique_integrated.res01.txt\", sep = \"/\"), quote = FALSE, row.names = TRUE, sep = \"\\t\")#11b:TopResultAllCluster$Group <- stringr::str_split_fixed(TopResultAllCluster$Cluster, \"_\", 2)[,1]TopResultAllCluster$Zones <- stringr::str_split_fixed(TopResultAllCluster$Cluster, \"_\", 2)[,2]orderC <- unique(TopResultAllCluster$Zones)[order(unique(TopResultAllCluster$Zones))]SideColors <- rep(c(rep(\"darkred\",3), rep(\"red\",1), rep(\"darkgreen\",3), rep(\"green\",1)), 3)newName <- function(dfCNES,i) { rownames(dfCNES) <- dfCNES[, i] dfCNES <- dfCNES[, -(i)] return(dfCNES)}for (ix in unique(TopResultAllCluster$Group)) { test <- TopResultAllCluster[TopResultAllCluster$Group == ix,] test <- test[!is.na(test$padj),] test <- test[test$padj < 0.05,] AllCluster <- unique(test$Zones) orgerGO <- unique(test$pathway) dfCNES <- data.frame(pathway = orgerGO[order(orgerGO)]) for (i in 1:length(AllCluster)){ dfC1 <- test[test$Zones == AllCluster[i],] dfC1 <- data.frame(dfC1[order(dfC1$pathway), c(1, 6)]) colnames(dfC1) <- c(\"pathway\", AllCluster[i]) dfCNES <- merge(dfCNES, dfC1, by = 1, all = T) } dfCNES <- newName(dfCNES, 1) dfCNES <- dfCNES[rowSums(is.na(dfCNES)+0) < 8,] dfCNES[is.na(dfCNES)] <- 0 finaldf2 <- as.matrix(dfCNES) finaldf2 <- finaldf2[, orderC] nameF <- paste(ix, \"uniquezones.txt\", sep = \".\") assign(nameF, finaldf2) write.table(x = finaldf2, file = paste(out_dir, nameF, sep = \"/\"), quote = FALSE, row.names = T, sep = \"\\t\")}#11c:Selected.Terms <- c(\"GOBP_RESPONSE_TO_TYPE_I_INTERFERON\",\"GOBP_RESPONSE_TO_INTERFERON_GAMMA\",\"GOBP_RESPONSE_TO_VIRUS\",\"GOBP_POSITIVE_REGULATION_OF_CYTOKINE_PRODUCTION\",\"GOBP_T_CELL_ACTIVATION\",\"GOBP_ADAPTIVE_IMMUNE_RESPONSE\",\"GOBP_REGULATION_OF_IMMUNE_EFFECTOR_PROCESS\",\"IL10_RO\",\"HALLMARK_ANGIOGENESIS\",\"HALLMARK_P53_PATHWAY\",\"HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION\",\"HALLMARK_ADIPOGENESIS\",\"HALLMARK_PEROXISOME\",\"GOBP_SHORT_CHAIN_FATTY_ACID_METABOLIC_PROCESS\",\"GOBP_LIPID_OXIDATION\",\"HALLMARK_BILE_ACID_METABOLISM\")dfNames <- paste0(unique(TopResultAllCluster$Group),\".uniquezones.txt\")ix3 <- matrix(nrow = length(Selected.Terms), ncol = 0)row.names(ix3) <- Selected.Termsfor (i in dfNames) { ix <- read.table(paste(out_dir, i, sep = \"/\"), header = T, sep = \"\\t\") ix <- ix[rownames(ix) %in% Selected.Terms,] diffG <- setdiff(Selected.Terms,rownames(ix)) diffM <- matrix(rep(0, 8∗length(diffG)), ncol = 8) rownames(diffM) <- diffG colnames(diffM) <- colnames(ix) ix2 <- rbind(ix, diffM) ix2 <- ix2[Selected.Terms,] colnames(ix2) <- paste(sub(\".uniquezones.txt\", \"\", i), colnames(ix2), sep = \".\") ix3 <- cbind(ix3, ix2)}ix3 <- as.matrix(ix3)pdf(paste(out_dir, \"Heatmap.uniquezones.pdf\", sep = \"/\"), heigh = 6, width = 8)heatmap.2(ix3, margins = c(8, 22), col = viridisLite::viridis(10), cexCol = 1, cexRow = .8, keysize = 1.1, dendrogram = \"none\", colsep = c(8,16), main = i, scale = \"none\", Rowv = F, Colv = F, ColSideColors = SideColors)legend(\"topright\", legend = c(\"Inner tumor\", \"Border tumor\", \"Peritumor\", \"Liver\"), col = unique(SideColors), lty = 1, lwd = 5, cex = .7)dev.off()Figure 12Heatmap showing GSEA analysis on distinct compartmental zones and treatment cohorts",
-      "substeps": [],
+      "title": "Plot median module scores (Figure 11)",
+      "instruction": "Generate a ggplot of median module scores across zones, coloured by RNA group, add a ribbon for the minimum score, and save as PDF.",
+      "substeps": [
+        {
+          "instruction": "Create the plot object: `p <- ggplot(full_df_cor_group, aes(x = Zones, y = MedianMS, color = RNA_Group, fill = RNA_Group, group = RNA_Group, ymin = SigMin, ymax = MedianMS)) + theme_bw() + theme(legend.position = \"right\", legend.background = element_rect(color = \"black\"), axis.text.x = element_text(angle = 45, hjust = 1)) + geom_point() + geom_ribbon(position = 'identity', alpha = .1) + xlab(\"\") + ylab(\"Median MScore\") + facet_wrap(.~SigName, ncol = 3, scales = \"free\")`.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the figure as a PDF of width 10 cm and height 7 cm: `ggsave(filename = paste(out_dir, \"Full_SignaturesMedianModScore.pdf\", sep = \"/\"), plot = p, width = 10, height = 7)`.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Run GSEA for each zone and treatment",
+      "instruction": "Perform fgsea on the list of differentially expressed genes for every compartmental zone and treatment cohort, then write the combined results.",
+      "substeps": [
+        {
+          "instruction": "Identify all unique cluster identifiers: `Clusters <- unique(cluster0degAll[,7])`.",
+          "title": ""
+        },
+        {
+          "instruction": "Initialize an empty data frame: `TopResultAllCluster <- NULL`.",
+          "title": ""
+        },
+        {
+          "instruction": "For each cluster `i` in `Clusters`:",
+          "title": ""
+        },
+        {
+          "instruction": "a. Extract the statistic vector for the cluster: `df2 <- cluster0degAll[cluster0degAll[,7] == i, 2]; names(df2) <- cluster0degAll[cluster0degAll[,7] == i, 6]; df2 <- df2[order(df2)]`.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Run fgsea with pathway database `miDB_sig2`, minimum gene set size 7, maximum 500: `test1 <- fgsea(pathways = miDB_sig2, stats = df2, minSize = 7, maxSize = 500)`.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Order the results by decreasing Normalised Enrichment Score (NES): `test1 <- test1[rev(order(NES))]`.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Convert to data frame and keep all columns: `TopResult <- as.data.frame(test1[,])[, c(1,2,3,4,5,6,7)]`.",
+          "title": ""
+        },
+        {
+          "instruction": "e. Add the cluster identifier: `TopResult$Cluster <- i`.",
+          "title": ""
+        },
+        {
+          "instruction": "f. Append to the master table: `TopResultAllCluster <- rbind(TopResultAllCluster, TopResult)`.",
+          "title": ""
+        },
+        {
+          "instruction": "After the loop, write the full GSEA table to `GSEA_Zones_unique_integrated.res01.txt` in the data directory: `write.table(x = TopResultAllCluster, file = paste(data_dir, \"GSEA_Zones_unique_integrated.res01.txt\", sep = \"/\"), quote = FALSE, row.names = TRUE, sep = \"\\t\")`.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Process GSEA results and build NES matrices",
+      "instruction": "Split cluster identifiers into treatment group and zone, order zones, create side‑color annotation, build per‑group NES matrices, replace non‑significant scores with 0, and write the matrices.",
+      "substeps": [
+        {
+          "instruction": "Separate the `Cluster` column into `Group` and `Zones`: `TopResultAllCluster$Group <- stringr::str_split_fixed(TopResultAllCluster$Cluster, \"_\", 2)[,1]` and `TopResultAllCluster$Zones <- stringr::str_split_fixed(TopResultAllCluster$Cluster, \"_\", 2)[,2]`.",
+          "title": ""
+        },
+        {
+          "instruction": "Create an ordered vector of zones: `orderC <- unique(TopResultAllCluster$Zones)[order(unique(TopResultAllCluster$Zones))]`.",
+          "title": ""
+        },
+        {
+          "instruction": "Define side‑color vector for heatmap annotation (repeating pattern darkred×3, red×1, darkgreen×3, green×1 three times): `SideColors <- rep(c(rep(\"darkred\",3), rep(\"red\",1), rep(\"darkgreen\",3), rep(\"green\",1)), 3)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Helper to set row names and drop a column: `newName <- function(dfCNES,i) { rownames(dfCNES) <- dfCNES[, i]; dfCNES <- dfCNES[, -(i)]; return(dfCNES) }`.",
+          "title": ""
+        },
+        {
+          "instruction": "For each treatment `ix` in `unique(TopResultAllCluster$Group)`:",
+          "title": ""
+        },
+        {
+          "instruction": "a. Subset to the group: `test <- TopResultAllCluster[TopResultAllCluster$Group == ix, ]`.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Remove rows with missing adjusted p‑value: `test <- test[!is.na(test$padj), ]`.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Keep only significant pathways (adjusted p‑value < 0.05): `test <- test[test$padj < 0.05, ]`.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Get the list of zones present: `AllCluster <- unique(test$Zones)` and the list of pathways: `orgerGO <- unique(test$pathway)`.",
+          "title": ""
+        },
+        {
+          "instruction": "e. Initialise a data frame with pathways ordered: `dfCNES <- data.frame(pathway = orgerGO[order(orgerGO)])`.",
+          "title": ""
+        },
+        {
+          "instruction": "f. For each zone `j` in `AllCluster`, extract NES values and merge:",
+          "title": ""
+        },
+        {
+          "instruction": "`dfC1 <- test[test$Zones == AllCluster[j], ]; dfC1 <- data.frame(dfC1[order(dfC1$pathway), c(1,6)]); colnames(dfC1) <- c(\"pathway\", AllCluster[j]); dfCNES <- merge(dfCNES, dfC1, by = 1, all = TRUE)`.",
+          "title": ""
+        },
+        {
+          "instruction": "g. Convert pathway names to row names and drop the first column: `dfCNES <- newName(dfCNES, 1)`.",
+          "title": ""
+        },
+        {
+          "instruction": "h. Remove rows with > 8 missing values: `dfCNES <- dfCNES[rowSums(is.na(dfCNES)+0) < 8, ]`.",
+          "title": ""
+        },
+        {
+          "instruction": "i. Replace remaining NA with 0: `dfCNES[is.na(dfCNES)] <- 0`.",
+          "title": ""
+        },
+        {
+          "instruction": "j. Convert to matrix and order columns by `orderC`: `finaldf2 <- as.matrix(dfCNES); finaldf2 <- finaldf2[, orderC]`.",
+          "title": ""
+        },
+        {
+          "instruction": "k. Write the matrix to a tab‑separated file named `<Group>.uniquezones.txt` in the output directory: `nameF <- paste(ix, \"uniquezones.txt\", sep = \".\"); write.table(x = finaldf2, file = paste(out_dir, nameF, sep = \"/\"), quote = FALSE, row.names = TRUE, sep = \"\\t\")`.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Create heatmap of selected pathways (Figure 12)",
+      "instruction": "Select a curated list of pathways, assemble a combined NES matrix across all treatment groups, and plot a heatmap with custom colours and legend.",
+      "substeps": [
+        {
+          "instruction": "Define the pathways to display:",
+          "title": ""
+        },
+        {
+          "instruction": "`Selected.Terms <- c(\"GOBP_RESPONSE_TO_TYPE_I_INTERFERON\",\"GOBP_RESPONSE_TO_INTERFERON_GAMMA\",\"GOBP_RESPONSE_TO_VIRUS\",\"GOBP_POSITIVE_REGULATION_OF_CYTOKINE_PRODUCTION\",\"GOBP_T_CELL_ACTIVATION\",\"GOBP_ADAPTIVE_IMMUNE_RESPONSE\",\"GOBP_REGULATION_OF_IMMUNE_EFFECTOR_PROCESS\",\"IL10_RO\",\"HALLMARK_ANGIOGENESIS\",\"HALLMARK_P53_PATHWAY\",\"HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION\",\"HALLMARK_ADIPOGENESIS\",\"HALLMARK_PEROXISOME\",\"GOBP_SHORT_CHAIN_FATTY_ACID_METABOLIC_PROCESS\",\"GOBP_LIPID_OXIDATION\",\"HALLMARK_BILE_ACID_METABOLISM\")`.",
+          "title": ""
+        },
+        {
+          "instruction": "Create a vector of the per‑group matrix filenames: `dfNames <- paste0(unique(TopResultAllCluster$Group), \".uniquezones.txt\")`.",
+          "title": ""
+        },
+        {
+          "instruction": "Initialize an empty matrix to hold combined data: `ix3 <- matrix(nrow = length(Selected.Terms), ncol = 0); row.names(ix3) <- Selected.Terms`.",
+          "title": ""
+        },
+        {
+          "instruction": "For each file `i` in `dfNames`:",
+          "title": ""
+        },
+        {
+          "instruction": "a. Load the group's NES matrix: `ix <- read.table(paste(out_dir, i, sep = \"/\"), header = TRUE, sep = \"\\t\")`.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Keep only rows that are in `Selected.Terms`: `ix <- ix[rownames(ix) %in% Selected.Terms, ]`.",
+          "title": ""
+        },
+        {
+          "instruction": "c. Identify any selected terms missing from the file: `diffG <- setdiff(Selected.Terms, rownames(ix))`.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Create a zero‑filled matrix for missing terms (8 columns assumed): `diffM <- matrix(rep(0, 8 * length(diffG)), ncol = 8); rownames(diffM) <- diffG; colnames(diffM) <- colnames(ix)`.",
+          "title": ""
+        },
+        {
+          "instruction": "e. Append missing rows: `ix2 <- rbind(ix, diffM)`; reorder to match `Selected.Terms`: `ix2 <- ix2[Selected.Terms, ]`.",
+          "title": ""
+        },
+        {
+          "instruction": "f. Prefix column names with the group identifier: `colnames(ix2) <- paste(sub(\".uniquezones.txt\", \"\", i), colnames(ix2), sep = \".\")`.",
+          "title": ""
+        },
+        {
+          "instruction": "g. Bind to the combined matrix: `ix3 <- cbind(ix3, ix2)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Convert the final combined object to a matrix: `ix3 <- as.matrix(ix3)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Open a PDF device of height 6 cm and width 8 cm: `pdf(paste(out_dir, \"Heatmap.uniquezones.pdf\", sep = \"/\"), heigh = 6, width = 8)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Plot the heatmap using `heatmap.2` with the following parameters:",
+          "title": ""
+        },
+        {
+          "instruction": "`heatmap.2(ix3, margins = c(8, 22), col = viridisLite::viridis(10), cexCol = 1, cexRow = .8, keysize = 1.1, dendrogram = \"none\", colsep = c(8,16), main = i, scale = \"none\", Rowv = FALSE, Colv = FALSE, ColSideColors = SideColors)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Add a legend in the top‑right corner indicating zone colours:",
+          "title": ""
+        },
+        {
+          "instruction": "`legend(\"topright\", legend = c(\"Inner tumor\", \"Border tumor\", \"Peritumor\", \"Liver\"), col = unique(SideColors), lty = 1, lwd = 5, cex = .7)`.",
+          "title": ""
+        },
+        {
+          "instruction": "Close the PDF device: `dev.off()`.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T00:25:56.529545Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 36,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

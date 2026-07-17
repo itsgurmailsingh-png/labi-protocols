@@ -14,9 +14,187 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "The approach also yields the pixel's fractional water / oil coverage and emulsion level, both of which affect the spectral feature. Emulsions scatter light with a wavelength dependency that significantly alters further the spectral feature's shape. Fortunately, the spectral feature is weakly sensitive to emulsion droplet size [18]. To date, near-infrared hyperspectral oil thickness remote sensing has not been field validated for oil slicks of known thickness. Furthermore, the effect of sub-pixel thickness and emulsion heterogeneity on the derived thickness remains unknown. Currently, commercial near-infrared imaging spectrometers are unavailable."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Select target oil segment",
+      "instruction": "Identify a thick, actionable oil slick segment on the sea surface and coordinate the airborne imaging platform and the two boom vessels so that the airplane can repeatedly image the segment while it is being collected.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Deploy and position boom system",
+      "instruction": "Connect two 33‑m long, 12.5 cm (6 in) diameter harbor booms with two ~10‑m tow ropes to the two fishing boats and to the modified weir skimmer; motor the boom vessels very slowly toward the target segment, towing the skimmer asymmetrically to keep it offset from the boom apex.",
+      "substeps": [
+        {
+          "instruction": "Maintain a steady, nearly straight line to avoid disturbing the slick or causing entrainment.",
+          "title": ""
+        },
+        {
+          "instruction": "Continuously communicate with the airplane and a third off‑load vessel to monitor drift speed and oil entrainment.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Close boom and equalize legs",
+      "instruction": "When the oil accumulates at the boom apex, close the boom mouth, then move the trailing boom vessel forward so the boom legs become symmetric and the skimmer sits at the apex, incorporating air into the slick and stabilising it.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Off‑load collected oil",
+      "instruction": "Open the skimmer latchable door, attach a throttled 160‑gallon min⁻¹ gasoline‑powered water pump to the skimmer port, and pump the oil into 20‑L (5‑gal) sealed plastic buckets; if oil is too viscous to flow, use a pool leaf skimmer to manually transfer it.",
+      "substeps": [
+        {
+          "instruction": "Seal each bucket and label with time, collect number, and fill order.",
+          "title": ""
+        },
+        {
+          "instruction": "Confirm negligible loss by visual monitoring from the sea‑surface observers and later aerial image inspection.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Handle collection failure",
+      "instruction": "If oil leaks from the skimmer, abandon the current collect: release the free side of the boom, have the other boat surge forward with the boom streaming behind, relocate to a new slick segment, and re‑attach the free side to the second boom vessel.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Weigh oil samples in laboratory",
+      "instruction": "Weigh each 5‑gal bucket on an NTEP Ranger 7000 balance (35 kg capacity, 0.5 g readability) and on a Sartorius LC3200D balance (3 kg capacity, 1 mg readability) using Class 1 calibration weights.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Determine water fraction by centrifugation",
+      "instruction": "Subsample each bucket, centrifuge the sample for at least 1 h at 3000 RPM, then measure total sample volume and water volume to quantify emulsion level.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Pre‑process INU navigation data",
+      "instruction": "Correct missing INU position points by linear interpolation of surrounding data, fill time‑base irregularities to a uniform 50 Hz rate, and filter yaw, pitch, and roll with a five‑point (0.1 s) median filter.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Project imagery onto uniform grid",
+      "instruction": "Use the ImGRAFT toolbox in MATLAB 2016a to project TIR and VIS images onto a UTM grid at 0.2 m resolution using 2‑D cubic‑spline interpolation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Determine camera sensor size (FOV)",
+      "instruction": "In a raw TIR city‑scene image (640 × 480 px), select three distinct landmarks, obtain their pixel coordinates (Iₙ,Jₙ) and corresponding lat/long from Google Earth, and solve for the true sensor dimensions; resulting sensor sizes are 11.69 × 8.80 cm for the A655s TIR camera and 23.43 × 15.00 cm for the 7 K HDPro VIS camera.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Optimize camera‑INU alignment",
+      "instruction": "Run ImGRAFT optimization varying camera sensor size, translation (x,y) and yaw while fixing camera height, pitch = 90° (nadir) and roll = 0°, to align the three ground‑reference points with their GPS coordinates.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Apply temporal offset correction",
+      "instruction": "Determine a temporal offset of 0.1 s between video frames and INU data and a sensor‑size scaling factor of 106 % for both the A655s and 7 K cameras by minimizing RMS error of overlapping projected images.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Co‑register TIR and VIS imagery",
+      "instruction": "Create a DEM (sea‑surface altitude = 0 m), select three non‑collinear control points by matching oil features in TIR and VIS images, and run ImGRAFT to refine TIR camera location, yaw, pitch, roll, and focal length; keep world coordinates and distortion coefficients fixed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Mask and de‑speckle TIR image",
+      "instruction": "In ImageJ, trace artifacts in the VIS image to create a mask, import the mask to MATLAB and set masked TIR pixels to NaN, then apply imclose.m with a 5 × 5‑pixel structural element and smooth.m to the TIR image.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Classify thick‑oil pixels",
+      "instruction": "Classify pixels as thick oil based on brightness temperature (TB) values and texture; use water aft of the boat stern as the reference TB for oil‑free water.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Derive water‑temperature distribution",
+      "instruction": "Model the TB probability distribution Φ(TB) as the sum of three Gaussians (oil, water, wake) per Eq. (7); identify water pixels where Φ_W > 0.01 a_W, and remove outliers >2 σ from a 1‑m moving average, interpolating their values.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Fit background water temperature profile",
+      "instruction": "Fit non‑outlier water TB values to TB_W(y) = b + c y + sin(d y) (Eq. 8), then construct a piecewise linear background with a Gaussian transition (Eqs. 9‑10) to obtain ΔTB(x,y) = TB(x,y) − TB_W(x,y).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Calibrate ΔTB to oil thickness",
+      "instruction": "Using four successful collects, relate collected oil mass M to ΔTB‑derived area A(ΔTB) with the iterative model M(ΔTB) = k ∫A(ΔTB)dΔTB + N (Eq. 10); start with k = 1, compute k₂ by minimizing N across all collects, and obtain the final calibration curve (Fig. 14).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Apply calibration to slick surveys",
+      "instruction": "For each survey image, compute ΔTB, convert to oil mass using the calibration function, and estimate uncertainties by 10 000 Monte‑Carlo simulations using a TB standard deviation of 0.084 K; fit the resulting mass distribution with a Gaussian and report the half‑width as the uncertainty.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T12:03:11.055140Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "The approach combines sea surface and airborne measurements as part of the Seep Assessment Study (SAS), described in Leifer et al. [1]. The study collected thermal infrared (TIR) and visible (VIS) spectrum imagery, as well as viewing position and orientation data of a targeted oil slick segment by the oil spill mapping science package, SeaSpires™. The targeted oil slick segment was boomed, skimmed, collected, and weighed in the laboratory. These two datasets (remote sensing and surface) provided an in-scene calibration of oil thickness to remote sensing data. In essence, the in-scene calibration is a reverse planned-release experiment. Herein, we present the SAS methodology. The SAS is described in Leifer et al. [1] and investigated TIR oil slick thickness remote sensing. The SAS was applied to the perennial and continuous thick oil slicks from the Coal Oil Point seep field. These slicks provide an opportunity to field validate oil slick remote sensing. This opportunity is particularly important, given that planned releases are infeasible in US waters, and the priority during an oil spill is mitigation, not science. As a result, field validation of oil spill remote sensing approaches largely has been lacking [2,3]. Furthermore, permitting is unnecessary for a natural seep oil slick, there are no spill startup dynamics, and experimental repetition under diverse sea state and meteorology conditions are feasible [27]. The approach involved collecting an oil slick segment that also is remotely sensed. In essence, the SAS is a reverse planned release experiment - the remotely sensed oil is boomed, skimmed, collected, and then assessed in the laboratory. In a planned release, a quantity of oil is released into the environment and then remote sensed. The SAS targeted thick, actionable oil slicks with the definition of thick versus thin oil based on the underlying heat and radiative processes. Leifer et al. [1] found that for Coal Oil Point oil, the transition from thin to ",
+  "content_type": "protocol",
+  "content_type_score": 36,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

@@ -19,72 +19,155 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 4.0,
+  "quality_score": 4.5,
   "category": "Imaging & Microscopy",
   "estimated_time_mins": 48,
   "materials": [
     "ImageJ",
     "Fiji",
-    "Flair-multislice-reordering.ijm"
+    "Flair-multislice-reordering.ijm",
+    "Paste the macro below and click Run."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "assumes Multibatch slice data that is not &#34;in order&#34; anatomically. This code also assumes that a dataset titled &#34;FLAIR&#34; is open but this code can be modified to work for any multislice datasets (T2w, etc_) Graphical Abstract",
+      "title": "Prepare ImageJ Environment",
+      "instruction": "Open the anatomically out-of-order stacks in ImageJ / Fiji.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Code is pasted below - however I recommend downloading the zip file attached here OR checking the latest version of the github repo and downloading the .ijm file directly. Github repo: Beluga-In-The-Elevator/reslice-multibatches-FLAIR-or-MRIdatasets: Reslice multibatch MR datasets // Reorder 24-slice FLAIR stack from interleaved to anatomical order //assumes user already has open dataset(s) that they wish to process // User selects which open dataset to process titles = getList(&#34;image.titles&#34;); if (titles.length == 0) exit(&#34;No image windows are open.&#34;); Dialog.create(&#34;Choose dataset&#34;); Dialog.addImageChoice(&#34;Dataset&#34;); Dialog.show(); origTitle = Dialog.getImageChoice(); selectWindow(origTitle); run(&#34;Select All&#34;); // selects the whole image if (nSlices != 24) { print(&#34;ERROR: nSlices = &#34; + nSlices + &#34; (expected 24).&#34;); exit(&#34;Expected 24 slices.&#34;); } print(&#34;? Selected dataset: \\&#34;&#34; + origTitle + &#34;\\&#34;&#34;); // Make 1–8 selectWindow(origTitle); run(&#34;Make Substack...&#34;, &#34;slices=1-8&#34;); rename(&#34;Batch1&#34;); // Make 9–16 selectWindow(origTitle); run(&#34;Make Substack...&#34;, &#34;slices=9-16&#34;); rename(&#34;Batch2&#34;); // Make 17–24 selectWindow(origTitle); run(&#34;Make Substack...&#34;, &#34;slices=17-24&#34;); rename(&#34;Batch3&#34;); // Create a new 24-slice stack for the reordered data w = getWidth(); h = getHeight(); newImage(&#34;Reordered&#34;, &#34;32-bit black&#34;, w, h, 24); print(&#34;? Created 24-slice reordered stack.&#34;); // Interleave with logging print(&#34;Begin interleaving 3 × 8 slices; DICOM filenames:&#34;); for (slice = 1; slice &lt;= 8; slice++) { for (batch = 1; batch &lt;= 3; batch++) { batchName = &#34;Batch&#34; + batch; selectWindow(batchName); setSlice(slice); run(&#34;Copy&#34;); dicomFile = getInfo(&#34;image.filename&#34;); if (dicomFile == &#34;&#34;) dicomFile = &#34;(no filename)&#34;; print(&#34; ? Copy [Slice &#34; + slice + &#34; from &#34; + batchName + &#34; = &#34; + dicomFile + &#34;]&#34;); selectWindow(&#34;Reordered&#34;); setSlice((slice - 1) * 3 + batch); run(&#34;Paste&#34;); } } print(&#34;? Reordering done; check window &#39;Reordered&#39;.&#34;); // adjust contrast selectWindow(&#34;Reordered&#34;); mid = floor(nSlices/2) + 1; setSlice(mid); run(&#34;Enhance Contrast&#34;, &#34;saturated=0.35&#34;); // save data prompt // Ask user for save folder saveLocation = getDirectory(&#34;Where do you want to save the reordered stack?&#34;); // Build filename: Reordered_.tif outName = &#34;Reordered_&#34; + origTitle + &#34;.tif&#34;; savePath = saveLocation + outName; selectWindow(&#34;Reordered&#34;); saveAs(&#34;Tiff&#34;, savePath); print(&#34;? Saved to: &#34; + savePath); //delete or comment out the below section if you would like to troubleshoot a reordering issue and make sure the batches are being split properly if (isOpen(&#34;Batch1&#34;)) { selectWindow(&#34;Batch1&#34;); close(); } if (isOpen(&#34;Batch2&#34;)) { selectWindow(&#34;Batch2&#34;); close(); } if (isOpen(&#34;Batch3&#34;)) { selectWindow(&#34;Batch3&#34;); close(); }",
+      "title": "Load Reordering Macro",
+      "instruction": "Load the 'Flair-multislice-reordering.ijm' macro into ImageJ.",
+      "substeps": [
+        {
+          "instruction": "Drag and drop the .ijm file into the ImageJ tool bar",
+          "title": ""
+        },
+        {
+          "instruction": "Open the Script Editor (Windows/Linux: Alt + Shift + N; macOS: Option + Shift + N)",
+          "title": ""
+        },
+        {
+          "instruction": "Select language IJ1 Macro",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Open your anatomically out-of-order stacks in ImageJ / Fiji",
+      "title": "Execute Macro and Select Dataset",
+      "instruction": "Run the macro and select the target dataset from the 'Choose dataset' dialog.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Drag and drop the &#34;Flair-multislice-reordering.ijm&#34; into the ImageJ tool bar",
+      "title": "Verify Slice Count",
+      "instruction": "Ensure the selected dataset contains exactly 24 slices; the macro will exit with an error if nSlices is not 24.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Open the Script Editor and select language IJ1 Macro.",
+      "title": "Split Stack into Batches",
+      "instruction": "The macro automatically splits the original stack into three substacks based on slice ranges.",
+      "substeps": [
+        {
+          "instruction": "Create 'Batch1' from slices 1-8",
+          "title": ""
+        },
+        {
+          "instruction": "Create 'Batch2' from slices 9-16",
+          "title": ""
+        },
+        {
+          "instruction": "Create 'Batch3' from slices 17-24",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Paste the macro below and click Run.",
+      "title": "Interleave Slices",
+      "instruction": "The macro creates a new 24-slice 32-bit black image titled 'Reordered' and interleaves the slices from the three batches.",
+      "substeps": [
+        {
+          "instruction": "Iterate through slices 1 to 8",
+          "title": ""
+        },
+        {
+          "instruction": "For each slice, copy and paste from Batch1, Batch2, and Batch3 sequentially into the 'Reordered' stack at position (slice - 1) * 3 + batch",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Reordered: 24‑slice stack in anatomical order, contrast adjusted. Data output should already be saved to the file location you chose.",
+      "title": "Adjust Contrast",
+      "instruction": "The macro adjusts the contrast of the 'Reordered' stack.",
+      "substeps": [
+        {
+          "instruction": "Select the middle slice (floor(nSlices/2) + 1)",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'Enhance Contrast' with saturated=0.35",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "To get to the macro menu/ Script Editor, follow these steps: On Windows / Linux: Alt + Shift + N On macOS: Option + Shift + N",
+      "title": "Save Reordered Stack",
+      "instruction": "Save the processed stack to a specified directory.",
+      "substeps": [
+        {
+          "instruction": "Select the save folder when prompted",
+          "title": ""
+        },
+        {
+          "instruction": "Save the file as a Tiff with the filename 'Reordered_[OriginalTitle].tif'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Cleanup",
+      "instruction": "The macro closes the temporary Batch1, Batch2, and Batch3 windows.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [
+    {
+      "type": "image",
+      "filename": "FLAIRmultibatchimageprocessing-CE545833402511F1A5B40A58A9FEAC02.png",
+      "local_path": "data/media/protocols_io/reorder-interleaved-flair-slices-imagej-macro-jynkcpvcx/FLAIRmultibatchimageprocessing-CE545833402511F1A5B40A58A9FEAC02.png",
+      "source_url": "https://files.protocols.io/external/FLAIRmultibatchimageprocessing-CE545833402511F1A5B40A58A9FEAC02.png",
+      "caption": "",
+      "bytes": 445487,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/reorder-interleaved-flair-slices-imagej-macro-jynkcpvcx/FLAIRmultibatchimageprocessing-CE545833402511F1A5B40A58A9FEAC02.png"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 62,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

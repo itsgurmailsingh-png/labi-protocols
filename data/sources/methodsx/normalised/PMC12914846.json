@@ -11,74 +11,132 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
   "doi": "10.1016/j.mex.2026.103811",
   "citation": "10.1016/j.mex.2026.103811",
-  "category": "Other",
+  "category": "Taxonomy & Biodiversity",
   "tags": [],
   "estimated_time_mins": 70,
-  "materials": [],
+  "materials": [
+    "signal window u(tsig)t1t2, (",
+    "range of α, and ("
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "The method follows the procedure proposed by Niederleithinger et al. [8] and is refined for the specified experimental setup. The workflow consists of 1. Collection of the raw ultrasonic signals 2. Preprocessing of the raw signals and 3. Application of CWI methods to preprocessed ultrasonic signals. A schematic overview is given on Fig. 1.Fig. 1Flow diagram of the proposed evaluation method. For each step, parameters which need to be determined for calculation are indicated by a gear symbol.Fig. 1 dummy alt text",
-      "substeps": [],
+      "title": "Collect ultrasonic signals during loading",
+      "instruction": "Increase the compressive load on the concrete specimen from experimental time t = 0 min at a constant rate of 50 N s⁻¹ (equivalent to 0.005 N mm⁻² s⁻¹). Record an ultrasonic signal every 10 s, which corresponds to a stress increase of 0.05 N mm⁻² (0.1 % of the specimen’s compressive strength of 42.9 MPa) between successive signals, until failure. Example stress values: 0 N mm⁻² at 0 min, 3 N mm⁻² at 10 min, 18 N mm⁻² at 60 min.",
+      "substeps": [
+        {
+          "instruction": "Set loading machine to 50 N s⁻¹.",
+          "title": ""
+        },
+        {
+          "instruction": "Start timer at t = 0 min.",
+          "title": ""
+        },
+        {
+          "instruction": "Every 10 s, trigger the ultrasonic transducer and store the raw waveform.",
+          "title": ""
+        },
+        {
+          "instruction": "Log the corresponding compressive stress (e.g., 0, 3, 18 N mm⁻²).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Analysis with coda wave interferometry",
-      "instruction": "Coda Wave Interferometry (CWI) relies on the comparison of a reference signal, recorded at an initial material state and a perturbed signal recorded after the material has undergone changes. The coefficient of cross-correlation (CC) or similar properties such as coherency between the ultrasonic signals can be computed to assess the changes in the material qualitatively. Several approaches have been proposed for quantifying the signal changes.",
-      "substeps": [],
+      "title": "Preprocess signals with frequency filtering",
+      "instruction": "Apply band‑pass frequency filters to each recorded raw signal, creating two independent data sets:",
+      "substeps": [
+        {
+          "instruction": "Filter A: 10 kHz – 150 kHz.",
+          "title": ""
+        },
+        {
+          "instruction": "Filter B: 40 kHz – 150 kHz.",
+          "title": ""
+        },
+        {
+          "instruction": "Store the filtered waveforms for later CWI analysis.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Analysis with coda wave interferometry",
-      "instruction": "Here, the stretching technique [[8], [25]] is applied, where the reference signal u(tsig) is stretched or compressed linearly and for each stretching factor α, the correlation coefficient CC(α) between the stretched reference signal and another signal of interest u˜(tsig) is calculated according to Eq. (4). In many cases, just a part of the signal between t1 and t2 (time window u(tsig)t1t2) is used to exclude direct (ballistic) waves, to exclude parts of the signal dominated by noise, or to control spatial sensitivity (early part: area close to direct path, later parts: scattered, longer paths):(4)CC(α)=∫t1t2upreprocessed(tsig·(1+α))·u˜preprocessed(tsig)dtsig∫t1t2(upreprocessed(tsig·(1+α)))2dtsig·∫t1t2(u˜preprocessed(tsig))2dtsig",
+      "title": "Select time window for correlation",
+      "instruction": "Define a time window [t₁, t₂] within each preprocessed signal that excludes the direct (ballistic) arrival and noisy portions; this window will be used for all correlation calculations.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Analysis with coda wave interferometry",
-      "instruction": "During computation, the stretching factor α is varied in small increments such that CC(α) is maximized. The stretching factor which yields the highest correlation between the reference and perturbed state signal, i.e., CCmax, is related to the relative velocity change Δv/v between the velocity of the reference signal v and the velocity of the other signal v˜ according to Eq. (5):(5)α=v˜−vv=Δv/v",
-      "substeps": [],
+      "title": "Compute stretched‑signal correlation for each α",
+      "instruction": "For a series of stretching factors α, linearly stretch (or compress) the reference waveform and calculate the correlation coefficient CC(α) with the perturbed waveform over the chosen window:",
+      "substeps": [
+        {
+          "instruction": "Stretch the reference: u_pre(t·(1+α)).",
+          "title": ""
+        },
+        {
+          "instruction": "Compute numerator: ∫_{t₁}^{t₂} u_pre(t·(1+α))·ũ_pre(t) dt.",
+          "title": ""
+        },
+        {
+          "instruction": "Compute denominator: √[∫_{t₁}^{t₂} u_pre²(t·(1+α)) dt] × √[∫_{t₁}^{t₂} ũ_pre²(t) dt].",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate CC(α) = numerator / denominator.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Analysis with coda wave interferometry",
-      "instruction": "Negative Δv/v values indicate a velocity decrease in the changed state compared to the reference state, while positive Δv/v values indicate increase in velocity. Note, that there are different notations in literature where (1−α) is implemented in Eq. (4), such that α=−Δv/v. The derivation of (4), (5) is provided in the appendix.",
+      "title": "Find optimal stretching factor α",
+      "instruction": "Vary α in small increments (resolution to be chosen) and identify the value α_opt that maximizes CC(α). Record the maximum correlation as CC_max.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Analysis with coda wave interferometry",
-      "instruction": "In literature, the notations for the relative velocity change further vary with regards to whether lower- or upper-case delta (∆ or δ) or simply a lower-case Latin d is used and whether the letter v is written italic or upright. In line with standardization, e.g. [26], the notation Δv/v with capital delta and italic v should be adopted as Δ indicates a finite difference, whereas δ or d denote small or infinitesimal variation and italic letters are used for symbols representing physical quantities while upright letters are used for units.",
+      "title": "Calculate relative velocity change Δv/v",
+      "instruction": "Set Δv/v = α_opt (since α = Δv/v). Positive Δv/v indicates a velocity increase; negative Δv/v indicates a decrease.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Analysis with coda wave interferometry",
-      "instruction": "The velocity change Δv/v is usually used as an indicator for a homogeneous, often almost completely reversible change such as a moderate change in stress or temperature. The remaining decorrelation DCr, with DCr=1−CCmax, is an indicator a) for inhomogeneity and b) for additional scatterers, e.g. cracks.",
+      "title": "Determine decorrelation DCr",
+      "instruction": "Compute the remaining decorrelation DCr = 1 – CC_max; DCr quantifies inhomogeneity or the appearance of new scatterers.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Select reference scheme and cumulate α",
+      "instruction": "Choose a reference approach based on the magnitude of CC_max:",
       "substeps": [
         {
-          "instruction": "The velocity change Δv/v is usually used as an indicator for a homogeneous, often almost completely reversible change such as a moderate change in stress or temperature. The remaining decorrelation DCr, with DCr=1−CCmax, is an indicator",
+          "instruction": "Fixed reference: If CC_max stays above 0.7 for all signals, compare every signal to the initial reference and report Δv/v directly.",
           "title": ""
         },
         {
-          "instruction": "for inhomogeneity and",
+          "instruction": "Stepwise reference: If CC_max falls below 0.7, use each signal as the reference for the next one. Compute α_n for each adjacent pair and cumulate using α_c,n = α_n (for n = 1) or α_c,n = (α_c,n‑1 + 1)(α_n + 1) – 1 (for n > 1).",
           "title": ""
         },
         {
-          "instruction": "for additional scatterers, e.g. cracks.",
+          "instruction": "Moving reference (auto CWI): Update the reference only when CC_max drops below a chosen threshold (e.g., 0.7). Record each update and recompute Δv/v relative to the new reference; note that CC values themselves are not accumulated.",
           "title": ""
         }
       ],
@@ -86,84 +144,181 @@
       "timers": []
     },
     {
-      "step_id": 7,
-      "title": "Analysis with coda wave interferometry",
-      "instruction": "Signal alterations due to dilation and compression by 1 % are shown in Fig. 5 using an idealized waveform for illustration purposes. The initial reference signal is synthetically generated as a damped sinusoidal waveform incorporating smooth amplitude modulation. The idealized signal was generated with a 10 MHz sampling rate over a duration of 2048 μs, using a 60 kHz frequency. It incorporates an exponential decay with a rate of −10,000 μs⁻¹, a modulation depth of 0.3, and a smoothness parameter of 100 to produce realistic amplitude modulation.Fig. 5Idealized wave form with no stretching (reference signal) and stretching by ±1 % applied. A stretching factor of α = +1 % indicates that the reference wave needs to be compressed to match the changed wave form (velocity increase). Analogously, a stretching factor of α = −1 % indicates that the reference wave needs to be dilated to match the changed wave form (velocity decrease).Fig. 5 dummy alt text",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
       "step_id": 8,
-      "title": "Fixed, step(wise) and moving reference",
-      "instruction": "When analyzing a set of signals recorded, e.g., during an experiment, three approaches can be used to derive the signal changes over time:(1)Fixed reference: All signals are compared to the same reference signal recorded at the beginning of the observation period. For each signal, the relative velocity change Δv/v reflecting the change between the initial state and the state at signal collection is retrieved. A fixed reference is suggested when the changes in the medium are small and CCmax value stays above 0.7. This value is derived from observation and experimentation; other authors recommend even stricter limits.(2)Step(wise) reference: Calculations are performed for adjacent signals such that the previous measured signal is taken as the reference for comparison. Therefore, the stretching yields the relative velocity change Δv/v between two adjacent signals. For derivation of the signal change with respect to the initial state, the velocity variation needs to be cumulated. The cumulated stretching factor αc or cumulated relative velocity change Δv/v, for the nth signal can be calculated as given in Eq. (6) and is derived as described in the appendix. This approach has been used in various previous studies, e.g., by Niederleithinger et al. [8] and Sun et al. [27]. Using the stepwise reference approach is suggested, when signals exhibit major changes with CCmax of the fixed reference approach falling below 0.7.(6)αc,n={αn,(αc,n−1+1)(αn+1)−1,n=1n>1Attention must be paid when applying Eq. (6), as rounding errors may occur, which also accumulate and may lead to significant deviations between the actual and calculated values. The relative deviation between actual and cumulated value is potentially greater if the change per adjacent signal is small and many individual values are cumulated. This is why, in the stepwise method the choice of an adequate increment of α (see Section 3.2) is crucial, as bigger step size leads to inaccuracies in the calculation of the velocity change, and error propagation cumulates to large deviations from the actual velocity change. To test whether accumulation of rounding errors occurs in a certain analysis, additional calculations may be performed and compared for stability of the results, e.g., using a subset of the collected signals and fixed reference approach, or by skipping signals when computation with the stepwise reference approach. Note, that CC values can’t be accumulated.(3)Moving reference (or auto CWI): Fixed and stepwise reference can be combined, such that the reference signal is only updated, once CCmax drops below a certain threshold, e.g., 0.7. This approach was applied, e.g., by Diewald et al. [10] and Vu et al. [28] who studied mechanical loading of concrete specimen and observed periods of small signal changes where fixed reference can be applied and periods of strong signal alterations, where consecutive signals needed to be compared to maintain sufficient correlation.",
+      "title": "Report Δv/v, CCmax, and DCr",
+      "instruction": "For each time point, output the relative velocity change (Δv/v or cumulated Δv/v), the maximum correlation coefficient (CC_max), and the decorrelation (DCr). If a moving reference was used, indicate the moments when the reference was updated.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Fixed, step(wise) and moving reference",
-      "instruction": "Using moving reference cumulation of the relative velocity change according to Eq. (6) needs to be performed to relate the values back to the initial state each time the reference is updated. However, as mentioned above, CC values cannot be accumulated, implying that the resulting values for CCmax only refer to the state of the last update. The number and distribution of updates over the duration of the monitoring thereby depends on the selected threshold. Therefore, the results retrieved using moving reference should always include an indication when updates were made.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "Fixed, step(wise) and moving reference",
-      "instruction": "As discussed above, both values, Δv/v and CCmax, provide different valuable information. While both parameters for the fixed and stepwise approach can be interpreted consistently over the entire monitoring period, interpretation of the moving reference results is more challenging and may lead to misinterpretations, especially by inexperienced users. Therefore, it is recommended to apply either fixed reference or stepwise reference to all analyzed signals consistently, since this allows clear interpretation of the retrieved parameters. Both approaches should be applied complementary for analysis of the entire monitoring period or for specific subperiods of interest to assess the true characteristics of signal changes.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "Analysis parameters",
-      "instruction": "For implementation of the analysis and calculation of the CWI parameters, Δv/v, or cumulated Δv/v and CCmax(α), the following parameters need to be selected: (1) signal window u(tsig)t1t2, (2) range of α, and (3) resolution of α. A description of the individual parameters and their influence on the values obtained is provided below.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "Method validation",
-      "instruction": "The proposed procedure is validated by application to ultrasonic signals collected from one concrete specimen subjected to compression loading with the measurement specifications stated above. These signals were generated and analyzed in a previous study by Diewald et al. [[10], [22]]. From experimental time texp = 0 min compressive load was increased continuously until failure with a loading rate of 50 N/s, corresponding to a stress increase of 0.005 N/mm2s. Ultrasonic signals were collected at an interval of 10 s leading to an increase in compressive stress of 0.05 N/mm2 between two adjacent signals. With a predetermined compressive strength of 42.9 MPa this equals a 0.1 % stress increase in terms of compressive strength. Further experimental details and data interpretation is given by Diewald et al. [10] and Vu et al. [28].",
+      "title": "Generate synthetic reference waveform (optional)",
+      "instruction": "If an illustrative synthetic reference is desired, generate a damped sinusoid with the following parameters:",
       "substeps": [
         {
-          "instruction": "The proposed procedure is validated by application to ultrasonic signals collected from one concrete specimen subjected to compression loading with the measurement specifications stated above. These signals were generated and analyzed in a previous study by Diewald et al. [[10], [22]]. From experimental time texp = 0 min compressive load was increased continuously until failure with a loading rate of 50 N/s, corresponding to a stress increase of",
+          "instruction": "Sampling rate: 10 MHz.",
           "title": ""
         },
         {
-          "instruction": "N/mm2s. Ultrasonic signals were collected at an interval of 10 s leading to an increase in compressive stress of",
+          "instruction": "Total duration: 2048 μs.",
           "title": ""
         },
         {
-          "instruction": "N/mm2 between two adjacent signals. With a predetermined compressive strength of",
+          "instruction": "Central frequency: 60 kHz.",
           "title": ""
         },
         {
-          "instruction": "MPa this equals a",
+          "instruction": "Exponential decay rate: –10 000 μs⁻¹.",
           "title": ""
         },
         {
-          "instruction": "% stress increase in terms of compressive strength. Further experimental details and data interpretation is given by Diewald et al. [10] and Vu et al. [28].",
+          "instruction": "Amplitude modulation depth: 0.3.",
+          "title": ""
+        },
+        {
+          "instruction": "Smoothness parameter for modulation: 100.",
           "title": ""
         }
       ],
       "is_critical": false,
       "timers": []
-    },
-    {
-      "step_id": 13,
-      "title": "Method validation",
-      "instruction": "The signals were preprocessed according to the workflow described herein (see also Fig. 3, Fig. 4). Frequency filtering is performed for both suggested frequency ranges 10 kHz – 150 kHz and 40 kHz – 150 kHz creating two sets of preprocessed signals which were subsequently analyzed by CWI methods. Fig. 6 displays three preprocessed ultrasonic signals collected during the experiment.Fig. 6Preprocessed ultrasonic signals collected from one concrete specimen subjected to increasing compressive loads. Frequency filtering was performed for a frequency range of 10 kHz – 150 kHz. The compressive stress on the specimen was 0 N/mm2 at experimental time texp = 0 min, 3 N/mm2 at texp = 10 min, and 18 N/mm2 at texp= 60 min.Fig. 6 dummy alt text",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T05:10:09.606638Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "The method follows the procedure proposed by Niederleithinger et al. [8] and is refined for the specified experimental setup. The workflow consists of 1. Collection of the raw ultrasonic signals 2. Preprocessing of the raw signals and 3. Application of CWI methods to preprocessed ultrasonic signals. A schematic overview is given on Fig. 1.Fig. 1Flow diagram of the proposed evaluation method. For each step, parameters which need to be determined for calculation are indicated by a gear symbol.Fig. 1 dummy alt text The proposed procedure is validated by application to ultrasonic signals collected from one concrete specimen subjected to compression loading with the measurement specifications stated above. These signals were generated and analyzed in a previous study by Diewald et al. [[10], [22]]. From experimental time texp = 0 min compressive load was increased continuously until failure with a loading rate of 50 N/s, corresponding to a stress increase of 0.005 N/mm2s. Ultrasonic signals were collected at an interval of 10 s leading to an increase in compressive stress of 0.05 N/mm2 between two adjacent signals. With a predetermined compressive strength of 42.9 MPa this equals a 0.1 % stress increase in terms of compressive strength. Further experimental details and data interpretation is given by Diewald et al. [10] and Vu et al. [28]. The signals were preprocessed according to the workflow described herein (see also Fig. 3, Fig. 4). Frequency filtering is performed for both suggested frequency ranges 10 kHz – 150 kHz and 40 kHz – 150 kHz creating two sets of preprocessed signals which were subsequently analyzed by CWI methods. Fig. 6 displays three preprocessed ultrasonic signals collected during the experiment.Fig. 6Preprocessed ultrasonic signals collected from one concrete specimen subjected to increasing compressive loads. Frequency filtering was performed for a frequency range of 10 kHz – 150 kHz. The compressive stress on the specimen was 0 N/mm2 at experiment",
+  "content_type": "protocol",
+  "content_type_score": 30,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 95160,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 94493,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 89375,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 87651,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 55603,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 36801,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 46697,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 52754,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 69649,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 71857,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 53063,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 69434,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 69628,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC12914846/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12914846/",
+      "caption": "",
+      "bytes": 48965,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC12914846/gr9.jpg"
+    }
+  ]
 }

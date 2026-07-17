@@ -114,7 +114,7 @@ def to_raw_schema(detail: dict) -> dict:
         "license_note": f"figshare article detail endpoint license.name: {license_name}",
         "description": description_plain,
         "steps_raw": description_plain,
-        "keywords": [t.get("title", "") for t in detail.get("tags", [])],
+        "keywords": [t.get("title", "") if isinstance(t, dict) else str(t) for t in detail.get("tags", [])],
         "resource_type": detail.get("defined_type_name", ""),
         "fetched_at": datetime.datetime.utcnow().isoformat(),
     }
@@ -125,14 +125,14 @@ def fetch_keyword(keyword: str, item_type: int, saved: set, total_saved: list) -
     while True:
         if len(total_saved) >= MAX_RECORDS:
             return
-        params = {
+        body = {
             "search_for": keyword,
             "item_type": item_type,
             "page_size": PAGE_SIZE,
             "page": page,
         }
         try:
-            r = requests.get(f"{BASE}/articles/search", params=params, headers=HEADERS, timeout=20)
+            r = requests.post(f"{BASE}/articles/search", json=body, headers=HEADERS, timeout=20)
             if r.status_code == 429:
                 print("  Rate limited — sleeping 30s")
                 time.sleep(30)

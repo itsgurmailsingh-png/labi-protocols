@@ -11,93 +11,279 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4473032/",
   "doi": "10.1016/j.mex.2014.10.008",
   "citation": "10.1016/j.mex.2014.10.008",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [],
   "estimated_time_mins": 60,
   "materials": [],
   "steps": [
     {
       "step_id": 0,
-      "title": "Data analysis – head position estimation",
-      "instruction": "Head position estimation occurred in the localizer scan and all three experiments. For each one-second data segment passed to the real-time computer, we calculated the magnetic field strength generated at each sensor due to the activation of each HPI coil. First, a cross-talk correction matrix was applied to the MEG data to eliminate cross-talk interference between sensors [6]. For each sensor, the data were then baseline corrected based on the mean amplitude over the data segment. Following this, a continuous signal decomposition was performed at each coil frequency to determine the sine (real) and cosine (imaginary) component of the decomposition of the magnetic field due to each HPI coil [7]. At each coil frequency, the two components for all sensors were plotted to a complex plane, and a linear regression of these data was performed. Real values indicating magnetic field strength at the coil frequency were determined by projecting the components for each sensor to the linear regression. For each HPI coil, the resultant estimates of magnetic field strength across the sensors defined the “measured” MEG field data.",
-      "substeps": [],
+      "title": "Preprocess 1‑s MEG segment",
+      "instruction": "For each one‑second data segment sent to the real‑time computer, apply the cross‑talk correction matrix, baseline‑correct each sensor using the segment mean, decompose the signal at each HPI coil frequency to obtain sine (real) and cosine (imaginary) components, plot these components for all sensors on a complex plane, perform linear regression, and project each sensor’s components onto the regression line to obtain the magnetic field strength (the “measured” MEG field) for each coil.",
+      "substeps": [
+        {
+          "instruction": "Apply cross‑talk correction matrix to eliminate inter‑sensor interference.",
+          "title": ""
+        },
+        {
+          "instruction": "Baseline‑correct each sensor using the mean amplitude over the 1‑s segment.",
+          "title": ""
+        },
+        {
+          "instruction": "Perform continuous signal decomposition at each HPI coil frequency to obtain sine and cosine components.",
+          "title": ""
+        },
+        {
+          "instruction": "Plot the two components for all sensors on a complex plane.",
+          "title": ""
+        },
+        {
+          "instruction": "Fit a linear regression to the plotted data.",
+          "title": ""
+        },
+        {
+          "instruction": "Project each sensor’s components onto the regression line to derive magnetic field strength at the coil frequency (measured field).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Data analysis – head position estimation",
-      "instruction": "Using the last one-second data segment collected in the localizer scan, the rigorous fitting method described below was applied to each HPI coil to provide accurate estimation of coil position, orientation and magnitude. The resulting parameters for each coil defined a rigid body, with the relative positions, orientations and magnitudes of all HPI coils fixed. For the rigorous fitting method, an unconstrained multivariable optimization algorithm (Nelder–Mead simplex direction search) [8] was applied to the final one-second data segment to estimate six parameters (x, y, z, location; x, y, z magnitude/orientation) for each HPI coil. The initial parameters for the optimization were provided by the acquisition software's initial head position estimation. Based on these values, the magnetic field generated orthogonal to each MEG sensor by an HPI coil modeled as a magnetic dipole defined the “calculated” MEG field data [9]. For each coil, the algorithm iteratively perturbed the parameters to optimize the least-squares error between the “measured” and “calculated” field data. The optimization algorithm was performed three times per coil. In the first optimization, only the magnitude of the magnetic dipole was allowed to vary. In the second optimization, only dipole orientation was allowed to vary. In the final optimization, only the location was allowed to vary. This approach provided a magnetic dipole location and orientation/amplitude that remained stable with additional optimizations.",
-      "substeps": [],
+      "title": "Rigorous coil localization (localizer)",
+      "instruction": "Using the final one‑second segment of the localizer scan, estimate each HPI coil’s position, orientation, and magnitude with an unconstrained Nelder‑Mead simplex optimization applied three times per coil (first magnitude only, then orientation only, finally location only), starting from the acquisition software’s initial head‑position estimate; the resulting six parameters per coil define a rigid body of the four coils.",
+      "substeps": [
+        {
+          "instruction": "Provide initial parameters from the acquisition software’s head‑position estimate.",
+          "title": ""
+        },
+        {
+          "instruction": "Run Nelder‑Mead optimization allowing only dipole magnitude to vary (first pass).",
+          "title": ""
+        },
+        {
+          "instruction": "Run Nelder‑Mead optimization allowing only dipole orientation to vary (second pass).",
+          "title": ""
+        },
+        {
+          "instruction": "Run Nelder‑Mead optimization allowing only dipole location to vary (third pass).",
+          "title": ""
+        },
+        {
+          "instruction": "Combine the optimized parameters of all four coils to define a rigid body.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Data analysis – head position estimation",
-      "instruction": "The approach described above accurately localized each HPI coil. However, this method required 12 iterative processes (three for each coil) and was, thus, not feasible for real-time analysis. Therefore, once the initial coil localizations were completed, the four coil positions and magnitude/orientations defined a rigid body. During the subsequent experiments, HPI coil localization was performed by iteratively transforming the position of the rigid body as a whole, as described below. Therefore, only one iterative process was required, which substantially reduced processing requirements. Minimizing the amount of time required for head position estimation following the localizer scan provided the additional time necessary for rtSE processing (e.g., filtering, lead-field calculation, source estimation).",
-      "substeps": [],
+      "title": "Real‑time head position estimation",
+      "instruction": "For every subsequent one‑second data segment, compute the measured fields for the four coils, then run a single six‑parameter constrained active‑set optimization that translates and rotates the rigid body to minimize the least‑squares error between measured and calculated fields, constraining translation to ≤1 cm and rotation to ≤3° per axis, using the previous segment’s transform as the initial guess; retain only the three coils with the lowest error for the fit and save the resulting coordinate‑frame transformation matrix.",
+      "substeps": [
+        {
+          "instruction": "Calculate measured magnetic fields for all four HPI coils.",
+          "title": ""
+        },
+        {
+          "instruction": "Set up a six‑parameter active‑set optimization (translation + rotation).",
+          "title": ""
+        },
+        {
+          "instruction": "Constrain the optimization to ≤1 cm translation and ≤3° rotation on each axis.",
+          "title": ""
+        },
+        {
+          "instruction": "Initialize the algorithm with the transform from the previous segment.",
+          "title": ""
+        },
+        {
+          "instruction": "Select the three coils that yield the lowest least‑squares error for error calculation.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the resulting transformation matrix to file.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Data analysis – head position estimation",
-      "instruction": "For all subsequent data segments passed to the real-time computer, a single six-parameter iterative algorithm optimized the translation and rotation of the HPI coil rigid body by minimizing the least-squares error between all four “measured” and “calculated” fields in one step. To further reduce processing time, a constrained optimization algorithm (active-set) [10] was used. Additionally, the optimized rigid body transform from the previous data segment was used as an initial guess, and the rigid body transformation for each data segment was constrained to 1 cm translation and 3° rotation in each axis. This constraint provided reasonable processing speed for real-time applications, while being able to compensate for head velocities experienced in all but severe cases during neuroimaging studies [5]. To reduce the chance of spurious findings due to bad data for one coil, only the three coils that generated the lowest least-squares error were used for the error calculation. For each data segment, a coordinate frame transformation matrix was determined based on the optimized parameters and saved to a file.",
-      "substeps": [],
+      "title": "Post‑experiment coil trajectory calculation",
+      "instruction": "After each experiment, apply the saved transformation matrices to reconstruct HPI coil positions over time, and run the vendor‑supplied MaxFilter offline HPI analysis for the same data to enable direct comparison between real‑time and offline coil‑position estimates.",
+      "substeps": [
+        {
+          "instruction": "Load each segment’s transformation matrix and compute the corresponding coil positions.",
+          "title": ""
+        },
+        {
+          "instruction": "Run MaxFilter’s offline HPI routine to obtain coil positions for each second.",
+          "title": ""
+        },
+        {
+          "instruction": "Compare real‑time and offline coil‑position time courses.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Data analysis – head position estimation",
-      "instruction": "At the completion of each experiment, the HPI coil positions over time were calculated using transformation matrices for each data segment. The HPI position estimation was also completed using the standard offline approach implemented in the vendor-supplied MaxFilter software package. Real-time and offline HPI coil position estimates were compared between methods over time, as described in the statistical analysis section below.",
-      "substeps": [],
+      "title": "Real‑time trial extraction and averaging",
+      "instruction": "When a data segment contains an event marker for a phantom current source, extract a trial from –100 ms to +200 ms relative to the marker, baseline‑correct to the trial mean, apply a Hanning window and a 40 Hz low‑pass filter, then baseline‑correct again using the 50 ms pre‑onset interval; continuously update the inter‑trial average and display it for quality control, and after 100 trials extract the measured field at the 31 ms post‑onset peak latency.",
+      "substeps": [
+        {
+          "instruction": "Isolate trials spanning –100 ms to +200 ms around each event marker.",
+          "title": ""
+        },
+        {
+          "instruction": "Baseline‑correct each trial to its mean amplitude.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply a Hanning window and low‑pass filter at 40 Hz.",
+          "title": ""
+        },
+        {
+          "instruction": "Perform a second baseline correction using the 50 ms preceding activation onset.",
+          "title": ""
+        },
+        {
+          "instruction": "Update and display the running inter‑trial average.",
+          "title": ""
+        },
+        {
+          "instruction": "After accumulating 100 trials, record the measured field at 31 ms latency.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Data analysis – real-time source localization",
-      "instruction": "Phantom current sources were localized using the real-time computer in Experiment 2 and compared to the known positions. Real-time averaging for each current source was completed as described below. As each data segment was passed to the real-time analysis computer, sections of data that included an event marker indicating current source activation were isolated as “trials”. Each trial was synchronized to the event marker and included 100 ms of data before and 200 ms of data after the marker. Trials were averaged separately for each current source. As trials were added, the average data were baseline corrected to the mean across the trial, and a Hanning window and low pass filter at 40 Hz were applied to eliminate edge effects and high-frequency interference. Finally, data were baseline corrected based on the 50 ms prior to the activation onset. The running inter-trial average was displayed on the real-time analysis computer for quality assurance during collection. After 100 trials were averaged for each current source, the measured MEG field data at the peak latency of 31 ms post-onset defined the “measured” MEG field data.",
-      "substeps": [],
+      "title": "Equivalent current dipole modeling",
+      "instruction": "For each current source, perform a grid‑search ECD fit on a spherical grid (radius = 8 cm, spacing = 1 cm) centered on the MEG origin, calculating three dipoles (one per cardinal axis) at each grid point and selecting the position with the lowest least‑squares error; then refine this estimate with an unconstrained BFGS non‑linear least‑squares optimization starting from the grid location and a zero‑magnitude moment.",
+      "substeps": [
+        {
+          "instruction": "Generate a spherical grid (8 cm radius, 1 cm spacing) around the MEG system origin.",
+          "title": ""
+        },
+        {
+          "instruction": "At each grid point, compute three dipoles aligned with the X, Y, and Z axes.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the least‑squares error between measured and modeled fields for each dipole.",
+          "title": ""
+        },
+        {
+          "instruction": "Select the grid point/dipole combination with the minimum error as the initial ECD.",
+          "title": ""
+        },
+        {
+          "instruction": "Run BFGS optimization, allowing position and orientation to vary, starting from the grid‑derived location and a moment of zero magnitude.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Data analysis – real-time source localization",
-      "instruction": "For each current source, localization was accomplished using equivalent current dipole (ECD) modeling [11]. An initial guess for the ECD location was calculated using a grid-search approach. MEG field data were calculated for ECDs on a spherical grid with a radius of 8 cm and spacing of 1 cm centered on the origin of the MEG system. Three ECDs were calculated at each position – one in each cardinal axis. The least-squares error between the measured and calculated field data was used to find the best-fit ECD. Following this, an unconstrained non-linear least-squares error optimization (Broyden-Fletcher-Golfarb-Shanno) [12–15] further refined the ECD position and orientation. The initial parameters for this optimization were the location determined from the grid search, and a moment of zero magnitude. Real-time estimated locations of all eight ECDs were compared to known locations of the current sources.",
-      "substeps": [],
+      "title": "Calculate rtSE peak‑to‑peak magnitude",
+      "instruction": "In offline analysis, detect local extrema automatically in the rtSE data for each current‑source activation, compute the peak‑to‑peak magnitude, average these magnitudes across all activations at each stationary phantom position to obtain a mean source amplitude, and calculate the percent change of this mean relative to the scan start.",
+      "substeps": [
+        {
+          "instruction": "Run the automated local‑extrema detection algorithm on rtSE activation data.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate peak‑to‑peak magnitude for each activation.",
+          "title": ""
+        },
+        {
+          "instruction": "Average magnitudes for all activations at each stationary phantom position.",
+          "title": ""
+        },
+        {
+          "instruction": "Determine the percent change of each position’s mean amplitude relative to the initial scan mean.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Method validation",
-      "instruction": "Before implementing the rtSE method in human studies, it is necessary to validate that the technique can accurately estimate current source amplitudes in the presence of simulated head movement. We hypothesized that phantom (“head”) position estimation using our rtSE technique would be as accurate as a comparable offline approach. For the current sources within the phantom that simulate neural activity, we hypothesized that the real-time technique would localize the known phantom sources as accurately as the vendor-supplied off-line method. Further, we hypothesized that, while the phantom was moving, rtSE would accurately estimate the movement profile and the magnitude of the current source.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
-      "title": "Statistical analysis",
-      "instruction": "In offline analysis, the peak-to-peak magnitude of the rtSE data obtained during current source activation was calculated using an automated local extrema detection algorithm. For each position in which the phantom was stationary, the magnitudes for all activations of the current source were averaged. This provided an estimate of the mean source amplitude at that phantom position. The percent change of these values from the mean source amplitude at the start of the scan was also calculated.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 9,
-      "title": "Statistical analysis",
-      "instruction": "Also in offline analysis, the HPI coil positions for each second of data were obtained using the vendor-supplied MaxFilter software. This allowed for direct comparison to the HPI coil positions estimated in real-time. Displacements of the HPI coils from second to second were also calculated based on the offline algorithm to estimate the phantom velocity over time. Additionally, offline movement compensation of MEG data based on SSS [16] was also applied to the data from Experiment 3. Offline source estimation of the movement corrected MEG data was performed using the vendor-supplied software, and peak-to-peak magnitudes of current source activation were calculated as described above for the rtSE data. This provided comparative data for the accuracy of movement compensation achieved by the rtSE method.",
-      "substeps": [],
+      "title": "Offline HPI and source analysis",
+      "instruction": "Run MaxFilter to obtain HPI coil positions for each second of data, compute coil displacements and derive phantom velocity, apply SSS movement compensation, perform offline source estimation with the vendor software, and calculate peak‑to‑peak magnitudes of the current‑source activations using the same automated extrema method as for rtSE data.",
+      "substeps": [
+        {
+          "instruction": "Execute MaxFilter’s HPI routine to get coil positions per second.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate inter‑second coil displacements and estimate phantom velocity.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply Signal Space Separation (SSS) movement compensation to the MEG data.",
+          "title": ""
+        },
+        {
+          "instruction": "Run the vendor‑supplied offline source‑estimation pipeline.",
+          "title": ""
+        },
+        {
+          "instruction": "Detect local extrema and compute peak‑to‑peak magnitudes for the offline source data.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T06:19:29.765767Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "Before implementing the rtSE method in human studies, it is necessary to validate that the technique can accurately estimate current source amplitudes in the presence of simulated head movement. We hypothesized that phantom (“head”) position estimation using our rtSE technique would be as accurate as a comparable offline approach. For the current sources within the phantom that simulate neural activity, we hypothesized that the real-time technique would localize the known phantom sources as accurately as the vendor-supplied off-line method. Further, we hypothesized that, while the phantom was moving, rtSE would accurately estimate the movement profile and the magnitude of the current source.",
+  "content_type": "protocol",
+  "content_type_score": 23,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC4473032/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4473032/",
+      "caption": "",
+      "bytes": 95121,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC4473032/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC4473032/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4473032/",
+      "caption": "",
+      "bytes": 113573,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC4473032/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC4473032/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4473032/",
+      "caption": "",
+      "bytes": 79300,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC4473032/gr3.jpg"
+    }
+  ]
 }

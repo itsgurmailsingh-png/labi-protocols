@@ -1,0 +1,133 @@
+{
+  "protocol_id": "analysis_ready_satellite_data_mosaics_from_landsat_and_sentinel_2_imagery",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Analysis-ready satellite data mosaics from Landsat and Sentinel-2 imagery",
+  "author": "Ørka, Gailis, et al.",
+  "doi": "10.1016/j.mex.2022.101995",
+  "source_name": "methodsx",
+  "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9860476/",
+  "citation": "10.1016/j.mex.2022.101995",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "CC-BY-4.0 - verified from PMC XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 3.0,
+  "category": "Environmental Science",
+  "estimated_time_mins": 66,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Prepare Input Satellite Data",
+      "instruction": "Gather surface reflectance data for the target area using one of the following supported types: Sentinel-2 (L2A), Landsat 8 Collection 1 (LaSRC - OLI/TIRS), or Landsat 4-7 Collection 1 (LEDAPS - TM/ETM+).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Perform Spatiotemporal Data Aggregation",
+      "instruction": "Process the input scenes sequentially to build the mosaic using the following preprocessing sequence:",
+      "substeps": [
+        {
+          "instruction": "Sort all input scenes by date.",
+          "title": ""
+        },
+        {
+          "instruction": "Reproject scenes to the desired target projection if necessary.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate the spatial extents of potential contributions from each scene.",
+          "title": ""
+        },
+        {
+          "instruction": "Generate a pixel selection mask for each step using the Geomosaic method.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Calculate Class Scores",
+      "instruction": "Assign a class score to each pixel based on the satellite-specific hierarchy to determine quality (higher score equals better quality).",
+      "substeps": [
+        {
+          "instruction": "For Sentinel-2, use the hierarchy: 1 (no_data, saturated, defective), 2 (cloud_medium/high probability), 3 (thin cirrus), 4 (snow/ice), 5 (Dark, shadow, unclassified), 6 (vegetation, soil, water), 7 (clear_terrain, water).",
+          "title": ""
+        },
+        {
+          "instruction": "For Landsat, use the hierarchy: 1 (no_data, saturated), 2 (terrain_occlusion), 3 (cloud_medium/high probability), 4 (cirrus_medium/high probability), 5 (snow/ice), 6 (dark, shadow), 7 (clear_terrain, water).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Calculate Pixel Desirability Score",
+      "instruction": "Compute the weighted desirability score (Sdes) for each scene using the formula: Sdes = wdate*Sdate + wgpix*Sgpix + waot*Saot, where weights (wdate, wgpix, waot) are between 0 and 1 and sum to 1.",
+      "substeps": [
+        {
+          "instruction": "Calculate Sdate (relative distance from target date) using Sdate = exp(-(Dtarget - D)^2 / (2 * σ^2)), where σ = 30 days.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate Sgpix (ratio of good pixels) as the sum of pixels with the highest possible class score (6 for Sentinel-2, 7 for Landsat) divided by the total number of pixels (n).",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate Saot (mean aerosol optical thickness) as: Saot = 1 - (sum of aoti / n), where aoti is the aerosol optical thickness of pixel i.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Update Mosaic Pixels",
+      "instruction": "Update the mosaic pixels based on the class and desirability scores of the new scene compared to the current mosaic.",
+      "substeps": [
+        {
+          "instruction": "Replace the mosaic pixel if the new scene's pixel has a larger class score.",
+          "title": ""
+        },
+        {
+          "instruction": "If the class scores are equal, replace the mosaic pixel only if the new scene's desirability score (Sdes) is higher than the current pixel's Sdes.",
+          "title": ""
+        },
+        {
+          "instruction": "Update all bands in the mosaic for the selected pixels.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Generate Metadata Tilemap",
+      "instruction": "Create a tilemap containing a metadata identifier (stored as an unsigned integer) for each pixel to trace it back to the original input scene, and export this as a GeoTiff file.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "likely_not_protocol",
+  "content_type_score": 14,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

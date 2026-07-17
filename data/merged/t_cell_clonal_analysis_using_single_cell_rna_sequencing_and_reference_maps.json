@@ -1,0 +1,196 @@
+{
+  "protocol_id": "t_cell_clonal_analysis_using_single_cell_rna_sequencing_and_reference_maps",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "T Cell Clonal Analysis Using Single-cell RNA Sequencing and Reference Maps",
+  "author": "Massimo Andreatta",
+  "doi": "10.21769/BioProtoc.4735",
+  "source_name": "bio_protocol",
+  "source_url": "https://doi.org/10.21769/BioProtoc.4735",
+  "citation": "10.21769/BioProtoc.4735",
+  "license": "CC-BY-4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "PMC full-text XML — Bio-protocol — CC-BY confirmed in article XML",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 3.5,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 6,
+  "materials": [],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Create Seurat object from counts",
+      "instruction": "Load the raw count matrix into R and create a Seurat object; optionally subset to 100 cells for testing and project 50 cells for downstream analysis.",
+      "substeps": [
+        {
+          "instruction": "raw_counts <- readRDS(\"path/to/counts.rds\")  # load raw counts matrix",
+          "title": ""
+        },
+        {
+          "instruction": "seurat <- CreateSeuratObject(counts = raw_counts)  # create Seurat object",
+          "title": ""
+        },
+        {
+          "instruction": "seurat_subset <- subset(seurat, cells = 1:100)  # example: keep 100 cells",
+          "title": ""
+        },
+        {
+          "instruction": "seurat_projected <- RunUMAP(seurat_subset, dims = 1:30)  # example projection of 50 cells",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Project data and compute cell‑cycle scores",
+      "instruction": "Run ProjecTILs to embed the Seurat object in the reference map; ProjecTILs automatically calculates UCell‑based cell‑cycle signature scores.",
+      "substeps": [
+        {
+          "instruction": "merged.projected <- ProjecTILs(seurat_projected)  # projection step",
+          "title": ""
+        },
+        {
+          "instruction": "merged.projected$is.cycling <- ifelse(merged.projected$cycling.score.G2_M > 0.1, \"Proliferating\", \"Resting\")",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Calculate proliferation fraction for expanded clones",
+      "instruction": "Identify expanded clonotypes (≥2 cells) and compute, for each, the proportion of cells classified as proliferating.",
+      "substeps": [
+        {
+          "instruction": "expanded <- names(which(table(merged.projected[[]]$cdr3s_pat) >= 2))  # clones with ≥2 cells",
+          "title": ""
+        },
+        {
+          "instruction": "frequency.proliferating <- sapply(expanded, function(x) {",
+          "title": ""
+        },
+        {
+          "instruction": "sub <- subset(merged.projected[[]], subset = cdr3s_pat == x)",
+          "title": ""
+        },
+        {
+          "instruction": "sum(sub$is.cycling == \"Proliferating\") / ncol(sub)",
+          "title": ""
+        },
+        {
+          "instruction": "})",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Assess clonal overlap between subtypes",
+      "instruction": "Compute the Horn‑Morisita index to quantify TCR sharing between T‑cell subtypes.",
+      "substeps": [
+        {
+          "instruction": "clonal_overlap <- clonalOverlap(combined, cloneCall = \"cdr3s_pat\", method = \"morisita\")",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Visualize clonal overlap with circos plot",
+      "instruction": "Create a circos (chord) diagram of clonal sharing using scRepertoire and circlize.",
+      "substeps": [
+        {
+          "instruction": "circles <- getCirclize(merged.projected, cloneCall = \"cdr3s_pat\", group.by = \"functional.cluster\")",
+          "title": ""
+        },
+        {
+          "instruction": "circlize::chordDiagram(circles)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Compute clonotype bias toward cell states",
+      "instruction": "Calculate a bias metric that measures whether a clonotype is preferentially associated with a particular functional cluster.",
+      "substeps": [
+        {
+          "instruction": "bias <- clonotypeBias(merged.projected, cloneCall = \"cdr3s_pat\", split.by = \"patient\", group.by = \"functional.cluster\", min.expand = 10)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Export bias table and plot top biased clones",
+      "instruction": "Export the bias results, rank clones by Z‑score, and plot the six most biased clones on the reference embedding.",
+      "substeps": [
+        {
+          "instruction": "biased <- clonotypeBias(merged.projected, cloneCall = \"cdr3s_pat\", split.by = \"patient\", group.by = \"functional.cluster\", min.expand = 5, exportTable = TRUE)",
+          "title": ""
+        },
+        {
+          "instruction": "most.biased <- biased[order(biased$Z.score, decreasing = TRUE), ]",
+          "title": ""
+        },
+        {
+          "instruction": "plots <- list()",
+          "title": ""
+        },
+        {
+          "instruction": "for (i in 1:6) {",
+          "title": ""
+        },
+        {
+          "instruction": "ctype <- most.biased[i, \"Clone\"]",
+          "title": ""
+        },
+        {
+          "instruction": "cells <- which(merged.projected[[\"cdr3s_pat\"]] == ctype)",
+          "title": ""
+        },
+        {
+          "instruction": "title <- sprintf(\"Clone %s - size %d - patient %s\", ctype, most.biased[i, \"CloneSize\"], most.biased[i, \"patient\"])",
+          "title": ""
+        },
+        {
+          "instruction": "plots[[i]] <- plot.projection(ref.cd8, merged.projected[, cells]) + ggtitle(title)",
+          "title": ""
+        },
+        {
+          "instruction": "}",
+          "title": ""
+        },
+        {
+          "instruction": "wrap_plots(plots, ncol = 3)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 30,
+  "verification_status": "literature_sourced",
+  "merged_at": "2026-07-17"
+}

@@ -31,91 +31,276 @@
     "STAR",
     "HTSeq",
     "cytoscape",
-    "GraphPad Prism"
+    "GraphPad Prism",
+    "Timing: 30–50 min",
+    "Gene_name_2 rownames(Gene_name_",
+    "CTRL_1 rownames(CTRL_",
+    "CTRL_2 rownames(CTRL_"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "Before you begin your analysis, you need to prepare a platform for data storage and analysis. This procedure is performed on Linux CentOS, and you can download software and R packages online. The memory of the platform should be at least 10 times the size of the genome data.",
-      "substeps": [],
+      "title": "Prepare Linux analysis platform",
+      "instruction": "Set up a CentOS Linux workstation with at least 10 × the genome size in RAM, install Conda, and install all required bioinformatics tools (fastqc, bowtie2, samtools, macs2, STAR, htseq, DESeq2) and R packages (ChIPpeakAnno, GenomicFeatures, GenomicRanges).",
+      "substeps": [
+        {
+          "instruction": "Install Miniconda or Anaconda if not present.",
+          "title": ""
+        },
+        {
+          "instruction": "conda install -c bioconda fastqc bowtie2 samtools star htseq deseq2",
+          "title": ""
+        },
+        {
+          "instruction": "In R, install the packages: BiocManager::install(c('ChIPpeakAnno','GenomicFeatures','GenomicRanges'))",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "Processing of the ChIP-seq data is initiated with a quality check to ensure that the data do not contain the artificial sequences typically added during the experiment. The data filtered by removing adapter and primer sequences and low-quality reads are typically referred to as clean data. In the subsequent analysis, we use only clean data. After using Bowtie21 and Samtools2 to translate the clean data into the genome, the Model-Based Analysis of ChIP-Seq (MACS)3 framework is used to identify peaks. Bowtie2 is an ultrafast in-province tool for matching short sequences to template genomes. Bowtie2 uses the Burrows–Wheeler transform to establish the index for the genome, which has a small memory footprint and is convenient for rapid comparison. MACS is one of the most widely used peak-calling programs, which improves the spatial resolution by combining information from two sequencing tags to integrate the site location and orientation. The ChIPpeakAnno4 package is used to perform the downstream analysis after peak calling, including searching for the genes closest to the peak region, gene ontology (GO) enrichment analysis of the peak adjacent genes, and extraction of the sequences of the peak and its surrounding regions. Spliced Transcripts Alignment to a Reference (STAR) is used to map the transcriptome data to the genome, HTSeq5 is used to obtain the raw counts, and DESeq26 is used to determine the differential genes. In conclusion, the protocol uses the mainstream software and scripts to improve the ease and efficiency of ChIP-seq and RNA-seq data processing.",
-      "substeps": [],
-      "is_critical": true,
+      "title": "ChIP‑seq quality control",
+      "instruction": "Run FastQC on the raw ChIP‑seq FASTQ files and inspect the generated reports.",
+      "substeps": [
+        {
+          "instruction": "fastqc -o <output_dir> -t <num_threads> *.gz",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "ChIP-seq analysis",
-      "instruction": "Timing: 30–50 min",
-      "substeps": [],
+      "title": "Build Bowtie2 genome index",
+      "instruction": "Create a Bowtie2 index for the Pseudomonas syringae genome (FASTA) using 20 threads.",
+      "substeps": [
+        {
+          "instruction": "bowtie2-build --threads 20 Pseudomonas_syringae_genome.fa Pseudomonas_syringae_genome",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "ChIP-seq analysis",
-      "instruction": "Complete the entire ChIP-seq analysis process, including quality control, alignment and peak-calling. The corresponding test Data can be obtained from Data S1-Methods S1 in the supplemental information.1.Perform sequence quality control by FastQC.> conda install fastqcNote: Major parameters: -o: storage path of the generated report file and file name of the generated report; -t: number of threads; -q progress in real time.>fastqc ∗.gz2.Perform alignment.ChIP-seq reads are mapped to the Pseudomonas savastanoi pv. phaseolicola 1448A genome using Bowtie (version 2.4.5). Only the uniquely mapped reads are retained for the subsequent analyses. The test data file can be downloaded from this link: https://github.com/dengxinb2315/STAR-protocol-data.git.a.Construct the mapping file.Note: Bowtie is a super-fast, memory efficient tool for splicing short sequences into template genomes. Bowtie2 can be installed using Conda.> conda install bowtie2 -c biocondaNote: Mapping the high-throughput data to the index. –threads: number of threads.> bowtie2-build --threads 20 Pseudomonas syringae _genome.fa Pseudomonas syringae _genomeNote: Build indexes with the FASTA-format P. syringae genome files. –threads: number of threads; -1: the left part of the paired-end data; -2: the left part of the paired-end data; and -S: File for SAM output. More information regarding the genome file can be found here: (NCBI: https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000012205.1/ or http://pseudomonas.com/). The corresponding test Data can be obtained from Data S1-Methods S1 in the support file.> bowtie2 -p 20 -x Pseudomonas syringae _genome -1 R1.fq -2 R2.fq -S Gene_name.bathc1.samNote: Samtools is designed to handle SAM/BAM format alignment files. This tool can sort and merge SAM files and export BAM files. To install Samtools using Conda, use the command ‘conda install samtools’. The main function of the view command is to convert the input file to the output file. Typically, the SAM file post-alignment is converted to the BAM file, and then various operations are performed on the BAM file. -q: mapping quality >= INT; -bS: output BAM format file and ignore the input format.> samtools view -q 255 -bS -> Gene_name.bathc1.bamb.Identify the binding peaks (p macs2 callpeak -t Gene_name.batch1.bam -c Input.batch1.bam -f BAM -g 6264404 -n Gene_name_pval -B -p 1e-5 --nomodel --extsize 75c.Annotate the peaks (in R)Note: Three R packages are needed. The ChIPpeakAnno package includes functions to retrieve the sequences around the peak; obtain the enriched GO terms; and find the nearest gene, exon, miRNA, or custom features such as the most conserved elements and other transcription-factor-binding sites supplied by users. GenomicFeatures12 is a set of tools and methods for preparing and manipulating transcript centric annotations. The GenomicRanges13 package defines general purpose containers for storing and manipulating genomic intervals and variables defined along a genome. The test data file can be downloaded from this link: https://github.com/dengxinb2315/STAR-protocol-data.git># In R>library(ChIPpeakAnno)>library(GenomicFeatures)> library(GenomicRanges)> ### all peak files###> peak_list ### import annotation files (gene location, obtained from gtf file)> sss sss colnames(sss) ge ### annotation ###> for(s in 1 : length(peak_list)){pe annotatedPeak df as.data.frame(values(ge[as.numeric(values(annotatedPeak)$feature),])))> write.table(df,paste(\"1directly_anno/\",peak_list[s],\"_annotation.txt\",sep=\"\"),quote=FALSE, row.names=FALSE, sep=\"\\t\")> }",
-      "substeps": [],
+      "title": "Align ChIP‑seq reads",
+      "instruction": "Map paired‑end ChIP‑seq reads to the Pseudomonas savastanoi pv. phaseolicola 1448A genome with Bowtie2 (v2.4.5), keeping only uniquely mapped reads.",
+      "substeps": [
+        {
+          "instruction": "bowtie2 -p 20 -x Pseudomonas_syringae_genome -1 R1.fq -2 R2.fq -S Gene_name_batch1.sam",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "RNA-seq analysis",
-      "instruction": "Timing: 30–50 min",
-      "substeps": [],
+      "title": "Convert SAM to filtered BAM",
+      "instruction": "Convert the SAM file to BAM, retaining reads with mapping quality ≥255.",
+      "substeps": [
+        {
+          "instruction": "samtools view -q 255 -bS Gene_name_batch1.sam > Gene_name_batch1.bam",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "RNA-seq analysis",
-      "instruction": "Complete the entire RNA-seq analysis process, including quality control, alignment and annotation.",
-      "substeps": [],
+      "title": "Call ChIP‑seq peaks",
+      "instruction": "Use MACS2 to call peaks on the filtered BAM file with the specified parameters.",
+      "substeps": [
+        {
+          "instruction": "macs2 callpeak -t Gene_name_batch1.bam -c Input.batch1.bam -f BAM -g 6264404 -n Gene_name_pval -B -p 1e-5 --nomodel --extsize 75",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "RNA-seq analysis",
-      "instruction": "The corresponding test Data can be obtained from Data S2-Methods S2 in the support file.3.Perform sequence quality control by FastQC.>fastqc ∗.gz4.Perform alignment.RNA-seq reads are mapped to the P. syringae genome using STAR, and only the uniquely mapped reads are retained for the subsequent analyses. The STAR software is designed to align sequenced reads to the reference genome. The software is characterised by high accuracy and mapping speed (50 times those of other competitive software).a.Build a genome index.Note: --runMode: type of runs; --runThreadN: number of threads; --genomeDir: index storage location; --genomeFastaFiles: FASTA file for index building.> STAR --runMode genomeGenerate --runThreadN 20 –genomeDir STAR_Index_ PS --genomeFastaFiles PS _NCBI_genome.fab.Perform alignment using STARNote: --runThreadN: number of threads; --genomeDir: index storage location; --readFilesIn: storage location of the paired-end FASTQ files; --outFilterMultimapNmax: maximum number of multiple alignments for a read that will be output to the SAM/BAM files; --outFilterMismatchNmax: alignment is output only if it has no more mismatches than this value.; --outSAMtype: type of SAM/BAM output; --outFileNamePrefix: prefix of the output file; --quantMode: type of quantification requested> STAR --runThreadN 60 –genomeDir ./STAR_Index_PS --readFilesIn Gene_name-1_combined_R1.fastq.cutadapt.fastq Gene_name-1_combined_R2.fastq.cutadapt.fastq --outFilterMultimapNmax 1 --outFilterMismatchNmax 2 --outSAMtype BAM Unsorted --outFileNamePrefix ./9alignment_batch2/Gene_name_1_ --quantMode GeneCounts5.Obtain the raw counts using HTSeq.",
-      "substeps": [],
+      "title": "Annotate peaks in R",
+      "instruction": "Load the peak files and annotate them with ChIPpeakAnno, GenomicFeatures, and GenomicRanges, then write annotation tables.",
+      "substeps": [
+        {
+          "instruction": "library(ChIPpeakAnno)",
+          "title": ""
+        },
+        {
+          "instruction": "library(GenomicFeatures)",
+          "title": ""
+        },
+        {
+          "instruction": "library(GenomicRanges)",
+          "title": ""
+        },
+        {
+          "instruction": "# import peak files into peak_list",
+          "title": ""
+        },
+        {
+          "instruction": "for (s in seq_along(peak_list)) {",
+          "title": ""
+        },
+        {
+          "instruction": "annotatedPeak <- annotatePeak(peak_list[s], TxDb=txdb, annoDb='org.Ps.eg.db')",
+          "title": ""
+        },
+        {
+          "instruction": "df <- as.data.frame(values(annotatedPeak))",
+          "title": ""
+        },
+        {
+          "instruction": "write.table(df, file=paste0('1directly_anno/', peak_list[s], '_annotation.txt'),",
+          "title": ""
+        },
+        {
+          "instruction": "quote=FALSE, row.names=FALSE, sep='\\t')",
+          "title": ""
+        },
+        {
+          "instruction": "}",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "RNA-seq analysis",
-      "instruction": "HTSeq is a Python package for analyzing high-throughput sequencing data. HTSeq-count is an application that counts the reads in a number of units located on the genome, which refers to a set of locations on the chromosome (commonly known as the gene exon).Note: -f: format of the input file; -r: specifies how the data is sorted; -s: specifies if the data are from a chain-specific library; -t: smallest counting unit; -m: determines whether specific read definitions should be counted when counting reads.> htseq-count -f bam -r name -s no -t CDS -m intersection-strict Gene_name.bamPS_gene.gtf > Gene_name_intersection_strict_counts_out.txt6.Obtain the differentially expressed genes (DEGs).",
-      "substeps": [],
+      "title": "RNA‑seq quality control",
+      "instruction": "Run FastQC on the raw RNA‑seq FASTQ files.",
+      "substeps": [
+        {
+          "instruction": "fastqc -o <output_dir> -t <num_threads> *.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "RNA-seq analysis",
-      "instruction": "Obtain the raw counts using DESeq.14 The test data file can be downloaded from this link: https://github.com/dengxinb2315/STAR-protocol-data.git",
-      "substeps": [],
+      "title": "Build STAR genome index",
+      "instruction": "Generate a STAR index for the P. syringae genome using 20 threads.",
+      "substeps": [
+        {
+          "instruction": "STAR --runMode genomeGenerate --runThreadN 20 --genomeDir STAR_Index_PS --genomeFastaFiles PS_NCBI_genome.fa",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "RNA-seq analysis",
-      "instruction": "The program outputs the DEG file of the RNA-seq result. In the subsequent analysis, CSV or TXT files can be used.># In R> library(DESeq2)> Gene_name_1 rownames(Gene_name_1) Gene_name_2 rownames(Gene_name_2) CTRL_1 rownames(CTRL_1) CTRL_2 rownames(CTRL_2) mRNA_counts mRNA_counts colnames(mRNA_counts) coldata cds mat dds coldata cds colData(cds)$condition dds Gene_name_res Gene_name_DEGs_adjp 1),which(Gene_name_res$padj write.csv(Gene_name_DEGs_adjp,file=\"Gene_name_DEGs.csv\")>",
-      "substeps": [],
+      "title": "Align RNA‑seq reads with STAR",
+      "instruction": "Map paired‑end RNA‑seq reads to the genome with STAR, keeping only uniquely mapped reads and outputting unsorted BAM and gene counts.",
+      "substeps": [
+        {
+          "instruction": "STAR --runThreadN 60 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--genomeDir ./STAR_Index_PS \\",
+          "title": ""
+        },
+        {
+          "instruction": "--readFilesIn Gene_name-1_combined_R1.fastq.cutadapt.fastq Gene_name-1_combined_R2.fastq.cutadapt.fastq \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outFilterMultimapNmax 1 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outFilterMismatchNmax 2 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outSAMtype BAM Unsorted \\",
+          "title": ""
+        },
+        {
+          "instruction": "--outFileNamePrefix ./9alignment_batch2/Gene_name_1_ \\",
+          "title": ""
+        },
+        {
+          "instruction": "--quantMode GeneCounts",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Count reads with HTSeq‑count",
+      "instruction": "Generate gene‑level raw counts from the STAR‑produced BAM using HTSeq‑count with strict intersection on CDS features.",
+      "substeps": [
+        {
+          "instruction": "htseq-count -f bam -r name -s no -t CDS -m intersection-strict Gene_name.bam PS_gene.gtf > Gene_name_intersection_strict_counts_out.txt",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Differential expression with DESeq2",
+      "instruction": "Import the count matrix into R, create a DESeqDataSet, run DESeq, extract adjusted‑p‑value results, and save as CSV.",
+      "substeps": [
+        {
+          "instruction": "library(DESeq2)",
+          "title": ""
+        },
+        {
+          "instruction": "# Load count tables (example placeholders)",
+          "title": ""
+        },
+        {
+          "instruction": "counts <- read.table('Gene_name_intersection_strict_counts_out.txt', header=TRUE, row.names=1)",
+          "title": ""
+        },
+        {
+          "instruction": "coldata <- data.frame(row.names=colnames(counts), condition=c('Gene_name','CTRL'))",
+          "title": ""
+        },
+        {
+          "instruction": "dds <- DESeqDataSetFromMatrix(countData=counts, colData=coldata, design=~condition)",
+          "title": ""
+        },
+        {
+          "instruction": "dds <- DESeq(dds)",
+          "title": ""
+        },
+        {
+          "instruction": "res <- results(dds, alpha=0.05)",
+          "title": ""
+        },
+        {
+          "instruction": "write.csv(as.data.frame(res), file='Gene_name_DEGs.csv')",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T00:41:54.480180Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Before you begin your analysis, you need to prepare a platform for data storage and analysis. This procedure is performed on Linux CentOS, and you can download software and R packages online. The memory of the platform should be at least 10 times the size of the genome data. Processing of the ChIP-seq data is initiated with a quality check to ensure that the data do not contain the artificial sequences typically added during the experiment. The data filtered by removing adapter and primer sequences and low-quality reads are typically referred to as clean data. In the subsequent analysis, we use only clean data. After using Bowtie21 and Samtools2 to translate the clean data into the genome, the Model-Based Analysis of ChIP-Seq (MACS)3 framework is used to identify peaks. Bowtie2 is an ultrafast in-province tool for matching short sequences to template genomes. Bowtie2 uses the Burrows–Wheeler transform to establish the index for the genome, which has a small memory footprint and is convenient for rapid comparison. MACS is one of the most widely used peak-calling programs, which improves the spatial resolution by combining information from two sequencing tags to integrate the site location and orientation. The ChIPpeakAnno4 package is used to perform the downstream analysis after peak calling, including searching for the genes closest to the peak region, gene ontology (GO) enrichment analysis of the peak adjacent genes, and extraction of the sequences of the peak and its surrounding regions. Spliced Transcripts Alignment to a Reference (STAR) is used to map the transcriptome data to the genome, HTSeq5 is used to obtain the raw counts, and DESeq26 is used to determine the differential genes. In conclusion, the protocol uses the mainstream software and scripts to improve the ease and efficiency of ChIP-seq and RNA-seq data processing.",
+  "content_type": "protocol",
+  "content_type_score": 41,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

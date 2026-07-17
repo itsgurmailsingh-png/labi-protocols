@@ -15,203 +15,157 @@
   "estimated_time_mins": 144,
   "materials": [
     "ITK-SNAP",
-    "NIFTI file"
+    "NIFTI file",
+    "Select Next in the lower right hand corner.",
+    "Once you have added enough &#34;bubbles&#34; select next.",
+    "Type the following: EstimateTensorNLSS -i directory_DRBUDDI_proc/file_name.list -m directory/mask_name.nii",
+    "Choose your display mode to be RGB Display.",
+    "Once you have added enough \"bubbles\" select next."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "This protocol will present the steps needed to compute multiple tensor maps on the HPC in TORTOISE. The protocol assumes that DIFFPREP and DRBUDDI have already been applied.",
+      "title": "Launch ITK‑SNAP via Singularity",
+      "instruction": "Open a terminal, change to the container directory, load the Singularity module, and run the ITK‑SNAP container.",
+      "substeps": [
+        {
+          "instruction": "cd /rsgrps/hutchinsone/Singularity_Containers",
+          "title": ""
+        },
+        {
+          "instruction": "module load singularity",
+          "title": ""
+        },
+        {
+          "instruction": "singularity run nklab-neurotools-v0.4.sif itksnap",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Open up ITK-snap to create mask. Type the following in a terminal: cd /rsgrps/hutchinsone/Singularity_Containersmodule load singularitysingularity run nklab-neurotools-v0.4.sif itksnap",
+      "title": "Load structural image",
+      "instruction": "In ITK‑SNAP, browse to the folder DTITest_DTI_proc_DRBUDDI_proc and open the file structural.nii.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Once ITK-SNAP opens browse to the structural image. The folder you should be pulling the structural.nii image from is in DTITest_DTI_proc_DRBUDDI_proc",
+      "title": "Create brain mask with snake tool",
+      "instruction": "Use the snake tool and related controls to segment the brain, adjust thresholds, grow bubbles, and save the mask as a NIFTI file.",
+      "substeps": [
+        {
+          "instruction": "Click the Snake tool to start mask creation.",
+          "title": ""
+        },
+        {
+          "instruction": "Move the red lines to adjust boundaries for the fill function.",
+          "title": ""
+        },
+        {
+          "instruction": "Select Segment 3D after adjusting the red lines.",
+          "title": ""
+        },
+        {
+          "instruction": "Select the blue thresholding view and adjust the threshold until bone, muscle tissue, and eyes are removed as desired.",
+          "title": ""
+        },
+        {
+          "instruction": "Click the Add Bubble at Cursor button while clicking around in all three orthogonal views to place seed points.",
+          "title": ""
+        },
+        {
+          "instruction": "Press the Play button to grow the bubbles; optionally press the Update button to view the growing mask.",
+          "title": ""
+        },
+        {
+          "instruction": "When satisfied, press the Pause button and then click Finish.",
+          "title": ""
+        },
+        {
+          "instruction": "Press Update a second time to display the completed mask in the lower‑left corner.",
+          "title": ""
+        },
+        {
+          "instruction": "Save the mask as a NIFTI file and exit ITK‑SNAP.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Click on the snake tool to start making the mask.",
+      "title": "Generate tensor estimation files",
+      "instruction": "Run EstimateTensorNLLS to obtain two output files, _DT.nii and _AM.nii; the _DT.nii file will be used for subsequent map creation.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Move the red lines to adjust boundaries for the fill function.",
+      "title": "Compute all tensor maps",
+      "instruction": "Execute ComputeAllTensorMaps.bash with the path to the _DT.nii file to generate every available tensor map.",
+      "substeps": [
+        {
+          "instruction": "ComputeAllTensorMaps.bash directory/tensor_file_name.nii",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Select Segment 3D after you finish adjusting the red lines.",
+      "title": "Compute specific tensor map (DEC)",
+      "instruction": "If only a single map is required, run the appropriate command (e.g., ComputeDECMap) and replace ‘DEC’ with the desired map name for other maps.",
+      "substeps": [
+        {
+          "instruction": "ComputeDECMap -i directory/tensor_file_name.nii   // outputs a DEC map",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Select the blue thresholding view and then adjust your thresholding till you are satisfied.",
+      "title": "Visualize DEC map in ITK‑SNAP",
+      "instruction": "Open the generated DEC map in ITK‑SNAP, click the Layer Inspector button, and view the finished RGB display.",
+      "substeps": [
+        {
+          "instruction": "Open DEC map in ITK‑SNAP.",
+          "title": ""
+        },
+        {
+          "instruction": "Click the Layer Inspector button to view the RGB overlay.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 7,
-      "title": "",
-      "instruction": "For thresholding typically you want to remove bone, muscle tissue, and eyes if possible.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 8,
-      "title": "",
-      "instruction": "Click the Add Bubble at Cursor button while clicking around on all the 3 different views to move the cursor.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 9,
-      "title": "",
-      "instruction": "Select Next in the lower right hand corner.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 10,
-      "title": "",
-      "instruction": "Select the play button to grow the bubbles. You can additionally select the update button at the bottom of the screen to view your growing mask.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 11,
-      "title": "",
-      "instruction": "Once you have added enough &#34;bubbles&#34; select next.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 12,
-      "title": "",
-      "instruction": "When the mask is done select the pause button and click finish.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 13,
-      "title": "",
-      "instruction": "You can select update a second time and your completed mask will appear in the lower left hand corner.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 14,
-      "title": "",
-      "instruction": "Save your mask as a NIFTI file, and exit out of ITK-SNAP.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 15,
-      "title": "",
-      "instruction": "Type the following to get information about the command. EstimateTensorNLLS",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 16,
-      "title": "",
-      "instruction": "Type the following: EstimateTensorNLSS -i directory_DRBUDDI_proc/file_name.list -m directory/mask_name.nii",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 17,
-      "title": "",
-      "instruction": "This creates two files a _DT.nii and a _AM.nii. You will use the _DT.nii file.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 18,
-      "title": "",
-      "instruction": "To create every tensor map type the following command: ComputeAllTensorMaps.bash directory/tensor_file_name.nii",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 19,
-      "title": "",
-      "instruction": "The above command runs a script to create all tensor maps available, but if you want to only create a certain tensor map you can use can just type: ComputeDECMap -i directory/tensor_file_name.nii This example will only output a DEC map, but if you want to output another map just change the &#39;DEC&#39; to be the name of the desired map.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 20,
-      "title": "",
-      "instruction": "Open your DEC map in ITK-SNAP.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 21,
-      "title": "",
-      "instruction": "Click on the Layer Inspector button:",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 22,
-      "title": "",
-      "instruction": "Choose your display mode to be RGB Display.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 23,
-      "title": "",
-      "instruction": "Below is the finished RGB display of your DEC map.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T14:07:56.540549Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 49,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "dq6rfw26-7B591116687311F08F960A58A9FEAC02.jpg",
+      "local_path": "data/media/protocols_io/creating-tensor-maps-8jyhupw/dq6rfw26-7B591116687311F08F960A58A9FEAC02.jpg",
+      "source_url": "https://files.protocols.io/external/dq6rfw26-7B591116687311F08F960A58A9FEAC02.jpg",
+      "caption": "",
+      "bytes": 11657,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/creating-tensor-maps-8jyhupw/dq6rfw26-7B591116687311F08F960A58A9FEAC02.jpg"
+    }
+  ]
 }

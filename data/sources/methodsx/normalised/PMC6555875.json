@@ -18,107 +18,153 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "The integration of pump-probe capabilities only briefly interrupts the existing setup in which we add the in-line transfer relay to the bias voltage path [16]. The schematics in Fig. 1 shows the hookup of the AWG (red) to the STM control electronics and the optional RF generator (dashed yellow). In contrast to previous pump-probe setups where an RF relay served as a chopper for lock-in detection, we here use a mechanical relay as a transfer switch to either connect the DC bias from the STM control electronics (for tunneling spectroscopy and regular topographic imaging) or the pulses from the AWG to the STM apparatus [16]. For the present purpose, we use a PCB mount relay (Tianbo) that we control with a 5 V USB power supply and to which we solder BNC connectors. Different relays of any sophistication may equally work but are not needed in our case, since neither edge times are affected nor is any ringing introduced by the relay.Fig. 1Blue drawings indicate existing STM system, control electronics, and lock-in amplifier. The red sketch shows how to implement the AWG into that system using a transfer relay. The dashed yellow drawing is the optional integration of a pulsed RF generator. The inset in the STM box indicates the RF diode circuit used to emulate an STM in the present work.Fig. 1",
+      "title": "Install transfer relay in bias line",
+      "instruction": "Insert a PCB‑mount relay (Tianbo) into the bias‑voltage path of the STM control electronics, solder BNC connectors to the relay contacts, and power the relay with a 5 V USB supply; the relay will act as a mechanical transfer switch between the DC bias and the AWG pulse output.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Method details",
-      "instruction": "Our method for pump-probe spectroscopy and pulsed-ESR uses the waveform-sequencing ability of the AWG. Waveform-sequencing is essentially the consecutive and seamless execution of a list of predefined arbitrary waveforms (arbs), often compared to playing songs from a playlist in a music player.",
+      "title": "Connect AWG and optional RF generator",
+      "instruction": "Wire the arbitrary waveform generator (AWG) to the STM control electronics as shown in Fig. 1 (red lines) and, if desired, add the RF generator (Keysight N5183B) via the dashed yellow connections; the AWG output and the RF generator share the same cabling to the STM box, while the relay selects either the DC bias or the AWG pulses for the STM bias line.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Method details",
-      "instruction": "Fig. 2a illustrates our method. We first create three arbs for the pump-pulse (arbP: yellow) and probe-pulses (arbA: green, and arbB: orange) using MATLAB. These arbs have equal sample length of l=tarb×SR, where SR is the sample-rate of the AWG. The length of the arbs should be designed with the dynamics of the studied system in mind. This means that the total duration of the arb, i.e., tarbA, should be several times the expected relaxation times to ensure excitation of the system from a known equilibrium state. The two distinct probe-pulse arbs (arbA and arbB) are applied cyclically in Ch1 at about fcycle =887 Hz to modulate the tunneling current for lock-in detection. Our waveform playlist is composed of a dedicated arb sequence of probe-pulses consisting of N segments of arbA (cycle A) followed by N segments of arbB (cycle B), where N=1/2fcycletarbA. To provide a synchronization signal for the lock-in amplifier, we set the sync output to high (Hi) during cycle A, and during cycle B we set it to low (Lo). The effective fcycle will depend on the rounding down in the determination of N.Fig. 2Waveform-sequencing concept. a) The waveform-sequence consist of two repeated cycles of distinct probe-arbs (arbA and arbB) and is played on Ch1. The pump-arb (arbP) is generated in Ch2. Both channels are added internally by the AWG and applied to output 1. A sync-signal marks the temporal position within the waveform-sequence for lock-in detection. b) Measured time-trace of output 1 at the end of cycle A, demonstrating the seamless transition between the cycles. The shift of the probe-pulse is used in time-resolved measurements and serves to vary the time-delay between pump and probe-pulse.Fig. 2",
-      "substeps": [
-        {
-          "instruction": "Fig. 2a illustrates our method. We first create three arbs for the pump-pulse (arbP: yellow) and probe-pulses (arbA: green, and arbB: orange) using MATLAB. These arbs have equal sample length of l=tarb×SR, where SR is the sample-rate of the AWG. The length of the arbs should be designed with the dynamics of the studied system in mind. This means that the total duration of the arb, i.e., tarbA, should be several times the expected relaxation times to ensure excitation of the system from a known equilibrium state. The two distinct probe-pulse arbs (arbA and arbB) are applied cyclically in Ch1 at about fcycle =887 Hz to modulate the tunneling current for lock-in detection. Our waveform playlist is composed of a dedicated arb sequence of probe-pulses consisting of N segments of arbA (cycle A) followed by N segments of arbB (cycle B), where N=1/2fcycletarbA. To provide a synchronization signal for the lock-in amplifier, we set the sync output to high (Hi) during cycle A, and during cycle B we set it to low (Lo). The effective fcycle will depend on the rounding down in the determination of N.Fig. 2Waveform-sequencing concept.",
-          "title": ""
-        },
-        {
-          "instruction": "The waveform-sequence consist of two repeated cycles of distinct probe-arbs (arbA and arbB) and is played on Ch1. The pump-arb (arbP) is generated in Ch2. Both channels are added internally by the AWG and applied to output 1. A sync-signal marks the temporal position within the waveform-sequence for lock-in detection.",
-          "title": ""
-        },
-        {
-          "instruction": "Measured time-trace of output 1 at the end of cycle A, demonstrating the seamless transition between the cycles. The shift of the probe-pulse is used in time-resolved measurements and serves to vary the time-delay between pump and probe-pulse.Fig. 2",
-          "title": ""
-        }
-      ],
+      "title": "Create pump and probe waveforms (arbs)",
+      "instruction": "Using MATLAB, generate three arbitrary waveforms (arbs): pump arb P (arbP) and two probe arbs A and B (arbA, arbB). Each arb must have equal sample length l = t_arb × SR, where SR is the AWG sample‑rate. Design the total arb duration t_arbA to be several times the expected relaxation time of the system. Set arbA to a 10 ns, 50 mV pulse, arbB = ‑arbA, and arbP to a 5 ns, 150 mV pulse. All three arbs have a total duration of 50 ns.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Method details",
-      "instruction": "The execution of the pump-arb is simpler as we play it perpetually on Ch2, as also indicated in Fig. 2a. The waveform-sequence of Ch1 and the pump-arbs on Ch2 are added internally by the AWG and finally applied to output 1. As an example, we show in Fig. 2b a measured time-trace of this combined output 1 signal, recorded with an oscilloscope at the threshold between cycle A and B. The transition from one cycle to the other is as seamless as the transitions between any two arbs. The three arbs used here have a duration of 50 ns. ArbP contains a 5 ns wide pulse of 150 mV amplitude and is generated by Ch2. The waveform-sequence composed of arbA and arbB is generated on Ch1 and contains a 10 ns wide pulse of 50 mV amplitude for arbA, while arbB = −arbA.",
+      "title": "Configure waveform sequencing and sync signal",
+      "instruction": "Program the AWG to play the probe arbs cyclically on Channel 1 at approximately f_cycle = 887 Hz for lock‑in detection. Build a playlist consisting of N segments of arbA (cycle A) followed by N segments of arbB (cycle B), where N = 1 / (2 f_cycle t_arbA). Set the AWG sync output high during cycle A and low during cycle B. Note that the effective f_cycle may be reduced by rounding down N.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Method details",
-      "instruction": "We now discuss how to use this setup for time-resolved measurements. As we see from Fig. 2b, the pulses constitute only a short part of their respective arb. Since our waveform-sequencing guarantees the perfect synchronization of Ch1 and Ch2, arbP will always be in sync with arbA and arbB. This leaves the pulse-position within the arb, i.e., the phase, as the handle through which to control the time-delay Δt between pump and probe-pulses.",
+      "title": "Play pump arb continuously on Channel 2",
+      "instruction": "Configure Channel 2 of the AWG to output arbP perpetually; the AWG internally adds Channel 1 and Channel 2 and delivers the combined signal on output 1 to the STM bias line.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Method details",
-      "instruction": "We conveniently vary the position of the pump-pulse within arbP via the phase modulation function (PM, see Fig. 3a). To that end, we use the Mod-In input of the AWG to steer the phase of Ch2 by using an external DC voltage (Vctr) from the STM control electronics (see schematics Fig. 1). A dedicated DAQ card may serve that purpose as well. We adjust the phase of arbP by +/−180 degrees for Vctr = +/−5 V. This is equivalent to the circular shift of the pulse position within arbP when Vctr is swept from −5 to +5 V and corresponds to a variation of the relative time Δt between pump and probe-pulse in the fully available range tarbA. Note that the phase of Ch2 may also be adjusted via the computer control of the AWG, which might be useful for certain applications or when no control voltage is available.Fig. 3Modulation schemes acting on the pump-arb (arbP), played on Ch2. (a) The phase modulation (PM) adjusts the relative time Δt between the pump and the probe-pulse. (b) The amplitude modulation (AM) controls the pump-pulse amplitude at fixed Δt. Both modes are controlled via the external Vctr voltage.Fig. 3",
+      "title": "Set phase modulation for time‑delay control",
+      "instruction": "Connect the Mod‑In input of the AWG to an external DC control voltage (V_ctr) from the STM control electronics (or a DAQ card). Vary V_ctr between ‑5 V and +5 V to shift the phase of arbP by ‑180° to +180°, which circularly moves the 5 ns pump pulse within its 50 ns arb and thus scans the pump‑probe delay Δt over the full t_arbA range. Phase can also be set via computer control of the AWG.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Method details",
-      "instruction": "Similarly, for a chosen time delay between pump and probe-pulse, we again use the amplitude modulation (AM, see schematics in Fig. 3b) of the AWG to control the amplitude of the pump-pulses via Vctr. A voltage of +5 V corresponds to the maximal amplitude and −5 V to the maximal negative amplitude. The AM mode is useful in the search for threshold voltages at which dynamical processes are excited, as for instance shown in previous work [6,9].",
+      "title": "Set amplitude modulation for pump amplitude",
+      "instruction": "Use the amplitude‑modulation (AM) input of the AWG, driven by the same V_ctr, to adjust the pump‑pulse amplitude: V_ctr = +5 V yields the maximal positive amplitude, V_ctr = ‑5 V yields the maximal negative amplitude. This mode is useful for locating threshold voltages of dynamical processes.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Method validation",
-      "instruction": "To reveal the time-resolution of our method through the bottle neck of a bandwidth limited system, for instance a transimpedance amplifier, we exploit a nonlinear tunneling junction, which is frequently used as a base for time-resolved measurements [2]. We simulate here a nonlinear tunneling junction by a Schottky diode (Pasternack, PE8014), indicated by the diode circuit in the inset of Fig. 1. The nonlinearity of the diode creates an additional current when pump and probe-pulses coincide due to IVpump+Vprobe≠IVpump+I(Vprobe) [2]. Note that an actual STM might show signs of impedance mismatches (reflections) that may have to be compensated, for instance via pulse-shaping described by Grosse and coworkers [17] or suppressed by adjusting the edge times. Fig. 4 shows the diode signal when we overlap pump and probe-pulses generated by the earlier described waveform-sequencing method and the phase-modulation. At first, we show the overlap of DC pump and DC probe-pulses on the nonlinearity in panel a. We vary the duration of the pump-pulse tpump from 5 to 15 ns at a fixed probe-pulse width of 10 ns to reveal the correlation effect of the nonlinearity.Fig. 4Cross correlation of pulses measured via a nonlinearity using (a) DC pump with DC probe-pulses (10 ns) and (b) RF pump with DC probe-pulses (10 ns). The pump-pulse width is indicated next to the respective correlation traces. The cross-correlation trace in panel (b) shows a dip at negative time delays due to slight ringing introduced by the bias-tee, which has an impedance mismatch.Fig. 4",
+      "title": "Validate timing with Schottky diode junction",
+      "instruction": "Replace the STM tip with a Schottky diode (Pasternack PE8014) to act as a nonlinear tunneling junction. Overlap pump and probe pulses; the diode’s nonlinearity produces an extra current when the pulses coincide, allowing assessment of the system’s time resolution and detection of impedance mismatches.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Method validation",
-      "instruction": "We further use the same method to superimpose RF pump-pulses and DC probe-pulses, as seen in the resulting correlation trace in Fig. 4b. Instead of internally combining Ch1 and Ch2 on output 1, we now feed Ch2 directly to the pulse-trigger input of the RF generator (Keysight N5183B). As indicated in Fig. 1, the cabling remains conveniently untouched for this operation mode. The output of Ch1 is now solely playing the waveform-sequence of probe-pulses (arbA, arbB). The launched RF pulses travel via the resistive bias-tee (Tektronix, PSPL5370) to the tunneling junction where they overlap with the DC pulses. For this demonstration, we set the generator to a frequency of 20 GHz at a power level of -5 dBm. The probe-pulse width tprobe is held constant in Fig. 4b while we vary the width of the triggered RF pulses tpump from 5 ns to 25 ns. As can be seen in the correlation data, the width of the RF pulses scales with the width of their trigger pulses, thus presenting all requirements for pulsed-ESR methods that require the controlled application of RF pulses of precise timing and duration.",
+      "title": "Perform DC pump–probe correlation measurements",
+      "instruction": "With both pump and probe pulses generated as DC pulses, keep the probe width fixed at 10 ns and vary the pump‑pulse width t_pump from 5 ns to 15 ns. Record the diode current versus relative delay to obtain the cross‑correlation trace.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Method validation",
-      "instruction": "The shape of the correlation curves in Fig. 4 reveals important information about the effective time-resolution and offers valuable diagnostical insight into the system. For instance, the roundness of the correlation data is determined by the edge-times of the pump and probe-pulses, which is here about 3 ns and limited by the speed of our AWG. Further, the correlation data is useful in the detection of ringing due to the presence of impedance mismatches [17], which lead to the subtle dip in Fig. 4b and was caused by our mismatched bias-tee (pick-off impedance of 450 Ω).",
+      "title": "Configure RF pump with DC probe pulses",
+      "instruction": "Route Channel 2 directly to the pulse‑trigger input of the RF generator (Keysight N5183B). Keep Channel 1 playing only the probe‑pulse sequence (arbA/arbB). The RF generator should be set to 20 GHz frequency and –5 dBm output power. The RF pulses travel through a resistive bias‑tee (Tektronix PSPL5370) to the junction and overlap with the DC probe pulses (still 10 ns). Vary the RF‑pulse width t_pump from 5 ns to 25 ns while recording the diode correlation signal.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "Method validation",
-      "instruction": "The time-delay of the maxima in the correlation data, such as in Fig. 4, is extremely sensitive to variations in the cable lengths. To estimate the minimal length to which we are sensitive, we add cable segments of different lengths to the Ch2-Pulse path (Fig. 1). The length-dependent time-delay of the correlation maxima is measured to a precision of 30 ps. From that data, we find the cable propagation time of (4.98 ± 0.06) ns m−1, a corresponding velocity factor of (0.671 ± 0.008), and a sensitivity to variations in the cable length of about 6 mm.",
+      "title": "Analyze correlation curves for edge times and ringing",
+      "instruction": "Examine the shape of the correlation traces: edge times of ~3 ns indicate the AWG speed limit; any dip at negative delays (as seen in the RF case) signals ringing caused by impedance mismatches such as the bias‑tee’s 450 Ω pick‑off impedance.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Measure cable‑length‑dependent delay and propagation",
+      "instruction": "Insert cable segments of known lengths into the Channel 2 pulse path and measure the shift of the correlation‑maximum with a precision of 30 ps. From the linear dependence obtain a propagation time of (4.98 ± 0.06) ns m⁻¹, a velocity factor of (0.671 ± 0.008), and a sensitivity to length changes of about 6 mm.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T08:48:24.507334Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 14,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC6555875/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6555875/",
+      "caption": "",
+      "bytes": 96581,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6555875/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC6555875/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6555875/",
+      "caption": "",
+      "bytes": 217057,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6555875/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC6555875/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6555875/",
+      "caption": "",
+      "bytes": 164393,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6555875/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC6555875/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6555875/",
+      "caption": "",
+      "bytes": 85203,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6555875/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC6555875/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6555875/",
+      "caption": "",
+      "bytes": 225972,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6555875/gr4.jpg"
+    }
+  ]
 }

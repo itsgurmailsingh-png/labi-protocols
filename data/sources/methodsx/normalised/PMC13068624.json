@@ -11,7 +11,7 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13068624/",
   "doi": "10.1016/j.mex.2026.103883",
   "citation": "10.1016/j.mex.2026.103883",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [],
   "estimated_time_mins": 66,
   "materials": [],
@@ -42,9 +42,22 @@
     },
     {
       "step_id": 3,
-      "title": "SeedlingNet – segmentation method",
+      "title": "Create HSV threshold masks",
       "instruction": "Threshold-Based Masking: In order to accurately separate and identify the plant regions from the other pixel values, threshold values are established empirically for the H, S, and V channels through channel-wise binary masking. The purpose of creating thresholds is to define the hue and saturation ranges of green plants while eliminating the hues and saturation ranges associated with the non-plant areas, such as soil, shadows, and background clutter. Thresholding not only increases the contrast between the vegetation and its surroundings but also creates an initial binary mask, which will be further processed for segmentation in the pipeline. The color masks derived from the threshold values can be seen in Eqs. (3), (4), and (5).(3)MH(x,y)={1ifHmin≤H(x,y)≤Hmax0otherwise(4)MS(x,y)={1ifSmin≤S(x,y)≤Smax0otherwise(5)MV(x,y)={1ifVmin≤V(x,y)≤Vmax0otherwise",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Set Hmin and Hmax, compute MH(x,y)=1 if Hmin≤H(x,y)≤Hmax else 0",
+          "title": ""
+        },
+        {
+          "instruction": "Set Smin and Smax, compute MS(x,y)=1 if Smin≤S(x,y)≤Smax else 0",
+          "title": ""
+        },
+        {
+          "instruction": "Set Vmin and Vmax, compute MV(x,y)=1 if Vmin≤V(x,y)≤Vmax else 0",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
@@ -58,25 +71,64 @@
     },
     {
       "step_id": 5,
-      "title": "SeedlingNet – segmentation method",
+      "title": "Apply binary mask to image",
       "instruction": "Foreground Isolation: The binary mask M(x,y) is applied to the original RGB image to isolate plant regions. This operation preserves only the plant pixels, while suppressing the background by replacing it with black, and produces a visually interpretable segmented image as presented in eq. (7).(7)Isegmented(x,y)={IRGB(x,y),ifM(x,y)=1[0,0,0],otherwise",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Apply binary mask M(x,y) to the original RGB image IRGB(x,y).",
+          "title": ""
+        },
+        {
+          "instruction": "Retain plant pixels where M(x,y)=1 and replace all other pixels with [0,0,0] (black).",
+          "title": ""
+        },
+        {
+          "instruction": "Output the resulting segmented image Isegmented(x,y) as defined in Eq. 7.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "SeedlingNet – segmentation method",
+      "title": "Apply morphological opening and closing",
       "instruction": "Morphological Refinement: Despite the HSV-based masking, residual noise and artifacts may persist due to illumination inconsistencies or background interference. To address this, morphological operations are employed to refine the binary mask using a 5 × 5 structuring element (SE). The mask is processed through an opening operation followed by a closing operation, mathematically defined in (8), (9).(8)Mopen(x,y)=(M⊖SE)⊕SE(9)Mclean(x,y)=(Mopen⊖SE)⊕SEwhere, (M⊖SE)⊕SE denotes erosion and dilation, respectively. This process removes specks and fills holes, yielding a cleaner and more contiguous plant region.",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Define a 5 × 5 structuring element (SE)",
+          "title": ""
+        },
+        {
+          "instruction": "Apply opening (erosion then dilation) to the binary mask using SE",
+          "title": ""
+        },
+        {
+          "instruction": "Apply closing (erosion then dilation) to the opened mask using SE",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "SeedlingNet – segmentation method",
+      "title": "Detect contours and apply final mask",
       "instruction": "Contour Detection and Final Masking: Contour analysis is conducted using cv2.findContours() to detect the boundaries of connected white regions in Mclean(x,y) which are likely to represent leaves or seedlings. The detected contours are drawn and filled on a blank canvas to produce a final refined mask. This refined mask is then applied in a second masking operation as given in eq. (10).(10)Ifinal(x,y)={Isegmented(x,y),ifMclean(x,y)=1[0,0,0],otherwise",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Run cv2.findContours() on Mclean(x,y) to detect boundaries of connected white regions (leaf/seedling candidates).",
+          "title": ""
+        },
+        {
+          "instruction": "Draw and fill the detected contours on a blank canvas to create a refined mask.",
+          "title": ""
+        },
+        {
+          "instruction": "Apply the refined mask in a second masking operation per Eq. (10): Ifinal(x,y)=Isegmented(x,y) if Mclean(x,y)=1, otherwise set pixel to [0,0,0].",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
@@ -105,7 +157,59 @@
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T05:30:10.020130Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "This segmentation process involves a combination of thresholding, using the HSV color space, and morphological operations that allow the separation of plants from complex backgrounds. The first step consists of changing the original RGB image to the HSV image. This will improve contrast between the image of the leaf and the other components, and allow for a greater possibility of separating pixel areas of characteristic colour and range of intensity which correspond to green leaves. After converting to HSV, the H, S, and V channels (hue, saturation, and value) can each be thresholded individually. This will produce a binary mask for each channel that represents pixel areas that meet the conditions of being healthy green in colour and having an acceptable range of intensity. After creating binary masks for each of the three channels, they can be combined using a logical AND operator to create a binary mask that represents only the pixels that meet the conditions for all three channels. This composite binary mask must then be cleaned up through the use of morphological operations, such as erosion and dilation. Erosion will eliminate small noise in the binary mask, while dilation will help to fill in small gaps in the binary mask, providing a smoother contour around the leaf. Once cleaned up using morphological operations, the accurate tracing of the outline of the leaf through contour detection will provide the necessary information to create a clean final segmented leaf in the original image. This entire workflow can be employed to accurately segment leaves from images containing complex backgrounds or where the lighting conditions are uneven. Fig. 2 presents the workflow of the proposed segmentation method. The proposed segmentation approach was validated on a plant seedlings dataset to test the method's reliability and robustness by simulating experiments in environments with the potential to influence the outcome of the results. The results have been compared to t",
+  "content_type": "protocol",
+  "content_type_score": 27,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC13068624/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13068624/",
+      "caption": "",
+      "bytes": 87894,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC13068624/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC13068624/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13068624/",
+      "caption": "",
+      "bytes": 73231,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC13068624/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC13068624/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13068624/",
+      "caption": "",
+      "bytes": 39047,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC13068624/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC13068624/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13068624/",
+      "caption": "",
+      "bytes": 155713,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC13068624/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC13068624/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13068624/",
+      "caption": "",
+      "bytes": 61474,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC13068624/gr2.jpg"
+    }
+  ]
 }

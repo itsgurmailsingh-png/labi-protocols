@@ -19,99 +19,110 @@
     "uproc software",
     "sra toolkit",
     "irods software",
-    "GitHub"
+    "GitHub",
+    "Login to iPlant"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Login to iPlant",
-      "instruction": "Login to iPlant",
+      "title": "Locate fasta files",
+      "instruction": "Navigate to /iplant/home/shared/imicrobe/class/obese_lean and note the four fasta files: SRR029687.fasta (lean T1), SRR029692.fasta (lean T2), SRR029686.fasta (obese T19), SRR029688.fasta (obese T20).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "Locate obese/lean data files",
-      "instruction": "Look for the obese lean data files in the community data directory: /iplant/home/shared/imicrobe/class/obese_lean SRR029687 - lean T1 SRR029692 - lean T2 SRR029686 -obese T19 SRR029688 - obese T20 You will use the fasta files in this directory for the next step.",
+      "title": "Run uproc on each fasta",
+      "instruction": "In iPlant, click Apps → experimental → imicrobe → uproc, open Required Args, use Browse to select each fasta file (e.g., /iplant/home/shared/imicrobe/class/obese_lean/SRR029687.fasta) under \"Sequence file\", and run uproc with default parameters. Repeat for all four fasta files.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "Run uproc on fasta files",
-      "instruction": "Click on the Apps button, navigate to experimental->imicrobe->uproc Click on uproc Click on \"Required Args\" Use the Browse function to navigate to \" /iplant/home/shared/imicrobe/class/obese_lean/SRR029687.fasta\" under \"Sequence file\" Run uproc with default parameters on the fasta file Repeat for all of the other fasta files in the obese lean dataset",
+      "title": "Download dataset via iRODS",
+      "instruction": "Log into the HPC, load the iRODS module with `module load irods`, change to the shared directory using `icd /iplant/home/shared/imicrobe/class`, and download the entire obese_lean directory recursively with `iget -r obese_lean`.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "Login to HPC and get data (optional sra toolkit workaround)",
-      "instruction": "Login to the HPC Some people are having issues with running the sra toolkit on the hpc. You can download these files from iPlant too: % module load irods % icd /iplant/home/shared/imicrobe/class % iget -r obese_lean",
+      "title": "Initialize iRODS configuration",
+      "instruction": "If this is your first iRODS use, run `iinit` and provide the following settings: host = data.iplantcollaborative.org; port = 1247; zone = iplant; user = your iPlant username; login = your iPlant login.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "Load irods and initialize (if first time)",
-      "instruction": "Load irods on the hpc % module load irods If this is the first time you have used irods, you will need to run: % iinit use the configurations: host-> data.iplantcollaborative.org; port -> 1247; zone -> iplant; user-> your iplant user; login -> your iplant login",
+      "title": "Copy and rename uproc outputs",
+      "instruction": "Create a local folder for the results and rename each uproc output:",
+      "substeps": [
+        {
+          "instruction": "mkdir obese_lean && cd obese_lean",
+          "title": ""
+        },
+        {
+          "instruction": "For each analysis, change to its iPlant analysis directory, e.g., `icd /iplant/home/your_user/analyses/uproc_SRR029687-your-analysis`",
+          "title": ""
+        },
+        {
+          "instruction": "Retrieve the output with `iget uproc-out`",
+          "title": ""
+        },
+        {
+          "instruction": "Rename it to the sample name with `.uproc` extension, e.g., `mv uproc-out SRR029687.uproc`",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat the three commands for SRR029692, SRR029686, and SRR029688",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "Transfer and rename uproc output files",
-      "instruction": "Copy your files from the uproc runs to iPlant and rename them by the file_name.uproc % mkdir obese_lean % cd obese_lean % icd /iplant/home/your_user/analyses/uproc_SRR029687-your-analysis % iget uproc-out % mv uproc-out SRR029687.uproc Repeat for each fasta file",
+      "title": "Identify core KEGG IDs",
+      "instruction": "Write a Perl script named `get_core.pl` that parses the four .uproc files (T1, T2, T19, T20) and outputs KEGG IDs that appear in all four files with at least 50 read matches. The script should produce a list of core KEGG IDs.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "Write program to find \"core\" KEGG IDs",
-      "instruction": "Write a program that finds all kegg ids that are \"core\" to each file (in T1, T2, T19, and T20) and have at least 50 read matches. The uproc output files have the following: <kegg_id>,<read count> \"core\" means that the kegg id is present in each of the uproc files Program name: get_core.pl Output: should be a list of kegg ids",
+      "title": "Identify variable KEGG IDs",
+      "instruction": "Write a Perl script named `get_variable.pl` that parses the same .uproc files and outputs KEGG IDs that appear in 1–3 of the files (but not all four) with at least 50 read matches. The script should produce a list of variable KEGG IDs.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "Write program to find \"variable\" KEGG IDs",
-      "instruction": "Write a program that finds all kegg ids that are \"variable\" in the files (in T1, T2, T19, and T20) and have at least 50 read matches. The uproc output files have the following: <kegg_id>,<read count> \"variable\" means that the kegg id is present in 1-3 uproc files, but not all 4. Program name: get_variable.pl Output: should be a list of kegg ids",
+      "title": "Combine core and variable scripts",
+      "instruction": "Merge the functionality of `get_core.pl` and `get_variable.pl` into a single script called `get_core_and_variable.pl` that outputs both the core and variable KEGG ID lists.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "Combine core and variable programs",
-      "instruction": "Combine the two programs into a single program: get_core_and_variable.pl",
+      "title": "Submit scripts and results",
+      "instruction": "Upload the Perl scripts and their output files to the GitHub repository under the folder abe487/obese_lean.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 9,
-      "title": "Submit scripts and results to GitHub",
-      "instruction": "Submit your scripts and results to github under the folder abe487/obese_lean",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 10,
-      "title": "Discuss \"core\" and \"variable\" concepts",
-      "instruction": "Write up a discussion in the forum on what you think \"core\" and \"variable\" means based on the article. What are we trying to find out when we do this?",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T10:13:12.869429Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 35,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

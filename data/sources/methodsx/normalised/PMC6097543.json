@@ -14,170 +14,220 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": 120,
-  "materials": [],
+  "materials": [
+    "2. The diode voltage response is sent to the digital oscilloscope, where it is sampled, averaged and stored. The oscilloscope is set to dc coupling and high input impedance. Furthermore, oscilloscope time-scale has to be set such that at least one full period of the square wave signal is acquired, as shown in Fig. 2. The visualized diode voltage response should be an alternating sequence of exponential rise and decay profiles.Fig. 2One period of the (100 s duration) step input power (yellow) and diode voltage (red) as visualized with the oscilloscope. Ascending and descending exponential decays are averaged and saved.Fig. 2",
+    "The number of averages must be chosen such that noise and cryocooler fluctuations are filtered out. Furthermore, this depends also on the required accuracy: more averages means higher accuracy, but a compromise has to be found. Indeed, an acquisition of 100 averages of one period of a 10 mHz signal would take more than 2 h."
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Method details",
-      "instruction": "The two methods presented here are independent and, according to the type of the measurement and to the experimental conditions [1,2], the user can choose the method that better fits his needs. Otherwise, both can be carried out in order to perform a self-consistency check, as presented in Ref. [4].",
-      "substeps": [],
+      "title": "Generate square‑wave power step",
+      "instruction": "Program the AWG to output an adequately slow square‑wave voltage (~10 mHz) with low level VL = 0 V and a high level VH chosen so as not to disturb the cryocooler temperature while maximizing signal‑to‑noise. Amplify the signal with the gain amplifier and connect it to the SMD resistor R. The thermal power change per step is P = (VH – VL)² / R = VH² / R.",
+      "substeps": [
+        {
+          "instruction": "Set AWG frequency to ~10 mHz",
+          "title": ""
+        },
+        {
+          "instruction": "Set low level VL = 0 V",
+          "title": ""
+        },
+        {
+          "instruction": "Choose high level VH appropriately",
+          "title": ""
+        },
+        {
+          "instruction": "Pass the signal through the gain amplifier",
+          "title": ""
+        },
+        {
+          "instruction": "Apply the amplified voltage to the SMD resistor",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Time-domain analysis",
-      "instruction": "In the time-domain analysis, a rapid power step is applied to the cryocooler. Linear system theory guarantees that the output response vs. time of transient follows a sum of exponential decays, depending on the number of poles and zeros that characterize the system.",
-      "substeps": [],
+      "title": "Acquire diode voltage with oscilloscope",
+      "instruction": "Connect the diode output to a digital oscilloscope set to DC coupling and high input impedance. Adjust the time‑scale to capture at least one full period of the square wave. Sample, average, and store the waveform. Choose the number of averages to suppress noise and cryocooler fluctuations; e.g., 100 averages of a 10 mHz period require >2 h.",
+      "substeps": [
+        {
+          "instruction": "Set oscilloscope coupling to DC",
+          "title": ""
+        },
+        {
+          "instruction": "Set high input impedance",
+          "title": ""
+        },
+        {
+          "instruction": "Set time‑scale for ≥ one period of the square wave",
+          "title": ""
+        },
+        {
+          "instruction": "Sample and average the diode voltage",
+          "title": ""
+        },
+        {
+          "instruction": "Store the acquired data",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Time-domain analysis",
-      "instruction": "In the following, the subsequent operations required for the time-domain analysis are listed:",
+      "title": "Process voltage to temperature",
+      "instruction": "Add back the previously subtracted DC offset VDC to each acquired voltage point. Convert the corrected voltage to temperature using the diode’s calibrated voltage‑temperature curve.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Time-domain analysis",
-      "instruction": "1. An adequately slow square wave voltage signal (around 10 mHz), provided by the AWG, is applied to the SMD resistor after being properly amplified by the gain amplifier. The low-level (VL) of the square wave is set to 0 V, while the high level (VH) has to be properly chosen in order to not affect the operating temperature and to maximize signal-to-noise ratio at the same time. The thermal power variation that is generated by the SMD resistor R in each step is given by P = (VH − VL)2/R = VH2/R",
+      "title": "Separate ascending and descending data",
+      "instruction": "Divide the temperature‑time data into two sets: ascending portions (VL → VH) and descending portions (VH → VL). Process each set independently.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Time-domain analysis",
-      "instruction": "2. The diode voltage response is sent to the digital oscilloscope, where it is sampled, averaged and stored. The oscilloscope is set to dc coupling and high input impedance. Furthermore, oscilloscope time-scale has to be set such that at least one full period of the square wave signal is acquired, as shown in Fig. 2. The visualized diode voltage response should be an alternating sequence of exponential rise and decay profiles.Fig. 2One period of the (100 s duration) step input power (yellow) and diode voltage (red) as visualized with the oscilloscope. Ascending and descending exponential decays are averaged and saved.Fig. 2",
+      "title": "Equalize data points per temperature interval",
+      "instruction": "Because the oscilloscope samples at constant ΔN/Δt, high‑slope regions contain fewer points per temperature interval. Subdivide the full temperature change ΔT into M equal intervals (example M = 5) and select a subset of points so that each interval contains approximately the same number of samples (matching the smallest interval count). This yields a constant ΔN/ΔT for subsequent fitting.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Time-domain analysis",
-      "instruction": "The number of averages must be chosen such that noise and cryocooler fluctuations are filtered out. Furthermore, this depends also on the required accuracy: more averages means higher accuracy, but a compromise has to be found. Indeed, an acquisition of 100 averages of one period of a 10 mHz signal would take more than 2 h.",
+      "title": "Fit ΔT/P to exponential sum",
+      "instruction": "For each ascending or descending segment compute ΔT/P and fit it to a sum of exponentials: ΔT/P = Σ_i A_i (1 – e^{‑t/τ_i}). Record amplitudes A_i, time constants τ_i and their uncertainties ε(A_i), ε(τ_i).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Time-domain analysis",
-      "instruction": "3. Data are collected and processed: first, each acquired voltage value has to be summed with the dc voltage VDC that was previously canceled. Then, using the known calibration curve of the diode, the temperature evolution of the cold region as a result of the power excitation is obtained.",
+      "title": "Compute weighted average of fit parameters",
+      "instruction": "Combine the parameters from the ascending and descending fits by weighted averaging: A_i,avg = (A_i,asc/ε_{A_i,asc}² + A_i,desc/ε_{A_i,desc}²) / (1/ε_{A_i,asc}² + 1/ε_{A_i,desc}²); τ_i,avg is obtained analogously. The final averaged model is ΔT/P|_avg = Σ_i A_i,avg (1 – e^{‑t/τ_i,avg}).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Time-domain analysis",
-      "instruction": "4. Data are split into ascending (from VL to VH) and descending (from VH to VL) parts. Each rising or descending part is separately analyzed and processed.",
+      "title": "Apply sinusoidal power excitation",
+      "instruction": "Bias the SMD resistor with a sinusoidally varying voltage V(t) = VH·(1 + sin(2π f t))/2, where VL = 0 V. The instantaneous power is Pt = V(t)² / R = VH² (1 + sin(2π f t))/2R. Vary the frequency f over the desired range.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Time-domain analysis",
-      "instruction": "5. Since the oscilloscope has a constant sampling time, the number of sampled points per unit time ΔN/Δt is constant. This means that for high-slope temperature variations a lower number of points per interval of temperature variation ΔN/ΔT will be sampled, compared to lower slope deviations. This is clearly represented in Fig. 3, where the full temperature increase is subdivided into M equal intervals (M = 5 in the example), each counting a number of sampled points Ni that increases as the slope of the waveform under test decreases. This could affect the successive fitting procedure, since it reduces the weight of short time constants components, as a consequence of the few representative samples extracted in the first part of the transient.Fig. 3Sampled temperature-to-time response to the ascending power step input as in Fig. 1. Full temperature variation ΔT is subdivided into M = 5 equal intervals.Fig. 3",
+      "title": "Measure diode response with lock‑in",
+      "instruction": "Connect the diode output to a lock‑in amplifier referenced to the AWG. Set the lock‑in time constant τ_c such that τ_c ≫ 1/f. Record the rms magnitude and phase of the diode signal relative to the reference. Convert rms voltage to temperature using the diode calibration curve.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Time-domain analysis",
-      "instruction": "Therefore, it could be useful to skim sampled data by selecting the number of points such that each temperature sub-interval will count (approximately) the same number of data points (that should coincide with the number of the less numerous interval, N1 in the example in Fig. 4). This data selection leads to a constant ΔN/ΔT.Fig. 4Skimmed temperature-to-time response to the ascending power step input as in Fig. 1. Full temperature variation ΔT is subdivided into M = 5 equal intervals.Fig. 4",
+      "title": "Alternative oscilloscope measurement",
+      "instruction": "If a lock‑in amplifier is unavailable, use the digital oscilloscope to sample both diode voltage and input voltage (on a second channel). Compute magnitude from peak‑to‑peak or rms values and convert to temperature via the diode calibration. Determine phase φ = 2π·Δt·f from the time delay Δt between input and diode voltage peaks. This method is slower and less accurate, especially when diode amplitude approaches zero.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "Time-domain analysis",
-      "instruction": "6. Each rise or descent in temperature ΔT is divided by the power P and the result is fitted by a sum of exponential decays given by:ΔTP=∑iAi1-e-tτiwhere Ai, τi are respectively the amplitude and the time constant of the i-th decay contribution and ε(Ai) and ε(τi) are their errors evaluated from the fit and are used in the following step.",
+      "title": "Repeat across frequency sweep",
+      "instruction": "Repeat the sinusoidal excitation and measurement for a set of frequencies spanning the range of interest, typically spaced equally on a logarithmic scale.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "Time-domain analysis",
-      "instruction": "7. A weighted average of the parameters of the two fitting functions (ascending and descending) is performed such that a unique final exponential function for (ΔT/P)avg is obtained, as shown below.Ai,avg=Ai,ascεAi,asc2+Ai,descεAi,desc21εAi,asc2+1εAi,desc2,τi,avg=τi,ascετi,asc2+τi,descετi,desc21ετi,asc2+1ετi,desc2ΔTPavg=∑iAi,avg1−e−tτi,avg",
+      "title": "Fit magnitude/phase to rational function",
+      "instruction": "Plot magnitude and phase versus frequency. Fit the complex response with a rational function of s: f(s) = k·(s – z₁)(s – z₂)…(s – z_m) / (s – p₁)(s – p₂)…(s – p_n). Extract zeros z_i, poles p_i, and coefficient k.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "Frequency-domain analysis",
-      "instruction": "In the frequency domain analysis, electrical power with sinusoidal dependence over time is applied for a set of frequencies. Linear system theory guarantees that the output response vs. time is a sinewave, with the same frequency as the input stimulus.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 13,
-      "title": "Frequency-domain analysis",
-      "instruction": "In the following, the subsequent operation required for the frequency-domain analysis are listed:",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 14,
-      "title": "Frequency-domain analysis",
-      "instruction": "1. The SMD resistor is biased at a varying voltage given byVt=VH1+sin2πft2where VH is the maximum voltage, while the low voltage VL is zero. Accordingly, electrical power generated by the SMD resistor is a sinewave function with frequency f given byPt=Vt2R=VH21+sin2πft2R",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 15,
-      "title": "Frequency-domain analysis",
-      "instruction": "2. The diode voltage response is measured by the lock-in amplifier, which determines magnitude and phase of each spectral component with respect to the reference signal provided by the AWG. Lock-in time constant τc should be varied according to the reference frequency f, such that τc >> f−1. The lock-in measures magnitude as the rms of the reference frequency component of the diode voltage. Linearized diode calibration curve guarantees a consistent rms voltage to temperature conversion.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 16,
-      "title": "Frequency-domain analysis",
-      "instruction": "If a lock-in amplifier is not available, it is possible to perform frequency-domain analysis using the digital oscilloscope, albeit with lower accuracy. In that case, the diode voltage is properly sampled and averaged as explained for the time-domain analysis. Input voltage is sampled as well, using another channel of the oscilloscope (Fig. 5). Magnitude is obtained from peak-to-peak or rms measurements and temperature conversion via the diode calibration curve. Phase φ can be evaluated from the delay Δt between the peaks of input and diode voltages as φ = 2π∙Δt∙f, with φ in radians. Nevertheless, this method is more time-consuming and less accurate compared the lock-in technique, especially when the diode voltage amplitude approaches zero. Hence, lock-in method is preferable.Fig. 5Left: diode voltage response (red) to a power sinewave over the set of frequencies in the range of interest [5] input as visualized with the oscilloscope. Sine square-root input voltage (yellow) is also measured for phase evaluation through Δt measurement. Right: input power sinewave (red) calculated as V(t)2/R and temperature variation (blue) measured by the diode according to its calibration curve.Fig. 5",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 17,
-      "title": "Frequency-domain analysis",
-      "instruction": "3. This procedure has to be repeated for a set of frequencies in the range of interest, which usually are equally spaced in logarithmic scale.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 18,
-      "title": "Frequency-domain analysis",
-      "instruction": "4. Plots of magnitude and phase vs. frequency are obtained. By fitting them with a complex rational function:fs=ks-z1s-z2…s-zms-p1s-p2…s-pnit is possible to determine the number and values of the zeros (z1…zm), poles (p1 …pn) and coefficient (k) of the transfer function.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 19,
-      "title": "Time-domain and frequency-domain analysis comparison",
-      "instruction": "1. The transfer function of a system is given by the Laplace transform of its pulse response in time domain. Pulse response is simply calculable as the time derivative of step response. Therefore, we can derivate the system transfer function in two ways. First, we can differentiate in time our step response ΔT/P, obtainingdΔT/Pdt=∑iAiτie−tτiand then we can calculate its Laplace transform. The second way is to first evaluate the Laplace transform of the step response ΔT/P and then to multiply it by s, since it is known thatsT/PΔℒ∫0tftdt=ℒftswhere ℒ is the Laplace transform operator and f(t) is the time-domain pulse response.f(t)",
+      "title": "Derive transfer function from step response",
+      "instruction": "Compute the pulse response by differentiating the step response ΔT/P: d(ΔT/P)/dt = Σ_i (A_i/τ_i) e^{‑t/τ_i}. Obtain its Laplace transform, or alternatively multiply the Laplace transform of the step response by s, to yield the system transfer function.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T07:53:56.491258Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "description": "The two methods presented here are independent and, according to the type of the measurement and to the experimental conditions [1,2], the user can choose the method that better fits his needs. Otherwise, both can be carried out in order to perform a self-consistency check, as presented in Ref. [4].",
+  "content_type": "protocol",
+  "content_type_score": 30,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC6097543/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6097543/",
+      "caption": "",
+      "bytes": 68825,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6097543/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC6097543/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6097543/",
+      "caption": "",
+      "bytes": 43276,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6097543/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC6097543/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6097543/",
+      "caption": "",
+      "bytes": 47032,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6097543/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC6097543/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6097543/",
+      "caption": "",
+      "bytes": 52336,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6097543/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC6097543/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6097543/",
+      "caption": "",
+      "bytes": 103641,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6097543/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/methodsx/PMC6097543/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6097543/",
+      "caption": "",
+      "bytes": 58366,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6097543/fx1.jpg"
+    }
+  ]
 }

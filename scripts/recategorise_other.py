@@ -13,7 +13,8 @@ SOURCES_DIR = pathlib.Path("data/sources")
 KNOWN_SOURCES = [
     "bio_protocol", "pubmed_central", "vendor",
     "protocols_io", "zenodo", "figshare",
-    "openwetware", "github_opentrons",
+    "openwetware", "github_opentrons", "star_protocols",
+    "methodsx", "biological_procedures", "current_protocols",
 ]
 
 # keyword → category (checked in order, first match wins)

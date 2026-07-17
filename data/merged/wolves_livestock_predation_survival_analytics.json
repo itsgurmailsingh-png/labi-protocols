@@ -19,26 +19,234 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 1.0,
+  "quality_score": 5.5,
   "category": "Bioinformatics",
   "estimated_time_mins": 12,
   "materials": [],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "ID_TRS_yr --&gt; identifier for each area-year combination (please see study for more information) Interv_dich --&gt; intervention type (lethal, non-lethal) wolves_killed --&gt; number of wolves killed Interv_dummy --&gt; dummy variable for intervention type (0 if ‘non-lethal’, 1 if ‘lethal’) Delay_in_yrstop_time --&gt; time to recurrent event (in days) or censoring status_event --&gt; failure binary variable (1 if recurrent event; 0 if censored) start_time --&gt; start time variable (all obs ‘0’) yr_stratum --&gt; order of recurrent events within a particular area-yr† year --&gt; year variable (1998-2014) ‘Area’ refers to the section, neighborhood or neighborhood of township area scales.",
+      "title": "Initialize Stata Environment",
+      "instruction": "Set up the workspace and load the dataset.",
+      "substeps": [
+        {
+          "instruction": "Clear all existing data and memory",
+          "title": ""
+        },
+        {
+          "instruction": "Change directory to the file location",
+          "title": ""
+        },
+        {
+          "instruction": "Start a log file named 'Name.smcl' (replacing any existing file)",
+          "title": ""
+        },
+        {
+          "instruction": "Set memory to 1g",
+          "title": ""
+        },
+        {
+          "instruction": "Load 'Data.dta' replacing existing data",
+          "title": ""
+        },
+        {
+          "instruction": "Set 'more off' permanently",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "clear allcd “/Location/Of/File”log using Sample .DO FILE clear all cd “/Location/Of/File” log using &#34;Name.smcl&#34;, replace set mem 1g use &#34;Data.dta&#34;, replace set more off, permanently ************************************************ ****Replacing intervention type if wolves_killed = 0§ ************************************************ replace Interv_dich=&#34;non-lethal&#34; if wolves_killed==0 replace Interv_dummy=0 if Interv_dich==&#34;non-lethal&#34; ************************************************ ***Set data as survival time for PWP-GT model ************************************************ stset Delay_in_yrstop_time, failure(status_event) exit(time .) enter(start_time) list ID_TRS_yr _t0 _t _d _st** stdescribe stsum ************************************************ ***Limiting analysis to # of Strata†† ************************************************ use “Data_Strata#.dta” stset Delay_in_yrstop_time, failure(status_event) exit(time .) enter(start_time) stdescribe stsum *Comparing survival functions by group sts list, by(Interv_dich) sts list, by(Interv_dich) compare *Graphing survival functions by group sts graph, by(Interv_dich) sts graph, fail by(Interv_dich) *Graphing smoothed hazard estimates (hazard ratio) by group sts graph, hazard by(Interv_dich) sts graph, cumhaz by(Interv_dich) *Testing equality of survival functions by group (Log-rank test) sts test Interv_dich sts test Interv_dich, strata(yr_stratum) ***COX MODELS (stcox)*** **STRATIFIED** stcox Interv_dummy year, strata(yr_stratum) vce(cluster ID_TRS_yr) stcox Interv_dummy year, nohr strata(yr_stratum) vce(cluster ID_TRS_yr) *Checking Proportional Hazard assumptions estat phtest, log detail estat phtest, plot(Interv_dummy) stphplot, by(Interv_dummy) estat phtest, plot(year) stphplot, by(year) *Adding time-varying covariate to account for proportional hazard assumption violation stcox Interv_dummy year, tvc(Interv_dummy) texp(_t) strata(yr_stratum) vce(cluster ID_TRS_yr) *FRAILTY (MIXED-EFFECTS) MODEL** strmcure Interv_dummy year, shared(ID_TRS_yr) strata(yr_stratum) ************************************************ ***Correlation between delay between incidents and wolves killed (for ‘Lethal’ only) ************************************************ spearman Delay_in_yrstop_time wolves_killed if Interv_dich==&#34;Lethal&#34; log close Sample .DO FILE ‡ A similar procedure was used for the township and neighborhood of township scales, using their respective spatial unit identifiers. § This section was used for our main dataset. We removed this section of code for our alternate ‘traps-placed’ dataset, to include as ‘lethal’ those cases were attempts were made to trap wolves (please see study). ** May need to break ties in Delay_in_yrstop_time variable to retain observations (please see stset help in Stata) †† A separate dataset was created including only those area-year records with strata (yr_stratum) values with enough observations to be properly modelled (please see study).",
+      "title": "Clean Intervention Variables",
+      "instruction": "Update intervention type and dummy variables based on wolf kill counts.",
+      "substeps": [
+        {
+          "instruction": "Replace 'Interv_dich' with 'non-lethal' if 'wolves_killed' equals 0",
+          "title": ""
+        },
+        {
+          "instruction": "Replace 'Interv_dummy' with 0 if 'Interv_dich' is 'non-lethal'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Configure Survival Time Data",
+      "instruction": "Set the data as survival time for the PWP-GT model using the stset command.",
+      "substeps": [
+        {
+          "instruction": "Execute stset using 'Delay_in_yrstop_time' as the time variable, 'status_event' as the failure variable, 'time .' as the exit, and 'start_time' as the entry",
+          "title": ""
+        },
+        {
+          "instruction": "List variables: ID_TRS_yr, _t0, _t, _d, and _st",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'stdescribe' and 'stsum' to summarize the survival data",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Analyze Specific Strata",
+      "instruction": "Perform survival analysis on a filtered dataset containing only records with sufficient observations per strata.",
+      "substeps": [
+        {
+          "instruction": "Load 'Data_Strata#.dta'",
+          "title": ""
+        },
+        {
+          "instruction": "Re-run stset with 'Delay_in_yrstop_time', failure('status_event'), exit('time .'), and enter('start_time')",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'stdescribe' and 'stsum'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Compare Survival Functions",
+      "instruction": "Evaluate and visualize survival functions grouped by intervention type ('Interv_dich').",
+      "substeps": [
+        {
+          "instruction": "List survival functions by group and compare them",
+          "title": ""
+        },
+        {
+          "instruction": "Graph survival functions by group",
+          "title": ""
+        },
+        {
+          "instruction": "Graph survival functions including failures by group",
+          "title": ""
+        },
+        {
+          "instruction": "Graph smoothed hazard estimates (hazard ratio) by group",
+          "title": ""
+        },
+        {
+          "instruction": "Graph cumulative hazard by group",
+          "title": ""
+        },
+        {
+          "instruction": "Perform a Log-rank test to test equality of survival functions by 'Interv_dich'",
+          "title": ""
+        },
+        {
+          "instruction": "Perform a Log-rank test by 'Interv_dich' stratified by 'yr_stratum'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Execute Cox Proportional Hazards Models",
+      "instruction": "Run stratified Cox models to analyze the effect of intervention and year.",
+      "substeps": [
+        {
+          "instruction": "Run stcox for 'Interv_dummy' and 'year', stratified by 'yr_stratum' with cluster robust standard errors (vce) by 'ID_TRS_yr'",
+          "title": ""
+        },
+        {
+          "instruction": "Run the same stcox model with the 'nohr' option",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Verify Proportional Hazard Assumptions",
+      "instruction": "Test the proportional hazards assumption for the model covariates.",
+      "substeps": [
+        {
+          "instruction": "Run 'estat phtest, log detail'",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'estat phtest' and 'stphplot' for 'Interv_dummy'",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'estat phtest' and 'stphplot' for 'year'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Adjust for Assumption Violations",
+      "instruction": "Apply a time-varying covariate if the proportional hazard assumption is violated.",
+      "substeps": [
+        {
+          "instruction": "Run stcox for 'Interv_dummy' and 'year', adding a time-varying covariate 'tvc(Interv_dummy)' with 'texp(_t)', stratified by 'yr_stratum' and clustered by 'ID_TRS_yr'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Run Frailty Model",
+      "instruction": "Execute a mixed-effects (frailty) model.",
+      "substeps": [
+        {
+          "instruction": "Run 'strmcure' for 'Interv_dummy' and 'year', with shared frailty 'shared(ID_TRS_yr)' and stratified by 'yr_stratum'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Analyze Correlation for Lethal Interventions",
+      "instruction": "Calculate the correlation between the delay between incidents and the number of wolves killed for lethal interventions only.",
+      "substeps": [
+        {
+          "instruction": "Perform a Spearman correlation between 'Delay_in_yrstop_time' and 'wolves_killed' where 'Interv_dich' equals 'Lethal'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Finalize Session",
+      "instruction": "Close the log file and end the session.",
+      "substeps": [
+        {
+          "instruction": "Close the log file 'Sample .DO FILE'",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "likely_not_protocol",
+  "content_type_score": 19,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

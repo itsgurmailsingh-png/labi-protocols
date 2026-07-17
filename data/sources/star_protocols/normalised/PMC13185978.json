@@ -35,19 +35,233 @@
     "video camera",
     "recording PC",
     "3D printer",
-    "black laboratory partition curtain"
+    "black laboratory partition curtain",
+    "Timing: 1–2 h\n3.Set up the working environment on both the analysis PC and the recording PC.a.Install the Anaconda Python Platform (https://www.anaconda.com/products/distribution) on the analysis PC.b.Create a conda environment to run the Python script and DeepLabCut.i.Download DEEPLABCUT.yml file from the project GitHub repository (https://github.com/weizefeng-animal-resource/MarmosetGazeEstimation).ii.Open the Anaconda Command Prompt and install the environment using the following commands.cdpath/to/the/folder/containing/DEEPLABCUT.ymlconda env create -f DEEPLABCUT.ymlc.After the environment is successfully created, activate the new ‘DEEPLABCUT’ environment using the following command.conda activate DEEPLABCUTd.Set up the working directory for the analysis PC.i.Download analysis.py from the same repository.ii.Move the Python script to a new empty directory.iii.Use this directory as the working directory on the analysis PC.iv.Run the following commands in the Anaconda Command Prompt.cd path/to/the/working/directorypython analysis.py -t createDirsv.Confirm that the required directory structure has been created in the working directory.e.Set up the working directory for the recording PC.i.Repeat steps a to c on the recording PC (use EXPERIMENT.yml instead of DEEPLABCUT.yml in step b).ii.Download recording.py from the same repository.iii.Move the Python script to a new empty directory.iv.Confirm that the required directory structure has been created in the working directory.f.Activate the ‘EXPERIMENT’ environment and run the following commands in the Anaconda Command Prompt to generate the necessary directories.cd path/to/the/working/directorypython recording.py -t createDirs",
+    "Timing: 5 days",
+    "Timing: 10 min",
+    "Timing: 2–4 h",
+    "Marmosets’ attention declines across trials (Limitations).",
+    "This study did not generate new unique reagents."
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "Assessment of gaze direction provides a powerful approach for quantifying visual attention and behavioral responses in primates. Eye-tracking paradigms using image- and video-based stimuli have been widely employed in humans to quantify differences in gaze patterns, including responses to social stimuli.2 The common marmoset (Callithrix jacchus) has emerged as a valuable non-human primate model for studying social behavior and neurodevelopmental disorders.3 However, most eye-tracking techniques in marmosets require invasive head fixation, which limits their broader applicability, particularly in genetically engineered disease models.4,5,6 Here, we describe a noninvasive platform for assessing attention to visual stimuli in marmosets through gaze estimation based on facial orientation and demonstrate its application in evaluating social preference. We provide step-by-step procedures for setting up the behavioral test, training the animals, and analyzing the data. All codes, training guidelines, and setup instructions are available in an open repository to enhance reproducibility and accessibility for the broader research community. We also provide a sample dataset in the repository so that users can perform a test run of the system in their own environments. This platform enables quantitative and straightforward estimation of gaze direction and can be applied not only to the assessment of social preference but also to the evaluation of gaze responses to diverse visual stimuli tailored to specific research objectives.",
+      "title": "Prepare experimental room and hardware",
+      "instruction": "Set up a blackout‑curtained room (800 mm × 900 mm × 1000 mm) with a monitor on a 390 × 250 × 185 mm stand, a platform for the monkey chair, and a web camera mounted on the monitor stand. Position the chair 50 cm from the monitor center, adjust platform height so the stimulus is at eye level, and mount the camera 20 cm from the chair, 1 cm below the head‑fixation component. Align chair, monitor, and camera horizontally; verify that a central stimulus appears centered on the monitor and in the camera view. Connect monitor and camera to a recording PC, set the PC desktop to a black background and use the monitor as an extended display. Use a camera with 1280 × 720 px resolution, 30 fps, 70–90° FOV; avoid wide‑angle lenses with strong distortion. Use a monitor with ≥60 Hz refresh, placed ≥50 cm from the animal (half‑width ≥ distance × tan 25°). Maintain illumination inside the chair cover at ~20 lux.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Print and attach 3D‑printed cover",
+      "instruction": "Download HeadCover.stl from the GitHub repository, print the cover on a 3D printer, and attach it to the monkey chair as shown in Figures 1E‑F.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Establish software environments",
+      "instruction": "On both analysis and recording PCs install Anaconda, download DEEPLABCUT.yml (analysis) or EXPERIMENT.yml (recording) from the repository, create the conda environment with `conda env create -f <file>.yml`, and activate it (`conda activate DEEPLABCUT` or `conda activate EXPERIMENT`). Create an empty working directory, place analysis.py (analysis PC) or recording.py (recording PC) there, and run `python <script>.py -t createDirs` to generate the required folder structure.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Calibrate web and video cameras",
+      "instruction": "Print Chessboard.pdf on A3 paper, mount on a rigid surface, and capture 10‑15 images of the chessboard from varied angles with the web camera (bright, uniform lighting). Move images to the Camera1 folder and run `python analysis.py -t calCamera1` (environment DEEPLABCUT). Repeat with a video camera, move images to Camera2 folder, and run `python analysis.py -t calCamera2`. Successful runs create camera1.pickle and camera2.pickle.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Determine monitor‑camera geometry",
+      "instruction": "Download ArUcoMarkers.pdf, print on A4 at original scale, cut out markers, and measure edge lengths (4.9 cm for monitor markers, 2.0 cm for camera markers). Attach the four markers to the monitor corners and two markers to the sides of the web camera. Using the video camera, capture an overview image showing all markers with bright, uniform illumination. Move the image to the Setup folder and run `python analysis.py -t locateSetup`. Verify creation of setup.pickle and the two marker images. Keep the monitor‑camera relative positions unchanged; if altered, back up setup.pickle and repeat this step.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Create calibration stimulus video",
+      "instruction": "Install AviUtl (Windows), set project resolution to 1920 × 1080 px and 25 fps, and design a circular stimulus of 5.5° ± 0.2° diameter. Place six stimulus locations in a 3 × 2 grid with the following angular coordinates (horizontal°, vertical°): [0,0] (cue), [17.8,0] and [‑17.8,0] (face/object), [17.4,11.5], [0,11.5], [‑17.4,11.5] (upper calibration points). At each location present the stimulus for 5 s after two brief presentations, delivering two presentations per location in sequence. Export as MP4 and copy the video to the recording PC working directory.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Create social‑preference stimulus video",
+      "instruction": "Using AviUtl with the same resolution and frame rate, prepare ten pairs of stimuli: an unfamiliar marmoset neutral face and an object. Size each stimulus to 8.5° ± 3.5° width × 6° ± 2° height, standardizing luminance. For each trial present two central cue stimuli at [0,0] for 0.6 s each, then display the face and object side‑by‑side for 5 s with a horizontal separation of 35.6° (aligned vertically). Repeat for 10 trials, counterbalancing left‑right positions across trials. Export as MP4 and move to the recording PC working directory.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Verify frame delay",
+      "instruction": "Darken the experimental room completely. Ensure camera and monitor are connected to the recording PC. Run `python recording.py -t detectDelays -v <stimulus_video>.mp4` (environment EXPERIMENT). Record the displayed delay value; it will be needed for later analysis.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Habituate marmosets to chair",
+      "instruction": "For 5 consecutive days seat each marmoset in the chair with the 3D‑printed cover, place the chair on the platform, and allow 10 min of free sitting each day. Gently guide the animal to face forward if needed, then reward with sponge cake and return it to its home cage. If after 5 days the animal does not remain upright and forward‑facing for 10 min, extend habituation until the criterion is met.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Record calibration stimulus",
+      "instruction": "Open an Anaconda Command Prompt, activate EXPERIMENT, navigate to the recording PC working directory, and run `python recording.py -t run -c 0 -v <calibration_video>.mp4 -o calibration_output.mp4`. The monitor shows a black screen until ENTER is pressed; press ENTER only after confirming the marmoset is upright and facing the monitor. After the video ends, press ENTER to stop recording. Verify that calibration_output.mp4 appears in the Results folder.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Record social‑preference test",
+      "instruction": "After the calibration run, wait 90 s, then manually reward the animal. Run the social‑preference video with `python recording.py -t run -c 0 -v <social_video>.mp4 -o social_output.mp4`. Press ENTER to start, ensure the marmoset is facing the monitor, and press ESC to abort if necessary. After the video finishes, press ENTER to terminate, confirm the output file, then remove the animal, reward, and return it to its home cage.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Detect facial landmarks with DeepLabCut",
+      "instruction": "Activate the DEEPLABCUT environment and launch DLC GUI via `python -c \"import deeplabcut; deeplabcut.launch_dlc()\"`. Open the recorded videos, label the following landmarks: outer corners of both eyes, nose, center of mouth, and both mouth corners (leave occluded points unlabeled). Train the network until validation accuracy ≈0.96 (training on 192 manually labeled frames, 95 % training split, 500 000 iterations, training error ~1.06 px, test error ~2.15 px). Export the tracking results as CSV files and move them to the DeepLabCutOutputs folder. Run `python analysis.py -t estimateGazePoints -a 0.96` to compute gaze points; confirm CSV results appear in the Results folder.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Calibrate gaze‑estimation model",
+      "instruction": "Select frames where the animal is looking at each calibration stimulus (head stationary, stimulus centered). Edit the automatically generated calibration_configs.csv according to the repository example. Run `python analysis.py -t calEstimator` (environment DEEPLABCUT). Verify creation of calibrator.pickle.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Apply calibrated model to experimental videos",
+      "instruction": "Run `python analysis.py -t calResults` to generate calibrated gaze points for the social‑preference recordings. Confirm CSV files are placed in the CalibratedResults folder.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Optional: generate annotated video",
+      "instruction": "Copy the recorded video and the stimulus video into the working directory. Run `python analysis.py -t annotateVideo -c <CalibratedResults>.csv -m <recorded_video>.mp4 -s <stimulus_video>.mp4 -o <annotated_output>.mp4 -d <frame_delay> -a 0.96`. The resulting video with facial landmarks, 3‑D orientation, and gaze dots will be saved in the Annotated Videos folder.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Compute tolerance window radius",
+      "instruction": "Calculate the radius as screen distance (50 cm) × tan(10°). This radius defines the area around each stimulus within which a gaze is counted as directed at the stimulus.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:12:44.609305Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Assessment of gaze direction provides a powerful approach for quantifying visual attention and behavioral responses in primates. Eye-tracking paradigms using image- and video-based stimuli have been widely employed in humans to quantify differences in gaze patterns, including responses to social stimuli.2 The common marmoset (Callithrix jacchus) has emerged as a valuable non-human primate model for studying social behavior and neurodevelopmental disorders.3 However, most eye-tracking techniques in marmosets require invasive head fixation, which limits their broader applicability, particularly in genetically engineered disease models.4,5,6 Here, we describe a noninvasive platform for assessing attention to visual stimuli in marmosets through gaze estimation based on facial orientation and demonstrate its application in evaluating social preference. We provide step-by-step procedures for setting up the behavioral test, training the animals, and analyzing the data. All codes, training guidelines, and setup instructions are available in an open repository to enhance reproducibility and accessibility for the broader research community. We also provide a sample dataset in the repository so that users can perform a test run of the system in their own environments. This platform enables quantitative and straightforward estimation of gaze direction and can be applied not only to the assessment of social preference but also to the evaluation of gaze responses to diverse visual stimuli tailored to specific research objectives. REAGENT or RESOURCESOURCEIDENTIFIERExperimental models: Organisms/strainsCommon marmosets (Callithrix jacchus), 19 males and 9 females, 1–11 years oldBreeding colony of The University of TokyoN/ASoftware and algorithmsDeepLabCut (Version 2.3.9)Mathis et al.8http://www.mackenziemathislab.org/deeplabcutPython (Version 3.10.19)Pythonhttps://www.python.org/Prism 9GraphPadRRID:SCR_002798AviUtl (Version 1.10)N/Ahttps://spring-fragrance.mints.ne.jp/aviutl/Power",
+  "content_type": "protocol",
+  "content_type_score": 46,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/star_protocols/PMC13185978/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13185978/",
+      "caption": "",
+      "bytes": 328894,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13185978/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC13185978/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13185978/",
+      "caption": "",
+      "bytes": 469325,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13185978/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC13185978/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13185978/",
+      "caption": "",
+      "bytes": 393933,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13185978/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC13185978/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13185978/",
+      "caption": "",
+      "bytes": 186124,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13185978/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC13185978/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13185978/",
+      "caption": "",
+      "bytes": 134450,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13185978/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC13185978/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13185978/",
+      "caption": "",
+      "bytes": 372038,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13185978/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/star_protocols/PMC13185978/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13185978/",
+      "caption": "",
+      "bytes": 233119,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13185978/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/star_protocols/PMC13185978/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13185978/",
+      "caption": "",
+      "bytes": 375589,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13185978/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/star_protocols/PMC13185978/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13185978/",
+      "caption": "",
+      "bytes": 120584,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC13185978/gr8.jpg"
+    }
+  ]
 }

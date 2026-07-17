@@ -19,7 +19,7 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 6.0,
+  "quality_score": 3.5,
   "category": "Bioinformatics",
   "estimated_time_mins": 72,
   "materials": [
@@ -35,89 +35,145 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Plate maps of the starting density plate A .xlsx file with one plate per sheet Cells contain strain-id Example",
+      "title": "Prepare Input Files",
+      "instruction": "Create the necessary mapping files for the analysis pipeline.",
+      "substeps": [
+        {
+          "instruction": "Prepare a plate map .xlsx file (starting density plate A) with one plate per sheet, where cells contain the strain-id.",
+          "title": ""
+        },
+        {
+          "instruction": "Prepare a .xlsx file specifying the strain-id to orf-name relationship, with strain_id in the first column and orf_name in the second column.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Table specifying strain-id to orf-name relationship A .xlsx file containing unique strain_id to each orf_name First column is strain_id Second column is orf_name Each strain_id from Step 1 should have an associated orf_name Example *orf_name variable is used for names of the mutants in the experiment.",
+      "title": "Install Dependencies and Software",
+      "instruction": "Set up the required MATLAB tools and LID scripts.",
+      "substeps": [
+        {
+          "instruction": "Install Database Toolbox via APPS > Get More Apps in MATLAB.",
+          "title": ""
+        },
+        {
+          "instruction": "Download and unzip the mysql connector JDBC driver.",
+          "title": ""
+        },
+        {
+          "instruction": "Clone the following repositories into the MATLAB folder: Matlab-Colony-Analyzer-Toolkit.git, bean-matlab-toolkit.git, lidetector.git, and sau-matlab-toolkit.git.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Dependencies: Install Database Toolbox from the APPS &gt; Get More Apps option within MATLAB Download and unzip mysql connector JDBC driver from here .",
+      "title": "Configure Bash Scripts",
+      "instruction": "Make the LID bash scripts executable within the lidetector directory.",
+      "substeps": [
+        {
+          "instruction": "Run 'chmod +x initialize.sh'",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'chmod +x buildraw.sh'",
+          "title": ""
+        },
+        {
+          "instruction": "Run 'chmod +x lid.sh'",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Download LID and associated scripts from Github in your MATLAB folder. ~$ cd MATLAB ~/MATLAB$ git clone https://github.com/sauriiiin/Matlab-Colony-Analyzer-Toolkit.git ~/MATLAB$ git clone https://github.com/sauriiiin/bean-matlab-toolkit.git ~/MATLAB$ git clone https://github.com/sauriiiin/lidetector.git ~/MATLAB$ git clone https://github.com/sauriiiin/sau-matlab-toolkit.git",
+      "title": "Initialize Database",
+      "instruction": "Execute the initialize.sh script from the lidetector folder using the required experimental metadata.",
+      "substeps": [
+        {
+          "instruction": "Ensure you have the following information ready: MySQL credentials (username, password, database name), experiment name (prefix for tables), upscale patterns (combinations of lower density plates condensed to higher density plates), reference strain orf_name, and file paths to the plate map and strain-id/orf-name .xlsx files.",
+          "title": ""
+        },
+        {
+          "instruction": "Run './initialize.sh' to create tables: _pos2coor, _pos2orf_name, _pos2rep, _pos2strain_id, and _strainid2orf_name.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Make LID bash scripts executable. ~/MATLAB$ cd lidetector ~/MATLAB/lidetector$ chmod +x initialize.sh ~/MATLAB/lidetector$ chmod +x buildraw.sh ~/MATLAB/lidetector$ chmod +x lid.sh",
+      "title": "Organize Colony Size Estimations",
+      "instruction": "Prepare colony size estimation data using a tool such as the MATLAB Colony Analyzer Toolkit (MCAT).",
+      "substeps": [
+        {
+          "instruction": "Organize data in ascending order of hours, plate number, column number, and row number.",
+          "title": ""
+        },
+        {
+          "instruction": "Ensure the file structure includes pixel counts from multiple images (e.g., image1, image2, image3) and an average column consisting of the average pixel count of those images.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Information to keep in hand before proceeding: MySQL credentials - username, password, database name Name of experiment - this will be used as a prefix for all the tables that will be generated Upscale patterns from the experiment - ie in what combinations were the lower density plates condensed to form the higher density plates Name (orf_name) of reference strain used File path to plate map .xlsx file from Step 1 File path to the strain_id to orf_name .xlsx file from Step 2",
+      "title": "Generate Raw Data Tables",
+      "instruction": "Combine the colony size estimation table with position IDs from the _pos2coor table.",
+      "substeps": [
+        {
+          "instruction": "Run './buildraw.sh' from the lidetector directory.",
+          "title": ""
+        },
+        {
+          "instruction": "Verify the generation of _RAW (raw estimations per hour per position id), _smudgebox (excluded position ids), and _JPEG (cleaned table where border colonies, smudge box colonies, and colonies with pixel count < 10 are NULL'd).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Execute the initialize bash script from within the lidetector folder. ~/MATLAB/lidetector$ ./initialize.sh Successful run will create the following tables _pos2coor = position ids and their corresponding plate coordinate (density, plate number, column number and row number). _pos2orf_name = position ids and the corresponding orf-name _pos2rep = position ids of lowest density plates to their replicates at higher density plates based on the upscale pattern _pos2strain_id = position ids and their corresponding strain ids _strainid2orf_name = same as table from Step 2 Example files can be found in Data.zip .",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 7,
-      "title": "",
-      "instruction": "Organize colony size estimations from your favorite colony size estimator, like the MATLAB Colony Analyzer Toolkit (MCAT), in ascending order of hours, plate number, column number, row number. Below is the structure of such a file. Here image1,2,3 are pixel counts from 3 different images of the same plate. Average column consists of the average pixel count of image1,2,3. A B C D E 1 hours image1 image2 image3 average 2 3 4 Example",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 8,
-      "title": "",
-      "instruction": "Combine the above table with positions ids from _pos2coor table using the below command. ~/MATLAB/lidetector$ ./buildraw.sh Successful completion of this command will generate: _RAW = raw colony size estimations per hour per position id of all the images _ smudgebox = position ids to be excluded from analysis that correspond to the user defined coordinates _JPEG = clean version of the raw table with border colonies, colonies corresponding to the smudge box and those colonies with pixel count of less than 10 NULL&#39;d Example files can be found in Data.zip .",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 9,
-      "title": "",
-      "instruction": "Information to keep in handy before proceeding: Path to MALTAB directory Path to lidetector directory Path to where the JDBC driver was unzipped from Step 3",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 10,
-      "title": "",
-      "instruction": "Execute the LI Detector ~/MATLAB/lidetector$ ./lid.sh Successful run will create the following tables: _NORM = position ids and their corresponding relative fitness measurements along with the background pixel count measurement based on references _FITNESS = similar to _NORM but with strain ids and orf-names included _FITNESS_STAT = strain-id-wise mean, median and standard deviation of relative fitness _PVALUE = strain-id-wise empirical p-values where stat = (strain mean fitness - reference mean fitness)/reference fitness standard deviation es = (strain mean fitness - reference mean fitness)reference mean fitness Example files can be found in Data.zip .",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 11,
-      "title": "",
-      "instruction": "Users can skip step 8 &amp; 9 to use LI Detector&#39;s imageanalyzer function if they choose to utilize MCAT as their desired tool for colony size estimation. LID: imageanalyzer by Saurin B Parikh Skip this step if you have successfully executed step 8 &amp; 9.",
+      "title": "Execute LI Detector",
+      "instruction": "Run the main LI Detector script to calculate fitness measurements.",
+      "substeps": [
+        {
+          "instruction": "Ensure you have the paths to the MATLAB directory, lidetector directory, and the unzipped JDBC driver.",
+          "title": ""
+        },
+        {
+          "instruction": "Run './lid.sh' to generate the following tables: _NORM (relative fitness and background pixel count), _FITNESS (relative fitness with strain ids and orf-names), _FITNESS_STAT (mean, median, and standard deviation of relative fitness), and _PVALUE (empirical p-values).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [
+    {
+      "type": "image",
+      "filename": "ksm8bhge7-D92818EA687311F08F960A58A9FEAC02.jpg",
+      "local_path": "data/media/protocols_io/li-detector-analytical-pipeline-bpvrmn56/ksm8bhge7-D92818EA687311F08F960A58A9FEAC02.jpg",
+      "source_url": "https://files.protocols.io/external/ksm8bhge7-D92818EA687311F08F960A58A9FEAC02.jpg",
+      "caption": "",
+      "bytes": 325170,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/li-detector-analytical-pipeline-bpvrmn56/ksm8bhge7-D92818EA687311F08F960A58A9FEAC02.jpg"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 34,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

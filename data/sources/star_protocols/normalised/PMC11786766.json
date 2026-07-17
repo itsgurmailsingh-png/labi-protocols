@@ -32,46 +32,174 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "Before you begin",
-      "instruction": "This section includes the software installation as well as the collection of pre-compiled data used in this study to train and utilize a DT-LEMBAS model.1",
+      "title": "Install software and download data",
+      "instruction": "Install all required software packages for DT‑LEMBAS and download the pre‑compiled drug‑target interaction files, L1000 transcriptomic data, and any other resources referenced in the GitHub repository (https://github.com/Lauffenburger-Lab/DrugsANNSignaling).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Before you begin",
-      "instruction": "DT-LEMBAS is an interactome-based artificial neural network model that takes as input log-transformed drug concentrations and predicts the induced activity of multiple transcription factors. DT-LEMBAS consists of two components: a drug layer that transforms input drugs to signaling perturbations on available target nodes (for a pre-defined drug-target space), and a signaling module (termed LEMBAS2), defined as a recurrent neural network and constraint to an existing prior knowledge signaling network (PKN), which takes the signaling input and propagates it in the intracellular network to predict transcription factor activity. Empirically, in our case studies and data1,2 we observed that at least ∼120 conditions are needed when training a predictive model using ∼100 TFs, and a Prior Knowledge Network (PKN) of ∼12 thousand interactions.",
+      "title": "Prepare drug concentration matrix",
+      "instruction": "Create the input file “DrugsIn” in tab‑separated (.tsv) format containing log‑transformed drug concentrations; rows correspond to samples (experimental conditions) and columns to the available drugs. Curate this file manually.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Step-by-step method details",
-      "instruction": "Here, we describe step-by-step methods for training interactome-based deep learning models to simulate cellular transcriptional responses to drugs. This aims to infer off-target effects and to understand their downstream signaling activities. This protocol is divided into 7 steps: 1) retrieving pre-compiled drug-target interactions (DTIs) or using your own with the same file formats, 2) inferring transcription factor (TF) activity from gene expression data (using the DoRothEA regulon7 together with the VIPER algorithm8), and pre-processing and filtering TFs and samples, 3) constructing a prior knowledge network (PKN) to act as a scaffold for the deep learning model, 4) train cell line-specific models, 5) extracting the inferred DTIs from the model, 6) estimating off-target effects of drugs on specific TFs and selecting a sample of interest, and 7) ultimately extract the mechanism of action (MoA) of a drug’s off-target effect on a TF, in the form of a smaller signaling network.",
+      "title": "Generate drug‑target interaction file",
+      "instruction": "Retrieve pre‑compiled drug‑target interactions (DTIs) or compile your own using the same file format; save as “TargetsIn” (.tsv) with drugs as rows and target proteins as columns. This file will be used in the modeling pipeline.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Step-by-step method details",
-      "instruction": "As an example of these steps, we use transcriptomic data from the L1000 dataset9 to train an ensemble of 50 models simulating drug-induced transcriptional responses on the A375 cancer cell line. Then, after extracting learned DTIs, we build a signaling network explaining Lestaurtinib’s off-target effects on the FOXM1 transcription factor. All steps can also be found in the GitHub repository: https://github.com/Lauffenburger-Lab/DrugsANNSignaling.",
+      "title": "Infer transcription factor activities",
+      "instruction": "Apply the DoRothEA regulon together with the VIPER algorithm to the L1000 gene‑expression data to infer TF activity, then preprocess and filter TFs and samples as needed; export the resulting activity matrix as “TFsOut” (.tsv).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Step-by-step method details",
-      "instruction": "There are several files that are generated and used in the protocol. Here we describe the most important ones that are required for training a model and using it for a case study. “DrugsIn” is the input file (X) of the model in .tsv format, containing the input drug concentrations, with samples in the rows and the available drugs in the columns. This is manually curated by the user. “TargetsIn” is a .tsv file containing prior knowledge of drug-target interactions with drugs in the rows and targets in the columns. This is generated in Step 1. “TFsOut” is the output file (Y) of the model in .tsv file format, containing output TF activities. This is generated in Step 2. “PKN” is the prior knowledge signaling network which will be used as a scaffold for the neural network model. This is generated in Step 3, or you can provide a manually curated one. “PknAnnotation” is the Annotation file for the PKN, generated in Step 3, or you can provide a manually curated one. “ChemicalSims” is a .csv file containing chemical similarities between drugs in a matrix format. This is generated in Step 4.",
+      "title": "Build prior knowledge network",
+      "instruction": "Construct a prior knowledge signaling network (PKN) containing approximately 12 000 interactions and save it as the “PKN” file; also generate the corresponding annotation file “PknAnnotation”. The PKN will serve as the scaffold for the recurrent neural‑network component of DT‑LEMBAS.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Train cell‑line specific models",
+      "instruction": "Using the prepared “DrugsIn”, “TargetsIn”, “TFsOut”, and “PKN” files, train DT‑LEMBAS models for the chosen cell line (e.g., A375). For the example, train an ensemble of 50 independent models on the L1000 data; ensure the training set includes at least ~120 experimental conditions, ~100 TFs, and the ~12 k‑interaction PKN.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Extract inferred DTIs and chemical similarities",
+      "instruction": "After training, extract the learned drug‑target interaction weights from each model and combine them to produce a matrix of inferred DTIs; compute pairwise chemical similarity between drugs and save the result as the “ChemicalSims” (.csv) matrix.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Estimate off‑target effects on TFs",
+      "instruction": "Use the inferred DTIs to predict off‑target effects of each drug on specific transcription factors; select a TF of interest (e.g., FOXM1) and a drug (e.g., Lestaurtinib) for downstream analysis.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Derive mechanism‑of‑action network",
+      "instruction": "From the off‑target predictions, extract a sub‑network of the PKN that connects the selected drug to the chosen TF, yielding a compact signaling network that explains the drug’s off‑target effect (e.g., Lestaurtinib → FOXM1).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T00:35:40.114582Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 22,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/star_protocols/PMC11786766/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 290419,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.gif",
+      "local_path": "data/media/star_protocols/PMC11786766/fx2.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 3426,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/fx2.gif"
+    },
+    {
+      "type": "image",
+      "filename": "fx3.gif",
+      "local_path": "data/media/star_protocols/PMC11786766/fx3.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 3281,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/fx3.gif"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC11786766/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 100892,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC11786766/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 194078,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC11786766/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 108610,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC11786766/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 405583,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC11786766/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 269401,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/star_protocols/PMC11786766/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 160561,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/star_protocols/PMC11786766/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11786766/",
+      "caption": "",
+      "bytes": 186821,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC11786766/gr7.jpg"
+    }
+  ]
 }

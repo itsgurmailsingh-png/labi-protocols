@@ -24,115 +24,163 @@
     "Standard desktop or laptop with Linux, macOS, or Windows (with Docker/Conda support)",
     "EnsembleFlex (available on GitHub)",
     "Python and R (dependencies as per environment.yml and requirements.R)",
-    "Input folder with monomeric PDB files; sample datasets available from the EnsembleFlex repository"
+    "Input folder with monomeric PDB files; sample datasets available from the EnsembleFlex repository",
+    "highlights clusters and putative transition trajectories.("
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "BEST PRACTICES FOR STRUCTURAL ENSEMBLE ANALYSIS USING EnsembleFlex",
-      "instruction": "This protocol outlines a recommended approach for analyzing protein structural ensembles with EnsembleFlex. It emphasizes comprehensive data preparation, advanced superposition strategies, and double‐scale flexibility analysis. Detailed steps guide the user through avoiding common pitfalls (e.g., misalignment in heterogeneous ensembles) and interpreting results using multiple metrics, such as RMSD, RMSF, PCA, and UMAP. The automated nature of EnsembleFlex ensures minimal adjustments are necessary, allowing researchers to focus on data interpretation.",
+      "title": "Prepare and superpose ensemble",
+      "instruction": "Gather all protein structures, ensure comprehensive data preparation and apply advanced superposition strategies using EnsembleFlex before any analysis.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "Analysis on two scales: Backbone‐only vs all‐atom flexibility",
-      "instruction": "EnsembleFlex computes flexibility at two scales and interpreting them together is essential for correct biological interpretation.",
+      "title": "Run backbone‑only flexibility",
+      "instruction": "Compute backbone‑only (atoms N, Cα, C, O; optionally Cα‑only) flexibility metrics with EnsembleFlex to capture large‑scale collective motions.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "Analysis on two scales: Backbone‐only vs all‐atom flexibility",
-      "instruction": "Backbone‐only (N, Cα, C, O), or even Cα‐only, captures large‐scale, collective motions of the protein scaffold, i.e., domain translations, hinge bending, and loop movements. Backbone metrics are directly comparable between residues and across ensembles because the same atoms are present for each residue. This scale is therefore ideal for identifying domain motions and hinge axes.",
+      "title": "Run all‑atom flexibility",
+      "instruction": "Compute all‑atom flexibility (includes side‑chain heavy atoms) with EnsembleFlex to obtain detailed residue‑level RMSF values.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "Analysis on two scales: Backbone‐only vs all‐atom flexibility",
-      "instruction": "All‐atom (includes side‐chain heavy atoms) provides detailed residue‐level information, revealing rotameric changes, side‐chain breathing of pockets, and local packing rearrangements that are crucial for ligand recognition and catalysis. All‐atom metrics are influenced by residue size, atom count, and local environment, and can therefore show elevated values for bulky or solvent‐exposed residues even in the absence of backbone displacement.",
+      "title": "Interpret RMSF results",
+      "instruction": "Compare backbone and all‑atom RMSF: high backbone RMSF predicts high all‑atom RMSF (true backbone mobility); low backbone but high all‑atom RMSF indicates side‑chain‑driven mobility.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "Analysis on two scales: Backbone‐only vs all‐atom flexibility",
-      "instruction": "Interpretation rule‐of‐thumb: Always consider all‐atom results in the context of backbone results. If backbone RMSF is high for a residue, high all‐atom RMSF is expected and likely reflects true backbone mobility. If backbone RMSF is low but all‐atom RMSF is high, the mobility is predominately side‐chain‐driven and may affect ligand interactions without large backbone rearrangements. Using both scales together enables discrimination between global architectural changes and local, functionally relevant rearrangements.",
+      "title": "Perform PCA on backbone",
+      "instruction": "Apply Principal Component Analysis (PCA) to the aligned backbone coordinates using EnsembleFlex.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "Principal component analysis (PCA)",
-      "instruction": "PCA is a linear technique identifying orthogonal modes (principal components, PCs) that capture decreasing proportions of variance. In EnsembleFlex, PCA applied to aligned backbone coordinates is commonly used to extract dominant collective motions.",
-      "substeps": [],
+      "title": "Inspect PCA variance and plots",
+      "instruction": "Examine the percentage of variance explained by PC1 and PC2 (look for >50 % to 70 %); generate PC1 vs PC2 scatter plots; extract per‑residue loadings; optionally animate motions along PCs while noting that extrapolations may be non‑physical.",
+      "substeps": [
+        {
+          "instruction": "Check explained variance of PC1 and PC2 (>50 %–70 % is desirable).",
+          "title": ""
+        },
+        {
+          "instruction": "Create PC1 vs PC2 scatter plot to reveal clusters or transition paths.",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate per‑residue loadings to identify hinge regions and moving domains.",
+          "title": ""
+        },
+        {
+          "instruction": "Animate motions along selected PCs, avoiding over‑extrapolation.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "Principal component analysis (PCA)",
-      "instruction": "Key practical points:\n(1) Explained variance. Inspect the percentage of variance explained by the first PCs. If PC1 and PC2 capture a large fraction (e.g., >50% to 70%), a few modes summarize most variation; if explained variance is low, more PCs are needed to characterize the ensemble.(2) PC scatter plots. Projecting structures onto PC axes (e.g., PC1 vs PC2) highlights clusters and putative transition trajectories.(3) Per‐residue loadings. Decompose PCs to determine which residues contribute most. Mapping loadings onto the structure reveals hinge regions and moving domains.(4) Animations and extrapolation. Animate motions along PCs to visualize directions of motion. Be aware that those extrapolations may produce non‐physical conformations.(5) Pitfalls: PCA on poorly superposed structures produces spurious modes. PCA results can also be biased by ensemble composition (over‐representation of one state).",
-      "substeps": [],
+      "title": "Analyze ligand binding site",
+      "instruction": "Use EnsembleFlex’s binding‑site module (default heavy‑atom distance cutoff 3.5 Å) to identify residues within 3.5 Å of HETATM ligand atoms, generate occurrence frequencies, heatmaps, annotated PDBs (B‑factor encoding), and binding‑site radius‑of‑gyration histograms; combine these outputs with RMSF metrics.",
+      "substeps": [
+        {
+          "instruction": "Run binding‑site detection with default 3.5 Å cutoff.",
+          "title": ""
+        },
+        {
+          "instruction": "Review residue‑frequency heatmap and annotated PDB files.",
+          "title": ""
+        },
+        {
+          "instruction": "Assess binding‑site radius‑of‑gyration histogram for site plasticity.",
+          "title": ""
+        },
+        {
+          "instruction": "Integrate frequency data with backbone and all‑atom RMSF to classify residues as stable anchors or flexible contacts.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "Ligand binding site analysis",
-      "instruction": "EnsembleFlex's automated binding‐site module identifies residues within a user‐defined heavy‐atom distance cutoff (default 3.5 Å) from HETATM ligand atoms and summarizes occurrence frequencies, ligand‐residue heatmaps, and annotated PDBs (B‐factor encoding of occurrence/frequency). When interpreting these outputs, combine frequency information with flexibility metrics: residues that are frequently observed in the binding site and show low backbone and all‐atom RMSF are likely structurally stable anchors for ligand interactions; and residues with high binding frequency but high RMSF indicate flexible contacts that may confer promiscuity or reduce affinity. Use the ligand‐residue heatmap and clustered interaction patterns to detect sub‐pocket preferences and to prioritize fragment series that share conserved interaction fingerprints. Check binding‐site radius of gyration (an approximation to binding‐site‐size) histograms to assess site plasticity: a narrow distribution suggests a rigid/fixed site, while a broad distribution signals adaptable binding sites that may require different optimization strategies.",
-      "substeps": [],
+      "title": "Conduct conserved‑water analysis",
+      "instruction": "Cluster oxygen positions within 2.4 Å to locate conserved water sites, visualize clusters with provided PyMOL scripts, filter out spurious HETATMs/ions, and cross‑validate with ESSA/ENM hotspots.",
+      "substeps": [
+        {
+          "instruction": "Cluster water oxygens using a 2.4 Å distance threshold.",
+          "title": ""
+        },
+        {
+          "instruction": "Visualize clusters in PyMOL using the supplied scripts.",
+          "title": ""
+        },
+        {
+          "instruction": "Filter out low‑occupancy or alternate‑conformation HETATMs/ions.",
+          "title": ""
+        },
+        {
+          "instruction": "Compare conserved water sites with ESSA‑identified hotspots.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "Conserved‐water analysis",
-      "instruction": "Conserved‐water analysis (clustered oxygen positions, typically within 2.4 Å) highlights hydration sites that mediate protein‐ligand contacts or stabilize pocket geometry. Visualize conserved water clusters with the provided PyMOL scripts. Waters conserved across many structures are good candidates for exploitation or displacement in fragment growth, whereas partially conserved waters may be context‐dependent and useful for ligand design that preserves favorable water‐mediated networks. Always inspect crystallographic metadata (resolution, occupancy, alternate conformations) and filter spurious HETATMs/ions before analysis since crystallization additives can produce misleading binding‐site or water clusters. Finally, cross‐validate binding‐site signals with ESSA/ENM outputs: residues identified as ESSA hotspots that also appear in frequent binding‐site mappings point to positions where ligand binding could materially alter global dynamics and are high‐priority targets for experimental follow‐up.",
+      "title": "Run predictive ENM methods",
+      "instruction": "Execute elastic network model analyses in EnsembleFlex: Gaussian Network Model (GNM), Anisotropic Network Model (ANM), all‑atom normal mode analysis (aaNMA), and Essential Site Scanning Analysis (ESSA).",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "Predictive (ENM‐based) methods: ANM, GNM and ESSA",
-      "instruction": "In addition to data‐driven ensemble analyses, EnsembleFlex integrates predictive, generative methods based on elastic network models (ENMs) to provide complementary insight into intrinsic protein dynamics. The tool implements two commonly used coarse‐grained ENMs, i.e., Gaussian network model (GNM) and anisotropic network model (ANM), as well as all‐atom normal mode analysis (aaNMA) and essential site scanning analysis (ESSA).",
+      "title": "Identify ESSA allosteric hotspots",
+      "instruction": "Apply ESSA to evaluate the effect of perturbing each residue on global dynamics, highlighting residues whose perturbation significantly alters collective motions.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "ESSA (essential site scanning analysis)",
-      "instruction": "ESSA evaluates the effect of perturbing (e.g., ligand‐binding) individual residues on the global dynamics predicted by an ENM. It identifies residues that, if bound or perturbed, are predicted to significantly alter collective motions, thereby suggesting potential allosteric hotspots or sites of functional importance.",
+      "title": "Generate computational ensemble (optional)",
+      "instruction": "Select a structure of interest from the EnsembleFlex results, generate a computational ensemble based on it, and repeat the full analysis workflow on the new ensemble.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "Suggestions for Further Analysis",
-      "instruction": "Upon analysis of an experimental ensemble dataset a user may want to consider generating a computational ensemble starting from a structure of interest, identified through the EnsembleFlex analysis, and repeat the analysis on such an ensemble, to further deepen the insights in the direction of interest.",
-      "substeps": [],
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 12,
-      "title": "Suggestions for Further Analysis",
-      "instruction": "In a fragment/ligand screening setup a user may want to consider performing additional fine‐grained protein‐ligand interaction analysis.",
+      "title": "Consider further fine‑grained analysis",
+      "instruction": "For fragment or ligand screening projects, optionally perform additional detailed protein‑ligand interaction analyses beyond the standard EnsembleFlex outputs.",
       "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:32:48.881631Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 28,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

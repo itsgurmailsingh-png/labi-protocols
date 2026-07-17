@@ -23,227 +23,497 @@
     "dwibiascorrect",
     "mrgrid",
     "dtifit",
-    "fslmaths"
+    "fslmaths",
+    "mrdegibbs [OUT_denoised] [OUT_Gibbs] mrdegibbs dwi_denoised.nii.gz dwi_Gibbs.nii.gz"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Double-check if your native and original images are in FLOAT32 and oriented with the MNI. - Convert to float- fslmaths dwidata.nii.gz dwi.nii.gz -odt float",
+      "title": "Convert images to FLOAT32",
+      "instruction": "Ensure native and original images are FLOAT32 and oriented to MNI; convert using fslmaths dwidata.nii.gz dwi.nii.gz -odt float",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "DWI Denoising: dwidenoise -datatype float32 -noise level_noise.nii.gz [IN] [OUT_denoised] dwidenoise -datatype float32 -noise level_noise.nii.gz dwi.nii.gz dwi_denoised.nii.gz",
+      "title": "Denoise DWI data",
+      "instruction": "Run dwidenoise with datatype float32 and noise map level_noise.nii.gz on the original DWI: dwidenoise -datatype float32 -noise level_noise.nii.gz dwi.nii.gz dwi_denoised.nii.gz",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "mrdegibbs [OUT_denoised] [OUT_Gibbs] mrdegibbs dwi_denoised.nii.gz dwi_Gibbs.nii.gz",
+      "title": "Create temporary brain mask",
+      "instruction": "Generate a brain mask from the Gibbs‑corrected DWI using the b‑vectors and b‑values: dwi2mask -fslgrad bvecs.txt bvals.txt dwi_Gibbs.nii.gz temp_brain_mask.nii.gz",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "need brain – bet doesn’t work as well as dwi2mask dwi2mask -fslgrad bvecs.txt bvals.txt dwi_Gibbs.nii.gz temp_brain_mask.nii.gz",
+      "title": "Generate nodif brain mask for eddy",
+      "instruction": "Run the nodif_brain_mask.sh script, rename outputs with the prefix dwi_Gibbs_, and delete the temporary mask file",
+      "substeps": [
+        {
+          "instruction": "bash nodif_brain_mask.sh dwi_Gibbs.nii.gz 4214_52 temp_brain_mask.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "Rename the two nodif files to dwi_Gibbs_brain_mask.nii.gz (and the corresponding nodif image) so that eddy can find them",
+          "title": ""
+        },
+        {
+          "instruction": "Delete temp_brain_mask.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Run ‘nodif_brain_mask.sh’ script [e.g., bash nodif_brain_mask.sh dwi_Gibbs.nii.gz 4214_52 temp_brain_mask.nii.gz ] to get temporary nodif brain masks for eddy. Rename both of these nodif files with the prefix ‘dwi_Gibbs_’ e.g., ‘dwi_Gibbs_brain_mask’ for eddy. Delete the ‘temp_brain’ file.",
+      "title": "Eddy current and motion correction",
+      "instruction": "Run FSL eddy on the Gibbs‑corrected DWI using the generated brain mask and the following options: --fwhm=0 --flm=quadratic --slm=linear --data_is_shelled",
+      "substeps": [
+        {
+          "instruction": "eddy --imain=dwi_Gibbs.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "--mask=dwi_Gibbs_brain_mask.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "--index=index.txt \\",
+          "title": ""
+        },
+        {
+          "instruction": "--acqp=acqparams.txt \\",
+          "title": ""
+        },
+        {
+          "instruction": "--bvecs=bvecs.txt \\",
+          "title": ""
+        },
+        {
+          "instruction": "--bvals=bvals.txt \\",
+          "title": ""
+        },
+        {
+          "instruction": "--fwhm=0 \\",
+          "title": ""
+        },
+        {
+          "instruction": "--flm=quadratic \\",
+          "title": ""
+        },
+        {
+          "instruction": "--slm=linear \\",
+          "title": ""
+        },
+        {
+          "instruction": "--out=eddy_unwarped_images \\",
+          "title": ""
+        },
+        {
+          "instruction": "--data_is_shelled",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Run eddy correction and get rotated vector file eddy --imain=dwi_Gibbs.nii.gz --mask=dwi_Gibbs_brain_mask.nii.gz --index=index.txt --acqp=acqparams.txt --bvecs=bvecs.txt --bvals=bvals.txt --fwhm=0 --flm=quadratic --slm=linear --out=eddy_unwarped_images --data_is_shelled",
+      "title": "Extract nodif and brain mask from data.nii.gz",
+      "instruction": "Create a nodif volume from data.nii.gz and generate a temporary brain mask",
+      "substeps": [
+        {
+          "instruction": "fslroi data.nii.gz nodif_data0 1",
+          "title": ""
+        },
+        {
+          "instruction": "dwi2mask -fslgrad eddy_unwarped_images.eddy_rotated_bvecs.txt bvals.txt data.nii.gz temp_brain_mask.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Nodif and Brain extraction on the data.nii.gz fslroi data.nii.gznodif_data0 1 dwi2mask -fslgrad eddy_unwarped_images.eddy_rotated_bvecs.txt bvals.txt data.nii.gz temp_brain_mask.nii.gz",
+      "title": "Create nodif brain mask for data",
+      "instruction": "Run nodif_brain_mask.sh on data.nii.gz, rename outputs with a data_ prefix, and delete the temporary mask file",
+      "substeps": [
+        {
+          "instruction": "bash nodif_brain_mask.sh data.nii.gz 4214_52 temp_brain_mask.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "Rename nodif_brain_mask.nii.gz to data_nodif_brain_mask.nii.gz and nodif_brain.nii.gz to data_nodif_brain.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "Delete temp_brain_mask.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Run ‘nodif_brain_mask.sh’ script [e.g., bash nodif_brain_mask.sh data.nii.gz 4214_52 temp_brain_mask.nii.gz ] output is ‘nodif_brain_mask.nii.gz’ and ‘nodif_brain.nii.gz’ rename and add ‘data’ in front, so ‘data_nodif_brain’. Delete ‘temp_brain’ file.",
+      "title": "Bias field correction (ANTs)",
+      "instruction": "Correct bias in data.nii.gz using ANTs via dwibiascorrect, providing gradient files, mask, and bias output options",
+      "substeps": [
+        {
+          "instruction": "dwibiascorrect ants data.nii.gz data_bias.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "-fslgrad eddy_unwarped_images.eddy_rotated_bvecs.txt bvals.txt \\",
+          "title": ""
+        },
+        {
+          "instruction": "-mask data_nodif_brain_mask.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "-bias bias_image.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "-ants.b [100,3]",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Bias Field correction (via ANTs): dwibiascorrect ants data.nii.gz data_bias.nii.gz -fslgrad eddy_unwarped_images.eddy_rotated_bvecs.txt bvals.txt -mask data_nodif_brain_mask.nii.gz -bias bias_image.nii.gz -ants.b [100,3]",
+      "title": "Upsample DWI for coregistration",
+      "instruction": "Resample the bias‑corrected DWI to 1.25 mm isotropic voxels using mrgrid",
+      "substeps": [
+        {
+          "instruction": "mrgrid -vox 1.25 data_bias.nii.gz regrid data_bias_HR.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Upsample DWI images for better coregistration with MNI template mrgrid -vox 1.25 data_bias.nii.gz regrid data_bias_HR.nii.gz",
+      "title": "Fit diffusion tensor model",
+      "instruction": "Run dtifit on the upsampled, bias‑corrected data using the eddy‑rotated b‑vectors and the nodif brain mask",
+      "substeps": [
+        {
+          "instruction": "dtifit -k data_bias_HR.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "-o DTI_map_w-linear_ \\",
+          "title": ""
+        },
+        {
+          "instruction": "-m nodif_brain_mask.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "-r eddy_unwarped_images.eddy_rotated_bvecs.txt \\",
+          "title": ""
+        },
+        {
+          "instruction": "-b bvals.txt \\",
+          "title": ""
+        },
+        {
+          "instruction": "-w",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "Fit tensor model dtifit -k data_bias_HR.nii.gz -o DTI_map_w-linear_ -m nodif_brain_mask.nii.gz -r eddy_unwarped_images.eddy_rotated_bvecs.txt -b bvals.txt -w",
+      "title": "Create group FA template (optional)",
+      "instruction": "Collect all subjects' nodif_brain.nii.gz images, build a group template, and warp native FA maps into template space",
+      "substeps": [
+        {
+          "instruction": "Copy all nodif_brain.nii.gz files into a single folder and cd there",
+          "title": ""
+        },
+        {
+          "instruction": "bash buildtemplateparallel.sh -d 3 -o template -c 0 -r 1 -n 0 -i 3 *.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "WarpImageMultiTransform 3 <FA_native.nii.gz> <FA_template.nii.gz> -R templatetemplate.nii.gz <warp_file> <affine_file>",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
-      "instruction": "Optional: create bash script to generate group template Copy all the nodif_brain.nii.gz images into one folder and change directory to it. Then run: bash buildtemplateparallel.sh -d 3 -o template -c 0 -r 1 -n 0 -i 3 *.nii.gz WarpImageMultiTransform 3 [in: FA map in native space] [out: FA map in template space] -R templatetemplate.nii.gz [warp file] [affine file]",
+      "title": "Merge FA maps into 4‑D file",
+      "instruction": "Place all subjects' FA maps (already in template space) in one folder and concatenate them temporally",
+      "substeps": [
+        {
+          "instruction": "fslmerge -t all_FA.nii.gz *.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
-      "instruction": "At this point all participant FA maps should be in template space. Create a 4D (x,y,z + time) file with all your maps:Insert all your FA in template space in one folder and run: fslmerge -t [output] *.nii.gz",
+      "title": "Create mean mask from all subjects",
+      "instruction": "Generate a binary mask that covers the union of all FA images",
+      "substeps": [
+        {
+          "instruction": "fslmaths all_FA.nii.gz -max 0 -Tmin -bin mean_mask -odt char",
+          "title": ""
+        },
+        {
+          "instruction": "fslmaths all_FA.nii.gz -mas mean_mask all_FA.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
-      "instruction": "Create then apply mask from all subjects fslmaths all_FA.nii.gz -max 0 -Tmin -bin mean_mask -odt char fslmaths all_FA.nii.gz -mas mean_mask all_FA.nii.gz",
+      "title": "Compute mean FA and WM mask",
+      "instruction": "Average FA across subjects and threshold to obtain a white‑matter mask (FA > 0.20)",
+      "substeps": [
+        {
+          "instruction": "fslmaths all_FA -Tmean mean_FA",
+          "title": ""
+        },
+        {
+          "instruction": "fslmaths mean_FA -thr 0.20 -bin WM_mask",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
-      "instruction": "Create a mean of the FA over-time and create white matter mask (thresholded at FA&gt;0.20): fslmaths all_FA -Tmean mean_FA fslmaths mean_FA -thr 0.20 -bin WM_mask",
+      "title": "Apply mask to smoothed FA maps",
+      "instruction": "Mask the smoothed FA 4‑D file with the mean mask",
+      "substeps": [
+        {
+          "instruction": "fslmaths all_FA_smooth -mas mean_mask all_FA_smooth",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
-      "instruction": "Apply your mask to your smoothed maps: fslmaths all_FA_smooth -mas mean_mask all_FA_smooth",
+      "title": "Run voxel‑wise linear regression",
+      "instruction": "In MATLAB, call the LM function with covariates, the masked smoothed FA image, and the WM mask",
+      "substeps": [
+        {
+          "instruction": "LM (covariates.txt, all_FA_smooth.nii, WM_mask.nii)",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
-      "instruction": "At this point you should have a FA map &#39;all_FA.nii.gz&#39; for all subjects.",
+      "title": "Generate FDR‑corrected statistical maps",
+      "instruction": "The LM script outputs FDR‑corrected p‑value and t‑statistic maps for each behavioral variable",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
-      "instruction": "Create linear regression script (that applies model voxel-by-voxel) using the LM.m function in MATLAB by using: LM (file_ID1, raw_image_subject, mask) e.g., LM (covariates.txt, all_FA_smooth.nii, WM_mask.nii)",
+      "title": "Create corrected maps for score_1",
+      "instruction": "Use AFNI 3dcalc to copy the FDR‑corrected p‑value and t‑stat maps for the first variable",
+      "substeps": [
+        {
+          "instruction": "3dcalc -ascore_1_FDR.nii -expr 'a*1' -prefix score_1_FDR_corrected.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "3dcalc -a score_1_tStat.nii -expr 'a*1' -prefix score_1_tStat_corrected.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
-      "instruction": "Resulting files will be the FDR-corrected p-value and tstat maps for each variable.",
+      "title": "Separate positive and negative t‑stats",
+      "instruction": "Split the corrected t‑stat map into positive and negative components and flip the sign of the negative image",
+      "substeps": [
+        {
+          "instruction": "fslmaths score_1_tStat_corrected.nii.gz -thr 0 positive_score1.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "fslmaths score_1_tStat_corrected.nii.gz -uthr 0 negative_score1.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "fslmaths negative_score1.nii.gz -mul -1 negative_score1.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
-      "instruction": "Example is for first behavioral variable &#39;score_1&#39; 3dcalc -ascore_1_FDR.nii-expr &#39;a*1&#39; -prefixscore_1_FDR_corrected.nii.gz 3dcalc -a score_1_tStat.nii -expr &#39;a*1&#39; -prefix score_1_tStat_corrected.nii.gz",
+      "title": "Cluster FDR‑corrected p‑value map",
+      "instruction": "Identify clusters in the FDR‑corrected p‑value map that are <0.01 and ≥100 voxels",
+      "substeps": [
+        {
+          "instruction": "3dClusterize -nosum -1Dformat -inset score_1_FDR_corrected.nii.gz -idat 0 -ithr 0 -NN 2 -clust_nvox 100 -1sided RIGHT_TAIL 0.99 -pref_map Clust_mask_motor.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "fslmaths Clust_mask_motor.nii.gz -bin Clust_mask_motor.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
-      "instruction": "Split scores tStat into positive and negative (this provides you with positive and negative correlations): Fslmathsscore_1_tStat_corrected.nii.gz -thr 0 positive_score1.nii.gz Fslmathsscore_1_tStat_corrected.nii.gz -uthr 0 negative_score1.nii.gz *For negative images, need to multiply by -1 Fslmaths negative_score1.nii.gz -mul -1 negative_score1.nii.gz",
+      "title": "Coregister template to MNI space",
+      "instruction": "Register the group FA template to the MNI152 1 mm brain using ANTs SyN",
+      "substeps": [
+        {
+          "instruction": "antsRegistrationSyN.sh -d 3 -m /Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/group_template/templatetemplate.nii.gz -f /usr/local/fsl/data/standard/MNI152_T1_1mm_brain.nii.gz -o /Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI -t s",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
-      "instruction": "Get FDR-corrected p-value clusters that are less than 0.01 and that are at least 100 voxels in size 3dClusterize -nosum -1Dformat -inset score_1_FDR_corrected.nii.gz -idat 0 -ithr 0 -NN 2 -clust_nvox 100 -1sided RIGHT_TAIL 0.99 -pref_map Clust_mask_motor.nii.gz fslmaths Clust_mask_motor.nii.gz -bin Clust_mask_motor.nii.gz",
+      "title": "Verify ROI binarization",
+      "instruction": "Ensure all ROI images are binary; when resampling, use nearest‑neighbor interpolation",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 22,
-      "title": "",
-      "instruction": "Coregister the template to MNI: antsRegistrationSyN.sh -d 3 -m /Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/group_template/templatetemplate.nii.gz -f /usr/local/fsl/data/standard/MNI152_T1_1mm_brain.nii.gz -o /Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI -t s",
+      "title": "Transform cluster mask to MNI",
+      "instruction": "Apply the template‑to‑MNI transforms to the motor‑cluster mask using nearest‑neighbor interpolation",
+      "substeps": [
+        {
+          "instruction": "antsApplyTransforms -d 3 -i Clust_mask_motor.nii.gz -o Clust_mask_motor_MNI.nii.gz -r /usr/local/fsl/data/standard/MNI152_T1_1mm_brain.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "-t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI1Warp.nii.gz,0] \\",
+          "title": ""
+        },
+        {
+          "instruction": "-t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI0GenericAffine.mat,0] \\",
+          "title": ""
+        },
+        {
+          "instruction": "-n NearestNeighbor",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 23,
-      "title": "",
-      "instruction": "Check that ROIs are Binarized (use nearest neighbor command when the images are binarized). Behavioral variables are &#39;score_1&#39; and &#39;motor&#39; Transform clusters to MNI: antsApplyTransforms -d 3 -i Clust_mask_motor.nii.gz -o Clust_mask_motor_MNI.nii.gz -r/usr/local/fsl/data/standard/MNI152_T1_1mm_brain.nii.gz -t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI1Warp.nii.gz,0] -t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI0GenericAffine.mat,0] -n NearestNeighbor",
+      "title": "Transform score t‑stats to MNI",
+      "instruction": "Warp the positive and negative score_1 t‑stat images to MNI space using the same transforms as the cluster mask",
+      "substeps": [
+        {
+          "instruction": "antsApplyTransforms -d 3 -i positive_score1.nii.gz -o positive_score1_MNI.nii.gz -r /usr/local/fsl/data/standard/MNI152_T1_1mm_brain.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "-t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI1Warp.nii.gz,0] \\",
+          "title": ""
+        },
+        {
+          "instruction": "-t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI0GenericAffine.mat,0]",
+          "title": ""
+        },
+        {
+          "instruction": "antsApplyTransforms -d 3 -i negative_score1.nii.gz -o negative_score1_MNI.nii.gz -r /usr/local/fsl/data/standard/MNI152_T1_1mm_brain.nii.gz \\",
+          "title": ""
+        },
+        {
+          "instruction": "-t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI1Warp.nii.gz,0] \\",
+          "title": ""
+        },
+        {
+          "instruction": "-t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI0GenericAffine.mat,0]",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 24,
-      "title": "",
-      "instruction": "Transform scores tstat (positive and negative) to MNI space: antsApplyTransforms -d 3 -ipositive_score1.nii.gz-opositive_score1_MNI.nii.gz -r/usr/local/fsl/data/standard/MNI152_T1_1mm_brain.nii.gz -t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI1Warp.nii.gz,0] -t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI0GenericAffine.mat,0] antsApplyTransforms -d 3 -inegative_score1.nii.gz-onegative_score1_MNI.nii.gz -r/usr/local/fsl/data/standard/MNI152_T1_1mm_brain.nii.gz -t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI1Warp.nii.gz,0] -t [/Users/syschaef/Desktop/4214_DTI/MRtrix_preproc/template_to_MNI/templatetemplate_to_MNI0GenericAffine.mat,0]",
+      "title": "Mask t‑stats with significant clusters",
+      "instruction": "Restrict the MNI‑warped positive and negative t‑stat maps to voxels within the significant motor‑cluster mask and binarize the results",
+      "substeps": [
+        {
+          "instruction": "fslmaths positive_score1_MNI.nii.gz -mas Clust_mask_motor_MNI.nii.gz positive_score1masked_MNI.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "fslmaths positive_score1masked_MNI.nii.gz -bin Clust_mask_motor_positive_MNI.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "fslmaths negative_score1_MNI.nii.gz -mas Clust_mask_motor_MNI.nii.gz negative_score1masked_MNI.nii.gz",
+          "title": ""
+        },
+        {
+          "instruction": "fslmaths negative_score1masked_MNI.nii.gz -bin Clust_mask_motor_negative_MNI.nii.gz",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 25,
-      "title": "",
-      "instruction": "Mask the tstat scores with significant cluster files: Positive: fslmathspositive_score1_MNI.nii.gz -mas Clust_mask_motor_MNI.nii.gzpositive_score1masked_MNI.nii.gz fslmathspositive_score1masked_MNI.nii.gz -bin Clust_mask_motor_positive_MNI.nii.gz Negative : fslmathsnegative_score1_MNI.nii.gz -mas Clust_mask_motor_MNI.nii.gznegative_score1masked_MNI.nii.gz fslmathsnegative_score1masked_MNI.nii.gz -bin Clust_mask_motor_negative_MNI.nii.gz",
+      "title": "Extract cluster locations from atlas",
+      "instruction": "Use custom code (e.g., fslmaths) to intersect the significant cluster masks with a white‑matter atlas such as the JHU atlas and record the cluster coordinates",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 26,
-      "title": "",
-      "instruction": "Custom code extracted significant cluster locations from the JHU white matter atlas, but use the atlas of your choice and identify clusters by using &#39; fslmaths &#39; (see fslwiki for tutorial)",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T14:32:58.979828Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 32,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

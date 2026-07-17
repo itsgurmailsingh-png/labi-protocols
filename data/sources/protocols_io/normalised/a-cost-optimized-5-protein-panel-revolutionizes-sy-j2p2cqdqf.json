@@ -13,258 +13,255 @@
   "citation": "dx.doi.org/10.17504/protocols.io.e6nvwwxwzvmk/v1",
   "category": "Bioinformatics",
   "estimated_time_mins": 186,
-  "materials": [],
+  "materials": [
+    "Data preparation and preprocessing",
+    "Predict probabilities on the test set. (",
+    "Compare ProtRS with PRS and clinical risk factors",
+    "Extract the standard PRS for SLE.",
+    "Cost-optimized incremental protein selection",
+    "for this k‑protein ProtRS.",
+    "Population attributable fraction (PAF) calculation",
+    "Sensitivity analyses",
+    "Replace mean imputation (Step 1.",
+    "Re-compute ProtRS and model performance (AUC). (",
+    "Verify high Pearson correlations (&gt;0.",
+    "with original ProtRS"
+  ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Data preparation and preprocessing",
+      "title": "Extract case and control cohorts",
+      "instruction": "Obtain UK Biobank approved data, extract 48,036 control individuals from the non‑cancer self‑reported population without SLE or related autoimmune conditions, and extract SLE cases using ICD‑9/ICD‑10 codes and self‑report while excluding other autoimmune diseases.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Extract control individuals (n=48,036) from non-cancer self-reported population without SLE or related autoimmune conditions.",
+      "title": "Impute and standardize protein data",
+      "instruction": "For each of the 2,923 plasma proteins, replace missing values (NA) with the protein’s mean across all samples, then center and scale each protein to zero mean and unit variance.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "For each of the 2,923 plasma proteins, perform mean imputation for missing values (replace NA with the protein’s mean across all samples).",
+      "title": "Identify SLE‑associated proteins (LASSO BCCS)",
+      "instruction": "Run 1,000 balanced case‑control subsampling (BCCS) iterations of LASSO logistic regression to select stable proteins.",
+      "substeps": [
+        {
+          "instruction": "Set random seed for reproducibility (e.g., set.seed(123)).",
+          "title": ""
+        },
+        {
+          "instruction": "For iteration = 1 to 1,000:",
+          "title": ""
+        },
+        {
+          "instruction": "1. Randomly sample from the control pool a number of controls equal to the number of SLE cases (n = 544) to create a 1:1 balanced case‑control set.",
+          "title": ""
+        },
+        {
+          "instruction": "2. Fit LASSO logistic regression (glmnet, family = \"binomial\", alpha = 1) with disease status as outcome and all 2,923 proteins as predictors.",
+          "title": ""
+        },
+        {
+          "instruction": "3. Select the penalty parameter λ by 10‑fold cross‑validation using lambda.min (minimum mean cross‑validated error).",
+          "title": ""
+        },
+        {
+          "instruction": "4. Record the non‑zero coefficients and corresponding protein names.",
+          "title": ""
+        },
+        {
+          "instruction": "After completing 1,000 iterations, count the selection frequency for each protein (how many iterations it had a non‑zero coefficient).",
+          "title": ""
+        },
+        {
+          "instruction": "Retain proteins selected in ≥500 iterations (≥50 % frequency) as stable SLE‑associated biomarkers.",
+          "title": ""
+        },
+        {
+          "instruction": "For each retained protein, compute its final coefficient as the median of its non‑zero coefficients across all iterations where it was selected.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Center and scale each protein to zero mean and unit variance.",
+      "title": "Compute Protein Risk Score (ProtRS)",
+      "instruction": "For each individual j, calculate ProtRS = Σ (β_i × Prot_ij), where β_i is the final median coefficient from the previous step and Prot_ij is the centered‑and‑scaled level of protein i for individual j.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "Obtain UK Biobank approved data. Extract SLE cases using ICD-9 / ICD-10 and self-report. Exclude other autoimmune diseases.",
+      "title": "Evaluate 35‑protein model (BCCS)",
+      "instruction": "Assess the predictive performance of the full 35‑protein ProtRS model using 1,000 BCCS iterations.",
+      "substeps": [
+        {
+          "instruction": "For each of 1,000 BCCS iterations (new random control subset):",
+          "title": ""
+        },
+        {
+          "instruction": "1. Split the balanced set into training (70 %) and testing (30 %).",
+          "title": ""
+        },
+        {
+          "instruction": "2. Fit a logistic regression model: SLE ~ ProtRS + age + gender on the training set.",
+          "title": ""
+        },
+        {
+          "instruction": "3. Predict probabilities on the test set.",
+          "title": ""
+        },
+        {
+          "instruction": "4. Calculate AUC, accuracy, precision, sensitivity, specificity, and F1 using the pROC and caret packages.",
+          "title": ""
+        },
+        {
+          "instruction": "Aggregate the 1,000 metric values and report the median and the 95 % uncertainty interval (2.5th and 97.5th percentiles).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "Identification of SLE‑associated proteins using LASSO with BCCS (1,000 iterations)",
+      "title": "Evaluate alternative risk models",
+      "instruction": "Using the same 1,000 BCCS iterations, build and compare additional logistic models.",
+      "substeps": [
+        {
+          "instruction": "Model PRS: SLE ~ PRS + age + gender.",
+          "title": ""
+        },
+        {
+          "instruction": "Model clinical: SLE ~ smoking + sleep_duration + insomnia + PM2.5 + age + gender.",
+          "title": ""
+        },
+        {
+          "instruction": "Categorise continuous variables as described: PM2.5, PRS, and ProtRS by quartiles; sleep duration into a 9‑hour category.",
+          "title": ""
+        },
+        {
+          "instruction": "Evaluate performance metrics (AUC, accuracy, etc.) as in the previous step and compare results with bar plots.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Set random seed for reproducibility (e.g., `set.seed(123)`).",
+      "title": "Rank proteins and test reduced panels",
+      "instruction": "Determine how model performance changes when using fewer top‑ranked proteins.",
+      "substeps": [
+        {
+          "instruction": "Rank the 35 stable proteins by descending selection frequency (from Step 3).",
+          "title": ""
+        },
+        {
+          "instruction": "For k = 1 to 35:",
+          "title": ""
+        },
+        {
+          "instruction": "1. Take the top k proteins.",
+          "title": ""
+        },
+        {
+          "instruction": "2. Compute ProtRS_k as the weighted sum using their median coefficients.",
+          "title": ""
+        },
+        {
+          "instruction": "3. Repeat the 1,000 BCCS evaluation (training/testing logistic regression with ProtRS_k) as in Step 5.",
+          "title": ""
+        },
+        {
+          "instruction": "Plot performance metrics (AUC, accuracy, etc.) against the number of proteins k.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "For ** iteration = 1 to 1,000 **: (1) Randomly sample from the control pool a number of controls equal to the number of SLE cases (n=544) → balanced case‑control set (1:1). (2) Run LASSO logistic regression (`glmnet`, family=&#34;binomial&#34;, alpha=1) with disease status as outcome and all 2,923 proteins as predictors. (3) Select the penalty parameter λ by 10‑fold cross‑validation using `lambda.min` (the λ giving minimum mean cross‑validated error). (4) Record the non‑zero coefficients and corresponding protein names.",
+      "title": "Identify cost‑effective optimum",
+      "instruction": "Select the smallest protein set that yields minimal loss of performance: the top 5 proteins (TRIM21, SOD2, KLK3, IL15, ADIPOQ) achieve AUC = 0.82 while reducing assay costs by approximately 87 % compared with the 35‑protein panel.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "After 1,000 iterations, count the ** selection frequency ** for each protein (how many iterations it had non‑zero coefficient).",
+      "title": "Compute population attributable fractions",
+      "instruction": "Estimate PAF for each risk factor using discrete categories and the graphPAF package.",
+      "substeps": [
+        {
+          "instruction": "Discretise variables as in previous steps: ProtRS, PRS, and PM2.5 by quartiles; insomnia, smoking as binary; sleep duration as described.",
+          "title": ""
+        },
+        {
+          "instruction": "Use graphPAF::PAF_calc_discrete() with PAF = 1 – Σ(p_i / RR_i), where p_i is the proportion in exposure level i and RR_i is the relative risk from logistic regression.",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat the calculation for each of the 1,000 BCCS iterations and report the median PAF with 95 % uncertainty interval.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Retain proteins selected in ** ≥500 iterations (≥50% frequency) ** as stable SLE‑associated biomarkers.",
+      "title": "Test alternative imputation methods",
+      "instruction": "Assess robustness of ProtRS and model performance to different missing‑value strategies.",
+      "substeps": [
+        {
+          "instruction": "Replace mean imputation (Step 2) with one of: multiple imputation by chained equations (mice), median imputation, or k‑nearest neighbours (k = 5, VIM::kNN).",
+          "title": ""
+        },
+        {
+          "instruction": "Re‑compute ProtRS and repeat model performance evaluation (AUC).",
+          "title": ""
+        },
+        {
+          "instruction": "Verify that Pearson correlation between the new ProtRS and the original mean‑imputed ProtRS exceeds 0.96.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "For each retained protein, compute the **final coefficient** as the median of its non‑zero coefficients across all iterations where it was selected.",
+      "title": "Increase iteration stability",
+      "instruction": "Repeat the LASSO BCCS procedure with more iterations to test stability of selected proteins.",
+      "substeps": [
+        {
+          "instruction": "Run Step 3 with 10,000 BCCS iterations for LASSO, retaining proteins selected in ≥50 % of iterations.",
+          "title": ""
+        },
+        {
+          "instruction": "Compare the resulting protein set with the original 1,000‑iteration set using a Venn diagram (Figure S5); expect >97 % concordance.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 11,
-      "title": "",
-      "instruction": "Calculate Protein Risk Score (ProtRS) and evaluate full 35‑protein model",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 12,
-      "title": "",
-      "instruction": "For each individual j, compute ProtRS = Σ(β_i × Prot_ij) where β_i is the final coefficient from Step 2.5, and Prot_ij is the centered+scaled protein level.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 13,
-      "title": "",
-      "instruction": "For each of 1,000 BCCS iterations (new random control subset each time): (1) Split the balanced set into training (70%) and testing (30%). (2) Fit a logistic regression model: `SLE ~ ProtRS + age + gender` on the training set. (3) Predict probabilities on the test set. (4) Calculate AUC, accuracy, precision, sensitivity, specificity, F1 using `pROC` and `caret`.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 14,
-      "title": "",
-      "instruction": "Aggregate the 1,000 metrics: report median and 95% uncertainty interval (2.5th and 97.5th percentiles)",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 15,
-      "title": "",
-      "instruction": "Compare ProtRS with PRS and clinical risk factors",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 16,
-      "title": "",
-      "instruction": "Extract the standard PRS for SLE.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 17,
-      "title": "",
-      "instruction": "Using the same 1,000 BCCS iterations as in Step 3, build logistic regression models: (1) Model PRS: `SLE ~ PRS + age + gender`. (2) Model clinical: `SLE ~ smoking + sleep_duration + insomnia + PM2.5 + age + gender`. (3) Categorise continuous variables as described in Methods: PM2.5, PRS, ProtRS by quartiles; sleep duration into &lt;7h, 7‑8h, &gt;9h.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 18,
-      "title": "",
-      "instruction": "Evaluate performance metrics for each model similarly. Compare bar plots.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 19,
-      "title": "",
-      "instruction": "Cost-optimized incremental protein selection",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 20,
-      "title": "",
-      "instruction": "Rank the 35 stable proteins by **descending selection frequency** (from Step 2.3).",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 21,
-      "title": "",
-      "instruction": "For k = 1 to 35: (1) Take the top k proteins. (3) Compute ProtRS_k as weighted sum using their median coefficients (from Step 2.5). (4) Repeat the 1,000 BCCS evaluation (Step 3.2) for this k‑protein ProtRS.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 22,
-      "title": "",
-      "instruction": "Plot performance metrics (AUC, accuracy, etc.) against number of proteins.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 23,
-      "title": "",
-      "instruction": "Identify the “ cost-effective optimum ” where adding more proteins yields minimal gain. The top 5 proteins (TRIM21, SOD2, KLK3, IL15, ADIPOQ) achieve AUC=0.82 while reducing assay costs by ~87% compared to 35 proteins.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 24,
-      "title": "",
-      "instruction": "Population attributable fraction (PAF) calculation",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 25,
-      "title": "",
-      "instruction": "For each risk factor (ProtRS, PRS, insomnia, sleep duration, PM2.5, smoking), discretise variables as described (e.g., ProtRS by quartiles, lowest quartile as reference).",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 26,
-      "title": "",
-      "instruction": "Using the `graphPAF` R package function `PAF_calc_discrete()`, compute PAF with the formula: PAF = 1 – Σ (p_i / RR_i) where p_i = proportion in exposure level i, RR_i = relative risk compared to optimal level (estimated from logistic regression).",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 27,
-      "title": "",
-      "instruction": "Repeat for each of the 1,000 BCCS iterations to obtain median PAF and 95% UI.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 28,
-      "title": "",
-      "instruction": "Sensitivity analyses",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 29,
-      "title": "",
-      "instruction": "Alternative imputation methods: (1) Replace mean imputation (Step 1.3) with multiple imputation by chained equations (`mice`), median imputation, or k-nearest neighbours (k=5, `VIM::kNN`). (2) Re-compute ProtRS and model performance (AUC). (3) Verify high Pearson correlations (&gt;0.96) with original ProtRS",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 30,
-      "title": "",
-      "instruction": "Higher iteration stability (1) Repeat Step 2 with **10,000 BCCS iterations** for LASSO, retaining proteins selected in ≥50% of iterations. (2) Compare overlap with the 1,000‑iteration set using a Venn diagram (Figure S5). Expect &gt;97% concordance.",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T13:30:43.482493Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 34,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

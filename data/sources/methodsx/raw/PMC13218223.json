@@ -9,7 +9,378 @@
   "license_verified": true,
   "license_note": "CC-BY-4.0 - verified from PMC XML",
   "description": "This study highlights the construction of confidence intervals within the Multivariable Truncated Spline Logistic Model (MTSLM). Its truncated spline function allow flexible modeling of nonlinear relationships across sub-intervals that conventional logistic regression cannot capture. A simulation study is conducted to validate the performance of proposed method, and Human Development Index (HDI) data in Indonesia are used as an empirical illustration to demonstrate its practical applicability. The results show that several predictors are statistically significant. For instance, access to clean water has a confidence interval [0.0124, 0.0566], while the percentage of poor population shows interval with range [−0.4039, −0.0341]. Nonlinear effects are evident in the unemployment variable, with both confidence interval [0.5083, 1.2985] and [−1.4760, −0.3656]. Similar patterns are observed for school enrollment rates. The confidence interval analysis result provides insight into the reliability of these predictor effects, emphasizing the role of infrastructure, education, and social-economic factors.The findings demonstrate that MTSLM not only improves accuracy but also provides informative and reliable estimates of predictors influencing HDI.The highlights of this study:•Develop convidence interval for MTSLM to flexibly nonlinear model.•A simulation study and real HDI data are used to validate the proposed method.•The MTSLM model outperforms binary logistic model.",
-  "steps_raw": [],
+  "steps_raw": [
+    {
+      "title": "Specifications table",
+      "instruction": "Subject areaMathematics and StatisticsMore specific subject areaStatistics; Statistical Inference; Nonparametric Regression; Binary Outcomes DataName of your methodMultivariable Truncated Spline Logistic Model (MTSLM)Name and reference of original methodSpline Function in the Proceedings of the Edinburgh Mathematical Society of Whittaker, E. T. (1922), On a New Method of Graduation, 41, 63–75.doi: https://doi.org/10.1017/S0013091500077853Maximum likelihood estimation in the book of Hosmer, D. W., & Lemeshow, S. (2000), Applied Logistic Regression, 2nd Edition. United States of America, Canada. https://books.google.co.id/books?id=Po0RLQ7USIMC&lpg=PP1&pg=PP1%23v=onepage&q&f=false#v=onepage&q&f=falseResource availabilityThis study uses secondary data from publications issued by the Indonesian Central Statistics Agency (BPS) (https://www.bps.go.id/id/statistics-table/2/NDEzIzI=/-metode-baru–indeks-pembangunan-manusia.html)To facilitate the implementation of the methods described in this study, we developed a package (syntax) using R Studio. We have made this package publicly available for ease of use with various datasets. This package can be accessed via the following link: https://github.com/Afiqah-ctrl/Convidence-Interval-for-MTSLM.git"
+    },
+    {
+      "title": "Multivariable truncated spline logistic model (MTSLM)",
+      "instruction": "The key idea of this section is to utilize the logit link function to transform the nonlinear relationship between predictor variables and success probabilities into a linear structure on the logit scale. This transformation is essential because the success probability π(xi) is bounded between 0 and 1, whereas the logit function is defined over the entire real line. The relationship is expressed as follows [6]:(2)logit(π(xi))=log(π(xi)1−π(xi))=f(x1i,x2i,…,xpi)Here, the unknown function f(x1i,x2i,…,xpi) is approximated using a multivariable truncated spline function of degree m. The explicit logit equation for the model is defined as:(3)logit(π(xi))=β0+∑j=1p∑k=1mβjkxjik+∑j=1p∑u=1rβj(m+u)(xji−Kju)+mwhere β0,βjk, and βj(m+u) are the unknown coefficients to be estimated and m≥1 denotes the degree of the spline, Kju represents the u-th knot associated with the j-th predictor, and (.)+m represents the truncated spline basis function of degree m. Note that the truncated power basis function in (3) is defined aswhere u=1,2,…,r indicates the number of knot points."
+    },
+    {
+      "title": "Multivariable truncated spline logistic model (MTSLM)",
+      "instruction": "For computational implementation, the model (3) is represented in matrix notation as:(4)logit(π)=Xβ=1nβ0+∑j=1pxjβj=(1nx1⋯xp)(β0β1⋮βp)where 1n denotes an n×1 vector of ones, while xj presents the truncated spline basis matrix for the j-th explanatory variable, given byxj=[1xi1…xi1m(xi1−Kj1)+m…(xi1−Kjr)+m]i=1n"
+    },
+    {
+      "title": "Multivariable truncated spline logistic model (MTSLM)",
+      "instruction": "The corresponding parameter vector can be expressed asβj=[β0βj1…βjmβj(m+1)…βj(m+r)]′."
+    },
+    {
+      "title": "Multivariable truncated spline logistic model (MTSLM)",
+      "instruction": "Hence, the i-row of the design full matrix X∈Rn×[1+p(m+r)]isXi=[1,x1i,…,x1im,(x1i−K11)+m,…,(x1i−K1r)+m,…,xpi,…,xpim,(xpi−Kp1)+m,…,(xpi−Kpr)+m]"
+    },
+    {
+      "title": "Multivariable truncated spline logistic model (MTSLM)",
+      "instruction": "Accordingly, the associated parameter vector β∈R[p(m+r)+1]×1 isβ=[β0,β11,…,β1m,β1(m+1),…,β1(m+r),…,βp1,…,βpm,βp(m+1),…,βp(m+r)]′."
+    },
+    {
+      "title": "Multivariable truncated spline logistic model (MTSLM)",
+      "instruction": "Following the construction of the spline based design matrix, the MTSLM is finalized for binary outcome data. By applying the inverse logit transformation (3), the success probability π(xi) for the i-th observation is estimated as(5)π(xi)=exp(β0+∑j=1p∑k=1mβjkxjik+∑j=1p∑u=1rβj(m+u)(xji−Kju)+m)1+exp(β0+∑j=1p∑k=1mβjkxjik+∑j=1p∑u=1rβj(m+u)(xji−Kju)+m)=exp(Xi′β)1+exp(Xi′β)"
+    },
+    {
+      "title": "Multivariable truncated spline logistic model (MTSLM)",
+      "instruction": "Assuming that the outcome variable Yi follows a Bernoulli distribution with success probability π(xi), the unknown parameters are estimated using the Maximum Likelihood Estimation (MLE) method. The likelihood function is given by(6)l(β)=∏i=1nP(Yi=yi)=∏i=1nπ(xi)yi(1−π(xi))1−yiwhere πi(xi)=P(Yi=1|xi), as defined in (1)."
+    },
+    {
+      "title": "Multivariable truncated spline logistic model (MTSLM)",
+      "instruction": "For computational convenience, the logarithm of the likelihood function is maximized. Taking logarithms of (6), the log likelihood function can be written as(7)L(β)=∑i=1n[yilogπ(xi)+(1−yi)log(1−π(xi))]=∑i=1n[yi(f(x1i,…,xpi))−log{1+exp(f(x1i,…,xpi))}]where f(xi)=f(x1i,x2i,...xpi)=Xi′β,andπ(xi)=exp{f(xi)}/(1+exp{f(xi)})."
+    },
+    {
+      "title": "Multivariable truncated spline logistic model (MTSLM)",
+      "instruction": "The MLE of the parameter vector is obtained numerically using the Newton–Raphson iterative scheme, expressed as(8)β^(t+1)=β^(t)−(H(β^)(t))−1g(β^)(t)Here,β^=[β^0,β^11,…,β^1m,β^1(m+1),…,β^1(m+r),…,β^p1,…,β^pm,β^p(m+1),…,β^p(m+r)]′g(β^)(t)=∂L(β)∂β,isthegradient(score)vector,andH(β^)(t)=∂2L(β)∂β∂β′,isHessianmatrixoftheloglikelihoodfunction,where both are evaluated at the t-th iteration."
+    },
+    {
+      "title": "Convidence interval",
+      "instruction": "Suppose given random sample {(x1i,…,xpi),i=1,2,..,n} that is assumed to be independent and has probability density function, where (x1i,…,xpi)=xi denotes the p-dimensional covariate vector for the i-th observation. Let Zj​ be a standardized statistic. For a given significance level α, the corresponding the paired statistics c and d satisfy the probability equation [17]:(9)P(c≤Zj≤d)=1−∝"
+    },
+    {
+      "title": "Convidence interval",
+      "instruction": "Under standard regularity conditions, the maximum likelihood estimator β^ is asymptotically normally distributed [17], such that(10)n(β^−β)→dN(0,[I(β^)]−1)orβ^≈N(β,[[I(β^)]−1]−1)"
+    },
+    {
+      "title": "Convidence interval",
+      "instruction": "Note that, here, the Fisher information matrix is given byI(β^)=X`WX,withW=diag[π(xi)(1−π(xi))], since the parameter estimator is asymptotically normally distributed and its variance is obtained from the inverse Fisher information matrix, the confidence interval is constructed using the standard normal distribution."
+    },
+    {
+      "title": "Pivotal quantity",
+      "instruction": "The purpose of the pivotal quantity is to construct a confidence interval for the unknown parameter. According to Eq. (10), the following statistics can be defined(11)Zj∼N(0,1),Zj=β^j−βjSE^(β^j),j=1,2,…,pwhere SE^(β^j)=(X′WX)jj−1 denotes the standard error estimator."
+    },
+    {
+      "title": "Pivotal quantity",
+      "instruction": "In this section, it should be noted that we determine the asymptotic properties of the parameter and probability estimators. Using the properties of the Newton Raphson algorithm and the Continuous Mapping Theorem (CMT), we show that the estimated parameter vector β^ and the estimated outcome probability π^(xi) are consistent estimators of the true parameter vector β and the true outcome probability π(xi), respectively."
+    },
+    {
+      "title": "Theorem 1",
+      "instruction": "The Eq. (11) can be used as a pivotal quantity that the following conditions hold:"
+    },
+    {
+      "title": "Theorem 1",
+      "instruction": "C1 (Consistency of the estimators): β^j→Pβj,and π^(xi)→Pπ(xi),n→∞"
+    },
+    {
+      "title": "Theorem 1",
+      "instruction": "C2 (Consistency of the standard error estimator): SE^(β^j)→Pσj=SE(βj),n→∞. where σj=σj2 denotes the asymptotic standard error of β^j."
+    },
+    {
+      "title": "Theorem 1",
+      "instruction": "Under these two conditions given above, the following applies asymptotically [18]."
+    },
+    {
+      "title": "Theorem 1",
+      "instruction": "If β^n→Pβ and g is continue function, so g(β^n)→Pg(β) is valid"
+    },
+    {
+      "title": "Theorem 1",
+      "instruction": "If Xn→dx and Yn→Pa, so XnYn→dxac)n(β^j−βj)→dN(0,σj2,then(β^j−βj)SE^(β^j)→dN(0,1)"
+    },
+    {
+      "title": "Theorem 1",
+      "instruction": "Consequently, Eq. (11) defines an asymptotically valid pivotal quantity for constructing confidence intervals for βj."
+    },
+    {
+      "title": "Proof C1",
+      "instruction": "Let β^jbe the estimator of βj obtained via the Newton–Raphson algorithm. The Newton–Raphson iteration is given byβ^(t+1)=β^(t)−[H(β^(t))]−1g(β^(t))."
+    },
+    {
+      "title": "Proof C1",
+      "instruction": "Taking probability limits (plim) on both sides yieldsplimn→∞β^(t+1)=plimn→∞(β^(t)−[H(β^(t))]−1g(β^(t)))plimn→∞β^(t+1)=plimn→∞β^(t)−plimn→∞[H(β^(t))]−1g(β^(t))"
+    },
+    {
+      "title": "Proof C1",
+      "instruction": "By the CMT and standard regularity conditions,(12)plimn→∞β^(t+1)=β(t)−[H(β^(t))]−1g(β(t))=β(t+1)"
+    },
+    {
+      "title": "Proof C1",
+      "instruction": "Therefore, we validate that the estimated parameter vector β^(t+1) is a consistent estimator of the true parameter vector β(t+1), such that β^(t+1)→Pβ(t+1) as n→∞. Consequently, it follows that each component βj of the vector β^(t+1) is a consistent estimator of its corresponding true parameter βj, i.e., β^j→Pβjwhenn→∞."
+    },
+    {
+      "title": "Proof C1",
+      "instruction": "Furthermore, since β^j is a consistent estimator for βj, it follows that the estimator π^(xi)converges to π(xi). That is, π^(xi)→Pπ(xi), whenn→∞. The estimated outcome probability π^(xi)is defined asπ^(xi)=exp(X′β^)1+exp(X′β^)where XTβ^=β^0+∑j=1p∑k=1mβ^jkxjik+∑j=1p∑u=1rβ^j(m+u)(xji−Kju)+m, as defined in (5). Taking probability limits, we obtainplimn→∞π^(xi)=plimn→∞(eX′β^1+eX′β^)"
+    },
+    {
+      "title": "Proof C1",
+      "instruction": "Since the logistic function is continuous, the CMT implies(13)plimn→∞π^(xi)=plimn→∞eX′β^1+eX′β^=plimn→∞(eX′β^)plimn→∞(1+eX′β^)=eX′β^1+eX′β^=π(xi)"
+    },
+    {
+      "title": "Proof C1",
+      "instruction": "It can be concluded that the estimator π^(xi) is a consistent estimator for π(xi), i.e., π^(xi)→Pπ(xi) as n→∞."
+    },
+    {
+      "title": "Proof C2",
+      "instruction": "The variance estimator SE^(β^j) of βj can be obtained by the following equationVar(β^j)=[(XTW^X)−1]jj=∑i=1nxij2π^(xi)(1−π^(xi))where W^=diag[π(xi)(1−π(xi)]i=1n, as described in (10)."
+    },
+    {
+      "title": "Proof C2",
+      "instruction": "Equivalently, the estimated standard error of βjcan be written asSE^(β^j)=∑i=1nxij2π^(xi)(1−π^(xi))"
+    },
+    {
+      "title": "Proof C2",
+      "instruction": "By the C1, we have π^(xi)→Pπ(xi),n→∞ for each i. Furthermore, since the function g is continuous on (0,1), the CMT impliesπ^(xi)(1−π^(xi))→Pπ(xi)(1−π(xi))."
+    },
+    {
+      "title": "Proof C2",
+      "instruction": "Applying Slutsky’s theorem and the CMT again yields(14)plimn→∞SE^(β^j)=plimn→∞(∑i=1nxij2π^(xi)(1−π^(xi)))=∑i=1nxij2plimn→∞[π^(xi)(1−π^(xi))]=∑i=1nxij2π(xi)(1−π(xi))=σjHence, SE^(β^j)→Pσj=SE(βj), as n→∞."
+    },
+    {
+      "title": "Proof C2",
+      "instruction": "This completes the proof. Moreover, the estimator SE^(β^j) is a consistent estimator for SE(βj). Therefore, from Eq. (12–14), it follows that the statistic Zj is asymptotically standard normal. Consequently, Zj can be used as a pivotal quantity for constructing confidence intervals for βj."
+    },
+    {
+      "title": "Lagrange function",
+      "instruction": "Using the pivotal quantity, the values of c and d that satisfy Eq. (9) can be determined.P(c≤β^j−βjSE^(β^j)≤d)=1−α"
+    },
+    {
+      "title": "Lagrange function",
+      "instruction": "Equivalently,P(cSE^(β^j)≤β^j−βj≤dSE^(β^j))=1−α, that can be reimpressed asP(β^j−dSE^(β^j)≤βj≤β^j−cSE^(β^j))=1−α"
+    },
+    {
+      "title": "Lagrange function",
+      "instruction": "The length of the above confidence interval equation is defined byl(c,d)=−cSE^(β^j)−(−dSE^(β^j))=−cSE^(β^j)+dSE^(β^j)=(d−c)SE^(β^j)"
+    },
+    {
+      "title": "Lagrange function",
+      "instruction": "For example, Zj=β^j−βjSE^(β^j)∼N(0,1) is pivotal quantity for βj parameter. The shortest (1−α)×100% confidence interval can be obtained by solving Lagrange function under the probability constraint Φ(d)−Φ(c)=(1−α), given by(15)L(c,d,λ)=(d−c)SE^(β^j)+λ[Φ(d)−Φ(c)−(1−α)]where l(c,d) is interval length and Φ(.) is cumulative distribution function (CDF) of the standard normal distribution. The Lagrange function optimization is solved by taking the partial derivatives of the Lagrange function:(16)∂L(c,d,λ)∂c=−SE^(β^j)−λ∅(c)=0(17)∂L(c,d,λ)∂d=SE^(β^j)+λ∅(d)=0(18)∂L(c,d,λ)∂λ=Φ(d)−Φ(c)−(1−α)=0where ∅(.) denotes the standard normal density function. From equations (2.15) and (2.16), it follows that∅(d)−∅(c),whichimpliesc=−d."
+    },
+    {
+      "title": "Lagrange function",
+      "instruction": "Notice that under the standard normal assumption, the values of c and d are obtained directly from the quantiles of the standard normal distribution, namely c=−Zα/2 aand =Zα/2. Therefore, the shortest confidence interval for the MTSLM is given by(19)P(β^j−Zα/2SE^(β^j)≤βj≤β^j+Zα/2SE^(β^j))=1−α"
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "A simulation study was conducted using a nonlinear sample size of 200 to evaluate the confidence interval performance of the MTSLM, namely x1,x2,x3. Simulated data were generated to reflect varying patterns across three predictor variables. Scatterplots were constructed by grouping the predictor values and plotting them against the logit value within each group to explore the relationship between variables. These visualizations help identify underlying patterns that are consistent with a nonparametric regression structure. The resulting scatterplots are presented in Fig. 1.Fig. 1Scatterplots between HDI observed logit with each predictor variable of simulated data.Fig 1 dummy alt text"
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "From the simulated scatterplots, there is an indication of tendency changes across different sub-intervals of the grouped predictor variables. For the x1, a decreasing trend in the estimated effect is observed on group five, suggesting a extreme change in the relationship within that interval. For the x2, the pattern exhibits a more pronounced variation, indicating a significant change in the response behavior across groups. Meanwhile, for the x3, a notable shift is observed starting from group 13 and above, where the pattern becomes more distinct compared to earlier intervals. These observed suggest that the relationship between the variables is nonlinear and may differ across sub-intervals. Therefore, based on the generated data structure, a truncated spline approach is considered appropriate to capture these changes while maintaining a flexible model representation."
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "Given the presence of sharply changing patterns across the predictor variables, a selection of knot points is required to capture the relationship. In this study, the selection of knot points was performed by evaluating one, two, three, and four candidate knot combinations, where each combination was assessed based on Akaike Information Criterion (AIC). The optimal knot configuration is then chosen as the one that yields the minimum AIC value, indicating the best balance between model fit and complexity"
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "The results show that the optimal number of knot points for the simulation data are K1u= 4, and K2u= 3, K3u= 4, with the smallest AIC value of 147.2145, as shown in Table 1. The selected optimal knot locations are obtained as follows: x1is K11= 0.789, K12= 0.219, K13= 0.274, and K14=0.802. For x2 is K21= 0.806, K22=0.423, and K23= 0.268. For x3 is K31= 0.202, K32= 0.401, K33= 0.600, and K44= 0.799. Thus, the Multivariable Truncated Spline Linear Model (MTSLM) can be written as follows:logit(π(xi))=β0+β11x1i+β12(x1i−0.789)++β13(x1i−0.219)++β14(x1i−0.274)++β15(x1i−0.802)++β21x2i+β22(x2i−0.806)++β23(x2i−0.423)++β24(x2i−0.268)++β31x3i+β32(x3i−0.202)++β33(x4i−0.401)++β34(x4i−0.600)++β35(x4i−0.799)+Table 1Determining the optimal number of knot points in the simulated data.Table 1 dummy alt textNo.Combination of Knot PointAIC Value11,1,1176.040121,1,2176.908431,1,3167.768941,1,4154.585451,2,1177.903261,2,2178.869471,2,3168.98981,2,4155.84691,3,1178.7207101,3,2179.6977⋮604,3,4147.2145614,4,1176.9115624,4,2177.2112634,4,3163.5687644,4,4147.3441"
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "The next step is to construct confidence intervals for each parameter in the model. This study uses a 95% confidence level, calculated based on Eq. (19). Conclusions are drawn if zero is not included in the interval, then the parameter is considered to have a significant effect on the model. The results of the confidence interval calculations for the MTSLM parameters are presented in Table 2 below.Tabel 295% Confidence interval of parameters in the MTSLM of simulated data.Tabel 2 dummy alt textParameterEstimateLowerUpperβ^0−0.03213.08294.0186*β^11−1.59433.03960.8509*β^12−2.1378−6.77252.4969β^136.2965−0.182312.7752β^14−11.3356−19.4642−3.2069*β^1510.29003.868516.7116*β^212.12570.10734.1441*β^22−3.7589−10.14412.6263β^236.1714−1.161913.5047β^24−3.7027−7.1559−0.2495*β^3115.51318.798312.2280*β^32−19.4373−8.1552−0.7195β^33−13.9991−7.75079.7524β^341.1753−9.145421.4961β^356.45311.770011.1361*⁎denotes statistically significant parameters."
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "From these results, it can be seen that several parameters have confidence intervals that do not include zero, so it can be concluded that these parameters are statistically significant in the model. These significant parameters are marked with an asterisk (*)."
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "After estimating the MTSLM and interpreting its parameters, it is necessary to evaluate whether the added complexity of the model truly offers meaningful advantages. For comparison purposes, a convetional binary logistic regression model was also developed at this stage to examine the relationship between the simulation data used in this study.π(xi)=exp(1.7697−1.4015x1i−1.1023x2i−2.7412x3i)1+exp(1.7697−1.4015x1i−1.1023x2i−2.7412x3i)"
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "The following table lists a comparison of deviance and AIC values between the conventional binary logistic regression model and the MTSLM model Table 3.Tabel 3Comparison of deviance value and AIC for simulated data.Tabel 3 dummy alt textModelDevianceAICBinary Logistic Regression176.6742184.6742MTSLM117.2145147.2145"
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "Based on a comparison of deviance and AIC, MTSLM performs better than binary logistic regression for the simulated data. This is evident from the smaller deviance value of MTSLM (117.2145 vs. 176.6742) and the lower AIC (147.2145 vs. 184.6742). Therefore, MTSLM can be concluded as the more optimal model for this simulated data."
+    },
+    {
+      "title": "Simulation data application",
+      "instruction": "Based on the classification performance evaluation results in Table 4, MTSLM demonstrated better performance than binary logistic regression across all indicators. MTSLM achieved an AUC of 94.44%, which is higher than the logistic model’s 82.55%, indicating better discriminatory ability in distinguishing between classes. Additionally, MTSLM also yields higher accuracy (87%), sensitivity (89.38%), specificity (83.9%), and F1 score (88.59%) values compared to binary logistic regression. This indicates that MTSLM is not only more accurate overall but also more balanced in identifying both classes, positive and negative.Table 4Calculation of model classification goodness for simulated data.Table 4 dummy alt textModelAUCAccuracySensitivitySpecificityF1 ScoreBinary Logistic Regression82.55%72.5%77.31%68.71%76.09%MTSLM94.44%87%89.38%83.9%88.59%"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "In applying the MTSLM method, this study uses secondary data on the status of regions based on the HDI in the year. The research variables used in this study are presented in Table 5.Tabel 5Research variables.Tabel 5 dummy alt textNotationVariableDesctiprionyHuman Development Index (HDI)0: Low HDI, 1: High HDIx1Percentage of Households with Access to Clean WaterRatiox2Percentage of Poor PopulationRatiox3Open Unemployment RateRatiox4High School Enrollment RateRatio"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "Based on data from 514 districts/cities in Indonesia in 2023 that were sampled for the study, there were 305 districts/cities in the high HDI category (HDI ≥ 70). Furthermore, there were 206 districts/cities in the low HDI category (HDI < 70) [19]. The multicollinearity test is shown in the Table 6 below.Tabel 6VIF.Tabel 6 dummy alt textVariableVIFX11.041347X2−0.1854X30.2643X40.2636"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "Based on Table 6, each predictor variable has a VIF value of <10, so it can be concluded that there is no multicollinearity between the predictor variables in the model. To explore the potential nonlinear relationships between each predictor and HDI status, we constructed scatterplots of grouped data against the Logit of HDI. These are presented in Figure 2."
+    },
+    {
+      "title": "Real data application",
+      "instruction": "Based on the scatter plot in Fig. 2, it can be initially identified that there is a tendency for the relationship to change sharply at certain sub-intervals between the HDI logit and the predictor variables. For the access to clean water variable, a pronounced change in the pattern is detected around the group corresponding to a value of 75. Similarly, the percentage of poor population exhibits varying tendencies across certain sub-intervals. For the unemployment rate, a more evident structural change is observed toward the upper tail of the data. Meanwhile, the school enrollment rate shows noticeable fluctuations, particularly around the intervals near values of 50 and 70, where the trend changes more distinctly compared to adjacent regions. Therefore, in this study, HDI modeling is conducted using a linear truncated spline (m=1) approach, which is suitable for capturing local changes in the relationship while maintaining model interpretability. To validate the proposed MTSLM method, the dataset was randomly divided into training and testing subsets. 80% of the data were used for model estimation (training set), while the remaining 20% were reserved for model evaluation (testing set).Fig. 2Scatterplot between HDI observed logit with each predictor variable of HDI data.Fig 2 dummy alt text"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "The analysis then proceeds by applying the model to the complete dataset with all knot point combination, with the number of knot points on each predictor variable limited to a maximum of four. The selection of the optimal knot points using the minimum AIC value. The optimal number of knot points for HDI data, are K1u= 1, K2u= 1, K3u= 1, and K4u= 4, where the minimum AIC value is 345.637 as presented in Table 7 below:Table 7Determining the optimal number of knot points in the HDI data.Table 7 dummy alt textNo.Combination of Knot PointAIC Value11,1,1,1346.643822,1,1,1348.62133,1,1,1349.536544,1,1,1349.730251,2,1,1348.215662,2,1,1350.196273,2,1,1351.0136⋮1931,1,1,4345.6371942,1,1,4347.59481953,1,1,4348.55911964,1,1,4348.69991971,2,1,4346.83171982,2,1,4348.78731993,2,1,4349.60762004,2,1,4349.7587⋮2553,4,4,4358.27942564,4,4,4358.2481"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "Based on Table 7 the optimal model obtained, it can be seen that the optimal knot point model for X1is K11= 91.13, for X2 is K21= 9.53, for X3 is K31= 4.05, and, for X4 are K41= 58.652, K42= 62.578, K43= 64.518, and K44= 67.634. So that the MTSLM can be expressed as follows:logit(π(xi))=β0+β11x1i+β12(x1i−91.13)++β21x2i+β22(x2i−9.53)++β31x3i+β32(x3i−4.05)++β41x4i+β42(x4i−58.652)++β43(x4i−62.578)++β44(x4i−64.518)++β45(x4i−67.634)+"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "After obtaining the MTSLM in HDI, the next step is to compile confidence intervals for each parameter in the MTSLM. In this study, a 95% confidence interval was used, which was formed using Eq. (19). Conclusions were drawn by observing whether the confidence interval of a parameter included the value zero. If the confidence interval does not contain zero, then the parameter has a significant effect on the model. The following presents the results of the confidence interval for the parameters of the MTSLM."
+    },
+    {
+      "title": "Real data application",
+      "instruction": "Based on Table 8, it can be seen that the estimated parameters β^11,β^21,β^31,β^32β^43,β^44,β^45 have 95% confidence intervals that do not contain zero. For instance, β^11 ranges from 0.0124 to 0.0566, β^21 ranges from −0.4039 to −0.0341, β^31ranges from 0.5083 to 1.2985, β^32 ranges from −1.4760 to −0.3656, β^43 ranges from 0.0841 to 2.1558, β^44 ranges from −2.6122 to −0.2531, and β^45ranges from 0.0463 to 1.1620. Therefore, it can be concluded that all predictor variables that significantly affect the HDI based on the MTSLM are the Percentage of Households with Access to Clean Water (x1), Percentage of Poor Population (x2), Open Unemployment Rate (x3), and High School Enrollment Rate (x4). This result is supported by Fig. 3, which presents a coefficient plot of the 95% confidence intervals. The visualization clearly shows that significant parameters have confidence intervals that do not cross zero, while non-significant parameters intersect the zero line. This is in line with the initial identification results through scatterplots, which show a variable relationship in certain sub-intervals between all predictor variables and the HDI logit based on the observation data.Tabel 895% Confidence interval of parameters in HDI data.Tabel 8 dummy alt textParameterEstimateLowerUpperβ^0−7.0936−12.8966−1.2906*β^110.03450.01240.0566*β^12−0.0151−0.14030.1101β^21−0.2190−0.4039−0.0341*β^22−0.0035−0.24980.2428β^310.90340.50831.2985*β^32−0.9208−1.4760−0.3656*β^410.0582−0.03830.1548β^42−0.1101−0.46850.2484β^431.12000.08412.1558*β^44−1.4327−2.6122−0.2531*β^450.60410.04631.1620*⁎denotes statistically significant parameters.Fig. 395% confidence interval plot of the estimated parameters.Fig 3 dummy alt text"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "Furthermore, based on the results of parameter estimation obtained in Table 8, the interpretation of the MTSLM data can be carried out for each predictor variable by assuming that the other predictor variables are constant. The following is the interpretation:a. Percentage of Households with Access to Clean Water (X₁)logit(π^(xi)){0.0345x1i,x1i<91.130.0194x1i−1.3777,x1i≥91.13"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "For households with access to clean water <91.13%, every 1% increase increases the relative probability of the region being in the high HDI category by exp(0.0345) = 1.0351. After exceeding 91.13%, the effect decreases, as indicated by the effective coefficient 0.0345 − 0.0151 = 0.0194, so that the relative probability increases to exp(0.0194) = 1.0196. This shows that additional increases in access to clean water at already high levels have a smaller impact on the probability of a region being in the high HDI category.b. Percentage of Poor Population (X₂)logit(π^(xi)){−0.2190x2i,x2i<9.53−0.2225x2i−0.0334,x2i≥9.53"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "At a poverty rate of <9.53%, every 1% increase will reduce the relative probability of a region being in the high HDI category by exp(−0.2190) = 0.8033 times. When the percentage of poor people exceeds 9.53%, this negative effect becomes stronger with an effective coefficient of −0.2190 − 0.0035 = −0.2225, and the relative probability of a region being in the high HDI category decreases to exp(−0.2225) = 0.8005 times. This shows that an increase in the poverty rate above this threshold further reduces the probability of a region being in the high HDI category.c. Open Unemployment Rate (X3)logit(π^(xi)){0.9034x3i,x3i<4.05−0.0174x3i+3.7272,x3i≥4.05"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "In regions with an open unemployment rate of <4.05%, every 1% point increase in rate increases the relative probability of the region being in the high HDI category by exp(0.9034) = 2.468 times, assuming other predictor variables remain constant. Once the exceeds 4.05%, the rate of influence changes with an effective coefficient of 0.9034 − 0.9208 = −0.0174, with a value of exp(−0.0174) = 0.9827. Although this change is statistically significant, the magnitude of the effect is practically very small, so that an increase in rate at higher levels has almost no effect on the probability of a region being in the high HDI category. This indicates a nonlinear relationship with a threshold effect between rate and the probability of a region having a high HDI.d. High School Enrollment Rate (X4)logit(π^(xi)){0.0582x4i,x3i<58.652−0.0519x4i−6.4587,58.652≤x4i>62.5781.0681x4i−69.9237,62.578≤x4i>64.518−0.3646x4i−104.7784,64.518≤x4i>67.6340.2395x4i−50.3544,x4i≥67.634"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "In regions with an rate value of <58.652%, every 1% increase in rate tends to increase the odds of risk by exp(0.0582) = 1.0600 times, although the effect is not yet statistically significant. In the range of 58.652% to 62.578%, the effective coefficient changes to 0.0582 − 0.1101 = −0.0519, with an odds ratio of exp(−0.0519) = 0.9494, which is also insignificant. Furthermore, in the range of 62.578% - 64.518%, the effective coefficient increases to −0.0519 + 1.1200 = 1.0681, with an odds ratio of exp(1.0681) = 2.910, and the effect is statistically significant. However, in the range of 64.518% - 67.634%, there is a reversal of influence with an effective coefficient of 1.0681 − 1.4327 = −0.3646 and odds ratio exp(−0.3646) = 0.6945. For rate values above 67.634%, the effect increases again with an effective coefficient of −0.3646 + 0.6041 = 0.2395 and an odds ratio of exp(0.2395) = 1.271. These results indicate that the effect of rate on the probability of a region achieving a high HDI is nonlinear and provides an optimal impact only in certain ranges."
+    },
+    {
+      "title": "Real data application",
+      "instruction": "After obtaining the MTSLM along with the estimation results and parameter interpretation, it is important to assess whether the complexity of the model provides real benefits. As a comparison model, at this stage a conventional binary logistic regression model was constructed to model the relationship between the HDI outcomes variable and the predictor variables used in this study.π(xi)=exp(−8.1039+0.0325x1i−0.2123x2i+0.3062x3i+0.1100x4i)1+exp(−8.1039+0.0325x1i−0.2123x2i+0.3062x3i+0.1100x4i)"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "The following table lists a comparison of deviance and AIC values between the conventional binary logistic regression model and the MTSLM model."
+    },
+    {
+      "title": "Real data application",
+      "instruction": "Based on Table 9, it can be seen that the nonparametric approach produces a better model for HDI modeling than the binary logistic. Next, performance measures derived from the confusion matrix are computed to evaluate how well each model discriminates between high and low HDI. The results are summarized in Table 6.Tabel 9Comparison of deviance value and AIC for HDI data.Tabel 9 dummy alt textModelDevianceAICBinary Logistic Regression341.119351.118MTSLM321.637345.637"
+    },
+    {
+      "title": "Real data application",
+      "instruction": "Based the classification performance results in Table 10, MTSLM demonstrates higher overall classification ability compared to conventional logistic regression, as evaluated using training and testing data. The MTSLM yielded a higher Area Under the Curve (AUC) of 89.20% than the logistic model at 88.77%, indicating a better overall discriminative capability in distinguishing regions with category across different classification thresholds. In addition, the specificity of MTSLM at 75.56% is also higher than the logistic model at 73.34%, indicating a better ability to recognize areas with low HDI. The superiority of MTSLM is also reflected in the F1 score of 84.03%, which are higher than the logistic model.Table 10Calculation of model classification goodness for HDI data.Table 10 dummy alt textModelAUCAccuracySensitivitySpecificityF1 ScoreBinary Logistic Regression88.77%79.90%86.20%73.34%83.34%MTSLM89.20%81.55%86.20%75.56%84.03%"
+    },
+    {
+      "title": "Summary",
+      "instruction": "The Multivariable Truncated Spline Logistic Model (MTSLM) demonstrates superior overall performance compared to the conventional binary logistic model. This superiority is indicating that MTSLM provides better discrimination and a more balanced classification between regions with high and low HDI. The improved performance highlights the advantage of incorporating truncated spline components, which allow the model to capture changing patterns on certain sub-intervals relationships that cannot be represented by standard logistic regression."
+    },
+    {
+      "title": "Summary",
+      "instruction": "A novel contribution of this study lies in the construction of confidence intervals for the MTSLM parameters, developed using a pivotal quantity based approach. This construction enables reliable statistical inference by explicitly accounting for the uncertainty of spline based parameter estimates. A simulation study was conducted to evaluate the performance of the proposed method under controlled conditions. The result demonstrate that MTSLM performs better than standard logistic regression, thereby supporting the effectiveness of the proposed approach. In read data application, the confidence interval analysis confirms that all four predictors x1 (Percentage of Households with Access to Clean Water), x2 (Percentage of Poor Population), x3 (Open Unemployment Rate), and x4 (High School Enrollment Rate) are statistically significant in explaining the probability of achieving high HDI status. Access to clean water and high school enrollment rate, emphasizing the importance of basic infrastructure and education in human development. In contrast, the percentage of poor population and open unemployment rate, reflecting structural socioeconomic constraints that hinder HDI improvement."
+    },
+    {
+      "title": "Summary",
+      "instruction": "Overall, these findings indicate that MTSLM not only outperforms binary logistic regression in classification accuracy but also provides a more flexible and informative representation of the underlying social economic factors influencing HDI. Despite its contributions, future research may consider extending the MTSLM framework to spatial or panel data settings in order to better account for regional interdependencies and temporal dynamics. In addition, integrating MTSLM with artificial intelligence based prediction approaches could further improve model robustness and enhance its ability to capture complex and evolving patterns of regional inequality."
+    },
+    {
+      "title": "Limitations",
+      "instruction": "1. Data Splitting:"
+    },
+    {
+      "title": "Limitations",
+      "instruction": "The dataset is divided into training and testing sets with an 80:20 ratio. This partition may lead to slight variations in model performance across different splits.2. Knot Selection:"
+    },
+    {
+      "title": "Limitations",
+      "instruction": "The number of knots in the spline is limited to a maximum of four, selected based on the Akaike Information Criterion (AIC). Different numbers of knots may also be considered in future studies to provide additional insights and to further explore the model’s with respect to knot specification.3. Parameter Estimation:"
+    },
+    {
+      "title": "Limitations",
+      "instruction": "Model parameters are estimated using Maximum Likelihood Estimation (MLE), followed by iterative with the Newton Raphson method.4. Classification Threshold:"
+    },
+    {
+      "title": "Limitations",
+      "instruction": "The predicted probabilities are classified into 0 or 1 using a cutoff threshold of 0.5.5. Confidence Intervals:"
+    },
+    {
+      "title": "Limitations",
+      "instruction": "Confidence intervals are constructed using the Pivotal Quantity approach.6. Data Source:"
+    },
+    {
+      "title": "Limitations",
+      "instruction": "The analysis uses secondary data on the Human Development Index (HDI) at the districs/cities in Indonesia for 2023.7. Multicollinearity Check:"
+    },
+    {
+      "title": "Limitations",
+      "instruction": "Continuous predictor variables are verified to not exhibit multicollinearity."
+    },
+    {
+      "title": "Related research article",
+      "instruction": "For a published article: A. S. Suriaslan, I. N. Budiantara, and V. Ratnasari, “Nonparametric regression estimation using multivariable truncated splines for binary response data,” MethodsX, vol. 14, Jun. 2025, https://doi.org/10.1016/j.mex.2024.103084."
+    },
+    {
+      "title": "CRediT author statement",
+      "instruction": "Afiqah Saffa Suriaslan: Conceptualization, Methodology, Software, Writing – original draft, Visualization."
+    },
+    {
+      "title": "CRediT author statement",
+      "instruction": "I Nyoman Budiantara: Conceptualization, Methodology, Writing – review & editing, Validation, Supervision."
+    },
+    {
+      "title": "CRediT author statement",
+      "instruction": "Vita Ratnasari: Conceptualization, Methodology, Validation, Supervision."
+    },
+    {
+      "title": "CRediT author statement",
+      "instruction": "Dursun Aydin: Methodology, Validation, Formal analysis, Writing – review & editing, Supervision."
+    }
+  ],
   "materials": [],
-  "fetched_at": "2026-06-19T00:23:54.909435+00:00"
+  "fetched_at": "2026-06-19T00:23:54.909435+00:00",
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC13218223/gr3.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/1db1/13218223/7d85292d0712/gr3.jpg",
+      "caption": "",
+      "bytes": 30758
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC13218223/gr2.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/1db1/13218223/8d5df9a397a6/gr2.jpg",
+      "caption": "",
+      "bytes": 58187
+    },
+    {
+      "type": "image",
+      "filename": "fx1.gif",
+      "local_path": "data/media/methodsx/PMC13218223/fx1.gif",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/1db1/13218223/d8edd36212f4/fx1.gif",
+      "caption": "",
+      "bytes": 1951
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC13218223/gr1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/1db1/13218223/dcfaafcf9590/gr1.jpg",
+      "caption": "",
+      "bytes": 41000
+    },
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC13218223/ga1.jpg",
+      "source_url": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/1db1/13218223/e42902bccca8/ga1.jpg",
+      "caption": "",
+      "bytes": 74557
+    }
+  ]
 }

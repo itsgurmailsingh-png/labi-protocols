@@ -28,10 +28,304 @@
     "MATLAB R2018b",
     "Prism (8 or 9)",
     "M205 fluorescent dissection microscope",
-    "PLANAPO 2.0× objective for M205"
+    "PLANAPO 2.0× objective for M205",
+    "6.Protein half-life h is calculated as followsEquation 5h=ln(2)Dp",
+    "Test smoothing the raw data with a small-windowed (3–5 data point) moving average. This should help when time points are sparse or experimental measures are noisy. Such small smoothing should not greatly change the downstream calculated rates (e.g., anterograde ColIV Dp median changes from 0.12 to 0.11 when using non-smoothed data) but could improve modeling performance as offering a better representation of the experimental mRNA dynamics.",
+    "Test a different fitting function. For example, if the mRNA profile shows a recognizable shape (e.g., Gaussian), such function could be used instead of a generic spline to achieve better fitting.",
+    "Consider increasing the temporal resolution of the acquisition. This will provide the fitting functions with more data points as input, helping to capture the observed dynamics.",
+    "Average the experiments to obtain a single input",
+    "Please do not try bleach corrections as they might skew the data. As the fluorescence is used as proxy for the protein amount, this might affect the results.",
+    "Test down-sampling by imaging with a lower temporal resolution. The signal should still show a discernable logistic behavior for the subsequent steps to work.",
+    "Consider using a different experimental acquisition mode (e.g., western blot).",
+    "Drosophila strains and other reagents used in this study were generated in (Matsubayashi et al., 2020) and will be available upon reasonable request."
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Obtain mRNA time course",
+      "instruction": "Measure the temporal expression of the target mRNA using any suitable method (e.g., RNA‑seq or qPCR) from the earliest detectable expression to near homeostasis; for the example datasets the Drosophila ColIV and Ndg mRNA profiles were obtained from a published RNA‑seq time course (Graveley et al., 2011).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Obtain protein time course",
+      "instruction": "Measure relative protein levels over time, preferably by time‑lapse imaging of a fluorescently tagged protein (e.g., GFP protein‑trap lines) or by western blot; in the example whole embryos were imaged every 2 min on a Leica M205 dissection microscope, fluorescence intensity was quantified in Fiji, a 15‑frame moving average was applied, and autofluorescence from control embryos was subtracted. Verify photobleaching is negligible by comparing a continuously imaged sample with a spared control.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Validate data suitability",
+      "instruction": "Check that the mRNA profile shows a single peak followed by a plateau (simple behavior) and that the protein profile follows a logistic (sigmoidal) increase from zero to a plateau; these are required for the model assumptions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Set up analysis software",
+      "instruction": "Download the modeling code from https://github.com/stemarcotti/protein_turnover_modelling, unzip it, and open MATLAB (tested on R2018b). Ensure GraphPad Prism (v8 or v9) and Excel are available for data interpolation and logistic fitting.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Interpolate mRNA profile",
+      "instruction": "Increase the temporal resolution of the mRNA data to match the protein sampling interval (2 min).",
+      "substeps": [
+        {
+          "instruction": "Copy time and mRNA values into an XY table in Prism.",
+          "title": ""
+        },
+        {
+          "instruction": "Determine required number of points: total experiment time (e.g., –10 h to 38 h for ColIV, –4 h to 44 h for Ndg) equals 2 880 min; with 2‑min steps this yields 1 441 data points (2 880/2 + 1).",
+          "title": ""
+        },
+        {
+          "instruction": "Select Analyze → Fit spline/LOWESS and choose a cubic spline with 1 441 segments (adjust if needed).",
+          "title": ""
+        },
+        {
+          "instruction": "Check the spline fit visually and ensure it reproduces the expected peak‑plateau shape; if fitting is poor, consider smoothing the raw data with a 3‑point moving average or using a different fitting function.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Fit protein logistic curve",
+      "instruction": "Fit the protein time‑course to a logistic model to obtain K, ti and r parameters.",
+      "substeps": [
+        {
+          "instruction": "Copy time and protein intensity into an XY table in Prism (one column per biological replicate).",
+          "title": ""
+        },
+        {
+          "instruction": "Select Analyze → Nonlinear regression (curve fit) → Dose‑response – Stimulation → log(agonist) vs. response – Variable slope (four parameters).",
+          "title": ""
+        },
+        {
+          "instruction": "Inspect the Goodness‑of‑Fit R² (average ≈ 0.99 in the example) and ensure the Bottom parameter is near zero (represents residual autofluorescence).",
+          "title": ""
+        },
+        {
+          "instruction": "Export the fitted parameters; convert GraphPad outputs to logistic parameters using Equation 2 (K = Span), Equation 3 (ti = logEC50) and Equation 4 (r = HillSlope × ln 10) – an Excel workbook (01_logistic_parameters.xlsx) is provided.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Prepare input CSV files",
+      "instruction": "Create a folder for the analysis and generate two CSV files required by the MATLAB scripts.",
+      "substeps": [
+        {
+          "instruction": "File 1: interpolated mRNA profile – two columns (time [min], mRNA value) with as many rows as the interpolated points.",
+          "title": ""
+        },
+        {
+          "instruction": "File 2: logistic parameters – three rows (K, ti, r) and one column per biological replicate (e.g., 10 replicates for ColIV, 6 for Ndg).",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Run anterograde modeling",
+      "instruction": "Estimate synthesis (Sp) and degradation (Dp) rates by solving Equation 1 numerically using the mRNA input.",
+      "substeps": [
+        {
+          "instruction": "Open anterograde_model.m in MATLAB and run it.",
+          "title": ""
+        },
+        {
+          "instruction": "When prompted, locate the mRNA CSV and the logistic‑parameter CSV.",
+          "title": ""
+        },
+        {
+          "instruction": "Enter the time interval (2 min) and the experiment span (e.g., start = 0 h, end = 15 h for ColIV; 0–20 h for Ndg).",
+          "title": ""
+        },
+        {
+          "instruction": "The script outputs four CSV files containing Sp, Dp and their 95 % confidence intervals for each replicate.",
+          "title": ""
+        },
+        {
+          "instruction": "Check that confidence intervals are much smaller than biological variability; large intervals indicate poor model fit.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Run retrograde modeling",
+      "instruction": "Perform the inverse analysis (protein → mRNA) to verify internal consistency.",
+      "substeps": [
+        {
+          "instruction": "Create a new empty folder and copy the two CSV files generated in the previous step into it.",
+          "title": ""
+        },
+        {
+          "instruction": "Open retrograde_model.m in MATLAB and run it.",
+          "title": ""
+        },
+        {
+          "instruction": "Select the same time interval (2 min) and experiment span as used for anterograde modeling.",
+          "title": ""
+        },
+        {
+          "instruction": "Four output CSV files (Sp, Dp, confidence intervals) are produced.",
+          "title": ""
+        },
+        {
+          "instruction": "Compare anterograde and retrograde rate estimates; they should be similar. Large discrepancies signal model inadequacy.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Calculate protein half‑life",
+      "instruction": "Convert degradation rates to half‑life values using h = ln(2)/Dp.",
+      "substeps": [
+        {
+          "instruction": "Open the provided Excel workbook (02_half-life.xlsx).",
+          "title": ""
+        },
+        {
+          "instruction": "Paste the Dp values obtained from either anterograde or retrograde modeling (both give comparable results).",
+          "title": ""
+        },
+        {
+          "instruction": "The workbook computes h for each replicate; the example datasets yielded ~6 h for ColIV and ~14 h for Ndg.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:13:51.031855Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "REAGENT or RESOURCESOURCEIDENTIFIERExperimental models: organisms/strainsD. melanogaster: ColIVα2 (Vkg)-GFP (embryos)(Morin et al., 2001)N/AD. melanogaster: Ndg-GFP (embryos)(Sarov et al., 2016)N/ASoftware and algorithmsLAS AFLeicahttp://www.leica-microsystems.com/home/ImageJ/FijiFijihttp://fiji.sc/MATLAB R2018bMathWorkshttps://www.mathworks.com/products/matlab.htmlPrism (8 or 9)GraphPadhttps://www.graphpad.com/scientific-software/prism/MATLAB custom code for fitting purpose(Matsubayashi et al., 2020)https://github.com/stemarcotti/protein_turnover_modellingDeposited dataThe “modENCODE Temporal Expression Data” of vkg/ColIVα2 mRNA(Graveley et al., 2011)http://flybase.org/reports/FBgn0016075The “modENCODE Temporal Expression Data” of LanA mRNA(Graveley et al., 2011)http://flybase.org/reports/FBgn0002526The “modENCODE Temporal Expression Data” of Ndg mRNA(Graveley et al., 2011)https://flybase.org/reports/FBgn0026403OtherM205 fluorescent dissection microscopeLeicahttp://www.leica-microsystems.com/home/PLANAPO 2.0× objective for M205Leica10450030Alternatives: Live organism, tissue, cultured cells, etc. for which it is possible to measure mRNA and protein profile over time can be used as the experimental models.Alternatives: Any Imaging software other than LAS AF can be used to quantify fluorescent proteins.Alternatives: Any statistical software for fitting and graphing (e.g., SPSS, Prism, R, MATLAB, Python) can be applied for data analysis.Alternatives: Depending on the model system, another experimental setup may be required to measure the mRNA and protein profiles over time (e.g., microscope and objectives). If the modeling was appropriate for the protein of interest, the anterograde and retrograde approaches should lead to similar values for the rate of synthesis and degradation (Figure 6). Moreover, the confidence intervals for these parameters should be small compared to biological variability (i.e., the nonlinear regression performed well on the data, Figure 7). If",
+  "content_type": "protocol",
+  "content_type_score": 34,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/star_protocols/PMC7988239/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 154548,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "fx2.gif",
+      "local_path": "data/media/star_protocols/PMC7988239/fx2.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 4451,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/fx2.gif"
+    },
+    {
+      "type": "image",
+      "filename": "fx3.gif",
+      "local_path": "data/media/star_protocols/PMC7988239/fx3.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 4299,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/fx3.gif"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC7988239/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 144262,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC7988239/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 160648,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC7988239/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 57795,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC7988239/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 112522,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC7988239/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 191505,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/star_protocols/PMC7988239/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 119871,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/star_protocols/PMC7988239/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 129444,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/star_protocols/PMC7988239/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7988239/",
+      "caption": "",
+      "bytes": 97453,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC7988239/gr8.jpg"
+    }
+  ]
 }

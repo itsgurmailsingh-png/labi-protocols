@@ -30,7 +30,15 @@
     "COBRA Toolbox v3.0",
     "Gurobi Optimizer 9.1.1",
     "R-3.6.2 for Windows (64 bit)",
-    "Lenovo G50-30 80G0 model laptop computer"
+    "Lenovo G50-30 80G0 model laptop computer",
+    "Timing: 2 weeks to 1 month",
+    "Many GSMMs are publicly available in online repositories such as the Kyoto Encyclopedia of Genes and Genomes (KEGG) (Kanehisa et al., 2016), the Biochemical Genetic and Genomic (BiGG) knowledge-base (Norsigian et al., 2020), the BioCyc collection of pathway/genome databases (Karp et al., 2019), MetaNetX (Moretti et al., 2021) and the ModelSEED and PlantSEED databases (Devoid et al., 2013; Seaver et al., 2014). The preparation of these models for flux balance analysis involves the automated reconstruction of all metabolic reactions taking place in the organism, supplemented by the functional annotation of genes, metabolites and pathways. This is usually followed by extensive manual curation and gap-filling (Prigent et al., 2017), the extent of which is subject to the quality of the initial model reconstruction (Lieven et al., 2020). Furthermore, predictions obtained from GSMMs can be reconciled with in vivo findings and used to identify current gaps in our knowledge of metabolism (Mienda, 2017). However, there are often inconsistencies that must be reconciled between models and experimental data that would otherwise result in outcomes that are falsely predicted by the model (false positives) or experimentally observed outcomes that the model fails to predict (false negatives).5.Create a genome-scale model for Synechococcus sp. PCC 7002 by converting model.xml into a .mat model in MATLAB:% Add cobratoolbox and Gurobi directories to MATLAB pathaddpath(genpath('C:\\Users\\xxxx\\xxxx\\cobratoolbox'))addpath(genpath('C:\\gurobi911'));% Initialize the COBRA ToolboxinitCobraToolbox% Create a .mat model from an XML modelfbamodel = readCbModel('modelXML.xml');Note: In order to relate genes, metabolites and reactions during FBA, the GSMM must contain a field of logical gene-protein-reaction (GPR) association rules. These rules record the involvement of every gene in every reaction of the metabolic network and must be adjusted when integrating new data that record differential gene expression under various conditions.Note: Although the field fbamodel.rules already exists within the model, running compute_reaction_expression.m creates the field fbamodel.grRules (a string representation of the GPR rules), which will be solved mathematically at the stage of omic data integration. As these new rules do not contain parentheses, it must be manually ensured that AND is solved before OR when substituting MIN and MAX respectively. This means that in the final expression, the MINs must be calculated before the MAXs. The function associate_genes_reactions.m called by compute_reaction_expression.m substitutes the ORs first (which become MAXs), and then the ANDs inside the MAXs. This generates an expression that first solves the ANDs (within an internal loop) and then solves the ORs (within an external loop).6.Create new fields within the model for grRules and two flux objectives (f and g) that will be specified in flux balance analysis:% Add new field for grRulesfbamodel = creategrRulesField(fbamodel)% Remove field c that is used to specify a single flux objectivefield = 'c';fbamodel = rmfield(fbamodel,field)% Create new fields f and g (whose length is equal to the number of reactions in the model)to later specify pairwise primary and secondary flux objectives in the modelfbamodel.f = zeros(742,1);fbamodel.g = zeros(742,1);% Save the model in .mat formatwriteCbModel(fbamodel,'format','mat','fileName','SynechococcusPCC7002.mat');7.Match the parsing of gene IDs in the transcriptomic data with those listed in fbamodel.genes:% Run the script compute_reaction_expression.m, which calls the function associate_genes_reactions.m in order to substitute the expressions AND and OR with MIN and MAX within fbamodel.grRules and creates the variables required for condition−specific flux balance analysis − i.e. pos_genes_in_react_expr, reaction_expression and ixs_genes_sorted_by_lengthcompute_reaction_expression;CRITICAL: When parsing the strings within grRules (i.e., replacing AND and OR with MIN and MAX), it is essential to check the parentheses to ensure that the code runs correctly. Depending on the existing parsing rules for parentheses, it may be necessary to edit associate_genes_reactions.m to adjust the substitution loop according to the model in question.CRITICAL: Steps 6 and 7 only apply when creating a new GSMM, as it must be ensured that a new grRules field is written in the model to link gene IDs in the omic dataset with those in the model. When applying the steps to a new model or data, it is important to ensure the consistency of gene names between external data and the GSMM, but modelers wishing to run the analysis for the Synechococcus GSMM only need to load the variables already saved in the code repository.8.As stated previously, conducting manual curation of all model fields, including genes, reactions, metabolites and subsystems prior to performing FBA is necessary to ensure the verity of biological outputs. Particularly, subsystems within the model may be known by multiple names or annotated inconsistently. It is also possible, as in our case, that several reactions are assigned with multiple subsystems or even none at all. In the case of reactions, we create a new array of subsystem names that are modified to account for reactions classified by more than one subsystem:% Create a cell array of subsystemssubsystems = fbamodel.subSystems;% Merge the same names for amino acid metabolism into a single subsystemold_aa = {'Amino Acid Metabolisms','Amino Acid Metabolism'};new_aa = 'Amino acid metabolism';subsystems = replace(subsystems,old_aa,new_aa);% Merge the same names for exchange reactions into a single subsystemsubsystems = replace(subsystems,'Exchange Reaction','Exchange');% Divide the names for lipid and cell wall metabolism into separate subsystemssubsystems = replace(subsystems,'Lipid and Cell Wall Metabolism', 'Lipid metabolism and Cell wall');% Merge the same names for unassigned reactions into a single subsystemold_none = {'None','Other'};new_none = 'Unassigned';subsystems = replace(subsystems,old_none,new_none);subsystems(cellfun('isempty',subsystems)) = {'Unassigned'};9.Since it has been used to differentiate multiple subsystems associated with single reactions in fbamodel.subSystems, the word 'and' can be used as a string delimiter to divide subsystem names across a cell array of separate strings:% Replace existing instances of 'and' with '&' within single subsystemsold_names = {'Metabolism of terpenoids and polyketides','Metabolism of terpenoids and polyketides','Metabolism of cofactors and vitamins','Coenzymes and prosthetic groups','Glycan biosynthesis andmetabolism','Nucleotides and nucleic acids','Nucleotide Metabolism','Carbohydrate Metabolism','EnergyMetabolism'};new_names = {'Metabolism of terpenoids & polyketides','Metabolism of terpenoids & polyketides','Metabolism of cofactors & vitamins','Coenzymes & prosthetic groups','Glycan biosynthesis &metabolism','Nucleotides & nucleic acids','Nucleotide metabolism','Carbohydrate metabolism',' Energymetabolism'};subsystems = replace(subsystems,old_names,new_names);% Split multiple subsystems across reactions into a cell array of strings by using 'and' as a delimiternew_subsystems = regexpi(subsystems,'and','split');% Remove trailing spaces from the end of each stringnew_subsystems = strtrim(new_subsystems);% Remove any blank cells remaining in the subsystems arraynew_subsystems{12}(2)=[];new_subsystems{225}(2)=[];% Replace subsystem names in the modelfbamodel.subSystems = new_subsystems;CRITICAL: Parsing strings at the correct positions within single subsystems and removing any trailing spaces and blank cells after name replacement are essential to ensure consistency and match strings accurately within subsystem names during Pathway-level PCA (optional) and Pathway-level correlation analysis (optional).",
+    "or Photosystem II (fbamodel.rxnNames =",
+    "Timing: < 5 min",
+    "In this analysis, PCA is being used to compare the contribution of each growth condition to the construction of dimensions that summarize the greatest proportion of variance in the dataset. Furthermore, specific genes and reactions contributing to variance between conditions can be pinpointed using Pathway-level PCA, wherein they are classified according to their genetic/metabolic function. The role of these genes and reactions in significant pathways or cellular processes can also be ascertained in a more detailed manner.",
+    "or coordinates (Figure",
+    "Timing: < 10 min",
+    "Timing: < 15 min"
   ],
   "steps": [
     {
@@ -75,7 +83,7 @@
     },
     {
       "step_id": 5,
-      "title": "Preparation of metabolic model",
+      "title": "Convert model to .mat using COBRA Toolbox",
       "instruction": "Any organism with a baseline GSMM and available transcriptomic data can be analyzed using this protocol. The COBRA Toolbox is a popular module for constraint-based reconstruction and analysis of metabolic networks in MATLAB (Heirendt et al., 2019). In most cases, models are written in the Systems Biology Markup Language (SBML) to ensure compliance with the COBRA modules used for analysis (Keating et al., 2006). In this instance, we convert the model directly into .mat format for analysis in MATLAB using the COBRA Toolbox (the resulting model is shown in Figure 1).Figure 1A list of all fields present in the Synechococcus sp. PCC 7002 GSMM (saved as fbamodel.mat).",
       "substeps": [],
       "is_critical": false,
@@ -99,9 +107,42 @@
     },
     {
       "step_id": 8,
-      "title": "Preparation of transcriptomic data",
+      "title": "Preprocess RNA‑seq reads",
       "instruction": "The transcriptomic profiles utilized in this study originate from three studies conducted by Ludwig and Bryant (2011, 2012a,b) that sequenced RNA reads for Synechococcus sp. PCC 7002 cells grown under different conditions (detailed in Table 2). Following their generation via SOLiD™ sequencing, the study by Yang et al. (2015) describes how these data have been preprocessed prior to their inclusion in our protocol. The reads obtained from the NCBI Sequence Read Archive (SRA) were filtered to eliminate low-quality reads and aligned against the Synechococcus genome using Burrows-Wheeler Aligner (BWA) software. Following this, the sequences that did not map to the reference genome, those that were mapped to the rRNA-coding regions or those aligned to more than one region were eliminated. The remaining uniquely mapped genes were converted into reads per kilobase million (RPKM) and fold change values.Table 2Experimental conditionsConditionDescription of culture conditionsReferenceStandard controlMedium A+ at 38°C, illuminated at 250 μmol photons m−2s−1, sparged in air with 1% (v/v) CO2, with cells harvested at OD730nm = 0.7.(Ludwig and Bryant, 2011)Dark oxicIncubated in darkness prior to harvest, sparged in N2(Ludwig and Bryant, 2011)Dark anoxicIncubated in darkness prior to harvest(Ludwig and Bryant, 2011)High lightIlluminated at 900 μmol photons m−2 s−1 prior to harvest(Ludwig and Bryant, 2011)OD 0.4Harvested at OD730nm = 0.4(Ludwig and Bryant, 2011)OD 1.0Harvested at OD730nm = 1.0(Ludwig and Bryant, 2011)OD 3.0Harvested at OD730nm = 3.0(Ludwig and Bryant, 2011)OD 5.0Harvested at OD730nm = 5.0(Ludwig and Bryant, 2011)Low O2Sparged in N2(Ludwig and Bryant, 2011)Low CO2Sparged with air [0.035% (v/v) CO2](Ludwig and Bryant, 2012a)N-limitedCells washed in medium A (lacking NO3−) and resuspended(Ludwig and Bryant, 2012a)S-limitedCells washed with MgCl2(Ludwig and Bryant, 2012a)PO43- limitedCells washed without (PO43-) harvested at OD 730 nm = 0.7(Ludwig and Bryant, 2012a)Fe-limitedCells washed in medium A with 720 μM deferoxamine me-sylate B added at OD730nm = 0.35(Ludwig and Bryant, 2012a)NO3-Standard growth in medium A (lacking NaNO3) with 25 mM HEPES, 1 μM NiSO4, 12 mM NaNO3(Ludwig and Bryant, 2012a)NH3Standard growth in medium A (lacking NaNO3) with 25 mM HEPES, 1 μM NiSO4 and 10 mM NH4Cl(Ludwig and Bryant, 2012a)CO(NH2)2Standard growth in medium A (lacking NaNO3) with 25 mM HEPES, 1 μM NiSO4 and 10 mM CO(NH2)2(Ludwig and Bryant, 2012a)Heat Shock1 h heat shock at 47°C(Ludwig and Bryant, 2012b)22°CStandard growth at 22°C(Ludwig and Bryant, 2012b)30°CStandard growth at 30°C(Ludwig and Bryant, 2012b)Oxidative stress5 μM methyl viologen added 30 min prior to harvesting(Ludwig and Bryant, 2012b)MixotrophicMedium A+ supplemented with 10 mM glycerol(Ludwig and Bryant, 2012b)Low saltMedium A+ containing 3 mM NaCl and 0.08 mM KCl(Ludwig and Bryant, 2012b)High saltMedium A+ containing 1.5 M NaCl and 40 mM KCl(Ludwig and Bryant, 2012b)",
-      "substeps": [],
+      "substeps": [
+        {
+          "instruction": "Download reads from NCBI Sequence Read Archive (SRA)",
+          "title": ""
+        },
+        {
+          "instruction": "Filter reads to remove low‑quality sequences",
+          "title": ""
+        },
+        {
+          "instruction": "Align reads to the Synechococcus genome using BWA",
+          "title": ""
+        },
+        {
+          "instruction": "Discard reads that did not map to the reference genome",
+          "title": ""
+        },
+        {
+          "instruction": "Discard reads that map to rRNA‑coding regions",
+          "title": ""
+        },
+        {
+          "instruction": "Discard reads that align to more than one region",
+          "title": ""
+        },
+        {
+          "instruction": "Convert uniquely mapped reads to RPKM values",
+          "title": ""
+        },
+        {
+          "instruction": "Calculate fold‑change values",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
@@ -221,45 +262,199 @@
       "step_id": 23,
       "title": "Pathway-level correlation analysis",
       "instruction": "Similar to the pathway-level PCA, a more detailed functional classification of correlation coefficients can be yielded by performing a pathway-level correlation analysis where mean absolute PCC values are classified according to the subsystems assigned to each reaction in the GSMM (see Figure 18 for a bar plot of pathway correlations). This provides an opportunity to study these components in a more detailed manner through expanding the scope of biological insights detected and establishing connections between reactions within the same pathway. In order to account for the differing number of reactions in each pathway, the number of reactions within a binned range of PCC values can also be recorded for each subsystem listed in the model (see Figure 19 for a heatmap of pathway correlations). In this way, correlations between flux rates in each pathway and their growth rates can be assessed more fairly. In this section, we demonstrate a pathway-level analysis in MATLAB using a table of correlation coefficients calculated between Biomass - ATP maintenance flux values and growth rates (where corr_ATP_table has been generated using the same steps as in correlation analysis).53.Extract correlation coefficients for the flux data in MATLAB and convert them into absolute values:% Load PCC values from tables generated during the correlation analysisATP_PCC = table2array(corr_ATP_table(:,3));ATP_PCC(isnan(ATP_PCC)) = 0;% Convert coefficients into absolute valuesATP_PCC_abs = abs(ATP_PCC);CRITICAL: Correlation coefficients are converted into absolute values prior to calculating the mean PCC for all pathways since only the magnitude of correlation (and not the direction) is considered when plotting the bar chart in Figure 18. However, the heatmap in Figure 19 indicates the signs of individual correlation coefficients as well as the number of reactions within each pathway.54.Calculate mean PCC values for each subsystem using the same number of reactions recorded within each subsystem (cardinality_subsystems) and reaction indices obtained for each subsystem (ixs_subsystems) as in Pathway-level PCA (optional):% Create an empty vector to store averages of PCC values for subsystems:ATP_PCC_mean = zeros(numel(ixs_subsystems),1);% Calculate mean PCC by subsystemfor c = 1:numel(ixs_subsystems) ATP_PCC_mean(c) = mean(ATP_PCC_abs(ixs_subsystems{c},1));end55.Plot a bar chart using the mean values:% Set subsystem names as x−axis labelsX_labels = categorical(list_subsystems);% Plot the subsystems (x) against mean pathway PCC values (y):X = categorical(list_subsystems);bar(X,ATP_PCC_mean);xlabel('Subsystems');ylabel('Mean PCC');hold onset(gca, 'XTickLabelRotation',45);Note: Since the mean absolute PCC values disregard the signs of individual correlation coefficients, we can also plot a heatmap recording the number of PCCs within a series of binned ranges for each subsystem. This gives a better indication of the number of reactions within each pathway as well as the direction of correlation.56.Create variables to store PCC values for all reactions within each subsystem:all_corr_ATP = cell(numel(ixs_subsystems),1);% Create bins to sort PCC valuesbin_1 = zeros(numel(ixs_subsystems),1);...bin_7 = zeros(numel(ixs_subsystems),1);57.Use a ‘for’ loop to record the number of correlation values within a given range for each bin:% Store correlation values for each subsystem in a cell arrayfor c = 1:numel(ixs_subsystems) all_corr_ATP{c} = ATP_PCC(ixs_subsystems{c},1);% Within this loop, temporarily convert each row of cells into numericals all_corr_ATP_val = cell2mat(all_corr_ATP(c,1));% Record the number of coefficients within each bin bin_1(c) = numel(find(all_corr_ATP_val >= −0.7 & all_corr_ATP_val = −0.5 & all_corr_ATP_val = −0.3 & all_corr_ATP_val = −0.1 & all_corr_ATP_val = 0.1 & all_corr_ATP_val = 0.3 & all_corr_ATP_val = 0.5 & all_corr_ATP_val < 0.7));end58.Plot the number of reactions in each bin and subsystem using a heatmap:% Concatenate bins horizontally into an arraycdata = horzcat(bin_1,bin_2,bin_3,bin_4,bin_5,bin_6,bin_7);% Label the bins (x)xvalues = {'[−0.7, −0.5[','[−0.5, −0.3[','[−0.3, −0.1[','[−0.1, 0.1[','[0.1, 0.3[','[0.3, 0.5[','[0.5, 0.7['};% Label the subsystems (y)yvalues = list_subsystems(:)';% Plot the heatmap using a custom colormap (ATPmap):h = heatmap(xvalues,yvalues,cdata,'Title','Biomass − ATP maintenance','XLabel','PCC','YLabel','Subsystems','Colormap',ATPmap,'ColorbarVisible','off');Note: Similar heatmaps can be plotted for the Biomass - Photosystem I and Biomass - Photosystem II correlation coefficients to evaluate the correlation between metabolic flux and growth rates across various pathways.Figure 18Example of bar chart for pathway-level mean absolute Pearson correlation coefficient (PCC) values calculated between Biomass - ATP maintenance fluxes (x) and growth rates (y).Part of this figure is reprinted with permission from Vijayakumar et al. (2020).Figure 19Example of PCC heatmap for pathway-level Pearson correlation coefficient (PCC) values calculated between Biomass - ATP maintenance fluxes (x) and growth rates (y)Red text in the bin labels indicates a negative correlation coefficient and blue text indicates a positive correlation coefficient. Part of this figure is reprinted with permission from Vijayakumar et al. (2020).",
-      "substeps": [
-        {
-          "instruction": "Similar to the pathway-level PCA, a more detailed functional classification of correlation coefficients can be yielded by performing a pathway-level correlation analysis where mean absolute PCC values are classified according to the subsystems assigned to each reaction in the GSMM (see Figure 18 for a bar plot of pathway correlations). This provides an opportunity to study these components in a more detailed manner through expanding the scope of biological insights detected and establishing connections between reactions within the same pathway. In order to account for the differing number of reactions in each pathway, the number of reactions within a binned range of PCC values can also be recorded for each subsystem listed in the model (see Figure 19 for a heatmap of pathway correlations). In this way, correlations between flux rates in each pathway and their growth rates can be assessed more fairly. In this section, we demonstrate a pathway-level analysis in MATLAB using a table of correlation coefficients calculated between Biomass - ATP maintenance flux values and growth rates (where corr_ATP_table has been generated using the same steps as in correlation analysis).53.Extract correlation coefficients for the flux data in MATLAB and convert them into absolute values:% Load PCC values from tables generated during the correlation analysisATP_PCC = table2array(corr_ATP_table(:,3));ATP_PCC(isnan(ATP_PCC)) = 0;% Convert coefficients into absolute valuesATP_PCC_abs = abs(ATP_PCC);CRITICAL: Correlation coefficients are converted into absolute values prior to calculating the mean PCC for all pathways since only the magnitude of correlation (and not the direction) is considered when plotting the bar chart in Figure 18. However, the heatmap in Figure 19 indicates the signs of individual correlation coefficients as well as the number of reactions within each pathway.54.Calculate mean PCC values for each subsystem using the same number of reactions recorded within each subsystem (cardinality_subsystems) and reaction indices obtained for each subsystem (ixs_subsystems) as in Pathway-level PCA (optional):% Create an empty vector to store averages of PCC values for subsystems:ATP_PCC_mean = zeros(numel(ixs_subsystems),1);% Calculate mean PCC by subsystemfor c = 1:numel(ixs_subsystems) ATP_PCC_mean(c) = mean(ATP_PCC_abs(ixs_subsystems{c},1));end55.Plot a bar chart using the mean values:% Set subsystem names as x−axis labelsX_labels = categorical(list_subsystems);% Plot the subsystems (x) against mean pathway PCC values (y):X = categorical(list_subsystems);bar(X,ATP_PCC_mean);xlabel('Subsystems');ylabel('Mean PCC');hold onset(gca, 'XTickLabelRotation',45);Note: Since the mean absolute PCC values disregard the signs of individual correlation coefficients, we can also plot a heatmap recording the number of PCCs within a series of binned ranges for each subsystem. This gives a better indication of the number of reactions within each pathway as well as the direction of correlation.56.Create variables to store PCC values for all reactions within each subsystem:all_corr_ATP = cell(numel(ixs_subsystems),1);% Create bins to sort PCC valuesbin_1 = zeros(numel(ixs_subsystems),1);...bin_7 = zeros(numel(ixs_subsystems),1);57.Use a ‘for’ loop to record the number of correlation values within a given range for each bin:% Store correlation values for each subsystem in a cell arrayfor c = 1:numel(ixs_subsystems) all_corr_ATP{c} = ATP_PCC(ixs_subsystems{c},1);% Within this loop, temporarily convert each row of cells into numericals all_corr_ATP_val = cell2mat(all_corr_ATP(c,1));% Record the number of coefficients within each bin bin_1(c) = numel(find(all_corr_ATP_val >= −",
-          "title": ""
-        },
-        {
-          "instruction": "& all_corr_ATP_val = −",
-          "title": ""
-        },
-        {
-          "instruction": "& all_corr_ATP_val = −",
-          "title": ""
-        },
-        {
-          "instruction": "& all_corr_ATP_val = −",
-          "title": ""
-        },
-        {
-          "instruction": "& all_corr_ATP_val =",
-          "title": ""
-        },
-        {
-          "instruction": "& all_corr_ATP_val =",
-          "title": ""
-        },
-        {
-          "instruction": "& all_corr_ATP_val =",
-          "title": ""
-        },
-        {
-          "instruction": "& all_corr_ATP_val < 0.7));end58.Plot the number of reactions in each bin and subsystem using a heatmap:% Concatenate bins horizontally into an arraycdata = horzcat(bin_1,bin_2,bin_3,bin_4,bin_5,bin_6,bin_7);% Label the bins (x)xvalues = {'[−0.7, −0.5[','[−0.5, −0.3[','[−0.3, −0.1[','[−0.1, 0.1[','[0.1, 0.3[','[0.3, 0.5[','[0.5, 0.7['};% Label the subsystems (y)yvalues = list_subsystems(:)';% Plot the heatmap using a custom colormap (ATPmap):h = heatmap(xvalues,yvalues,cdata,'Title','Biomass − ATP maintenance','XLabel','PCC','YLabel','Subsystems','Colormap',ATPmap,'ColorbarVisible','off');Note: Similar heatmaps can be plotted for the Biomass - Photosystem I and Biomass - Photosystem II correlation coefficients to evaluate the correlation between metabolic flux and growth rates across various pathways.Figure 18Example of bar chart for pathway-level mean absolute Pearson correlation coefficient (PCC) values calculated between Biomass - ATP maintenance fluxes (x) and growth rates (y).Part of this figure is reprinted with permission from Vijayakumar et al. (2020).Figure 19Example of PCC heatmap for pathway-level Pearson correlation coefficient (PCC) values calculated between Biomass - ATP maintenance fluxes (x) and growth rates (y)Red text in the bin labels indicates a negative correlation coefficient and blue text indicates a positive correlation coefficient. Part of this figure is reprinted with permission from Vijayakumar et al. (2020).",
-          "title": ""
-        }
-      ],
+      "substeps": [],
       "is_critical": true,
       "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:22:13.359050Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "The generation of a genome-scale view of metabolic activity is a useful step for many biological scientists, requiring the construction of a computational model that can be adapted to suit the purpose of each analysis by integrating omic additional data to simulate specific genetic or environmental conditions (Vijayakumar et al., 2018). Metabolic networks must be converted into a mathematical format that is both amenable to predictive modeling and able to effectively convey the functional state or behavior of the cell at a multi-systems level (Yurkovich and Palsson, 2015). To this end, genome-scale metabolic models (GSMMs) are mathematical representations of all known biochemical reactions and transmembrane transporters that occur within a living system. They provide a comprehensive view of all metabolic processes by recording and quantifying their flux, which can be defined as the rate of metabolic turnover or conversion of reactants into products (Palsson, 2015). Several methods for constraint-based reconstruction and analysis (COBRA) can be used to simulate flux through metabolic networks at the whole-genome scale (Bordbar et al., 2014). Among these, flux balance analysis (FBA) is a technique that utilizes linear programming to predict flux through all reactions in the metabolic network by locating a set of values in the solution space that best satisfies a given objective function representing the main metabolic goal for the cell (Reed, 2012; Dusad et al., 2020). With the rapid advent of high-throughput technologies, supplementation of GSMMs with multi-dimensional omic data describing various levels of biological organization can provide the opportunity to trace molecular components across multiple functional states and record their interactions (Blazier and Papin, 2012; Ebrahim et al., 2016; Li et al., 2018). However, the quality of available experimental datasets can severely limit the predictive power of the model (Yurkovich and Palsson, 2018). To this end, t",
+  "content_type": "protocol",
+  "content_type_score": 35,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/fx1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 316227,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/fx1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 362233,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 509753,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 253115,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 420784,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 132929,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr14.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr14.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 190694,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr14.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr15.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr15.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 181661,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr15.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr16.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr16.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 173912,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr16.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr17.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr17.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 140434,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr17.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr18.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr18.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 230189,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr18.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr19.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr19.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 490441,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr19.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 176943,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 438434,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 427792,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 322722,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 257778,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 250933,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 201149,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/star_protocols/PMC8488602/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8488602/",
+      "caption": "",
+      "bytes": 517926,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/star_protocols/PMC8488602/gr9.jpg"
+    }
+  ]
 }

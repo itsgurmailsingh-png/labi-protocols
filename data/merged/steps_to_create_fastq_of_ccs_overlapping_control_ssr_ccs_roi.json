@@ -1,0 +1,154 @@
+{
+  "protocol_id": "steps_to_create_fastq_of_ccs_overlapping_control_ssr_ccs_roi",
+  "parent_protocol_id": null,
+  "version_count": 1,
+  "title": "Steps to Create FASTQ of CCS Overlapping Control SSR - CCS ROI",
+  "author": "Gregory P Harhay",
+  "doi": "dx.doi.org/10.17504/protocols.io.9i6h4he",
+  "source_name": "protocols_io",
+  "source_url": "https://www.protocols.io/view/steps-to-create-fastq-of-ccs-overlapping-control-s-9i6h4he",
+  "citation": "dx.doi.org/10.17504/protocols.io.9i6h4he",
+  "license": "CC-BY 4.0",
+  "license_verified": true,
+  "license_url": "",
+  "license_note": "Confirmed via CrossRef DOI metadata: dx.doi.org/10.17504/protocols.io.9i6h4he",
+  "peer_reviewed": false,
+  "stats": {
+    "views": 0,
+    "runs": 0,
+    "bookmarks": 0,
+    "comments": 0
+  },
+  "quality_score": 3.5,
+  "category": "Genomics & Sequencing",
+  "estimated_time_mins": 60,
+  "materials": [
+    "Bedtools 2.27.1 https://github.com/arq5x/bedtools2 http://quinlanlab.org MatLab R2018b For those without Matlab licences, Matlab code can be run in CodeOcean at this Matlab Compute Capsule Phobos 3.3.12 Dr. Christoph Mayer Geneious 11.1.5 Biomatters Ltd Geneious was used to as wrapper for running sequence mappers, phobos, and sequence extraction"
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Acquire Reference Sequences",
+      "instruction": "Download annotated control SSR sequences and genome for mapping references (CP018802) from GenBank manually, via Geneious, or using a MatLab function.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Identify SSRs using Phobos",
+      "instruction": "Run Phobos to identify simple sequence repeats (SSRs) in the CP018802.1 genome, searching for repeats ranging from 2-mers to 10-mers.",
+      "substeps": [
+        {
+          "instruction": "Use the Geneious plugin for Phobos",
+          "title": ""
+        },
+        {
+          "instruction": "Set repeat unit naming to 'normalised alphabetical mode'",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Define and Synthesize SSR Control Duplexes",
+      "instruction": "Select the AAGC SSR locus (the largest tetranucleotide SSR below 100 bp) as the basis for synthesis. Synthesize oligos with 14 bp 5' flanking regions and 11 bp 3' flanks identical to CP018802, with 3 bp 5'-end overhangs to facilitate PacBio CCS library creation.",
+      "substeps": [
+        {
+          "instruction": "Synthesize 6 oligos to create 3 duplexes:",
+          "title": ""
+        },
+        {
+          "instruction": "NM4: 88 bp duplex, 63 bp SSR (4 AAGC repeat units removed from 79 bp genomic)",
+          "title": ""
+        },
+        {
+          "instruction": "NM3: 92 bp duplex, 67 bp SSR (3 AAGC repeat units removed from 79 bp genomic)",
+          "title": ""
+        },
+        {
+          "instruction": "NM2: 96 bp duplex, 71 bp SSR (2 AAGC repeat units removed from 79 bp genomic)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Map CCS to Control SSR",
+      "instruction": "Map raw PacBio Circular Consensus Sequence (CCS) files to the SSR reference using Geneious Assembler with Medium Sensitivity/Fast settings, iterating up to 5 times and mapping multiple best matches randomly.",
+      "substeps": [
+        {
+          "instruction": "For Single Control Duplex (NM4): Map 'Control_Single_Duplex_63bp_SSR_L_23088_raw.fastq' to the 88 bp/63 bp SSR reference and export to 'Control_Single_Duplex_63bp_SSR_L_23088_raw_map_AAGC_Nm4.bam' and '.bai' files.",
+          "title": ""
+        },
+        {
+          "instruction": "For Three Control Duplexes (NM2, NM3, NM4): Map 'Control_Three_Duplexes_SSR_L_23089_raw.fastq' using the NM3 sequence as the reference and export to 'Control_Three_Duplexes_L_23089_raw_map_AAGC_Nm3.bam' and '.bai' files.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Identify CCS Spanning the SSR ROI",
+      "instruction": "Use bedtools to identify CCS that completely overlap the SSR region of interest (ROI), including 5 bp on each flank. Use 0-based left coordinates and 1-based right coordinates for BED files.",
+      "substeps": [
+        {
+          "instruction": "For Single Duplex (NM4): Run 'bedtools intersect -a Control_Single_Duplex_63bp_SSR_L_23088_raw_map_AAGC_Nm4.bam -b CP018802_SSR_79bp_AAGC_Nm4.bed -F 1.0 -wa > Control_Single_Duplex_63bp_SSR_L_23088_raw_map_intersect_AAGC_Nm4.bam'.",
+          "title": ""
+        },
+        {
+          "instruction": "For Three Duplexes (NM3): Run 'bedtools intersect -a Control_Three_Duplexes_L_23089_raw_map_AAGC_Nm3.bam -b CP018802_SSR_79bp_AAGC_Nm3.bed -F 1.0 -wa > Control_Three_Duplexes_L_23089_raw_map_intersect_AAGC_Nm3.bam'.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Extract ROI and Generate FASTQ",
+      "instruction": "Use Geneious to view the CCS mapping and identify the ROI (the region between the end of the SSR and the first adjacent base of the flanking regions). Use the 'Extract' function to select bases within the ROI and write them to a new FASTQ file.",
+      "substeps": [
+        {
+          "instruction": "For Single Duplex (NM4): Export to 'Control_Single_Duplex_63bp_SSR_ROI_NM4.fastq'.",
+          "title": ""
+        },
+        {
+          "instruction": "For Three Duplexes (NM3): Export to 'Control_Three_Duplexes_L_23089_SSR_ROI_Nm3.fastq'.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Transfer Data to Matlab",
+      "instruction": "Move the resulting ROI FASTQ files into a Matlab Compute environment, such as a Matlab Compute Capsule at Code Ocean or a local environment.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "media": [
+    {
+      "type": "image",
+      "filename": "ba54a-80C1D559687311F08F960A58A9FEAC02.png",
+      "local_path": "data/media/protocols_io/steps-to-create-fastq-of-ccs-overlapping-control-s-9i6h4he/ba54a-80C1D559687311F08F960A58A9FEAC02.png",
+      "source_url": "https://files.protocols.io/external/ba54a-80C1D559687311F08F960A58A9FEAC02.png",
+      "caption": "",
+      "bytes": 432898,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/steps-to-create-fastq-of-ccs-overlapping-control-s-9i6h4he/ba54a-80C1D559687311F08F960A58A9FEAC02.png"
+    }
+  ],
+  "content_type": "protocol",
+  "content_type_score": 26,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
+}

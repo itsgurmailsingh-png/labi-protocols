@@ -20,10 +20,501 @@
   "estimated_time_mins": null,
   "materials": [
     "Image",
-    "application 1"
+    "application 1",
+    "A. createStructureGrid",
+    "B. buildFires",
+    "C. computeLR",
+    "1 library(FireLossRate)",
+    "2 # Load data —-",
+    "3 fi <- raster('fi.tif')",
+    "4 flame_arrival_time <- raster('flame-arrival-time.tif')",
+    "5 structures <- read_sf('study-area.shp')",
+    "6 # Execution —-",
+    "7 final <- computeLR(fi, flame_arrival_time, structures, maxDist=500)",
+    "2 library(sf)",
+    "3 library(raster)",
+    "4 library(dplyr)",
+    "6 structures <- read_sf('geonb_buildings-bâtiment_shp.shp')",
+    "7 structuresGrid <- createStructuresGrid(structures,",
+    "8 cellSize = 100,",
+    "9 mode = \"maximal\",",
+    "10 xmin = userDefined, ymin = userDefined,",
+    "11 xmax = userDefined, ymax = userDefined,",
+    "12 internalBuffer = 500)",
+    "13 # Create fire list",
+    "14 fireList <- buildFires('BPmapFIRaw.csv',",
+    "15 'BPmapBI.csv')",
+    "17 fi <- raster('BPmapFIMed.tif')",
+    "18 structuresGrid <- st_transform(structuresGrid, st_crs(fi))",
+    "19 xmin <- fi@extent@xmin",
+    "20 ymin <- fi@extent@ymin",
+    "21 nCols <- fi@ncols"
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Load required R packages",
+      "instruction": "Install and load the R packages required by FireLossRate: sf, raster, data.table, dplyr, ggplot2, and the FireLossRate package itself.",
+      "substeps": [
+        {
+          "instruction": "install.packages(c('sf','raster','data.table','dplyr','ggplot2'))",
+          "title": ""
+        },
+        {
+          "instruction": "install.packages('FireLossRate')",
+          "title": ""
+        },
+        {
+          "instruction": "library(sf)",
+          "title": ""
+        },
+        {
+          "instruction": "library(raster)",
+          "title": ""
+        },
+        {
+          "instruction": "library(data.table)",
+          "title": ""
+        },
+        {
+          "instruction": "library(dplyr)",
+          "title": ""
+        },
+        {
+          "instruction": "library(ggplot2)",
+          "title": ""
+        },
+        {
+          "instruction": "library(FireLossRate)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Create structure grid from shapefile",
+      "instruction": "Use createStructureGrid to convert a polygon shapefile of structures into a rectangular grid of Pixels with Structures (PWS) with a user‑defined cell size, counting method, extent, and optional border buffer.",
+      "substeps": [
+        {
+          "instruction": "Read the shapefile containing building polygons, e.g., structures <- read_sf('geonb_buildings-bâtiment_shp.shp')",
+          "title": ""
+        },
+        {
+          "instruction": "Define the grid cell size (e.g., cellSize = 100 m).",
+          "title": ""
+        },
+        {
+          "instruction": "Choose a counting method: \"maximal\" (count a structure each time it intersects a pixel) or \"minimal\" (count only in the pixel containing the largest portion of the structure).",
+          "title": ""
+        },
+        {
+          "instruction": "Specify the study‑area extent with four coordinates (xmin, ymin, xmax, ymax) as needed.",
+          "title": ""
+        },
+        {
+          "instruction": "Optionally set an internal buffer distance (e.g., internalBuffer = 500 m) to exclude structures within that distance from the grid border.",
+          "title": ""
+        },
+        {
+          "instruction": "Run the function, e.g., structuresGrid <- createStructureGrid(structures, cellSize = 100, mode = \"maximal\", xmin = userDefined, ymin = userDefined, xmax = userDefined, ymax = userDefined, internalBuffer = 500)",
+          "title": ""
+        },
+        {
+          "instruction": "The output is a rectangular grid where each pixel contains a count of structures.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Prepare fire‑hazard inputs (single fire)",
+      "instruction": "Load raster files that describe fireline intensity and flame‑arrival time for a single fire scenario.",
+      "substeps": [
+        {
+          "instruction": "fi <- raster('fi.tif')               # fireline intensity (kW/m) per burnt pixel",
+          "title": ""
+        },
+        {
+          "instruction": "flame_arrival_time <- raster('flame-arrival-time.tif')   # time of ignition per pixel",
+          "title": ""
+        },
+        {
+          "instruction": "structures <- read_sf('study-area.shp')   # pre‑computed structure grid if available",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Prepare fire‑hazard inputs (multiple fires)",
+      "instruction": "Convert Burn‑P3 simulation outputs (fire intensity and iteration files) into a long‑format fire list using buildFires.",
+      "substeps": [
+        {
+          "instruction": "fireList <- buildFires('BPmapFIRaw.csv', 'BPmapBI.csv')   # reads intensity and iteration files, converts from wide to long, and merges them",
+          "title": ""
+        },
+        {
+          "instruction": "# The resulting table has columns: FireID (iteration), column, row, fi (fire intensity in kW/m)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Align spatial reference of all layers",
+      "instruction": "Ensure that the fire intensity raster, flame‑arrival raster (if used), structure grid, and fire list share the same coordinate reference system and extent.",
+      "substeps": [
+        {
+          "instruction": "fi <- raster('BPmapFIMed.tif')   # median fire intensity raster for multiple‑fire case",
+          "title": ""
+        },
+        {
+          "instruction": "structuresGrid <- st_transform(structuresGrid, st_crs(fi))",
+          "title": ""
+        },
+        {
+          "instruction": "xmin <- fi@extent@xmin",
+          "title": ""
+        },
+        {
+          "instruction": "ymin <- fi@extent@ymin",
+          "title": ""
+        },
+        {
+          "instruction": "nCols <- fi@ncols",
+          "title": ""
+        },
+        {
+          "instruction": "nRows <- fi@nrows",
+          "title": ""
+        },
+        {
+          "instruction": "resolution <- (fi@extent@xmax - fi@extent@xmin) / fi@ncols",
+          "title": ""
+        },
+        {
+          "instruction": "fireList$column <- xmin - resolution/2 + fireList$column * resolution",
+          "title": ""
+        },
+        {
+          "instruction": "fireList$row    <- ymin - resolution/2 + fireList$row * resolution",
+          "title": ""
+        },
+        {
+          "instruction": "fireList <- st_as_sf(fireList, coords = c('column','row'))",
+          "title": ""
+        },
+        {
+          "instruction": "st_crs(fireList) <- st_crs(structuresGrid)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Compute loss rates for each fire",
+      "instruction": "Run computeLR to calculate direct and indirect loss rates for every PWS, using fire intensity, optional flame‑arrival time, and the structure grid. The default maximum distance from fire edge is 500 m but can be changed via maxDist.",
+      "substeps": [
+        {
+          "instruction": "final <- computeLR(fi, flame_arrival_time, structures, maxDist = 500)   # single‑fire case",
+          "title": ""
+        },
+        {
+          "instruction": "or, for multiple fires:",
+          "title": ""
+        },
+        {
+          "instruction": "output <- fireList %>%",
+          "title": ""
+        },
+        {
+          "instruction": "group_by(FireID) %>%",
+          "title": ""
+        },
+        {
+          "instruction": "group_map(~ computeLR(fi = .x, buildings = structuresGrid, maxDist = 500))",
+          "title": ""
+        },
+        {
+          "instruction": "Inside computeLR the following operations occur:",
+          "title": ""
+        },
+        {
+          "instruction": "1. Convert fire intensity (and flame‑arrival) files to the required format if needed.",
+          "title": ""
+        },
+        {
+          "instruction": "2. Verify that coordinates match the structure grid.",
+          "title": ""
+        },
+        {
+          "instruction": "3. Project fire positions onto the grid.",
+          "title": ""
+        },
+        {
+          "instruction": "4. Select PWS within a buffer of twice maxDist to speed computation.",
+          "title": ""
+        },
+        {
+          "instruction": "5. Compute centroids of selected PWS.",
+          "title": ""
+        },
+        {
+          "instruction": "6. Calculate Euclidean distance from each centroid to the fire edge (diagonal distances considered).",
+          "title": ""
+        },
+        {
+          "instruction": "7. For each PWS within maxDist:",
+          "title": ""
+        },
+        {
+          "instruction": "a. Compute direct‑exposure loss rate LR(%) = 4.94 * FLI^0.34 (Eq. 1).",
+          "title": ""
+        },
+        {
+          "instruction": "b. If FLI > 6800 kW/m, set LR = 100 %.",
+          "title": ""
+        },
+        {
+          "instruction": "c. For indirect exposure (structures up to 500 m from fire edge), compute Normalized Loss Rate NLR = -0.21 * ln(DFE) + 1.37 (Eq. 2) and multiply LR by NLR.",
+          "title": ""
+        },
+        {
+          "instruction": "d. Keep the maximum LR (direct vs indirect) for the pixel.",
+          "title": ""
+        },
+        {
+          "instruction": "8. Multiply each PWS’s structure count by its LR to obtain the number of lost structures.",
+          "title": ""
+        },
+        {
+          "instruction": "9. Compute totals:",
+          "title": ""
+        },
+        {
+          "instruction": "- Total structures = sum of all PWS counts.",
+          "title": ""
+        },
+        {
+          "instruction": "- Exposed structures = count of PWS with LR ≥ 0.",
+          "title": ""
+        },
+        {
+          "instruction": "- Lost structures = sum of (count * LR/100).",
+          "title": ""
+        },
+        {
+          "instruction": "- Average exposure loss rate = Lost structures / Exposed structures.",
+          "title": ""
+        },
+        {
+          "instruction": "- Average community loss rate = Lost structures / Total structures.",
+          "title": ""
+        },
+        {
+          "instruction": "10. Return two objects:",
+          "title": ""
+        },
+        {
+          "instruction": "a. Final list of impacted PWS with fire intensity, position, distance, and LR.",
+          "title": ""
+        },
+        {
+          "instruction": "b. Summary table with the five indicators above.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Summarize impact indicators",
+      "instruction": "Use the auxiliary function summaryLR (or extract the summary object returned by computeLR) to obtain a tabular view of the four core impact indicators: number of exposed structures, number of lost structures, average exposure loss rate, and average community loss rate.",
+      "substeps": [
+        {
+          "instruction": "summary <- summaryLR(final)   # for single‑fire case",
+          "title": ""
+        },
+        {
+          "instruction": "# The summary contains:",
+          "title": ""
+        },
+        {
+          "instruction": "#   - total structures",
+          "title": ""
+        },
+        {
+          "instruction": "#   - exposed structures",
+          "title": ""
+        },
+        {
+          "instruction": "#   - lost structures",
+          "title": ""
+        },
+        {
+          "instruction": "#   - average exposure loss rate (%)",
+          "title": ""
+        },
+        {
+          "instruction": "#   - average community loss rate (%)",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Visualize results with ggplot2",
+      "instruction": "Create maps showing loss‑rate per PWS, hourly area burnt, and land‑cover types (structure, water, fuel) using ggplot2.",
+      "substeps": [
+        {
+          "instruction": "library(ggplot2)",
+          "title": ""
+        },
+        {
+          "instruction": "ggplot() +",
+          "title": ""
+        },
+        {
+          "instruction": "geom_sf(data = final, aes(fill = LR)) +",
+          "title": ""
+        },
+        {
+          "instruction": "geom_sf(data = fire_perimeter, colour = 'red') +   # optional fire perimeter layer",
+          "title": ""
+        },
+        {
+          "instruction": "scale_fill_viridis_c(name = 'Loss Rate (%)') +",
+          "title": ""
+        },
+        {
+          "instruction": "theme_minimal()",
+          "title": ""
+        },
+        {
+          "instruction": "Save the figure for reporting.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Optional: Map aggregated statistics for multiple fires",
+      "instruction": "For probabilistic assessments, aggregate the per‑fire outputs to map the number of times each PWS was exposed (loss rate > 0 %) or damaged (loss rate ≥ 50 %). Also compute mean, median, min, max loss rates across iterations if desired.",
+      "substeps": [
+        {
+          "instruction": "# Example aggregation:",
+          "title": ""
+        },
+        {
+          "instruction": "exposure_counts <- bind_rows(output) %>%",
+          "title": ""
+        },
+        {
+          "instruction": "group_by(PWS_id) %>%",
+          "title": ""
+        },
+        {
+          "instruction": "summarise(times_exposed = sum(LR > 0),",
+          "title": ""
+        },
+        {
+          "instruction": "times_damaged = sum(LR >= 50))",
+          "title": ""
+        },
+        {
+          "instruction": "# Plot with ggplot2 as in the previous step.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:32:12.560943Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 18,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC10326497/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326497/",
+      "caption": "",
+      "bytes": 76879,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326497/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10326497/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326497/",
+      "caption": "",
+      "bytes": 102494,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326497/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10326497/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326497/",
+      "caption": "",
+      "bytes": 67407,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326497/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10326497/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326497/",
+      "caption": "",
+      "bytes": 171983,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326497/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC10326497/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326497/",
+      "caption": "",
+      "bytes": 131456,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326497/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC10326497/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326497/",
+      "caption": "",
+      "bytes": 98917,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326497/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC10326497/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10326497/",
+      "caption": "",
+      "bytes": 97837,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10326497/gr6.jpg"
+    }
+  ]
 }

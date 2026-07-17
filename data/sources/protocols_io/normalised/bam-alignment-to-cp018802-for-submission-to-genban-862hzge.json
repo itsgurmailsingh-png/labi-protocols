@@ -16,59 +16,155 @@
   "materials": [
     "Geneious 11.1.5",
     "BowTie2",
-    "samtools"
+    "samtools",
+    "https://www.ncbi.nlm.nih.gov/nuccore/CP018802.1"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Geneious 11.1.5 Biomatters Ltd or another read mapper such as BowTie2 samtools 1.9 GitHub http://htslib.org/",
+      "title": "Install required software",
+      "instruction": "Ensure Geneious 11.1.5 (or an alternative mapper such as BowTie2) and samtools version 1.9 are installed and accessible; samtools can be obtained from https://htslib.org/.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "https://www.ncbi.nlm.nih.gov/nuccore/CP018802.1",
+      "title": "Map libraries to reference",
+      "instruction": "Map each of the nine PacBio CCS libraries (L.17494, L.17495, L.17836, L.18256_1, L.18256_2, L.18257, L.19770, L.19771, L.19981) to the reference CP018802 using Geneious Assembler with the settings: Medium Sensitivity/Fast, iterate up to 5 times, and map multiple best‑matched reads randomly. Export each resulting alignment as a SAM file.",
+      "substeps": [
+        {
+          "instruction": "Open Geneious (or BowTie2) and load reference CP018802.",
+          "title": ""
+        },
+        {
+          "instruction": "Load a library (e.g., L.17494) and run the Assembler with the specified parameters.",
+          "title": ""
+        },
+        {
+          "instruction": "When the alignment finishes, export the alignment to a SAM file named <library>_GeneMap_CP018802.sam.",
+          "title": ""
+        },
+        {
+          "instruction": "Repeat for all nine libraries.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Nine PacBio CCS libraries were mapped to CP018802 L.17494 L.17495 L.17836 L.18256_1 L.18256_2 L.18257 L.19770 L.19771 L.19981 Mapping Parameters: Geneious Assembler, Medium Sensitiivity/Fast, iterate up to 5 times, Map multiple best matched randomly for 9 libraries Export each alignment to SAM",
+      "title": "Add read group metadata to SAM",
+      "instruction": "For each SAM file, use samtools addreplacerg to replace the read‑group header with the correct library (LB) and sample (SM) identifiers, then delete any original @RG line so the header matches the example format.",
+      "substeps": [
+        {
+          "instruction": "Run: samtools addreplacerg -r ID:LB:<library> -r SM:63250 -m overwrite_all -o <library>_GeneMap_CP018802_RG.sam <library>_GeneMap_CP018802.sam (e.g., for L.17494 use -r ID:LB:17494).",
+          "title": ""
+        },
+        {
+          "instruction": "Open the resulting *_RG.sam file and verify that the header contains only:",
+          "title": ""
+        },
+        {
+          "instruction": "@HD VN:1.0 SO:unsorted",
+          "title": ""
+        },
+        {
+          "instruction": "@SQ SN:CP018802 LN:2110642",
+          "title": ""
+        },
+        {
+          "instruction": "@RG ID:LB:<library> SM:63250",
+          "title": ""
+        },
+        {
+          "instruction": "Remove any original @RG header lines that do not follow this format and save the file.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Edit each SAM with SAM tools to append library as read group (RG) ID and append sample RG tag to each of the SAM alignments generated samtools addreplacerg -r ID:LB:17494 -r SM:63250 -m overwrite_all -o L.17494_GeneMap_CP018802_RG.sam L.17494_GeneMap_CP018802.sam Edit SAM read group (@RG) metadata, append library (LB) and sample (SM) metadata for each SAM, need to remove original @RG header line, for example change @HD VN:1.0 SO:unsorted @SQ SN:CP018802 LN:2110642 @RG ID:Unpaired_reads_assembled_against_CP018802 SM:L.17495_GeneMap_CP018802 @RG ID:LB:17495 SM:63250 to @HD VN:1.0 SO:unsorted @SQ SN:CP018802 LN:2110642 @RG ID:LB:17495 SM:63250 and save file",
+      "title": "Merge SAMs into final BAM",
+      "instruction": "Combine all read‑group‑corrected SAM files into a single BAM file using samtools merge.",
+      "substeps": [
+        {
+          "instruction": "Run:",
+          "title": ""
+        },
+        {
+          "instruction": "samtools merge H_somni.L.101617.S.63250.bam \\",
+          "title": ""
+        },
+        {
+          "instruction": "L.19981_GeneMap_CP018802_RG.sam \\",
+          "title": ""
+        },
+        {
+          "instruction": "L.19771_GeneMap_CP018802_RG.sam \\",
+          "title": ""
+        },
+        {
+          "instruction": "L.19770_GeneMap_CP018802_RG.sam \\",
+          "title": ""
+        },
+        {
+          "instruction": "L.18257_GeneMap_CP018802_RG.sam \\",
+          "title": ""
+        },
+        {
+          "instruction": "L.18256_2_GeneMap_CP018802_RG.sam \\",
+          "title": ""
+        },
+        {
+          "instruction": "L.18256_1_GeneMap_CP018802_RG.sam \\",
+          "title": ""
+        },
+        {
+          "instruction": "L.17836_GeneMap_CP018802_RG.sam \\",
+          "title": ""
+        },
+        {
+          "instruction": "L.17495_GeneMap_CP018802_RG.sam \\",
+          "title": ""
+        },
+        {
+          "instruction": "L.17494_GeneMap_CP018802_RG.sam",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "samtools merge H_somni.L.101617.S.63250.bam L.19981_GeneMap_CP018802_RG.sam L.19771_GeneMap_CP018802_RG.sam L.19770_GeneMap_CP018802_RG.sam L.18257_GeneMap_CP018802_RG.sam L.18256_2_GeneMap_CP018802_RG.sam L.18256_1_GeneMap_CP018802_RG.sam L.17836_GeneMap_CP018802_RG.sam L.17495_GeneMap_CP018802_RG.sam L.17494_GeneMap_CP018802_RG.sam Merge SAM files into a single BAM",
+      "title": "Access final BAM file",
+      "instruction": "The merged BAM file (H_somni.L.101617.S.63250.bam) is available for download at https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?run=SRR8080935 and is named SRR8080935_CP018802.bam.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
-    },
-    {
-      "step_id": 5,
-      "title": "",
-      "instruction": "BAM file available at https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?run=SRR8080935 , the download BAM file is named SRR8080935_CP018802.bam",
-      "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-17T13:45:18.102549Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 37,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "baitjrq6-7F267877687311F08F960A58A9FEAC02.png",
+      "local_path": "data/media/protocols_io/bam-alignment-to-cp018802-for-submission-to-genban-862hzge/baitjrq6-7F267877687311F08F960A58A9FEAC02.png",
+      "source_url": "https://files.protocols.io/external/baitjrq6-7F267877687311F08F960A58A9FEAC02.png",
+      "caption": "",
+      "bytes": 160854,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/protocols_io/bam-alignment-to-cp018802-for-submission-to-genban-862hzge/baitjrq6-7F267877687311F08F960A58A9FEAC02.png"
+    }
+  ]
 }

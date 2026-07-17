@@ -11,12 +11,105 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6251016/",
   "doi": "10.1016/j.mex.2018.11.003",
   "citation": "10.1016/j.mex.2018.11.003",
-  "category": "Other",
+  "category": "Taxonomy & Biodiversity",
   "tags": [],
   "estimated_time_mins": null,
   "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Define river sub‑basins and units",
+      "instruction": "Divide the Yangtze River Basin into 11 sub‑basins (Jinsha, Min‑Tuo, Jialing, Han, Wu, upper mainstem, middle mainstem, lower mainstem, Dongting, Poyang) and further partition them into 56 geographic units based on the natural river system and annual discharge.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Extract geographic attributes in ArcGIS",
+      "instruction": "Using the Spatial Analyst Tool in ArcGIS 10.0, obtain longitude, latitude, altitude, and channel‑length data for each unit. Generate a rectangular envelope covering the minimum and maximum x and y coordinates, compute the four corner points and the centre of gravity of the envelope, then calculate maximum, minimum and mean values of each factor with the Zonal Statistics tool. Acquire altitude data at 3 arc‑seconds (~90 m) resolution from the Shuttle Radar Topography Mission (SRTM) database via the International Scientific & Technical Data Mirror Site (http://datamirror.csdb.cn).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Perform hydrologic analysis and stream length",
+      "instruction": "In the Spatial Analyst Toolbox of ArcGIS, apply an eight‑direction (D8) flow model to a hydrologically conditioned elevation model (fill sinks) derived from a digital elevation model (DEM). Compute flow accumulation for each cell; designate cells with sufficient accumulated flow as streams to define the stream network. Sum the lengths of all streams within each unit to obtain total channel length.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Calculate taxonomic diversity in R",
+      "instruction": "Using R (see Appendix A), calculate the following indices for each unit:\n- Average Taxonomic Distinctness (Δ+): Δ+ = [∑∑_{i<j} ω_{ij}] / [s(s‑1)/2], where ω_{ij} is the distinctness weight between species i and j and s is the number of species present.\n- Total Taxonomic Diversity (sΔ+): sΔ+ = ∑_{i}[ (∑_{j≠i} ω_{ij}) / (s‑1) ].\nImplement the formulas directly on presence‑absence species data.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Estimate functional richness",
+      "instruction": "For each unit, construct a multidimensional functional trait space using species traits, then apply the quick‑hull algorithm to obtain the minimum convex hull that encloses all species; the hull volume represents functional richness.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Generate functional distance matrix and PCoA",
+      "instruction": "In R, compute a functional distance matrix using Gower’s distance to accommodate nominal, ordinal, continuous, and missing trait data. Perform a Principal Coordinates Analysis (PCoA) on this matrix and retain the species coordinates on the first three axes as synthetic functional traits describing fish functional strategies. Use the ‘FD’ and ‘vegan’ packages (see Appendix B).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Compute taxonomic β‑diversity",
+      "instruction": "For each pair of units, calculate the Jaccard dissimilarity index (β_jac) = (b + c) / (a + b + c), where a = species shared, b = species present only in the first unit, c = species present only in the second unit. Decompose β_jac into turnover (β_jtu) = 2 min(b,c) / (a + 2 min(b,c)) and nestedness (β_jne) = {[max(b,c) – min(b,c)] / (a + b + c)} × [a / (a + 2 min(b,c))].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Compute functional β‑diversity",
+      "instruction": "For each pair of units, obtain convex‑hull volumes V(C1) and V(C2) and their intersection V(C1∩C2). Compute functional β‑diversity = [V(C1) + V(C2) – 2 V(C1∩C2)] / [V(C1) + V(C2) – V(C1∩C2)]. Compute functional turnover = [2 min(V(C1),V(C2)) – 2 V(C1∩C2)] / [2 min(V(C1),V(C2)) – V(C1∩C2)] and functional nestedness = { |V(C1) – V(C2)| / [V(C1) + V(C2) – V(C1∩C2)] } × [ V(C1∩C2) / (2 min(V(C1),V(C2)) – V(C1∩C2)) ]. Relate a, b, c to volumes as a = V(C1∩C2), b = V(C1) – V(C1∩C2), c = V(C2) – V(C1∩C2).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Average β‑diversity across basins",
+      "instruction": "Using R packages ‘FD’, ‘betapart’, and ‘vegan’ (see Appendix C), calculate for each unit the mean β‑diversity by averaging all pairwise β‑diversity values (taxonomic and functional) between the focal unit and all other units.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Normalize diversity metrics",
+      "instruction": "For each of the nine diversity aspects (species richness, β‑species richness turnover, β‑species richness nestedness, taxonomic diversity, β‑taxonomic turnover, β‑taxonomic nestedness, functional diversity, β‑functional turnover, β‑functional nestedness), apply min‑max normalization: y_i = (x_i – min(x_j)) / (max(x_j) – min(x_j)), where i indexes the aspect and j indexes all units.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Calculate integrated diversity index",
+      "instruction": "Sum the nine normalized values for each unit to obtain the Integrated Diversity Index (IDI): IDI = Σ_{i=1}^{9} y_i. Sort units by descending IDI to identify priority zones for conservation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T08:07:07.070274Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "likely_not_protocol",
+  "content_type_score": 14,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true
 }

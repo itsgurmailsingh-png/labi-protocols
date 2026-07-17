@@ -29,78 +29,132 @@
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "LAST Debian GNU/Linux http://last.cbrc.jp/last/ Martin Frith lastdb Mus_musculus.GRCm38.cds.all.fa Create the transcriptome index from the transcriptome fasta file using lastdb. An anonymous pipe is used",
+      "title": "Create transcriptome index",
+      "instruction": "Use lastdb to create a transcriptome index from the transcriptome fasta file (Mus_musculus.GRCm38.cds.all.fa).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Map the reads to the Mmus transcripts with LAST. The results of that mapping can be piped through last-map-probs to exclude unlikely hits, then through my maf_bcsplit.pl script to convert to a one-line-per-mapping CSV format. This CSV format is further processed to make sure that there is only one mapping per transcript-read pair, and then aggregated to sum up counts per transcript. for id in trnCounts_LAST_${id}_vs_Mmus_transcriptome.txt done\" description=\"LAST mapping; probable hit filtering, read counting, and conversion to count file\" os_version=\"\" os_name=\"\" guid=\"1B6502BF437946C3A38477D61796DC83\" > for id in \"fwd_4T1_BC06\" \"rev_4T1_BC06\" \"fwd_4T1_BC07\" \"rev_4T1_BC07\" do lastal Mus_musculus.GRCm38.cds.all.fa trnCounts_LAST_${id}_vs_Mmus_transcriptome.txt done LAST mapping; probable hit filtering, read counting, and conversion to count file",
+      "title": "Map reads to transcripts",
+      "instruction": "Map reads to Mmus transcripts using LAST, filter unlikely hits with last-map-probs, and convert to a one-line-per-mapping CSV format using the maf_bcsplit.pl script.",
+      "substeps": [
+        {
+          "instruction": "Process the CSV to ensure only one mapping per transcript-read pair.",
+          "title": ""
+        },
+        {
+          "instruction": "Aggregate counts per transcript for samples: fwd_4T1_BC06, rev_4T1_BC06, fwd_4T1_BC07, and rev_4T1_BC07.",
+          "title": ""
+        },
+        {
+          "instruction": "Save results to files named trnCounts_LAST_${id}_vs_Mmus_transcriptome.txt.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Transcript counts are converted into a narrow table (one line per transcript/count/barcode tuple) that includes strand direction and a barcode tag: trnCounts <- lapply(c(\"fwd_4T1_BC06\", \"rev_4T1_BC06\", \"fwd_4T1_BC07\", \"rev_4T1_BC07\"), function(x){ res <- read.table(sprintf((\"trnCounts_%s_vs_Mmus_transcriptome.txt\"), x), stringsAsFactors=FALSE, col.names=c(\"Count\",\"Transcript\", \"Direction\")); if(grepl(\"rev\",x)){ res$Direction = c(\"-\" = \"+\", \"+\" = \"-\")[res$Direction]; } res$DB <- paste0(sub(\"..._4T1_\",\"\",x), res$Direction); return(res); }); trnCounts <- rbind(trnCounts[[1]],trnCounts[[2]],trnCounts[[3]],trnCounts[[4]]); trnCounts <- lapply(c(\"fwd_4T1_BC06\", \"rev_4T1_BC06\", \"fwd_4T1_BC07\", \"rev_4T1_BC07\"), function(x){ res <- read.table(sprintf((\"trnCounts_%s_vs_Mmus_transcriptome.txt\"), x), stringsAsFactors=FALSE, col.names=c(\"Count\",\"Transcript\", \"Direction\")); if(grepl(\"rev\",x)){ res$Direction = c(\"-\" = \"+\", \"+\" = \"-\")[res$Direction]; } res$DB <- paste0(sub(\"..._4T1_\",\"\",x), res$Direction); return(res); }); trnCounts <- rbind(trnCounts[[1]],trnCounts[[2]],trnCounts[[3]],trnCounts[[4]]);",
+      "title": "Convert counts to narrow table",
+      "instruction": "In R, convert transcript counts into a narrow table containing Count, Transcript, and Direction columns.",
+      "substeps": [
+        {
+          "instruction": "For 'rev' samples, flip the Direction values ('-' to '+' and '+' to '-').",
+          "title": ""
+        },
+        {
+          "instruction": "Create a barcode tag (DB) by combining the sample ID (removing '_4T1_') and the Direction.",
+          "title": ""
+        },
+        {
+          "instruction": "Combine the processed data for all four samples (fwd_4T1_BC06, rev_4T1_BC06, fwd_4T1_BC07, rev_4T1_BC07) into a single data frame (trnCounts).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "The transcript revision number (if any) is removed from the transcript ID: trnCounts$Transcript <- sub(\"\\\\.[0-9]+$\",\"\",trnCounts$Transcript); trnCounts$Transcript <- sub(\"\\\\.[0-9]+$\",\"\",trnCounts$Transcript);",
+      "title": "Clean transcript IDs",
+      "instruction": "Remove the transcript revision number (if present) from the transcript ID using a regular expression (sub('\\\\.[0-9]+$', '', trnCounts$Transcript)).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "The annotation file is loaded into memory: ensembl.df <- read.delim(\"ensembl_mm10_geneFeatureLocations.txt.gz\", col.names=c(\"Transcript\",\"Description\",\"Start\", \"End\",\"Strand\",\"Gene\",\"Chr\"), stringsAsFactors=FALSE); ensembl.df <- read.delim(\"ensembl_mm10_geneFeatureLocations.txt.gz\", col.names=c(\"Transcript\",\"Description\",\"Start\", \"End\",\"Strand\",\"Gene\",\"Chr\"), stringsAsFactors=FALSE);",
+      "title": "Load annotation file",
+      "instruction": "Load the Ensembl annotation file 'ensembl_mm10_geneFeatureLocations.txt.gz' into a data frame (ensembl.df) with columns: Transcript, Description, Start, End, Strand, Gene, and Chr.",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "The dplyr and tidyr packages are used to convert to a wide format, and pull the associated annotation from the ensembl annotation file: library(dplyr); library(tidyr); trnCounts.wide % summarise(Count = sum(Count)) %>% spread(DB, Count) %>% inner_join(ensembl.df, by=\"Transcript\"); library(dplyr); library(tidyr); trnCounts.wide % summarise(Count = sum(Count)) %>% spread(DB, Count) %>% inner_join(ensembl.df, by=\"Transcript\");",
+      "title": "Format and join data",
+      "instruction": "Use the dplyr and tidyr packages to transform the data into a wide format and merge it with the annotation file.",
+      "substeps": [
+        {
+          "instruction": "Summarize counts and spread the DB column into separate columns.",
+          "title": ""
+        },
+        {
+          "instruction": "Perform an inner join with ensembl.df by the 'Transcript' field.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Missing data is set to a count of zero to simplify subsequent computation: trnCounts.wide$WTfwd <- coalesce(trnCounts.wide$`BC06+`,0L); trnCounts.wide$WTrev <- coalesce(trnCounts.wide$`BC06-`,0L); trnCounts.wide$ρ0fwd <- coalesce(trnCounts.wide$`BC07+`,0L); trnCounts.wide$ρ0rev <- coalesce(trnCounts.wide$`BC07-`,0L); trnCounts.wide$WTfwd <- coalesce(trnCounts.wide$`BC06+`,0L); trnCounts.wide$WTrev <- coalesce(trnCounts.wide$`BC06-`,0L); trnCounts.wide$ρ0fwd <- coalesce(trnCounts.wide$`BC07+`,0L); trnCounts.wide$ρ0rev <- coalesce(trnCounts.wide$`BC07-`,0L);",
+      "title": "Handle missing data",
+      "instruction": "Replace missing data with a count of zero using the coalesce function for the following columns: WTfwd (BC06+), WTrev (BC06-), ρ0fwd (BC07+), and ρ0rev (BC07-).",
+      "substeps": [],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "This was a pilot experiment with no replicate data (hence why I refer to this as 'differential coverage', rather than differential expression. I would usually use software with proper statistical modeling (such as DESeq2 ), but in this case I'm generating a quick rough-cut comparison using basic R. I introduce a fudge factor to account for missing data, and use this factor in the calculation of differential coverage (as log2 fold change). The strand-specificity of the sequencing and transcript annotation allows this differential coverage to be determined for only those reads mapping in the correct direction. Results are rounded to 1 d.p. as an additional warning that these results have a low precision. As the alignment is to transcripts, the direction of the gene is ignored: fcFudge <- 5; trnCounts.wide$DCov <- round(log2(trnCounts.wide$WTfwd+fcFudge)-log2(trnCounts.wide$ρ0fwd+fcFudge),1); fcFudge <- 5; trnCounts.wide$DCov <- round(log2(trnCounts.wide$WTfwd+fcFudge)-log2(trnCounts.wide$ρ0fwd+fcFudge),1); However, if aligning to genome sequences, use the following code: fcFudge <- 5; trnCounts.wide$DCov <- round(ifelse(trnCounts.wide$Strand == 1, log2(trnCounts.wide$WTfwd+fcFudge)-log2(trnCounts.wide$ρ0fwd+fcFudge), log2(trnCounts.wide$WTrev+fcFudge)-log2(trnCounts.wide$ρ0rev+fcFudge)),1); fcFudge <- 5; trnCounts.wide$DCov <- round(ifelse(trnCounts.wide$Strand == 1, log2(trnCounts.wide$WTfwd+fcFudge)-log2(trnCounts.wide$ρ0fwd+fcFudge), log2(trnCounts.wide$WTrev+fcFudge)-log2(trnCounts.wide$ρ0rev+fcFudge)),1);",
+      "title": "Calculate differential coverage",
+      "instruction": "Calculate the differential coverage (DCov) as a log2 fold change using a fudge factor (fcFudge = 5) to account for missing data.",
+      "substeps": [
+        {
+          "instruction": "For alignment to transcripts: Calculate DCov as round(log2(WTfwd + 5) - log2(ρ0fwd + 5), 1).",
+          "title": ""
+        },
+        {
+          "instruction": "For alignment to genome sequences: Use the Strand column to determine whether to use fwd or rev counts: if Strand == 1, use (WTfwd, ρ0fwd); otherwise use (WTrev, ρ0rev).",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Finally, the resultant table is writtent out to a CSV file, ordered by the absolute value of the differential coverage statistic: trnCounts.wide <- arrange(trnCounts.wide, -abs(DCov)); write.csv(trnCounts.wide[,c(\"Transcript\",\"WTfwd\",\"WTrev\",\"ρ0fwd\",\"ρ0rev\", \"DCov\",\"Gene\",\"Description\",\"Chr\",\"Start\",\"End\")], file=\"wide_transcript_Counts_WTvsρ0.csv\", row.names=FALSE); trnCounts.wide <- arrange(trnCounts.wide, -abs(DCov)); write.csv(trnCounts.wide[,c(\"Transcript\",\"WTfwd\",\"WTrev\",\"ρ0fwd\",\"ρ0rev\", \"DCov\",\"Gene\",\"Description\",\"Chr\",\"Start\",\"End\")], file=\"wide_transcript_Counts_WTvsρ0.csv\", row.names=FALSE);",
+      "title": "Export results",
+      "instruction": "Order the final table by the absolute value of the DCov statistic and write the results to a CSV file named 'wide_transcript_Counts_WTvsρ0.csv'.",
+      "substeps": [
+        {
+          "instruction": "Include columns: Transcript, WTfwd, WTrev, ρ0fwd, ρ0rev, DCov, Gene, Description, Chr, Start, and End.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
-      "timers": [],
-      "substeps": []
+      "timers": []
     }
   ],
-  "verification_status": "verified",
+  "verification_status": "community_trusted",
   "normalised_at": "2026-06-18T22:06:47.899717Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "content_type": "protocol",
+  "content_type_score": 25,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "_cover_image_checked": true
 }

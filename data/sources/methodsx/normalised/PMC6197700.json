@@ -14,9 +14,178 @@
   "category": "Other",
   "tags": [],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "In order to verify the method, the results have to be checked through spoofing detection techniques. Several methods are available for detection of spoofing attack. We have adopted the analysis of signal ACF plot as it is a good indicator of the system under spoofing. In this method, the ACF is plotted and the spoofing is detected by the user through analysing the plots visually, looking for more than one peak in the plots. Furthermore, Shape Distortion based Spoofing metric (MSD) is also used to validate the results. The formula for the SD metric is given as under(2)MSD= ∑k=-KK(ACFmeasτkj- ACFTypτkj)2where(3)Rtypτij= 1-τiTcfor 1-τiTc> μnjμnjother wise,(4)Rmeasτij= ∑n= 0N-1rjncjne-j2πfIFjn,and the threshold is calculated by(5)ηj=C* NˆojIn Eqs. (2), (3), (4), (5), r(n) and c(n) are the digitized received signal and local generated replica PRN code respectively and e-j2πfIFjn is the local generated replica carrier for jth satellite. N is number of samples in integration time Ts and defined as N = fs * Ts, where fs is the sampling rate. μn is the calculated nominal values of ACF under the influence of noise. Tc is one chip time and k is the number of correlators on each side of the prompt correlator. Nˆoj is the estimated noise power, C is constant calculated from un-spoofed data and ηj is the threshold on signal distortion metric for jth satellite for spoofing detection based on satellite’s noise power."
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Plan spoofer delay and power profile",
+      "instruction": "Define the spoofer delay profile that specifies the time (or position) change and transmit power for each spoofing phase (alignment, control, pull‑off, capture) as illustrated in Fig. 1 and Table 1. The alignment phase transmits no power; during control the power is increased gradually to lock the target; during pull‑off the power stays at the planned level; capture ends the attack.",
+      "substeps": [
+        {
+          "instruction": "Alignment: 0–0 s, 0 m distance, 0 % power.",
+          "title": ""
+        },
+        {
+          "instruction": "Control: 0–20 s, 0 m distance, power ramps to required level.",
+          "title": ""
+        },
+        {
+          "instruction": "Pull‑off: 20–160 s, 0–800 m distance, power held at 100 % of required level.",
+          "title": ""
+        },
+        {
+          "instruction": "Capture: 160–180 s, 800 m distance.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Record field GNSS data with two receivers",
+      "instruction": "Deploy two identical GNSS recorders (MAX2769 front‑end, sampling rate 16.368 Msps, IF 4.092 MHz) each equipped with a TCXO of ±5 × 10⁻⁷ s/s accuracy. Record for 180 s: one receiver remains static (target) while the other (spoofer) moves up to 800 m according to the plan.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Validate recorded data via SDR navigation",
+      "instruction": "Process each recorder’s raw data with a software‑defined receiver (SDR) to obtain navigation solutions. Verify that the target remains within ~20 m of its nominal position and that the spoofer moves the planned 800 m, confirming correct data acquisition.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Coarse and fine code phase alignment",
+      "instruction": "Align the two recordings so that their epochs match. Perform coarse alignment by matching navigation‑message bit boundaries (millisecond accuracy). Then perform fine alignment by matching prompt‑arm sample positions from the tracking loops to achieve sample‑rate accuracy.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Determine code phase offsets (k, l)",
+      "instruction": "From the fine alignment, compute the sample offset between recordings. The example yields a difference of 28 461 822 samples (≈1 738 869.86 µs). Set k = 28 461 822 and l = 0 for use in the mixing equation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Match signal power and apply power profile",
+      "instruction": "Estimate carrier‑to‑noise ratio (C/N₀) for each recorder from the prompt I/Q envelope. Scale the recordings by a factor γ[n] that follows the pre‑planned spoofer power profile (γ[n] equals the required spoofer power advantage for the pull‑off and control phases, i.e., n > 20 s).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Determine clock frequency scaling factors (α, β)",
+      "instruction": "Re‑align code phase at the start of the control phase (≈20 s). The observed offset of 85 samples corresponds to a crystal frequency mismatch of 0.25965 ppm. Set α = 1.00000025965, β = 1 (or vice‑versa) for the mixing equation. An alternative method is to compute the mismatch from the receiver clock correction rates (0.920649 ppm and 0.666151 ppm, giving a mismatch of 0.254498 ppm).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Resample recordings to correct clock mismatch",
+      "instruction": "Resample the recording with the higher effective sampling rate using the scaling factor α (or β) so that both recordings share the same clock rate before mixing.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Mix recordings to generate synthetic spoofing signal",
+      "instruction": "Combine the two aligned, power‑matched, and clock‑matched recordings using the equation c[n] = γ[n]·a[αn + k] + b[βn + l], where a[n] and b[n] are the spoofer and target recordings, respectively, and the previously determined values of γ[n], α, β, k, and l are applied.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Verify synthetic signal using ACF and MSD metrics",
+      "instruction": "Analyze the autocorrelation function (ACF) of the mixed signal at 20 s intervals (e.g., 3 dB and –0.4 dB spoofer power advantage) to observe single‑peak (locked) or double‑peak (spoofed) behavior. Compute the MSD metric using equations (2)–(5) with N = fs·Ts, μₙ, Tc, etc., and compare to the threshold ηⱼ to confirm spoofing detection during the pull‑off phase.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T08:01:41.761493Z",
-  "llm_normalised": false
+  "llm_normalised": false,
+  "content_type": "protocol",
+  "content_type_score": 32,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC6197700/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6197700/",
+      "caption": "",
+      "bytes": 98337,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6197700/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC6197700/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6197700/",
+      "caption": "",
+      "bytes": 31147,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6197700/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC6197700/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6197700/",
+      "caption": "",
+      "bytes": 134992,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6197700/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC6197700/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6197700/",
+      "caption": "",
+      "bytes": 110708,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6197700/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC6197700/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6197700/",
+      "caption": "",
+      "bytes": 55802,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6197700/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC6197700/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6197700/",
+      "caption": "",
+      "bytes": 35668,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6197700/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC6197700/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6197700/",
+      "caption": "",
+      "bytes": 64729,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC6197700/gr7.jpg"
+    }
+  ]
 }

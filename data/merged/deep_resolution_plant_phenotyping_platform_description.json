@@ -2,7 +2,7 @@
   "protocol_id": "deep_resolution_plant_phenotyping_platform_description",
   "parent_protocol_id": null,
   "version_count": 1,
-  "title": "Deep-resolution Plant Phenotyping Platform Description",
+  "title": "Deep-resolution plant phenotyping platform description",
   "author": "Taras Pasternak",
   "doi": "dx.doi.org/10.17504/protocols.io.brsdm6a6",
   "source_name": "protocols_io",
@@ -19,235 +19,230 @@
     "bookmarks": 0,
     "comments": 0
   },
-  "quality_score": 15.5,
+  "quality_score": 11.5,
   "category": "Plant Biology",
   "estimated_time_mins": 186,
   "materials": [
-    "Fiji",
-    "HDF5",
-    "XUV-tool",
-    "Bio-Formats",
-    "Plugins"
+    "you can visualize every step, View>Log. NOTE",
+    "Detailed protocol for segmentation step by step:",
+    "Detailed protocol for nuclei analysis step by step:"
   ],
   "steps": [
     {
       "step_id": 0,
-      "title": "",
-      "instruction": "Image pre-processing pipeline:",
+      "title": "Import raw images into Fiji",
+      "instruction": "Open Fiji, choose Plugins → Bio‑Formats → Bio‑Formats Importer, select all relevant .lsm or .tiff series, and click OK.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 1,
-      "title": "",
-      "instruction": "Image analysis (segmentation/nuclei detection). For the analysis, images must be imported to organ analysis software ( https://lmb.informatik.uni-freiburg.de/lmbsoft/iRoCS/ ). Channel-&gt; import channel-&gt; Ok For better visualization, normalize button must be clicked and the signal should be adjusted by changes to gamma, alpha and choosing best color (figure 1 for clarity). 2-3-4 channels can be imported one by one. After that, the corresponding plugin should be applied: Segmented Root or Detect Nuclei. Figure 1. Example of software panel after importing channel with the Arabidopsis shoot. Important notices: NOTE1: IRoCS Toolbox is developed inside Freiburg University; hence its binaries are not signed for Windows SmartScreen. However, it is safe to run labelling.exe or other released executables, and their source code can be found on GitHub (https://github.com/lmb-freiburg/iRoCS-Toolbox). If Windows SmartScreen displays an information window when running labelling.exe, saying &#34;Windows protected your PC&#34;, you can click &#34;More Info&#34;, and then &#34;Run Anyway&#34;. NOTE2: you can visualize every step, View&gt;Log. NOTE3: make sure that you save your images in every step that you made a modification; the correction can NOT be recovered. NOTE4: it is recommended to save the file after labeling it with a new name. After channel rename, both channels have been saved, which is significantly increases the file size.",
+      "title": "Export images to HDF5",
+      "instruction": "In Fiji, select Plugins → HDF5 → Save to HDF5 and choose to create a new file or replace an existing one.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 2,
-      "title": "",
-      "instruction": "Import .lsm/.tiff file to Fiji: Plugins -&gt; Bio Formats -&gt; Bio-Formats Importer -&gt; select all relevant series -&gt; OK",
+      "title": "Stitch image tiles",
+      "instruction": "Stitch tiles using the recommended XUV‑tool or, alternatively, Fiji 3D stitching.",
+      "substeps": [
+        {
+          "instruction": "XUV‑tool: Add files to the project, select the tiles to stitch, run the stitcher, ignore current coordinates, click Run, then Save as .hdf5 (do NOT use “Save project”; default is .ims). When stitching multiple channels, first save tile positions from the first channel (Position Editor → note positions) and reuse them for subsequent channels.",
+          "title": ""
+        },
+        {
+          "instruction": "Fiji 3D stitching (alternative): Plugins → Stitching → deprecated → 3D Stitching, select the first and second series, click OK, then repeat by selecting the combined series and the next series until all series are stitched. Note that this method only stitches two tiles at a time and requires higher memory.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 3,
-      "title": "",
-      "instruction": "Export to HDF5: Plugins -&gt; HDF5 -&gt; Save to HDF5 (new or replace)",
+      "title": "Load HDF5 file into iRoCS",
+      "instruction": "In iRoCS, go to Channel → Import Channels, select the HDF5 file, and choose t0/channel0 as the channel to load.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 4,
-      "title": "",
-      "instruction": "1.Stitching in XUV-tool: (recommended):Add file to the proje )\" target=\"_blank\" rel=\"noopener\">ct-&gt; select files you want to stitch-&gt; Run stitcher-&gt; ignore the current coordinates -&gt;Run-&gt;Save as .hdf5 (do not use save the project; default saving option is .ims). When you scan simultaneously 2-3 channels, it is highly recommended to save the position of the tiles from the first channel (by click position editor and mention positions of each tile after stitching). When you stitched the second-third channels, use this information for each channel. In the case you stitched all channels automatically, you may have a slight differences in overlapping volume, which will affect your analysis in the future).",
-      "is_critical": true,
+      "title": "Segment root structure",
+      "instruction": "Run Plugins → C01 Segment root; set the processing element size to a value between 0.5 and 0.7 for reasonable runtime, and adjust gamma correction between 1 and 2 according to image quality.",
+      "substeps": [],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 5,
-      "title": "",
-      "instruction": "1.Alternatively, one can use Fiji 3D stitching option, but it allows to stitch only 2 tiles simultaneously and require much higher memory resources. Stitch: Plugins -&gt; Stitching -&gt; deprecated -&gt; 3D Stitching -&gt; select first and second series -&gt; OK, then repeat and select combined series and the third one, repeat until all the series are stitched together.",
+      "title": "Clean segmentation artifacts",
+      "instruction": "Optionally remove irrelevant segments and correct over‑segmented cells.",
+      "substeps": [
+        {
+          "instruction": "Hold Shift, right‑click on black background, then left‑click on any segment to delete it.",
+          "title": ""
+        },
+        {
+          "instruction": "Hold Ctrl, right‑click on a fragment, move the cursor to the fragment you wish to fuse, and left‑click to merge.",
+          "title": ""
+        }
+      ],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 6,
-      "title": "",
-      "instruction": "Detailed protocol for segmentation step by step:",
+      "title": "Add QC annotation marker",
+      "instruction": "Create a new annotation channel via Channels → New annotation channel, place a point at the QC location, and optionally rename the channel to “QC”.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 7,
-      "title": "",
-      "instruction": "Load HDF5 file : Channel -&gt; Import Channels -&gt; select file -&gt; select t0/channel0",
+      "title": "Attach iRoCS coordinate axis",
+      "instruction": "Select Plugins → C02 Attach iRoCS to segmented cells, choose the segmentation/cellular Masks channel as the segmentation input and the previously created QC channel as the QC input.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 8,
-      "title": "",
-      "instruction": "Perform segmentation : Plugins -&gt; C01 Segment root -&gt; for (THIS TYPE OF ROOT) adjust processing element size to 0.5-0.7 range for reasonable runtime and results. Smaller element size will produce better segmentation but consumes significantly more time and computational resources. Examples of recommended parameters are in Figure 2. Figure 2. Possible segmentation parameters. Processing element size can be 0.5-0.7; Gamma corrections are dependent from the image quality and can be in the range 1-2.",
+      "title": "Convert mask to cell markers",
+      "instruction": "Run the Connected Component Labeling plugin, choose “cells” as the marker type, and start processing.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 9,
-      "title": "",
-      "instruction": "Optionally remove irrelevant segments : while holding Shift, right-click on black background, then left-click on the segments to remove. Make correction of over-segmented cells: while holding Ctrl, right-click on one fragment, move the cursor to the fragment you want to fuse, and left-click on it. Examples are in figure 3. NOTE: This step is important if your images have particles or undesirable elements in your samples. Removing this issue helps to get a faster analysis and clear images. To remove this issue, move the bars and red lines in all the images and make sure to do not have large irrelevant segments. Figure 3. Example of the segmentation corrections. Blue arrow-irrelevant segments; white arrow- correction of the over-segmented cell. This option available only in version 1.2.4.",
-      "is_critical": true,
+      "title": "Assign cell layers",
+      "instruction": "Assign layers to segmented cells using either the Arabidopsis model or manual settings.",
+      "substeps": [
+        {
+          "instruction": "Arabidopsis root: Plugins → C03 Assign layers to segmented cell, load the model files downloaded from the iRoCS website, and click OK.",
+          "title": ""
+        },
+        {
+          "instruction": "Other organs: In the Channel Control window, move “/cellularMasks” and then “/annotation/segmented” to visible, set View type to “label”, Operation to “label marker”, open Marker Presets, choose a label marker design, and assign the desired cell type.",
+          "title": ""
+        }
+      ],
+      "is_critical": false,
       "timers": []
     },
     {
       "step_id": 10,
-      "title": "",
-      "instruction": "Add QC marker : Channels -&gt; New annotation channel -&gt; drop point in the place of QC-&gt; optionally rename to QC",
+      "title": "Label subtypes and cell files",
+      "instruction": "In Marker Presets, select “subtype” and click the desired cells; then select “cell file” and click cells to assign cell‑file numbers.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 11,
-      "title": "",
-      "instruction": "Attach axis : Plugins -&gt; C02 Attach iRoCS to segmented cells -&gt; select segmentation/cellular Masks channel as segmentation channel, the previously created channel with the marker as QC channel.",
+      "title": "Export segmentation results",
+      "instruction": "Channel → Export annotation channel to CSV to save the segmentation data.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 12,
-      "title": "",
-      "instruction": "Convert mask to a marker by using the corresponding plugin: choose connected component labeling and choose cells as marker type, start processing.",
+      "title": "Load HDF5 for nuclei detection",
+      "instruction": "Again, go to Channel → Import Channels, select the HDF5 file, and choose t0/channel0.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 13,
-      "title": "",
-      "instruction": "Assign layers : For Arabidopsis root: Plugins -&gt; C03 Assign layers to segmented cell -&gt; chose model files (download from website to your folder) Plugins -&gt; OK For the other root/organs you can do it manually: In the window channel control, you can move the channel “/cellularMasks” and after “/annotation/segmented” and select “visible”. Then in view type, choose a “label” and operation choose “label marker”. In section “marker presets,” choose a label marker design or assign a new one and choose the “cell type” for a label. Every time that you click over you selected cells, they will have a number and the contour of the cell the color that you selected. Figure 4. Example of assigned layers. Vasculature labeling with cell sub-type *arraow) and visible root asymmetry in epidermis - blue and magenta arrows. Quantitative geometry of each cells come in step 3.9.",
+      "title": "Detect nuclei",
+      "instruction": "Run Plugins → 01 Detect Nuclei and load the appropriate model file from the iRoCS website.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 14,
-      "title": "",
-      "instruction": "Subtype and cell file labels :In section “marker presets,” choose “subtype” and click over your selected cells. For the cell files, choose “cell file” and click on the cell you wish. Later on, you can recognize these cells in .csv file. See Figure 4 for visualization. Figure 5. Panel “Channel control” example.",
+      "title": "Label epidermal cells",
+      "instruction": "Use Plugin → 02 Label Epidermis, loading the Arabidopsis model from the website, or manually label at least 50 randomly chosen epidermal cells.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 15,
-      "title": "",
-      "instruction": "Export results. )\" target=\"_blank\" rel=\"noopener\">Channel&gt;Export annotation channel to CSV . Figure 6. Example of extracted data in .csv file.",
+      "title": "Add QC marker for nuclei",
+      "instruction": "Create a QC annotation channel as described in step 7.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 16,
-      "title": "",
-      "instruction": "Detailed protocol for nuclei analysis step by step:",
+      "title": "Attach axis for nuclei data",
+      "instruction": "Plugins → 03 Attach iRoCS, select the annotation/detector channel as the annotation input and the QC channel as the QC input.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 17,
-      "title": "",
-      "instruction": "Load HDF5 file : Channel -&gt; Import Channels -&gt; select file -&gt; select t0/channel0 channel",
+      "title": "Assign layers to nuclei",
+      "instruction": "Plugins → 04, load the model file (https://lmb.informatik.uni-freiburg.de/lmbsoft/iRoCS/wt-model.rf.h5) and the corresponding “Layer assignment” file.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 18,
-      "title": "",
-      "instruction": "Detect nuclei : Plugins -&gt; 01 Detect Nuclei -&gt; as a model use corresponding file from web-site",
+      "title": "Manually correct layers and nuclei",
+      "instruction": "If image quality, plant age, or species differ, open the annotation channel, select the label marker, and manually adjust layer and nuclei labels as needed.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 19,
-      "title": "",
-      "instruction": "Label epidermis: Plugin -&gt; 02 Label Epidermis -&gt; as a model, use file from the website (Arabidopsis only) or label manually at least 50 randomly chosen epidermis cells.",
+      "title": "Render 3D visualization",
+      "instruction": "View → Show OpenGL rendering; use plugin version 1.2.1 for segmented objects and version 1.2.4 for nuclei.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 20,
-      "title": "",
-      "instruction": "Add QC marker : Channels -&gt; New annotation channel -&gt; drop point in the place of QC-&gt; optionally rename to QC",
+      "title": "Export 3D structures for printing",
+      "instruction": "File → Export as Analyze and STL; the plugin converts data to .stl files, grouping cells with the same label into the same file.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 21,
-      "title": "",
-      "instruction": "Attach axis : Plugins -&gt; 03 Attach iRoCS -&gt; select annotation channel as annotation/detector and as QC previously created a channel with the marker as QC channel.",
+      "title": "Export final annotations and analyse",
+      "instruction": "Export annotation channels to CSV (Channel → Export annotation channel to CSV), open the files in Excel, and use columns such as X, Y, Z (center‑of‑mass), cell‑file number, distance from QC (µm), radial distance (µm), subtype, mitotic status, cell volume, nuclei radius, etc.; for root analysis also compute radians and un‑rolled coordinates for graphical presentation.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     },
     {
       "step_id": 22,
-      "title": "",
-      "instruction": "Assign layers : Plugins -&gt; 04 -&gt; select model file (corresponding model from website), &#34;Layer assignment &#34; file (direct link https://lmb.informatik.uni-freiburg.de/lmbsoft/iRoCS/wt-model.rf.h5)",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 23,
-      "title": "",
-      "instruction": "Corrections of the layers after segmentations and nuclei labeling. Models for segmentation, nuclei detection, and layers labeling were created for high-quality images for the root of 4 days old Arabidopsis plants. If you image quality or age of the plants (species) are different, you must use manual corrections for the layers. Nuclei corrections: choose annotation channel, label marker, and changes manually layer label.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 24,
-      "title": "",
-      "instruction": "3D-rendering. 3D rendering allows you to visualize organ structure as layers by layers by animation. )\" target=\"_blank\" rel=\"noopener\">View&gt;shown open GL rendering. For the segmented object, version 1.2.1 is optimal, while for the nuclei, version 1.2.4 is only abundant. Figure 7. Example of the stipule rendering",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 25,
-      "title": "",
-      "instruction": "Extraction of 3D cell structure for 3D printer. File&gt;export as analyze and STL This plugin converts your data to the .stlfile. Cell with the same label convert in the same file. 3D structure of each cell is available.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 26,
-      "title": "",
-      "instruction": "Export results. )\" target=\"_blank\" rel=\"noopener\">Channel&gt;Export annotation channel to CSV .",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 27,
-      "title": "",
-      "instruction": "Data extraction/presentation. After corrections, you need to export annotation channels to .csv and process them in excel. In an excel file. From the segmentation, you will have X, Y, Z as a position of center mass of the cells in the whole frame; label as the cell file number; distance from QC in µm, radial distance in µm, subtype; mitotic; cell file and cell volume. From the nuclei labeling, you will have: X, Y, Z as a position of the nuclei in the whole frame; label as the cell file number; distance from QC in µm, radial distance in µm, nuclei radius; subtype; mitotic; cell file. In the case of the root analysis, each cell/nuclei have three basic coordinates: distance from QC, radial distance, and radians (un-rolled organ). We would suggest using in the graphical presentation un-rolled root, e.g., radians on the x-axis and distance from QC as the y-axis. Volume can be embedded as third coordinates for the cells as well as for nuclei.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 28,
-      "title": "",
-      "instruction": "Statistical analysis. The platform allows us to extract at least all parameters from 5000 cells from Arabidopsis and 30000 cells for large roots (tobacco, tomato, millet). In the commonly used method, authors analyzed maximal 100 cells per root. The platform allows to collect more detailed information, which helps to get deeper insight of developmental processes as well as helps better understanding of plant responses to environmental stimuli.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 29,
-      "title": "",
-      "instruction": "Literature. Emmenlauer, M., Ronneberger, O., Ponti, A., Schwarb, P., Griffa, A., Filippi, A., ... &amp; Burkhardt, H. 2009. XuvTools: free, fast and reliable stitching of large 3D datasets. Journal of microscopy 233, 42-60. Pasternak, T., Tietz, O., Rapp, K., Begheldo, M., Nitschke, R., Ruperti, B., &amp; Palme, K. 2015. Protocol: an improved and universal procedure for whole-mount immunolocalization in plants. Plant methods 11, 50. Pasternak, T., Teale, W., Falk, T., Ruperti, B., &amp; Palme, K. 2018 A PLA-iRoCS Pipeline for the Localization of Protein–Protein Interactions In Situ. In Phenotypic Screening, Humana Press, New York, NY. 161-170 Schmidt, T., Pasternak, T., Liu, K., Blein, T., Aubry‐Hivet, D., Dovzhenko, A., ... &amp; Ronneberger, O. 2014. The iRoCS Toolbox–3D analysis of the plant root apical meristem at cellular resolution. The Plant Journal 77 , 806-814.",
-      "is_critical": false,
-      "timers": []
-    },
-    {
-      "step_id": 30,
-      "title": "",
-      "instruction": "Note: we recommended to orientated the root horizontally, with the root tip on the left side.",
+      "title": "Orient root for imaging",
+      "instruction": "Place the root horizontally with the tip on the left side before acquiring images.",
+      "substeps": [],
       "is_critical": false,
       "timers": []
     }
   ],
-  "verification_status": "verified",
-  "merged_at": "2026-06-18"
+  "media": [],
+  "content_type": "protocol",
+  "content_type_score": 48,
+  "verification_status": "community_trusted",
+  "merged_at": "2026-07-17"
 }

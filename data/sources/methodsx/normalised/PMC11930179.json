@@ -11,16 +11,359 @@
   "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
   "doi": "10.1016/j.mex.2025.103247",
   "citation": "10.1016/j.mex.2025.103247",
-  "category": "Other",
+  "category": "Bioinformatics",
   "tags": [
     "gabor filter",
     "lung tumor",
     "roi"
   ],
   "estimated_time_mins": null,
-  "materials": [],
-  "steps": [],
-  "verification_status": "verified",
+  "materials": [
+    "Local Sensitivity, (",
+    "Parameter Sharing, (",
+    "Hierarchical Feature Learning and (",
+    "Implementation of the Gabor Filter, (",
+    "Segmentation using contours to label ROI and (",
+    "kernel regularization and (",
+    "Feature Extraction, (",
+    "Feature Generation and (",
+    "Specificity and (",
+    "non-pre-processed data,",
+    "Haar Filter [35] and",
+    "model performance, (",
+    "overfitting/underfitting, (",
+    "model complexity and ("
+  ],
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Download and prepare dataset",
+      "instruction": "Download the IQ‑OTH/NCCD lung cancer dataset from https://www.kaggle.com/datasets/hamdallak/the-iqothnccd-lung-cancer-dataset?-Resource=download (1190 images, 140 cases, three classes: Normal, Benign, Malignant). Merge the Normal and Benign classes into a single non‑malignant class, yielding two classes (malignant, non‑malignant). Split the data into 80 % training and 20 % testing sets.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Apply Gabor filter",
+      "instruction": "For each image, apply a Gabor filter with parameters freq = 5, sigx = 0.25, sigy = 0.25; compute the absolute value, then normalize to 0‑255 using filtimg = (filtimg‑np.min(filtimg))/(np.max(filtimg)‑np.min(filtimg))*255 and convert to uint8.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Segment lungs using contours",
+      "instruction": "Segment the Gabor‑filtered image by: (1) converting to grayscale, (2) applying adaptive thresholding to obtain a binary image, (3) finding contours of bright lung areas, (4) selecting the largest contour, (5) computing its bounding box, (6) adding a fixed padding, (7) clipping the coordinates to stay within image bounds, and (8) cropping the lung region.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Sharpen cropped images",
+      "instruction": "Apply the sharpening kernel Sharpkernel = [[‑1,‑1,‑1], [‑1, 9,‑1], [‑1,‑1,‑1]] to the cropped ROI using a filter function (e.g., sharpimage = filter(inputimg, ‑1, Sharpkernel).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Organize sharpened images",
+      "instruction": "Further crop the sharpened images as needed and save them into separate folders for malignant and non‑malignant samples for downstream classification.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Configure data augmentation",
+      "instruction": "Create an ImageDataGenerator with the following parameters: rescale = 1./255, rotation_range = 20 ° for the CNN pipeline (10 ° for the EIM‑LTI pipeline), width_shift_range = 0.1, height_shift_range = 0.1, zoom_range = 0.10 (10 %), fill_mode = 'reflect', validation_split = 0.2, horizontal_flip = True. The generator will apply these transformations on‑the‑fly during model training.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Build CNN architecture",
+      "instruction": "Construct a CNN in Python 3 with the following layers: Input 300 × 300 × 3; Conv2D 32 filters 3 × 3 + ReLU; MaxPool 2 × 2; Conv2D 64 filters 3 × 3 + ReLU; MaxPool 2 × 2; Conv2D 128 filters 3 × 3 + ReLU; MaxPool 2 × 2; Conv2D 256 filters 3 × 3 + ReLU; MaxPool 2 × 2; Flatten; Dense 512 units with ReLU, L2 regularization λ = 0.01, Dropout = 0.5; Output Dense 1 unit with sigmoid activation.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Set training hyper‑parameters",
+      "instruction": "Compile the model with Adam optimizer (learning rate = 0.0001 for the architecture description, but experiments used a constant learning rate = 0.001), batch size = 64, loss = binary cross‑entropy, and enable restore_best_weights = True.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Train CNN with augmentation",
+      "instruction": "Fit the CNN on the training set using the ImageDataGenerator defined earlier, reserving 20 % of the training data for validation. Perform 5‑fold cross‑validation: split the dataset into five folds, iteratively use one fold as validation and the remaining four as training, and record per‑fold accuracies (98.63 %, 98.18 %, 98.17 %, 98.63 %, 97.71 %). Overall cross‑validation accuracy = 98.27 %.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Extract CNN features",
+      "instruction": "Create a feature‑extraction model that outputs the activations of the second‑last layer (layer ‑2). Use this model to generate feature vectors for all training images (traindata) and validation images (valdata).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Train linear SVM",
+      "instruction": "Instantiate scikit‑learn's SVC with kernel='linear'. Fit the SVM on the CNN‑extracted training feature vectors and the flattened training labels (use ravel() to ensure a 1‑D label array).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Evaluate model performance",
+      "instruction": "Compute the following metrics on the test set (or validation folds) using the standard formulas: Precision = TP/(TP+FP) × 100 %; Sensitivity/Recall = TP/(TP+FN) × 100 %; Specificity = TN/(TN+FP) × 100 %; F1‑Score = 2·Precision·Recall/(Precision+Recall). Record training loss, training accuracy, validation loss, and validation accuracy (e.g., CNN with Gabor filter: training accuracy ≈ 96.19 %, validation accuracy ≈ 95.48 %, learning rate = 0.001).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Test on balanced unseen data",
+      "instruction": "Download a separate balanced set of 50 malignant and 50 non‑malignant CT images from https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images?resource=download. Run the full EIM‑LTI pipeline (Gabor pre‑processing, segmentation, sharpening, augmentation, CNN feature extraction, SVM classification) on this set. Report confusion matrix (TP = 42, FN = 8, FP = 0, TN = 50) and derived metrics: Precision (malignant) = 1.0, Recall (malignant) = 0.84, F1‑Score (malignant) ≈ 0.91, Precision (non‑malignant) ≈ 0.98, Recall (non‑malignant) = 1.0, F1‑Score (non‑malignant) ≈ 0.98.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T03:00:05.374935Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Cross-validation is a broadly recognized methodology in machine learning. The technique uses multiple training-validation splits to produce a more reliable performance estimate of the model. Due to its iterative approach, the model can learn from various subgroups of data, eventually steering to a more general and steadier predictive performance. By using cross-validation approach organizations gain maximum data value and precise model performance evaluation through limited datasets.K-fold cross-validation technique has been employed to confirm the robust evaluation and generalization of the EIM-LTI model. During cross validation, the dataset is partitioned into five different folds. Among the five subsets of data, one of these was assigned as the validation set, while the other four subsets of data were applied for training the data in each iteration. The above process is repetitive iterative till every fold has been utilized as the validation set for once. The training and the validation sets are methodically varied, to mitigate the threat of overfitting and confirmed that the performance of the model was not inclined due to the data distribution. After the completion of five-fold cross validation, our model obtained an accuracy of 98.27 % through all the iterations. The achieved accuracy during its performance analysis proved that the model can effectively classify the data. Cross-validation serves as a performance metric and in hyperparameter tuning. The model is evaluated across various training-validation splits to adjust hyperparameters to improve predictive precision while inhibiting overfitting. Model reliability was proven by its reliable performance in all validation folds. Figs. 19 and 20 depict the cross-validation performance accuracy and the cross-validation accuracy per fold. The accuracy of five folds of cross-validation is 98.63 %, 98.18 %, 98.17 %, 98.63 % and 97.71 % respectively. Finally, the average accuracy is computed for five folds as 98.27 ",
+  "content_type": "protocol",
+  "content_type_score": 44,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "fx1.gif",
+      "local_path": "data/media/methodsx/PMC11930179/fx1.gif",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 8307,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/fx1.gif"
+    },
+    {
+      "type": "image",
+      "filename": "ga1.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/ga1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 72092,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/ga1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 57215,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr10.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr10.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 34145,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr10.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr11.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr11.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 84550,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr11.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr12.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr12.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 34263,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr12.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr13.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr13.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 49425,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr13.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr14.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr14.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 56083,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr14.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr15.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr15.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 37067,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr15.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr16.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr16.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 38371,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr16.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr17.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr17.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 29326,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr17.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr18.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr18.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 40141,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr18.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr19.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr19.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 35135,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr19.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 38258,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr20.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr20.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 37083,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr20.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr21.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr21.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 63709,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr21.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr22.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr22.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 51060,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr22.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 31617,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 41999,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 114299,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 42395,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 86202,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 67089,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC11930179/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11930179/",
+      "caption": "",
+      "bytes": 48134,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC11930179/gr9.jpg"
+    }
+  ]
 }

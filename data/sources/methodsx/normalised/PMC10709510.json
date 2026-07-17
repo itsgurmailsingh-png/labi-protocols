@@ -19,10 +19,1045 @@
   ],
   "estimated_time_mins": null,
   "materials": [
-    "Image"
+    "Image",
+    "Scale. Time in the model is run in years, with the time steps in a year set to either one-day or one-week. Thus, the user can specify the number of years, e.g., 10 or 100 years, and run a simulation with either 52 or 365 time steps per simulation. In a simulation, most of the processes will occur at every time step (e.g., growth), while some will occur only at certain times of the year, such as certain events in the life cycle of trees. The timing of such annual events is chosen to be close to reality (e.g., seed dispersal in summer). However, species-specific variability is not integrated. Furthermore, vegetation development is not seasonal or growing season dependent, i.e. there is no vegetation dieback in winter.",
+    "to partial shade (",
+    "and large sites (≥ 5000 m",
+    "Compared to the first version of the model [3], three major technical improvements have been implemented: version control, automated model testing, and variable landscape initialization. While the first two are primarily for the model development phase to ensure consistency and error prevention, the last one also has implications for the user in the application of the model.",
+    "As an important step in making model development traceable, we moved the model to the Git version control system. Changes to the model repository are now recorded in the form of commits, with comments and annotations. In the commits, we started using the keywords listed by Ayllón et al. [43] for maintaining model notebooks. Prior to the Git implementation, the extension with Ellenberg's EIVs described in this paper was implemented. The other software improvements were implemented using version control.",
+    "Another improvement to the model development phase was the implementation of automated model testing. Up to this point, the model had been developed in a straightforward manner for a specific landscape. The simulated results were manually checked for plausibility at the landscape level, with no automated test routines. We have now developed an automated routine to compare the model output at any time during development with the results of previous model runs. For these tests, we selected ecologically meaningful landscape scenarios from previous model runs to cover a wide range of settings. Model output for comparison included species cover and vegetation type information for all cells over the simulated time period. Differences were calculated for both image and text files. When the test script detected differences, we actively evaluated whether or not the code changes made were intended to affect the test scenario. In some cases, the changes in model behavior were intentional; in these cases, the valid test results were updated to reflect these model changes. This automated testing routine helped us track unexpected model behavior during the development process.",
+    "it gives the model the flexibility to change vegetation entities based on landscape needs without changing the source code; (",
+    "it allows transparency of all parameters and categorizations used by the model; and (",
+    "it made the code cleaner and also increased the consistent application of the processes. For example, some processes, such as seed dispersal, were previously initialized only for the hardcoded entity names. Therefore, we changed the trigger for the processes to a Boolean parameter in global initialization tables so that the dependency for the respective entities could be initialized accordingly.",
+    "The list of available herbaceous plants consisted of a wide range of ecologically diverse species and included one species that was typical for each type of patch (Table 12). For the simulation, the only difference between the species was their tolerance to the environment. All the other parameters of the plants were kept the same (gmax = 3.5 and FS = 10,000). Furthermore, the simulation was started with an equal cover of 1% for all species. Thus, growth differences depended only on the tolerance of a species to the environmental conditions of a cell. Our prediction was that in each patch only the most suitable plants would grow and eventually develop a high degree of cover.Fig. 6Patchy test landscape. Different patch types: (",
+    "surrounding open landscape; (",
+    "wet floodplain grassland; (",
+    "acidic and nutrient-poor moorlands; (",
+    "alkaline/calcareous and nutrient-poor moorlands; (",
+    "woodland edge; (",
+    "nonspecific woodland; (",
+    "acidic and nutrient-poor woodland; (",
+    "alkaline and nutrient-poor woodland; ("
   ],
-  "steps": [],
-  "verification_status": "verified",
+  "steps": [
+    {
+      "step_id": 0,
+      "title": "Model description",
+      "instruction": "This model description follows the ODD (Overview, Design concepts, and Details) protocol [16]. Earlier versions of the model were published separately, focusing on different aspects of the landscape: herbaceous vegetation and early woody encroachment. While herbaceous vegetation is a mandatory element of the model, wood encroachment is optional. As the model extension in this publication has been developed for herbaceous vegetation only, the description for the woody encroachment part only provides an overview. For more information on woody vegetation, see Hudjetz et al. [4].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 1,
+      "title": "Model description",
+      "instruction": "Following Supplement S3 of Grimm et al. [16], we provide a “nested ODD”, where the submodel representing herbaceous vegetation is described by an ODD description of its own. In addition, we follow Supplement S4 of Grimm et al. [16] on “ODD of modified models” by using different font colors to distinguish elements of the model that are new or from the two earlier versions. See Supplement 1 for the colored ODD document.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 2,
+      "title": "Model description",
+      "instruction": "Note that the ODD was specifically designed to be read in a hierarchical order, i.e. to get an overview first before going into details. We therefore recommend reading the Overview part of the ODD first (ODD 1, ODD 2, ODD 3), and also the Design Concepts part (ODD 4), as they introduce the overall structure and, in particular, the rationale of the model, which to our knowledge is the first (with its precursors) to use indicator values, or concepts from plant sociology, in a simulation model. After that, we recommend reading about the stylized test applications (Section ‘Two exemplary model applications for demonstration’) first, as it will facilitate understanding the details of the model, its initial settings, and calibration, if one knows the overall purpose of all this.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 3,
+      "title": "Model description",
+      "instruction": "The original Delphi code implementing the model has been overhauled. It is now strictly object-orientated. All objects and processes described in the text correspond to objects and methods in the source code. The executable version of the model is available at https://github.com/gaiac-eco/LandS.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 4,
+      "title": "Purpose and patterns",
+      "instruction": "Purpose. The main purpose of this model is to illustrate and predict vegetation succession in semi-natural landscapes for small-scale applications, such as a national park. Therefore, the model simulates the dynamics of the vegetation in a landscape mosaic and includes competition among herbaceous species as well as early wood encroachment. To make the model applicable to different landscapes, the modeled plant species from the data input files require calibration in a pre-configuration process. The model can be used to develop different management scenarios for situations where the landscape has changed or where changes are imminent. Examples include intended/planned changes in land management in protected areas, or action plans following severe storms that have created windthrow areas in forests. Ultimately, the model is intended as a decision support system (DSS) for stakeholders involved in the management of these landscapes.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 5,
+      "title": "Purpose and patterns",
+      "instruction": "Patterns. In evaluating the model, we distinguish between two types of vegetation patterns: equilibrium vegetation communities and intermediate state vegetation communities. Equilibrium patterns are observable in reality and can be derived from field data, expert knowledge, or the literature. Intermediate vegetation communities occur after a change in environmental conditions, such as abandonment. These communities transition between equilibria, are usually short-lived, and are not necessarily realistically simulated. We thus focus on the final outcome of succession, rather than on all the details of the transient dynamics, which are known to be often idiosyncratic anyway. If time series of vegetation data are available, the transition stage can also be evaluated.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 6,
+      "title": "Entities, state variables and scales",
+      "instruction": "The model contains the following entities: the landscape representing the global environment, grid cells, and two types of plant entities for the herbaceous and woody vegetation. The entities and their state variables are listed in Table 1.Table 1Model components. Simulation settings, state variables, and parameters of the model.Table 1Model componentSymbolDefault/Initialization valueUnitLandscape (global environment)Number of cells10 x 10–Cell sizeA100m2Number simulation yearsy10aTime steps per yeart365/52d/wCellX-Y-coordinates0,0–Type of cell, to be modeled or not to be modeledYes/No–Site Ecological Indicator Value for light, temperature, moisture, reaction, nutrientssite EIVL/T/M/R/N∈ [1, …, 9]1[–]Utilization intensity for cutting, grazing, tramplingIC/G/TRScenario specific1; ∈ [0, …, 100]–Available spaceAS–m²Vegetation typeVTStudy site/landscape specific; depending on observations–Herbaceous vegetation with grass and forb species (Study site/landscape specific)Species ecological indicator value for cutting, grazing, tramplingspecies EIVC/G/TR∈ [1, …, 9]2–Species ecological indicator value for light, temperature, moisture, reaction, nutrientsspecies EIVL/T/M/R/N∈ [1, …, 9]2–Maximum growth rategmax∈ [0, …, 10]1a-1Factor for self-regulationFS∈ [0, …, 15,000]1–CovercFor initialization depending on observations; later simulatedm2Woody vegetation with bush and tree species (Study site/landscape specific), optional and not used in the current model setup.1See the corresponding initialization section for further instructions on selection or calibration.2According to Ellenberg et al. [6], Dierschke [17], and Briemle et al. [10] within a maximal change of +/- 0.2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 7,
+      "title": "Entities, state variables and scales",
+      "instruction": "The landscape component contains the spatiotemporal information of the model, and deals with the simulation, i.e. iterations over years and time steps. The usual cell size is 10 m × 10 m, but it can be adjusted if necessary. The total size of the simulated area can be large, but it depends on the given study site. The maximal size simulated so far was about 1500 ha, i.e. 150,000 cells of 100 m² over a simulation period of 100 years, calculated in daily time steps. The landscape uses closed boundaries that represent the spatially explicit landscape derived from observations and mapping. In the landscape grid, modeled cells are typically embedded in an environment of unmodeled cells, which are assumed to be stable landscape elements that are not affected by succession. The general idea is that in order to produce recognizable maps and scenarios, it is helpful to include surrounding structures, such as roads or forest areas, that shape the landscape but are either not involved in the short-term succession or are only indirectly involved (e.g., forest areas can still serve as a seed source). These surrounding structures also act as a buffer around the modeled area, so the model is not dependent on periodic boundary conditions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 8,
+      "title": "Entities, state variables and scales",
+      "instruction": "Each cell is embedded in the landscape grid and characterized by its X/Y coordinates. Cells are divided into two types: cells to be modeled and cells not to be modeled. A modeled cell is further characterized by its environmental factors (i.e., light, temperature, soil moisture, reaction (soil pH), soil nutrients, and land use intensity of cutting, grazing, and trampling), which are determined by the study site and potential scenarios, see Section ‘Initialization’ ‘Site parameterization – site EIVs’ for a description on how to obtain values for these factors. These environmental factors are integrated either as site-specific Ecological Indicator Values (site EIVs) or as Utilization Intensity (I), see Section ‘Basic Principles’ for an in-depth explanation of the concept of EIVs. In each cell, the growth of the vegetation entities is modeled (Fig. 1). The whole community within a cell cannot occupy more than 100% of the area. Therefore, the available area, i.e. the area not yet covered by vegetation, in a cell is defined as a state variable. Each cell is further characterized by the state variable vegetation type, which represents the plant community in a cell. The vegetation type is used to initialize the vegetation entities. It is also a summarizing endpoint for convenient visualization and comparison with field surveys.Fig. 1General model concept.Fig 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 9,
+      "title": "Entities, state variables and scales",
+      "instruction": "The model contains two types of plant entities, herbaceous species (i.e., grass and forb species) and woody species (i.e., tree and bush species). In the model, we use a hybrid approach for them: an individual-based model (IBM) for woody species and a compartment model with difference equations for the herbaceous species. While woody species are further divided into two types according to their life form (bushes and trees), grass and forb species are modeled equally at the population level in a cell. Therefore, each cell can contain only one compartment of each herbaceous species, but more than one woody individual, depending on the cell size and the size/age of the individuals.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 10,
+      "title": "Entities, state variables and scales",
+      "instruction": "Herbaceous vegetation. Herbaceous plants are modeled as compartments in a cell, with the state variable cover representing the abundance of each species. In general, each herbaceous entity is characterized by species-specific, static state variables for its preference or tolerance to various environmental factors, i.e. species-specific Ecological Indicator Values (species EIVs). These values are derived from the phytosociological literature; see Section Initialization ‘Species parameterization – grouping and species-specific EIVs' on how and where to obtain these values. Other state variables are calibrated during the preliminary model setup, i.e. a maximum growth rate and a self-regulation factor (FS).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 11,
+      "title": "Entities, state variables and scales",
+      "instruction": "Because of the compartmental model, the herbaceous layer is modeled as a homogeneous entity in each cell. This does not allow for fine-scale heterogeneity, which is important for plant coexistence [18]. Therefore, FS is used to substitute for microsites that are unfavorable for the dominant species. The factor makes room for more inferior species by limiting the species to a maximum cover and preventing the best-adapted species from taking over all the space. Plants with a low FS value are reduced in growth at a lower cover than species with a high FS-value.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 12,
+      "title": "Entities, state variables and scales",
+      "instruction": "While it is possible to model all existing species in the herbaceous layer, this could lead to overparameterization and hinder model calibration and output. In these cases, a set of representatives can be selected. Representatives are either a single plant species or a plant group consisting of species with similar ecological characteristics. For further details about the choice and parameterization of representatives, see ‘Species parameterization’.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 13,
+      "title": "Entities, state variables and scales",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 14,
+      "title": "Entities, state variables and scales",
+      "instruction": "Scale. Time in the model is run in years, with the time steps in a year set to either one-day or one-week. Thus, the user can specify the number of years, e.g., 10 or 100 years, and run a simulation with either 52 or 365 time steps per simulation. In a simulation, most of the processes will occur at every time step (e.g., growth), while some will occur only at certain times of the year, such as certain events in the life cycle of trees. The timing of such annual events is chosen to be close to reality (e.g., seed dispersal in summer). However, species-specific variability is not integrated. Furthermore, vegetation development is not seasonal or growing season dependent, i.e. there is no vegetation dieback in winter.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 15,
+      "title": "Process overview and scheduling",
+      "instruction": "Landscape development is modeled by nesting processes at two spatial scales: the year and daily or weekly time steps within the year. All cells are recalculated from the upper left to the lower right at each time step. To account for interactions between neighboring cells, the relevant variables are stored and continuously updated throughout the cell cycle. Processes based on these neighbor interactions, which ultimately update the state variables, are then executed in separate cell cycles. The processes are scheduled as shown in Fig. 2.Fig. 2Processes and scheduling. Process names correspond to those of the submodels described in detail in Section ODD7.Fig 2",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 16,
+      "title": "Process overview and scheduling",
+      "instruction": "Herbaceous vegetation. For the forbs and grasses, we considered processes of vegetative growth, mortality and interspecies competition within a cell, and vegetative growth from adjacent, neighboring cells. In each time step, the following processes for the herbaceous layer are executed in the given order. They are divided into two cell cycles. The process names correspond to those of the submodels that implement them, which are described in detail in Section ODD 7.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 17,
+      "title": "Process overview and scheduling",
+      "instruction": "First cell cycle:•Update visualization, i.e. vegetation type by a decision tree using the cover of all entities (not in every time step, only twice a year)•Update of the cover of all herbaceous compartments (entities) in a cell by the dynamic growth and competition model, consisting of:•Mortality, which updates the cover of all compartments and the available space in the cell by the increased amount.•Potential growth in a cell, which updates the potential growth of each entity.•Potential growth to adjacent cells, which determines the target cell and the amount of potential ingrowth to the target cell, and updates the potential growth in the current cell by the reduced amount.•Realized growth (competition model), which uses the available space and the potential growth of all entities (in a cell and of its neighbors from the previous time step) to update the cover of each entity.•Update the storage variable of the amount of potential growth to neighboring cells in a temporary array for the next time step.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 18,
+      "title": "Process overview and scheduling",
+      "instruction": "In a second cell cycle, the sum of potential growth from neighbors in each cell is updated.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 19,
+      "title": "Process overview and scheduling",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 20,
+      "title": "Grid-based approach",
+      "instruction": "The model consists of two vegetation submodels that are embedded in a raster-based landscape. This raster-based approach allows the initialization with spatially explicit input data of the actual landscape, integrating the initial vegetation composition and the resulting neighborhood interactions, which are crucial for the course of the succession in a given landscape [12,[19], [20], [21], [22]. Moreover, the approach allows the simulation of various management regimes on distinct areas of the modeled landscape. Further, we chose a detailed spatial scale for the grid cells to avoid artifacts, which might result from a wider grid [23].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 21,
+      "title": "Ecological indicator values",
+      "instruction": "In our approach, the interaction of plant species with their environment is based on the plant sociological concept of Ecological Indicator Values (EIVs) often referred to as Ellenberg indicator values, which is one of the most prominent examples of EIVs [5,9]. EIVs are ordinal scales of environmental gradients such as light intensity, soil moisture, or nutrient availability that have been defined based on large, empirical datasets. The values do not represent physiological requirements, but rather the ecological preferences of plant species along these gradients. Thus, these values not only integrate the relationship of plants to environmental factors, but also capture to some extent distributional and competitive relationships. They are referred to here as 'species EIVs'. The actual growth, and hence cover, of a species then depends on how well the species EIVs match the corresponding environmental factors, the 'site EIVs'. Spatially explicit changes in site EIVs are used to simulate management or disturbance scenarios.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 22,
+      "title": "Coupling of compartment and individual-based modeling for plants",
+      "instruction": "In a landscape, different scales of vegetation need to be considered. In the case of grasses and forbs, clonal growth and size make it difficult to distinguish individuals in the field. Therefore, grasses and forbs are perceived more as the sum of these plants, whereas bushes and trees can be distinguished as single individuals in the landscape. To account for the activity of these plants at these different scales, we choose different modeling approaches for the vegetation layers: an IBM for woody species and a compartment model with difference equation for the grass and forbs. This type of hybrid approach is considered a powerful tool for environmental modeling [24,25]. For example, the model of native beech forests, BEFORE [26] uses cover to describe seedlings and young trees up to 3 m, and individuals to describe canopy and sub-canopy trees.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 23,
+      "title": "Vegetation types",
+      "instruction": "We use the plant sociological concept of plant communities to categorize vegetation patterns that correspond to different combinations of environmental factors [17]. In the model, these plant communities are referred to as vegetation types. Species composition and abundance (cover) can be used to describe and distinguish vegetation types. A distinction is usually made between differential and companion species. Differential species are characterized by their relative abundance and consistent occurrence in a given plant community. Companion species, on the other hand, are species that occur in a plant community but do not play a constant or dominant role. This concept allows aggregating the simulated cover of the plant species, the primary model output, into the vegetation type corresponding to that species composition. For this reason, the model is equipped with a decision tree that derives a vegetation type based on the simulated cover for each cell. This model output can then be linked to a GIS to visualize detailed raster maps, which is a precondition for the application by stakeholders who want to apply the model to existing landscapes [27].",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 24,
+      "title": "Initialization and calibration",
+      "instruction": "The initialization and calibration of the herbaceous vegetation are based on two general ecological concepts, the dynamic equilibrium of plant communities [28] and space-for-time substitutions [29]. Plant communities in equilibrium in the sense of Braun-Blanquet [30] include both climax communities and permanent communities (=Dauergesellschaften) that have not reached their climax state but are stable in composition. The space-for-time concept is used to determine the long-term effects of varying environmental conditions on vegetation types by using spatially different sites in the given landscape with varying conditions to substitute for the temporal observations of vegetation succession. For the pre-configuration, the equilibrium vegetation patterns under different environmental conditions of the studied landscape are used to calibrate two species-specific state variables (gmax and FS). The more vegetation types, and therefore combinations of environmental factors, used in the calibration, the better the plant behavior will reflect different real-world scenarios.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 25,
+      "title": "Emergence",
+      "instruction": "The main outputs of the model are vegetation type maps of the landscape that are based on a decision tree that evaluates the key outcomes of the simulation: the herbaceous plant cover, and the number, age and cover of trees and bushes. These key outcomes emerge from the competition within and between the different vegetation layers in a cell, the life cycle processes of trees and bushes, the disturbance by wildlife, and the effects of the environmental conditions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 26,
+      "title": "Emergence",
+      "instruction": "Herbaceous vegetation. The competitive vigor of herbaceous species emerges from their growth rate in relation to that of the other herbaceous species in the community of a cell, and depends directly on the environmental conditions. The cover of species over the simulation time results from their initial cover, their growth under competition, and the ingrowth from adjacent cells (neighborhood interactions). Spatial and temporal vegetation dynamics then emerge from the cover of single species.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 27,
+      "title": "Emergence",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 28,
+      "title": "Adaptation",
+      "instruction": "Herbaceous vegetation. Species have three behaviors that indirectly represent adaptation to their own state and that of their environment: the potential to grow into neighboring cells, the reduction of their growth under unfavorable environmental conditions, and a growth limit. Growth into neighboring cells is modeled as direct objective-seeking: if an entity's cover is above a threshold, it has the potential to grow into an adjacent cell (see Objectives and Stochasticity). Growth reduction under unfavorable conditions is modeled as indirect objective-seeking: if a species EIV is not equal to the corresponding site EIV in a cell its growth factor is reduced (see ‘Sensing’ below and ‘Calculation of growth rate’ in the Submodel section). The growth limit is also modeled as indirect objective-seeking. The species have two calibrated parameters, gmax and FS, which modify the growth rate. The values of the parameters are estimated for each species through an iterative calibration process (see ‘Species parameterization’ for a detailed description). The objective measures during calibration in the pre-configuration process are species assemblages with specific species cover that have been obtained at the study site. These vegetation assemblages differ between environmental conditions, e.g. the specific species cover of a meadow differs from the species cover of a pasture. If the simulated cover for a species during the pre-configuration process is not similar to the objective measure, the gmax and FS parameters are adjusted.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 29,
+      "title": "Adaptation",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 30,
+      "title": "Objectives",
+      "instruction": "Herbaceous vegetation. The objective measure of the adaptive behavior ‘growth into neighboring cells’ is the cover of the species. If the cover exceeds the threshold of 1%, a stochastic process is applied to decide whether the entity grows into a neighboring cell or not, and if so, which of the eight neighboring cells is chosen.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 31,
+      "title": "Objectives",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 32,
+      "title": "Sensing",
+      "instruction": "Herbaceous vegetation. Plant entities can sense the site conditions (i.e., light, temperature, moisture, reaction, and nutrients) and the management regimes (i.e., different types of land use) in their cell. They do this by comparing their own species' EIV with the corresponding site EIV of the cell. The comparison is made in separate control functions that result in a factor that modifies the growth of the species. For site conditions, Ellenberg's species EIVs indicate the realized niche for a plant species. The further the species deviates from the optimal values, the more its growth is reduced. Species with a lower Briemle species EIVs are more sensitive to a certain form of land use and are more heavily restricted in their growth.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 33,
+      "title": "Sensing",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 34,
+      "title": "Interaction",
+      "instruction": "The model includes interactions within and between the different vegetation layers. All plants compete directly or indirectly for space. Herbaceous species compete directly for space within their layer, while woody species, once germinated, grow and use the space indirectly in the herbaceous layer. Large trees can also interact directly with the environment by changing the light conditions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 35,
+      "title": "Interaction",
+      "instruction": "Herbaceous vegetation. Due to interspecific competition, species cannot always realize their full potential growth but have to share the available space with other species. The share of the available area that each species gets is calculated according to the species’ potential growth, which is calculated dynamically based on the species’ current growth rate. The species with the highest potential growth will achieve the biggest share of the available area and will outcompete the other species over time. This approach is similar to the concept of “lottery competition” [31].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 36,
+      "title": "Interaction",
+      "instruction": "When trees and bushes are available, certain species in the herbaceous layer can inhibit species-specifically the growth of woody seeds by reducing the number of woody seeds available in a cell.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 37,
+      "title": "Interaction",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 38,
+      "title": "Stochasticity",
+      "instruction": "To take natural variation into account, several processes are calculated stochastically:",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 39,
+      "title": "Stochasticity",
+      "instruction": "Herbaceous vegetation. Since the raster-based approach can only distinguish between the different covers of species in different cells, and no information about distribution within a cell is given, the spatial dispersal of plants is modeled stochastically. At each time step, it is randomly chosen whether a plant grows into an adjacent cell. The probability (p) of spread to neighboring cells is implemented as a linear function of species’ cover (c), so that the higher the cover, the greater the probability of dispersal to other cells (p = c / cell size). It is randomly chosen, into which one of the adjacent cells the species spreads, as well as the percentage of growth that is transferred to the adjacent cell.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 40,
+      "title": "Stochasticity",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 41,
+      "title": "Stochasticity",
+      "instruction": "Disturbance by wildlife. Used for woody vegetation, therefore not relevant for the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 42,
+      "title": "Observation",
+      "instruction": "The primary output of a simulation is the cover of each species in each cell. For visualization, the cover of the dominant plants and differential species is used in a decision tree to derive the vegetation type corresponding to the species composition of a cell. These vegetation types can then be used to illustrate the simulation results in detailed raster-maps. The representation as a raster map with the cells as vegetation types resembles the results of a biotope mapping as it is done in reality in nature conservation and thus enables the comparison and transfer of the simulation results. The user can either view the output in the graphical user interface (GUI) or export it to text or CSV files for further analysis or upload to a GIS.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 43,
+      "title": "Observation",
+      "instruction": "The GUI provides the user with an interactive copy of the simulated landscape, allowing navigation through the simulated years and individual cells. The vegetation type in each cell is indicated by a different color. Different observation tabs provide the user with different information, either based on a selected cell or for the entire simulated area (landscape level). For each cell, the user can toggle between a graph showing the development of each species cover over the simulated time or a pie chart view showing the species cover for a single simulation year. In addition, the user can view cell-defining environmental properties, such as the site EIVs, as well as simple summaries, such as the number of trees and bushes in a cell. For the entire simulated area, the user can also view graphs over time and pie charts, similar to the cell evaluation, but now for the species cover of all cells. These views are particularly useful for calibration and when simulating a homogeneous area. At the landscape level, the user is also provided with a pie chart showing the percentage of vegetation types present.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 44,
+      "title": "Initialization",
+      "instruction": "Each landscape contains specific vegetation communities. While the basic concept of the model is generic and applicable to many landscapes, the model requires landscape-specific (= case-specific) initialization data that define the entities of a simulated landscape, i.e. the species of the herbaceous vegetation and the associated vegetation types. This means that the model must be pre-configured and calibrated for a specific landscape before simulations can be run. While the initialization uses data input files, which can be changed, the core concept of the model depends on using the same species list for a given study area with all its sites. Species competition and species adaptation to different environmental conditions will handle the site-specific variations within the study area. This means, for example, that in previous applications in the Eifel National Park in Germany [3], meadows, pastures, and abandoned grasslands were all modeled with the same initialization data for species.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 45,
+      "title": "Initialization after pre-configuration",
+      "instruction": "For initialization the model uses imported settings from initialization files, to allow case-specific initialization of different landscapes, and global parameters specified by the user in the GUI. These initialization files can be divided into two types of data: Tables with global settings that define the available plant species and their state variables, and raster-maps with cell-specific settings that define the state variables of the cells (Table 2). The tables with global initialization values are the result of the pre-configuration (see the next subsections for a detailed description of the general pre-configuration approach) and are generic for simulations within a landscape, while the cell-specific raster-maps are case-specific and partially exchangeable depending on the simulated scenario. For small test simulations, the cell-specific initialization files can be replaced with user input in the GUI to create a homogeneous cell grid.Table 2Overview of the elements for the initialization.Table 2ElementSourceTypeVegetation types and initial plant coverField data, literature on plant communities and vegetation classification (see ‘Vegetation types for initialization and evaluation’).Global tablesHerbaceous speciesField data, expert knowledge, and species EIVs as suggested by Ellenberg et al. [6], Dierschke [17], and Briemle et al. [10]; guidance for calibration (see ‘Species parameterization’).Global tableWoody speciesOptional and not used in the current model setup.Global tableVegetation type mapField data, status quo of the landscape, with cell-specific attribution of number of woody species, when applicable.Cell-specific grid mapSite EIVs mapObservations, soil map, digital terrain models (DTM), and expert knowledge; guidance for site EIVs (see ‘Site parameterization’).Cell-specific grid mapLand use map (present and historic)Observations, aerial photographs, historical maps and interviews with farmers and land users; guidance for site-specific EIVs (see ‘Site parameterization’).Cell-specific grid mapDecision tree for vegetation types (for output)Developed based on the available species and possible vegetation types of the current landscape (see ‘Vegetation types for initialization and evaluation’).Global table",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 46,
+      "title": "Initialization after pre-configuration",
+      "instruction": "The GUI allows the user to specify various settings, turn on/off mechanisms, and set the values for global parameters during a simulation. Some of the global parameters (Table 3) modulate the herbaceous vegetation growth model by changing the environmental control functions of the site conditions and weights to balance the effect of all factors. Depending on the landscape studied, each environmental control function of a site condition (light, temperature, soil moisture, reaction, and nutrients) can be adjusted by changing its slope for species with regular EIVs. In addition, the control function can be fitted with a slope and an alternative optimum for species with an indifferent EIV (see the ‘Dynamic Growth Model’ section in the Herbaceous Vegetation submodel for more details). Fitting these values is part of the pre-configuration.Table 3Global parameters specified in the GUI for the initialization.Table 3Global parameters in the GUISymbolDefault/Initialization valueSlope for the control functions of each EIVL/T/M/R/NslopeL/T/M/R/N∈ [0, …, 2]Slope for the control functions of each EIVL/T/M/R/N for species with indifferent EIVsslopered_L/T/M/R/N∈ [0, …, 1]Optimum for the control functions of each EIVL/T/M/R/N for species with indifferent EIVsOptred_L/T/M/R/N∈ [0, …, 1]Weights for environmental factors (light, temperature, moisture, reaction, nutrients, cutting, grazing, trampling)wL/T/M/R/N/C/G/TR∈ [1, …, 20]",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 47,
+      "title": "Initialization after pre-configuration",
+      "instruction": "Landscape and Cells. The landscape grid is created as a blank slate and then initialized with cell-specific information from raster maps or GUI input fields. Scenarios are later simulated by spatially explicit changes in environmental conditions or management for a cell or area or cells. It also includes global parameters such as calibrated slope and optimum values for the control functions or weights for each environmental factor.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 48,
+      "title": "Initialization after pre-configuration",
+      "instruction": "Herbaceous vegetation. The entities are initialized with the status quo cover. However, this spatially explicit initialization of herbaceous entities is simplified, because vegetation maps typically consist of mapped vegetation types with a list of plants in each vegetation type. Accordingly, each cell is assigned a vegetation type for which a specific cover per plant species has been defined and provided in the imported global tables.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 49,
+      "title": "Initialization after pre-configuration",
+      "instruction": "For simulating secondary succession, such as the development of established plant communities following a change in land use, this approach of starting with the status quo vegetation cover has proven useful. However, to simulate primary succession, i.e. the development of vegetation following disturbance or construction activities that result in larger areas with raw soil conditions, a soil seed bank can be mimicked by initializing all available species in the landscape with a low initial cover, e.g. 0.1%.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 50,
+      "title": "Initialization after pre-configuration",
+      "instruction": "Herbaceous entities of the same species only differ in their state variable ‘cover’ at initialization. This depends on the cell and its vegetation type in which they were created. Entities of different species will also differ based on the remaining state variables defined in the imported global tables. EIVs are based on literature values. Species with similar ecological preferences and occurrences may also be similar at initialization.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 51,
+      "title": "Initialization after pre-configuration",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 52,
+      "title": "Initialization after pre-configuration",
+      "instruction": "Disturbance by wildlife. Used for woody vegetation, therefore not relevant for the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 53,
+      "title": "Necessary data obtained from a pre-configuration",
+      "instruction": "The pre-configuration includes the following mandatory elements: vegetation types, herbaceous layer entities, and environmental conditions. The main sources for the pre-configuration are local vegetation relevés from different sites of the study area, covering the different environmental conditions and combinations. They are supplemented by expert knowledge, literature, or historical data (Table 2). The quality and completeness of the vegetation data available from the study area can greatly influence the quality of the pre-configured model, it is important to cover the range of environmental conditions. Detailed instructions for the pre-configuration and the estimation of site-specific EIVs are provided below.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 54,
+      "title": "Necessary data obtained from a pre-configuration",
+      "instruction": "Herbaceous vegetation. For vegetation distribution, the cover of each modeled species must be specified for each vegetation type. A cell is then assigned a vegetation type and the corresponding cover for all its entities. The initial vegetation distribution in the simulated landscape can influence the simulation outcome. Species that would be favored by a certain set of environmental conditions, but do not exist in that part of the landscape, might migrate from other parts of the landscape and thus affect vegetation dynamics.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 55,
+      "title": "Necessary data obtained from a pre-configuration",
+      "instruction": "Environmental conditions. Site and soil conditions are defined similarly to Ellenberg's species EIVs on a 9-point scale. Land use is applied with relative values between 0 and 100 for cutting, grazing, and trampling, i.e., all set to 0 for no disturbance.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 56,
+      "title": "Necessary data obtained from a pre-configuration",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 57,
+      "title": "General approach for the pre-configuration and calibration of the model",
+      "instruction": "The pre-configuration of the model and the parameter calibration of the chosen entities have a great influence on the model output. Therefore, we describe here the general approach and patterns followed for calibration. These are required for each new landscape to be simulated. Existing model configurations are listed in Table 4.Table 4Landscapes with existing preliminary model setups.Table 4Landscape and site locationSpecial featuresSourceMesophilic, extensively used grassland; Eifel National Park, GermanyBased on land use, Briemle EIVsSiehoff et al. [3]Windthrow areas in spruce forests; Hochsauerland district, GermanyBased on land use and environmental conditions, Briemle's EIVs and Ellenberg's EIVsNot published",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 58,
+      "title": "Vegetation types for initialization and evaluation",
+      "instruction": "Vegetation types, a concept from phytosociology (see ‘Basic principles’), are important for the aggregation of information on species composition and abundance at a higher landscape scale. They play two roles in the model. First, they manage the initialization of plant entities, and second, they aggregate the simulated cover of all plants into a single endpoint for visualization. Therefore, we initialize the model with three different global tables: one general, one for the initialization process, and one for the evaluation process (Table 5). Each of these tables must be adapted to the specifics of a new landscape during the pre-configuration.Table 5Different types of initialization tables depend on the vegetation type.Table 5TableDescriptionVegetation typeContains all vegetation types of the landscape and whether a type is simulated or not, e.g. roads or field paths are structural elements and are not dynamically simulated. It is required as attribute table for the raster-based vegetation type map.Initialization coverContains all simulated vegetation types with the respective initialization cover for each relevant plant entityDecision treeContains dominating and districting entities with thresholds to derive the vegetation type from the simulated cover of the plant assemblage",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 59,
+      "title": "Vegetation types for initialization and evaluation",
+      "instruction": "Set of vegetation types. Using field data from a given study area and expert knowledge is the best way to determine the vegetation types of a landscape in the pre-configuration process. First, an analysis of vegetation relevés (or vegetation inventories) and vegetation maps can be used to determine which vegetation types are most prevalent in the study area. In addition, it is important to determine which vegetation types are in a stable state of equilibrium under the current environmental conditions and which vegetation types may be in an active successional process between equilibrium states. These equilibrium states will be the reference for the calibration of species competition parameters (see ‘Initialization’). It is also necessary to analyze which environmental factors, such as light availability in forests, soil moisture in arid areas, or soil nutrients in nutrient poor areas, etc., or some combination of thereof, are responsible for the observed patterns in the current landscape. This can then be used to calibrate the weights for site EIVs in the model, and thus the influence, that individual environmental factors have in modifying the growth function of species in a simulation (see ‘Calculation of growth rate’ in the submodel section).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 60,
+      "title": "Vegetation types for initialization and evaluation",
+      "instruction": "Initialization cover. Simulations typically begin with the vegetation status quo at a study site. However, the real landscape is simplified in that each vegetation type is assumed to have a particular species composition and cover. It is therefore necessary to specify the initial cover of each herbaceous entity for a given vegetation type. This initial cover is also derived from the relevés, e.g. as an average of the mapped plots of a vegetation type. However, it is important to use only plots that represent mostly pure equilibrium states of a vegetation type for the calculation to exclude edge effects due to vegetation plots that are in a transition between states.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 61,
+      "title": "Vegetation types for initialization and evaluation",
+      "instruction": "Decision tree. One of the last steps in the pre-configuration is usually the creation of the decision tree. The decision tree is based on the dominant and differential species that are used in the current simulation and their cover in a cell. The model executes queries using logical conditions such as “IF species 1 > 50% AND/OR species 2 < 5%”. Once a logical condition is satisfied, the corresponding vegetation type is assigned to a cell. It is therefore important to make the conditions specific enough and to allocate them in an ecologically meaningful order, e.g. starting with the dominant species with a high cover, followed by a combination of species with a high cover and differential species that indicate certain conditions. An example decision tree for the Eifel National Park with the dominant grasses Arrenatherum elatius, Cynosurus cristatus, Dactylis glomerata, Holcus lanatus, Festuca rubra agg. and Lolium perenne, and the climbing plants as differential species is shown in Fig. 3.Fig. 3An example decision tree for deriving vegetation types from species composition, the name of species is referring to their simulated cover, first published by Siehoff et al. [3].Fig 3",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 62,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "In our approach, species interaction with the environment relies on EIVs (see ‘Basic principles’). This means that a species depends on how well its species EIVs match the corresponding environmental factors, the site EIVs. For this interaction to work, it is necessary to provide corresponding scales for site EIVs. Unlike species EIVs (see ‘Species parameterization’), site EIVs are not generally available. In the past, there have been some attempts to generate site EIVs for different plant communities, e.g. Böcker et al. [32]. However, there are not many sources available for easy reference. Therefore, we provide general guidance on how to obtain site EIVs.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 63,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Briemle site EIVs. The Briemle species EIVs describe the tolerance of species to three types of land use (utilization): cutting, grazing, and trampling [10]. They have been developed mainly for grasslands. The scale ranges from less tolerant (1) to very tolerant (9). For the corresponding site EIVs, Siehoff et al. [3] developed a relative intensity scale and defined different land use scenarios (Table 6).Table 6Land use scenarios with their corresponding utilization intensity were first published by Siehoff et al. [3].Table 6Description of the land use formUtilization intensity (cutting – grazing – trampling)Hay-meadow75 – 1 – 1Mown pasture (very extensive)75 – 20 – 10Extensive pasture0 – 35 – 20Intensive pasture0 – 50 – 50Sheep pen0 – 85 – 85 or 0 – 80 –80Fallow0 – 1 – 1",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 64,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Ellenberg site EIVs. The original Ellenberg species EIVs describe the optimum of species in their realized niche [17]. Therefore, we use a different approach than for the Briemle site EIVs and introduce Ellenberg site EIVs as 9-point scales analogous to the original species scales. There are two ways to determine the values at a given site: (1) calculation of average species EIVs based on all mapped species of a vegetation type, and (2) theoretical estimation from other sources such as soil maps with parameters such as elevation, slope, and soil parameters. Both approaches have their advantages and disadvantages (Table 7). The calculation of site EIV from average species EIVs is a common practice in the analysis of vegetation data and is well described [5,17]. Site EIVs derived from a detailed vegetation mapping can indicate very small-scale changes in local conditions. Theoretical estimation of site EIVs requires expert knowledge of phytogeography and is more general because national soil maps are often provided at larger scales and fine-scale maps are not available everywhere. Nevertheless, these soil maps can provide valuable information where meaningful vegetation mapping is not available, such as after a recent disturbance.Table 7Advantages and disadvantages of the possible methods for the derivation of Ellenberg site EIVs.Table 7Calculation of average EIVs based on vegetation mapping and species listsTheoretical estimation of site EIVs, based on soil mapsAdvantage•Fine-scale•Easy to obtain•The principle is well described in the literature•Applicable without further expertise•Often widely available•Future scenarios use the same logic as current scenarios to derive valuesDisadvantage•Not available for future scenarios (only over time for space)•Not available after recent disturbances when the vegetation is destroyed/absent, such as fires, floods, or raw soil conditions•The same sources are used for species EIV selection•National or federal state-specific standards for soil maps and the available parameters•Requires expert knowledge of phytogeography to determine how soil and site characteristics affect the vegetation",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 65,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Site EIVs based on vegetation mapping. If detailed vegetation data are available, average site EIVs can be calculated based on the species lists for each vegetation type. This is based on the assumption that the presence of all species in an area reflects the environmental conditions more reliably than a single species. [5]. Areas are therefore defined and distinguished by the similarity of their species composition. Since the species composition also determines the vegetation type, this is similar to the concept of vegetation types (see ‘Basic principles’). Therefore, the calculation must be performed separately for each vegetation type with its characteristic species community.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 66,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "There are several ways to calculate these site EIVs from vegetation data. Either the median or a weighted mean of an EIV can be calculated over all species present. For the weighted mean, there is also a choice between qualitative and quantitative weighting (using presence/absence or abundance data). For a comprehensive analysis and discussion of considerations and pitfalls when calculating weighted average or median EIVs, see Diekmann et al. [5]. Technically, there is no difference in the model depending on which calculation is chosen. It is therefore important that the chosen approach is appropriate for the quality of the available data.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 67,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Site EIVs based on soil map information. The availability of digital soil maps and the information they provide varies across Germany [33]. Here, we provide a compilation of parameters that can be used to estimate site EIVs (Table 8) based on information from German soil maps from North Rhine-Westphalia (NRW) [34]. We have focused on estimating EIVs for open and semi-open landscapes up to high montane altitudes. As a result, not all of the environmental factors, in particular the l- and T-values, are fully available here. Another problem was that the soil maps provide some parameters aggregated in classes. Therefore, it is not always possible to refer to each value on the 9-point scale, and some values are given as proxies for a group.Table 8Overview of how soil map information is used to derive site EIVs. The parameters provided refer to the information available in the German soil map of NRW, BK50 [34,39].Table 8ParameterValuesL-ValueI) Small sites; open area 20° 5°not definedII) Large sites; open area ≥ 5000 m21 – 66.57.589AspectUsed for a covered area of any size, e.g. woodlands. Requires further information.WSW to ESEWSW to ESEAnySE to SWHillslope> 20°5° - 20° 5°T-Value1–344.55678–9Altitude [m]> 15001500–800800–650650–450450–300 640N-Value1–3 (2)33–4 (3.5)4–6 (5)6–7 (6.5)8–9 (8.5)Soil typeP, Q, E, O, NR, ZB, L, K, S, SG, G, GNB, L, K, S, SG, G, GNB, L, K, S, SG, G, GNB, L, K, S, SG, G, GNSoil textural classes (of the top layer)anyany4, 5, 6, 7, 8, 932, 31, 2, 3Thickness of the top soil layeranyanyany 200 cmSoil type abbreviations: P = podzol; Q = regosol; E = plaggen; O = syrosem; N = ranker; R = rendzina; Z = pararendzina; B = brown earth; L = para-brown earth; K = colluvisol; S = pseudogley; SG = stagnogley; G = gley; GN = wet gley. Soil texture classes: 1 = loamy clay; 2 = clayey loam; 3 = clayey silt; 4 = sandy loam; 5 = very loamy sand; 6 = sandy silt; 7 = loamy sand; 8 = sandy; 9 = low on fine-grained soil.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 68,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Site EIV for light (L-Value). Ellenberg's light availability scale for plants ranges from deep shade (1) to partial shade (5) to full light (9) [6]. To determine the site value from the soil map information, the size of the site, its aspect, and slope can be used (L-Value, Table 8). For an open or semi-open landscape, the l-Values should be 6 or higher. This is because the shaded condition is only temporally. On small sites, the surrounding area may affect the light availability, e.g. due to tree shading. To account for these peripheral effects of the surroundings, we distinguish between small sites (< 5000 m2) and large sites (≥ 5000 m2) for the l-Value estimation. Small sites generally have a lower value than larger sites with the same parameters. In addition to the site size, aspect, and slope are used to estimate the l-Value. A southern aspect with a moderate slope gradient is beneficial for a high l-Value, while a northern aspect with a steep slope results in a lower l-Value.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 69,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "For completeness, it should be noted that for a site to be classified as half-shaded or less (1–5), there must be sufficient cover. This may be due to other vegetation, such as a forest, or to special features, such as at the base of a north-facing cliff. A meaningful classification then requires further information to determine the l-Values, such as stem density and forest type.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 70,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Site EIV for temperature (T-Value). Ellenberg's temperature scale for plants ranges from plants as cold indicators (1) to extreme heat indicators (9). In Ellenberg et al. [6], the authors made a first attempt to assign elevation classes and mean annual temperature to the T-Values. Consistent with this, we use the elevation from the soil maps as a parameter for estimating the T-value. Values 8–9 should only be used for warm, lowland sites with and require further information. Similar to the l-Values aspect and hillslope could be used here. To use T-Values below 4, a further adaptation to alpine and subalpine conditions is required.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 71,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Site EIV for soil moisture (M-Value). Ellenberg's soil moisture scale for plants ranges from plants as very dry indicators (1) to wet indicators (9) to underwater plants (12). Since the LandS model is designed for terrestrial habitats, the original scale was truncated at 9, to exclude the values dedicated to aquatic plants. German soil maps from North Rhine-Westphalia provide a parameter called “ecological moisture class” [34]. It uses the soil properties usable field capacity in the effective root zone, waterlogging level, and groundwater level to assess the soil moisture. We use this parameter to estimate the M-Value. Other valuable sources could be the slightly different ecological moisture assessments according to Bechler & Toth [35] or Hauffe et al. [36].",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 72,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Site EIV for soil reaction (R-Value). Ellenberg's soil reaction scale for plants ranges from plants as strong acid indicators (1) to alkaline and calcareous soil indicators (9). The soil reaction EIV can be measured by the pH, for example, and is one of the better measurable Ellenberg EIVs [17]. We used Cation Exchange Capacity (CEC) classes from soil maps to estimate the R-Value. Low CEC values result in low R-Values and vice versa. With more detailed parameter classes, some of the combined categories could be further developed.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 73,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Site EIV for soil nutrient/nitrogen (N-Value). Ellenberg's soil nutrient scale for plants ranges from indicators of nutrient-poor sites (1) to indicators of excessively nutrient-rich sites (9). We use soil type, texture, and topsoil thickness from soil maps to estimate how well the soil provides nutrients to plants and derive the N-Value from this estimate. Some soils, such as podzols, regosols, plaggens, syrosems, or rankers, are naturally low in nutrients. For other soil types, texture plays an important role, as coarser textures such as gravel and sand have lower nutrient retention [37,38]. Finally, for very fine-grained soils (clays, class 3–1), the thickness of the soil layer can be used to further segment the N-value.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 74,
+      "title": "Site parameterization – site EIVs",
+      "instruction": "Adjusting and adapting site EIVs. Estimating site EIVs from soil map information may not accurately capture all environmental conditions. Depending on local conditions or the scenario being considered, it may be necessary to modify the values that were estimated above. For example, when simulating used grassland, the effect of fertilization or airborne nitrogen deposition must be considered and the N-value may need to be increased. Small-scale landscape patterns may also require adjustments. For example, it may be necessary to increase the F-Value at the foot of a slope or in depressions; similarly drainage could be accounted for by decreasing the F-Value. This can be done, for example, by using observations or information from a DTM so that the final EIV map reflects the environmental conditions as accurately as possible. In addition, different climate scenarios can be simulated by adjusting the T-Value.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 75,
+      "title": "Species parameterization – grouping and species-specific EIVs",
+      "instruction": "Based on the previous analysis of vegetation types, a set of representative species and ecological plant groups can be defined to represent the habitat-specific species composition. First, the species EIVs for site condition and land use are calculated based on literature values, and then the maximum growth rate gmax and the self-regulation factor (FS) are calibrated for all species. The calibration follows vegetation patterns that have been identified as being in the equilibrium state (see previous section).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 76,
+      "title": "Species parameterization – grouping and species-specific EIVs",
+      "instruction": "Set of representative species. Since modeling of all existing herbaceous species could result in over-parameterization and could make model calibration impossible, a set of representative species can be selected. First, it is important to select the most abundant species that dominate the competition in the study area, as single species. These are often grass species among a few other species, depending on the landscape. It is also useful to select a few characteristic species that are not dominant but are characteristic of certain equilibrium states. Beyond these single species, the remaining species can be grouped into plant groups of species with similar ecological behavior. These groups usually need to be adapted to the set of environmental factors that drive the specific landscape. For example, when studying managed grasslands, traits that integrate a response to mechanical disturbance by cutting or grazing [10] may be useful. However, in wetlands, for example, other factors such as different moisture or nutrient groups may be more appropriate.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 77,
+      "title": "Species parameterization – grouping and species-specific EIVs",
+      "instruction": "Species EIVs. Values for the different species can be found in the literature. Ellenberg's EIVs for light, temperature, moisture, soil reaction (pH), and nutrients are published for Germany in Ellenberg et al. [6,11] and Ellenberg & Leuschner [12]. Ellenberg-type EIVs are also available for other European countries and on a European scale [40]. A European map with recommendations for areas where these Ellenberg-type values can be applied is also provided by Tichý et al. [40]. Briemle's EIVs for cutting, grazing, and trampling are published in Dierschke & Briemle [41]. EIVs of species groups can be represented either by a group indicator species and its literature values, or by an average of all species in the group and their literature values. If an average of all species in a group is calculated, it may be necessary to introduce a threshold for the degree of occurrence to exclude randomly occurring species. Calibration results can be enhanced during the pre-configuration process by adjusting the EIVs of some species to the simulated geographic area according to the obtained data at the study site and expert knowledge as suggested by Ellenberg et al. [6], Dierschke [17], and Briemle et al. [10], within a maximum change of +/- 0.2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 78,
+      "title": "Species parameterization – grouping and species-specific EIVs",
+      "instruction": "Calibrating the gmax and FS parameters. The iterative calibration process involves adjusting the parameters gmax and FS for each plant species to visually match the simulated cover with the predefined cover of different calibration scenarios. These calibration scenarios are usually vegetation types in the equilibrium state under the influence of different environmental factors, and sometimes short-term developments from one vegetation type to another after a change in environmental conditions. The procedure starts by simulating a single scenario and adjusting the parameters until the simulated vegetation composition matches the observed reference values (Fig. 4).Fig. 4Screenshots showing parts of the output GUI of two different simulation runs: at the start of the calibration process (left) and after calibration (right) with the dynamic equilibrium of the examined community.Fig 4",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 79,
+      "title": "Species parameterization – grouping and species-specific EIVs",
+      "instruction": "Subsequent scenarios are calibrated in the same way, but with a backward check to ensure that previously calibrated scenarios are still accurate. The parameters need to be fine-tuned, especially for species that are present in multiple calibration scenarios, to prevent the species cover from evolving too far from reality. Before calibration, it is helpful to categorize species based on the patterns of dominance and abundance observed in the scenarios (Table 9). Species with high cover tend to be dominant and thus have high FS values. Species with low abundance often have a low gmax and are therefore less competitive in the community in a variety of scenarios. Once a few scenarios have been calibrated, this should become easier. If the calibration or backward checks are difficult, it may be necessary to change the weighting of the environmental factors (see below) to better represent the dominant environmental gradients of the simulated sites. The calibrated gmax and FS values of all species are then used for all simulations of the given landscape.Table 9Categorization of observable patterns to derive exemplary start values for calibration.Table 9Observable patternCalibration valuesDominant speciesFs = 1000Less dominant speciesFs = 500Least dominant speciesFs = 100Species with a high abundancegmax = 5.0Species with a medium abundancegmax = 4.5Species with a low abundancegmax = 3.5",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 80,
+      "title": "Species parameterization – grouping and species-specific EIVs",
+      "instruction": "Weighting of environmental factors. The weights of the environmental factors are important to regulate the impact that a factor has on the growth of species (see ‘Dynamic growth model’). While it is possible and sometimes necessary to tweak the weighting values during the pre-configuration process, the weights should depict the important gradients at the studied site. For example, modeling grasslands along a moisture gradient may benefit from a higher weight for moisture, or modeling a forested landscape may make light availability more important and thus more heavily weighted, while other factors such as soil pH, if constant in these landscapes, are less heavily weighted because they do not play a strong role in differentiating the vegetation. Observations and data analyses of the observed species with their species EIVs at different sampling sites within the landscape can help evaluate the importance of different factors.",
+      "substeps": [],
+      "is_critical": true,
+      "timers": []
+    },
+    {
+      "step_id": 81,
+      "title": "Input data",
+      "instruction": "The model does currently not include input data that is loaded during the simulation run.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 82,
+      "title": "Submodels",
+      "instruction": "As the model contains mandatory and optional submodels for vegetation and disturbance elements, we use a nested ODD approach here to describe each submodel in detail if used.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 83,
+      "title": "Herbaceous vegetation",
+      "instruction": "The model for the forb and grass layer was first developed by Siehoff et al. [3] and used as a submodel by Hudjetz et al. [4]. Here we extend the existing model with a second set of growth dependencies.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 84,
+      "title": "Purpose",
+      "instruction": "The forb and grass layer submodel is the foundation of the landscape and thus the underlying component for all subsequent succession. The model simulates vegetation growth based on environmental conditions and disturbances.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 85,
+      "title": "Process overview and scheduling",
+      "instruction": "The herbaceous submodel is embedded in each cell of the landscape grid to calculate species’ cover. All cells are recalculated each time step from the upper left corner to the lower right one. At each time step within all cells, each plant behaves in the following order (for an overview see Fig. 2, green boxes represent processes of the herbaceous vegetation):",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 86,
+      "title": "Process overview and scheduling",
+      "instruction": "First, a certain part of the cover of each plant dies creating available space within the cell. Mortality is implemented to allow the processes of competition to take place even when the whole space is used up. Without mortality, the plants could not grow (and thus compete) as soon, as the whole area is covered. The plants are not able to push each other out, but gain competitive power only by their realized growth under competition with the other plants into available (uncovered) space.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 87,
+      "title": "Process overview and scheduling",
+      "instruction": "The growth of the species is then calculated as a function of its cover, its sensitivity to the given environmental conditions and land use (using EIVs), its maximal growth rate, and its factor for self-regulation. A part of the species’ growth is transferred to the adjacent cells, simulating vegetative spread; seed dispersal over larger distances is not taken into account. This ingrowth into neighboring cells results either in additional growth of an already existing species or in a new species immigrating into the cell. If the sum of potential growth and ingrowth from neighboring cells of all species exceeds the available space within the cell, the available area is divided according to the species’ potential growth, and a new realized growth is calculated. The competition between the different species takes place only in this step when the potential growth is recalculated to realized growth. The competitive strength of each plant is derived from the dynamic growth model by the relative weighting of the potential growth of each species.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 88,
+      "title": "Process overview and scheduling",
+      "instruction": "At the end of each time step, the cover of all species is updated. From the cover of the dominant plants, the vegetation type of the cell is derived, which can be plotted into raster-maps.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 89,
+      "title": "Herbaceous vegetation submodel",
+      "instruction": "The simulation of herbaceous species is divided into four submodels: a constant mortality model, a dynamic growth model that calculates the potential growth of the species based on its growth rate, and the competition model. These submodels and the equations used (Table 10) are described in the following sections.Table 10Equations used in the herbaceous vegetation submodel.Table 10Eq.#DescriptionFunctionSource1MortalityM = cover × 200% a-1Siehoff et al. [3]2Growth rateg=gmax×Fs−(cAS)×100Fs×ftotalSiehoff et al. [3], this paper3Control function for land use X and species jf(x)=(1−EIVxj9)×100−SVx100+EIVxj9Siehoff et al. [3]4Control function for site condition X and species jf(x)={normalEIV,e−slopex(SVx−EIVxj)29indifferentEIV,e−slopex(SVx−EIVxj)29−OptxThis paper5Weighting of control functionsWx=(2−f(x))wxThis paper6Total environmental dependency functionftotal=∑(Wx×f(x))∑x−∑WxThis paper7Potential growth(dcdt)pot=g×cSiehoff et al. [3]8Realized growth(dcdt)real=g×c×availablespace∑(dcdt)potSiehoff et al. [3]",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 90,
+      "title": "Mortality",
+      "instruction": "A fixed arbitrary mortality rate of 200% per year for all species is assumed to create available space. To obtain the corresponding mortality for each growth cycle, the annual mortality is divided by time steps. At the beginning of each growth cycle, the cover of each entity is reduced accordingly.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 91,
+      "title": "Dynamic growth model",
+      "instruction": "Calculation of growth rate. The growth rate of each plant species is calculated according to its current cover, its maximal growth rate, its factor for self-regulation, and the local environmental dependencies (Eq. 1).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 92,
+      "title": "Dynamic growth model",
+      "instruction": "The values for maximum growth rate and factor for self-regulation need to be calibrated on vegetation data from the area under study. More information about data and scenarios used for calibration is given in Section ‘Species parameterization’.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 93,
+      "title": "Dynamic growth model",
+      "instruction": "The environmental dependencies on the EIVs are implemented as two different types of control functions: the site condition control function and the land use control function. These control functions are then weighted to represent the importance of each environmental factor to the simulated landscape and the study site. Finally, an overall environmental growth factor is calculated from the weighted growth functions. How environmental factors influence growth rate has changed from the previous model version with the introduction of the second set of EIVs (see below). For a detailed description of how the species EIVs are obtained see ‘Species parameterization’.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 94,
+      "title": "Control function for site conditions",
+      "instruction": "The control functions for site conditions are calculated as ecological tolerance functions (Eq. 4). The optimum value of 1 is reached when a species’ EIV is equal to the corresponding site EIV. Suboptimal conditions are indicated by values below 1 (see Fig. 5A). In addition, the slope regulates the width of the optimum curve, increasing or decreasing the sharpness of the ecological tolerance to an environmental condition. It therefore determines how strong the growth factor is reduced when species EIV and site EIV are not equal. In case an EIV is indifferent for a certain species, we modified the regular control function with the possibility to reduce the slope and the optimum. The reduced slope mimics the broader tolerance of the species. These modifications, as well as the regular slope, are specific to each EIV, but globally valid for all species.Fig. 5Control functions for site conditions (A) and land use (B) at different species EIVs. (A) Control functions are calculated here for regular species EIVs with a slope of 1, and for indifferent species EIVs with a reduced slope of 0.3 and a reduced optimum of 0.6. (B) There are no indifferent species for the land use.Fig 5",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 95,
+      "title": "Control function for site conditions",
+      "instruction": "Control function for land use. The control functions for the form of land use are calculated as linear sensitivity functions (Eq. 3). The degree of growth inhibition depends on the intensity of land use. The function f(X) results in values between 0.1 and 1, decreasing the growth rate of species that are sensitive to the given land use (Fig. 5B). A value of 1 signifies that the species is not affected by the form of land use. Total environmental dependence function and weights. In an earlier version of the model, we calculated the environmental dependence by simply multiplying all the values of the environmental control functions. Typically, however, environmental dependencies are at suboptimal conditions, i.e., below values of 1. With three control functions, a typical value would be 0.73 ≈ 0.34, but introducing five more factors shifts the value in the example to 0.78, resulting in a total value <0.1. This issue has previously been discussed in a forest gap model [42]. Therefore, we introduce here an alternative way to calculate the total environmental factor (Eq. 6). This approach uses the weighted means of the control functions (Eq. 5). It also introduces the possibility of weighting individual factors according to their ecological relevance to the current landscape and study site. These weights are global within the modeled environment and therefore the same for all species. They can be adjusted for different landscapes and are assessed during pre-configuration (see ‘Initialization’). When weighted equally, environmental factors play similar roles in the growth of species. When individual factors are weighted significantly higher, the growth curve shifts toward adaptation to those factors. This flexibility allows better calibration for a variety of landscapes with different dominating gradients.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 96,
+      "title": "Calculation of potential growth",
+      "instruction": "The total potential growth of each species is the sum of potential growth within a cell and ingrowth from adjacent cells. Potential growth is calculated according to the species’ growth rate and its cover (Eq. 7). This potential growth refers to the capability of a species to grow into an uncovered area. Since each cell is a homogeneous entity and no information about the distribution of species within one cell is given, potential growth is randomly split into the potential growth within the actual cell and to adjacent cells (see Design concepts, ‘Interaction’), where it is added to the total potential growth of the plant species.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 97,
+      "title": "Competition model - calculation of realized growth",
+      "instruction": "Plant species interact by struggling for the available space. The share of available space that each species gets depends on its potential growth compared to the others. If the sum of the potential growth of all species exceeds the available area, the area is divided among the species according to their potential growth, i.e. the sum of growth within the cells and ingrowth from adjacent cells (Eq. 8).",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 98,
+      "title": "Competition model - calculation of realized growth",
+      "instruction": "This function simulates a ‘simultaneous’ growth of all species and their competition for space. The species with the highest potential growth will occupy the largest fraction of the available area, where potential growth is dynamically calculated as a function of cover, maximum growth rate, intraspecific competition, and sensitivity to the given environmental conditions ‘Dynamic growth model’.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 99,
+      "title": "Competition model - calculation of realized growth",
+      "instruction": "This competition model acts in a way that the competitive vigor of a species does not only depend on its intrinsic strength, indicated by the parameters gmax and FS, but is strongly influenced by its tolerance of the prevailing environmental conditions as well as the applied form of land use. Two species with the same values for gmax and FS, but different EIVs will therefore behave differently according to the environmental factors.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 100,
+      "title": "Woody vegetation",
+      "instruction": "Woody vegetation. Optional and not used in the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 101,
+      "title": "Disturbance by wildlife",
+      "instruction": "Disturbance by wildlife is used for woody vegetation. Therefore, it is not relevant to the current model setup.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 102,
+      "title": "Software improvements",
+      "instruction": "Compared to the first version of the model [3], three major technical improvements have been implemented: version control, automated model testing, and variable landscape initialization. While the first two are primarily for the model development phase to ensure consistency and error prevention, the last one also has implications for the user in the application of the model.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 103,
+      "title": "Software improvements",
+      "instruction": "As an important step in making model development traceable, we moved the model to the Git version control system. Changes to the model repository are now recorded in the form of commits, with comments and annotations. In the commits, we started using the keywords listed by Ayllón et al. [43] for maintaining model notebooks. Prior to the Git implementation, the extension with Ellenberg's EIVs described in this paper was implemented. The other software improvements were implemented using version control.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 104,
+      "title": "Software improvements",
+      "instruction": "Another improvement to the model development phase was the implementation of automated model testing. Up to this point, the model had been developed in a straightforward manner for a specific landscape. The simulated results were manually checked for plausibility at the landscape level, with no automated test routines. We have now developed an automated routine to compare the model output at any time during development with the results of previous model runs. For these tests, we selected ecologically meaningful landscape scenarios from previous model runs to cover a wide range of settings. Model output for comparison included species cover and vegetation type information for all cells over the simulated time period. Differences were calculated for both image and text files. When the test script detected differences, we actively evaluated whether or not the code changes made were intended to affect the test scenario. In some cases, the changes in model behavior were intentional; in these cases, the valid test results were updated to reflect these model changes. This automated testing routine helped us track unexpected model behavior during the development process.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 105,
+      "title": "Software improvements",
+      "instruction": "Finally, to allow a wide application of the model for different users, we made the landscape initialization variable. To do this, we have removed all hard-coded generic species specifications from the source code. Instead, processes are now completely dependent on initialization parameters. This was necessary for three main reasons: (1) it gives the model the flexibility to change vegetation entities based on landscape needs without changing the source code; (2) it allows transparency of all parameters and categorizations used by the model; and (3) it made the code cleaner and also increased the consistent application of the processes. For example, some processes, such as seed dispersal, were previously initialized only for the hardcoded entity names. Therefore, we changed the trigger for the processes to a Boolean parameter in global initialization tables so that the dependency for the respective entities could be initialized accordingly.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 106,
+      "title": "Two exemplary model applications for demonstration",
+      "instruction": "The model is designed to simulate the development of a vegetation community under a set of environmental conditions. Thus, both tolerance to environmental conditions and intrinsic competitive strength determine the ability of herbaceous plant species to grow. Environmental tolerance is represented by the species EIVs described in the phytosociological literature, while competitive strength is captured by two calibrated parameters, maximum growth rate (gmax) and self-regulation factor (FS), which account for fine-scale heterogeneity and simplify the remaining interspecific competition (for details on the design concept, see ODD). We designed two stylized model applications to demonstrate the model behavior for these two mechanics: a simulation of a landscape with patches of different environmental conditions (Test 1, ‘patchy landscape’) and the development of a grassland community under soil impoverishment by reducing the site EIV N-value (Test 2). An executable version of the model along with all initialization files, a start file for both tests and instructions on how to run the model is available online at (https://github.com/gaiac-eco/LandS). Both tests are designed to demonstrate how the model is used and that it produces meaningful results. For this purpose, we selected scenarios that are sufficiently simple that it is easy to predict the model's output using reason alone.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 107,
+      "title": "Preliminary model setup for Test 1",
+      "instruction": "To test the part of growth based on environmental tolerance, we designed a patchy test landscape (Fig. 6) where ten different patches represent an ecologically viable combination of different environmental conditions (Table 11). Each patch type consisted of four cells, in a test plot of 10 × 20 cells, with each cell being 100 m2. The list of available herbaceous plants consisted of a wide range of ecologically diverse species and included one species that was typical for each type of patch (Table 12). For the simulation, the only difference between the species was their tolerance to the environment. All the other parameters of the plants were kept the same (gmax = 3.5 and FS = 10,000). Furthermore, the simulation was started with an equal cover of 1% for all species. Thus, growth differences depended only on the tolerance of a species to the environmental conditions of a cell. Our prediction was that in each patch only the most suitable plants would grow and eventually develop a high degree of cover.Fig. 6Patchy test landscape. Different patch types: (0) surrounding open landscape; (1) dry, acidic and nutrient-poor grassland; (2) dry, calcareous and nutrient-poor grassland; (3) wet floodplain grassland; (4) acidic and nutrient-poor moorlands; (5) alkaline/calcareous and nutrient-poor moorlands; (6) woodland edge; (7) nonspecific woodland; (8) acidic and nutrient-poor woodland; (9) alkaline and nutrient-poor woodland; (10) alkaline and nutrient-rich woodland; for further information on patch types with site EIVs see Table 13.Fig 6Table 11Site parameterization: patchy experimental landscape with site-specific EIVs.Table 11Patch number (#)Site/Patch type descriptionSite EIVsLTMRN(0)Surrounding: Grassland with no specific tendency towards moisture or nutrients85565(1)Dry grasslanda, acidic and nutrient-poor85333(2)Dry grasslanda, calcareous and nutrient-poor85383(3)Wet floodplain grasslanda, nutrient-rich with no specific tendency towards soil pH85868(4)Moorlandsa, wet, acidic and nutrient-poor85833(5)Moorlandsa, wet, alkaline/calcareous and nutrient-poor85883(6)Woodland edgeb, no specific tendency towards other factors55565(7)Woodlandc, no specific tendency towards other factors35565(8)Woodlandc, acidic and nutrient-poor35533(9)Woodlandc, alkaline and nutrient-poor35583(10)Woodlandc, alkaline and nutrient-rich35588a: open habitat in full light.b: semi-shaded habitat.c: fully shaded habitat; L: light value, T: temperature value, M: soil moisture value, R: reaction value (soil pH) and N: soil nutrient value.Table 12Selected species with different species-specific EIVs for the patchy landscape, their ecological characteristics and the number (#) of the patch type where the species should, become dominant after some time. The EIVs are taken from plant sociological literature [12,44].Table 12SpeciesEcological characteristics#Species EIVsLTMRNLolium perenneGrass native to Europe and North Africa with medium site requirements, also widely distributed by anthropogenic seeding.(0)86577Agrostis strictaSilicate and pioneer grassland characteristic species(1)97221Bromus erectusCharacteristic species of meager, calcareous, dry and semi-dry grasslands.(2)85383Alopecurus geniculatusCharacteristic species of floodplain grasslands, which are characterized by alternate periods of drought and flooding.(3)96877Eriophorum angustifoliumAcidophilic, characteristic species of acidic bogs.(4)8x942Carex davallianaCharacteristic species of calcareous fen communities, representing alkaline or calcareous and low-nutrient wetland habitats.(5)94982Poa nemoralisHalf-shade plant, characteristic species of mixed deciduous woods, especially in open areas.(6)5x554Carex sylvaticaCharacteristic species of moderately dry to moderately moist central European broadleaf forests.(7)25565Luzula luzuloidesAcidophilic and characteristic species of the association of acidic red beech forests.(8)4x534Carex albaDistinctive species of lime-beech and pine forests on dry soils.(9)55482Campanula tracheliumDistinctive species of lime-beech forests on eutrophic and moderately dry to moderately moist soils.(10)4x688L: light value, T: temperature value, M: soil moisture value, R: reaction value (soil pH), N: soil nutrient value and x: indifferent ecological behavior of this species.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 108,
+      "title": "Results for the ‘patchy landscape’ (Test 1)",
+      "instruction": "The simulation of the patchy landscape showed that for all patches, the best adapted plant species eventually developed the highest cover (Fig. 7). For the surrounding cells with no particular environmental tendencies, Lolium perenne became the most dominant species, as expected, accompanied by a lower cover of Bromus erectus. One or two accompanying species were typical of all patch types and had a low abundance, mostly ranging between 5% and 15% cover. The accompanying species was mostly L. perenne, which is the species adapted to intermediate conditions and therefore plausible to have low growth in other patches representing environmental conditions at the more extreme end of the environmental gradients. However, its growth in woodland patches - where light availability was much worse for L. perenne - suggests that its presence in all patches may simply be due to the neighborhood interactions implemented. Each patch cell was adjacent to at least two surrounding cells with L. perenne, which ensured the continuous ingrowth from these neighboring cells. In woodland patches 7, 8 and 9, there was a small peak of Poa nemoralis next to the dominant species at the beginning, which makes sense as these patches are not ideal but somewhat suitable for this species. At the same time, the peak of P. nemoralis is missing in the last forest patch 10, because the difference in N values was too large in this plot. In patch 9, Carex alba was the predominant species, with Carex sylvatica also strongly represented at the beginning, but declining in the long term, while C. alba increased steadily in cover.Fig. 7Average species cover in each patch type (consisting of 4 cells) over time. Different patch types: (0) surrounding open landscape; (1) dry, acidic and nutrient-poor grassland; (2) dry, calcareous and nutrient-poor grassland; (3) wet floodplain grassland; (4) acidic and nutrient-poor moorlands; (5) alkaline/calcareous and nutrient-poor moorlands; (6) woodland edge; (7) nonspecific woodland; (8) acidic and nutrient-poor woodland; (9) alkaline and nutrient-poor woodland; (10) alkaline and nutrient-rich woodland; for further information on patch types with site EIVs see Table 13 and for species characteristics see Table 14.Fig 7",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 109,
+      "title": "Results for the ‘patchy landscape’ (Test 1)",
+      "instruction": "In summary, Test 1 showed the successful establishment of the best-adapted species in each patch, as previously hypothesized. Semi-adapted species that grew alongside the best-adapted species declined and died out over time. Additionally, this simulation experiment showed the impact of the ingrowth mechanism from neighboring cells. Although this mechanism was not essential for this experiment, it is important for the general application of the model when the coexistence of communities leads to continuous competition along the edges, resulting in overlapping areas.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 110,
+      "title": "Preliminary model setup Test 2",
+      "instruction": "Our goal for Test 2 was to use an application example to demonstrate the functionality of a calibrated community under change. At the same time, it allowed us to examine the calibration process for two closely related communities. We designed two forms of a grassland community: One representing a fertilized lowland meadow and one representing an unfertilized lowland meadow (Table 14). These community forms were based on the plant community “Arrhenatheretum elatioris” (named after the characteristic dominant species Arrhenatherum elatius [[12], [44], [45]]). The fertilized meadow represents a nutrient-rich form of this community with a high proportion of stand-forming grasses. The unfertilized meadow is a less nutrient-rich form with a lower proportion of grasses and more flowering plants. In general, the species present could be divided into two groups: those present in only one of the two community forms and those that were present in both. The size of the test plot was 10 × 10 cells with each cell being 100 m2.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 111,
+      "title": "Preliminary model setup Test 2",
+      "instruction": "Each community form was calibrated to mimic the expected cover of the different species under the respective environmental conditions (Table 13). To mimic a general availability of species, those species that only occurred in one form were still initialized with a cover of 0.01% in the other form. During calibration, we changed the species parameters FS and gmax until the cover of all species in both communities remained constant at the predefined level over the calibration period of 30 years. In other words, we calibrated until the specified cover equilibrium was reached (see the ‘Design Concepts’ and ‘Initialization’ sections of the Model Description for a detailed description of the calibration process.).Table 13Site EIVs for the patchy experimental landscape with (0) representing a nutrient-rich form of a lowland meadow and (2) a nutrient-poor form.Table 13#Site/Patch type descriptionSite EIVsLTMRNCGTR(0)Lowland meadow (fertilized)855687511(1)Lowland meadow (unfertilized)855657511#: community form number; L: light value, T: temperature value, M: soil moisture value, R: reaction value (soil pH) and N: soil nutrient value.Table 14Exemplary species with different EIVs. Single species cover for each community form: (0) nutrient-rich, fertilized meadow with a total cover of 100.08% and (1) nutrient-poor, unfertilized meadow with a total cover of 100.03%.Table 14SpeciesCover [%]Species EIVsgmaxFS(0)(1)LTMRNCGTRAnthriscus sylvestris50.017x5x87333.8142Heracleum sphondylium50.01752x87335.9464Taraxacum officinale50.015x5x88776.36163Arrhenatherum elatius6030855776335.336201Alopecurus pratensis1056x6677445.3333Festuca pratensis458x6x66464.255105Tragopogon pratensis4.55764766224.30687Holcus lanatus0.0110766x56444.52106Achillea millefolium0.0158x4x57454.11745Crepis biennis0.015756656224.3771Knautia arvensis0.015764x45324.9572Daucus carota0.018864x46344.71158Rhinanthus minor0.017754x35835.2480Leucanthemum vulgare0.0157x4x36344.82564Lotus corniculatus0.0137x4736444.6566Galium mollugo3.557647x7333.94188Ranunculus acris327x6xx6564.31432L: light value, T: temperature value, M: soil moisture value, R: reaction value (soil pH), N: soil nutrient value and x: indifferent ecological behavior of this species.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 112,
+      "title": "Preliminary model setup Test 2",
+      "instruction": "To also test if the model can predict the transition between the two community forms if key environmental variables are changed, we started simulations with the species composition of the fertilized meadow, but changed the environment to nutrient-poor conditions. We then predicted that the species composition of the fertilized meadow would change into the species composition of the nutrient-poor unfertilized meadow.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 113,
+      "title": "Results for the grassland community under soil impoverishment (Test 2)",
+      "instruction": "The successful calibration of the considered community forms and the confirmation of the transition from one to the other after changing the environmental conditions are the main results of this simulation experiment. Fig. 8A and B show the successful calibration of the nutrient-rich and nutrient-poor forms of a lowland meadow after a calibration period of 30 years. For both communities it was possible to calibrate the equilibrium state towards the predefined cover for all species. Those species that were initialized at low cover for general availability (e.g. Knautia arvensis in the nutrient-rich form) disappeared completely after a few years in the forms to which they did not belong. The most abundant species, Arrhenatherum elatius, was calibrated to be stable at different cover levels in the fertilized and unfertilized meadow – 60% and 30%, respectively. In the calibration scenario, each cell contained a different species cover and therefore a different community composition, while the average cover for each species in the test plot was stable. This is illustrated in Fig. 9 using Arrhenatherum elatius in the fertilized meadow as an example. While the average cover of A. elatius in this simulation plot was stable at 60%, the individual cells varied from 55% to 65%. This shows how each cell contains a dynamic equilibrium of varying species cover, which also reflects community diversity.Fig. 8Average species cover in the test plot. Calibrated equilibrium states of the grassland community in the fertilized (A) and unfertilized form (B) and the simulated transition from fertilized to unfertilized after the initial calibration (C).Fig 8Fig. 9Cover development of Arrhenatherum elatius in each of the 100 cells of the test plot for the fertilized meadow after the final calibration.Fig 9",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 114,
+      "title": "Results for the grassland community under soil impoverishment (Test 2)",
+      "instruction": "Most of the transition from fertilized to unfertilized meadow took about 25 years (Fig. 8, C). Some species, such as Festuca pratensis or Galium mollugo, initially developed a spike and increased their respective cover until competitive pressure from other species increased and the spiking species decreased to the expected level of the unfertilized community form. Only a few species, such as Lotus corniculatus, took longer to reach their equilibrium cover level and thus had little effect on the cover of the whole community. Both the initial spike and the longer transition period for some species may not necessarily reflect reality and could be artifacts. Therefore, the preliminary calibration of the model is usually based on empirical data of time-for-space substitution collected at the study site to confirm the main vegetation dynamics or to improve the simulation results by further calibration.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    },
+    {
+      "step_id": 115,
+      "title": "Results for the grassland community under soil impoverishment (Test 2)",
+      "instruction": "In addition, the current model only allows an instantaneous change of environmental conditions at the beginning of the simulation, i.e. for the transition simulation we changed the N-value from 8 to 5. It might be useful to implement the possibility of a gradual transition period with continuous changes in environmental conditions to simulate these transitions even more realistically in future model versions.",
+      "substeps": [],
+      "is_critical": false,
+      "timers": []
+    }
+  ],
+  "verification_status": "literature_sourced",
   "normalised_at": "2026-06-19T01:48:12.883489Z",
-  "llm_normalised": true
+  "llm_normalised": true,
+  "description": "Landscape development is modeled by nesting processes at two spatial scales: the year and daily or weekly time steps within the year. All cells are recalculated from the upper left to the lower right at each time step. To account for interactions between neighboring cells, the relevant variables are stored and continuously updated throughout the cell cycle. Processes based on these neighbor interactions, which ultimately update the state variables, are then executed in separate cell cycles. The processes are scheduled as shown in Fig. 2.Fig. 2Processes and scheduling. Process names correspond to those of the submodels described in detail in Section ODD7.Fig 2 Herbaceous vegetation. For the forbs and grasses, we considered processes of vegetative growth, mortality and interspecies competition within a cell, and vegetative growth from adjacent, neighboring cells. In each time step, the following processes for the herbaceous layer are executed in the given order. They are divided into two cell cycles. The process names correspond to those of the submodels that implement them, which are described in detail in Section ODD 7. First cell cycle:•Update visualization, i.e. vegetation type by a decision tree using the cover of all entities (not in every time step, only twice a year)•Update of the cover of all herbaceous compartments (entities) in a cell by the dynamic growth and competition model, consisting of:•Mortality, which updates the cover of all compartments and the available space in the cell by the increased amount.•Potential growth in a cell, which updates the potential growth of each entity.•Potential growth to adjacent cells, which determines the target cell and the amount of potential ingrowth to the target cell, and updates the potential growth in the current cell by the reduced amount.•Realized growth (competition model), which uses the available space and the potential growth of all entities (in a cell and of its neighbors from the previous time step) to upda",
+  "content_type": "likely_not_protocol",
+  "content_type_score": 18,
+  "exclude_low_confidence": false,
+  "_whole_protocol_attempted": true,
+  "media": [
+    {
+      "type": "image",
+      "filename": "gr1.jpg",
+      "local_path": "data/media/methodsx/PMC10709510/gr1.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10709510/",
+      "caption": "",
+      "bytes": 74171,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10709510/gr1.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr2.jpg",
+      "local_path": "data/media/methodsx/PMC10709510/gr2.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10709510/",
+      "caption": "",
+      "bytes": 148092,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10709510/gr2.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr3.jpg",
+      "local_path": "data/media/methodsx/PMC10709510/gr3.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10709510/",
+      "caption": "",
+      "bytes": 64458,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10709510/gr3.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr4.jpg",
+      "local_path": "data/media/methodsx/PMC10709510/gr4.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10709510/",
+      "caption": "",
+      "bytes": 84795,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10709510/gr4.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr5.jpg",
+      "local_path": "data/media/methodsx/PMC10709510/gr5.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10709510/",
+      "caption": "",
+      "bytes": 47744,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10709510/gr5.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr6.jpg",
+      "local_path": "data/media/methodsx/PMC10709510/gr6.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10709510/",
+      "caption": "",
+      "bytes": 135046,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10709510/gr6.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr7.jpg",
+      "local_path": "data/media/methodsx/PMC10709510/gr7.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10709510/",
+      "caption": "",
+      "bytes": 116794,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10709510/gr7.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr8.jpg",
+      "local_path": "data/media/methodsx/PMC10709510/gr8.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10709510/",
+      "caption": "",
+      "bytes": 82974,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10709510/gr8.jpg"
+    },
+    {
+      "type": "image",
+      "filename": "gr9.jpg",
+      "local_path": "data/media/methodsx/PMC10709510/gr9.jpg",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10709510/",
+      "caption": "",
+      "bytes": 84384,
+      "url": "https://cdn.jsdelivr.net/gh/itsgurmailsingh-png/labi-protocols-media@main/methodsx/PMC10709510/gr9.jpg"
+    }
+  ]
 }
